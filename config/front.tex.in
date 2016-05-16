@@ -1,0 +1,8 @@
+\title{@PROJECT_NAME@}
+\subtitle{Monte Carlo Kernel Library}
+\author{Yan Zhou}
+\date{version @PROJECT_VERSION@}
+
+\maketitle
+\tableofcontents
+\listoftables

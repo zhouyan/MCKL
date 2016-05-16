@@ -1,0 +1,14 @@
+build
+manual/manual.pdf
+manual/prg/gmm
+manual/prg/pf
+manual/prg/pf.pdf
+manual/prg/pf.rout
+manual/prg/pf_ocl
+manual/prg/pf_seq
+manual/prg/pf_tbb
+manual/prg/program_option
+manual/prg/progress
+manual/tab/rng_distribution_*.tex
+manual/tab/rng_engine_*.tex
+manual/tex/inc.tex

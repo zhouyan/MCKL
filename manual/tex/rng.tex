@@ -1,0 +1,1073 @@
+\chapter{Random number generating}
+\label{chap:Random number generating}
+
+The library has a comprehensive \rng system to facilitate implementation of
+Monte Carlo algorithms. Similar to the standard library header \verb|<random>|,
+there are mainly two parts of this system. The first is a set of \rng{} engines
+that generate random integers. The other is a set of distribution generators.
+The former are documented in Sections~\ref{sec:Counter-based RNG}
+to~\ref{sec:MKL RNG}, and the later in Section~\ref{sec:Distributions}. Apart
+from these, the library also provides facilities for vectorized random number
+generating (Section~\ref{sec:Vectorized random number generating}) and using
+multiple \rng{}s in parallel programs (Section~\ref{sec:Multiple RNG streams}).
+
+\section{Vectorized random number generating}
+\label{sec:Vectorized random number generating}
+
+Before we discuss other features, we first introduce a generic function
+\verb|rand|, which provides vectorized random number generating. There are two
+versions. The first operates on \rng engines and generates random integers,
+\begin{Verbatim}
+  template <typename RNGType>
+  inline void rand(
+      RNGType &rng, std::size_t n, typename RNGType::result_type *r);
+\end{Verbatim}
+The effect of the function call,
+\begin{Verbatim}
+  rand(rng, n, r);
+\end{Verbatim}
+is equivalent to the loop,
+\begin{Verbatim}
+  for (std::size_t i = 0; i != n; ++i)
+      r[i] = rng();
+\end{Verbatim}
+The results will always be the same unless a non-deterministic \rng is used.
+For some \rng{}s implemented in the library, the vectorized version may have
+considerable performance advantage.
+
+The second version of \verb|rand| is for generating distribution random
+numbers,
+\begin{Verbatim}
+  template <typename RNGType, typename DistributionType>
+  inline void rand(RNGType &rng, const DistributionType &distribution,
+      std::size_t n, typename DistributionType::result_type *r);
+\end{Verbatim}
+For example,
+\begin{Verbatim}
+  NormalDistribution<double> normal;
+  rand(rng, normal, n, r);
+\end{Verbatim}
+This is similar to the following loop,
+\begin{Verbatim}
+  for (std::size_t i = 0; i != n; ++i)
+      r[i] = normal(rng);
+\end{Verbatim}
+Depending on the type of \verb|rng| and the distribution (including its
+parameters), the vectorized version may have superior performance. However, the
+results will not be exactly the same as using a loop.
+
+\subsection{Performance measurement}
+\label{sub:Performance measurement}
+
+All performance results shown later in this chapter is measured in single core
+cycles per bytes (cpB) for \rng{}s, or cycles per element (cpE) for
+distributions (\verb|double| precision). The processor used to measure the
+performance is an Intel Core i7-4960\textsc{hg} \cpu. Three compilers are
+tested. The \llvm clang (version~3.8), the \gnu{} \gcc (version~6.1), and the
+Intel \cpp compiler (version~2016 update~3). When multiple compilers are
+tested, they are labeled ``\llvm'', ``\gnu'', and ``Intel'', respectively in
+tables. If only results from one compiler are shown, then unless stated
+otherwise, it is the \llvm clang compiler. The operating system is Mac OS X
+(version~11.1). Depending on the \cpu, the compiler, and the operating system,
+performance may vary considerably. The library does not attempt to optimize for
+any particular platform. However, given accelerated vectorized mathematical
+functions (seed Section~\ref{sec:Vectorized functions}), for any given
+platform, the relative performance advantage to alternatives, such as the
+standard library, is usually substantial.
+
+For \rng engines, we measure the performance of generating random bits instead
+of the raw output from the engines. All internal usages of \rng{}s in the
+library first transfer the raw output to unsigned integers uniform on the set
+$\{0,\dots,2^W-1\}$, $W\in\{32,64\}$ (see Section~\ref{sub:Uniform bits
+  distribution}). Direct use of the raw output from \rng engines is rare in
+applications.
+
+Two usage cases are considered. The first is the performance of generating
+random integers one by one,
+\begin{Verbatim}
+  UniformBitsDistribution<std::uint64_t> rbits;
+  for (std:size_t i = 0; i != n; ++i)
+      r[i] = rbits(rng);
+\end{Verbatim}
+The second is the vectorized performance,
+\begin{Verbatim}
+  rand(rng, rbits, n, r.data());
+\end{Verbatim}
+In both cases, we repeat the simulations 100 times, each time with the number
+of elements $n$ chosen randomly between 5,000 and 10,000. The total number of
+cycles of the 100 simulations are recorded, and then divided by the total
+number of bytes generated. This gives the performance measurement in cpB. This
+experiment is repeated ten times, and the best results are shown. The two cases
+are labeled ``Loop'' and ``\verb|rand|'', respectively.
+
+For the performance of distributions, we measure four methods of drawing random
+numbers from the same distribution. The procedures is similar, except now we
+measure the performance in cpE. First, if the distribution is available in the
+standard library or the Boost\footnote{\url{http://www.boost.org}} library, we
+measure the following case,
+\begin{Verbatim}
+  std::normal_distribution<double> rnorm_std(0, 1);
+  for (std::size_t i = 0; i = n; ++i)
+      r[i] = rnorm_std(rng);
+\end{Verbatim}
+Second, we measure the performance of the library's implementation,
+\begin{Verbatim}
+  NormalDistribution<double> rnorm_mckl(0, 1);
+  for (std::size_t i = 0; i = n; ++i)
+      r[i] = rnorm_mckl(rng);
+\end{Verbatim}
+The third is the vectorized performance,
+\begin{Verbatim}
+  rand(rng, rnorm_mckl, n, r.data());
+\end{Verbatim}
+For all the three above, the \rng is \verb|ARSx8| (Section~\ref{sub:AES-NI
+  instructions based RNG}). The last is when \rng is \verb|MKL_SFMT19937|
+(Section~\ref{sec:MKL RNG}),
+\begin{Verbatim}
+  MKL_SFMT19937 rng_mkl;
+  rand(rng_mkl, rnorm_mckl, n, r.data());
+\end{Verbatim}
+In this case, not only the \rng itself is faster, the distribution might also
+use \mkl routines. The four cases are labeled ``\std'', ``\mckl'',
+``\verb|rand|'' and ``\mkl'', respectively.
+
+\section{Counter-based \protect\rng}
+\label{sec:Counter-based RNG}
+
+The standard library provides a set of \rng engines (performance data in
+Table~\appref{tab:Performance of standard library RNG}). Unfortunately, none of
+them are suitable for parallel computing without considerable efforts. To
+illustrate the problem, consider the situation where there are two threads that
+need to generate random numbers. And thus two \rng engine instances need to be
+created for each thread. Let the random numbers generated by them be
+$\{r_i^1\}_{i>0}$ and $\{r_i^2\}_{i>0}$. Because of the deterministic and
+recursive natural of the these \rng{}s, there exists $k\in\Integer$, such that,
+$r_i^1 = r_{i + k}^2$ for all $i > \max\{0, -k\}$. If $\Abs{k}$ is larger than
+or close to the total number of random numbers required in each thread, then
+this situation might not be an issue. However, there is no easy way to ensure
+such a condition.
+
+There are two standard solutions to this problem. The first is to use
+sub-streams for each thread. For example,
+\begin{Verbatim}
+  std::mt19937 rng;
+
+  // Thread k
+  std::mt19937 rng_k = rng;
+  rng_k.discard(n * k);
+\end{Verbatim}
+where $n$ is the number of random numbers required by each thread. The $k$\ith
+thread only uses the random numbers in the sub-stream $\{r_i\}_{nk < i \le
+  n(k+1)}$. For this to work, the \rng needs a fast \verb|discard|
+implementation, preferably with $\calO(1)$ cost. In addition, one needs to
+manage \rng{}s explicitly for each thread, which prevents this method to be
+used in environments where threads are created implicitly, such as using \tbb
+for parallelization.
+
+The second solution is to use a leap-frog algorithm, such that each thread will
+use the elements $\{r_{iK + k}\}_{i>0}$ of the stream, where $K$ is the total
+number of threads. This is not directly supported in the standard library, but
+can be emulated,
+\begin{Verbatim}
+  std::mt19937 rng;
+
+  // Thread k
+  std::mt19937 tmp = rng;
+  tmp.discard(k);
+  std::discard_block_engine<std::mt19937, K, 1> rng_k(tmp);
+\end{Verbatim}
+This not only requires managing the \rng{}s explicitly, but also knowing the
+number of threads at compile-time, which prevents it to be used in any
+applications using dynamic parallelization. And similar to the first solution,
+it cannot be used when threads are created implicitly.
+
+The development by \textcite{Salmon:2011um} made high performance parallel \rng
+much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
+such that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i =
+f_k(c_i)\}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
+and $f_{k_2}$ will generate two sequences that appear statistically
+independent. Compared to more conventional \rng{}s which use recursions $y_i =
+f_k(y_{i - 1})$, these counter-based \rng{}s are much easier to setup in a
+parallelized environment. If $c$, the counter, is an unsigned integer with $b$
+bits, and $k$, the key, is an unsigned integer with $d$ bits. Then for each
+$k$, the \rng has a period $2^b$. And there can be at most $2^d$ independent
+streams. Another way is to view this kind of \rng{}s is that, it is one \rng{}
+with state $\{c, k\}$ for $0 \le c < 2^b$ and $0 \le k < 2^d$. And thus it has
+a period $2^{b + d}$. And the division of the state into counter and key
+provides an easy way to setup a large number of sub-streams.
+
+Of course, not any sequence of counters and keys are suitable. The \rng{}s are
+still deterministic. Since $f_k$ for any given $k$ is a bijection, the sequence
+of counter $\{c_i = f_k^{-1}(i)\}_{i\ge0}$ will of course produce a very
+regular sequence $\{y_i = i\}_{i\ge0}$. However, for regular sequences, such
+as $\{c_i = i\}_{i\ge0}$ and $\{k_j = j\}_{j\ge0}$, the resulting sequences
+$\{\{y_i\}_{i\ge0}^j\}_{j\ge0}$ appear random. See \textcite{Salmon:2011um} for
+more details.
+
+Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s implemented
+in the library, along with the bits of the counter and the key. They all
+output 32-bits unsigned integers uniform on the set $\{0,\dots,2^{32}-1\}$. For
+64-bits output, a suffix \verb|_64| may be appended to the corresponding \rng
+engine names. For example, \verb|Threefry4x64| and \verb|Threefry4x64_64| both
+generate the same 256-bits random integers internally. The only difference is
+that \verb|operator()| of the former returns 32 or those 256 bits each time it
+is executed, while the later returns 64 bits.
+
+All \rng{}s in Table~\ref{tab:Counter-based RNG} are actually type aliases.
+More generally the library defines the following class template as the
+interface,
+\begin{Verbatim}
+  template <typename ResultType, typename Generator>
+  class CounterEngine;
+\end{Verbatim}
+where \verb|ResultType| shall be an unsigned integer type and \verb|Generator|
+is the class that actually implements the algorithm. See the reference manual
+for details of the generator type. For most users, those implemented in the
+library are sufficient. They are introduced in the next few sections. A few
+configuration macros of these generators are listed in
+Table~\ref{tab:Configuration macros for counter-based RNG} and will be referred
+to later.
+
+\begin{table}
+  \tbfigures
+  \begin{tabularx}{\textwidth}{p{3in}LL}
+    \toprule
+    Class & Counter bits & Key bits \\
+    \midrule
+    \verb|AES128x1|, \verb|ARS128x2|, \verb|AES128x4|, \verb|AES128x8|
+    & 128 & 128 \\
+    \verb|AES192x1|, \verb|ARS192x2|, \verb|AES192x4|, \verb|AES192x8|
+    & 128 & 192 \\
+    \verb|AES256x1|, \verb|AES256x2|, \verb|AES256x4|, \verb|AES256x8|
+    & 128 & 256 \\
+    \verb|ARSx1|, \verb|ARSx2|, \verb|ARSx4|, \verb|ARSx8| & 128 & 128 \\
+    \verb|Philox2x32|    & 64   & 32   \\
+    \verb|Philox2x64|    & 128  & 64   \\
+    \verb|Philox4x32|    & 128  & 64   \\
+    \verb|Philox4x64|    & 256  & 128  \\
+    \verb|Threefry2x32|  & 64   & 64   \\
+    \verb|Threefry2x64|  & 128  & 128  \\
+    \verb|Threefry4x32|  & 128  & 128  \\
+    \verb|Threefry4x64|  & 256  & 256  \\
+    \verb|Threefry8x64|  & 512  & 512  \\
+    \verb|Threefry16x64| & 1024 & 1024 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Counter-based \protect\rng}
+  \label{tab:Counter-based RNG}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Macro & Default \\
+    \midrule
+    \verb|MCKL_RNG_AES128_ROUNDS|          & \verb|10| \\
+    \verb|MCKL_RNG_AES192_ROUNDS|          & \verb|12| \\
+    \verb|MCKL_RNG_AES256_ROUNDS|          & \verb|14| \\
+    \verb|MCKL_RNG_ARS_ROUNDS|             & \verb|5|  \\
+    \verb|MCKL_RNG_AES_NI_BLOCKS|          & \verb|8|  \\
+    \verb|MCKL_RNG_PHILOX_ROUNDS|          & \verb|10| \\
+    \verb|MCKL_RNG_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
+    \verb|MCKL_RNG_THREEFRY_ROUNDS|        & \verb|20| \\
+    \verb|MCKL_RNG_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Configuration macros for counter-based \protect\rng}
+  \label{tab:Configuration macros for counter-based RNG}
+\end{table}
+
+\subsection{\protect\aesni instructions based \protect\rng}
+\label{sub:AES-NI instructions based RNG}
+
+The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
+instructions based \rng{}s in \textcite{Salmon:2011um} are implemented in the
+following generator,
+\begin{Verbatim}
+  template <typename KeySeqType, std::size_t Rounds, std::size_t Blocks>
+  class AESNIGenerator;
+\end{Verbatim}
+The corresponding \rng engine is,
+\begin{Verbatim}
+  template <typename ResultType, typename KeySeqType, std::size_t Rounds,
+      std::size_t Blocks>
+  using AESNIEngine =
+      CounterEngine<ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
+\end{Verbatim}
+where \verb|KeySeqType| is the class used to generate the sequences of round
+keys. The parameter \verb|Rounds| is the number of rounds of \aes encryption to
+be performed. See the reference manual for details of how to define the key
+sequence class. The \aesni encryption instructions have a latency of seven or
+eight cycles, while they can be issued at every cycle. Therefore better
+performance can be achieved if multiple 128-bits random integers are generated
+at the same time. This is specified by the template parameter \verb|Blocks|.
+Larger blocks, up to eight, might improve performance. But this is at the cost
+of larger state size. Without going into details, there are four types of
+sequence of round keys implemented by the library,
+\begin{Verbatim}
+  template <std::size_t Rounds>
+  using AES128KeySeq =
+      internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
+
+  template <std::size_t Rounds>
+  using AES192KeySeq =
+      internal::AESKeySeq<Rounds, internal::AES192KeySeqGenerator>;
+
+  template <std::size_t Rounds>
+  using AES256KeySeq =
+      internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator>;
+
+  template <typename Constants = ARSConstants>
+  using ARSKeySeq = internal::ARSKeySeqImpl<Constants>;
+\end{Verbatim}
+and correspondingly four \rng engines,
+\begin{Verbatim}
+  template <typename ResultType, std::size_t Rounds = MCKL_RNG_AES128_ROUNDS,
+      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS>
+  using AES128Engine =
+      AESNIEngine<ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
+
+  template <typename ResultType, std::size_t Rounds = MCKL_RNG_AES192_ROUNDS,
+      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS>
+  using AES192Engine =
+      AESNIEngine<ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
+
+  template <typename ResultType, std::size_t Rounds = MCKL_RNG_AES256_ROUNDS,
+      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS>
+  using AES256Engine =
+      AESNIEngine<ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
+
+  template <typename ResultType, std::size_t Rounds = MCKL_RNG_ARS_ROUNDS,
+      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS,
+      typename Constants = ARSConstants>
+  using ARSEngine =
+      AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
+\end{Verbatim}
+The first three are equivalent to \aes-128, \aes-192 and \aes-256 block ciphers
+used in counter mode. The last is the \ars algorithm introduced by
+\textcite{Salmon:2011um}. The last template parameter \verb|Constants| of
+\verb|ARSKeySeq| and \verb|ARSEngine| is a trait class that defines the
+constants of the Weyl's sequence. See \textcite{Salmon:2011um} for details. The
+defaults are taken from the paper. To use an alternative pair of 64-bits
+integers as the constants, one can define and use a trait class as the
+following,
+\begin{Verbatim}
+  template <std::size_t>
+  struct NewWeylConstant;
+
+  template<>
+  struct NewWeylConstant<0>
+  {
+      static constexpr std::uint64_t value = FIRST_CONSTANT;
+  };
+
+  template<>
+  struct NewWeylConstant<1>
+  {
+      static constexpr std::uint64_t value = SECOND_CONSTANT;
+  };
+
+  struct NewConstants
+  {
+      template <std::size_t I>
+      using weyl = NewWeylConstant<I>;
+  };
+
+  using NewARS = ARSEngine<ResultType, Rounds, NewConstants>;
+\end{Verbatim}
+Alternative methods are also possible. The only requirement is that, the
+following statement,
+\begin{Verbatim}
+  template <std::size_t I>
+  using weyl = typename Constants::template weyl<I>;
+\end{Verbatim}
+shall define the type \verb|weyl| such that it has a static constant expression
+member data \verb|value| that is the \verb|I|\ith Weyl constant. A few type
+aliases are defined for convenience. For example,
+\begin{Verbatim}
+  using ARSx8    = ARSEngine<std::uint32_t, MCKL_RNG_ARS_ROUNDS, 8>;
+  using ARSx8_64 = ARSEngine<std::uint64_t, MCKL_RNG_ARS_ROUNDS, 8>;
+  using ARS      = ARSEngine<std::uint32_t>;
+  using ARS_64   = ARSEngine<std::uint64_t>;
+\end{Verbatim}
+The engine \verb|ARS| is the library's default \rng if \aesni instructions are
+supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
+algorithms, as well as both 32- and 64-bits output versions. These aliases are
+listed in Table~\ref{tab:Counter-based RNG}. The performance of these engines
+depends on a few factors, such as \cpu types, compilers, operating systems,
+etc. See Tables~\appref{tab:Performance of AES128Engine}
+to~\appref{tab:Performance of ARSEngine} for performance data. In any case, the
+performance is good enough even for the most demanding applications. The
+library does not attempt to optimize the algorithm for any particular platform.
+In realistic applications, the performance of \rng is unlikely to become a
+bottle neck. Note that, the best performance is obtained with the vectorized
+\verb|rand| function (see Section~\ref{sec:Vectorized random number
+  generating}).
+
+\subsection{Philox}
+\label{sub:Philox}
+
+The Philox algorithm in \textcite{Salmon:2011um} is implemented in the
+following generator,
+\begin{Verbatim}
+  template <typename T, std::size_t K = MCKL_RNG_PHILOX_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_RNG_PHILOX_ROUNDS,
+      typename Constants = PhiloxConstants<T, K>>
+  class PhiloxGenerator;
+\end{Verbatim}
+The corresponding \rng engine is,
+\begin{Verbatim}
+  template <typename ResultType, typename T = ResultType,
+      std::size_t K = MCKL_RNG_PHILOX_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_RNG_PHILOX_ROUNDS,
+      typename Constants = PhiloxConstants<T, K>>
+  using PhiloxEngine =
+      CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
+\end{Verbatim}
+The default vector length and the number of rounds can be changed by
+configuration macros listed in Table~\ref{tab:Configuration macros for
+  counter-based RNG}. There is no limit on the template parameter \verb|K| or
+\verb|Rounds|, nor any limitation on \verb|T| except that it has to be an
+unsigned integer type. See \textcite{Salmon:2011um} on the most general form of
+the algorithm. However, the library only provides default constants for 32- and
+64-bits unsigned integer type \verb|T| and \verb|K| taking the values \verb|2|
+or \verb|4|. These four engines are defined as type aliases for convenience,
+\begin{Verbatim}
+  template <typename ResultType>
+  using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
+
+  template <typename ResultType>
+  using Philox4x32Engine = PhiloxEngine<ResultType, std::uint32_t, 4>;
+
+  template <typename ResultType>
+  using Philox2x64Engine = PhiloxEngine<ResultType, std::uint64_t, 2>;
+
+  template <typename ResultType>
+  using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
+\end{Verbatim}
+Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
+in Table~\ref{tab:Counter-based RNG}. To use the engine with \verb|K| taking
+values larger than four, or \verb|T| being unsigned integer type with bits
+other than 32 or 64, one needs to provide a suitable trait class,
+\verb|Constant|. It is similar to that of \verb|ARSEngine|. See the reference
+manual of \verb|PhiloxConstants| for an example of how to define it. The
+performance data is in Table~\appref{tab:Performance of PhiloxEngine}.
+
+\subsection{Threefry}
+\label{sub:Threefry}
+
+The Threefry algorithm in \textcite{Salmon:2011um} is implemented in the
+following generator,
+\begin{Verbatim}
+  template <typename T, std::size_t K = MCKL_RNG_THREEFRY_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_RNG_THREEFRY_ROUNDS,
+      typename Constants = ThreefryConstants<T, K>>
+  class ThreefryGenerator;
+\end{Verbatim}
+The corresponding \rng engine is,
+\begin{Verbatim}
+  template <typename ResultType, typename T = ResultType,
+      std::size_t K = MCKL_RNG_THREEFRY_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_RNG_THREEFRY_ROUNDS,
+      typename Constants = ThreefryConstants<T, K>>
+  using ThreefryEngine =
+      CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
+\end{Verbatim}
+The default vector length and the number of rounds can be changed by
+configuration macros listed in Table~\ref{tab:Configuration macros for
+  counter-based RNG}. Similar to the implementation of the Philox algorithm,
+there is no limit on the template parameter \verb|K| or \verb|Rounds| as long
+as a suitable trait class \verb|Constant| is provided. The library provides
+default constants for 64-bits unsigned integer type \verb|T| and \verb|K|
+taking the values \verb|4|, \verb|8| and \verb|16|, taken from the
+skein\footnote{\url{http://www.skein-hash.info}} hash algorithm, for which the
+Threefish algorithm was originally developed for. Defaults for 32-bits \verb|T|
+or \verb|K| taking the value \verb|2| are also provided, taken from
+\textcite{Salmon:2011um}. Type aliases for these configurations are defined for
+convenience,
+\begin{Verbatim}
+  template <typename ResultType>
+  using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
+
+  template <typename ResultType>
+  using Threefry4x32Engine = ThreefryEngine<ResultType, std::uint32_t, 4>;
+
+  template <typename ResultType>
+  using Threefry2x64Engine = ThreefryEngine<ResultType, std::uint64_t, 2>;
+
+  template <typename ResultType>
+  using Threefry4x64Engine = ThreefryEngine<ResultType, std::uint64_t, 4>;
+
+  template <typename ResultType>
+  using Threefry8x64Engine = ThreefryEngine<ResultType, std::uint64_t, 8>;
+
+  template <typename ResultType>
+  using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
+\end{Verbatim}
+Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
+in Table~\ref{tab:Counter-based RNG}. The performance data is in
+Table~\appref{tab:Performance of ThreefryEngine}.
+
+\subsection{\texttt{RNG} and \texttt{RNGMini}}
+\label{sub:RNG and RNGMini}
+
+Note that, not all \rng{}s implemented by the library is available on all
+platforms. The library also defines two type aliases \verb|RNG| and
+\verb|RNG_64|, which are one of the \rng{}s listed in
+Table~\ref{tab:Counter-based RNG}. The preference is in the order listed in
+Table~\ref{tab:Default RNG}. The user can define the configuration macro
+\verb|MCKL_RNG_TYPE| to override the choice made by the library.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLL}
+    \toprule
+    Alias  & Class & Availability \\
+    \midrule
+    \verb|RNG|    & \verb|ARS|         & \verb|MCKL_HAS_AES_NI| \\
+                  & \verb|Threefry|    & Always available       \\
+    \verb|RNG_64| & \verb|ARS_64|      & \verb|MCKL_HAS_AES_NI| \\
+                  & \verb|Threefry_64| & Always available       \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Default \protect\rng}
+  \label{tab:Default RNG}
+\end{table}
+
+\subsection{Seeding counter-based \protect\rng}
+\label{sub:Seeding counter-based RNG}
+
+The singleton class template \verb|SeedGenerator| can be used to generate
+distinctive seeds sequentially. For example,
+\begin{Verbatim}
+  auto &seed = SeedGenerator<void, unsigned>::instance();
+  RNG rng1(seed.get()); // Construct rng1
+  RNG rng2(seed.get()); // Construct rng2 with another seed
+\end{Verbatim}
+The first argument to the template can be any type. For different types,
+different instances of \verb|SeedGenerator| will be created. Thus, the seeds
+generated by two generators, \verb|SeedGenerator<T1>| and
+\verb|SeedGenerator<T2>|, will be independent. The second parameter is the type
+of the seed values. It can be any unsigned integer type. Classes such as
+\verb|Particle<T>| will use the generator of the following type,
+\begin{Verbatim}
+  using Seed = SeedGenerator<NullType, MCKL_SEED_RESULT_TYPE>;
+\end{Verbatim}
+where \verb|MCKL_SEED_RESULT_TYPE| is a configuration macro which is defined to
+\verb|unsigned| by default.
+
+One can save and set the seed generator using standard \cpp streams. For
+example,
+\begin{Verbatim}
+  std::ifstream is("seed.txt");
+  if (is)
+      is >> Seed::instance();    // Read seed from a file
+  else
+      Seed::instance().set(101); // Set it manually
+  is.close();
+  // Using Seed
+  std::ofstream os("seed.txt");
+  os << Seed::instance();        // Write the seed to a file
+  os.close();
+\end{Verbatim}
+This way, if the simulation program needs to be repeated multiple times, each
+time it will use a different set of seeds. A single seed generator is enough
+for a single program. However, it is more difficult to ensure that each
+computing node has a distinctive set of seeds in a distributed system. A simple
+solution is to use the \verb|modulo| method of \verb|SeedGenerator|. For
+example,
+\begin{Verbatim}
+  Seed::instance().modulo(n, r);
+\end{Verbatim}
+where $n$ is the number of processes and $r$ is the rank of the current node.
+After this call, all seeds generated will belong to the equivalent class $s
+\equiv r \mod n$. Therefore, no two nodes will ever generate the same seeds.
+Note that, the seeds generated are not random at all. For any deterministic
+\rng{}s, the same seeds always produce identical streams. However, distinctive
+seeds does not always lead to independent streams. This seed generator is only
+suitable for counter-based \rng{}s.
+
+\section{Non-deterministic \protect\rng}
+\label{sec:Non-deterministic RNG}
+
+If the \rdrand instructions are supported, the library also implements three
+\rng{}s, \verb|RDRAND16|, \verb|RDRAND32| and \verb|RDRAND64|. They output 16-,
+32-, and 64-bits random integers, respectively. The \rdrand instruction may not
+return a random integer at all. The \rng engine will keep trying until it
+succeeds. One can limit the maximum number of trials by defining the
+configuration macro \verb|MCKL_RNG_RDRAND_NTRIAL_MAX|. A value of zero, the
+default, means the number of trials is unlimited. If it is a positive number,
+and if after the specified number of trials no random integer is return by the
+\rdrand instruction, zero is returned. The performance data is in
+Table~\appref{tab:Performance of non-deterministic RNG}.
+
+\section{\protect\mkl{} \protect\rng}
+\label{sec:MKL RNG}
+
+The \mkl library provides some high performance \rng{}s. The library implements
+a wrapper class \verb|MKLEngine| that makes them accessible as \cppoo engines.
+They are listed in Table~\ref{tab:MKL RNG}. Note that, \mkl{} \rng{}s perform
+the best when they are used to generate vectors of random numbers. These
+wrappers use a buffer to store such vectors. And thus they have much larger
+state space than usual \rng{}s. Each \rng engines output by default 32-bits
+integers. Similar to the counter-based \rng{}s, 64-bits variants are also
+defined. The performance data is in Table~\appref{tab:Performance of MKL RNG}.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Class & \mkl \brng \\
+    \midrule
+    \verb|MKL_MCG59|         & \verb|VSL_BRNG_MCG59|         \\
+    \verb|MKL_MT19937|       & \verb|VSL_BRNG_MT19937|       \\
+    \verb|MKL_MT2203|        & \verb|VSL_BRNG_MT2203|        \\
+    \verb|MKL_SFMT19937|     & \verb|VSL_BRNG_SFMT19937|     \\
+    \verb|MKL_NONDETERM|     & \verb|VSL_BRNG_NONDETERM|     \\
+    \verb|MKL_ARS5|          & \verb|VSL_BRNG_ARS5|          \\
+    \verb|MKL_PHILOX4X32X10| & \verb|VSL_BRNG_PHILOX4X32X10| \\
+    \bottomrule
+  \end{tabularx}
+  \caption{\protect\mkl{} \protect\rng}
+  \label{tab:MKL RNG}
+\end{table}
+
+\section{Multiple \protect\rng streams}
+\label{sec:Multiple RNG streams}
+
+Earlier in Section~\ref{sub:Particle} we introduced that \verb|particle.rng(i)|
+returns an independent \rng instance. This is actually done through a class
+template called \verb|RNGSet|. Three of them are implemented in the library.
+They all have the same interface,
+\begin{Verbatim}
+  RNGSet<RNG> rng_set(N); // A set of N RNGs
+  rng_set.resize(n);      // Change the size of the set
+  rng_set.seed();         // Seed each RNG in the set with Seed::instance()
+  rng_set[i];             // Get a reference to the i-th RNG
+\end{Verbatim}
+The first implementation is \verb|RNGSetScalar|. As its name suggests, it is
+only a wrapper of a single \rng. All calls to \verb|rng_set[i]| returns a
+reference to the same \rng. It is only useful when an \verb|RNGSet| interface
+is required while the thread-safety and other issues are not important.
+
+The second implementation is \verb|RNGSetVector|. It is an array of \rng{}s
+with length $N$. It has memory cost $\calO(N)$. Many of the counter-based
+\rng{}s have small state size and thus for moderate $N$, this cost is not an
+issue. The method calls \verb|rng_set[i]| and \verb|rng_set[j]| return
+independent \rng{}s if $i \ne j$. This implementation has the advantage that
+the behavior of an algorithm can be entirely deterministic even when the
+scheduling of parallel execution is dynamic, since each sample has its own
+\rng.
+
+Last, if \tbb is available, there is a third implementation \verb|RNGSetTBB|,
+which uses thread-local storage (\tls). It has much smaller memory footprint
+than \verb|RNGSetVector| while maintains better thread-safety. The performance
+impact of using \tls is minimal unless the computation at the calling site is
+trivial. For example,
+\begin{Verbatim}
+  void eval_each(std::size_t, ParticleIndex<T> idx)
+  {
+      auto &rng = idx.rng();
+      // using rng to initialize state
+      // do some computation, likely far more costly than TLS
+  }
+\end{Verbatim}
+The type alias \verb|RNGSet| is defined to be \verb|RNGSetTBB| if \tbb is
+available, otherwise defined to be \verb|RNGSetVector|. It is used by the
+\verb|Particle| class template. One can replace the type of \rng set used by
+\verb|Particle<T>| with a member type of \verb|T|. For example,
+\begin{Verbatim}
+  class T
+  {
+      public:
+      using rng_set_type = RNGSetScalar<RNG>;
+  };
+\end{Verbatim}
+will replace the type of the \rng set contained in \verb|Particle<T>|. Below is
+a more advanced example of replacing \verb|rng_set_type| when using OpenMP for
+parallelization.
+\begin{Verbatim}
+  template <typename RNGType>
+  class RNGSetOMP
+  {
+      public:
+      RNGSetOMP(std::size_t) : rng_(/* maximum number of OpenMP threads */)
+      {
+          seed();
+      }
+
+      void resize(std::size_t) {}
+
+      void seed() { Seed::instance()(rng_.size(), rng_.begin()); }
+
+      RNGType &operator[](std::size_t)
+      {
+          return rng_[omp_get_thread_num()];
+      }
+
+      private:
+      Vector<RNGType> rng_;
+  };
+
+  class T
+  {
+      public:
+      using rng_set_type = RNGSetOMP<RNG>;
+  };
+\end{Verbatim}
+In this example, only a small number of \rng{} engines are created and it is
+(mostly) thread-safe. However, there are quite a few situations where this
+class is not suitable, with serialized nested parallel region being a primary
+one. The library does not provide the above implementation by default. There
+are too many cases that it can be misused.
+
+\section{Distributions}
+\label{sec:Distributions}
+
+The library provides implementations of some common distributions. Some of them
+are the same as those in the standard library, with \verb|CamelCase| names. For
+example, \verb|NormalDistribuiton| can be used as a drop-in replacement of
+\verb|std::normal_distribuiton|. This includes all of the continuous
+distributions defined in the standard library. As stated in
+Section~\ref{sec:Vectorized random number generating}, all the distributions
+defined in the library support vectorized random number generating. In the
+following sections we introduce each distributions included in the library.
+
+\subsection{Uniform bits distribution}
+\label{sub:Uniform bits distribution}
+
+The class template,
+\begin{Verbatim}
+  template <typename UIntType>
+  class UniformBitsDistribution;
+\end{Verbatim}
+is similar to the standard library's \verb|std::independent_bits_engine|,
+except that it always generates full size random integers. That is, let $W$ be
+the number of bits of \verb|UIntType|, then the output is uniform on the set
+$\{0,\dots,2^W - 1\}$. For example,
+\begin{Verbatim}
+  UniformBitsDistribution<std::uint32_t> rbits;
+  rbits(rng); // Return 32-bits random integers
+\end{Verbatim}
+Let $\rmin$ and $\rmax$ be the minimum and maximum of the random integers
+generated by \verb|rng|. Let $R = \rmax - \rmin + 1$. Let $r_i$ be consecutive
+output of \verb|rng()|. If there exists an integer $M > 0$ such that $R = 2^M$,
+then the result is,
+\begin{equation*}
+  U = \sum_{k = 0}^{K - 1} (r_k - \rmin) 2^{kM} \bmod 2^W
+\end{equation*}
+where $K = \Ceil{W / M}$. Unlike \verb|std::independent_bits_engine|, the
+calculation can be vectorized, which leads to better performance. Note that,
+all constants in the algorithm are computed at compile-time and the summation
+is fully unrolled, and thus there is no runtime overhead. In the case $\rmin =
+0$ and $M = W$, most optimizing compilers shall be able to generate
+instructions such that the distribution does exactly nothing and returns the
+results of \verb|rng()| directly. If there does not exist an integer $M > 0$
+such that $R = 2^M$, then \verb|std::indepdent_bits_engine| will be used.
+
+\subsection{Standard uniform distribution}
+\label{sub:Standard uniform distribution}
+
+All continuous distributions are built upon the standard uniform distribution.
+And thus the performance and quality of the algorithm transferring random
+integers to random floating point numbers on the set $[0, 1]$ are of critical
+importance. The library provides five distributions, listed in
+Table~\ref{tab:Standard uniform distributions}. They are all class template
+with a single template type parameter \verb|RealType|, which is the floating
+point result type. For each distribution, the random integers produced by
+\rng{}s are transferred to 32- or 64-bits intermediate random integers through
+\verb|UniformBitsDistribution| before they are further converted to floating
+numbers. The integer type depends on \verb|RealType|, the range of the integers
+produced by the \rng{}, $R$, and the configuration macros
+\verb|MCKL_RNG_U01_USE_64BITS_DOUBLE|. The exact relations are listed in
+Table~\ref{tab:Intermediate integer types of standard uniform distributions}.
+In the remaining of this section, let $W$ be the number of bits of the
+intermediate random integers, and $M$ be the number of significant bits
+(including the implicit one) of \verb|RealType|. We also denote the input
+random integers as $U$ and the output random real numbers as $X$.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Distribution & Support \\
+    \midrule
+    \verb|U01CCDistribution| & $[0, 1]$ \\
+    \verb|U01CODistribution| & $[0, 1)$ \\
+    \verb|U01OCDistribution| & $(0, 1]$ \\
+    \verb|U01OODistribution| & $(0, 1)$ \\
+    \verb|U01Distribution|   & $[0, 1)$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Standard uniform distributions}
+  \label{tab:Standard uniform distributions}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LlL}
+    \toprule
+    \verb|RealType| & Conditions & Integer type \\
+    \midrule
+    \verb|float| & $\log_2 R \ge 64$ & \verb|std::uint64_t| \\
+                 & Otherwise         & \verb|std::uint32_t| \\
+    \verb|double| & $\log_2 R \ge 64$ & \verb|std::uint64_t| \\
+    & \verb|MCKL_RNG_U01_USE_64BITS_DOUBLE| & \verb|std::uint64_t| \\
+    & Otherwise & \verb|std::uint32_t| \\
+    \verb|long double| & Always & \verb|std::uint64_t| \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Intermediate integer types of standard uniform distributions}
+  \label{tab:Intermediate integer types of standard uniform distributions}
+\end{table}
+
+\paragraph{\texttt{U01CCDistribution}}
+
+This distribution produce random real numbers on $[0, 1]$, with the lower and
+upper bounds inclusive. The specific algorithm is as the following,
+\begin{align*}
+  P &= \min\{W - 1, M\} \\
+  V &= \begin{cases}
+    U &\text{if } P + 1 < W \\
+    \Floor{(U \bmod 2^{W - 1}) / 2^{W - P -2}} &\text{otherwise}
+  \end{cases} \\
+  Z &= (V \bmod 1) + V \\
+  X &= 2^{-(P + 1)} Z
+\end{align*}
+The minimum and maximum are $0$ and $1$, respectively.
+
+\paragraph{\texttt{U01CODistribution}}
+
+This distribution produce random real numbers on $[0, 1)$, with the lower bound
+inclusive and the upper bound never produced. The specific algorithm is as the
+following,
+\begin{align*}
+  P &= \min\{W, M\} \\
+  V &= \Floor{U / 2^{W - P}} \\
+  X &= 2^{-P} V
+\end{align*}
+The minimum and maximum are $0$ and $1 - 2^{-P}$, respectively.
+
+\paragraph{\texttt{U01OCDistribution}}
+
+This distribution produce random real numbers on $(0, 1]$, with the upper bound
+inclusive and the lower bound never produced. The specific algorithm is as the
+following,
+\begin{align*}
+  P &= \min\{W, M\} \\
+  V &= \Floor{U / 2^{W - P}} \\
+  X &= 2^{-P} V + 2^{-P}
+\end{align*}
+The minimum and maximum are $2^{-P}$ and $1$, respectively.
+
+\paragraph{\texttt{U01OODistribution}}
+
+This distribution produce random real numbers on $(0, 1)$, with the lower and
+upper bounds never produced. The specific algorithm is as the following,
+\begin{align*}
+  P &= \min\{W + 1, M\} \\
+  V &= \Floor{U / 2^{W + 1 - P}} \\
+  X &= 2^{-(P - 1)} V + 2^{-P}
+\end{align*}
+The minimum and maximum are $2^{-P}$ and $1 - 2^{-P}$, respectively.
+
+\paragraph{\texttt{U01Distribution}}
+
+It is now clear that the above four distributions actually produce ``fixed
+point'' instead of ``floating point'' numbers. The output $X$ can be
+represented exactly by the target \verb|RealType|. They have two advantages.
+First, when it is important that the lower or upper bound is never produced, to
+avoid underflow, overflow or other undefined behaviors in subsequent
+calculations, they provide such assurance. Second, they usually can be executed
+with only a couple of instructions by modern processors. And thus can have
+better performance.
+
+The main drawback is accuracy. If \verb|RealType| is \verb|float| or
+\verb|long double|, then the difference is minimal, since the intermediate
+random integers have more bits than the significant of the target floating
+point type. The situation is a bit more tricky in the case of \verb|double| and
+the intermediate random integers are 32-bits. In this case,
+\verb|U01CODistribution| can only produce $2^{32}$ distinctive values while
+\verb|double| can represent much more values exactly within the range $[0, 1)$.
+In contrast, the standard library will use at least 53 random bits. This will
+not matter in most realistic applications. In fact, random numbers produced by
+\verb|U01CODistribution| passes all tests in the {\lnfigures\tbfigures
+  TestU01}%
+\footnote{\url{http://www.iro.umontreal.ca/~simardr/testu01/tu01.html}} library
+that \verb|std::uniform_real_distribution| would pass, for a good \rng. In
+other words, the quality of the \rng is the dominating factor.
+
+However, there are situations where one do want the extra precision. For
+example, the library implement the Normal distribution using the standard
+Box-Muller method \parencite{Box:1958hv}, for performance consideration. Better
+accuracy at the tail can only be archived by using procedures that can produce
+values closer to zero than $2^{-32}$. In this case, there are two solutions.
+The first is to define the configuration macro
+\verb|MCKL_RNG_U01_USE_FIXED_POINT| to zero, and thus \verb|U01Distribution| is
+no longer the same as \verb|U01CODistribution|. Instead, it behaves similarly
+to \verb|std::generate_canonical|. More specifically,
+\begin{align*}
+  P &= \Floor{(W + M - 1) / W} \\
+  K &= \max\{1, P\} \\
+  X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
+\end{align*}
+The other solution is to define the configuration macro
+\verb|MCKL_RNG_U01_USE_64BITS_DOUBLE| to a non-zero value, such that the
+intermediate random integers will always be 64-bits for \verb|double| output.
+This configuration macro also affects all other four distributions discussed
+earlier.
+
+\subsection{Distributions using the inverse method}
+\label{sub:Distributions using the inverse method}
+
+Table~\ref{tab:Distributions using the inverse method} lists all the
+distributions implemented with the inverse method. The performance data of
+these distributions is in Table~\appref{tab:Performance of distributions using
+  the inverse method}. Note that, in this and other tables in the remaining of
+this section, we shortened the class name for brevity. For example, in the
+table the Cauchy distribution is listed as \verb|Cauchy| while the full
+declaration of the class template is,
+\begin{Verbatim}
+  template <typename RealType>
+  class CauchyDistribution;
+\end{Verbatim}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{lllL}
+    \toprule
+    Distribution & Parameters & Support & \cdf \\
+    \midrule
+    \verb|Cauchy| & \verb|a|, \verb|b| & $(-\infty,\infty)$ &
+    $\frac{1}{\pi}\arctan\Round[Big]{\frac{x - a}{b}} + \frac{1}{2}$ \\
+    \verb|Exponential| & \verb|lambda| & $[0,\infty)$ &
+    $1 - \EE^{-\lambda x}$ \\
+    \verb|ExtremeValue| &\verb|a|, \verb|b| & $(-\infty,\infty)$ &
+    $\exp\Curly[Big]{-\exp\Round[Big]{-\frac{x - a}{b}}}$ \\
+    \verb|Laplace| & \verb|a|, \verb|b| & $(-\infty,\infty)$ &
+    $\frac{1}{2} + \frac{1}{2}\mathrm{sgn}(x - a)\Round[Big]{1 -
+      \exp\Curly[Big]{-\frac{\Abs{x - a}}{b}}}$ \\
+    \verb|Logistic| & \verb|a|, \verb|b| & $(-\infty,\infty)$ &
+    $\Round[Big]{1 + \exp\Curly[Big]{-\frac{x - a}{b}}}^{-1}$ \\
+    \verb|Pareto| & \verb|a|, \verb|b| & $[a, \infty)$ &
+    $1 - \Round[Big]{\frac{b}{x}}^a$ \\
+    \verb|Rayleigh| & \verb|sigma| & $[0, \infty)$ &
+    $1 - \exp\Curly[Big]{-\frac{x^2}{2\sigma^2}}$ \\
+    \verb|UniformReal| & \verb|a|, \verb|b| & $[a, b)$ &
+    $\frac{x - a}{b - a}$ \\
+    \verb|Weibull| & \verb|a|, \verb|b| & $[0, \infty)$ &
+    $1 - \exp\Curly[Big]{-\Round[Big]{\frac{x}{b}}^a}$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Distributions using the inverse method}
+  \label{tab:Distributions using the inverse method}
+\end{table}
+
+\subsection{Normal and related distribution}
+\label{sub:Normal and related distribuiton}
+
+The class template
+\begin{Verbatim}
+  template <typename RealType>
+  class NormalDistribution;
+\end{Verbatim}
+implements the Normal distribution with \pdf,
+\begin{equation*}
+  f(x) =
+  \frac{1}{\sqrt{2\pi\sigma^2}}\exp\Curly[Big]{-\frac{(x-\mu)^2}{2\sigma^2}},
+\end{equation*}
+using the Box-Muller method \parencite{Box:1958hv}. It is also used to
+implement the Log-Normal distribution, $X = \EE^{m + s Z}$, where $Z$ follows
+the standard Normal distribution,
+\begin{Verbatim}
+  template <typename RealType>
+  class LognormalDistribution;
+\end{Verbatim}
+and the Levy distribution, $X = a + b / Z^2$,
+\begin{Verbatim}
+  template <typename RealType>
+  class LevyDistribution;
+\end{Verbatim}
+The performance data of these distributions is in Table~\appref{tab:Performance
+  of Normal and related distributions}.
+
+\paragraph{Multivariate Normal distribution}
+
+The library also implements the multivariate Normal distribution,
+\begin{Verbatim}
+  template <typename RealType, std::size_t Dim>
+  class NormalMVDistribution;
+\end{Verbatim}
+If \verb|Dim| is zero (\verb|Dynamic|), then the distribution can only be
+constructed with,
+\begin{Verbatim}
+  explicit NormalMVDistribution(std::size_t dim,
+      const result_type *mean = nullptr, const result_type *chol = nullptr);
+\end{Verbatim}
+If \verb|Dim| is a positive integer, it can only be constructed with,
+\begin{Verbatim}
+  explicit NormalMVDistribution(
+      const result_type *mean = nullptr, const result_type *chol = nullptr);
+\end{Verbatim}
+In either case, the parameter \verb|mean| is the mean vector. If it is a null
+pointer, then it is assumed to be a zero vector. The parameter \verb|chol| is a
+$d(d + 1)/2$-vector, where $d$ is the dimension. The vector is the lower
+triangular elements of the Cholesky decomposition of the covariance matrix,
+packed row by row. Libraries such as \lapack has routines to compute such a
+matrix. Alternatively, one can use the covariance functionalities in the
+library. See Section~\ref{sec:Sample covariance}, which also provides a
+concrete example of using the multivariate Normal distribution.
+
+\subsection{Gamma and related distribution}
+\label{sub:Gamma and related distribution}
+
+The class template
+\begin{Verbatim}
+  template <typename RealType>
+  class GammaDistribution;
+\end{Verbatim}
+implements the Gamma distribution with \pdf,
+\begin{equation*}
+  f(x) = \frac{\EE^{-x/\beta}}{\Gamma(\alpha)}\beta^{-\alpha}x^{\alpha-1}.
+\end{equation*}
+The specific algorithm used depends on the parameters. If $\alpha = 1$, it
+becomes the exponential distribution. If $0 < \alpha < 0.6$, it is generated
+through transformation of exponential power distribution
+\parencite[sec~2.6]{Devroye:1986gi}. If $0.6\le\alpha<1$, then rejection method
+from the Weibull distribution is used \parencite[sec.~3.4]{Devroye:1986gi}. If
+$\alpha > 1$, then the method in \textcite{Marsaglia:2000vq} is used. There are
+three related distributions,
+\begin{Verbatim}
+  template <typename RealType>
+  class ChiSquaredDistribution;
+
+  template <typename RealType>
+  class FisherFDistribution;
+
+  template <typename RealType>
+  class StudentTDistribution;
+\end{Verbatim}
+They implement the $\chi^2$-distribution, the Fisher's $F$-distribution, and
+the Student's $t$-distribution, respectively. The performance data of these
+distributions, for different parameters are in Tables~\appref{tab:Performance
+  of Gamma distribution} to~\appref{tab:Performance of Student's
+  t-distribution}.
+
+\subsection{Beta distribution}
+\label{sub:Beta distribution}
+
+The class template
+\begin{Verbatim}
+  template <typename RealType>
+  class BetaDistribution;
+\end{Verbatim}
+implements the Beta distribution with \pdf,
+\begin{equation*}
+  f(x) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}
+  x^{\alpha - 1}(1 - x)^{\beta - 1}
+\end{equation*}
+The specific algorithm used depends on the parameters. If $\alpha = 1/2$ and
+$\beta = 1/2$, or $\alpha = 1$ or $\beta = 1$, then the inverse method is used.
+If $\alpha > 1$ and $\beta > 1$, the method in \textcite{Cheng:1978jl} is used.
+Otherwise, let $K = 0.852$, $C = -0.956$, and $D = \beta + K\alpha^2 + C$. If
+$\alpha < 1$, $\beta < 1$ and $D \le 0$, then Jöhnk's method
+\parencite[sec.~3.5]{Devroye:1986gi} is used. In all other cases, one of the
+switching algorithms in \textcite{Atkinson:1979es} is used. Note that, there is
+no vectorized implementation at the moment for the switching algorithms. In
+other cases, the vectorized generating shall provide considerable speedup. The
+performance data is in Table~\appref{tab:Performance of Beta distribution}
