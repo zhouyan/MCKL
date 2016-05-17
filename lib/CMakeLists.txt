@@ -40,11 +40,8 @@ SET(MCKL_LIB_SOURCE_MCKL
     ${PROJECT_SOURCE_DIR}/src/smp/smp.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/utility.cpp)
 
-SET(MCKL_LIB_SOURCE_MCKLRNG
-    ${PROJECT_SOURCE_DIR}/src/rng/rng.cpp)
-
 SET(MCKL_LIB_TYPE shared static)
-SET(MCKL_LIB_NAME mckl mcklrng)
+SET(MCKL_LIB_NAME mckl)
 
 IF(NOT DEFINED MCKL_INSTALL_LIB_DIR)
     IF(EXISTS ${CMAKE_INSTALL_PREFIX}/lib64)

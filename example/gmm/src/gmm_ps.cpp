@@ -37,16 +37,8 @@ int main(int argc, char **argv)
     std::size_t n = 100;
     std::size_t c = 4;
     std::size_t power = 0;
-
-    mckl::ProgramOptionMap option;
-    option.add("N", "Number of particles", &N, N);
-    option.add("n", "Number of iterations", &n, n);
-    option.add("c", "Number of components", &c, c);
-    option.add("power", "Power of the prior annealing", &power, 2);
-    option.process(argc, argv);
-    if (option.count("help"))
-        return 0;
-
+    if (argc > 1)
+        power = static_cast<std::size_t>(std::atoi(argv[1]));
     gmm_ps(N, n, c, power);
 
     return 0;

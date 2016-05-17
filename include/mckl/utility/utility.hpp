@@ -35,16 +35,10 @@
 #include <mckl/internal/config.h>
 #include <mckl/utility/aligned_memory.hpp>
 #include <mckl/utility/covariance.hpp>
-#include <mckl/utility/program_option.hpp>
-#include <mckl/utility/progress.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
 #if MCKL_HAS_HDF5
 #include <mckl/utility/hdf5.hpp>
-#endif
-
-#if MCKL_HAS_OPENCL
-#include <mckl/utility/opencl.hpp>
 #endif
 
 #endif // MCKL_UTILITY_UTILITY_HPP

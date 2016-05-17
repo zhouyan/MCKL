@@ -149,18 +149,6 @@
 /// \ingroup Utility
 /// \brief Load and store objects in the HDF5 format
 
-/// \defgroup OpenCL OpenCL
-/// \ingroup Utility
-/// \brief Resource management for OpenCL
-
-/// \defgroup ProgramOption Program option
-/// \ingroup Utility
-/// \brief Process program command line options
-
-/// \defgroup Progress Progress
-/// \ingroup Utility
-/// \brief Display progress while algorithms proceed
-
 /// \defgroup StopWatch Stop watch
 /// \ingroup Utility
 /// \brief Time measurement

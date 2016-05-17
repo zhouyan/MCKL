@@ -34,73 +34,67 @@
 
 /// \defgroup C_API C API
 /// \brief Interfacing with C
-///
+
 /// \defgroup C_API_Definitions Enumerators, placeholders and macros
 /// \ingroup C_API
-///
+
 /// \defgroup C_API_Core Core
 /// \ingroup C_API
-///
+
 /// \defgroup C_API_Core_StateMatrix mckl::StateMatrix
 /// \ingroup C_API_Core
-///
+
 /// \defgroup C_API_Core_Weight mckl::Weight
 /// \ingroup C_API_Core
-///
+
 /// \defgroup C_API_Core_Particle mckl::Particle
 /// \ingroup C_API_Core
-///
+
 /// \defgroup C_API_Core_Monitor mckl::Monitor
 /// \ingroup C_API_Core
-///
+
 /// \defgroup C_API_Core_Sampler mckl::Sampler
 /// \ingroup C_API_Core
-///
+
 /// \defgroup C_API_Resample Resample algorithms
 /// \ingroup C_API
-///
+
 /// \defgroup C_API_RNG Random number generating
 /// \ingroup C_API
-///
+
 /// \defgroup C_API_RNG_RNG RNG engines
 /// \ingroup C_API_RNG
-///
+
 /// \defgroup C_API_RNG_Seed mckl::Seed
 /// \ingroup C_API_RNG
-///
+
 /// \defgroup C_API_RNG_U01Sequence U01 sequence
 /// \ingroup C_API_RNG
-///
+
 /// \defgroup C_API_RNG_DISTRIBUITON Distribution
 /// \ingroup C_API_RNG
-///
+
 /// \defgroup C_API_RNG_MKLRNG Intel Math Kernel Library
 /// \ingroup C_API_RNG
-///
+
 /// \defgroup C_API_RNG_RandomWalk Random walk
 /// \ingroup C_API_RNG
-///
+
 /// \defgroup C_API_SMP Symmetric multiprocessing
 /// \ingroup C_API
-///
+
 /// \defgroup C_API_Utility Utility
 /// \ingroup C_API
-///
+
 /// \defgroup C_API_Utility_AlignedMemory Aligned memory allocation
 /// \ingroup C_API_Utility
-///
+
 /// \defgroup C_API_Utility_Covariance Covariance
 /// \ingroup C_API_Utility
-///
+
 /// \defgroup C_API_Utility_HDF5 HDF5 objects IO
 /// \ingroup C_API_Utility
-///
-/// \defgroup C_API_Utility_ProgramOption Program option
-/// \ingroup C_API_Utility
-///
-/// \defgroup C_API_Utility_Progress Progress
-/// \ingroup C_API_Utility
-///
+
 /// \defgroup C_API_Utility_StopWatch Stop watch
 /// \ingroup C_API_Utility
 

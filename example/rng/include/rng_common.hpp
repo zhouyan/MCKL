@@ -33,7 +33,6 @@
 #define MCKL_EXAMPLE_RNG_COMMON_HPP
 
 #include <mckl/rng/rng.hpp>
-#include <mckl/utility/program_option.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
 #define MCKL_EXAMPLE_RNG_MAIN(prg, NVal, MVal)                                \
@@ -41,13 +40,10 @@
     {                                                                         \
         std::size_t N = NVal;                                                 \
         std::size_t M = MVal;                                                 \
-        mckl::ProgramOptionMap option;                                        \
-        option.add("N", "Number of samples in each run", &N, N);              \
-        option.add("M", "Number of repetitions", &M, M);                      \
-        option.process(argc, argv);                                           \
-        if (option.count("help"))                                             \
-            return 0;                                                         \
-                                                                              \
+        if (argc > 1)                                                         \
+            N = static_cast<std::size_t>(std::atoi(argv[1]));                 \
+        if (argc > 2)                                                         \
+            M = static_cast<std::size_t>(std::atoi(argv[2]));                 \
         rng_##prg(N, M);                                                      \
                                                                               \
         return 0;                                                             \

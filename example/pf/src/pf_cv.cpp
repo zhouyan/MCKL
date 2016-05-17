@@ -34,13 +34,8 @@
 int main(int argc, char **argv)
 {
     std::size_t N = 1000;
-
-    mckl::ProgramOptionMap option;
-    option.add("N", "Number of particles", &N, N);
-    option.process(argc, argv);
-    if (option.count("help"))
-        return 0;
-
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
     pf_cv(N);
 
     return 0;
