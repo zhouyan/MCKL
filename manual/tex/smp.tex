@@ -24,7 +24,7 @@ function in section~\ref{sub:Implementation (PF)},
   {
       Vector<double> weight(particle.size());
       for (auto idx : particle)
-          weight[idx.id()] = idx.log_likelihood(iter);
+          weight[idx.i()] = idx.log_likelihood(iter);
       particle.weight().add_log(weight.data());
   }
 \end{Verbatim}
@@ -52,7 +52,7 @@ convertible to \verb|eval_type|.
 
       void eval_each(std::size_t iter, ParticleIndex<PF> idx)
       {
-          weight_[idx.id()] = idx.log_likelihood(iter);
+          weight_[idx.i()] = idx.log_likelihood(iter);
       }
 
       void eval_last(std::size_t, Particle<PF> &particle)
@@ -79,7 +79,7 @@ parallelized one. For example,
 
       void eval_each(std::size_t iter, ParticleIndex<PF> idx)
       {
-          weight_[idx.id()] = idx.log_likelihood(iter);
+          weight_[idx.i()] = idx.log_likelihood(iter);
       }
 
       void eval_last(std::size_t, Particle<PF> &particle)

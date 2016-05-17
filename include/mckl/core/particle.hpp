@@ -51,21 +51,19 @@ class ParticleIndexBase
     using size_type = typename particle_type::size_type;
     using rng_type = typename particle_type::rng_type;
 
-    ParticleIndexBase(size_type id, particle_type *pptr) : pptr_(pptr), id_(id)
-    {
-    }
+    ParticleIndexBase(size_type i, particle_type *pptr) : pptr_(pptr), i_(i) {}
 
     particle_type &particle() const { return *pptr_; }
 
     particle_type *particle_ptr() const { return pptr_; }
 
-    size_type id() const { return id_; }
+    size_type i() const { return i_; }
 
-    rng_type &rng() const { return pptr_->rng(id_); }
+    rng_type &rng() const { return pptr_->rng(i_); }
 
     private:
     particle_type *pptr_;
-    size_type id_;
+    size_type i_;
 }; // class ParticleIndexBase
 
 /// \brief ParticleIndex base class trait
@@ -87,8 +85,8 @@ MCKL_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// {
 ///     public:
 ///     particle_index_type(
-///         typename Particle<T>::size_type id, Particle<S> *pptr);
-///     size_type id() const;
+///         typename Particle<T>::size_type i, Particle<S> *pptr);
+///     size_type i() const;
 ///     Particle<S> &particle() const;
 ///     Particle<S> *patricle_ptr() const;
 /// };
@@ -103,8 +101,8 @@ class ParticleIndex : public ParticleIndexBaseType<T>
     using size_type = typename particle_type::size_type;
     using rng_type = typename particle_type::rng_type;
 
-    ParticleIndex(size_type id, particle_type *pptr)
-        : ParticleIndexBaseType<T>(id, pptr)
+    ParticleIndex(size_type i, particle_type *pptr)
+        : ParticleIndexBaseType<T>(i, pptr)
     {
     }
 
@@ -112,7 +110,7 @@ class ParticleIndex : public ParticleIndexBaseType<T>
     ParticleIndex<T> operator[](IntType n)
     {
         return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                    static_cast<std::ptrdiff_t>(this->id()) +
+                                    static_cast<std::ptrdiff_t>(this->i()) +
                                     static_cast<std::ptrdiff_t>(n)),
             this->particle_ptr());
     }
@@ -134,14 +132,14 @@ inline bool operator==(
         "Compare two ParticleIndex objects from two different particle "
         "systems");
 
-    return idx1.id() == idx2.id();
+    return idx1.i() == idx2.i();
 }
 
 template <typename T>
 inline bool operator!=(
     const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
 {
-    return idx1.id() != idx2.id();
+    return idx1.i() != idx2.i();
 }
 
 template <typename T>
@@ -152,7 +150,7 @@ inline bool operator<(
         "Compare two ParticleIndex objects from two different particle "
         "systems");
 
-    return idx1.id() < idx2.id();
+    return idx1.i() < idx2.i();
 }
 
 template <typename T>
@@ -163,7 +161,7 @@ inline bool operator>(
         "Compare two ParticleIndex objects from two different particle "
         "systems");
 
-    return idx1.id() > idx2.id();
+    return idx1.i() > idx2.i();
 }
 
 template <typename T>
@@ -174,7 +172,7 @@ inline bool operator<=(
         "Compare two ParticleIndex objects from two different particle "
         "systems");
 
-    return idx1.id() <= idx2.id();
+    return idx1.i() <= idx2.i();
 }
 
 template <typename T>
@@ -185,13 +183,13 @@ inline bool operator>=(
         "Compare two ParticleIndex objects from two different particle "
         "systems");
 
-    return idx1.id() >= idx2.id();
+    return idx1.i() >= idx2.i();
 }
 
 template <typename T>
 inline ParticleIndex<T> &operator++(ParticleIndex<T> &idx)
 {
-    idx = ParticleIndex<T>(idx.id() + 1, idx.particle_ptr());
+    idx = ParticleIndex<T>(idx.i() + 1, idx.particle_ptr());
 
     return idx;
 }
@@ -200,7 +198,7 @@ template <typename T>
 inline ParticleIndex<T> operator++(ParticleIndex<T> &idx, int)
 {
     ParticleIndex<T> idx_tmp(idx);
-    idx = ParticleIndex<T>(idx.id() + 1, idx.particle_ptr());
+    idx = ParticleIndex<T>(idx.i() + 1, idx.particle_ptr());
 
     return idx_tmp;
 }
@@ -208,7 +206,7 @@ inline ParticleIndex<T> operator++(ParticleIndex<T> &idx, int)
 template <typename T>
 inline ParticleIndex<T> &operator--(ParticleIndex<T> &idx)
 {
-    idx = ParticleIndex<T>(idx.id() - 1, idx.particle_ptr());
+    idx = ParticleIndex<T>(idx.i() - 1, idx.particle_ptr());
 
     return idx;
 }
@@ -217,7 +215,7 @@ template <typename T>
 inline ParticleIndex<T> operator--(ParticleIndex<T> &idx, int)
 {
     ParticleIndex<T> idx_tmp(idx);
-    idx = ParticleIndex<T>(idx.id() - 1, idx.particle_ptr());
+    idx = ParticleIndex<T>(idx.i() - 1, idx.particle_ptr());
 
     return idx_tmp;
 }
@@ -226,7 +224,7 @@ template <typename T, typename IntType>
 inline ParticleIndex<T> operator+(const ParticleIndex<T> &idx, IntType n)
 {
     return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                static_cast<std::ptrdiff_t>(idx.id()) +
+                                static_cast<std::ptrdiff_t>(idx.i()) +
                                 static_cast<std::ptrdiff_t>(n)),
         idx.particle_ptr());
 }
@@ -235,7 +233,7 @@ template <typename T, typename IntType>
 inline ParticleIndex<T> operator+(IntType n, const ParticleIndex<T> &idx)
 {
     return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                static_cast<std::ptrdiff_t>(idx.id()) +
+                                static_cast<std::ptrdiff_t>(idx.i()) +
                                 static_cast<std::ptrdiff_t>(n)),
         idx.particle_ptr());
 }
@@ -244,7 +242,7 @@ template <typename T, typename IntType>
 inline ParticleIndex<T> operator-(const ParticleIndex<T> &idx, IntType n)
 {
     return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                static_cast<std::ptrdiff_t>(idx.id()) -
+                                static_cast<std::ptrdiff_t>(idx.i()) -
                                 static_cast<std::ptrdiff_t>(n)),
         idx.particle_ptr());
 }
@@ -273,8 +271,8 @@ inline std::ptrdiff_t operator-(
         "Substract two ParticleIndex objects from two different particle "
         "systems");
 
-    return static_cast<std::ptrdiff_t>(idx1.id()) -
-        static_cast<std::ptrdiff_t>(idx2.id());
+    return static_cast<std::ptrdiff_t>(idx1.i()) -
+        static_cast<std::ptrdiff_t>(idx2.i());
 }
 
 /// \brief A subset of particles

@@ -7,10 +7,10 @@ static inline void pf_init_first(size_t t, mckl_particle particle)
 
 static inline void pf_init_each(size_t t, mckl_particle_index idx)
 {
-    idx.state[PosX] = pf_pos_x[idx.id];
-    idx.state[PosY] = pf_pos_y[idx.id];
-    idx.state[VelX] = pf_vel_x[idx.id];
-    idx.state[VelY] = pf_vel_y[idx.id];
+    idx.state[PosX] = pf_pos_x[idx.i];
+    idx.state[PosY] = pf_pos_y[idx.i];
+    idx.state[VelX] = pf_vel_x[idx.i];
+    idx.state[VelY] = pf_vel_y[idx.i];
 }
 
 static inline void pf_move_first(size_t t, mckl_particle particle)
@@ -20,15 +20,15 @@ static inline void pf_move_first(size_t t, mckl_particle particle)
 
 static inline void pf_move_each(size_t t, mckl_particle_index idx)
 {
-    idx.state[PosX] += pf_pos_x[idx.id] + 0.1 * idx.state[VelX];
-    idx.state[PosY] += pf_pos_y[idx.id] + 0.1 * idx.state[VelY];
-    idx.state[VelX] += pf_vel_x[idx.id];
-    idx.state[VelY] += pf_vel_y[idx.id];
+    idx.state[PosX] += pf_pos_x[idx.i] + 0.1 * idx.state[VelX];
+    idx.state[PosY] += pf_pos_y[idx.i] + 0.1 * idx.state[VelY];
+    idx.state[VelX] += pf_vel_x[idx.i];
+    idx.state[VelY] += pf_vel_y[idx.i];
 }
 
 static inline void pf_weight_each(size_t t, mckl_particle_index idx)
 {
-    pf_inc_w[idx.id] = pf_log_likelihood(t, idx);
+    pf_inc_w[idx.i] = pf_log_likelihood(t, idx);
 }
 
 static inline void pf_weight_last(size_t t, mckl_particle particle)

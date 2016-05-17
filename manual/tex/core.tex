@@ -351,7 +351,7 @@ To access the particle system, use
 For any type \verb|T|, the type \verb|ParticleIndex<T>| has the following
 methods,
 \begin{Verbatim}
-  idx.id();  // The index used to construct idx, i
+  idx.i();   // The index used to construct idx, i
   idx.rng(); // => particle.rng(i);
 \end{Verbatim}
 If \verb|T| is a derived class of \verb|StateMatrix|, then
@@ -933,7 +933,7 @@ will be computed with the \verb|log_likelihood| method of
   {
       Vector<double> weight(particle.size());
       for (auto idx : particle)
-          weight[idx.id()] = idx.log_likelihood(iter);
+          weight[idx.i()] = idx.log_likelihood(iter);
       particle.weight().add_log(weight.data());
   }
 \end{Verbatim}

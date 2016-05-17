@@ -89,25 +89,25 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     {
         public:
         particle_index_type(
-            typename Particle<S>::size_type id, Particle<S> *pptr)
-            : ParticleIndexBase<S>(id, pptr)
+            typename Particle<S>::size_type i, Particle<S> *pptr)
+            : ParticleIndexBase<S>(i, pptr)
         {
         }
 
         std::size_t dim() const { return this->particle().state().dim(); }
 
-        value_type &operator()(std::size_t pos) const
+        value_type &operator()(size_type j) const
         {
             return this->particle().state()(
-                static_cast<size_type>(this->id()), pos);
+                static_cast<size_type>(this->i()), j);
         }
 
-        value_type &at(std::size_t pos) const
+        value_type &at(size_type j) const
         {
             runtime_assert(
-                pos < this->dim(), "**StateMatrix::at** index out of range");
+                j < this->dim(), "**StateMatrix::at** index out of range");
 
-            return operator()(pos);
+            return operator()(j);
         }
     }; // class particle_index_type
 
@@ -121,7 +121,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     ///
     /// \details
     /// `dim` is ignored if `Dim > 0`.
-    void reserve(size_type N, std::size_t dim)
+    void reserve(size_type N, size_type dim)
     {
         data_.reserve(N * (Dim == Dynamic ? dim : this->dim()));
     }
@@ -142,7 +142,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     protected:
     explicit StateMatrixBase(size_type N) : size_(N), data_(N * Dim) {}
 
-    StateMatrixBase(size_type N, std::size_t dim) : size_(N)
+    StateMatrixBase(size_type N, size_type dim) : size_(N)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::StateMatrix** used with "
                                       "an object with fixed dimension");
@@ -165,14 +165,14 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         return *this;
     }
 
-    void resize_data(size_type N, std::size_t dim)
+    void resize_data(size_type N, size_type dim)
     {
         size_ = N;
         this->set_dim(dim);
         data_.resize(N * dim);
     }
 
-    std::size_t data_size() const { return data_.size(); }
+    size_type data_size() const { return data_.size(); }
 
     friend bool operator==(const StateMatrixBase<Layout, Dim, T> &state1,
         const StateMatrixBase<Layout, Dim, T> &state2)
@@ -219,13 +219,11 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
-    StateMatrix(size_type N, std::size_t dim) : state_matrix_base_type(N, dim)
-    {
-    }
+    StateMatrix(size_type N, size_type dim) : state_matrix_base_type(N, dim) {}
 
     void resize(size_type N) { resize_both(N, this->dim()); }
 
-    void resize(size_type N, std::size_t dim)
+    void resize(size_type N, size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
                                       "object with fixed dimension");
@@ -233,7 +231,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         resize_both(N, dim);
     }
 
-    void resize_dim(std::size_t dim)
+    void resize_dim(size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
                                       "an object with fixed dimension");
@@ -241,39 +239,37 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         resize_both(this->size(), dim);
     }
 
-    T &operator()(size_type id, std::size_t pos)
+    T &operator()(size_type i, size_type j)
     {
-        return this->data()[id * this->dim() + pos];
+        return this->data()[i * this->dim() + j];
     }
 
-    const T &operator()(size_type id, std::size_t pos) const
+    const T &operator()(size_type i, size_type j) const
     {
-        return this->data()[id * this->dim() + pos];
+        return this->data()[i * this->dim() + j];
     }
 
-    T &at(size_type id, std::size_t pos)
+    T &at(size_type i, size_type j)
     {
-        runtime_assert(!internal::is_negative(id) && id < this->size() &&
-                pos < this->dim(),
+        runtime_assert(i < this->size() && j < this->dim(),
             "**StateMatrix::at** index out of range");
 
-        return operator()(id, pos);
+        return operator()(i, j);
     }
 
-    const T &at(size_type id, std::size_t pos) const
+    const T &at(size_type i, size_type j) const
     {
-        runtime_assert(!internal::is_negative(id) && id < this->size() &&
-                pos < this->dim(),
+        runtime_assert(i < this->size() && j < this->dim(),
             "**StateMatrix::at** index out of range");
 
-        return operator()(id, pos);
+        return operator()(i, j);
     }
 
     template <typename OutputIter>
-    OutputIter read_state(std::size_t pos, OutputIter first) const
+    OutputIter read_state(size_type j, OutputIter first) const
     {
         for (size_type i = 0; i != this->size(); ++i, ++first)
-            *first = operator()(i, pos);
+            *first = operator()(i, j);
 
         return first;
     }
@@ -285,21 +281,21 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
             first = std::copy_n(this->data(), this->data_size(), first);
 
         if (layout == ColMajor)
-            for (std::size_t d = 0; d != this->dim(); ++d)
+            for (size_type j = 0; j != this->dim(); ++j)
                 for (size_type i = 0; i != this->size(); ++i, ++first)
-                    *first = operator()(i, d);
+                    *first = operator()(i, j);
 
         return first;
     }
 
-    value_type *row_data(size_type id)
+    value_type *row_data(size_type i)
     {
-        return this->data() + id * this->dim();
+        return this->data() + i * this->dim();
     }
 
-    const value_type *row_data(size_type id) const
+    const value_type *row_data(size_type i) const
     {
-        return this->data() + id * this->dim();
+        return this->data() + i * this->dim();
     }
 
     /// \brief Copy particles
@@ -340,34 +336,34 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
             Dim == Dynamic || 8 < Dim > ());
     }
 
-    pack_type state_pack(size_type id) const
+    pack_type state_pack(size_type i) const
     {
         pack_type pack(this->dim());
-        std::copy(row_data(id), row_data(id) + this->dim(), pack.data());
+        std::copy_n(row_data(i), this->dim(), pack.data());
 
         return pack;
     }
 
-    void state_unpack(size_type id, const pack_type &pack)
+    void state_unpack(size_type i, const pack_type &pack)
     {
         runtime_assert(pack.size() >= this->dim(),
             "**StateMatrix::unpack** pack size is too small");
 
         const value_type *ptr = pack.data();
-        std::copy(ptr, ptr + this->dim(), row_data(id));
+        std::copy_n(ptr, this->dim(), row_data(i));
     }
 
-    void state_unpack(size_type id, pack_type &&pack)
+    void state_unpack(size_type i, pack_type &&pack)
     {
         runtime_assert(pack.size() >= this->dim(),
             "**StateMatrix::unpack** pack size is too small");
 
         const value_type *ptr = pack.data();
-        std::move(ptr, ptr + this->dim(), row_data(id));
+        std::move(ptr, ptr + this->dim(), row_data(i));
     }
 
     private:
-    void resize_both(size_type N, std::size_t dim)
+    void resize_both(size_type N, size_type dim)
     {
         if (N == this->size() && dim == this->dim())
             return;
@@ -380,7 +376,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         StateMatrix<RowMajor, Dim, T> tmp;
         tmp.resize_data(N, dim);
         const size_type K = std::min(N, this->size());
-        const std::size_t D = std::min(dim, this->dim());
+        const size_type D = std::min(dim, this->dim());
         if (D > 0)
             for (size_type k = 0; k != K; ++k)
                 std::copy_n(row_data(k), D, tmp.row_data(k));
@@ -394,20 +390,20 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 
     void duplicate_dispatch(size_type src, size_type dst, std::false_type)
     {
-        duplicate_pos<0>(row_data(src), row_data(dst),
+        duplicate_j<0>(row_data(src), row_data(dst),
             std::integral_constant<bool, 0 < Dim>());
     }
 
     template <std::size_t D>
-    void duplicate_pos(const value_type *, value_type *, std::false_type)
+    void duplicate_j(const value_type *, value_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
-    void duplicate_pos(const value_type *src, value_type *dst, std::true_type)
+    void duplicate_j(const value_type *src, value_type *dst, std::true_type)
     {
         dst[D] = src[D];
-        duplicate_pos<D + 1>(
+        duplicate_j<D + 1>(
             src, dst, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix
@@ -425,13 +421,11 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
-    StateMatrix(size_type N, std::size_t dim) : state_matrix_base_type(N, dim)
-    {
-    }
+    StateMatrix(size_type N, size_type dim) : state_matrix_base_type(N, dim) {}
 
     void resize(size_type N) { resize_both(N, this->dim()); }
 
-    void resize(size_type N, std::size_t dim)
+    void resize(size_type N, size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
                                       "object with fixed dimension");
@@ -439,7 +433,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         resize_both(N, dim);
     }
 
-    void resize_dim(std::size_t dim)
+    void resize_dim(size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
                                       "an object with fixed dimension");
@@ -447,20 +441,20 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         resize_both(this->size(), dim);
     }
 
-    T &operator()(size_type id, std::size_t pos)
+    T &operator()(size_type i, size_type j)
     {
-        return this->data()[pos * this->size() + id];
+        return this->data()[i + j * this->size()];
     }
 
-    const T &operator()(size_type id, std::size_t pos) const
+    const T &operator()(size_type i, size_type j) const
     {
-        return this->data()[pos * this->size() + id];
+        return this->data()[i + j * this->size()];
     }
 
     template <typename OutputIter>
-    OutputIter read_state(std::size_t pos, OutputIter first) const
+    OutputIter read_state(size_type j, OutputIter first) const
     {
-        return std::copy_n(col_data(pos), this->size(), first);
+        return std::copy_n(col_data(j), this->size(), first);
     }
 
     template <typename OutputIter>
@@ -468,7 +462,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     {
         if (layout == RowMajor)
             for (size_type i = 0; i != this->size(); ++i)
-                for (std::size_t d = 0; d != this->size(); ++d, ++first)
+                for (size_type d = 0; d != this->size(); ++d, ++first)
                     *first = operator()(i, d);
 
         if (layout == ColMajor)
@@ -477,14 +471,14 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         return first;
     }
 
-    value_type *col_data(std::size_t pos)
+    value_type *col_data(size_type j)
     {
-        return this->data() + pos * this->size();
+        return this->data() + j * this->size();
     }
 
-    const value_type *col_data(std::size_t pos) const
+    const value_type *col_data(size_type j) const
     {
-        return this->data() + pos * this->size();
+        return this->data() + j * this->size();
     }
 
     /// \brief Copy particles
@@ -508,7 +502,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
         InputIter idx = index;
         if (n == this->size()) {
-            for (std::size_t d = 0; d != this->dim(); ++d) {
+            for (size_type d = 0; d != this->dim(); ++d) {
                 idx = index;
                 for (size_type dst = 0; dst != n; ++dst, ++idx) {
                     operator()(dst, d) = operator()(
@@ -518,7 +512,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         } else {
             StateMatrix<ColMajor, Dim, T> tmp;
             tmp.resize_data(N, this->dim());
-            for (std::size_t d = 0; d != this->dim(); ++d) {
+            for (size_type d = 0; d != this->dim(); ++d) {
                 idx = index;
                 for (size_type dst = 0; dst != n; ++dst, ++idx)
                     tmp(dst, d) = operator()(static_cast<size_type>(*idx), d);
@@ -538,35 +532,35 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
             Dim == Dynamic || 8 < Dim > ());
     }
 
-    pack_type state_pack(size_type id) const
+    pack_type state_pack(size_type i) const
     {
         pack_type pack(this->dim());
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            pack[d] = operator()(id, d);
+        for (size_type j = 0; j != this->dim(); ++j)
+            pack[j] = operator()(i, j);
 
         return pack;
     }
 
-    void state_unpack(size_type id, const pack_type &pack)
+    void state_unpack(size_type i, const pack_type &pack)
     {
         runtime_assert(pack.size() >= this->dim(),
             "**StateMatrix::unpack** pack size is too small");
 
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            operator()(id, d) = pack[d];
+        for (size_type j = 0; j != this->dim(); ++j)
+            operator()(i, j) = pack[j];
     }
 
-    void state_unpack(size_type id, pack_type &&pack)
+    void state_unpack(size_type i, pack_type &&pack)
     {
         runtime_assert(pack.size() >= this->dim(),
             "**StateMatrix::unpack** pack size is too small");
 
-        for (std::size_t d = 0; d != this->dim(); ++d)
-            operator()(id, d) = std::move(pack[d]);
+        for (size_type j = 0; j != this->dim(); ++j)
+            operator()(i, j) = std::move(pack[j]);
     }
 
     private:
-    void resize_both(size_type N, std::size_t dim)
+    void resize_both(size_type N, size_type dim)
     {
         if (N == this->size() && dim == this->dim())
             return;
@@ -579,35 +573,35 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         StateMatrix<ColMajor, Dim, T> tmp;
         tmp.resize_data(N, dim);
         const size_type K = std::min(N, this->size());
-        const std::size_t D = std::min(dim, this->dim());
+        const size_type D = std::min(dim, this->dim());
         if (K > 0)
-            for (std::size_t d = 0; d != D; ++d)
+            for (size_type d = 0; d != D; ++d)
                 std::copy_n(col_data(d), K, tmp.col_data(d));
         *this = std::move(tmp);
     }
 
     void duplicate_dispatch(size_type src, size_type dst, std::true_type)
     {
-        for (std::size_t d = 0; d != this->dim(); ++d)
+        for (size_type d = 0; d != this->dim(); ++d)
             operator()(dst, d) = operator()(src, d);
     }
 
     void duplicate_dispatch(size_type src, size_type dst, std::false_type)
     {
-        duplicate_pos<0>(this->data() + src, this->data() + dst,
+        duplicate_j<0>(this->data() + src, this->data() + dst,
             std::integral_constant<bool, 0 < Dim>());
     }
 
     template <std::size_t D>
-    void duplicate_pos(const value_type *, value_type *, std::false_type)
+    void duplicate_j(const value_type *, value_type *, std::false_type)
     {
     }
 
     template <std::size_t D>
-    void duplicate_pos(const value_type *src, value_type *dst, std::true_type)
+    void duplicate_j(const value_type *src, value_type *dst, std::true_type)
     {
         dst[D * this->size()] = src[D * this->size()];
-        duplicate_pos<D + 1>(
+        duplicate_j<D + 1>(
             src, dst, std::integral_constant<bool, D + 1 < Dim>());
     }
 }; // class StateMatrix

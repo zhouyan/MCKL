@@ -48,7 +48,7 @@ class SamplerEvalSMPC
         if (work_.eval_each == nullptr)
             return;
 
-        mckl_particle_index idx_c = {&idx(0), idx.id()};
+        mckl_particle_index idx_c = {&idx(0), idx.i()};
         work_.eval_each(iter, idx_c);
     }
 
@@ -86,7 +86,7 @@ class MonitorEvalSMPC
         if (work_.eval_each == nullptr)
             return;
 
-        mckl_particle_index idx_c = {&idx(0), idx.id()};
+        mckl_particle_index idx_c = {&idx(0), idx.i()};
 
         work_.eval_each(iter, dim, idx_c, r);
     }

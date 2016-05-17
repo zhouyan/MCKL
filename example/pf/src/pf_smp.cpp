@@ -128,7 +128,7 @@ class PFWeight : public SamplerEvalSMP<PF, PFWeight>
     public:
     void eval_each(std::size_t iter, ParticleIndex<PF> idx)
     {
-        weight_[idx.id()] = idx.log_likelihood(iter);
+        weight_[idx.i()] = idx.log_likelihood(iter);
     }
 
     void eval_first(std::size_t, Particle<PF> &particle)

@@ -187,7 +187,7 @@ typedef struct {
 /// \brief `mckl::SingleParticle`
 typedef struct {
     double *state;
-    size_t id;
+    size_t i;
 } mckl_particle_index;
 
 /// \brief `mckl::Particle`

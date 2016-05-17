@@ -209,7 +209,7 @@ class PFCVWeight : public mckl::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
 
     void eval_each(std::size_t iter, mckl::ParticleIndex<T> idx)
     {
-        w_[idx.id()] = idx.log_likelihood(iter);
+        w_[idx.i()] = idx.log_likelihood(iter);
     }
 
     void eval_first(std::size_t, mckl::Particle<T> &particle)
