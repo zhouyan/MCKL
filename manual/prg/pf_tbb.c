@@ -59,12 +59,10 @@ int main(int argc, char **argv)
 
     mckl_sampler sampler = mckl_sampler_new(n, 4);
     mckl_sampler_resample_scheme(sampler, MCKLStratified, 0.5);
+    mckl_sampler_eval_smp(MCKLBackendTBB, sampler, pf_init, MCKLSamplerInit);
+    mckl_sampler_eval_smp(MCKLBackendTBB, sampler, pf_move, MCKLSamplerMove);
     mckl_sampler_eval_smp(
-        MCKLBackendTBB, sampler, pf_init, MCKLSamplerInit, 1);
-    mckl_sampler_eval_smp(
-        MCKLBackendTBB, sampler, pf_move, MCKLSamplerMove, 1);
-    mckl_sampler_eval_smp(MCKLBackendTBB, sampler, pf_weight,
-        MCKLSamplerInit | MCKLSamplerMove, 1);
+        MCKLBackendTBB, sampler, pf_weight, MCKLSamplerInit | MCKLSamplerMove);
     mckl_monitor pf_pos =
         mckl_monitor_new_smp(MCKLBackendTBB, 2, pf_eval, 0, MCKLMonitorMCMC);
     mckl_sampler_set_monitor(sampler, "pos", pf_pos);
