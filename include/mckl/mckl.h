@@ -101,6 +101,7 @@
 #include <mckl/core/core.h>
 #include <mckl/resample/resample.h>
 #include <mckl/rng/rng.h>
+#include <mckl/rngc/rngc.h>
 #include <mckl/smp/smp.h>
 #include <mckl/utility/utility.h>
 
