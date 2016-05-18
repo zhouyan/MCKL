@@ -33,7 +33,6 @@
 #define MCKL_MATH_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/math/cblas.hpp>
 #include <mckl/math/constants.hpp>
 #include <mckl/math/vmath.hpp>
 

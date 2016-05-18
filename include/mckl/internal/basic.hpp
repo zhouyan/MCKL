@@ -35,6 +35,7 @@
 #include <mckl/internal/config.h>
 
 #include <mckl/internal/assert.hpp>
+#include <mckl/internal/cblas.hpp>
 #include <mckl/internal/defines.hpp>
 #include <mckl/internal/forward.hpp>
 #include <mckl/internal/traits.hpp>

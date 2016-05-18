@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/math/cblas.hpp
+// MCKL/include/mckl/internal/cblas.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_MATH_CBLAS_HPP
-#define MCKL_MATH_CBLAS_HPP
+#ifndef MCKL_INTERNAL_CBLAS_HPP
+#define MCKL_INTERNAL_CBLAS_HPP
 
 #include <mckl/internal/config.h>
 
@@ -376,4 +376,4 @@ inline void cblas_dsyrk(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
 
 #endif // MCKL_USE_CBLAS
 
-#endif // MCKL_MATH_CBLAS_HPP
+#endif // MCKL_INTERNAL_CBLAS_HPP
