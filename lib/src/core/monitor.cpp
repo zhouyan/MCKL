@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/core/core.h>
+#include <mckl/mckl.h>
 #include "libmckl.hpp"
 
 namespace mckl

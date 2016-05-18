@@ -29,9 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <mckl/mckl.h>
 #include <mckl/random/rng.hpp>
-#include <mckl/resample/resample.h>
-#include <mckl/resample/resample.hpp>
+#include <mckl/resample.hpp>
 
 extern "C" {
 
@@ -71,7 +71,7 @@ void mckl_resample_trans_rep_index(
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     MCKL_DEFINE_LIB_RESAMPLE_DISPATCH(                                        \
         RNGType, Name, name, Multinomial, multinomial)                        \
     MCKL_DEFINE_LIB_RESAMPLE_DISPATCH(                                        \
@@ -102,7 +102,7 @@ using mckl_resample_type = void (*)(
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_resample_multinomial_##name,
 
 static mckl_resample_type mckl_resample_multinomial_dispatch[] = {
@@ -117,7 +117,7 @@ static mckl_resample_type mckl_resample_multinomial_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_resample_residual_##name,
 
 static mckl_resample_type mckl_resample_residual_dispatch[] = {
@@ -132,7 +132,7 @@ static mckl_resample_type mckl_resample_residual_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_resample_stratified_##name,
 
 static mckl_resample_type mckl_resample_stratified_dispatch[] = {
@@ -147,7 +147,7 @@ static mckl_resample_type mckl_resample_stratified_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_resample_systematic_##name,
 
 static mckl_resample_type mckl_resample_systematic_dispatch[] = {
@@ -162,7 +162,7 @@ static mckl_resample_type mckl_resample_systematic_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_resample_residual_stratified_##name,
 
 static mckl_resample_type mckl_resample_residual_stratified_dispatch[] = {
@@ -177,7 +177,7 @@ static mckl_resample_type mckl_resample_residual_stratified_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_resample_residual_systematic_##name,
 
 static mckl_resample_type mckl_resample_residual_systematic_dispatch[] = {

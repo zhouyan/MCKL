@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/core/core.hpp
+// MCKL/include/mckl/algorithm.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,14 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_CORE_CORE_HPP
-#define MCKL_CORE_CORE_HPP
+#ifndef MCKL_ALGORITHM_HPP
+#define MCKL_ALGORITHM_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/core/monitor.hpp>
-#include <mckl/core/particle.hpp>
-#include <mckl/core/sampler.hpp>
-#include <mckl/core/state_matrix.hpp>
-#include <mckl/core/weight.hpp>
+#include <mckl/algorithm/mh.hpp>
 
-#endif // MCKL_CORE_CORE_HPP
+#endif // MCKL_ALGORITHM_HPP

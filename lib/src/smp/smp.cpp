@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/smp/smp.h>
-#include <mckl/smp/smp.hpp>
+#include <mckl/mckl.h>
+#include <mckl/smp.hpp>
 #include "libmckl.hpp"
 
 namespace mckl

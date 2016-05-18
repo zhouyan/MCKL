@@ -32,8 +32,8 @@
 #ifndef MCKL_LIBMCKLRNG_HPP
 #define MCKL_LIBMCKLRNG_HPP
 
-#include <mckl/random/random.h>
-#include <mckl/random/random.hpp>
+#include <mckl/mckl.h>
+#include <mckl/random.hpp>
 
 #define MCKL_DEFINE_LIB_RANDOM_DIST(RNGType)                                  \
     RNGType &rng_cpp = *reinterpret_cast<RNGType *>(rng.ptr);                 \

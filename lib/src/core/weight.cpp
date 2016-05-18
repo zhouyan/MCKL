@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/core/core.h>
+#include <mckl/mckl.h>
 #include <mckl/random/rng.hpp>
 #include "libmckl.hpp"
 
@@ -116,7 +116,7 @@ void mckl_weight_add_log(mckl_weight weight, const double *first, int stride)
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline size_t mckl_weight_draw_##name(mckl_weight weight, mckl_rng rng)   \
     {                                                                         \
         return ::mckl::cast(weight).draw(                                     \

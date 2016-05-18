@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/math/math.hpp
+// MCKL/include/mckl/math.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,12 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_MATH_MATH_HPP
-#define MCKL_MATH_MATH_HPP
+#ifndef MCKL_MATH_HPP
+#define MCKL_MATH_HPP
 
 #include <mckl/internal/config.h>
 #include <mckl/math/cblas.hpp>
 #include <mckl/math/constants.hpp>
 #include <mckl/math/vmath.hpp>
 
-#endif // MCKL_MATH_MATH_HPP
+#endif // MCKL_MATH_HPP

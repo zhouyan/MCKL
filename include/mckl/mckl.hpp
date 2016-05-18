@@ -154,13 +154,13 @@
 /// \brief Time measurement
 
 #include <mckl/internal/config.h>
-#include <mckl/algorithm/algorithm.hpp>
-#include <mckl/core/core.hpp>
-#include <mckl/math/math.hpp>
-#include <mckl/random/rng.hpp>
-#include <mckl/randomc/randomc.h>
-#include <mckl/resample/resample.hpp>
-#include <mckl/smp/smp.hpp>
-#include <mckl/utility/utility.hpp>
+#include <mckl/algorithm.hpp>
+#include <mckl/core.hpp>
+#include <mckl/math.hpp>
+#include <mckl/random.hpp>
+#include <mckl/randomc.h>
+#include <mckl/resample.hpp>
+#include <mckl/smp.hpp>
+#include <mckl/utility.hpp>
 
 #endif // MCKL_HPP

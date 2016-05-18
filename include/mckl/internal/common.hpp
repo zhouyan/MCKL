@@ -33,7 +33,7 @@
 #define MCKL_INTERNAL_COMMON_HPP
 
 #include <mckl/internal/basic.hpp>
-#include <mckl/math/math.hpp>
+#include <mckl/math.hpp>
 #include <mckl/utility/aligned_memory.hpp>
 
 namespace mckl

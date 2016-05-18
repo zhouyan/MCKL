@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/utility/utility.h>
+#include <mckl/mckl.h>
 #include "libmckl.hpp"
 
 extern "C" {

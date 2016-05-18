@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <mckl/mckl.h>
 #include <mckl/utility/covariance.hpp>
-#include <mckl/utility/utility.h>
 
 extern "C" {
 

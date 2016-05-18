@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/smp/smp.hpp
+// MCKL/include/mckl/resample.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,18 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_SMP_SMP_HPP
-#define MCKL_SMP_SMP_HPP
+#ifndef MCKL_RESAMPLE_HPP
+#define MCKL_RESAMPLE_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/smp/backend_base.hpp>
-#include <mckl/smp/backend_seq.hpp>
-#include <mckl/smp/backend_std.hpp>
-#if MCKL_HAS_OMP
-#include <mckl/smp/backend_omp.hpp>
-#endif
-#if MCKL_HAS_TBB
-#include <mckl/smp/backend_tbb.hpp>
-#endif
+#include <mckl/resample/algorithm.hpp>
+#include <mckl/resample/index.hpp>
+#include <mckl/resample/transform.hpp>
 
-#endif // MCKL_SMP_SMP_HPP
+#endif // MCKL_RESAMPLE_HPP

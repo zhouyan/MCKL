@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/rng.hpp
+// MCKL/include/mckl/utility.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,15 +29,16 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_RANDOM_HPP
-#define MCKL_RANDOM_RANDOM_HPP
+#ifndef MCKL_UTILITY_HPP
+#define MCKL_UTILITY_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/random/distribution.hpp>
-#include <mckl/random/rng.hpp>
-#include <mckl/random/rng_set.hpp>
-#include <mckl/random/seed.hpp>
-#include <mckl/random/u01.hpp>
-#include <mckl/random/u01_sequence.hpp>
+#include <mckl/utility/aligned_memory.hpp>
+#include <mckl/utility/covariance.hpp>
+#include <mckl/utility/stop_watch.hpp>
 
-#endif // MCKL_RANDOM_RANDOM_HPP
+#if MCKL_HAS_HDF5
+#include <mckl/utility/hdf5.hpp>
+#endif
+
+#endif // MCKL_UTILITY_HPP

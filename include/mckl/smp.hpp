@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/algorithm/algorithm.hpp
+// MCKL/include/mckl/smp.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,10 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_ALGORITHM_ALGORITHM_HPP
-#define MCKL_ALGORITHM_ALGORITHM_HPP
+#ifndef MCKL_SMP_HPP
+#define MCKL_SMP_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/algorithm/mh.hpp>
+#include <mckl/smp/backend_base.hpp>
+#include <mckl/smp/backend_seq.hpp>
+#include <mckl/smp/backend_std.hpp>
+#if MCKL_HAS_OMP
+#include <mckl/smp/backend_omp.hpp>
+#endif
+#if MCKL_HAS_TBB
+#include <mckl/smp/backend_tbb.hpp>
+#endif
 
-#endif // MCKL_ALGORITHM_ALGORITHM_HPP
+#endif // MCKL_SMP_HPP

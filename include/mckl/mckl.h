@@ -95,11 +95,11 @@
 /// \defgroup C_API_Utility_StopWatch Stop watch
 /// \ingroup C_API_Utility
 
-#include <mckl/core/core.h>
-#include <mckl/random/rng.h>
-#include <mckl/randomc/randomc.h>
-#include <mckl/resample/resample.h>
-#include <mckl/smp/smp.h>
-#include <mckl/utility/utility.h>
+#include <mckl/capi/core.h>
+#include <mckl/capi/random.h>
+#include <mckl/capi/resample.h>
+#include <mckl/capi/smp.h>
+#include <mckl/capi/utility.h>
+#include <mckl/randomc.h>
 
 #endif // MCKL_MCKL_H

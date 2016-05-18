@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <mckl/mckl.h>
 #include <mckl/utility/stop_watch.hpp>
-#include <mckl/utility/utility.h>
 
 mckl_stop_watch mckl_stop_watch_new(void) { return {new ::mckl::StopWatch()}; }
 
