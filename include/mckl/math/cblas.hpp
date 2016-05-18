@@ -41,8 +41,6 @@
 #ifndef MCKL_BLAS_INT
 #define MCKL_BLAS_INT MKL_INT
 #endif
-#elif MCKL_USE_ACCELERATE
-#include <Accelerate/Accelerate.h>
 #else
 #include <cblas.h>
 #endif

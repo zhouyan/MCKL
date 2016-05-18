@@ -36,12 +36,8 @@
 #include <mckl/math/constants.hpp>
 
 #if MCKL_USE_MKL_VML
-#include <mkl_vml.h>
-#elif MCKL_USE_ACCELERATE
-#include <Accelerate/Accelerate.h>
-#endif
 
-#if MCKL_USE_MKL_VML
+#include <mkl_vml.h>
 
 #define MCKL_DEFINE_MATH_VMATH_VML_1(func, name)                              \
     inline void name(std::size_t n, const float *a, float *y)                 \
@@ -166,85 +162,6 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
     internal::size_check<MKL_INT>(n, "modf");
     ::vdModf(static_cast<MKL_INT>(n), a, y, z);
 }
-
-} // namespace mckl
-
-#elif MCKL_USE_ACCELERATE
-
-#define MCKL_DEFINE_MATH_VMATH_VFORCE_1(func, name)                           \
-    inline void name(std::size_t n, const float *a, float *y)                 \
-    {                                                                         \
-        internal::size_check<int>(n, #name);                                  \
-        int m = static_cast<int>(n);                                          \
-        ::vv##func##f(y, a, &m);                                              \
-    }                                                                         \
-    inline void name(std::size_t n, const double *a, double *y)               \
-    {                                                                         \
-        internal::size_check<int>(n, #name);                                  \
-        int m = static_cast<int>(n);                                          \
-        ::vv##func(y, a, &m);                                                 \
-    }
-
-#define MCKL_DEFINE_MATH_VMATH_VFORCE_2(func, name)                           \
-    inline void name(std::size_t n, const float *a, const float *b, float *y) \
-    {                                                                         \
-        internal::size_check<int>(n, #name);                                  \
-        int m = static_cast<int>(n);                                          \
-        ::vv##func##f(y, a, b, &m);                                           \
-    }                                                                         \
-    inline void name(                                                         \
-        std::size_t n, const double *a, const double *b, double *y)           \
-    {                                                                         \
-        internal::size_check<int>(n, #name);                                  \
-        int m = static_cast<int>(n);                                          \
-        ::vv##func(y, a, b, &m);                                              \
-    }
-
-namespace mckl
-{
-
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(fabs, abs)
-
-MCKL_DEFINE_MATH_VMATH_VFORCE_2(div, div)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(sqrt, sqrt)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(cbrt, cbrt)
-MCKL_DEFINE_MATH_VMATH_VFORCE_2(pow, pow)
-
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(exp, exp)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(expm1, expm1)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(log, log)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(log10, log10)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(log1p, log1p)
-
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(cos, cos)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(sin, sin)
-inline void sincos(std::size_t n, const float *a, float *y, float *z)
-{
-    internal::size_check<int>(n, "sincos");
-    const int m = static_cast<int>(n);
-    ::vvsincosf(y, z, a, &m);
-}
-inline void sincos(std::size_t n, const double *a, double *y, double *z)
-{
-    internal::size_check<int>(n, "sincos");
-    const int m = static_cast<int>(n);
-    ::vvsincos(y, z, a, &m);
-}
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(tan, tan)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(acos, acos)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(asin, asin)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(atan, atan)
-MCKL_DEFINE_MATH_VMATH_VFORCE_2(atan2, atan2)
-
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(cosh, cosh)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(sinh, sinh)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(tanh, tanh)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(acosh, acosh)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(asinh, asinh)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(atanh, atanh)
-
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(floor, floor)
-MCKL_DEFINE_MATH_VMATH_VFORCE_1(ceil, ceil)
 
 } // namespace mckl
 

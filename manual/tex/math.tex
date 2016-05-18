@@ -57,11 +57,11 @@ while the others are of \verb|double| precision. The correct call shall be,
   fma(n, a.data(), b.data(), 2.0, y.data());
 \end{Verbatim}
 Without any third-party libraries, these functions do not provide performance
-gain compared to the simple loop. When \mkl or Apple Accelerate framework is
-present, some functions can have substantial performance improvement when all
-input arguments are vectors. The performance of vectorized random number
-generating introduced later in Section~\ref{sec:Vectorized random number
-  generating} heavily depends on these functions.
+gain compared to the simple loop. When \mkl is present, some functions can have
+substantial performance improvement when all input arguments are vectors. The
+performance of vectorized random number generating introduced later in
+Section~\ref{sec:Vectorized random number generating} heavily depends on these
+functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{p{2in}Lp{2in}L}

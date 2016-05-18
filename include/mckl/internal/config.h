@@ -75,9 +75,6 @@
 #ifndef MCKL_HAS_POSIX
 #define MCKL_HAS_POSIX 1
 #endif
-#ifndef MCKL_USE_ACCELERATE
-#define MCKL_USE_ACCELERATE 1
-#endif
 #endif
 #else // __APPLE__
 #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
@@ -151,16 +148,8 @@
 #define MCKL_USE_MKL_VSL MCKL_HAS_MKL
 #endif
 
-#ifndef MCKL_USE_ACCELERATE
-#define MCKL_USE_ACCELERATE 0
-#endif
-
 #ifndef MCKL_USE_CBLAS
-#if MCKL_USE_MKL_CBLAS || MCKL_USE_ACCELERATE
-#define MCKL_USE_CBLAS 1
-#else
-#define MCKL_USE_CBLAS 0
-#endif
+#define MCKL_USE_CBLAS MCKL_USE_MKL_CBLAS
 #endif
 
 #endif // MCKL_INTERNAL_CONFIG_H
