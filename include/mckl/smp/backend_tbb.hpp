@@ -35,7 +35,6 @@
 #include <mckl/smp/backend_base.hpp>
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
-#include <tbb/parallel_reduce.h>
 
 namespace mckl
 {
