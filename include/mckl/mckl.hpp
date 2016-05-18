@@ -84,54 +84,54 @@
 /// \ingroup Math
 /// \brief Math functions on vectors
 
-/// \defgroup RNG Random number generating
+/// \defgroup Random Random number generating
 /// \brief Random number generating engines and utilities
 
-/// \defgroup AESNIRNG AES-NI
-/// \ingroup RNG
+/// \defgroup AESNI AES-NI
+/// \ingroup Random
 /// \brief Random number generating using AES-NI
 
 /// \defgroup Distribution Distribution
-/// \ingroup RNG
+/// \ingroup Random
 /// \brief Distribution random varaites
 
-/// \defgroup MKLRNG Intel Math Kernel Library
-/// \ingroup RNG
+/// \defgroup MKL Intel Math Kernel Library
+/// \ingroup Random
 /// \brief Random number generating using MKL
 
 /// \defgroup Philox Philox
-/// \ingroup RNG
+/// \ingroup Random
 /// \brief Random number generating using Random123 Philox RNG
 
 /// \defgroup Threefry Threefry
-/// \ingroup RNG
+/// \ingroup Random
 /// \brief Random number generating using Random123 Threefry RNG
 
 /// \defgroup RDRAND Intel DRNG
-/// \ingroup RNG
+/// \ingroup Random
 /// \brief Random number generating using Intel RDRAND instructions
 
 /// \defgroup U01 U01
-/// \ingroup RNG
+/// \ingroup Random
 /// \brief Converting random integers to uniform floating points
 
 /// \defgroup U01Sequence U01 sequence
-/// \ingroup RNG
+/// \ingroup Random
 /// \brief Generating ordered uniform random sequence
 
-/// \defgroup RNGC Random number generating in C and OpenCL
+/// \defgroup RandomC Random number generating in C and OpenCL
 /// \brief Random number generating in C and OpenCL
 
 /// \defgroup PhiloxC Philox
-/// \ingroup RNGC
+/// \ingroup RandomC
 /// \brief Random number generating using Random123 Philox RNG
 
 /// \defgroup ThreefryC Threefry
-/// \ingroup RNGC
+/// \ingroup RandomC
 /// \brief Random number generating using Random123 Threefry RNG
 
 /// \defgroup U01C U01
-/// \ingroup RNGC
+/// \ingroup RandomC
 /// \brief Converting random integers to uniform floating points
 
 /// \defgroup Utility Utility
@@ -157,9 +157,9 @@
 #include <mckl/algorithm/algorithm.hpp>
 #include <mckl/core/core.hpp>
 #include <mckl/math/math.hpp>
+#include <mckl/random/rng.hpp>
+#include <mckl/randomc/randomc.h>
 #include <mckl/resample/resample.hpp>
-#include <mckl/rng/rng.hpp>
-#include <mckl/rngc/rngc.h>
 #include <mckl/smp/smp.hpp>
 #include <mckl/utility/utility.hpp>
 

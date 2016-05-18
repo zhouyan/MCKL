@@ -34,9 +34,9 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/core/weight.hpp>
+#include <mckl/random/rng_set.hpp>
+#include <mckl/random/seed.hpp>
 #include <mckl/resample/algorithm.hpp>
-#include <mckl/rng/rng_set.hpp>
-#include <mckl/rng/seed.hpp>
 
 namespace mckl
 {

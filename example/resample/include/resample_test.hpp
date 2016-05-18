@@ -34,8 +34,8 @@
 
 #include <mckl/core/state_matrix.hpp>
 #include <mckl/core/weight.hpp>
+#include <mckl/random/rng.hpp>
 #include <mckl/resample/resample.hpp>
-#include <mckl/rng/rng.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
 template <mckl::MatrixLayout Layout>

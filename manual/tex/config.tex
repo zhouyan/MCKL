@@ -75,7 +75,7 @@ instructions in Section~\ref{sub:AES-NI instructions based RNG} will are
 defined if this macro is true. One can include the following header directly to
 bypass this check,
 \begin{Verbatim}
-  #include <mckl/rng/aes_ni.hpp>
+  #include <mckl/random/aes_ni.hpp>
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_RDRAND}} Determine if the \rdrand instructions
@@ -84,7 +84,7 @@ instructions in Section~\ref{sec:Non-deterministic RNG} are only defined if
 this macro is true. One can include the following header directly to bypass
 this check,
 \begin{Verbatim}
-  #include <mckl/rng/rdrand.hpp>
+  #include <mckl/random/rdrand.hpp>
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_INT128}} Determine if the compiler support
@@ -138,7 +138,7 @@ parallelization is explicitly through \verb|MoveTBB| etc.
 The \rng{}s in Section~\ref{sec:MKL RNG} are only defined if this macro is
 true. One can include the following header directly to bypass this check,
 \begin{Verbatim}
-  #include <mckl/rng/mkl.hpp>
+  #include <mckl/random/mkl.hpp>
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_CBLAS}} Allow the library to use the

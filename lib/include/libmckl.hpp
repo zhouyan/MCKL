@@ -118,7 +118,7 @@ inline constexpr MCKLRNGType rng_type();
         return MCKL##Name;                                                    \
     }
 
-#include <mckl/rng/internal/rng_define_macro.hpp>
+#include <mckl/random/internal/rng_define_macro.hpp>
 
 } // namespace mckl
 

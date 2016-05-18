@@ -32,10 +32,10 @@
 #ifndef MCKL_LIBMCKLRNG_HPP
 #define MCKL_LIBMCKLRNG_HPP
 
-#include <mckl/rng/rng.h>
-#include <mckl/rng/rng.hpp>
+#include <mckl/random/random.h>
+#include <mckl/random/random.hpp>
 
-#define MCKL_DEFINE_LIB_RNG_DIST(RNGType)                                     \
+#define MCKL_DEFINE_LIB_RANDOM_DIST(RNGType)                                  \
     RNGType &rng_cpp = *reinterpret_cast<RNGType *>(rng.ptr);                 \
     for (size_t i = 0; i != n; ++i)                                           \
         r[i] = dist(rng_cpp);

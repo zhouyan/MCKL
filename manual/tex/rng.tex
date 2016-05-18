@@ -262,15 +262,15 @@ to later.
     \toprule
     Macro & Default \\
     \midrule
-    \verb|MCKL_RNG_AES128_ROUNDS|          & \verb|10| \\
-    \verb|MCKL_RNG_AES192_ROUNDS|          & \verb|12| \\
-    \verb|MCKL_RNG_AES256_ROUNDS|          & \verb|14| \\
-    \verb|MCKL_RNG_ARS_ROUNDS|             & \verb|5|  \\
-    \verb|MCKL_RNG_AES_NI_BLOCKS|          & \verb|8|  \\
-    \verb|MCKL_RNG_PHILOX_ROUNDS|          & \verb|10| \\
-    \verb|MCKL_RNG_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
-    \verb|MCKL_RNG_THREEFRY_ROUNDS|        & \verb|20| \\
-    \verb|MCKL_RNG_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
+    \verb|MCKL_AES128_ROUNDS|          & \verb|10| \\
+    \verb|MCKL_AES192_ROUNDS|          & \verb|12| \\
+    \verb|MCKL_AES256_ROUNDS|          & \verb|14| \\
+    \verb|MCKL_ARS_ROUNDS|             & \verb|5|  \\
+    \verb|MCKL_AES_NI_BLOCKS|          & \verb|8|  \\
+    \verb|MCKL_PHILOX_ROUNDS|          & \verb|10| \\
+    \verb|MCKL_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
+    \verb|MCKL_THREEFRY_ROUNDS|        & \verb|20| \\
+    \verb|MCKL_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros for counter-based \protect\rng}
@@ -322,23 +322,23 @@ sequence of round keys implemented by the library,
 \end{Verbatim}
 and correspondingly four \rng engines,
 \begin{Verbatim}
-  template <typename ResultType, std::size_t Rounds = MCKL_RNG_AES128_ROUNDS,
-      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS>
+  template <typename ResultType, std::size_t Rounds = MCKL_AES128_ROUNDS,
+      std::size_t Blocks = MCKL_AES_NI_BLOCKS>
   using AES128Engine =
       AESNIEngine<ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
 
-  template <typename ResultType, std::size_t Rounds = MCKL_RNG_AES192_ROUNDS,
-      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS>
+  template <typename ResultType, std::size_t Rounds = MCKL_AES192_ROUNDS,
+      std::size_t Blocks = MCKL_AES_NI_BLOCKS>
   using AES192Engine =
       AESNIEngine<ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
 
-  template <typename ResultType, std::size_t Rounds = MCKL_RNG_AES256_ROUNDS,
-      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS>
+  template <typename ResultType, std::size_t Rounds = MCKL_AES256_ROUNDS,
+      std::size_t Blocks = MCKL_AES_NI_BLOCKS>
   using AES256Engine =
       AESNIEngine<ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
 
-  template <typename ResultType, std::size_t Rounds = MCKL_RNG_ARS_ROUNDS,
-      std::size_t Blocks = MCKL_RNG_AES_NI_BLOCKS,
+  template <typename ResultType, std::size_t Rounds = MCKL_ARS_ROUNDS,
+      std::size_t Blocks = MCKL_AES_NI_BLOCKS,
       typename Constants = ARSConstants>
   using ARSEngine =
       AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
@@ -385,8 +385,8 @@ shall define the type \verb|weyl| such that it has a static constant expression
 member data \verb|value| that is the \verb|I|\ith Weyl constant. A few type
 aliases are defined for convenience. For example,
 \begin{Verbatim}
-  using ARSx8    = ARSEngine<std::uint32_t, MCKL_RNG_ARS_ROUNDS, 8>;
-  using ARSx8_64 = ARSEngine<std::uint64_t, MCKL_RNG_ARS_ROUNDS, 8>;
+  using ARSx8    = ARSEngine<std::uint32_t, MCKL_ARS_ROUNDS, 8>;
+  using ARSx8_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 8>;
   using ARS      = ARSEngine<std::uint32_t>;
   using ARS_64   = ARSEngine<std::uint64_t>;
 \end{Verbatim}
@@ -410,16 +410,16 @@ bottle neck. Note that, the best performance is obtained with the vectorized
 The Philox algorithm in \textcite{Salmon:2011um} is implemented in the
 following generator,
 \begin{Verbatim}
-  template <typename T, std::size_t K = MCKL_RNG_PHILOX_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_RNG_PHILOX_ROUNDS,
+  template <typename T, std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
   class PhiloxGenerator;
 \end{Verbatim}
 The corresponding \rng engine is,
 \begin{Verbatim}
   template <typename ResultType, typename T = ResultType,
-      std::size_t K = MCKL_RNG_PHILOX_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_RNG_PHILOX_ROUNDS,
+      std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
   using PhiloxEngine =
       CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
@@ -459,16 +459,16 @@ performance data is in Table~\appref{tab:Performance of PhiloxEngine}.
 The Threefry algorithm in \textcite{Salmon:2011um} is implemented in the
 following generator,
 \begin{Verbatim}
-  template <typename T, std::size_t K = MCKL_RNG_THREEFRY_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_RNG_THREEFRY_ROUNDS,
+  template <typename T, std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
   class ThreefryGenerator;
 \end{Verbatim}
 The corresponding \rng engine is,
 \begin{Verbatim}
   template <typename ResultType, typename T = ResultType,
-      std::size_t K = MCKL_RNG_THREEFRY_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_RNG_THREEFRY_ROUNDS,
+      std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
+      std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
   using ThreefryEngine =
       CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
@@ -594,7 +594,7 @@ If the \rdrand instructions are supported, the library also implements three
 32-, and 64-bits random integers, respectively. The \rdrand instruction may not
 return a random integer at all. The \rng engine will keep trying until it
 succeeds. One can limit the maximum number of trials by defining the
-configuration macro \verb|MCKL_RNG_RDRAND_NTRIAL_MAX|. A value of zero, the
+configuration macro \verb|MCKL_RDRAND_NTRIAL_MAX|. A value of zero, the
 default, means the number of trials is unlimited. If it is a positive number,
 and if after the specified number of trials no random integer is return by the
 \rdrand instruction, zero is returned. The performance data is in
@@ -777,7 +777,7 @@ point result type. For each distribution, the random integers produced by
 \verb|UniformBitsDistribution| before they are further converted to floating
 numbers. The integer type depends on \verb|RealType|, the range of the integers
 produced by the \rng{}, $R$, and the configuration macros
-\verb|MCKL_RNG_U01_USE_64BITS_DOUBLE|. The exact relations are listed in
+\verb|MCKL_U01_USE_64BITS_DOUBLE|. The exact relations are listed in
 Table~\ref{tab:Intermediate integer types of standard uniform distributions}.
 In the remaining of this section, let $W$ be the number of bits of the
 intermediate random integers, and $M$ be the number of significant bits
@@ -808,7 +808,7 @@ random integers as $U$ and the output random real numbers as $X$.
     \verb|float| & $\log_2 R \ge 64$ & \verb|std::uint64_t| \\
                  & Otherwise         & \verb|std::uint32_t| \\
     \verb|double| & $\log_2 R \ge 64$ & \verb|std::uint64_t| \\
-    & \verb|MCKL_RNG_U01_USE_64BITS_DOUBLE| & \verb|std::uint64_t| \\
+    & \verb|MCKL_U01_USE_64BITS_DOUBLE| & \verb|std::uint64_t| \\
     & Otherwise & \verb|std::uint32_t| \\
     \verb|long double| & Always & \verb|std::uint64_t| \\
     \bottomrule
@@ -899,16 +899,16 @@ Box-Muller method \parencite{Box:1958hv}, for performance consideration. Better
 accuracy at the tail can only be archived by using procedures that can produce
 values closer to zero than $2^{-32}$. In this case, there are two solutions.
 The first is to define the configuration macro
-\verb|MCKL_RNG_U01_USE_FIXED_POINT| to zero, and thus \verb|U01Distribution| is
-no longer the same as \verb|U01CODistribution|. Instead, it behaves similarly
-to \verb|std::generate_canonical|. More specifically,
+\verb|MCKL_U01_USE_FIXED_POINT| to zero, and thus \verb|U01Distribution| is no
+longer the same as \verb|U01CODistribution|. Instead, it behaves similarly to
+\verb|std::generate_canonical|. More specifically,
 \begin{align*}
   P &= \Floor{(W + M - 1) / W} \\
   K &= \max\{1, P\} \\
   X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{align*}
 The other solution is to define the configuration macro
-\verb|MCKL_RNG_U01_USE_64BITS_DOUBLE| to a non-zero value, such that the
+\verb|MCKL_U01_USE_64BITS_DOUBLE| to a non-zero value, such that the
 intermediate random integers will always be 64-bits for \verb|double| output.
 This configuration macro also affects all other four distributions discussed
 earlier.

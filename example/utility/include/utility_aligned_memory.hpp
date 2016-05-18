@@ -32,7 +32,7 @@
 #ifndef MCKL_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
 #define MCKL_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
 
-#include <mckl/rng/rng.hpp>
+#include <mckl/random/rng.hpp>
 #include <mckl/utility/aligned_memory.hpp>
 #include <mckl/utility/stop_watch.hpp>
 

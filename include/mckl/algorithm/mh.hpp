@@ -33,9 +33,9 @@
 #define MCKL_ALGORITHM_MH_HPP
 
 #include <mckl/internal/common.hpp>
-#include <mckl/rng/normal_distribution.hpp>
-#include <mckl/rng/normal_mv_distribution.hpp>
-#include <mckl/rng/u01_distribution.hpp>
+#include <mckl/random/normal_distribution.hpp>
+#include <mckl/random/normal_mv_distribution.hpp>
+#include <mckl/random/u01_distribution.hpp>
 
 namespace mckl
 {

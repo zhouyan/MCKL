@@ -59,26 +59,23 @@
 /// \defgroup C_API_Resample Resample algorithms
 /// \ingroup C_API
 
-/// \defgroup C_API_RNG Random number generating
+/// \defgroup C_API_Random Random number generating
 /// \ingroup C_API
 
-/// \defgroup C_API_RNG_RNG RNG engines
-/// \ingroup C_API_RNG
+/// \defgroup C_API_Random_RNG RNG engines
+/// \ingroup C_API_Random
 
-/// \defgroup C_API_RNG_Seed mckl::Seed
-/// \ingroup C_API_RNG
+/// \defgroup C_API_Random_Seed mckl::Seed
+/// \ingroup C_API_Random
 
-/// \defgroup C_API_RNG_U01Sequence U01 sequence
-/// \ingroup C_API_RNG
+/// \defgroup C_API_Random_U01Sequence U01 sequence
+/// \ingroup C_API_Random
 
-/// \defgroup C_API_RNG_DISTRIBUITON Distribution
-/// \ingroup C_API_RNG
+/// \defgroup C_API_Random_Distribution Distribution
+/// \ingroup C_API_Random
 
-/// \defgroup C_API_RNG_MKLRNG Intel Math Kernel Library
-/// \ingroup C_API_RNG
-
-/// \defgroup C_API_RNG_RandomWalk Random walk
-/// \ingroup C_API_RNG
+/// \defgroup C_API_Random_MKL Intel Math Kernel Library
+/// \ingroup C_API_Random
 
 /// \defgroup C_API_SMP Symmetric multiprocessing
 /// \ingroup C_API
@@ -99,9 +96,9 @@
 /// \ingroup C_API_Utility
 
 #include <mckl/core/core.h>
+#include <mckl/random/rng.h>
+#include <mckl/randomc/randomc.h>
 #include <mckl/resample/resample.h>
-#include <mckl/rng/rng.h>
-#include <mckl/rngc/rngc.h>
 #include <mckl/smp/smp.h>
 #include <mckl/utility/utility.h>
 
