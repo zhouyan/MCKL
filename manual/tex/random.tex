@@ -266,7 +266,7 @@ to later.
     \verb|MCKL_AES192_ROUNDS|          & \verb|12| \\
     \verb|MCKL_AES256_ROUNDS|          & \verb|14| \\
     \verb|MCKL_ARS_ROUNDS|             & \verb|5|  \\
-    \verb|MCKL_AES_NI_BLOCKS|          & \verb|8|  \\
+    \verb|MCKL_AESNI_BLOCKS|           & \verb|8|  \\
     \verb|MCKL_PHILOX_ROUNDS|          & \verb|10| \\
     \verb|MCKL_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
     \verb|MCKL_THREEFRY_ROUNDS|        & \verb|20| \\
@@ -323,22 +323,22 @@ sequence of round keys implemented by the library,
 and correspondingly four \rng engines,
 \begin{Verbatim}
   template <typename ResultType, std::size_t Rounds = MCKL_AES128_ROUNDS,
-      std::size_t Blocks = MCKL_AES_NI_BLOCKS>
+      std::size_t Blocks = MCKL_AESNI_BLOCKS>
   using AES128Engine =
       AESNIEngine<ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
 
   template <typename ResultType, std::size_t Rounds = MCKL_AES192_ROUNDS,
-      std::size_t Blocks = MCKL_AES_NI_BLOCKS>
+      std::size_t Blocks = MCKL_AESNI_BLOCKS>
   using AES192Engine =
       AESNIEngine<ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
 
   template <typename ResultType, std::size_t Rounds = MCKL_AES256_ROUNDS,
-      std::size_t Blocks = MCKL_AES_NI_BLOCKS>
+      std::size_t Blocks = MCKL_AESNI_BLOCKS>
   using AES256Engine =
       AESNIEngine<ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
 
   template <typename ResultType, std::size_t Rounds = MCKL_ARS_ROUNDS,
-      std::size_t Blocks = MCKL_AES_NI_BLOCKS,
+      std::size_t Blocks = MCKL_AESNI_BLOCKS,
       typename Constants = ARSConstants>
   using ARSEngine =
       AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
@@ -523,10 +523,10 @@ Table~\ref{tab:Default RNG}. The user can define the configuration macro
     \toprule
     Alias  & Class & Availability \\
     \midrule
-    \verb|RNG|    & \verb|ARS|         & \verb|MCKL_HAS_AES_NI| \\
-                  & \verb|Threefry|    & Always available       \\
-    \verb|RNG_64| & \verb|ARS_64|      & \verb|MCKL_HAS_AES_NI| \\
-                  & \verb|Threefry_64| & Always available       \\
+    \verb|RNG|    & \verb|ARS|         & \verb|MCKL_HAS_AESNI| \\
+                  & \verb|Threefry|    & Always available      \\
+    \verb|RNG_64| & \verb|ARS_64|      & \verb|MCKL_HAS_AESNI| \\
+                  & \verb|Threefry_64| & Always available      \\
     \bottomrule
   \end{tabularx}
   \caption{Default \protect\rng}
@@ -633,7 +633,7 @@ defined. The performance data is in Table~\appref{tab:Performance of MKL RNG}.
 \section{Multiple \protect\rng streams}
 \label{sec:Multiple RNG streams}
 
-Earlier in Section~\ref{sub:Particle} we introduced that \verb|particle.rng(i)|
+Earlier in Section~\ref{sec:Particle} we introduced that \verb|particle.rng(i)|
 returns an independent \rng instance. This is actually done through a class
 template called \verb|RNGSet|. Three of them are implemented in the library.
 They all have the same interface,

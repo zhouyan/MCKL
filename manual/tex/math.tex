@@ -28,7 +28,7 @@ For example, to perform additions of two vectors,
   // Fill vectors a and b
   add(n, a.data(), b.data(), y.data());
 \end{Verbatim}
-This is equivalent to
+This is equivalent to,
 \begin{Verbatim}
   for (std::size_t i = 0; i != n; ++i)
       y[i] = a[i] + b[i];
@@ -51,8 +51,9 @@ precision is not allowed. For example,
   Vector<double> y(n);
   fma(n, a.data(), b.data(), 2, y.data());
 \end{Verbatim}
-will cause compile-time error because the third argument is of type \verb|int|
-while the others are of \verb|double| precision. The correct call shall be,
+will cause compile-time error because the fourth argument \verb|2| is of type
+\verb|int| while the others are of \verb|double| precision. The correct call
+shall be,
 \begin{Verbatim}
   fma(n, a.data(), b.data(), 2.0, y.data());
 \end{Verbatim}
@@ -64,12 +65,12 @@ Section~\ref{sec:Vectorized random number generating} heavily depends on these
 functions.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{p{2in}Lp{2in}L}
+  \begin{tabularx}{\textwidth}{p{1.5in}Lp{1.5in}L}
     \toprule
     Function & Value & Function & Value \\
     \midrule
     \verb|const_inf|          & $\infty$        &
-    \verb|const_nan|          & Quiet NaN       \\
+    \verb|const_nan|          & NaN             \\
     \verb|const_zero|         & $0$             &
     \verb|const_one|          & $1$             \\
     \verb|const_pi|           & $\pi$           &

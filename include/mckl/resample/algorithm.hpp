@@ -39,64 +39,6 @@
 namespace mckl
 {
 
-/// \brief Resampling algorithm
-/// \ingroup Resample
-template <typename U01SeqType, bool Residual>
-class ResampleAlgorithm
-{
-    public:
-    /// \brief Generate replication numbers from normalized weights
-    ///
-    /// \param N Sample size before resampling
-    /// \param M Sample size after resampling
-    /// \param rng An RNG engine
-    /// \param weight N-vector of normalized weights
-    /// \param replication N-vector of replication numbers
-    template <typename RNGType, typename InputIter, typename OutputIter>
-    OutputIter operator()(std::size_t N, std::size_t M, RNGType &rng,
-        InputIter weight, OutputIter replication) const
-    {
-        return eval(N, M, rng, weight, replication,
-            std::integral_constant<bool, Residual>());
-    }
-
-    private:
-    U01SeqType u01seq_;
-
-    template <typename RNGType, typename InputIter, typename OutputIter>
-    OutputIter eval(std::size_t N, std::size_t M, RNGType &rng,
-        InputIter weight, OutputIter replication, std::false_type) const
-    {
-        using real_type = typename std::iterator_traits<InputIter>::value_type;
-
-        Vector<real_type> u01(M);
-        u01seq_(rng, M, u01.data());
-
-        return resample_trans_u01_rep(N, M, weight, u01.data(), replication);
-    }
-
-    template <typename RNGType, typename InputIter, typename OutputIter>
-    OutputIter eval(std::size_t N, std::size_t M, RNGType &rng,
-        InputIter weight, OutputIter replication, std::true_type) const
-    {
-        using real_type = typename std::iterator_traits<InputIter>::value_type;
-        using rep_type = typename std::iterator_traits<OutputIter>::value_type;
-
-        Vector<real_type> resid(N);
-        Vector<rep_type> integ(N);
-        std::size_t R =
-            resample_trans_residual(N, M, weight, resid.data(), integ.data());
-
-        Vector<real_type> u01(R);
-        u01seq_(rng, R, u01.data());
-        resample_trans_u01_rep(N, R, resid.data(), u01.data(), replication);
-        for (std::size_t i = 0; i != N; ++i, ++replication)
-            *replication += integ[i];
-
-        return replication;
-    }
-}; // class ResampleAlgorithm
-
 /// \brief Sampler<T>::eval_type subtype
 template <typename T>
 class ResampleEval
@@ -116,7 +58,7 @@ class ResampleEval
     void eval(const eval_type &new_eval) { eval_ = new_eval; }
 
     /// \brief Returns how many particles having non-zero replication number
-    std::size_t operator()(std::size_t, Particle<T> &particle) const
+    void operator()(std::size_t, Particle<T> &particle) const
     {
         runtime_assert(static_cast<bool>(eval_),
             "**ResampleEval::operator()** invalid evaluation object");
@@ -130,18 +72,66 @@ class ResampleEval
         resample_trans_rep_index(N, N, rep.data(), idx.data());
         particle.state().select(N, idx.data());
         particle.weight().set_equal();
-
-        std::size_t R = 0;
-        for (auto r : rep)
-            if (r != 0)
-                ++R;
-
-        return R;
     }
 
     private:
     eval_type eval_;
 }; // class ResampleEval
+
+/// \brief Resampling algorithm
+/// \ingroup Resample
+template <typename U01SeqType, bool Residual>
+class ResampleAlgorithm
+{
+    public:
+    /// \brief Generate replication numbers from normalized weights
+    ///
+    /// \param N Sample size before resampling
+    /// \param M Sample size after resampling
+    /// \param rng An RNG engine
+    /// \param weight N-vector of normalized weights
+    /// \param replication N-vector of replication numbers
+    template <typename RNGType, typename InputIter, typename OutputIter>
+    void operator()(std::size_t N, std::size_t M, RNGType &rng,
+        InputIter weight, OutputIter replication) const
+    {
+        eval(N, M, rng, weight, replication,
+            std::integral_constant<bool, Residual>());
+    }
+
+    private:
+    U01SeqType u01seq_;
+
+    template <typename RNGType, typename InputIter, typename OutputIter>
+    void eval(std::size_t N, std::size_t M, RNGType &rng, InputIter weight,
+        OutputIter replication, std::false_type) const
+    {
+        using real_type = typename std::iterator_traits<InputIter>::value_type;
+
+        Vector<real_type> u01(M);
+        u01seq_(rng, M, u01.data());
+        resample_trans_u01_rep(N, M, weight, u01.data(), replication);
+    }
+
+    template <typename RNGType, typename InputIter, typename OutputIter>
+    void eval(std::size_t N, std::size_t M, RNGType &rng, InputIter weight,
+        OutputIter replication, std::true_type) const
+    {
+        using real_type = typename std::iterator_traits<InputIter>::value_type;
+        using rep_type = typename std::iterator_traits<OutputIter>::value_type;
+
+        Vector<real_type> resid(N);
+        Vector<rep_type> integ(N);
+        std::size_t R =
+            resample_trans_residual(N, M, weight, resid.data(), integ.data());
+
+        Vector<real_type> u01(R);
+        u01seq_(rng, R, u01.data());
+        resample_trans_u01_rep(N, R, resid.data(), u01.data(), replication);
+        for (std::size_t i = 0; i != N; ++i, ++replication)
+            *replication += integ[i];
+    }
+}; // class ResampleAlgorithm
 
 /// \brief Multinomial resampling
 /// \ingroup Resample

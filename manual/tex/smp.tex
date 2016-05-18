@@ -17,8 +17,8 @@ one or more evaluation objects that is convertible to the following type,
 \end{Verbatim}
 In some situations, part of the evaluation process can be parallelized. For
 example, consider the weight step in the simple particle filter in
-section~\ref{sec:Example (Core concepts)}. Recall the simple \verb|PFWeight|
-function in section~\ref{sub:Implementation (PF)},
+section~\ref{sec:Example (PF)}. Recall the simple \verb|PFWeight| function in
+section~\ref{sub:Implementation (PF)},
 \begin{Verbatim}
   inline void PFWeight(std::size_t iter, Particle<PF> &particle)
   {
