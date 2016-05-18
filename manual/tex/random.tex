@@ -778,11 +778,11 @@ point result type. For each distribution, the random integers produced by
 numbers. The integer type depends on \verb|RealType|, the range of the integers
 produced by the \rng{}, $R$, and the configuration macros
 \verb|MCKL_U01_USE_64BITS_DOUBLE|. The exact relations are listed in
-Table~\ref{tab:Intermediate integer types of standard uniform distributions}.
-In the remaining of this section, let $W$ be the number of bits of the
-intermediate random integers, and $M$ be the number of significant bits
-(including the implicit one) of \verb|RealType|. We also denote the input
-random integers as $U$ and the output random real numbers as $X$.
+Table~\ref{tab:Intermediate integer types of uniform distributions}. In the
+remaining of this section, let $W$ be the number of bits of the intermediate
+random integers, and $M$ be the number of significant bits (including the
+implicit one) of \verb|RealType|. We also denote the input random integers as
+$U$ and the output random real numbers as $X$.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
@@ -813,8 +813,8 @@ random integers as $U$ and the output random real numbers as $X$.
     \verb|long double| & Always & \verb|std::uint64_t| \\
     \bottomrule
   \end{tabularx}
-  \caption{Intermediate integer types of standard uniform distributions}
-  \label{tab:Intermediate integer types of standard uniform distributions}
+  \caption{Intermediate integer types of uniform distributions}
+  \label{tab:Intermediate integer types of uniform distributions}
 \end{table}
 
 \paragraph{\texttt{U01CCDistribution}}

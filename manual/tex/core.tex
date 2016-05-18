@@ -387,7 +387,7 @@ if such a member class template exists. Otherwise, it derives from
 \verb|ParticleIndexBase<T>|, which only has methods as described earlier for
 any type \verb|T|. Therefore, it is possible to give \verb|ParticleIndex<T>|
 methods that are more convenient for a particular problem. We will see examples
-later in Section~\ref{sec:Example (Core concepts)}.
+later in Section~\ref{sec:Example (PF)}.
 
 The \verb|ParticleIndex| type can also be used like an random access iterator.
 For example,
@@ -685,7 +685,7 @@ are not necessarily the sequence $0,1,\dots,n$, where $n$ is the total number
 of iterations.
 
 \section{Example}
-\label{sec:Example (Core concepts)}
+\label{sec:Example (PF)}
 
 This is an example used in \textcite{Johansen:2009wd}. Through this example, we
 will show how to implement a simple particle filter. It shall walk one through
@@ -986,6 +986,6 @@ Section~\ref{sec:Store objects in HDF5 format}, using the \hdf format.
 
 \begin{figure}
   \includegraphics{fig/pf}
-  \caption{Estimates and observations of the almost constant velocity model}
+  \caption{Estimates and observations of the particle filter}
   \label{fig:pf}
 \end{figure}

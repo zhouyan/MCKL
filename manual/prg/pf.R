@@ -17,7 +17,7 @@ plt <- plt + xlab("$X$")
 plt <- plt + ylab("$Y$")
 plt <- plt + theme_bw() + theme(legend.position = "top")
 
-tikz("pf.tex", width = 5, height = 5, standAlone = TRUE)
+tikz("pf.tex", width = 4.5, height = 4.5, standAlone = TRUE)
 print(plt)
 dev.off()
 system("latexmk -silent -f pf.tex &>/dev/null")

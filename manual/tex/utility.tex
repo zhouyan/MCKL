@@ -39,12 +39,9 @@ as its input. The library provides three implementations, discussed below. The
 default argument \verb|AlignedMemory| is an alias to one of them by default. It
 can be changed by defining the macro \verb|MCKL_ALIGNED_MEMORY_TYPE|.
 
-\paragraph{\texttt{AlignedMemoryTBB}} This class uses the following from the
-\tbb library,
-\begin{Verbatim}
-  scalable_aligned_malloc
-  scalable_aligned_free
-\end{Verbatim}
+\paragraph{\texttt{AlignedMemoryTBB}} This class uses the functions
+\verb|scalable_aligned_malloc| and \verb|scalable_aligned_free| from the \tbb
+library.
 This is the default method if \verb|MCKL_USE_TBB_MALLOC| is true.
 
 \paragraph{\texttt{AlignedMemorySYS}} On \posix platforms, this class uses
@@ -98,15 +95,17 @@ The library provides the class template
   template <typename RealType = double>
   class Covariance;
 \end{Verbatim}
-to estimate the sample covariance
+to estimate the sample covariance $\Sigma$, for samples $x\in\Real^p$, $p\ge1$,
 \begin{align*}
   \Sigma_{i,j} &= \frac{\sum_{i=1}^N w_i}
   {(\sum_{i=1}^N w_i)^2 - \sum_{i=1}^n w_i^2}
   \sum_{k=1}^N w_k (x_{k,i} - \bar{x}_i)(x_{k,j} - \bar{x}_j) \\
   \bar{x}_i &= \frac{1}{\sum_{i=1}^N w_i}\sum_{k=1}^N w_k x_{k,i}
 \end{align*}
-At the time of writing, only \verb|float| and \verb|double| are supported. The
-class has the following operator as its interface,
+where $x_{i,j}$ is the $j$\ith component of the $i$\ith sample, and $w_i$ is
+the weight of the $i$\ith sample. At the time of writing, only \verb|float| and
+\verb|double| are supported. The class has the following operator as its
+interface,
 \begin{Verbatim}
   void operator()(
       MatrixLayout layout,
@@ -122,38 +121,37 @@ class has the following operator as its interface,
 \end{Verbatim}
 It computes the sample covariance matrix $\Sigma$,
 where $x$ is the $n$ by $p$ matrix of samples, and $w$ is the $n$-vector of
-weights. Below we given detailed description of each of the parameters,
+weights. Below we given detailed description of each parameter,
 \begin{description}
-  \item[\texttt{layout}] The storage layout of sample matrix $x$. It is assumed
-    to be an $n$ by $p$ matrix.
+  \item[\texttt{layout}] The storage layout of sample matrix $x$.
   \item[\texttt{n}] The number of samples.
-  \item[\texttt{p}] The dimension of each sample.
+  \item[\texttt{p}] The dimension of samples.
   \item[\texttt{x}] The sample matrix. If it is a null pointer, then no
-    computation is carried out.
-  \item[\texttt{w}] The weight vector. If it is a null pointer, then all
-    samples are assigned weight $1$.
+    computation is done.
+  \item[\texttt{w}] The weight vector. If it is a null pointer, then $w_i = 1$
+    for $i = 1,\dots,n$.
   \item[\texttt{mean}] Output storage of the mean. If it is a null pointer,
     then it is ignored.
   \item[\texttt{cov}] Output storage of the covariance matrix. If it is a null
     pointer, then it is ignored.
   \item[\texttt{cov\_layout}] The storage layout of the covariance matrix.
-  \item[\texttt{cov\_upper}] If \verb|true|, then the upper triangular of the
+  \item[\texttt{cov\_upper}] If true, then the upper triangular of the
     covariance matrix is packed, otherwise the lower triangular is packed.
-    Ignored if \verb|cov_pack| is \verb|false|.
-  \item[\texttt{cov\_packed}] If \verb|true|, then the covariance matrix is
+    It is ignored if \verb|cov_pack| is false.
+  \item[\texttt{cov\_packed}] If true, then the covariance matrix is
     packed.
 \end{description}
 The last three parameters specify the storage scheme of the covariance matrix.
 See any reference of \blas or \lapack for explanation of the scheme. Below is
 an example of the class in use,
 \begin{Verbatim}
-  using T = StateMatrix<RowMajor, Dynamic, double>;
-  Sampler<T> sampler(n, p);
+  using T = StateMatrix<RowMajor, p, double>;
+  Sampler<T> sampler(n);
   // Configure and iterate the sampler
   double mean[p];
   double cov[p * (p + 1) / 2];
   Covariance eval;
-  auto x = sampler.particle().value().data();
+  auto x = sampler.particle().state().data();
   auto w = sampler.particle().weight().data();
   eval(RowMajor, n, p, x, w, mean, cov, RowMajor, false, true);
 \end{Verbatim}
@@ -172,7 +170,7 @@ generate multivariate Normal proposals,
 \label{sec:Store objects in HDF5 format}
 
 If the \hdf library is available (\verb|MCKL_HAS_HDF5|), it is possible to
-store \verb|Sampler<T>| objects, etc., in the \hdf format. For example,
+store \verb|Sampler| objects, etc., in the \hdf format. For example,
 \begin{Verbatim}
   hdf5store(sampler, "pf.h5", "sampler", false);
 \end{Verbatim}
@@ -185,15 +183,15 @@ processed as the following,
   pf <- as.data.frame(h5read("pf.h5", "sampler"))
 \end{Verbatim}
 This creates a \verb|data.frame| similar to that shown in
-section~\ref{sub:Implementations}. The \verb|hdf5store| function is overloaded
-for \verb|StateMatrix|, \verb|Sampler<T>| and \verb|Monitor<T>|. It is also
-overloaded for \verb|Particle<T>| if an overload for \verb|T| is defined. The
-all follow the format as above. In addition, the following creates a new empty
-\hdf file,
+section~\ref{sub:Implementation (PF)}. The \verb|hdf5store| function is
+overloaded for \verb|StateMatrix|, \verb|Sampler| and \verb|Monitor|. It is
+also overloaded for \verb|Particle| if an overload for \verb|T| is defined.
+They all follow the format as above. In addition, the following creates a new
+empty \hdf file,
 \begin{Verbatim}
   hdf5store(filename);
 \end{Verbatim}
-while the following create a new group named \verb|dataname|,
+and the following creates a new group named \verb|dataname|,
 \begin{Verbatim}
   hdf5store(filename, dataname, append);
 \end{Verbatim}
@@ -201,11 +199,11 @@ while the following create a new group named \verb|dataname|,
 \section{Stop watch}
 \label{sec:Stop watch}
 
-Performance can only be improved after it is first properly benchmarked. There
-are advanced profiling programs for this purpose. However, sometime simple
-timing facilities are enough. The library provides a simple class
-\verb|StopWatch| for this purpose. As its name suggests, it works much like a
-physical stop watch. Here is a simple example
+Performance can only be improved after it is first properly profiled. There are
+advanced profiling programs for this purpose. However, sometime simple timing
+facilities are enough. The library provides a simple class \verb|StopWatch| for
+this purpose. As its name suggests, it works much like a physical stop watch.
+Here is a simple example
 \begin{Verbatim}
   StopWatch watch;
   for (std::size_t i = 0; i != n; ++i) {
@@ -219,5 +217,4 @@ physical stop watch. Here is a simple example
 \end{Verbatim}
 The above example demonstrate that timing can be accumulated between loop
 iterations, function calls, etc. It shall be noted that, the timing is only
-accurate if the computation between \verb|start| and \verb|stop| is
-non-trivial.
+using if the computation between \verb|start| and \verb|stop| is non-trivial.
