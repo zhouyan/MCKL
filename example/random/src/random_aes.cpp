@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/random/aes_ni.hpp>
+#include <mckl/random/aesni.hpp>
 
 int main()
 {

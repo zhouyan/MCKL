@@ -36,8 +36,8 @@
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
 #ifdef __AES__
-#ifndef MCKL_HAS_AES_NI
-#define MCKL_HAS_AES_NI 1
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
 #endif
 #endif
 

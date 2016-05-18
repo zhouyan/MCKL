@@ -37,7 +37,7 @@
 /// \brief Default `RNG` type
 /// \ingroup Config
 #ifndef MCKL_RNG_TYPE
-#if MCKL_HAS_AES_NI
+#if MCKL_HAS_AESNI
 #define MCKL_RNG_TYPE ::mckl::ARS
 #else
 #define MCKL_RNG_TYPE ::mckl::Threefry
@@ -47,7 +47,7 @@
 /// \brief Default `RNG_64` type
 /// \ingroup Config
 #ifndef MCKL_RNG_64_TYPE
-#if MCKL_HAS_AES_NI
+#if MCKL_HAS_AESNI
 #define MCKL_RNG_64_TYPE ARS_64
 #else
 #define MCKL_RNG_64_TYPE Threefry_64
@@ -69,8 +69,8 @@
 #include <mckl/random/philox.hpp>
 #include <mckl/random/threefry.hpp>
 
-#if MCKL_HAS_AES_NI
-#include <mckl/random/aes_ni.hpp>
+#if MCKL_HAS_AESNI
+#include <mckl/random/aesni.hpp>
 #endif
 
 #if MCKL_HAS_MKL

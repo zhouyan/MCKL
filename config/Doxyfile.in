@@ -2033,9 +2033,7 @@ PREDEFINED             = __TBB_TASK_GROUP_CONTEXT \
                          MCKL_HAS_MKL \
                          MCKL_HAS_OMP \
                          MCKL_HAS_POSIX \
-                         MCKL_HAS_SSE2 \
-                         MCKL_HAS_AVX2 \
-                         MCKL_HAS_AES_NI \
+                         MCKL_HAS_AESNI \
                          MCKL_HAS_TBB
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this

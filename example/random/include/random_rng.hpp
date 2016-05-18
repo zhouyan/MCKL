@@ -80,7 +80,7 @@ inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K, Rounds> &rng)
     return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
 }
 
-#if MCKL_HAS_AES_NI
+#if MCKL_HAS_AESNI
 
 template <typename ResultType, std::size_t Blocks>
 inline bool random_rng_kat(mckl::AES128Engine<ResultType, Blocks> &rng)
@@ -126,7 +126,7 @@ inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds, Blocks> &rng)
     return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
 }
 
-#endif // MCKL_HAS_AES_NI
+#endif // MCKL_HAS_AESNI
 
 template <typename RNGType>
 inline std::string random_rng_size(const RNGType &)

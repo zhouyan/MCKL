@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/aes_ni.hpp
+// MCKL/include/mckl/random/aesni.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_AES_NI_HPP
-#define MCKL_RANDOM_AES_NI_HPP
+#ifndef MCKL_RANDOM_AESNI_HPP
+#define MCKL_RANDOM_AESNI_HPP
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/counter.hpp>
@@ -73,8 +73,8 @@
 
 /// \brief AESEngine default blocks
 /// \ingroup Config
-#ifndef MCKL_AES_NI_BLOCKS
-#define MCKL_AES_NI_BLOCKS 8
+#ifndef MCKL_AESNI_BLOCKS
+#define MCKL_AESNI_BLOCKS 8
 #endif
 
 namespace mckl
@@ -1022,28 +1022,28 @@ using ARSKeySeq = internal::ARSKeySeqImpl<Constants>;
 /// \brief AES-128 RNG engine
 /// \ingroup AESNI
 template <typename ResultType, std::size_t Rounds = MCKL_AES128_ROUNDS,
-    std::size_t Blocks = MCKL_AES_NI_BLOCKS>
+    std::size_t Blocks = MCKL_AESNI_BLOCKS>
 using AES128Engine =
     AESNIEngine<ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
 
 /// \brief AES-192 RNG engine
 /// \ingroup AESNI
 template <typename ResultType, std::size_t Rounds = MCKL_AES192_ROUNDS,
-    std::size_t Blocks = MCKL_AES_NI_BLOCKS>
+    std::size_t Blocks = MCKL_AESNI_BLOCKS>
 using AES192Engine =
     AESNIEngine<ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
 
 /// \brief AES-256 RNG engine
 /// \ingroup AESNI
 template <typename ResultType, std::size_t Rounds = MCKL_AES256_ROUNDS,
-    std::size_t Blocks = MCKL_AES_NI_BLOCKS>
+    std::size_t Blocks = MCKL_AESNI_BLOCKS>
 using AES256Engine =
     AESNIEngine<ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
 
 /// \brief ARS RNG engine
 /// \ingroup AESNI
 template <typename ResultType, std::size_t Rounds = MCKL_ARS_ROUNDS,
-    std::size_t Blocks = MCKL_AES_NI_BLOCKS, typename Constants = ARSConstants>
+    std::size_t Blocks = MCKL_AESNI_BLOCKS, typename Constants = ARSConstants>
 using ARSEngine =
     AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
 
@@ -1224,4 +1224,4 @@ using ARS_64 = ARSEngine<std::uint64_t>;
 #endif
 #endif
 
-#endif // MCKL_RANDOM_AES_NI_HPP
+#endif // MCKL_RANDOM_AESNI_HPP

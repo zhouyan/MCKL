@@ -91,8 +91,8 @@
 #endif
 #endif
 
-#ifndef MCKL_HAS_AES_NI
-#define MCKL_HAS_AES_NI 0
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 0
 #endif
 
 #ifndef MCKL_HAS_RDRAND

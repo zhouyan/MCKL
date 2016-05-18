@@ -36,8 +36,8 @@
     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
 #ifdef __AES__
-#ifndef MCKL_HAS_AES_NI
-#define MCKL_HAS_AES_NI 1
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
 #endif
 #endif
 

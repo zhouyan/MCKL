@@ -35,8 +35,8 @@
 #define MCKL_INTEL_VERSION __INTEL_COMPILER
 
 #ifdef __AVX__
-#ifndef MCKL_HAS_AES_NI
-#define MCKL_HAS_AES_NI 1
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
 #endif
 #endif
 
