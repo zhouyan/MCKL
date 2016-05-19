@@ -13,7 +13,8 @@ Recall that, in section~\ref{sec:Sampler} we introduced the concepts of sampler
 evaluation objects. The primary method of iterating a sampler is through
 one or more evaluation objects that is convertible to the following type,
 \begin{Verbatim}
-  using eval_type = std::function<void(std::size_t, Particle<T> &)>;
+  using eval_type = std::function<void(
+      std::size_t, Particle<T> &)>;
 \end{Verbatim}
 In some situations, part of the evaluation process can be parallelized. For
 example, consider the weight step in the simple particle filter in
@@ -107,7 +108,10 @@ will be minimal and there can be considerable performance advantage.
 We have already seen the \verb|SamplerEvalSMP| class template. The full
 declaration of the template is as below,
 \begin{Verbatim}
-  template <typename T, typename = Virtual, typename = BackendSMP>
+  template <
+      typename T,
+      typename = Virtual,
+      typename = BackendSMP>
   class SamplerEvalSMP;
 \end{Verbatim}
 The first template parameter is the same as that of \verb|Sampler|. The second
@@ -190,21 +194,31 @@ particle system,
 A function or class that is convertible to \verb|eval_type| of \verb|Monitor|
 can also be parallelized. This is done through the following class template,
 \begin{Verbatim}
-  template <typename T, typename = Virtual, typename = BackendSMP>
+  template <
+      typename T,
+      typename = Virtual,
+      typename = BackendSMP>
   class MonitorEvalSMP;
 \end{Verbatim}
 This is similar to \verb|SamplerEvalSMP| except for the \verb|eval_each|
 method, which has the following signature,
 \begin{Verbatim}
   virtual void eval_each(
-      std::size_t iter, std::size_t dim, ParticleIndex<T> idx, double *r);
+      std::size_t iter,
+      std::size_t dim,
+      ParticleIndex<T> idx,
+      double *r);
 \end{Verbatim}
 Now the output parameter \verb|r| no longer points an $N$ by $d$ matrix.
 Instead it points to a $d$-vector specific for each particle. For example,
-recall the \verb|PFEstimate| function in section~\ref{sub:Implementation (PF)}.
+recall the estimation function \verb|PFEstimate| in
+section~\ref{sub:Implementation (PF)}.
 \begin{Verbatim}
   inline void PFEstimate(
-      std::size_t, std::size_t, Particle<PF> &particle, double *r)
+      std::size_t,
+      std::size_t,
+      Particle<PF> &particle,
+      double *r)
   {
       for (auto idx : particle) {
           *r++ = idx.pos_x();
@@ -291,19 +305,22 @@ The third template parameter of \verb|SamplerEvalSMP| and \verb|MonitorEvalSMP|
 specifies the programming model to use for parallelization. Possible types are
 \begin{Verbatim}
   class BackendSEQ; // Sequential implementation
-  class BackendSTD; // Parallelization using the standard library
-  class BackendOMP; // Parallelization using OpenMP
-  class BackendTBB; // Parallelization using Intel TBB
+  class BackendSTD; // Using the standard library
+  class BackendOMP; // Using OpenMP
+  class BackendTBB; // Using Intel TBB
 \end{Verbatim}
-It is also possible to implement new backends by partial specialization of
-\verb|SamplerEvalSMP| and \verb|MonitorEvalSMP|. However, this is a too
-technical topic to be included in this manual.
+It is also possible to implement new backends by class template partial
+specialization of \verb|SamplerEvalSMP| and \verb|MonitorEvalSMP|. However,
+this is a too technical topic to be included in this manual.
 
 Each partial specialization of \verb|SamplerEvalSMP| for the types above has a
 protected method,
 \begin{Verbatim}
   template <typename... Args>
-  void run(std::size_t iter, Particle<T> &particle, std::size_t grainsize,
+  void run(
+      std::size_t iter,
+      Particle<T> &particle,
+      std::size_t grainsize,
       Args &&... args);
 \end{Verbatim}
 which is called by the public operator method. One may use this function to
@@ -379,35 +396,53 @@ situation, instead of implementing \verb|eval_each|, one can implement an
   class Eval : public SamplerEvalSMP<T>
   {
       public:
-      void eval_range(std::size_t iter, const ParticleRang<T> &range)
+      void eval_range(
+          std::size_t iter,
+          const ParticleRang<T> &range)
       {
           GammaDistribution<double> gamma(2, 1);
           auto &rng = range.begin().rng();
           auto n = range.size();
-          auto r = range.particle().state().col_data(0) + range.first();
+          auto r =
+              range.particle().state().col_data(0) +
+              range.first();
           rand(rng, gamma, n, r);
       }
   };
 \end{Verbatim}
+If the such a method is defined, the particle system will first be partitioned
+into multiple disjoint ranges. And each thread will process one of more of such
+ranges. The \verb|eval_range| method has to be thread-safe. If both
+\verb|eval_range| and \verb|eval_each| are defined, the later is ignored.
+
 The class \verb|ParticleRange| is an abstraction of a subset of a particle
-system. It has the following methods,
+system. It can be constructed by the index of the first particle within the
+range and one pass the index of the last particle within the range, together
+with a pointer the particle system that it belongs to. For example,
 \begin{Verbatim}
-  range.particle();     // A reference to the particle system it belongs to
-  range.particle_ptr(); // A pointer to the particle system it belongs to
-  range.first(); // The index of the first particle within the range
-  range.last();  // The index of one pass the last particle within the range
-  range.begin(); // An ParticleIndex<T> object for the first particle
-  range.end();   // An ParticleIndex<T> object for one pass the last particle
+  ParticleRange<T> range(first, last, &particle);
+\end{Verbatim}
+or alternatively,
+\begin{Verbatim}
+  auto range = particle.range(first, last);
+\end{Verbatim}
+To access the particle system, use
+\begin{Verbatim}
+  range.particle();     // A reference to particle
+  range.particle_ptr(); // A pointer to particle
+\end{Verbatim}
+It has the following methods, 
+\begin{Verbatim}
+  range.first();
+  range.last();
+  range.begin(); // => range.particle().index(range.first());
+  range.end();   // => range.particle().index(range.last());
 \end{Verbatim}
 It can also be iterated, similar to \verb|Particle|. For example,
 \begin{Verbatim}
   for (auto idx : range)
       /* process ParticleIndex<T> object idx */;
 \end{Verbatim}
-If such a method is defined, the particle system will first be partitioned into
-multiple disjoint ranges. And each thread will process one of more of such
-ranges. The \verb|eval_range| method has to be thread-safe. If both
-\verb|eval_range| and \verb|eval_each| are defined, the later is ignored.
 
 \subsection{Using \texttt{eval\_range} with \tbb}
 
@@ -428,9 +463,56 @@ example,
           run(iter, particle, G);
       }
 
-      void eval_range(std::size_t iter, const ParticleRang<T> &range);
+      void eval_range(
+          std::size_t iter,
+          const ParticleRang<T> &range);
   };
 \end{Verbatim}
 where $G$ is the grain size. Even though the grain size has no effect for
 backends other than \tbb at the moment, it is planned to provide similar
 functionality as \tbb for other backends in the near future.
+
+\section{Random number generating}
+\label{sec:Random number generating}
+
+As we have already mentioned in Section~\ref{sub:The SamplerEvalSMP class},
+care has to be taken when generating random numbers in a multi-threaded
+environment. The \verb|Particle| class maintain a collection of \rng engines
+for this purpose. For example,
+\begin{Verbatim}
+  void eval_each(std::size_t iter, ParticleIndex<T> &idx)
+  {
+      auto &rng = idx.rng(); // => idx.particle().rng(idx.i());
+      std::normal_distribution<double> normal(0, 1);
+      idx(0) = normal(rng);
+      idx(1) = normal(rng);
+  }
+\end{Verbatim}
+Whenever possible, the library will use thread-local storage (\tls) to reduce
+memory usage while still provides thread-safe of the above \verb|rng|. It is
+more efficient to obtain a reference to the thread-local object only once
+instead of calling the \verb|idx.rng()| method everything an \rng engine is
+needed. This is the main reason that we did not use the alternative,
+\begin{Verbatim}
+  void eval_each(std::size_t iter, ParticleIndex<T> &idx)
+  {
+      std::normal_distribution<double> normal(0, 1);
+      idx(0) = normal(idx.rng());
+      idx(1) = normal(idx.rng());
+  }
+\end{Verbatim}
+Similarly, for \verb|eval_range|, one can use the following,
+\begin{Verbatim}
+  void eval_range(
+      std::size_t iter,
+      const ParticleRang<T> &range)
+  {
+      auto &rng = range.begin().rng();
+      for (auto idx : range)
+          /* use rng for idx */;
+  }
+\end{Verbatim}
+Note that, all particles within the range will be processed by a single thread,
+and thus it is safe to use one \rng engine for all of them, unless the for loop
+above is further parallelized, which may cause performance penalty due to over
+submitting, and thus not recommended.
