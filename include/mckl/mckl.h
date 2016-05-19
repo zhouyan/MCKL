@@ -56,9 +56,6 @@
 /// \defgroup C_API_Core_Sampler mckl::Sampler
 /// \ingroup C_API_Core
 
-/// \defgroup C_API_Resample Resample algorithms
-/// \ingroup C_API
-
 /// \defgroup C_API_Random Random number generating
 /// \ingroup C_API
 
@@ -68,14 +65,14 @@
 /// \defgroup C_API_Random_Seed mckl::Seed
 /// \ingroup C_API_Random
 
-/// \defgroup C_API_Random_U01Sequence U01 sequence
-/// \ingroup C_API_Random
-
 /// \defgroup C_API_Random_Distribution Distribution
 /// \ingroup C_API_Random
 
 /// \defgroup C_API_Random_MKL Intel Math Kernel Library
 /// \ingroup C_API_Random
+
+/// \defgroup C_API_Resample Resample algorithms
+/// \ingroup C_API
 
 /// \defgroup C_API_SMP Symmetric multiprocessing
 /// \ingroup C_API

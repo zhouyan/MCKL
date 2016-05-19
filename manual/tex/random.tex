@@ -20,7 +20,9 @@ versions. The first operates on \rng engines and generates random integers,
 \begin{Verbatim}
   template <typename RNGType>
   inline void rand(
-      RNGType &rng, std::size_t n, typename RNGType::result_type *r);
+      RNGType &rng,
+      std::size_t n,
+      typename RNGType::result_type *r);
 \end{Verbatim}
 The effect of the function call,
 \begin{Verbatim}
@@ -39,8 +41,11 @@ The second version of \verb|rand| is for generating distribution random
 numbers,
 \begin{Verbatim}
   template <typename RNGType, typename DistributionType>
-  inline void rand(RNGType &rng, const DistributionType &distribution,
-      std::size_t n, typename DistributionType::result_type *r);
+  inline void rand(
+      RNGType &rng,
+      const DistributionType &distribution,
+      std::size_t n,
+      typename DistributionType::result_type *r);
 \end{Verbatim}
 For example,
 \begin{Verbatim}
@@ -284,15 +289,21 @@ The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
 instructions based \rng{}s in \textcite{Salmon:2011um} are implemented in the
 following generator,
 \begin{Verbatim}
-  template <typename KeySeqType, std::size_t Rounds, std::size_t Blocks>
+  template <
+      typename KeySeqType,
+      std::size_t Rounds,
+      std::size_t Blocks>
   class AESNIGenerator;
 \end{Verbatim}
 The corresponding \rng engine is,
 \begin{Verbatim}
-  template <typename ResultType, typename KeySeqType, std::size_t Rounds,
+  template <
+      typename ResultType,
+      typename KeySeqType,
+      std::size_t Rounds,
       std::size_t Blocks>
-  using AESNIEngine =
-      CounterEngine<ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
+  using AESNIEngine = CounterEngine<
+          ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
 \end{Verbatim}
 where \verb|KeySeqType| is the class used to generate the sequences of round
 keys. The parameter \verb|Rounds| is the number of rounds of \aes encryption to
@@ -306,42 +317,50 @@ of larger state size. Without going into details, there are four types of
 sequence of round keys implemented by the library,
 \begin{Verbatim}
   template <std::size_t Rounds>
-  using AES128KeySeq =
-      internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
+  using AES128KeySeq = internal::AESKeySeq<
+      Rounds, internal::AES128KeySeqGenerator>;
 
   template <std::size_t Rounds>
-  using AES192KeySeq =
-      internal::AESKeySeq<Rounds, internal::AES192KeySeqGenerator>;
+  using AES192KeySeq = internal::AESKeySeq<
+      Rounds, internal::AES192KeySeqGenerator>;
 
   template <std::size_t Rounds>
-  using AES256KeySeq =
-      internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator>;
+  using AES256KeySeq = internal::AESKeySeq<
+      Rounds, internal::AES256KeySeqGenerator>;
 
   template <typename Constants = ARSConstants>
   using ARSKeySeq = internal::ARSKeySeqImpl<Constants>;
 \end{Verbatim}
 and correspondingly four \rng engines,
 \begin{Verbatim}
-  template <typename ResultType, std::size_t Rounds = MCKL_AES128_ROUNDS,
+  template <
+      typename ResultType,
+      std::size_t Rounds = MCKL_AES128_ROUNDS,
       std::size_t Blocks = MCKL_AESNI_BLOCKS>
-  using AES128Engine =
-      AESNIEngine<ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
+  using AES128Engine = AESNIEngine<
+      ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
 
-  template <typename ResultType, std::size_t Rounds = MCKL_AES192_ROUNDS,
+  template <
+      typename ResultType,
+      std::size_t Rounds = MCKL_AES192_ROUNDS,
       std::size_t Blocks = MCKL_AESNI_BLOCKS>
-  using AES192Engine =
-      AESNIEngine<ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
+  using AES192Engine = AESNIEngine<
+      ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
 
-  template <typename ResultType, std::size_t Rounds = MCKL_AES256_ROUNDS,
+  template <
+      typename ResultType,
+      std::size_t Rounds = MCKL_AES256_ROUNDS,
       std::size_t Blocks = MCKL_AESNI_BLOCKS>
-  using AES256Engine =
-      AESNIEngine<ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
+  using AES256Engine = AESNIEngine<
+      ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
 
-  template <typename ResultType, std::size_t Rounds = MCKL_ARS_ROUNDS,
+  template <
+      typename ResultType,
+      std::size_t Rounds = MCKL_ARS_ROUNDS,
       std::size_t Blocks = MCKL_AESNI_BLOCKS,
       typename Constants = ARSConstants>
-  using ARSEngine =
-      AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
+  using ARSEngine = AESNIEngine<
+      ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
 \end{Verbatim}
 The first three are equivalent to \aes-128, \aes-192 and \aes-256 block ciphers
 used in counter mode. The last is the \ars algorithm introduced by
@@ -410,19 +429,23 @@ bottle neck. Note that, the best performance is obtained with the vectorized
 The Philox algorithm in \textcite{Salmon:2011um} is implemented in the
 following generator,
 \begin{Verbatim}
-  template <typename T, std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
+  template <
+      typename T,
+      std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
       std::size_t Rounds = MCKL_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
   class PhiloxGenerator;
 \end{Verbatim}
 The corresponding \rng engine is,
 \begin{Verbatim}
-  template <typename ResultType, typename T = ResultType,
+  template <
+      typename ResultType,
+      typename T = ResultType,
       std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
       std::size_t Rounds = MCKL_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
-  using PhiloxEngine =
-      CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
+  using PhiloxEngine = CounterEngine<
+      ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
 \end{Verbatim}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in Table~\ref{tab:Configuration macros for
@@ -434,16 +457,20 @@ the algorithm. However, the library only provides default constants for 32- and
 or \verb|4|. These four engines are defined as type aliases for convenience,
 \begin{Verbatim}
   template <typename ResultType>
-  using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
+  using Philox2x32Engine = PhiloxEngine<
+      ResultType, std::uint32_t, 2>;
 
   template <typename ResultType>
-  using Philox4x32Engine = PhiloxEngine<ResultType, std::uint32_t, 4>;
+  using Philox4x32Engine = PhiloxEngine<
+      ResultType, std::uint32_t, 4>;
 
   template <typename ResultType>
-  using Philox2x64Engine = PhiloxEngine<ResultType, std::uint64_t, 2>;
+  using Philox2x64Engine = PhiloxEngine<
+      ResultType, std::uint64_t, 2>;
 
   template <typename ResultType>
-  using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
+  using Philox4x64Engine = PhiloxEngine<
+      ResultType, std::uint64_t, 4>;
 \end{Verbatim}
 Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
 in Table~\ref{tab:Counter-based RNG}. To use the engine with \verb|K| taking
@@ -459,19 +486,23 @@ performance data is in Table~\appref{tab:Performance of PhiloxEngine}.
 The Threefry algorithm in \textcite{Salmon:2011um} is implemented in the
 following generator,
 \begin{Verbatim}
-  template <typename T, std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
+  template <
+      typename T,
+      std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
   class ThreefryGenerator;
 \end{Verbatim}
 The corresponding \rng engine is,
 \begin{Verbatim}
-  template <typename ResultType, typename T = ResultType,
+  template <
+      typename ResultType,
+      typename T = ResultType,
       std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
       std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
-  using ThreefryEngine =
-      CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
+  using ThreefryEngine = CounterEngine<
+      ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
 \end{Verbatim}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in Table~\ref{tab:Configuration macros for
@@ -487,22 +518,28 @@ or \verb|K| taking the value \verb|2| are also provided, taken from
 convenience,
 \begin{Verbatim}
   template <typename ResultType>
-  using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
+  using Threefry2x32Engine = ThreefryEngine<
+      ResultType, std::uint32_t, 2>;
 
   template <typename ResultType>
-  using Threefry4x32Engine = ThreefryEngine<ResultType, std::uint32_t, 4>;
+  using Threefry4x32Engine = ThreefryEngine<
+      ResultType, std::uint32_t, 4>;
 
   template <typename ResultType>
-  using Threefry2x64Engine = ThreefryEngine<ResultType, std::uint64_t, 2>;
+  using Threefry2x64Engine = ThreefryEngine<
+      ResultType, std::uint64_t, 2>;
 
   template <typename ResultType>
-  using Threefry4x64Engine = ThreefryEngine<ResultType, std::uint64_t, 4>;
+  using Threefry4x64Engine = ThreefryEngine<
+      ResultType, std::uint64_t, 4>;
 
   template <typename ResultType>
-  using Threefry8x64Engine = ThreefryEngine<ResultType, std::uint64_t, 8>;
+  using Threefry8x64Engine = ThreefryEngine<
+      ResultType, std::uint64_t, 8>;
 
   template <typename ResultType>
-  using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
+  using Threefry16x64Engine = ThreefryEngine<
+      ResultType, std::uint64_t, 16>;
 \end{Verbatim}
 Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
 in Table~\ref{tab:Counter-based RNG}. The performance data is in
@@ -640,8 +677,9 @@ They all have the same interface,
 \begin{Verbatim}
   RNGSet<RNG> rng_set(N); // A set of N RNGs
   rng_set.resize(n);      // Change the size of the set
-  rng_set.seed();         // Seed each RNG in the set with Seed::instance()
   rng_set[i];             // Get a reference to the i-th RNG
+  rng_set.seed();         // Seed each RNG in the set
+                          // with Seed::instance()
 \end{Verbatim}
 The first implementation is \verb|RNGSetScalar|. As its name suggests, it is
 only a wrapper of a single \rng. All calls to \verb|rng_set[i]| returns a
@@ -689,14 +727,18 @@ parallelization.
   class RNGSetOMP
   {
       public:
-      RNGSetOMP(std::size_t) : rng_(/* maximum number of OpenMP threads */)
+      RNGSetOMP(std::size_t)
+          : rng_(/* maximum number of OpenMP threads */)
       {
           seed();
       }
 
       void resize(std::size_t) {}
 
-      void seed() { Seed::instance()(rng_.size(), rng_.begin()); }
+      void seed()
+      {
+          Seed::instance()(rng_.size(), rng_.begin());
+      }
 
       RNGType &operator[](std::size_t)
       {
@@ -907,11 +949,10 @@ longer the same as \verb|U01CODistribution|. Instead, it behaves similarly to
   K &= \max\{1, P\} \\
   X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{align*}
-The other solution is to define the configuration macro
-\verb|MCKL_U01_USE_64BITS_DOUBLE| to a non-zero value, such that the
-intermediate random integers will always be 64-bits for \verb|double| output.
-This configuration macro also affects all other four distributions discussed
-earlier.
+Alternatively, one can define \verb|MCKL_U01_USE_64BITS_DOUBLE| to a non-zero
+value, such that the intermediate random integers will always be 64-bits for
+\verb|double| output. This configuration macro also affects all other four
+distributions discussed earlier.
 
 \subsection{Distributions using the inverse method}
 \label{sub:Distributions using the inverse method}
@@ -988,31 +1029,6 @@ The performance data of these distributions is in Table~\appref{tab:Performance
 
 \paragraph{Multivariate Normal distribution}
 
-The library also implements the multivariate Normal distribution,
-\begin{Verbatim}
-  template <typename RealType, std::size_t Dim>
-  class NormalMVDistribution;
-\end{Verbatim}
-If \verb|Dim| is zero (\verb|Dynamic|), then the distribution can only be
-constructed with,
-\begin{Verbatim}
-  explicit NormalMVDistribution(std::size_t dim,
-      const result_type *mean = nullptr, const result_type *chol = nullptr);
-\end{Verbatim}
-If \verb|Dim| is a positive integer, it can only be constructed with,
-\begin{Verbatim}
-  explicit NormalMVDistribution(
-      const result_type *mean = nullptr, const result_type *chol = nullptr);
-\end{Verbatim}
-In either case, the parameter \verb|mean| is the mean vector. If it is a null
-pointer, then it is assumed to be a zero vector. The parameter \verb|chol| is a
-$d(d + 1)/2$-vector, where $d$ is the dimension. The vector is the lower
-triangular elements of the Cholesky decomposition of the covariance matrix,
-packed row by row. Libraries such as \lapack has routines to compute such a
-matrix. Alternatively, one can use the covariance functionalities in the
-library. See Section~\ref{sec:Sample covariance}, which also provides a
-concrete example of using the multivariate Normal distribution.
-
 \subsection{Gamma and related distribution}
 \label{sub:Gamma and related distribution}
 
@@ -1047,6 +1063,8 @@ the Student's $t$-distribution, respectively. The performance data of these
 distributions, for different parameters are in Tables~\appref{tab:Performance
   of Gamma distribution} to~\appref{tab:Performance of Student's
   t-distribution}.
+
+\paragraph{Dirichlet distribution}
 
 \subsection{Beta distribution}
 \label{sub:Beta distribution}

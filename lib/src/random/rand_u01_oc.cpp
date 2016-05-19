@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rand_u01_oc_##name(mckl_rng rng, size_t n, double *r)    \
     {                                                                         \
         ::mckl::u01_oc_distribution(                                          \

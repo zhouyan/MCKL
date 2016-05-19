@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rand_uniform_int_##name(                                 \
         mckl_rng rng, size_t n, int *r, int a, int b)                         \
     {                                                                         \
@@ -65,7 +65,7 @@ static mckl_rand_uniform_int_type mckl_rand_uniform_int_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_rand_uniform_int_##name,
 #define MCKL_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 

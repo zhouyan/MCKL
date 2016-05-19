@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline int mckl_rng_is_eq_##name(mckl_rng rng1, mckl_rng rng2)            \
     {                                                                         \
         ::mckl::runtime_assert(rng1.type == rng2.type,                        \

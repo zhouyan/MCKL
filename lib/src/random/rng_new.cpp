@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline mckl_rng mckl_rng_new_##name(unsigned seed)                        \
     {                                                                         \
         return {new RNGType(static_cast<RNGType::result_type>(seed)),         \

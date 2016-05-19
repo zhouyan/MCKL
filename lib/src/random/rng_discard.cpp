@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rng_discard_##name(mckl_rng rng, unsigned nskip)         \
     {                                                                         \
         reinterpret_cast<RNGType *>(rng.ptr)->discard(nskip);                 \

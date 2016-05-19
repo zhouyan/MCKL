@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/lib/src/random/u01_rand_systematic.cpp
+// MCKL/lib/src/resample/u01_rand_sorted.cpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,6 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <mckl/mckl.h>
 #include "libmcklrng.hpp"
 
 extern "C" {
@@ -41,21 +42,20 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
-    inline void mckl_u01_rand_systematic_##name(                              \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline void mckl_u01_rand_sorted_##name(                                  \
         mckl_rng rng, size_t n, double *r)                                    \
     {                                                                         \
-        ::mckl::u01_rand_systematic(                                          \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r);                     \
+        ::mckl::u01_rand_sorted(*reinterpret_cast<RNGType *>(rng.ptr), n, r); \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>
 
 #include <mckl/random/internal/rng_define_macro.hpp>
 
-using mckl_u01_rand_systematic_type = void (*)(mckl_rng, size_t, double *);
+using mckl_u01_rand_sorted_type = void (*)(mckl_rng, size_t, double *);
 
-static mckl_u01_rand_systematic_type mckl_u01_rand_systematic_dispatch[] = {
+static mckl_u01_rand_sorted_type mckl_u01_rand_sorted_dispatch[] = {
 
 #ifdef MCKL_RNG_DEFINE_MACRO
 #undef MCKL_RNG_DEFINE_MACRO
@@ -65,19 +65,18 @@ static mckl_u01_rand_systematic_type mckl_u01_rand_systematic_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
-    mckl_u01_rand_systematic_##name,
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name) mckl_u01_rand_sorted_##name,
 #define MCKL_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>
 
 #include <mckl/random/internal/rng_define_macro.hpp>
 
-    nullptr}; // mckl_u01_rand_systematic_dispatch
+    nullptr}; // mckl_u01_rand_sorted_dispatch
 
-void mckl_u01_rand_systematic(mckl_rng rng, size_t n, double *r)
+void mckl_u01_rand_sorted(mckl_rng rng, size_t n, double *r)
 {
-    mckl_u01_rand_systematic_dispatch[static_cast<std::size_t>(rng.type)](
+    mckl_u01_rand_sorted_dispatch[static_cast<std::size_t>(rng.type)](
         rng, n, r);
 }
 

@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline size_t mckl_rng_save_##name(mckl_rng rng, void *mem)               \
     {                                                                         \
         std::size_t size = sizeof(RNGType);                                   \

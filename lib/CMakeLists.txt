@@ -35,7 +35,7 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
 SET(MCKL_LIB_SOURCE_MCKL
     ${PROJECT_SOURCE_DIR}/src/core/core.cpp
-    ${PROJECT_SOURCE_DIR}/src/random/rng.cpp
+    ${PROJECT_SOURCE_DIR}/src/random/random.cpp
     ${PROJECT_SOURCE_DIR}/src/resample/resample.cpp
     ${PROJECT_SOURCE_DIR}/src/smp/smp.cpp
     ${PROJECT_SOURCE_DIR}/src/utility/utility.cpp)

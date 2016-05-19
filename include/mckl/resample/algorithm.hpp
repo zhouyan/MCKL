@@ -33,8 +33,8 @@
 #define MCKL_RESAMPLE_ALGORITHM_HPP
 
 #include <mckl/internal/common.hpp>
-#include <mckl/random/u01_sequence.hpp>
 #include <mckl/resample/transform.hpp>
+#include <mckl/resample/u01_sequence.hpp>
 
 namespace mckl
 {

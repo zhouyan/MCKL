@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rand_bernoulli_##name(                                   \
         mckl_rng rng, size_t n, int *r, double p)                             \
     {                                                                         \
@@ -63,8 +63,7 @@ using mckl_rand_bernoulli_type = void (*)(mckl_rng, size_t, int *, double);
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
-    mckl_rand_bernoulli_##name,
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name) mckl_rand_bernoulli_##name,
 #define MCKL_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
 static mckl_rand_bernoulli_type mckl_rand_bernoulli_dispatch[] = {

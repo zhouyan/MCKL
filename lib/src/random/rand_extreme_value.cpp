@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rand_extreme_value_##name(                               \
         mckl_rng rng, size_t n, double *r, double a, double b)                \
     {                                                                         \
@@ -66,7 +66,7 @@ static mckl_rand_extreme_value_type mckl_rand_extreme_value_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     mckl_rand_extreme_value_##name,
 #define MCKL_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 

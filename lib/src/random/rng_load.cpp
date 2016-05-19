@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rng_load_##name(mckl_rng rng, void *mem)                 \
     {                                                                         \
         std::memcpy(rng.ptr, mem, sizeof(RNGType));                           \

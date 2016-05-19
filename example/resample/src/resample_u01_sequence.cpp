@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/include/random_u01_sequence.cpp
+// MCKL/example/resample/include/resample_u01_sequence.cpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,6 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "random_u01_sequence.hpp"
+#include "resample_u01_sequence.hpp"
 
-MCKL_EXAMPLE_RANDOM_MAIN(u01_sequence, 10000, 1000)
+int main(int argc, char **argv)
+{
+    std::size_t N = 10000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
+    std::size_t M = 1000;
+    if (argc > 2)
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
+
+    resample_u01_sequence(N, M);
+
+    return 0;
+}

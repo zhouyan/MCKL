@@ -35,7 +35,6 @@ MCKL_ADD_EXAMPLE(random)
 
 MCKL_ADD_TEST(random rng)
 MCKL_ADD_TEST(random u01)
-MCKL_ADD_TEST(random u01_sequence)
 MCKL_ADD_TEST(random uniform_bits)
 
 IF(MKL_FOUND)

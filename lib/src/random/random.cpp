@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/lib/src/random/rng.cpp
+// MCKL/lib/src/random/random.cpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -84,11 +84,6 @@
 #include "rng_type.cpp"
 
 #include "seed.cpp"
-
-#include "u01_rand_sorted.cpp"
-#include "u01_rand_stratified.cpp"
-#include "u01_rand_systematic.cpp"
-#include "u01_trans.cpp"
 
 #if MCKL_HAS_MKL
 #include "mkl_brng.cpp"

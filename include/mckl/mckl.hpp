@@ -51,9 +51,6 @@
 /// \ingroup Algorithm
 /// \brief Random walk Metropolis-Hastings algorithm
 
-/// \defgroup Resample Resampling algorithms
-/// \brief Resampling algorithm functor classes
-
 /// \defgroup SMP Symmetric multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 
@@ -115,10 +112,6 @@
 /// \ingroup Random
 /// \brief Converting random integers to uniform floating points
 
-/// \defgroup U01Sequence U01 sequence
-/// \ingroup Random
-/// \brief Generating ordered uniform random sequence
-
 /// \defgroup RandomC Random number generating in C and OpenCL
 /// \brief Random number generating in C and OpenCL
 
@@ -133,6 +126,9 @@
 /// \defgroup U01C U01
 /// \ingroup RandomC
 /// \brief Converting random integers to uniform floating points
+
+/// \defgroup Resample Resampling algorithms
+/// \brief Resampling algorithm functor classes
 
 /// \defgroup Utility Utility
 /// \brief Utilities independent of other part of the library

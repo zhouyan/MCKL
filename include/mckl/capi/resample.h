@@ -77,6 +77,24 @@ void mckl_resample_residual_stratified(size_t n, size_t m, mckl_rng rng,
 void mckl_resample_residual_systematic(size_t n, size_t m, mckl_rng rng,
     const double *weight, size_t *replication);
 
+/// \brief `mckl::u01_trans_sorted`
+void mckl_u01_trans_sorted(size_t n, const double *u01, double *r);
+
+/// \brief `mckl::u01_trans_stratifed`
+void mckl_u01_trans_stratified(size_t n, const double *u01, double *r);
+
+/// \brief `mckl::u01_trans_systematic`
+void mckl_u01_trans_systematic(size_t n, const double *u01, double *r);
+
+/// \brief `mckl::u01_rand_sorted`
+void mckl_u01_rand_sorted(mckl_rng rng, size_t n, double *r);
+
+/// \brief `mckl::u01_rand_stratifed`
+void mckl_u01_rand_stratified(mckl_rng rng, size_t n, double *r);
+
+/// \brief `mckl::u01_rand_systematic`
+void mckl_u01_rand_systematic(mckl_rng rng, size_t n, double *r);
+
 /// @} C_API_Resample
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/include/random_u01_sequence.hpp
+// MCKL/example/resample/include/resample_u01_sequence.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,14 +29,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_RANDOM_U01_SEQUENCE_HPP
-#define MCKL_EXAMPLE_RANDOM_U01_SEQUENCE_HPP
+#ifndef MCKL_EXAMPLE_RESAMPLE_U01_SEQUENCE_HPP
+#define MCKL_EXAMPLE_RESAMPLE_U01_SEQUENCE_HPP
 
-#include <mckl/random/u01_sequence.hpp>
-#include "random_common.hpp"
+#include <mckl/random/rng.hpp>
+#include <mckl/resample/u01_sequence.hpp>
+#include <mckl/utility/stop_watch.hpp>
 
 template <typename U01SeqType, typename RealType>
-inline void random_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
+inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
     int twid, const std::string &name)
 {
     mckl::RNG rng;
@@ -79,7 +80,12 @@ inline void random_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
 
     double c1 = watch1.cycles() / num;
     double c2 = watch2.cycles() / num;
-    std::cout << std::setw(twid) << std::left << random_type_name<RealType>();
+    if (std::is_same<RealType, float>::value)
+        std::cout << std::setw(twid) << std::left << "float";
+    if (std::is_same<RealType, double>::value)
+        std::cout << std::setw(twid) << std::left << "double";
+    if (std::is_same<RealType, long double>::value)
+        std::cout << std::setw(twid) << std::left << "long double";
     std::cout << std::setw(twid) << std::left << name;
     std::cout << std::setw(twid) << std::right << c1;
     std::cout << std::setw(twid) << std::right << c2;
@@ -88,17 +94,17 @@ inline void random_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
 }
 
 template <typename RealType>
-inline void random_u01_sequence(std::size_t N, std::size_t M, int twid)
+inline void resample_u01_sequence(std::size_t N, std::size_t M, int twid)
 {
-    random_u01_sequence<mckl::U01SequenceSorted, RealType>(
+    resample_u01_sequence<mckl::U01SequenceSorted, RealType>(
         N, M, N, twid, "Sorted");
-    random_u01_sequence<mckl::U01SequenceStratified, RealType>(
+    resample_u01_sequence<mckl::U01SequenceStratified, RealType>(
         N, M, N, twid, "Stratified");
-    random_u01_sequence<mckl::U01SequenceSystematic, RealType>(
+    resample_u01_sequence<mckl::U01SequenceSystematic, RealType>(
         N, M, 1, twid, "Systematic");
 }
 
-inline void random_u01_sequence(std::size_t N, std::size_t M)
+inline void resample_u01_sequence(std::size_t N, std::size_t M)
 {
     const int twid = 15;
     const std::size_t lwid = twid * 5;
@@ -113,12 +119,12 @@ inline void random_u01_sequence(std::size_t N, std::size_t M)
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
-    random_u01_sequence<float>(N, M, twid);
+    resample_u01_sequence<float>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
-    random_u01_sequence<double>(N, M, twid);
+    resample_u01_sequence<double>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
-    random_u01_sequence<long double>(N, M, twid);
+    resample_u01_sequence<long double>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
-#endif // MCKL_EXAMPLE_RANDOM_U01_SEQUENCE_HPP
+#endif // MCKL_EXAMPLE_RESAMPLE_U01_SEQUENCE_HPP

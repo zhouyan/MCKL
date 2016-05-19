@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rng_assign_##name(mckl_rng rng, mckl_rng other)          \
     {                                                                         \
         ::mckl::runtime_assert(rng.type == other.type,                        \

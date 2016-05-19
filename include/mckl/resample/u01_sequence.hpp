@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/u01_sequence.hpp
+// MCKL/include/mckl/resample/u01_sequence.hpp
 //----------------------------------------------------------------------------
 //                         MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,10 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_U01_SEQUENCE_HPP
-#define MCKL_RANDOM_U01_SEQUENCE_HPP
+#ifndef MCKL_RESAMPLE_U01_SEQUENCE_HPP
+#define MCKL_RESAMPLE_U01_SEQUENCE_HPP
 
-#include <mckl/random/internal/common.hpp>
+#include <mckl/internal/common.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
 namespace mckl
@@ -112,7 +112,7 @@ inline void u01_trans_systematic_impl(
 
 /// \brief Tranform a sequence of standard uniform random numbers to sorted
 /// sequence
-/// \ingroup U01Sequence
+/// \ingroup Resample
 template <typename RealType>
 inline void u01_trans_sorted(std::size_t N, const RealType *u01, RealType *r)
 {
@@ -141,7 +141,7 @@ inline void u01_trans_sorted(std::size_t N, const RealType *u01, RealType *r)
 
 /// \brief Transform a sequence of standard uniform random numbers to a
 /// stratified sequence
-/// \ingroup U01Sequence
+/// \ingroup Resample
 template <typename RealType>
 inline void u01_trans_stratified(
     std::size_t N, const RealType *u01, RealType *r)
@@ -164,7 +164,7 @@ inline void u01_trans_stratified(
 
 /// \brief Transform a single standard uniform random number to a systematic
 /// sequence
-/// \ingroup U01Sequence
+/// \ingroup Resample
 template <typename RealType>
 inline void u01_trans_systematic(
     std::size_t N, const RealType *u01, RealType *r)
@@ -187,7 +187,7 @@ inline void u01_trans_systematic(
 }
 
 /// \brief Generate sorted standard uniform numbers with \f$O(N)\f$ cost
-/// \ingroup U01Sequence
+/// \ingroup Resample
 template <typename RealType, typename RNGType>
 inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r)
 {
@@ -214,7 +214,7 @@ inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r)
 }
 
 /// \brief Generate stratified standard uniform numbers
-/// \ingroup U01Sequence
+/// \ingroup Resample
 template <typename RealType, typename RNGType>
 inline void u01_rand_stratified(RNGType &rng, std::size_t N, RealType *r)
 {
@@ -232,7 +232,7 @@ inline void u01_rand_stratified(RNGType &rng, std::size_t N, RealType *r)
 }
 
 /// \brief Generate systematic standard uniform numbers
-/// \ingroup U01Sequence
+/// \ingroup Resample
 template <typename RealType, typename RNGType>
 inline void u01_rand_systematic(RNGType &rng, std::size_t N, RealType *r)
 {
@@ -246,7 +246,7 @@ inline void u01_rand_systematic(RNGType &rng, std::size_t N, RealType *r)
 }
 
 /// \brief Sorted of standard uniform numbers
-/// \ingroup U01Sequence
+/// \ingroup Resample
 class U01SequenceSorted
 {
     public:
@@ -264,7 +264,7 @@ class U01SequenceSorted
 }; // U01SequenceSorted
 
 /// \brief Stratified standard uniform numbers
-/// \ingroup U01Sequence
+/// \ingroup Resample
 class U01SequenceStratified
 {
     public:
@@ -282,7 +282,7 @@ class U01SequenceStratified
 }; // class U01SequenceStratified
 
 /// \brief Systematic standard uniform numbers
-/// \ingroup U01Sequence
+/// \ingroup Resample
 class U01SequenceSystematic
 {
     public:
@@ -301,4 +301,4 @@ class U01SequenceSystematic
 
 } // namespace mckl
 
-#endif // MCKL_RANDOM_U01_SEQUENCE_HPP
+#endif // MCKL_RESAMPLE_U01_SEQUENCE_HPP

@@ -36,5 +36,6 @@
 #include <mckl/resample/algorithm.hpp>
 #include <mckl/resample/index.hpp>
 #include <mckl/resample/transform.hpp>
+#include <mckl/resample/u01_sequence.hpp>
 
 #endif // MCKL_RESAMPLE_HPP

@@ -112,29 +112,6 @@ void mckl_seed_load_f(const char *filename);
 
 /// @} C_API_Random_Seed
 
-/// \addtogroup C_API_Random_U01Sequence
-/// @{
-
-/// \brief `mckl::u01_trans_sorted`
-void mckl_u01_trans_sorted(size_t n, const double *u01, double *r);
-
-/// \brief `mckl::u01_trans_stratifed`
-void mckl_u01_trans_stratified(size_t n, const double *u01, double *r);
-
-/// \brief `mckl::u01_trans_systematic`
-void mckl_u01_trans_systematic(size_t n, const double *u01, double *r);
-
-/// \brief `mckl::u01_rand_sorted`
-void mckl_u01_rand_sorted(mckl_rng rng, size_t n, double *r);
-
-/// \brief `mckl::u01_rand_stratifed`
-void mckl_u01_rand_stratified(mckl_rng rng, size_t n, double *r);
-
-/// \brief `mckl::u01_rand_systematic`
-void mckl_u01_rand_systematic(mckl_rng rng, size_t n, double *r);
-
-/// @} C_API_Random_U01Sequence
-
 /// \addtogroup C_API_Random_Distribution
 /// @{
 

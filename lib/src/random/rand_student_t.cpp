@@ -41,7 +41,7 @@ extern "C" {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rand_student_t_##name(                                   \
         mckl_rng rng, size_t n, double *r, double df)                         \
     {                                                                         \
@@ -65,8 +65,7 @@ static mckl_rand_student_t_type mckl_rand_student_t_dispatch[] = {
 #undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                         \
-    mckl_rand_student_t_##name,
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name) mckl_rand_student_t_##name,
 #define MCKL_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

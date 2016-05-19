@@ -35,3 +35,4 @@ MCKL_ADD_EXAMPLE(resample)
 
 MCKL_ADD_TEST(resample index)
 MCKL_ADD_TEST(resample transform)
+MCKL_ADD_TEST(resample u01_sequence)
