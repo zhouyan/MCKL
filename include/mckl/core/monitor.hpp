@@ -185,6 +185,9 @@ class Monitor
     template <typename OutputIter>
     OutputIter read_record_matrix(MatrixLayout layout, OutputIter first) const
     {
+        runtime_assert(layout == RowMajor || layout == ColMajor,
+            "**Monitor::read_record_matrix** invalid layout parameter");
+
         if (layout == RowMajor)
             return std::copy(record_.begin(), record_.end(), first);
 

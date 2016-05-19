@@ -409,6 +409,9 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     template <typename OutputIter>
     OutputIter read(MatrixLayout layout, OutputIter first) const
     {
+        runtime_assert(layout == RowMajor || layout == ColMajor,
+            "**StateMatrix::read** invalid layout parameter");
+
         if (layout == RowMajor)
             first = std::copy_n(this->data(), this->data_size(), first);
 
@@ -681,6 +684,9 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     template <typename OutputIter>
     OutputIter read(MatrixLayout layout, OutputIter first) const
     {
+        runtime_assert(layout == RowMajor || layout == ColMajor,
+            "**StateMatrix::read** invalid layout parameter");
+
         if (layout == RowMajor)
             for (size_type i = 0; i != this->size(); ++i)
                 first = read_row(i, first);
