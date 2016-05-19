@@ -77,19 +77,9 @@ class Weight
 
     /// \brief Read all normalized weights to an output iterator
     template <typename OutputIter>
-    OutputIter read_weight(OutputIter first) const
+    OutputIter read(OutputIter first) const
     {
         return std::copy(data_.begin(), data_.end(), first);
-    }
-
-    /// \brief Read all normalized weights to a random access iterator
-    template <typename RandomIter>
-    RandomIter read_weight(RandomIter first, size_type stride) const
-    {
-        for (std::size_t i = 0; i != size(); ++i, first += stride)
-            *first = data_[i];
-
-        return first;
     }
 
     /// \brief Set \f$W_i = 1/N\f$
@@ -104,20 +94,6 @@ class Weight
     void set(InputIter first)
     {
         std::copy_n(first, size(), data_.begin());
-        normalize(false);
-    }
-
-    /// \brief Set \f$W_i \propto w_i\f$
-    template <typename RandomIter>
-    void set(RandomIter first, size_type stride)
-    {
-        if (stride == 1) {
-            set(first);
-            return;
-        }
-
-        for (std::size_t i = 0; i != size(); ++i, first += stride)
-            data_[i] = *first;
         normalize(false);
     }
 
@@ -140,39 +116,11 @@ class Weight
     /// \brief Set \f$W_i \propto W_i w_i\f$
     void mul(double *first) { mul(const_cast<const double *>(first)); }
 
-    /// \brief Set \f$W_i \propto W_i w_i\f$
-    template <typename RandomIter>
-    void mul(RandomIter first, size_type stride)
-    {
-        if (stride == 1) {
-            mul(first);
-            return;
-        }
-
-        for (std::size_t i = 0; i != size(); ++i, first += stride)
-            data_[i] *= *first;
-        normalize(false);
-    }
-
     /// \brief Set \f$\log W_i = v_i + \mathrm{const.}\f$
     template <typename InputIter>
     void set_log(InputIter first)
     {
         std::copy_n(first, size(), data_.begin());
-        normalize(true);
-    }
-
-    /// \brief Set \f$\log W_i = v_i + \mathrm{const.}\f$
-    template <typename RandomIter>
-    void set_log(RandomIter first, size_type stride)
-    {
-        if (stride == 1) {
-            set_log(first);
-            return;
-        }
-
-        for (std::size_t i = 0; i != size(); ++i, first += stride)
-            data_[i] = *first;
         normalize(true);
     }
 
@@ -196,21 +144,6 @@ class Weight
 
     /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
     void add_log(double *first) { add_log(const_cast<const double *>(first)); }
-
-    /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
-    template <typename RandomIter>
-    void add_log(RandomIter first, size_type stride)
-    {
-        if (stride == 1) {
-            add_log(first);
-            return;
-        }
-
-        log(size(), data_.data(), data_.data());
-        for (std::size_t i = 0; i != size(); ++i, first += stride)
-            data_[i] += *first;
-        normalize(true);
-    }
 
     /// \brief Draw integer index in the range \f$[0, N)\f$ according to the
     /// weights
@@ -297,12 +230,7 @@ class WeightNull
     const double *data() const { return nullptr; }
 
     template <typename OutputIter>
-    void read_weight(OutputIter) const
-    {
-    }
-
-    template <typename RandomIter>
-    void read_weight(RandomIter, int) const
+    void read(OutputIter) const
     {
     }
 
@@ -313,18 +241,8 @@ class WeightNull
     {
     }
 
-    template <typename RandomIter>
-    void set(RandomIter, int)
-    {
-    }
-
     template <typename InputIter>
     void mul(InputIter)
-    {
-    }
-
-    template <typename RandomIter>
-    void mul(RandomIter, int)
     {
     }
 
@@ -333,18 +251,8 @@ class WeightNull
     {
     }
 
-    template <typename RandomIter>
-    void set_log(RandomIter, int)
-    {
-    }
-
     template <typename InputIter>
     void add_log(InputIter)
-    {
-    }
-
-    template <typename RandomIter>
-    void add_log(RandomIter, int)
     {
     }
 

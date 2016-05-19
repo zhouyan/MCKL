@@ -73,9 +73,9 @@ double mckl_weight_ess(mckl_weight weight)
     return ::mckl::cast(weight).ess();
 }
 
-void mckl_weight_read_weight(mckl_weight weight, double *first, size_t stride)
+void mckl_weight_read(mckl_weight weight, double *first)
 {
-    ::mckl::cast(weight).read_weight(first, stride);
+    ::mckl::cast(weight).read(first);
 }
 
 const double *mckl_weight_data(mckl_weight weight)
@@ -88,26 +88,24 @@ void mckl_weight_set_equal(mckl_weight weight)
     ::mckl::cast(weight).set_equal();
 }
 
-void mckl_weight_set(mckl_weight weight, const double *first, size_t stride)
+void mckl_weight_set(mckl_weight weight, const double *first)
 {
-    ::mckl::cast(weight).set(first, stride);
+    ::mckl::cast(weight).set(first);
 }
 
-void mckl_weight_mul(mckl_weight weight, const double *first, size_t stride)
+void mckl_weight_mul(mckl_weight weight, const double *first)
 {
-    ::mckl::cast(weight).mul(first, stride);
+    ::mckl::cast(weight).mul(first);
 }
 
-void mckl_weight_set_log(
-    mckl_weight weight, const double *first, size_t stride)
+void mckl_weight_set_log(mckl_weight weight, const double *first)
 {
-    ::mckl::cast(weight).set_log(first, stride);
+    ::mckl::cast(weight).set_log(first);
 }
 
-void mckl_weight_add_log(
-    mckl_weight weight, const double *first, size_t stride)
+void mckl_weight_add_log(mckl_weight weight, const double *first)
 {
-    ::mckl::cast(weight).add_log(first, stride);
+    ::mckl::cast(weight).add_log(first);
 }
 
 #ifdef MCKL_RNG_DEFINE_MACRO
