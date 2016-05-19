@@ -143,8 +143,14 @@ inline bool is_nullptr(T, std::false_type)
 template <typename T>
 inline bool is_nullptr(T ptr)
 {
-    return is_nullptr(ptr, std::is_pointer<T>());
+    return is_nullptr(
+        ptr, std::integral_constant<
+                 bool, (std::is_pointer<T>::value ||
+                           std::is_same<std::nullptr_t,
+                               typename std::remove_cv<T>::type>::value)>());
 }
+
+inline bool is_nullptr(std::nullptr_t) { return true; }
 
 template <unsigned long long U,
     int N = std::numeric_limits<unsigned long long>::digits - 1>
