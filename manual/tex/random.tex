@@ -61,6 +61,22 @@ Depending on the type of \verb|rng| and the distribution (including its
 parameters), the vectorized version may have superior performance. However, the
 results will not be exactly the same as using a loop.
 
+For consistency, the library also defines the function \verb|rand| for
+generating only one random number,
+\begin{Verbatim}
+  rand(rng);               // rng();
+  rand(rng, distribution); // distribution(rng);
+\end{Verbatim}
+And each \rng engine and distribution generator also has methods for vectorized
+generating,
+\begin{Verbatim}
+  rng(n, r);               // rand(rng, n, r);
+  distribution(rng, n, r); // rand(rng, distribution, n, r);
+\end{Verbatim}
+To write generic functions, it is recommended to use the function \verb|rand|
+instead of the member methods, since the former also works with classes not
+defined by this library, such as those in the standard library.
+
 \subsection{Performance measurement}
 \label{sub:Performance measurement}
 
@@ -303,7 +319,8 @@ The corresponding \rng engine is,
       std::size_t Rounds,
       std::size_t Blocks>
   using AESNIEngine = CounterEngine<
-          ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
+          ResultType,
+          AESNIGenerator<KeySeqType, Rounds, Blocks>>;
 \end{Verbatim}
 where \verb|KeySeqType| is the class used to generate the sequences of round
 keys. The parameter \verb|Rounds| is the number of rounds of \aes encryption to
@@ -553,7 +570,10 @@ platforms. The library also defines two type aliases \verb|RNG| and
 \verb|RNG_64|, which are one of the \rng{}s listed in
 Table~\ref{tab:Counter-based RNG}. The preference is in the order listed in
 Table~\ref{tab:Default RNG}. The user can define the configuration macro
-\verb|MCKL_RNG_TYPE| to override the choice made by the library.
+\verb|MCKL_RNG_TYPE| to override the choice of \verb|RNG| made by the library.
+Similarly, the \verb|MCKL_RNG_64_TYPE| macro can be used to override the choice
+of \verb|RNG_64|. These \rng engines are meant for general purpose usage. They
+have reasonable long period and large key space.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}
@@ -569,6 +589,12 @@ Table~\ref{tab:Default RNG}. The user can define the configuration macro
   \caption{Default \protect\rng}
   \label{tab:Default RNG}
 \end{table}
+
+The library also defines two type aliases \verb|RNGMini| and \verb|RNGMini_64|,
+which have the smallest state size among all \rng engines defined by the
+library. By default they are \verb|Philox2x32| and \verb|Philox2x32_64|. The
+choice can be overridden by configuration macros \verb|MCKL_RNG_MINI_TYPE| and
+\verb|MCKL_RNG_MINI_64_TYPE|, respectively.
 
 \subsection{Seeding counter-based \protect\rng}
 \label{sub:Seeding counter-based RNG}
@@ -746,7 +772,7 @@ parallelization.
       }
 
       private:
-      Vector<RNGType> rng_;
+      std::vector<RNGType> rng_;
   };
 
   class T
@@ -859,7 +885,7 @@ $U$ and the output random real numbers as $X$.
   \label{tab:Intermediate integer types of uniform distributions}
 \end{table}
 
-\paragraph{\texttt{U01CCDistribution}}
+\subsubsection{\texttt{U01CCDistribution}}
 
 This distribution produce random real numbers on $[0, 1]$, with the lower and
 upper bounds inclusive. The specific algorithm is as the following,
@@ -874,7 +900,7 @@ upper bounds inclusive. The specific algorithm is as the following,
 \end{align*}
 The minimum and maximum are $0$ and $1$, respectively.
 
-\paragraph{\texttt{U01CODistribution}}
+\subsubsection{\texttt{U01CODistribution}}
 
 This distribution produce random real numbers on $[0, 1)$, with the lower bound
 inclusive and the upper bound never produced. The specific algorithm is as the
@@ -886,7 +912,7 @@ following,
 \end{align*}
 The minimum and maximum are $0$ and $1 - 2^{-P}$, respectively.
 
-\paragraph{\texttt{U01OCDistribution}}
+\subsubsection{\texttt{U01OCDistribution}}
 
 This distribution produce random real numbers on $(0, 1]$, with the upper bound
 inclusive and the lower bound never produced. The specific algorithm is as the
@@ -898,7 +924,7 @@ following,
 \end{align*}
 The minimum and maximum are $2^{-P}$ and $1$, respectively.
 
-\paragraph{\texttt{U01OODistribution}}
+\subsubsection{\texttt{U01OODistribution}}
 
 This distribution produce random real numbers on $(0, 1)$, with the lower and
 upper bounds never produced. The specific algorithm is as the following,
@@ -909,7 +935,7 @@ upper bounds never produced. The specific algorithm is as the following,
 \end{align*}
 The minimum and maximum are $2^{-P}$ and $1 - 2^{-P}$, respectively.
 
-\paragraph{\texttt{U01Distribution}}
+\subsubsection{\texttt{U01Distribution}}
 
 It is now clear that the above four distributions actually produce ``fixed
 point'' instead of ``floating point'' numbers. The output $X$ can be
@@ -965,118 +991,52 @@ this section, we shortened the class name for brevity. For example, in the
 table the Cauchy distribution is listed as \verb|Cauchy| while the full
 declaration of the class template is,
 \begin{Verbatim}
-  template <typename RealType>
+  template <typename RealType = double>
   class CauchyDistribution;
 \end{Verbatim}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{lllL}
+  \begin{tabularx}{\textwidth}{llL}
     \toprule
-    Distribution & Parameters & Support & \cdf \\
+    Distribution & Parameters & Distribution function \\
     \midrule
-    \verb|Cauchy| & \verb|a|, \verb|b| & $(-\infty,\infty)$ &
-    $\frac{1}{\pi}\arctan\Round[Big]{\frac{x - a}{b}} + \frac{1}{2}$ \\
-    \verb|Exponential| & \verb|lambda| & $[0,\infty)$ &
-    $1 - \EE^{-\lambda x}$ \\
-    \verb|ExtremeValue| &\verb|a|, \verb|b| & $(-\infty,\infty)$ &
-    $\exp\Curly[Big]{-\exp\Round[Big]{-\frac{x - a}{b}}}$ \\
-    \verb|Laplace| & \verb|a|, \verb|b| & $(-\infty,\infty)$ &
-    $\frac{1}{2} + \frac{1}{2}\mathrm{sgn}(x - a)\Round[Big]{1 -
+    \verb|Cauchy| & \verb|a|, \verb|b|
+    & $\frac{1}{\pi}\arctan\Round[Big]{\frac{x - a}{b}} + \frac{1}{2}$ \\
+    \verb|Exponential| & \verb|lambda|
+    & $1 - \EE^{-\lambda x}$ \\
+    \verb|ExtremeValue| &\verb|a|, \verb|b|
+    & $\exp\Curly[Big]{-\exp\Round[Big]{-\frac{x - a}{b}}}$ \\
+    \verb|Laplace| & \verb|a|, \verb|b|
+    & $\frac{1}{2} + \frac{1}{2}\mathrm{sgn}(x - a)\Round[Big]{1 -
       \exp\Curly[Big]{-\frac{\Abs{x - a}}{b}}}$ \\
-    \verb|Logistic| & \verb|a|, \verb|b| & $(-\infty,\infty)$ &
-    $\Round[Big]{1 + \exp\Curly[Big]{-\frac{x - a}{b}}}^{-1}$ \\
-    \verb|Pareto| & \verb|a|, \verb|b| & $[a, \infty)$ &
-    $1 - \Round[Big]{\frac{b}{x}}^a$ \\
-    \verb|Rayleigh| & \verb|sigma| & $[0, \infty)$ &
-    $1 - \exp\Curly[Big]{-\frac{x^2}{2\sigma^2}}$ \\
-    \verb|UniformReal| & \verb|a|, \verb|b| & $[a, b)$ &
-    $\frac{x - a}{b - a}$ \\
-    \verb|Weibull| & \verb|a|, \verb|b| & $[0, \infty)$ &
-    $1 - \exp\Curly[Big]{-\Round[Big]{\frac{x}{b}}^a}$ \\
+    \verb|Logistic| & \verb|a|, \verb|b|
+    & $\Round[Big]{1 + \exp\Curly[Big]{-\frac{x - a}{b}}}^{-1}$ \\
+    \verb|Pareto| & \verb|a|, \verb|b|
+    & $1 - \Round[Big]{\frac{b}{x}}^a$ \\
+    \verb|Rayleigh| & \verb|sigma|
+    & $1 - \exp\Curly[Big]{-\frac{x^2}{2\sigma^2}}$ \\
+    \verb|UniformReal| & \verb|a|, \verb|b|
+    & $\frac{x - a}{b - a}$ \\
+    \verb|Weibull| & \verb|a|, \verb|b|
+    & $1 - \exp\Curly[Big]{-\Round[Big]{\frac{x}{b}}^a}$ \\
     \bottomrule
   \end{tabularx}
   \caption{Distributions using the inverse method}
   \label{tab:Distributions using the inverse method}
 \end{table}
 
-\subsection{Normal and related distribution}
-\label{sub:Normal and related distribuiton}
-
-The class template
-\begin{Verbatim}
-  template <typename RealType>
-  class NormalDistribution;
-\end{Verbatim}
-implements the Normal distribution with \pdf,
-\begin{equation*}
-  f(x) =
-  \frac{1}{\sqrt{2\pi\sigma^2}}\exp\Curly[Big]{-\frac{(x-\mu)^2}{2\sigma^2}},
-\end{equation*}
-using the Box-Muller method \parencite{Box:1958hv}. It is also used to
-implement the Log-Normal distribution, $X = \EE^{m + s Z}$, where $Z$ follows
-the standard Normal distribution,
-\begin{Verbatim}
-  template <typename RealType>
-  class LognormalDistribution;
-\end{Verbatim}
-and the Levy distribution, $X = a + b / Z^2$,
-\begin{Verbatim}
-  template <typename RealType>
-  class LevyDistribution;
-\end{Verbatim}
-The performance data of these distributions is in Table~\appref{tab:Performance
-  of Normal and related distributions}.
-
-\paragraph{Multivariate Normal distribution}
-
-\subsection{Gamma and related distribution}
-\label{sub:Gamma and related distribution}
-
-The class template
-\begin{Verbatim}
-  template <typename RealType>
-  class GammaDistribution;
-\end{Verbatim}
-implements the Gamma distribution with \pdf,
-\begin{equation*}
-  f(x) = \frac{\EE^{-x/\beta}}{\Gamma(\alpha)}\beta^{-\alpha}x^{\alpha-1}.
-\end{equation*}
-The specific algorithm used depends on the parameters. If $\alpha = 1$, it
-becomes the exponential distribution. If $0 < \alpha < 0.6$, it is generated
-through transformation of exponential power distribution
-\parencite[sec~2.6]{Devroye:1986gi}. If $0.6\le\alpha<1$, then rejection method
-from the Weibull distribution is used \parencite[sec.~3.4]{Devroye:1986gi}. If
-$\alpha > 1$, then the method in \textcite{Marsaglia:2000vq} is used. There are
-three related distributions,
-\begin{Verbatim}
-  template <typename RealType>
-  class ChiSquaredDistribution;
-
-  template <typename RealType>
-  class FisherFDistribution;
-
-  template <typename RealType>
-  class StudentTDistribution;
-\end{Verbatim}
-They implement the $\chi^2$-distribution, the Fisher's $F$-distribution, and
-the Student's $t$-distribution, respectively. The performance data of these
-distributions, for different parameters are in Tables~\appref{tab:Performance
-  of Gamma distribution} to~\appref{tab:Performance of Student's
-  t-distribution}.
-
-\paragraph{Dirichlet distribution}
-
 \subsection{Beta distribution}
 \label{sub:Beta distribution}
 
 The class template
 \begin{Verbatim}
-  template <typename RealType>
+  template <typename RealType = double>
   class BetaDistribution;
 \end{Verbatim}
 implements the Beta distribution with \pdf,
 \begin{equation*}
-  f(x) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}
+  f(x;\alpha,\beta) =
+  \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}
   x^{\alpha - 1}(1 - x)^{\beta - 1}
 \end{equation*}
 The specific algorithm used depends on the parameters. If $\alpha = 1/2$ and
@@ -1089,3 +1049,170 @@ switching algorithms in \textcite{Atkinson:1979es} is used. Note that, there is
 no vectorized implementation at the moment for the switching algorithms. In
 other cases, the vectorized generating shall provide considerable speedup. The
 performance data is in Table~\appref{tab:Performance of Beta distribution}
+
+\subsection{Normal and related distribution}
+\label{sub:Normal and related distribuiton}
+
+The class template
+\begin{Verbatim}
+  template <typename RealType = double>
+  class NormalDistribution;
+\end{Verbatim}
+implements the Normal distribution with \pdf,
+\begin{equation*}
+  f(x;\mu,\sigma) =
+  \frac{1}{\sqrt{2\pi\sigma^2}}\exp\Curly[Big]{-\frac{(x-\mu)^2}{2\sigma^2}},
+\end{equation*}
+using the Box-Muller method \parencite{Box:1958hv}. It is also used to
+implement the Log-Normal distribution, $X = \EE^{m + s Z}$, where $Z$ follows
+the standard Normal distribution,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class LognormalDistribution;
+\end{Verbatim}
+and the Levy distribution, $X = a + b / Z^2$,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class LevyDistribution;
+\end{Verbatim}
+The performance data of these distributions is in Table~\appref{tab:Performance
+  of Normal and related distributions}.
+
+\subsubsection{Multivariate Normal distribution}
+
+The library implements the multivariate Normal distribution with \pdf,
+\begin{equation*}
+  f(x_{1:d};\mu_{1:d},\Sigma) = \frac{1}{\sqrt{(2\pi)^d\Abs{\Sigma}}}
+  \exp\Curly[Big]{-\frac{1}{2}
+    (x_{1:d} - \mu_{1:d})^{\transpose}\Sigma^{-1}(x_{1:d} - \mu_{1:d})}
+\end{equation*}
+where $\mu_{1:d}$ is the mean vector and $\Sigma$ is covariance matrix, through
+the class template,
+\begin{Verbatim}
+  template <
+      typename RealType = double,
+      std::size_t Dim = Dynamic>
+  class NormalMVDistribution;
+\end{Verbatim}
+At the time of writing, only \verb|float| and \verb|double| are supported types
+for the template parameter \verb|RealType|. The second template parameter
+\verb|Dim| specify the dimension of the distribution, $d$. If \verb|Dim| is
+positive, then the dimension is fixed and the distribution generated can be
+constructed by,
+\begin{Verbatim}
+  NormalMVDistribution<double, Dim> normal_mv(mean, chol);
+\end{Verbatim}
+Otherwise, if \verb|Dim| is zero (recall that \verb|Dynamic| is just an
+enumerator with value zero), then the dimension has to be specified at runtime.
+The distribution generator can be constructed by,
+\begin{Verbatim}
+  NormalMVDistribution<double> normal_mv(d, mean, chol);
+\end{Verbatim}
+In either case, the parameter \verb|mean| is a pointer to the mean vector of
+length $d$, and \verb|chol| is a pointer to the lower triangular of the
+Cholesky decomposition of the covariance matrix packed row by row. For those
+unfamiliar with matrix storage schemes, this means that, \verb|chol| is a
+vector of length $p(p+1)/2$. Let $L$ be the lower triangular of the Cholesky
+decomposition, that is $LL^{\transpose} = \Sigma$, then the elements within the
+vector are $(L_{1,1},L_{2,1},L_{2,2},\dots,L_{d,d})^{\transpose}$.
+
+Further, both \verb|mean| and \verb|chol| can also be scalars instead of
+pointers to vectors. If \verb|mean| is a scalar, say $\mu$, then the mean
+vector is assumed to be a $d$-vector with all elements equal to $\mu$. If
+\verb|chol| is a scalar, say $\sigma$, then it is assumed that $L = \sigma I_d$
+and thus the covariance matrix is $\Sigma = \sigma^2 I_d$, where $I_d$ is the
+identity matrix.
+
+Allowing both scalars and vectors provides some flexibility. However, care need
+to be taken when the scalars are integers. For example,
+\begin{Verbatim}
+  NormalMVDistribution<double> normal_mv(d, 0, chol);
+\end{Verbatim}
+will result in compile-time error because the second argument can be converted
+to either a null pointer or a scalar of type \verb|double|. In this case, the
+compiler won't be able to determine which overloaded constructor should be
+used. The correct way is,
+\begin{Verbatim}
+  NormalMVDistribution<double> normal_mv(d, 0.0, chol);
+\end{Verbatim}
+To generate a single multivariate Normal random number, call,
+\begin{Verbatim}
+  normal_mv(rng, r);
+\end{Verbatim}
+where the output parameter \verb|r| is a pointer to an $d$-vector. Vectorized
+generating is also possible. For example,
+\begin{Verbatim}
+  rand(rng, normal_mv, n, r);
+\end{Verbatim}
+where the output parameter \verb|r| is a pointer to an $n$ by $d$ matrix of row
+major order.
+
+\subsection{Gamma and related distribution}
+\label{sub:Gamma and related distribution}
+
+The class template
+\begin{Verbatim}
+  template <typename RealType = double>
+  class GammaDistribution;
+\end{Verbatim}
+implements the Gamma distribution with \pdf,
+\begin{equation*}
+  f(x;\alpha,\beta) =
+  \frac{\EE^{-x/\beta}}{\Gamma(\alpha)}\beta^{-\alpha}x^{\alpha-1}.
+\end{equation*}
+The specific algorithm used depends on the parameters. If $\alpha = 1$, it
+becomes the exponential distribution. If $0 < \alpha < 0.6$, it is generated
+through transformation of exponential power distribution
+\parencite[sec~2.6]{Devroye:1986gi}. If $0.6\le\alpha<1$, then rejection method
+from the Weibull distribution is used \parencite[sec.~3.4]{Devroye:1986gi}. If
+$\alpha > 1$, then the method in \textcite{Marsaglia:2000vq} is used. There are
+three related distributions,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class ChiSquaredDistribution;
+
+  template <typename RealType = double>
+  class FisherFDistribution;
+
+  template <typename RealType = double>
+  class StudentTDistribution;
+\end{Verbatim}
+They implement the $\chi^2$-distribution, the Fisher's $F$-distribution, and
+the Student's $t$-distribution, respectively. The performance data of these
+distributions, for different parameters are in Tables~\appref{tab:Performance
+  of Gamma distribution} to~\appref{tab:Performance of Student's
+  t-distribution}.
+
+\subsubsection{Dirichlet distribution}
+
+The library implements the Dirichlet distribution, with \pdf,
+\begin{equation*}
+  f(x_{1:d};\alpha_{1:d}) = \frac{1}{\mathrm{B}(\alpha_{1:d})}
+  \prod_{i=1}^d x_i^{\alpha_i - 1}
+\end{equation*}
+where
+\begin{equation*}
+  \mathrm{B}(\alpha_{1:d}) =
+  \frac{\prod_{i=1}^d\Gamma(\alpha_i)}
+  {\Gamma\Round[Big]{\sum_{i=1}^d\alpha_i}}
+\end{equation*}
+through the class template,
+\begin{Verbatim}
+  template <
+      typename RealType = double,
+      std::size_t Dim = Dynamic>
+  class DirichletDistribution;
+\end{Verbatim}
+Similar to \verb|NormalMVDistribution|, the template parameter \verb|Dim| is
+the dimension of the distribution. If it is positive, the distribution
+generator can be constructed by,
+\begin{Verbatim}
+  DirichletDistribution<double, Dim> dirichlet(alpha);
+\end{Verbatim}
+and if it is zero, it can be constructed by,
+\begin{Verbatim}
+  DirichletDistribution<double> dirichlet(dim, alpha);
+\end{Verbatim}
+Also similar to \verb|NormalMVDistribution|, the parameter \verb|alpha| can be
+either a pointer to a $d$-vector or a scalar. The methods of generating one or
+multiple random numbers is also similar to that of \verb|NormalMVDistribution|.
