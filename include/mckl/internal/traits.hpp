@@ -162,48 +162,6 @@
     template <typename T>                                                     \
     using Outer = typename Outer##Trait<T>::type;
 
-#define MCKL_DEFINE_METHOD_CHECKER(name, RT, Args)                            \
-    template <typename U>                                                     \
-    class has_##name##_impl_                                                  \
-    {                                                                         \
-        class char2                                                           \
-        {                                                                     \
-            char c1;                                                          \
-            char c2;                                                          \
-        };                                                                    \
-                                                                              \
-        template <typename V, RT(V::*) Args>                                  \
-        class sfinae_;                                                        \
-                                                                              \
-        template <typename V, RT(V::*) Args const>                            \
-        class sfinae_const_;                                                  \
-                                                                              \
-        template <typename V, RT(*) Args>                                     \
-        class sfinae_static_;                                                 \
-                                                                              \
-        template <typename V>                                                 \
-        static char test(sfinae_<V, &V::name> *);                             \
-                                                                              \
-        template <typename V>                                                 \
-        static char test(sfinae_const_<V, &V::name> *);                       \
-                                                                              \
-        template <typename V>                                                 \
-        static char test(sfinae_static_<V, &V::name> *);                      \
-                                                                              \
-        template <typename V>                                                 \
-        static char2 test(...);                                               \
-                                                                              \
-        public:                                                               \
-        static constexpr bool value =                                         \
-            sizeof(test<U>(nullptr)) == sizeof(char);                         \
-    };                                                                        \
-                                                                              \
-    template <typename U>                                                     \
-    class has_##name##_                                                       \
-        : public std::integral_constant<bool, has_##name##_impl_<U>::value>   \
-    {                                                                         \
-    }; // class has_##name##_
-
 namespace mckl
 {
 
