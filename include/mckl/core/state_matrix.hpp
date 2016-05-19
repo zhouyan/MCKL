@@ -43,11 +43,10 @@ namespace internal
 template <std::size_t Dim>
 class StateMatrixDim
 {
-    public:
-    static constexpr std::size_t dim() { return Dim; }
-
     protected:
     void swap(StateMatrixDim<Dim> &) noexcept {}
+
+    std::size_t get_dim() const { return Dim; }
 
     static void set_dim(std::size_t) {}
 }; // class StateMatrixDim
@@ -55,16 +54,15 @@ class StateMatrixDim
 template <>
 class StateMatrixDim<Dynamic>
 {
-    public:
+    protected:
     StateMatrixDim() : dim_(0) {}
 
-    std::size_t dim() const { return dim_; }
-
-    protected:
     void swap(StateMatrixDim<Dynamic> &other) noexcept
     {
         std::swap(dim_, other.dim_);
     }
+
+    std::size_t get_dim() const { return dim_; }
 
     void set_dim(std::size_t dim) { dim_ = dim; }
 
@@ -94,18 +92,33 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
         {
         }
 
+        /// \brief `this->particle().state().dim()`
         std::size_t dim() const { return this->particle().state().dim(); }
 
+        /// \brief `this->particle().state().row_stride()`
+        size_type stride() const
+        {
+            return this->particle().state().row_stride();
+        }
+
+        /// \brief `this->particle().state().row_data(this->i())`
+        value_type *data() const
+        {
+            return this->particle().state().row_data(this->i());
+        }
+
+        /// \brief `this->particle().state()(this->i(), j)`
         value_type &operator()(size_type j) const
         {
             return this->particle().state()(
                 static_cast<size_type>(this->i()), j);
         }
 
+        /// \brief `this->particle().state().at(this->i(), j)`
         value_type &at(size_type j) const
         {
             runtime_assert(
-                j < this->dim(), "**StateMatrix::at** index out of range");
+                j < dim(), "**StateMatrix::at** index out of range");
 
             return operator()(j);
         }
@@ -114,24 +127,37 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     /// \brief The numbrer of particles
     size_type size() const { return size_; }
 
-    /// \brief Reserve space for specified number of particles
-    void reserve(size_type N) { data_.reserve(N * this->dim()); }
+    /// \brief The dimension
+    size_type dim() const { return this->get_dim(); }
 
-    /// \brief Reserve space for specified number of particles and dimensions
+    /// \brief Synonym of `dim()`
+    size_type row_size() const { return dim(); }
+
+    /// \brief Synonym of `size()`
+    size_type col_size() const { return size(); }
+
+    /// \brief Reserve space for specified sample size
+    void reserve(size_type N) { reserve(N, dim()); }
+
+    /// \brief Reserve space for specified sample size and dimension
     ///
     /// \details
-    /// `dim` is ignored if `Dim > 0`.
+    /// `dim` is ignored unless `Dim == Dynamic`.
     void reserve(size_type N, size_type dim)
     {
         data_.reserve(N * (Dim == Dynamic ? dim : this->dim()));
     }
 
+    /// \brief Release memory no longer needed
     void shrink_to_fit() { data_.shrink_to_fit(); }
 
+    /// \brief Pointer to the upper left corner of the matrix
     value_type *data() { return data_.data(); }
 
+    /// \brief Pointer to the upper left corner of the matrix
     const value_type *data() const { return data_.data(); }
 
+    /// \brief Swap two StateMatrix objects
     void swap(StateMatrixBase<Layout, Dim, T> &other) noexcept
     {
         internal::StateMatrixDim<Dim>::swap(other);
@@ -197,7 +223,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     Vector<T> data_;
 }; // class StateMatrixBase
 
-/// \brief Swap two StateMatrixBase objects
+/// \brief Swap two StateMatrix objects
 /// \ingroup Core
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 inline void swap(StateMatrixBase<Layout, Dim, T> &state1,
@@ -217,12 +243,18 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     using value_type = typename state_matrix_base_type::value_type;
     using pack_type = typename state_matrix_base_type::pack_type;
 
+    /// \brief Construct a matrix with `N` rows and `Dim` columns
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
+    /// \brief Construct a matrix with `N` rows and `dim` columns, only usable
+    /// when `Dim == Dynamic`
     StateMatrix(size_type N, size_type dim) : state_matrix_base_type(N, dim) {}
 
+    /// \brief Change the sample size
     void resize(size_type N) { resize_both(N, this->dim()); }
 
+    /// \brief Change the sample size and dimension, only usable when `Dim ==
+    /// Dynamic`
     void resize(size_type N, size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
@@ -231,6 +263,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         resize_both(N, dim);
     }
 
+    /// \brief Change the dimension, only usable when `Dim == Dynamic`
     void resize_dim(size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
@@ -239,17 +272,20 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         resize_both(this->size(), dim);
     }
 
-    T &operator()(size_type i, size_type j)
+    /// \brief The element at row `i` and column `j`
+    value_type &operator()(size_type i, size_type j)
     {
         return this->data()[i * this->dim() + j];
     }
 
-    const T &operator()(size_type i, size_type j) const
+    /// \brief The element at row `i` and column `j`
+    const value_type &operator()(size_type i, size_type j) const
     {
         return this->data()[i * this->dim() + j];
     }
 
-    T &at(size_type i, size_type j)
+    /// \brief The element at row `i` and column `j`, with assertion
+    value_type &at(size_type i, size_type j)
     {
         runtime_assert(i < this->size() && j < this->dim(),
             "**StateMatrix::at** index out of range");
@@ -257,12 +293,98 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         return operator()(i, j);
     }
 
-    const T &at(size_type i, size_type j) const
+    /// \brief The element at row `i` and column `j`, with assertion
+    const value_type &at(size_type i, size_type j) const
     {
         runtime_assert(i < this->size() && j < this->dim(),
             "**StateMatrix::at** index out of range");
 
         return operator()(i, j);
+    }
+
+    /// \brief The stride size of row-wise access
+    ///
+    /// \details
+    /// To iterate over a specific row `i`,
+    /// ~~~{.cpp}
+    /// auto stride = state.row_stride();
+    /// auto data = state.row_data(i);
+    /// auto size = state.row_size(); // or state.dim();
+    /// for (j = 0; j != size; ++j, data += stride)
+    ///     /* *data is the same as state(i, j) */;
+    /// ~~~
+    size_type row_stride() const { return 1; }
+
+    /// \brief Pointer to the beginning of a row
+    value_type *row_data(size_type i)
+    {
+        return this->data() + i * this->dim();
+    }
+
+    /// \brief Pointer to the beginning of a row
+    const value_type *row_data(size_type i) const
+    {
+        return this->data() + i * this->dim();
+    }
+
+    /// \brief The stride size of column-wise access
+    ///
+    /// \details
+    /// To iterate over a specific column `j`,
+    /// ~~~{.cpp}
+    /// auto stride = state.col_stride();
+    /// auto data = state.col_data(j);
+    /// auto size = state.col_size(); // or state.size();
+    /// for (i = 0; i != size; ++i, data += stride)
+    ///     /* *data is the same as state(i, j); */;
+    /// ~~~
+    size_type col_stride() const { return this->dim(); }
+
+    /// \brief Pointer to the beginning of a column
+    value_type *col_data(size_type j) { return this->data() + j; }
+
+    /// \brief Pointer to the beginning of a column
+    const value_type *col_data(size_type j) const { return this->data() + j; }
+
+    /// \brief Select samples
+    ///
+    /// \param N The new sample size
+    /// \param index N-vector of parent index
+    ///
+    /// \details
+    /// Let \f$a_i\f$ denote the value of `index[i]`, and
+    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{\{i\}}(a_j)\f$. Then it is required
+    /// that \f$a_i = i\f$ for all \f$r_i > 0\f$.
+    template <typename IntType, typename InputIter>
+    void select(IntType N, InputIter index)
+    {
+        size_type n = static_cast<size_type>(N);
+        if (this->size() == 0 || internal::is_nullptr(index)) {
+            this->resize(n);
+            return;
+        }
+
+        if (n > this->size())
+            this->resize(n);
+        for (size_type dst = 0; dst != n; ++dst, ++index)
+            duplicate(static_cast<size_type>(*index), dst);
+        if (n < this->size())
+            this->resize(n);
+
+        return;
+    }
+
+    /// \brief Duplicate a sample
+    ///
+    /// \param src The index of sample to be duplicated
+    /// \param dst The index of sample to be eliminated
+    void duplicate(size_type src, size_type dst)
+    {
+        if (src == dst)
+            return;
+
+        duplicate_dispatch(src, dst, std::integral_constant < bool,
+            Dim == Dynamic || 8 < Dim > ());
     }
 
     template <typename OutputIter>
@@ -286,54 +408,6 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
                     *first = operator()(i, j);
 
         return first;
-    }
-
-    value_type *row_data(size_type i)
-    {
-        return this->data() + i * this->dim();
-    }
-
-    const value_type *row_data(size_type i) const
-    {
-        return this->data() + i * this->dim();
-    }
-
-    /// \brief Copy particles
-    ///
-    /// \param N The new sample size
-    /// \param index N-vector of parent index
-    ///
-    /// \details
-    /// Let \f$a_i\f$ denote the value of `index[i]`, and
-    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{\{i\}}(a_j)\f$. Then it is required
-    /// that \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always
-    /// satisfied if `index` comes from `resamle_trans_rep_index`.
-    template <typename IntType, typename InputIter>
-    void select(IntType N, InputIter index)
-    {
-        size_type n = static_cast<size_type>(N);
-        if (this->size() == 0 || internal::is_nullptr(index)) {
-            this->resize(n);
-            return;
-        }
-
-        if (n > this->size())
-            this->resize(n);
-        for (size_type dst = 0; dst != n; ++dst, ++index)
-            duplicate(static_cast<size_type>(*index), dst);
-        if (n < this->size())
-            this->resize(n);
-
-        return;
-    }
-
-    void duplicate(size_type src, size_type dst)
-    {
-        if (src == dst)
-            return;
-
-        duplicate_dispatch(src, dst, std::integral_constant < bool,
-            Dim == Dynamic || 8 < Dim > ());
     }
 
     pack_type state_pack(size_type i) const
@@ -419,12 +493,18 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     using value_type = typename state_matrix_base_type::value_type;
     using pack_type = typename state_matrix_base_type::pack_type;
 
+    /// \brief Construct a matrix with `N` rows and `Dim` columns
     explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
 
+    /// \brief Construct a matrix with `N` rows and `dim` columns, only usable
+    /// when `Dim == Dynamic`
     StateMatrix(size_type N, size_type dim) : state_matrix_base_type(N, dim) {}
 
+    /// \brief Change the sample size
     void resize(size_type N) { resize_both(N, this->dim()); }
 
+    /// \brief Change the sample size and dimension, only usable when `Dim ==
+    /// Dynamic`
     void resize(size_type N, size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
@@ -433,6 +513,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         resize_both(N, dim);
     }
 
+    /// \brief Change the dimension, only usable when `Dim == Dynamic`
     void resize_dim(size_type dim)
     {
         static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
@@ -441,56 +522,89 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         resize_both(this->size(), dim);
     }
 
-    T &operator()(size_type i, size_type j)
+    /// \brief The element at row `i` and column `j`
+    value_type &operator()(size_type i, size_type j)
     {
         return this->data()[i + j * this->size()];
     }
 
-    const T &operator()(size_type i, size_type j) const
+    /// \brief The element at row `i` and column `j`
+    const value_type &operator()(size_type i, size_type j) const
     {
         return this->data()[i + j * this->size()];
     }
 
-    template <typename OutputIter>
-    OutputIter read_state(size_type j, OutputIter first) const
+    /// \brief The element at row `i` and column `j`, with assertion
+    value_type &at(size_type i, size_type j)
     {
-        return std::copy_n(col_data(j), this->size(), first);
+        runtime_assert(i < this->size() && j < this->dim(),
+            "**StateMatrix::at** index out of range");
+
+        return operator()(i, j);
     }
 
-    template <typename OutputIter>
-    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
+    /// \brief The element at row `i` and column `j`, with assertion
+    const value_type &at(size_type i, size_type j) const
     {
-        if (layout == RowMajor)
-            for (size_type i = 0; i != this->size(); ++i)
-                for (size_type d = 0; d != this->size(); ++d, ++first)
-                    *first = operator()(i, d);
+        runtime_assert(i < this->size() && j < this->dim(),
+            "**StateMatrix::at** index out of range");
 
-        if (layout == ColMajor)
-            first = std::copy_n(this->data(), this->data_size(), first);
-
-        return first;
+        return operator()(i, j);
     }
 
+    /// \brief The stride size of row-wise access
+    ///
+    /// \details
+    /// To iterate over a specific row `i`,
+    /// ~~~{.cpp}
+    /// auto stride = state.row_stride();
+    /// auto data = state.row_data(i);
+    /// auto size = state.row_size(); // or state.dim();
+    /// for (j = 0; j != size; ++j, data += stride)
+    ///     /* *data is the same as state(i, j) */;
+    /// ~~~
+    size_type row_stride() const { return this->size(); }
+
+    /// \brief Pointer to the beginning of a row
+    value_type *row_data(size_type i) { return this->data() + i; }
+
+    /// \brief Pointer to the beginning of a row
+    const value_type *row_data(size_type i) const { return this->data() + i; }
+
+    /// \brief The stride size of column-wise access
+    ///
+    /// \details
+    /// To iterate over a specific column `j`,
+    /// ~~~{.cpp}
+    /// auto stride = state.col_stride();
+    /// auto data = state.col_data(j);
+    /// auto size = state.col_size(); // or state.size();
+    /// for (i = 0; i != size; ++i, data += stride)
+    ///     /* *data is the same as state(i, j); */;
+    /// ~~~
+    size_type col_stride() const { return 1; }
+
+    /// \brief Pointer to the beginning of a column
     value_type *col_data(size_type j)
     {
         return this->data() + j * this->size();
     }
 
+    /// \brief Pointer to the beginning of a column
     const value_type *col_data(size_type j) const
     {
         return this->data() + j * this->size();
     }
 
-    /// \brief Copy particles
+    /// \brief Select samples
     ///
     /// \param N The new sample size
     /// \param index N-vector of parent index
     ///
     /// \details
     /// Let \f$a_i\f$ denote the value of `index[i]`, and
-    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{a_j = i}\f$. Then it is required that
-    /// \f$a_i = i\f$ for all \f$r_i > 0\f$. This condition is always satisfied
-    /// if `index` comes from `resamle_trans_rep_index`.
+    /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{\{i\}}(a_j)\f$. Then it is required
+    /// that \f$a_i = i\f$ for all \f$r_i > 0\f$.
     template <typename InputIter>
     void select(size_type N, InputIter index)
     {
@@ -523,6 +637,10 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         return;
     }
 
+    /// \brief Duplicate a sample
+    ///
+    /// \param src The index of sample to be duplicated
+    /// \param dst The index of sample to be eliminated
     void duplicate(size_type src, size_type dst)
     {
         if (src == dst)
@@ -530,6 +648,26 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 
         duplicate_dispatch(src, dst, std::integral_constant < bool,
             Dim == Dynamic || 8 < Dim > ());
+    }
+
+    template <typename OutputIter>
+    OutputIter read_state(size_type j, OutputIter first) const
+    {
+        return std::copy_n(col_data(j), this->size(), first);
+    }
+
+    template <typename OutputIter>
+    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
+    {
+        if (layout == RowMajor)
+            for (size_type i = 0; i != this->size(); ++i)
+                for (size_type d = 0; d != this->size(); ++d, ++first)
+                    *first = operator()(i, d);
+
+        if (layout == ColMajor)
+            first = std::copy_n(this->data(), this->data_size(), first);
+
+        return first;
     }
 
     pack_type state_pack(size_type i) const

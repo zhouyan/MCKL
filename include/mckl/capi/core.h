@@ -112,6 +112,12 @@ size_t mckl_state_matrix_size(mckl_state_matrix state_matrix);
 /// \brief `mckl::StateMatrix::dim`
 size_t mckl_state_matrix_dim(mckl_state_matrix state_matrix);
 
+/// \brief `mckl::StateMatrix::row_size`
+size_t mckl_state_matrix_row_size(mckl_state_matrix state_matrix);
+
+/// \brief `mckl::StateMatrix::col_size`
+size_t mckl_state_matrix_col_size(mckl_state_matrix state_matrix);
+
 /// \brief `mckl::StateMatrix::resize`
 void mckl_state_matrix_resize(
     mckl_state_matrix state_matrix, size_t n, size_t dim);
@@ -125,28 +131,26 @@ void mckl_state_matrix_shrink_to_fit(mckl_state_matrix state_matrix);
 
 /// \brief `mckl::StateMatrix::state`
 double mckl_state_matrix_get(
-    mckl_state_matrix state_matrix, size_t id, size_t pos);
+    mckl_state_matrix state_matrix, size_t i, size_t j);
 
 /// \brief `mckl::StateMatrix::state`
 void mckl_state_matrix_set(
-    mckl_state_matrix state_matrix, size_t id, size_t pos, double s);
+    mckl_state_matrix state_matrix, size_t i, size_t j, double value);
 
 /// \brief `mckl::StateMatrix::data`
 double *mckl_state_matrix_data(mckl_state_matrix state_matrix);
 
-/// \brief `mckl::StateMatrix::row_data`
-double *mckl_state_matrix_row_data(mckl_state_matrix state_matrix, size_t id);
+/// \brief `mckl::StateMatrix::row_stride`
+size_t mckl_state_matrix_row_stride(mckl_state_matrix state_matrix);
 
 /// \brief `mckl::StateMatrix::row_data`
-double *state_matrix_row_data(mckl_state_matrix state_matrix, size_t id);
+double *mckl_state_matrix_row_data(mckl_state_matrix state_matrix, size_t i);
 
-/// \brief `mckl::StateMatrix::read_state`
-void mckl_state_matrix_read_state(
-    mckl_state_matrix state_matrix, size_t pos, double *first);
+/// \brief `mckl::StateMatrix::col_stride`
+size_t mckl_state_matrix_col_stride(mckl_state_matrix state_matrix);
 
-/// \brief `mckl::StateMatrix::read_state_matrix`
-void mckl_state_matrix_read_state_matrix(
-    mckl_state_matrix state_matrix, MCKLMatrixLayout layout, double *first);
+/// \brief `mckl::StateMatrix::col_data`
+double *mckl_state_matrix_col_data(mckl_state_matrix state_matrix, size_t j);
 
 /// \brief `mckl::StateMatrix::copy`
 void mckl_state_matrix_select(
@@ -155,6 +159,14 @@ void mckl_state_matrix_select(
 /// \brief `mckl::StateMatrix::duplicate`
 void mckl_state_matrix_duplicate(
     mckl_state_matrix state_matrix, size_t src, size_t dst);
+
+/// \brief `mckl::StateMatrix::read_state`
+void mckl_state_matrix_read_state(
+    mckl_state_matrix state_matrix, size_t j, double *first);
+
+/// \brief `mckl::StateMatrix::read_state_matrix`
+void mckl_state_matrix_read_state_matrix(
+    mckl_state_matrix state_matrix, MCKLMatrixLayout layout, double *first);
 
 /// @} C_API_Core_StateMatrix
 
@@ -194,10 +206,10 @@ mckl_state_matrix mckl_particle_state(mckl_particle particle);
 mckl_weight mckl_particle_weight(mckl_particle particle);
 
 /// \brief `mckl::Particle::rng`
-mckl_rng mckl_particle_rng(mckl_particle particle, size_t id);
+mckl_rng mckl_particle_rng(mckl_particle particle, size_t i);
 
 /// \brief `mckl::Particle::index`
-mckl_particle_index mckl_particle_get_index(mckl_particle particle, size_t id);
+mckl_particle_index mckl_particle_get_index(mckl_particle particle, size_t i);
 
 /// @} C_API_Core_Particle
 

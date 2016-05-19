@@ -61,6 +61,16 @@ size_t mckl_state_matrix_dim(mckl_state_matrix state_matrix)
     return ::mckl::cast(state_matrix).dim();
 }
 
+size_t mckl_state_matrix_row_size(mckl_state_matrix state_matrix)
+{
+    return ::mckl::cast(state_matrix).row_size();
+}
+
+size_t mckl_state_matrix_col_size(mckl_state_matrix state_matrix)
+{
+    return ::mckl::cast(state_matrix).col_size();
+}
+
 void mckl_state_matrix_resize(
     mckl_state_matrix state_matrix, size_t n, size_t dim)
 {
@@ -79,15 +89,15 @@ void mckl_state_matrix_shrink_to_fit(mckl_state_matrix state_matrix)
 }
 
 double mckl_state_matrix_get(
-    mckl_state_matrix state_matrix, size_t id, size_t pos)
+    mckl_state_matrix state_matrix, size_t i, size_t j)
 {
-    return ::mckl::cast(state_matrix)(id, pos);
+    return ::mckl::cast(state_matrix)(i, j);
 }
 
 void mckl_state_matrix_set(
-    mckl_state_matrix state_matrix, size_t id, size_t pos, double state)
+    mckl_state_matrix state_matrix, size_t i, size_t j, double value)
 {
-    ::mckl::cast(state_matrix)(id, pos) = state;
+    ::mckl::cast(state_matrix)(i, j) = value;
 }
 
 double *mckl_state_matrix_data(mckl_state_matrix state_matrix)
@@ -95,22 +105,24 @@ double *mckl_state_matrix_data(mckl_state_matrix state_matrix)
     return ::mckl::cast(state_matrix).data();
 }
 
-double *mckl_state_matrix_row_data(mckl_state_matrix state_matrix, size_t id)
+size_t mckl_state_matrix_row_stride(mckl_state_matrix state_matrix)
 {
-    return ::mckl::cast(state_matrix).row_data(id);
+    return ::mckl::cast(state_matrix).row_stride();
 }
 
-void mckl_state_matrix_read_state(
-    mckl_state_matrix state_matrix, size_t pos, double *first)
+double *mckl_state_matrix_row_data(mckl_state_matrix state_matrix, size_t i)
 {
-    ::mckl::cast(state_matrix).read_state(pos, first);
+    return ::mckl::cast(state_matrix).row_data(i);
 }
 
-void mckl_state_matrix_read_state_matrix(
-    mckl_state_matrix state_matrix, MCKLMatrixLayout layout, double *first)
+size_t mckl_state_matrix_col_stride(mckl_state_matrix state_matrix)
 {
-    ::mckl::cast(state_matrix)
-        .read_state_matrix(static_cast<::mckl::MatrixLayout>(layout), first);
+    return ::mckl::cast(state_matrix).col_stride();
+}
+
+double *mckl_state_matrix_col_data(mckl_state_matrix state_matrix, size_t j)
+{
+    return ::mckl::cast(state_matrix).col_data(j);
 }
 
 void mckl_state_matrix_select(
@@ -123,6 +135,19 @@ void mckl_state_matrix_duplicate(
     mckl_state_matrix state_matrix, size_t src, size_t dst)
 {
     ::mckl::cast(state_matrix).duplicate(src, dst);
+}
+
+void mckl_state_matrix_read_state(
+    mckl_state_matrix state_matrix, size_t j, double *first)
+{
+    ::mckl::cast(state_matrix).read_state(j, first);
+}
+
+void mckl_state_matrix_read_state_matrix(
+    mckl_state_matrix state_matrix, MCKLMatrixLayout layout, double *first)
+{
+    ::mckl::cast(state_matrix)
+        .read_state_matrix(static_cast<::mckl::MatrixLayout>(layout), first);
 }
 
 } // extern "C"
