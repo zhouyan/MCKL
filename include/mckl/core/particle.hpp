@@ -432,15 +432,15 @@ class Particle
     const rng_set_type &rng_set() const { return rng_set_; }
 
     /// \brief Get an (parallel) RNG stream for a given particle
-    rng_type &rng(size_type id)
+    rng_type &rng(size_type i)
     {
-        return rng_set_[static_cast<std::size_t>(id)];
+        return rng_set_[static_cast<std::size_t>(i)];
     }
 
     /// \brief Get an (parallel) RNG stream for a given particle
-    const rng_type &rng(size_type id) const
+    const rng_type &rng(size_type i) const
     {
-        return rng_set_[static_cast<std::size_t>(id)];
+        return rng_set_[static_cast<std::size_t>(i)];
     }
 
     /// \brief Get the (sequential) RNG used stream for resampling
@@ -450,7 +450,7 @@ class Particle
     const rng_type &rng() const { return rng_; }
 
     /// \brief Get a ParticleIndex<T> object
-    ParticleIndex<T> index(size_type id) { return ParticleIndex<T>(id, this); }
+    ParticleIndex<T> index(size_type i) { return ParticleIndex<T>(i, this); }
 
     /// \brief Get a ParticleIndex<T> object for the first particle
     ParticleIndex<T> begin() { return index(0); }
