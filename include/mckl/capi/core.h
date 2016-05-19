@@ -66,7 +66,7 @@ void mckl_weight_shrink_to_fit(mckl_weight weight);
 double mckl_weight_ess(mckl_weight weight);
 
 /// \brief `mckl::Weight::read_weight`
-void mckl_weight_read_weight(mckl_weight weight, double *first, int stride);
+void mckl_weight_read_weight(mckl_weight weight, double *first, size_t stride);
 
 /// \brief `mckl::Weight::data`
 const double *mckl_weight_data(mckl_weight weight);
@@ -75,16 +75,18 @@ const double *mckl_weight_data(mckl_weight weight);
 void mckl_weight_set_equal(mckl_weight weight);
 
 /// \brief `mckl::Weight::set`
-void mckl_weight_set(mckl_weight weight, const double *first, int stride);
+void mckl_weight_set(mckl_weight weight, const double *first, size_t stride);
 
 /// \brief `mckl::Weight::mul`
-void mckl_weight_mul(mckl_weight weight, const double *first, int stride);
+void mckl_weight_mul(mckl_weight weight, const double *first, size_t stride);
 
 /// \brief `mckl::Weight::set_log`
-void mckl_weight_set_log(mckl_weight weight, const double *first, int stride);
+void mckl_weight_set_log(
+    mckl_weight weight, const double *first, size_t stride);
 
 /// \brief `mckl::Weight::add_log`
-void mckl_weight_add_log(mckl_weight weight, const double *first, int stride);
+void mckl_weight_add_log(
+    mckl_weight weight, const double *first, size_t stride);
 
 /// \brief `mckl::Weight::draw`
 size_t mckl_weight_draw(mckl_weight weight, mckl_rng rng);

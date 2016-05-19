@@ -73,7 +73,7 @@ double mckl_weight_ess(mckl_weight weight)
     return ::mckl::cast(weight).ess();
 }
 
-void mckl_weight_read_weight(mckl_weight weight, double *first, int stride)
+void mckl_weight_read_weight(mckl_weight weight, double *first, size_t stride)
 {
     ::mckl::cast(weight).read_weight(first, stride);
 }
@@ -88,22 +88,24 @@ void mckl_weight_set_equal(mckl_weight weight)
     ::mckl::cast(weight).set_equal();
 }
 
-void mckl_weight_set(mckl_weight weight, const double *first, int stride)
+void mckl_weight_set(mckl_weight weight, const double *first, size_t stride)
 {
     ::mckl::cast(weight).set(first, stride);
 }
 
-void mckl_weight_mul(mckl_weight weight, const double *first, int stride)
+void mckl_weight_mul(mckl_weight weight, const double *first, size_t stride)
 {
     ::mckl::cast(weight).mul(first, stride);
 }
 
-void mckl_weight_set_log(mckl_weight weight, const double *first, int stride)
+void mckl_weight_set_log(
+    mckl_weight weight, const double *first, size_t stride)
 {
     ::mckl::cast(weight).set_log(first, stride);
 }
 
-void mckl_weight_add_log(mckl_weight weight, const double *first, int stride)
+void mckl_weight_add_log(
+    mckl_weight weight, const double *first, size_t stride)
 {
     ::mckl::cast(weight).add_log(first, stride);
 }

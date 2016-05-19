@@ -84,7 +84,7 @@ class Weight
 
     /// \brief Read all normalized weights to a random access iterator
     template <typename RandomIter>
-    RandomIter read_weight(RandomIter first, int stride) const
+    RandomIter read_weight(RandomIter first, size_type stride) const
     {
         for (std::size_t i = 0; i != size(); ++i, first += stride)
             *first = data_[i];
@@ -109,7 +109,7 @@ class Weight
 
     /// \brief Set \f$W_i \propto w_i\f$
     template <typename RandomIter>
-    void set(RandomIter first, int stride)
+    void set(RandomIter first, size_type stride)
     {
         if (stride == 1) {
             set(first);
@@ -142,7 +142,7 @@ class Weight
 
     /// \brief Set \f$W_i \propto W_i w_i\f$
     template <typename RandomIter>
-    void mul(RandomIter first, int stride)
+    void mul(RandomIter first, size_type stride)
     {
         if (stride == 1) {
             mul(first);
@@ -164,7 +164,7 @@ class Weight
 
     /// \brief Set \f$\log W_i = v_i + \mathrm{const.}\f$
     template <typename RandomIter>
-    void set_log(RandomIter first, int stride)
+    void set_log(RandomIter first, size_type stride)
     {
         if (stride == 1) {
             set_log(first);
@@ -199,7 +199,7 @@ class Weight
 
     /// \brief Set \f$\log W_i = \log W_i + v_i + \mathrm{const.}\f$
     template <typename RandomIter>
-    void add_log(RandomIter first, int stride)
+    void add_log(RandomIter first, size_type stride)
     {
         if (stride == 1) {
             add_log(first);
