@@ -137,17 +137,23 @@ void mckl_state_matrix_duplicate(
     ::mckl::cast(state_matrix).duplicate(src, dst);
 }
 
-void mckl_state_matrix_read_state(
-    mckl_state_matrix state_matrix, size_t j, double *first)
+void mckl_state_matrix_read_row(
+    mckl_state_matrix state_matrix, size_t i, double *first)
 {
-    ::mckl::cast(state_matrix).read_state(j, first);
+    ::mckl::cast(state_matrix).read_row(i, first);
 }
 
-void mckl_state_matrix_read_state_matrix(
+void mckl_state_matrix_read_col(
+    mckl_state_matrix state_matrix, size_t j, double *first)
+{
+    ::mckl::cast(state_matrix).read_col(j, first);
+}
+
+void mckl_state_matrix_read(
     mckl_state_matrix state_matrix, MCKLMatrixLayout layout, double *first)
 {
     ::mckl::cast(state_matrix)
-        .read_state_matrix(static_cast<::mckl::MatrixLayout>(layout), first);
+        .read(static_cast<::mckl::MatrixLayout>(layout), first);
 }
 
 } // extern "C"

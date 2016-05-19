@@ -388,24 +388,33 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     template <typename OutputIter>
-    OutputIter read_state(size_type j, OutputIter first) const
+    OutputIter read_row(size_type i, OutputIter first) const
     {
-        for (size_type i = 0; i != this->size(); ++i, ++first)
-            *first = operator()(i, j);
+        return std::copy_n(row_data(i), this->dim(), first);
+    }
+
+    template <typename OutputIter>
+    OutputIter read_col(size_type j, OutputIter first) const
+    {
+        using vtype = typename std::iterator_traits<OutputIter>::value_type;
+
+        const size_type stride = col_stride();
+        const value_type *src = col_data(j);
+        for (size_type i = 0; i != this->size(); ++i, ++first, src += stride)
+            *first = static_cast<vtype>(*src);
 
         return first;
     }
 
     template <typename OutputIter>
-    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
+    OutputIter read(MatrixLayout layout, OutputIter first) const
     {
         if (layout == RowMajor)
             first = std::copy_n(this->data(), this->data_size(), first);
 
         if (layout == ColMajor)
             for (size_type j = 0; j != this->dim(); ++j)
-                for (size_type i = 0; i != this->size(); ++i, ++first)
-                    *first = operator()(i, j);
+                first = read_col(j, first);
 
         return first;
     }
@@ -605,31 +614,33 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     /// Let \f$a_i\f$ denote the value of `index[i]`, and
     /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{\{i\}}(a_j)\f$. Then it is required
     /// that \f$a_i = i\f$ for all \f$r_i > 0\f$.
-    template <typename InputIter>
-    void select(size_type N, InputIter index)
+    template <typename IntType, typename InputIter>
+    void select(IntType N, InputIter index)
     {
         size_type n = static_cast<size_type>(N);
         if (this->size() == 0 || internal::is_nullptr(index)) {
-            this->resize(N);
+            this->resize(n);
             return;
         }
 
         InputIter idx = index;
         if (n == this->size()) {
-            for (size_type d = 0; d != this->dim(); ++d) {
+            for (size_type j = 0; j != this->dim(); ++j) {
                 idx = index;
-                for (size_type dst = 0; dst != n; ++dst, ++idx) {
-                    operator()(dst, d) = operator()(
-                        static_cast<size_type>(*idx), d);
-                }
+                const value_type *src = col_data(j);
+                value_type *dst = col_data(j);
+                for (size_type i = 0; i != n; ++i, ++idx)
+                    dst[i] = src[*idx];
             }
         } else {
             StateMatrix<ColMajor, Dim, T> tmp;
             tmp.resize_data(N, this->dim());
-            for (size_type d = 0; d != this->dim(); ++d) {
+            for (size_type j = 0; j != this->dim(); ++j) {
                 idx = index;
-                for (size_type dst = 0; dst != n; ++dst, ++idx)
-                    tmp(dst, d) = operator()(static_cast<size_type>(*idx), d);
+                const value_type *src = col_data(j);
+                value_type *dst = tmp.col_data(j);
+                for (size_type i = 0; i != n; ++i, ++idx)
+                    dst[i] = src[*idx];
             }
             *this = std::move(tmp);
         }
@@ -651,18 +662,28 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     template <typename OutputIter>
-    OutputIter read_state(size_type j, OutputIter first) const
+    OutputIter read_row(size_type i, OutputIter first) const
+    {
+        using vtype = typename std::iterator_traits<OutputIter>::value_type;
+
+        const size_type stride = row_stride();
+        const value_type *src = row_data(i);
+        for (size_type j = 0; j != this->dim(); ++j, ++first, src += stride)
+            *first = static_cast<vtype>(*src);
+    }
+
+    template <typename OutputIter>
+    OutputIter read_col(size_type j, OutputIter first) const
     {
         return std::copy_n(col_data(j), this->size(), first);
     }
 
     template <typename OutputIter>
-    OutputIter read_state_matrix(MatrixLayout layout, OutputIter first) const
+    OutputIter read(MatrixLayout layout, OutputIter first) const
     {
         if (layout == RowMajor)
             for (size_type i = 0; i != this->size(); ++i)
-                for (size_type d = 0; d != this->size(); ++d, ++first)
-                    *first = operator()(i, d);
+                first = read_row(i, first);
 
         if (layout == ColMajor)
             first = std::copy_n(this->data(), this->data_size(), first);
