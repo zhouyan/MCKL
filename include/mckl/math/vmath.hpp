@@ -273,7 +273,7 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
         y[i] /= beta_b * b[i] + mu_b;
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b_i + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 {
@@ -281,7 +281,7 @@ inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
         y[i] = a[i] * b[i] + c[i];
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b_i + c\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
 {
@@ -293,7 +293,7 @@ inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
     }
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
 {
@@ -305,7 +305,7 @@ inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
     }
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i * b + c\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 {
@@ -321,7 +321,7 @@ inline void fma(std::size_t n, const T *a, T b, T c, T *y)
     }
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b_i + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
 {
@@ -333,7 +333,7 @@ inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
     }
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b_i + c\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, T c, T *y)
 {
@@ -345,7 +345,7 @@ inline void fma(std::size_t n, T a, const T *b, T c, T *y)
     }
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a * b + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, T b, const T *c, T *y)
 {

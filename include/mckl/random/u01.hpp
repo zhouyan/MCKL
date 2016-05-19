@@ -200,7 +200,7 @@ class U01Impl<UIntType, RealType, Open, Open>
 } // namespace mckl::internal
 
 /// \brief Convert uniform unsigned integers to floating points within [0, 1]
-/// \ingroup Random
+/// \ingroup U01
 ///
 /// \details
 /// Let \f$W\f$ be the number of digits of unsigned integer type `UIntType`.
@@ -224,7 +224,7 @@ inline RealType u01(UIntType u) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points within [0, 1]
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
@@ -240,7 +240,7 @@ inline void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline RealType u01_cc(UIntType u) noexcept
 {
@@ -248,7 +248,7 @@ inline RealType u01_cc(UIntType u) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1)
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline RealType u01_co(UIntType u) noexcept
 {
@@ -256,7 +256,7 @@ inline RealType u01_co(UIntType u) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1]
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline RealType u01_oc(UIntType u) noexcept
 {
@@ -264,7 +264,7 @@ inline RealType u01_oc(UIntType u) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1)
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline RealType u01_oo(UIntType u) noexcept
 {
@@ -272,7 +272,7 @@ inline RealType u01_oo(UIntType u) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline void u01_cc(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
@@ -280,7 +280,7 @@ inline void u01_cc(std::size_t n, const UIntType *u, RealType *r) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on [0, 1)
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline void u01_co(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
@@ -288,7 +288,7 @@ inline void u01_co(std::size_t n, const UIntType *u, RealType *r) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1]
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline void u01_oc(std::size_t n, const UIntType *u, RealType *r) noexcept
 {
@@ -296,7 +296,7 @@ inline void u01_oc(std::size_t n, const UIntType *u, RealType *r) noexcept
 }
 
 /// \brief Convert uniform unsigned integers to floating points on (0, 1)
-/// \ingroup Random
+/// \ingroup U01
 template <typename UIntType, typename RealType>
 inline void u01_oo(std::size_t n, const UIntType *u, RealType *r) noexcept
 {

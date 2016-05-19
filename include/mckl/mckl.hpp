@@ -47,9 +47,9 @@
 /// \defgroup Algorithm Algorithm
 /// \brief Monte Calro algorithms
 
-/// \defgroup RandomWalk Random walk
+/// \defgroup MH Metropolis-Hastings
 /// \ingroup Algorithm
-/// \brief Random walk Metropolis-Hastings algorithm
+/// \brief Metropolis-Hastings algorithm
 
 /// \defgroup SMP Symmetric multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
@@ -131,7 +131,7 @@
 /// \brief Resampling algorithm functor classes
 
 /// \defgroup Utility Utility
-/// \brief Utilities independent of other part of the library
+/// \brief Utilities
 
 /// \defgroup AlignedMemory Aligned memory alignment
 /// \ingroup Utility
@@ -139,7 +139,7 @@
 
 /// \defgroup Covariance Covariance
 /// \ingroup Utility
-/// \brief Covariance matrix estimation and manipulation
+/// \brief Covariance matrix estimation
 
 /// \defgroup HDF5 HDF5 objects I/O
 /// \ingroup Utility

@@ -77,7 +77,10 @@ IF(DOXYGEN_FOUND)
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/front.tex.in
         ${PROJECT_SOURCE_DIR}/manual/tex/front.tex)
     ADD_CUSTOM_TARGET(doxygen
-        DEPENDS ${PROJECT_BINARY_DIR}/config/Doxyfile
+        DEPENDS
+        ${PROJECT_BINARY_DIR}/config/Doxyfile
+        ${PROJECT_BINARY_DIR}/config/main.md
+        ${PROJECT_BINARY_DIR}/config/news.md
         COMMAND ${DOXYGEN_EXECUTABLE} config/Doxyfile
         COMMENT "Generating doxygen"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})

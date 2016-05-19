@@ -75,7 +75,7 @@ class StateMatrixDim<Dynamic>
 /// \brief Base type of StateMatrix
 /// \ingroup Core
 template <MatrixLayout Layout, std::size_t Dim, typename T>
-class StateMatrixBase : public internal::StateMatrixDim<Dim>
+class StateMatrixBase : private internal::StateMatrixDim<Dim>
 {
     public:
     using size_type = std::size_t;
@@ -184,12 +184,7 @@ class StateMatrixBase : public internal::StateMatrixDim<Dim>
     StateMatrixBase(StateMatrixBase<Layout, Dim, T> &&) = default;
 
     StateMatrixBase<Layout, Dim, T> &operator=(
-        StateMatrixBase<Layout, Dim, T> &&other) noexcept
-    {
-        swap(other);
-
-        return *this;
-    }
+        StateMatrixBase<Layout, Dim, T> &&other) = default;
 
     void resize_data(size_type N, size_type dim)
     {
@@ -238,17 +233,22 @@ template <std::size_t Dim, typename T>
 class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
 {
     public:
-    using state_matrix_base_type = StateMatrixBase<RowMajor, Dim, T>;
-    using size_type = typename state_matrix_base_type::size_type;
-    using value_type = typename state_matrix_base_type::value_type;
-    using pack_type = typename state_matrix_base_type::pack_type;
+    using typename StateMatrixBase<RowMajor, Dim, T>::size_type;
+    using typename StateMatrixBase<RowMajor, Dim, T>::value_type;
+    using typename StateMatrixBase<RowMajor, Dim, T>::pack_type;
 
     /// \brief Construct a matrix with `N` rows and `Dim` columns
-    explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
+    explicit StateMatrix(size_type N = 0)
+        : StateMatrixBase<RowMajor, Dim, T>(N)
+    {
+    }
 
     /// \brief Construct a matrix with `N` rows and `dim` columns, only usable
     /// when `Dim == Dynamic`
-    StateMatrix(size_type N, size_type dim) : state_matrix_base_type(N, dim) {}
+    StateMatrix(size_type N, size_type dim)
+        : StateMatrixBase<RowMajor, Dim, T>(N, dim)
+    {
+    }
 
     /// \brief Change the sample size
     void resize(size_type N) { resize_both(N, this->dim()); }
@@ -500,17 +500,22 @@ template <std::size_t Dim, typename T>
 class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
 {
     public:
-    using state_matrix_base_type = StateMatrixBase<ColMajor, Dim, T>;
-    using size_type = typename state_matrix_base_type::size_type;
-    using value_type = typename state_matrix_base_type::value_type;
-    using pack_type = typename state_matrix_base_type::pack_type;
+    using typename StateMatrixBase<ColMajor, Dim, T>::size_type;
+    using typename StateMatrixBase<ColMajor, Dim, T>::value_type;
+    using typename StateMatrixBase<ColMajor, Dim, T>::pack_type;
 
     /// \brief Construct a matrix with `N` rows and `Dim` columns
-    explicit StateMatrix(size_type N = 0) : state_matrix_base_type(N) {}
+    explicit StateMatrix(size_type N = 0)
+        : StateMatrixBase<ColMajor, Dim, T>(N)
+    {
+    }
 
     /// \brief Construct a matrix with `N` rows and `dim` columns, only usable
     /// when `Dim == Dynamic`
-    StateMatrix(size_type N, size_type dim) : state_matrix_base_type(N, dim) {}
+    StateMatrix(size_type N, size_type dim)
+        : StateMatrixBase<ColMajor, Dim, T>(N, dim)
+    {
+    }
 
     /// \brief Change the sample size
     void resize(size_type N) { resize_both(N, this->dim()); }

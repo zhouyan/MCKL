@@ -16,7 +16,7 @@ the contents of the `include` directory into a proper place, e.g.,
 [Doxygen][doxygen] generated reference manuals for the
 [master][MCKLDoxygenMaster] and [develop][MCKLDoxygenDevelop] branches, as well
 as for individual releases can be found online (see [release
-notes][MCKLReleases] for links). A [Manual][MCKLManual] is also provided.
+notes][MCKLReleases] for links). A [Manual][MCKLManualMaster] is also provided.
 
 # Third-party dependencies
 
