@@ -3,7 +3,7 @@
 # ============================================================================
 #  MCKL/manual/tab/rng_distribution.pl
 # ----------------------------------------------------------------------------
-#                          MCKL: Monte Carlo Kernel Library
+#  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
 #  Copyright (c) 2013-2016, Yan Zhou
 #  All rights reserved.

@@ -1,7 +1,7 @@
 //============================================================================
 // MCKL/example/utility/src/utility_aligned_memory.cpp
 //----------------------------------------------------------------------------
-//                         MCKL: Monte Carlo Kernel Library
+// MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
 // Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.

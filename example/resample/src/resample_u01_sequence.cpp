@@ -1,9 +1,9 @@
 //============================================================================
-// MCKL/example/resample/include/resample_u01_sequence.cpp
+// MCKL/example/resample/src/resample_u01_sequence.cpp
 //----------------------------------------------------------------------------
-//                         MCKL: Monte Carlo Kernel Library
+// MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c); 2013-2016, Yan Zhou
+// Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without

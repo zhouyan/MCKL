@@ -1,7 +1,7 @@
 //============================================================================
-// MCKL/include/mckl/rngc/threefry.h
+// MCKL/include/mckl/randomc/threefry.h
 //----------------------------------------------------------------------------
-//                         MCKL: Monte Carlo Kernel Library
+// MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
 // Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.

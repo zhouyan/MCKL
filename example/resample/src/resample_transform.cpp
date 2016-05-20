@@ -1,7 +1,7 @@
 //============================================================================
 // MCKL/example/resample/src/resample_transform.cpp
 //----------------------------------------------------------------------------
-//                         MCKL: Monte Carlo Kernel Library
+// MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
 // Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.

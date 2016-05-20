@@ -1,7 +1,7 @@
 //============================================================================
-// MCKL/include/random/internal/rng_define_macro.hpp
+// MCKL/include/mckl/random/internal/rng_define_macro.hpp
 //----------------------------------------------------------------------------
-//                         MCKL: Monte Carlo Kernel Library
+// MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
 // Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.

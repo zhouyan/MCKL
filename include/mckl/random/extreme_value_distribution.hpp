@@ -1,7 +1,7 @@
 //============================================================================
 // MCKL/include/mckl/random/extreme_value_distribution.hpp
 //----------------------------------------------------------------------------
-//                         MCKL: Monte Carlo Kernel Library
+// MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
 // Copyright (c) 2013-2016, Yan Zhou
 // All rights reserved.

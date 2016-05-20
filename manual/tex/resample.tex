@@ -1,7 +1,7 @@
 % ============================================================================
 %  MCKL/manual/tex/resample.tex
 % ----------------------------------------------------------------------------
-%                          MCKL: Monte Carlo Kernel Library
+%  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
 %  Copyright (c) 2013-2016, Yan Zhou
 %  All rights reserved.
@@ -35,7 +35,7 @@
 Given a particle system $\{W^i,X^i\}_{i=1}^N$, a resampling algorithm
 generate a new system $\{\hat{W}^i, \hat{X}^i\}_{i=1}^M$ such that,
 \begin{equation*}
-  \Exp\Square[Big]{\sum_{i=1}^M{\hat{W}^i\varphi(\hat{X}^i)}} = 
+  \Exp\Square[Big]{\sum_{i=1}^M{\hat{W}^i\varphi(\hat{X}^i)}} =
   \Exp\Square[Big]{\sum_{i=1}^N{W^i\varphi(X^i)}}
 \end{equation*}
 for test function $\varphi$. Regardless of other statistical properties, in

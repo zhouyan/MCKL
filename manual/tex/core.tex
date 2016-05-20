@@ -1,7 +1,7 @@
 % ============================================================================
 %  MCKL/manual/tex/core.tex
 % ----------------------------------------------------------------------------
-%                          MCKL: Monte Carlo Kernel Library
+%  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
 %  Copyright (c) 2013-2016, Yan Zhou
 %  All rights reserved.
@@ -108,14 +108,14 @@ template parameter \verb|Layout|. Therefore, to iterate over a specific row,
   auto rowptr = state.row_data(i);
   auto stride = state.row_stride();
   for (size_type j = 0; j != state.dim(); ++j, rowptr += stride)
-      /* *rowptr is the as state(i, j) */; 
+      /* *rowptr is the as state(i, j) */;
 \end{Verbatim}
 And similarly, to iterate over a specific column,
 \begin{Verbatim}
   auto colptr = state.col_data(j);
   auto stride = state.col_stride();
   for (size_type i = 0; i != state.dim(); ++i, colptr += stride)
-      /* *colptr is the as state(i, j) */; 
+      /* *colptr is the as state(i, j) */;
 \end{Verbatim}
 One can also retrieve a whole row or column through an output iterator. For
 example, to read the column $1$ and $3$ into a vector,
