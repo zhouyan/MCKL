@@ -59,7 +59,8 @@ inline void fisher_f_distribution_impl(
     div(n, s.data(), r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(FisherF, fisher_f, m, n)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    FisherF, fisher_f, RealType, RealType, m, RealType, n)
 
 } // namespace mckl::internal
 
@@ -68,7 +69,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(FisherF, fisher_f, m, n)
 template <typename RealType>
 class FisherFDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(FisherF, fisher_f, m, 1, n, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(FisherF)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        FisherF, fisher_f, RealType, result_type, m, 1, result_type, n, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_2(ChiSquaredDistribution<RealType>,
         chi_squared_m_, ChiSquaredDistribution<RealType>, chi_squared_n_)
 

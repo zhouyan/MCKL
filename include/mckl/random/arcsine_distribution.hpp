@@ -58,7 +58,8 @@ inline void arcsine_distribution_impl(
     fma(n, r, b - a, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Arcsine, arcsine, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Arcsine, arcsine, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -67,7 +68,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Arcsine, arcsine, a, b)
 template <typename RealType>
 class ArcsineDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Arcsine, arcsine, a, 0, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Arcsine)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Arcsine, arcsine, RealType, result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

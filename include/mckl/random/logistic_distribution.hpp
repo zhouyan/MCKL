@@ -59,7 +59,8 @@ inline void logistic_distribution_impl(
     fma(n, r, b, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Logistic, logistic, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Logistic, logistic, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -68,7 +69,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Logistic, logistic, a, b)
 template <typename RealType>
 class LogisticDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Logistic, logistic, a, 0, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Logistic)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Logistic, logistic, RealType, result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

@@ -63,10 +63,6 @@ inline void uniform_bits_distribution_impl(
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 {
-    static_assert(std::is_unsigned<UIntType>::value,
-        "**uniform_bits_distribution** used with UIntType other than unsigned "
-        "types");
-
     static constexpr int rbits = RNGTraits<RNGType>::bits;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;
     static constexpr int tbits =
@@ -101,8 +97,8 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r,
 template <typename UIntType>
 class UniformBitsDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_0(
-        UniformBits, uniform_bits, UIntType, unsigned, UNSIGNED)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(UniformBits)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_0(UniformBits, uniform_bits, UIntType)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

@@ -67,7 +67,8 @@ inline void laplace_distribution_impl(
     fma(n, s.data(), r, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Laplace, laplace, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Laplace, laplace, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -76,7 +77,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Laplace, laplace, a, b)
 template <typename RealType>
 class LaplaceDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Laplace, laplace, a, 0, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Laplace)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Laplace, laplace, RealType, result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

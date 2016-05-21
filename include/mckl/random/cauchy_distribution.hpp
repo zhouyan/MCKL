@@ -57,7 +57,8 @@ inline void cauchy_distribution_impl(
     fma(n, r, b, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Cauchy, cauchy, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Cauchy, cauchy, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -66,7 +67,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Cauchy, cauchy, a, b)
 template <typename RealType>
 class CauchyDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Cauchy, cauchy, a, 0, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Cauchy)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Cauchy, cauchy, RealType, result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

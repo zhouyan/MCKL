@@ -63,7 +63,8 @@ inline void levy_distribution_impl(
             r[i] = dist(rng);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Levy, levy, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Levy, levy, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -72,7 +73,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Levy, levy, a, b)
 template <typename RealType>
 class LevyDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Levy, levy, a, 0, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Levy)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Levy, levy, RealType, result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(
         NormalDistribution<RealType>, normal_)
 

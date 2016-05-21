@@ -66,7 +66,8 @@ inline void student_t_distribution_impl(
             r[i] = dist(rng);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(StudentT, student_t, n)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(
+    StudentT, student_t, RealType, RealType, n)
 
 } // namespace mckl::internal
 
@@ -75,7 +76,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(StudentT, student_t, n)
 template <typename RealType>
 class StudentTDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_1(StudentT, student_t, n, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(StudentT)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_1(
+        StudentT, student_t, RealType, result_type, n, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_2(ChiSquaredDistribution<RealType>,
         chi_squared_, NormalDistribution<RealType>, normal_)
 

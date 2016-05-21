@@ -107,7 +107,9 @@ inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType>
 class NormalDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Normal, normal, mean, 0, stddev, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Normal)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Normal, normal, RealType, result_type, mean, 0, result_type, stddev, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_2(result_type, v_, bool, saved_)
 
     public:

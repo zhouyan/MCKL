@@ -57,7 +57,8 @@ inline void rayleigh_distribution_impl(
     sqrt(n, r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Rayleigh, rayleigh, sigma)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(
+    Rayleigh, rayleigh, RealType, RealType, sigma)
 
 } // namespace mckl::internal
 
@@ -66,7 +67,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Rayleigh, rayleigh, sigma)
 template <typename RealType>
 class RayleighDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_1(Rayleigh, rayleigh, sigma, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Rayleigh)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_1(
+        Rayleigh, rayleigh, RealType, result_type, sigma, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

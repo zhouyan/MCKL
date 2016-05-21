@@ -52,8 +52,8 @@
     template <typename RealType>                                              \
     class Name##Distribution                                                  \
     {                                                                         \
-        MCKL_DEFINE_RANDOM_DISTRIBUTION_0(                                    \
-            Name, name, RealType, floating_point, FLOATING_POINT)             \
+        MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Name)                \
+        MCKL_DEFINE_RANDOM_DISTRIBUTION_0(Name, name, RealType)               \
         MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0                              \
                                                                               \
         public:                                                               \
@@ -167,11 +167,11 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 
 #endif // MCKL_U01_USE_FIXED_POINT
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01, u01)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CC, u01_cc)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CO, u01_co)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OC, u01_oc)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OO, u01_oo)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01, u01, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CC, u01_cc, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CO, u01_co, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OC, u01_oc, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OO, u01_oo, RealType)
 
 } // namespace mckl::internal
 
@@ -205,8 +205,9 @@ class U01Distribution : public U01CODistribution<RealType>
 template <typename RealType>
 class U01Distribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_0(
-        U01, u01, RealType, floating_point, FLOATING_POINT)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(U01)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_0(U01, u01, RealType)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:
     result_type min() const { return 0; }

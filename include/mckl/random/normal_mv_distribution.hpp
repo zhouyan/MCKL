@@ -63,10 +63,6 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, RealType mean, RealType chol)
 {
-    static_assert(is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
     size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
     size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
@@ -77,10 +73,6 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, RealType mean, const RealType *chol)
 {
-    static_assert(is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
     size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
     size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
@@ -99,10 +91,6 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, RealType chol)
 {
-    static_assert(is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
     size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
     size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
@@ -115,10 +103,6 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, const RealType *chol)
 {
-    static_assert(is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
     size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
     size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
@@ -145,6 +129,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType, std::size_t Dim>
 class NormalMVDistribution
 {
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_BLAS_TYPE(NormalMV)
 
     public:
     using result_type = RealType;
@@ -152,10 +137,6 @@ class NormalMVDistribution
 
     class param_type
     {
-        static_assert(internal::is_one_of<RealType, float, double>::value,
-            "**NormalMVDistributon::param_type** used with RealType other "
-            "than float or double");
-
         public:
         using result_type = RealType;
         using distribution_type = NormalMVDistribution<RealType, Dim>;

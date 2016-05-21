@@ -58,7 +58,8 @@ inline void extreme_value_distribution_impl(
     fma(n, r, -b, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(ExtremeValue, extreme_value, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    ExtremeValue, extreme_value, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -67,7 +68,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(ExtremeValue, extreme_value, a, b)
 template <typename RealType>
 class ExtremeValueDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(ExtremeValue, extreme_value, a, 0, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(ExtremeValue)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(ExtremeValue, extreme_value, RealType,
+        result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

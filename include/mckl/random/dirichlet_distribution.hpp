@@ -63,10 +63,6 @@ template <typename RealType, typename RNGType>
 inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *alpha)
 {
-    static_assert(std::is_floating_point<RealType>::value,
-        "**dirichlet_distribution** used with RealType other than floating "
-        "point types");
-
     if (n * dim == 0)
         return;
 
@@ -85,16 +81,14 @@ inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType, std::size_t Dim>
 class DirichletDistribution
 {
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Dirichlet)
+
     public:
     using result_type = RealType;
     using distribution_type = DirichletDistribution<RealType, Dim>;
 
     class param_type
     {
-        static_assert(std::is_floating_point<RealType>::value,
-            "**DirichletDistribution::param_type** used with RealType other "
-            "than floating point types");
-
         public:
         using result_type = RealType;
         using distribution_type = DirichletDistribution<RealType, Dim>;

@@ -58,6 +58,8 @@ enum GammaDistributionAlgorithm {
 template <typename RealType>
 class GammaDistributionConstant
 {
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Gamma)
+
     public:
     GammaDistributionConstant(RealType alpha = 1, RealType beta = 1)
     {
@@ -286,7 +288,8 @@ inline void gamma_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType>
 class GammaDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Gamma, gamma, alpha, 1, beta, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Gamma, gamma, RealType, result_type, alpha, 1, result_type, beta, 1)
 
     public:
     result_type min() const { return 0; }

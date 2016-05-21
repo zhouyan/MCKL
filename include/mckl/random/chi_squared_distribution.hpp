@@ -68,7 +68,9 @@ inline void chi_squared_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType>
 class ChiSquaredDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_1(ChiSquared, chi_squared, n, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(ChiSquared)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_1(
+        ChiSquared, chi_squared, RealType, result_type, n, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(
         GammaDistribution<RealType>, gamma_)
 

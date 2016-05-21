@@ -56,7 +56,8 @@ inline void pareto_distribution_impl(
     mul(n, b, r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Pareto, pareto, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Pareto, pareto, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -65,7 +66,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Pareto, pareto, a, b)
 template <typename RealType>
 class ParetoDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Pareto, pareto, a, 1, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Pareto)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Pareto, pareto, RealType, result_type, a, 1, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

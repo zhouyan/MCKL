@@ -43,6 +43,7 @@ namespace mckl
 template <typename IntType>
 class DiscreteDistribution
 {
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Discrete)
     public:
     using result_type = IntType;
     using distribution_type = DiscreteDistribution<IntType>;

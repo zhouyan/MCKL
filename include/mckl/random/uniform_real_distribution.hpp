@@ -55,7 +55,8 @@ inline void uniform_real_distribution_impl(
     fma(n, r, b - a, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(UniformReal, uniform_real, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    UniformReal, uniform_real, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -64,7 +65,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(UniformReal, uniform_real, a, b)
 template <typename RealType>
 class UniformRealDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(UniformReal, uniform_real, a, 0, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(UniformReal)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(UniformReal, uniform_real, RealType,
+        result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

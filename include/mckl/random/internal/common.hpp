@@ -39,7 +39,34 @@
 #include <mkl_vsl.h>
 #endif
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(Name, name)                    \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Name)                \
+    static_assert(std::is_floating_point<RealType>::value,                    \
+        "**" #Name                                                            \
+        "Distribution** used with RealType other than floating point types");
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_BLAS_TYPE(Name)                \
+    static_assert(                                                            \
+        ::mckl::internal::is_one_of<RealType, float, double>::value,          \
+        "**" #Name                                                            \
+        "Distribution** used with RealType other than float or double");
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Name)                 \
+    static_assert(std::is_integral<IntType>::value,                           \
+        "**" #Name                                                            \
+        "Distribution** used with IntType other than integer types");
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(Name)                \
+    static_assert(std::is_unsigned<UIntType>::value,                          \
+        "**" #Name                                                            \
+        "Distribution** used with UIntType other than unsigned integer "      \
+        "types");
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Name)                \
+    static_assert(std::is_floating_point<RealType>::value,                    \
+        "**" #Name                                                            \
+        "Distribution** used with RealType other than floating point types");
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(Name, name, T)                 \
     template <typename T, typename RNGType>                                   \
     inline void name##_distribution(RNGType &rng, std::size_t n, T *r)        \
     {                                                                         \
@@ -58,9 +85,9 @@
         name##_distribution(rng, N, r);                                       \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Name, name, p1)                \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Name, name, T, T1, p1)         \
     template <typename T, typename RNGType>                                   \
-    inline void name##_distribution(RNGType &rng, std::size_t N, T *r, T p1)  \
+    inline void name##_distribution(RNGType &rng, std::size_t N, T *r, T1 p1) \
     {                                                                         \
         const std::size_t K = BufferSize<T>::value;                           \
         const std::size_t M = N / K;                                          \
@@ -77,10 +104,10 @@
         name##_distribution(rng, N, r, param.p1());                           \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Name, name, p1, p2)            \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Name, name, T, T1, p1, T2, p2) \
     template <typename T, typename RNGType>                                   \
     inline void name##_distribution(                                          \
-        RNGType &rng, std::size_t N, T *r, T p1, T p2)                        \
+        RNGType &rng, std::size_t N, T *r, T1 p1, T2 p2)                      \
     {                                                                         \
         const std::size_t K = BufferSize<T>::value;                           \
         const std::size_t M = N / K;                                          \
@@ -97,14 +124,10 @@
         name##_distribution(rng, N, r, param.p1(), param.p2());               \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)        \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_0(Name, T)                 \
     public:                                                                   \
     class param_type                                                          \
     {                                                                         \
-        static_assert(std::is_##t<T>::value,                                  \
-            "**" #Name "Distribution::param_type** used with " #T             \
-            " other than " #Type " integer types");                           \
-                                                                              \
         public:                                                               \
         using result_type = T;                                                \
         using distribution_type = Name##Distribution<T>;                      \
@@ -137,33 +160,29 @@
         friend distribution_type;                                             \
     }; // class param_type
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_1(Name, name, p1, v1)      \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_1(                         \
+    Name, name, T, T1, p1, v1)                                                \
     public:                                                                   \
     class param_type                                                          \
     {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name                                                        \
-            "Distribution::param_type** used with RealType other "            \
-            "than floating point types");                                     \
-                                                                              \
         public:                                                               \
-        using result_type = RealType;                                         \
-        using distribution_type = Name##Distribution<RealType>;               \
+        using result_type = T;                                                \
+        using distribution_type = Name##Distribution<T>;                      \
                                                                               \
-        explicit param_type(result_type p1 = v1) : p1##_(p1)                  \
+        explicit param_type(T1 p1 = v1) : p1##_(p1)                           \
         {                                                                     \
             ::mckl::runtime_assert(                                           \
-                internal::name##_distribution_check_param(p1),                \
+                ::mckl::internal::name##_distribution_check_param(p1),        \
                 "**" #Name                                                    \
                 "Distribution** constructed with invalid arguments");         \
         }                                                                     \
                                                                               \
-        result_type p1() const { return p1##_; }                              \
+        T1 p1() const { return p1##_; }                                       \
                                                                               \
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
-            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
+            if (!::mckl::internal::is_equal(param1.p1##_, param2.p1##_))      \
                 return false;                                                 \
             return true;                                                      \
         }                                                                     \
@@ -193,11 +212,11 @@
             if (!is)                                                          \
                 return is;                                                    \
                                                                               \
-            result_type p1 = 0;                                               \
+            T1 p1 = 0;                                                        \
             is >> std::ws >> p1;                                              \
                                                                               \
             if (is) {                                                         \
-                if (internal::name##_distribution_check_param(p1)) {          \
+                if (::mckl::internal::name##_distribution_check_param(p1)) {  \
                     param.p1##_ = p1;                                         \
                 } else {                                                      \
                     is.setstate(std::ios_base::failbit);                      \
@@ -208,43 +227,37 @@
         }                                                                     \
                                                                               \
         private:                                                              \
-        result_type p1##_;                                                    \
+        T1 p1##_;                                                             \
                                                                               \
         friend distribution_type;                                             \
     }; // class param_type
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_2(                         \
-    Name, name, p1, v1, p2, v2)                                               \
+    Name, name, T, T1, p1, v1, T2, p2, v2)                                    \
     public:                                                                   \
     class param_type                                                          \
     {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name                                                        \
-            "Distribution::param_type** used with RealType other than "       \
-            "floating point types");                                          \
-                                                                              \
         public:                                                               \
-        using result_type = RealType;                                         \
-        using distribution_type = Name##Distribution<RealType>;               \
+        using result_type = T;                                                \
+        using distribution_type = Name##Distribution<T>;                      \
                                                                               \
-        explicit param_type(result_type p1 = v1, result_type p2 = v2)         \
-            : p1##_(p1), p2##_(p2)                                            \
+        explicit param_type(T1 p1 = v1, T2 p2 = v2) : p1##_(p1), p2##_(p2)    \
         {                                                                     \
             ::mckl::runtime_assert(                                           \
-                internal::name##_distribution_check_param(p1, p2),            \
+                ::mckl::internal::name##_distribution_check_param(p1, p2),    \
                 "**" #Name                                                    \
                 "Distribution** constructed with invalid arguments");         \
         }                                                                     \
                                                                               \
-        result_type p1() const { return p1##_; }                              \
-        result_type p2() const { return p2##_; }                              \
+        T1 p1() const { return p1##_; }                                       \
+        T2 p2() const { return p2##_; }                                       \
                                                                               \
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
-            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
+            if (!::mckl::internal::is_equal(param1.p1##_, param2.p1##_))      \
                 return false;                                                 \
-            if (!internal::is_equal(param1.p2##_, param2.p2##_))              \
+            if (!::mckl::internal::is_equal(param1.p2##_, param2.p2##_))      \
                 return false;                                                 \
             return true;                                                      \
         }                                                                     \
@@ -275,13 +288,14 @@
             if (!is)                                                          \
                 return is;                                                    \
                                                                               \
-            result_type p1 = 0;                                               \
-            result_type p2 = 0;                                               \
+            T1 p1 = 0;                                                        \
+            T2 p2 = 0;                                                        \
             is >> std::ws >> p1;                                              \
             is >> std::ws >> p2;                                              \
                                                                               \
             if (is) {                                                         \
-                if (internal::name##_distribution_check_param(p1, p2)) {      \
+                if (::mckl::internal::name##_distribution_check_param(        \
+                        p1, p2)) {                                            \
                     param.p1##_ = p1;                                         \
                     param.p2##_ = p2;                                         \
                 } else {                                                      \
@@ -293,8 +307,8 @@
         }                                                                     \
                                                                               \
         private:                                                              \
-        result_type p1##_;                                                    \
-        result_type p2##_;                                                    \
+        T1 p1##_;                                                             \
+        T2 p2##_;                                                             \
                                                                               \
         friend distribution_type;                                             \
     }; // class param_type
@@ -308,15 +322,12 @@
     explicit Name##Distribution(const param_type &) { reset(); }              \
     explicit Name##Distribution(param_type &&) { reset(); }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_1(Name, p1, v1)           \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_1(Name, T, T1, p1, v1)    \
     public:                                                                   \
-    using result_type = RealType;                                             \
-    using distribution_type = Name##Distribution<RealType>;                   \
+    using result_type = T;                                                    \
+    using distribution_type = Name##Distribution<T>;                          \
                                                                               \
-    explicit Name##Distribution(result_type p1 = v1) : param_(p1)             \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
+    explicit Name##Distribution(T1 p1 = v1) : param_(p1) { reset(); }         \
                                                                               \
     explicit Name##Distribution(const param_type &param) : param_(param)      \
     {                                                                         \
@@ -329,15 +340,15 @@
         reset();                                                              \
     }                                                                         \
                                                                               \
-    result_type p1() const { return param_.p1(); }
+    T1 p1() const { return param_.p1(); }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_2(Name, p1, v1, p2, v2)   \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_2(                        \
+    Name, T, T1, p1, v1, T2, p2, v2)                                          \
     public:                                                                   \
-    using result_type = RealType;                                             \
-    using distribution_type = Name##Distribution<RealType>;                   \
+    using result_type = T;                                                    \
+    using distribution_type = Name##Distribution<T>;                          \
                                                                               \
-    explicit Name##Distribution(result_type p1 = v1, result_type p2 = v2)     \
-        : param_(p1, p2)                                                      \
+    explicit Name##Distribution(T1 p1 = v1, T2 p2 = v2) : param_(p1, p2)      \
     {                                                                         \
         reset();                                                              \
     }                                                                         \
@@ -353,8 +364,8 @@
         reset();                                                              \
     }                                                                         \
                                                                               \
-    result_type p1() const { return param_.p1(); }                            \
-    result_type p2() const { return param_.p2(); }
+    T1 p1() const { return param_.p1(); }                                     \
+    T2 p2() const { return param_.p2(); }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0                              \
     private:                                                                  \
@@ -376,7 +387,7 @@
                                                                               \
     bool is_equal(const distribution_type &other) const                       \
     {                                                                         \
-        if (!internal::is_equal(m1, other.m1))                                \
+        if (!::mckl::internal::is_equal(m1, other.m1))                        \
             return false;                                                     \
         return true;                                                          \
     }                                                                         \
@@ -410,9 +421,9 @@
                                                                               \
     bool is_equal(const distribution_type &other) const                       \
     {                                                                         \
-        if (!internal::is_equal(m1, other.m1))                                \
+        if (!::mckl::internal::is_equal(m1, other.m1))                        \
             return false;                                                     \
-        if (!internal::is_equal(m2, other.m2))                                \
+        if (!::mckl::internal::is_equal(m2, other.m2))                        \
             return false;                                                     \
         return true;                                                          \
     }                                                                         \
@@ -481,11 +492,11 @@
     void operator()(                                                          \
         RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
-        if (n < 100) {                                                        \
+        if (n < 16) {                                                         \
             for (std::size_t i = 0; i != n; ++i)                              \
                 r[i] = operator()(rng, param);                                \
         } else {                                                              \
-            internal::name##_distribution(rng, n, r, param);                  \
+            ::mckl::internal::name##_distribution(rng, n, r, param);          \
         }                                                                     \
     }                                                                         \
                                                                               \
@@ -539,19 +550,22 @@
         distribution(rng, N, r);                                              \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_0(Name, name, T, t, Type)             \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)            \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_0(Name, name, T)                      \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_0(Name, T)                     \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                    \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_1(Name, name, p1, v1)                 \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_1(Name, name, p1, v1)          \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_1(Name, p1, v1)               \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_1(Name, name, T, T1, p1, v1)          \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_1(Name, name, T, T1, p1, v1)   \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_1(Name, T, T1, p1, v1)        \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Name, name, p1, v1, p2, v2)         \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_2(Name, name, p1, v1, p2, v2)  \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_2(Name, p1, v1, p2, v2)       \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_2(                                    \
+    Name, name, T, T1, p1, v1, T2, p2, v2)                                    \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_2(                             \
+        Name, name, T, T1, p1, v1, T2, p2, v2)                                \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_2(                            \
+        Name, T, T1, p1, v1, T2, p2, v2)                                      \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
 
 namespace mckl

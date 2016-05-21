@@ -63,7 +63,8 @@ inline void weibull_distribution_impl(
     }
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Weibull, weibull, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Weibull, weibull, RealType, RealType, a, RealType, b)
 
 } // namespace mckl::internal
 
@@ -72,7 +73,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Weibull, weibull, a, b)
 template <typename RealType>
 class WeibullDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Weibull, weibull, a, 1, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Weibull)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Weibull, weibull, RealType, result_type, a, 1, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:

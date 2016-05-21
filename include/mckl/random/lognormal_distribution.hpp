@@ -55,7 +55,8 @@ inline void lognormal_distribution_impl(
     exp(n, r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Lognormal, lognormal, m, s)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
+    Lognormal, lognormal, RealType, RealType, m, RealType, s)
 
 } // namespace mckl::internal
 
@@ -64,7 +65,9 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Lognormal, lognormal, m, s)
 template <typename RealType>
 class LognormalDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Lognormal, lognormal, m, 0, s, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Lognormal)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Lognormal, lognormal, RealType, result_type, m, 0, result_type, s, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(
         NormalDistribution<RealType>, normal_)
 

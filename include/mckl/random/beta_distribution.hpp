@@ -63,6 +63,8 @@ enum BetaDistributionAlgorithm {
 template <typename RealType>
 class BetaDistributionConstant
 {
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Beta)
+
     public:
     BetaDistributionConstant(RealType alpha = 1, RealType beta = 1)
     {
@@ -368,7 +370,8 @@ inline void beta_distribution(RNGType &rng, std::size_t n, RealType *r,
 template <typename RealType>
 class BetaDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(Beta, beta, alpha, 1, beta, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
+        Beta, beta, RealType, result_type, alpha, 1, result_type, beta, 1)
 
     public:
     result_type min() const { return 0; }
