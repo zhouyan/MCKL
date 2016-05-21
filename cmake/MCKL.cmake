@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/cmake/MCKLFunction.cmake
+#  MCKL/cmake/MCKL.cmake
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -248,14 +248,6 @@ ELSE(RDRAND_FOUND)
     UNSET(RDRAND_FOUND CACHE)
     SET(RDRAND_FOUND FALSE CACHE BOOL "NOT Found RDRAND")
 ENDIF(RDRAND_FOUND)
-
-# Linux librt
-IF(UNIX AND NOT APPLE AND NOT DEFINED LINUX_LIBRT)
-    FIND_LIBRARY(LINUX_LIBRT rt)
-ENDIF(UNIX AND NOT APPLE AND NOT DEFINED LINUX_LIBRT)
-IF(LINUX_LIBRT)
-    SET(MCKL_LINK_LIBRARIES ${MCKL_LINK_LIBRARIES} ${LINUX_LIBRT})
-ENDIF(LINUX_LIBRT)
 
 # HDF5
 INCLUDE(FindHDF5)
