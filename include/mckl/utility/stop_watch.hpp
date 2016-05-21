@@ -38,12 +38,6 @@
 #include <intrin.h>
 #endif
 
-/// \brief Default C++11 clock used as StopWatch
-/// \ingroup Config
-#ifndef MCKL_STOP_WATCH_CLOCK_TYPE
-#define MCKL_STOP_WATCH_CLOCK_TYPE std::chrono::high_resolution_clock
-#endif
-
 namespace mckl
 {
 
@@ -115,7 +109,7 @@ class StopWatchGuard
 
 /// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
-template <typename ClockType>
+template <typename ClockType = std::chrono::high_resolution_clock>
 class StopWatchClockAdapter
 {
     public:
@@ -240,7 +234,7 @@ class StopWatchClockAdapter
 
 /// \brief Stop watch using `<chrono>`
 /// \ingroup StopWatch
-using StopWatch = StopWatchClockAdapter<MCKL_STOP_WATCH_CLOCK_TYPE>;
+using StopWatch = StopWatchClockAdapter<>;
 
 } // namespace mckl
 
