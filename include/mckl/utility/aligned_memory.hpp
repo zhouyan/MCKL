@@ -292,8 +292,8 @@ template <typename T, std::size_t Alignment = AlignmentTrait<T>::value,
 class Allocator : public std::allocator<T>
 {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
-        "**Allocator** used with Alignment other than a power of two "
-        "positive integer");
+        "**Allocator** used with Alignment other than a power of two positive "
+        "integer");
 
     static_assert(Alignment >= sizeof(void *),
         "**Allocator** used with Alignment less than sizeof(void *)");
@@ -465,8 +465,8 @@ template <typename T, std::size_t N,
 class alignas(Alignment) Array : public std::array<T, N>
 {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
-        "**Array** used with Alignment other than a power of two "
-        "positive integer");
+        "**Array** used with Alignment other than a power of two positive "
+        "integer");
 
     static_assert(Alignment >= sizeof(void *),
         "**Array** used with Alignment less than sizeof(void *)");

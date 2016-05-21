@@ -258,7 +258,8 @@ class Covariance
                     for (std::size_t i = 0; i <= j; ++i)
                         *cov++ = cov_[j * p + i];
                 break;
-            default: break;
+            default:
+                break;
         }
     }
 }; // class Covariance

@@ -66,9 +66,10 @@ class NormalMVDistribution
         param_type(result_type mean, result_type chol)
             : is_scalar_mean_(true), is_scalar_chol_(true)
         {
-            static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with dynamic "
-                                          "dimension");
+            static_assert(Dim != Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "dynamic dimension");
+
             init_mean(mean);
             init_chol(chol);
         }
@@ -76,9 +77,10 @@ class NormalMVDistribution
         param_type(result_type mean, const result_type *chol)
             : is_scalar_mean_(true), is_scalar_chol_(false)
         {
-            static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with dynamic "
-                                          "dimension");
+            static_assert(Dim != Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "dynamic dimension");
+
             init_mean(mean);
             init_chol(chol);
         }
@@ -86,9 +88,10 @@ class NormalMVDistribution
         param_type(const result_type *mean, result_type chol)
             : is_scalar_mean_(false), is_scalar_chol_(true)
         {
-            static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with dynamic "
-                                          "dimension");
+            static_assert(Dim != Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "dynamic dimension");
+
             init_mean(mean);
             init_chol(chol);
         }
@@ -96,9 +99,10 @@ class NormalMVDistribution
         param_type(const result_type *mean, const result_type *chol)
             : is_scalar_mean_(false), is_scalar_chol_(false)
         {
-            static_assert(Dim != Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with dynamic "
-                                          "dimension");
+            static_assert(Dim != Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "dynamic dimension");
+
             init_mean(mean);
             init_chol(chol);
         }
@@ -109,9 +113,10 @@ class NormalMVDistribution
             , is_scalar_mean_(true)
             , is_scalar_chol_(true)
         {
-            static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with fixed "
-                                          "dimension");
+            static_assert(Dim == Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "fixed dimension");
+
             init_mean(mean);
             init_chol(chol);
         }
@@ -122,9 +127,10 @@ class NormalMVDistribution
             , is_scalar_mean_(true)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with fixed "
-                                          "dimension");
+            static_assert(Dim == Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "fixed dimension");
+
             init_mean(mean);
             init_chol(chol);
         }
@@ -135,9 +141,10 @@ class NormalMVDistribution
             , is_scalar_mean_(false)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with fixed "
-                                          "dimension");
+            static_assert(Dim == Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "fixed dimension");
+
             init_mean(mean);
             init_chol(chol);
         }
@@ -149,9 +156,10 @@ class NormalMVDistribution
             , is_scalar_mean_(false)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic, "**NormalMVDistribution::param_type*"
-                                          "* object declared with fixed "
-                                          "dimension");
+            static_assert(Dim == Dynamic,
+                "**NormalMVDistribution::param_type** object declared with "
+                "fixed dimension");
+
             init_mean(mean);
             init_chol(chol);
         }

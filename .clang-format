@@ -1,28 +1,30 @@
 ---
 BasedOnStyle                                   : LLVM
-
----
-Language                                       : Cpp
 AccessModifierOffset                           : 0
 AlignAfterOpenBracket                          : false
+AlignConsecutiveAssignments                    : false
+AlignConsecutiveDeclarations                   : false
 AlignEscapedNewlinesLeft                       : false
 AlignOperands                                  : false
 AlignTrailingComments                          : true
 AllowAllParametersOfDeclarationOnNextLine      : true
 AllowShortBlocksOnASingleLine                  : true
-AllowShortCaseLabelsOnASingleLine              : true
+AllowShortCaseLabelsOnASingleLine              : false
 AllowShortFunctionsOnASingleLine               : true
 AllowShortIfStatementsOnASingleLine            : false
 AllowShortLoopsOnASingleLine                   : false
 AlwaysBreakAfterDefinitionReturnType           : false
-AlwaysBreakBeforeMultilineStrings              : false
+AlwaysBreakBeforeMultilineStrings              : true
 AlwaysBreakTemplateDeclarations                : true
-BinPackArguments                               : true
 BinPackParameters                              : true
+BinPackArguments                               : true
+# BraceWrapping                                  :
+# BreakAfterJavaFieldAnnotations                 :
 BreakBeforeBinaryOperators                     : None
 BreakBeforeBraces                              : Linux
 BreakBeforeTernaryOperators                    : false
 BreakConstructorInitializersBeforeComma        : true
+# BreakStringLiterals                          : true
 ColumnLimit                                    : 79
 # CommentPragmas                                 :
 ConstructorInitializerAllOnOneLineOrOnePerLine : true
@@ -31,23 +33,27 @@ ContinuationIndentWidth                        : 4
 Cpp11BracedListStyle                           : true
 DerivePointerAlignment                         : false
 DisableFormat                                  : false
-# ExperimentalAutoDetectBinPacking               :
-# ForEachMacros                                  :
-IncludeCategories                              :
-  - Regex:           '^<mckl/.*/internal'
-    Priority:        1
-  - Regex:           '^<mckl/internal'
-    Priority:        2
-  - Regex:           '^<mckl/'
-    Priority:        3
-  - Regex:           '^<'
-    Priority:        4
-  - Regex:           '.\*'
-    Priority:        5
+ExperimentalAutoDetectBinPacking               : false
+# ForEachMacros :
+IncludeCategories :
+  - Regex:    '^<mckl/.*/internal'
+    Priority: 1
+  - Regex:    '^<mckl/internal'
+    Priority: 2
+  - Regex:    '^<mckl/'
+    Priority: 3
+  - Regex:    '^<'
+    Priority: 4
+  - Regex:    '.\*'
+    Priority: 5
+# IncludeIsMainRegex                             :
 IndentCaseLabels                               : true
 IndentWidth                                    : 4
 IndentWrappedFunctionNames                     : true
+# JavaScriptQuotes                               :
 KeepEmptyLinesAtTheStartOfBlocks               : true
+# MacroBlockBegin                                :
+# MacroBlockEnd                                  :
 MaxEmptyLinesToKeep                            : 1
 NamespaceIndentation                           : None
 ObjCBlockIndentWidth                           : 4
@@ -60,6 +66,8 @@ ObjCSpaceBeforeProtocolList                    : false
 # PenaltyExcessCharacter                         :
 # PenaltyReturnTypeOnItsOwnLine                  :
 PointerAlignment                               : Right
+ReflowComments                                 : true
+SortIncludes                                   : true
 SpaceAfterCStyleCast                           : true
 SpaceBeforeAssignmentOperators                 : true
 SpaceBeforeParens                              : ControlStatements

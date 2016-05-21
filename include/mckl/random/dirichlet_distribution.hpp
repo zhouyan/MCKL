@@ -57,35 +57,39 @@ class DirichletDistribution
 
         explicit param_type(result_type alpha) : is_scalar_(true)
         {
-            static_assert(Dim != Dynamic, "**DirichletDistribution::param_"
-                                          "type** object declared with "
-                                          "dynamic dimension");
+            static_assert(Dim != Dynamic,
+                "**DirichletDistribution::param_type** object declared with "
+                "dynamic dimension");
+
             init_alpha(alpha);
         }
 
         explicit param_type(const result_type *alpha) : is_scalar_(false)
         {
-            static_assert(Dim != Dynamic, "**DirichletDistribution::param_"
-                                          "type** object declared with "
-                                          "dynamic dimension");
+            static_assert(Dim != Dynamic,
+                "**DirichletDistribution::param_type** object declared with "
+                "dynamic dimension");
+
             init_alpha(alpha);
         }
 
         explicit param_type(std::size_t dim, result_type alpha)
             : alpha_(dim), is_scalar_(false)
         {
-            static_assert(Dim == Dynamic, "**DirichletDistribution::param_"
-                                          "type** object delcared with fixed "
-                                          "dimension");
+            static_assert(Dim == Dynamic,
+                "**DirichletDistribution::param_type** object delcared with "
+                "fixed dimension");
+
             init_alpha(alpha);
         }
 
         explicit param_type(std::size_t dim, const result_type *alpha)
             : alpha_(dim), is_scalar_(false)
         {
-            static_assert(Dim == Dynamic, "**DirichletDistribution::param_"
-                                          "type** object delcared with fixed "
-                                          "dimension");
+            static_assert(Dim == Dynamic,
+                "**DirichletDistribution::param_type** object delcared with "
+                "fixed dimension");
+
             init_alpha(alpha);
         }
 

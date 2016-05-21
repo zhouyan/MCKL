@@ -120,13 +120,15 @@ class SeedGenerator
     /// \brief Set the divisor and the remainder
     void modulo(result_type divisor, result_type remainder)
     {
-        runtime_assert(divisor > remainder, "**SeedGenerator::modulo** the "
-                                            "remainder is not smaller than "
-                                            "the divisor");
+        runtime_assert(divisor > remainder,
+            "**SeedGenerator::modulo** the "
+            "remainder is not smaller than "
+            "the divisor");
 
         result_type maxs = std::numeric_limits<result_type>::max() / divisor;
-        runtime_assert(maxs > 1, "**SeedGenerator::modulo** the maximum of "
-                                 "the internal seed will be no larger than 1");
+        runtime_assert(maxs > 1,
+            "**SeedGenerator::modulo** the maximum of "
+            "the internal seed will be no larger than 1");
 
         divisor_ = divisor;
         remainder_ = remainder;

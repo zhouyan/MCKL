@@ -58,17 +58,19 @@ inline std::uint64_t rdtsc()
     unsigned hi = 0;
     unsigned lo = 0;
 #if MCKL_HAS_X86_64
-    asm volatile("CPUID\n\t"
-                 "RDTSC\n\t"
-                 "mov %%edx, %0\n\t"
-                 "mov %%eax, %1\n\t"
-                 : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
+    asm volatile(
+        "CPUID\n\t"
+        "RDTSC\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
 #else  // MCKL_HAS_X64_64
-    asm volatile("CPUID\n\t"
-                 "RDTSC\n\t"
-                 "mov %%edx, %0\n\t"
-                 "mov %%eax, %1\n\t"
-                 : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
+    asm volatile(
+        "CPUID\n\t"
+        "RDTSC\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
 #endif // MCKL_HAS_X86_64
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
 #elif defined(MCKL_MSVC)

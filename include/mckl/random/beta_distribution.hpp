@@ -98,10 +98,16 @@ class BetaDistributionConstant
 
         a = b = t = p = 0;
         switch (algorithm) {
-            case BetaDistributionAlgorithmAS: break;
-            case BetaDistributionAlgorithm11: break;
-            case BetaDistributionAlgorithm1X: b = 1 / beta; break;
-            case BetaDistributionAlgorithmX1: a = 1 / alpha; break;
+            case BetaDistributionAlgorithmAS:
+                break;
+            case BetaDistributionAlgorithm11:
+                break;
+            case BetaDistributionAlgorithm1X:
+                b = 1 / beta;
+                break;
+            case BetaDistributionAlgorithmX1:
+                a = 1 / alpha;
+                break;
             case BetaDistributionAlgorithmC:
                 a = alpha + beta;
                 b = std::min(alpha, beta);

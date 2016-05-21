@@ -929,17 +929,37 @@ class MKLEngine
         if (Bits >= bits)
             m *= Bits / bits + (Bits % bits == 0 ? 0 : 1);
         switch (stream_.get_brng()) {
-            case VSL_BRNG_MCG31: stream_.skip_ahead(m); break;
-            case VSL_BRNG_MRG32K3A: stream_.skip_ahead(m); break;
-            case VSL_BRNG_MCG59: stream_.skip_ahead(m); break;
-            case VSL_BRNG_WH: stream_.skip_ahead(m); break;
-            case VSL_BRNG_MT19937: stream_.skip_ahead(m); break;
-            case VSL_BRNG_SFMT19937: stream_.skip_ahead(m); break;
-            case VSL_BRNG_SOBOL: stream_.skip_ahead(m); break;
-            case VSL_BRNG_NIEDERR: stream_.skip_ahead(m); break;
+            case VSL_BRNG_MCG31:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_MRG32K3A:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_MCG59:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_WH:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_MT19937:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_SFMT19937:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_SOBOL:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_NIEDERR:
+                stream_.skip_ahead(m);
+                break;
 #if INTEL_MKL_VERSION >= 110300
-            case VSL_BRNG_PHILOX4X32X10: stream_.skip_ahead(m); break;
-            case VSL_BRNG_ARS5: stream_.skip_ahead(m); break;
+            case VSL_BRNG_PHILOX4X32X10:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_ARS5:
+                stream_.skip_ahead(m);
+                break;
 #endif
             default:
                 while (nskip >= M) {

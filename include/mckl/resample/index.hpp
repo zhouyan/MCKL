@@ -128,9 +128,9 @@ class ResampleIndex
 
     std::size_t index_matrix_nrow(std::size_t iter_back) const
     {
-        runtime_assert(iter_back < iter_size(), "**ResampleIndex::index_"
-                                                "matrix_nrow** iteration "
-                                                "numbers out of range");
+        runtime_assert(iter_back < iter_size(),
+            "**ResampleIndex::index_matrix_nrow** iteration numbers out of "
+            "range");
 
         return index_[iter_back].size();
     }

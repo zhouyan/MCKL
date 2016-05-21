@@ -149,8 +149,8 @@ template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 {
     static_assert(std::is_unsigned<UIntType>::value,
-        "**uniform_bits_distribution** USED WITH UIntType OTHER THAN UNSIGNED "
-        "TYPES");
+        "**uniform_bits_distribution** used with UIntType other than unsigned "
+        "types");
 
     static constexpr int rbits = RNGTraits<RNGType>::bits;
     static constexpr int ubits = std::numeric_limits<UIntType>::digits;

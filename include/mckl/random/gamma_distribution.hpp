@@ -89,7 +89,8 @@ class GammaDistributionConstant
                 d = alpha - const_one<RealType>() / 3;
                 c = 1 / (3 * std::sqrt(d));
                 break;
-            case GammaDistributionAlgorithmE: break;
+            case GammaDistributionAlgorithmE:
+                break;
         }
     }
 

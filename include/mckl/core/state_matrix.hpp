@@ -170,8 +170,9 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
 
     StateMatrixBase(size_type N, size_type dim) : size_(N)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::StateMatrix** used with "
-                                      "an object with fixed dimension");
+        static_assert(Dim == Dynamic,
+            "**StateMatrix::StateMatrix** used with an object with fixed "
+            "dimension");
 
         resize_data(N, dim);
     }
@@ -257,8 +258,9 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     /// Dynamic`
     void resize(size_type N, size_type dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
-                                      "object with fixed dimension");
+        static_assert(Dim == Dynamic,
+            "**StateMatrix::resize** used with an object with fixed "
+            "dimension");
 
         resize_both(N, dim);
     }
@@ -266,8 +268,9 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     /// \brief Change the dimension, only usable when `Dim == Dynamic`
     void resize_dim(size_type dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
-                                      "an object with fixed dimension");
+        static_assert(Dim == Dynamic,
+            "**StateMatrix::resize_dim** used with an object with fixed "
+            "dimension");
 
         resize_both(this->size(), dim);
     }
@@ -524,8 +527,9 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     /// Dynamic`
     void resize(size_type N, size_type dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize** used with an "
-                                      "object with fixed dimension");
+        static_assert(Dim == Dynamic,
+            "**StateMatrix::resize** used with an object with fixed "
+            "dimension");
 
         resize_both(N, dim);
     }
@@ -533,8 +537,9 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     /// \brief Change the dimension, only usable when `Dim == Dynamic`
     void resize_dim(size_type dim)
     {
-        static_assert(Dim == Dynamic, "**StateMatrix::resize_dim** used with "
-                                      "an object with fixed dimension");
+        static_assert(Dim == Dynamic,
+            "**StateMatrix::resize_dim** used with an object with fixed "
+            "dimension");
 
         resize_both(this->size(), dim);
     }

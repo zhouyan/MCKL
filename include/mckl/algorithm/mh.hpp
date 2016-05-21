@@ -244,11 +244,16 @@ class NormalProposal
     {
         result_type z = normal_(rng);
         switch (flag_) {
-            case 0: return internal::normal_proposal_q(*x, *y, z);
-            case 1: return internal::normal_proposal_qb(*x, *y, z, b_);
-            case 2: return internal::normal_proposal_qa(*x, *y, z, a_);
-            case 3: return internal::normal_proposal_qab(*x, *y, z, a_, b_);
-            default: return 0;
+            case 0:
+                return internal::normal_proposal_q(*x, *y, z);
+            case 1:
+                return internal::normal_proposal_qb(*x, *y, z, b_);
+            case 2:
+                return internal::normal_proposal_qa(*x, *y, z, a_);
+            case 3:
+                return internal::normal_proposal_qab(*x, *y, z, a_, b_);
+            default:
+                return 0;
         }
     }
 
@@ -511,7 +516,8 @@ class NormalMVProposal
                     q += internal::normal_proposal_qab(
                         x[i], y[i], z_[i], a_[i], b_[i]);
                     break;
-                default: break;
+                default:
+                    break;
             }
         }
 
@@ -559,16 +565,18 @@ class NormalMVLogitProposal
     NormalMVLogitProposal(result_type chol)
         : normal_mv_(const_zero<result_type>(), chol)
     {
-        static_assert(Dim > 1, "**NormalMVLogitProposal** object declared "
-                               "with dimension less than 2");
+        static_assert(Dim > 1,
+            "**NormalMVLogitProposal** object declared with dimension less "
+            "than 2");
     }
 
     /// \brief Only usable when `Dim > 1`
     NormalMVLogitProposal(const result_type *chol)
         : normal_mv_(const_zero<result_type>(), chol)
     {
-        static_assert(Dim > 1, "**NormalMVLogitProposal** object declared "
-                               "with dimension less than 2");
+        static_assert(Dim > 1,
+            "**NormalMVLogitProposal** object declared with dimension less "
+            "than 2");
     }
 
     /// \brief Only usable when `Dim == Dynamic`
@@ -578,8 +586,9 @@ class NormalMVLogitProposal
         static_assert(Dim == Dynamic,
             "**NormalMVLogitProposal** object declared with fixed dimension");
 
-        runtime_assert(dim > 1, "**NormalMVLogitProposal** constructed with "
-                                "dimension less than 2");
+        runtime_assert(dim > 1,
+            "**NormalMVLogitProposal** constructed with dimension less than "
+            "2");
     }
 
     /// \brief Only usable when `Dim == Dynamic`
@@ -589,8 +598,9 @@ class NormalMVLogitProposal
         static_assert(Dim == Dynamic,
             "**NormalMVLogitProposal** object declared with fixed dimension");
 
-        runtime_assert(dim > 1, "**NormalMVLogitProposal** constructed with "
-                                "dimension less than 2");
+        runtime_assert(dim > 1,
+            "**NormalMVLogitProposal** constructed with dimension less than "
+            "2");
     }
 
     std::size_t dim() const { return normal_mv_.dim(); }
