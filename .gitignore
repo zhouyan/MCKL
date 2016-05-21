@@ -1,5 +1,19 @@
+*.swp
+.DS_Store
 build
+manual/manual.aux
+manual/manual.bbl
+manual/manual.bcf
+manual/manual.blg
+manual/manual.fdb_latexmk
+manual/manual.fls
+manual/manual.log
+manual/manual.lot
+manual/manual.out
 manual/manual.pdf
+manual/manual.run.xml
+manual/manual.tex.latexmain
+manual/manual.toc
 manual/prg/gmm
 manual/prg/pf
 manual/prg/pf.pdf
@@ -11,4 +25,5 @@ manual/prg/program_option
 manual/prg/progress
 manual/tab/rng_distribution_*.tex
 manual/tab/rng_engine_*.tex
+manual/tex/*.aux
 manual/tex/inc.tex
