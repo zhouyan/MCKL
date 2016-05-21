@@ -63,7 +63,7 @@ static inline void pf_weight(size_t t, mckl_particle particle)
     for (size_t i = 0; i < n; ++i)
         pf_inc_w[i] =
             pf_log_likelihood(t, mckl_particle_get_index(particle, i));
-    mckl_weight_add_log(mckl_particle_weight(particle), pf_inc_w, 1);
+    mckl_weight_add_log(mckl_particle_weight(particle), pf_inc_w);
 }
 
 static inline void pf_eval(
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     mckl_monitor_delete(&pf_pos);
     mckl_sampler_initialize(sampler);
     mckl_sampler_iterate(sampler, pf_obs_size - 1);
-    mckl_sampler_print_f(sampler, "pf.out", '\t');
+    mckl_sampler_print_f(sampler, "pf.est", '\t');
     mckl_sampler_delete(&sampler);
 
     pf_free();
