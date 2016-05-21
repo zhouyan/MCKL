@@ -47,6 +47,18 @@ inline bool rayleigh_distribution_check_param(RealType sigma)
     return sigma > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void rayleigh_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType sigma)
+{
+    u01_oc_distribution(rng, n, r);
+    log(n, r, r);
+    mul(n, -2 * sigma * sigma, r, r);
+    sqrt(n, r, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Rayleigh, rayleigh, sigma)
+
 } // namespace mckl::internal
 
 /// \brief Rayleigh distribution
@@ -74,25 +86,7 @@ class RayleighDistribution
     }
 }; // class RayleighDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void rayleigh_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType sigma)
-{
-    u01_oc_distribution(rng, n, r);
-    log(n, r, r);
-    mul(n, -2 * sigma * sigma, r, r);
-    sqrt(n, r, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating rayleigh random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(rayleigh, sigma)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_1(Rayleigh, rayleigh, sigma)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Rayleigh, RealType)
 
 } // namespace mckl
 

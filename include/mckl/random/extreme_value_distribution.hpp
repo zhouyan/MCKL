@@ -47,6 +47,19 @@ inline bool extreme_value_distribution_check_param(RealType, RealType b)
     return b > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void extreme_value_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    u01_oo_distribution(rng, n, r);
+    log(n, r, r);
+    mul(n, static_cast<RealType>(-1), r, r);
+    log(n, r, r);
+    fma(n, r, -b, a, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(ExtremeValue, extreme_value, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Extreme value distribution
@@ -77,26 +90,7 @@ class ExtremeValueDistribution
     }
 }; // class ExtremeValueDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void extreme_value_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    u01_oo_distribution(rng, n, r);
-    log(n, r, r);
-    mul(n, static_cast<RealType>(-1), r, r);
-    log(n, r, r);
-    fma(n, r, -b, a, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating extreme value random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(extreme_value, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(ExtremeValue, extreme_value, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(ExtremeValue, RealType)
 
 } // namespace mckl
 

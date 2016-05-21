@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/lognormal_distribution.hpp>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_lognormal_##name(                                   \
         mckl_rng rng, size_t n, double *r, double m, double s)                \
     {                                                                         \
-        ::mckl::lognormal_distribution(                                       \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, m, s);               \
+        ::mckl::LognormalDistribution<double> dist(m, s);                     \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

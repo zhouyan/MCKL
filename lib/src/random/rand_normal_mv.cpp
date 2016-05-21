@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/normal_mv_distribution.hpp>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_normal_mv_##name(mckl_rng rng, size_t n, double *r, \
         size_t dim, const double *mean, const double *chol)                   \
     {                                                                         \
-        ::mckl::normal_mv_distribution(                                       \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, dim, mean, chol);    \
+        ::mckl::NormalMVDistribution<double> dist(dim, mean, chol);           \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

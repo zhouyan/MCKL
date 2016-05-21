@@ -48,6 +48,23 @@ inline bool weibull_distribution_check_param(RealType a, RealType b)
     return a > 0 && b > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void weibull_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    u01_oo_distribution(rng, n, r);
+    log(n, r, r);
+    if (is_one(a)) {
+        mul(n, -b, r, r);
+    } else {
+        mul(n, static_cast<RealType>(-1), r, r);
+        pow(n, r, 1 / a, r);
+        mul(n, b, r, r);
+    }
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Weibull, weibull, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Weibull distribution
@@ -77,30 +94,7 @@ class WeibullDistribution
     }
 }; // class WeibullDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void weibull_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    u01_oo_distribution(rng, n, r);
-    log(n, r, r);
-    if (is_one(a)) {
-        mul(n, -b, r, r);
-    } else {
-        mul(n, static_cast<RealType>(-1), r, r);
-        pow(n, r, 1 / a, r);
-        mul(n, b, r, r);
-    }
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating weibull random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(weibull, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Weibull, weibull, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Weibull, RealType)
 
 } // namespace mckl
 

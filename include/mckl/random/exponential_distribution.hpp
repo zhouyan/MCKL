@@ -47,6 +47,17 @@ inline bool exponential_distribution_check_param(RealType lambda)
     return lambda > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void exponential_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType lambda)
+{
+    u01_oc_distribution(rng, n, r);
+    log(n, r, r);
+    mul(n, -1 / lambda, r, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Exponential, exponential, lambda)
+
 } // namespace mckl::internal
 
 /// \brief Exponential distribution
@@ -74,24 +85,7 @@ class ExponentialDistribution
     }
 }; // class ExponentialDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void exponential_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType lambda)
-{
-    u01_oc_distribution(rng, n, r);
-    log(n, r, r);
-    mul(n, -1 / lambda, r, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating exponential random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(exponential, lambda)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_1(Exponential, exponential, lambda)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Exponential, RealType)
 
 } // namespace mckl
 

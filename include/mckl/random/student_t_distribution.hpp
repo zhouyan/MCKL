@@ -48,6 +48,26 @@ inline bool student_t_distribution_check_param(RealType n)
     return n > 0;
 }
 
+template <std::size_t K, typename RealType, typename RNGType>
+inline void student_t_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType df)
+{
+    Array<RealType, K> s;
+    chi_squared_distribution(rng, n, r, df);
+    mul(n, 1 / df, r, r);
+    sqrt(n, r, r);
+    normal_distribution(
+        rng, n, s.data(), const_zero<RealType>(), const_one<RealType>());
+    div(n, s.data(), r, r);
+
+    StudentTDistribution<RealType> dist(df);
+    for (std::size_t i = 0; i != n; ++i)
+        if (!std::isfinite(r[i]))
+            r[i] = dist(rng);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(StudentT, student_t, n)
+
 } // namespace mckl::internal
 
 /// \brief Student-t distribution
@@ -92,33 +112,7 @@ class StudentTDistribution
     }
 }; // class StudentTDistribution
 
-namespace internal
-{
-
-template <std::size_t K, typename RealType, typename RNGType>
-inline void student_t_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType df)
-{
-    Array<RealType, K> s;
-    chi_squared_distribution(rng, n, r, df);
-    mul(n, 1 / df, r, r);
-    sqrt(n, r, r);
-    normal_distribution(
-        rng, n, s.data(), const_zero<RealType>(), const_one<RealType>());
-    div(n, s.data(), r, r);
-
-    StudentTDistribution<RealType> dist(df);
-    for (std::size_t i = 0; i != n; ++i)
-        if (!std::isfinite(r[i]))
-            r[i] = dist(rng);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating student-t random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(student_t, n)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_1(StudentT, student_t, n)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(StudentT, RealType)
 
 } // namespace mckl
 

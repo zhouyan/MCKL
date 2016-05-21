@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
+#include <mckl/random/uniform_bits_distribution.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_64_##name(                                          \
         mckl_rng rng, size_t n, unsigned long long *r)                        \
     {                                                                         \
-        ::mckl::uniform_bits_distribution(                                    \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r);                     \
+        ::mckl::UniformBitsDistribution<unsigned long long> dist;             \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

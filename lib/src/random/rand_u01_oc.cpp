@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
+#include <mckl/random/u01_distribution.hpp>
 
 extern "C" {
 
@@ -44,8 +46,8 @@ extern "C" {
 #define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     inline void mckl_rand_u01_oc_##name(mckl_rng rng, size_t n, double *r)    \
     {                                                                         \
-        ::mckl::u01_oc_distribution(                                          \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r);                     \
+        ::mckl::U01OCDistribution<double> dist;                               \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

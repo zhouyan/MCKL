@@ -113,6 +113,66 @@ using U01UIntType =
 
 #endif // MCKL_U01_USE_64BITS_DOUBLE
 
+MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_cc)
+MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_co)
+MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_oc)
+MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_oo)
+
+#if MCKL_U01_USE_FIXED_POINT
+
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+{
+    u01_co_distribution_impl<K>(rng, n, r);
+}
+
+#else // MCKL_U01_USE_FIXED_POINT
+
+template <std::size_t, typename RealType, typename UIntType>
+inline RealType u01_distribution_impl(const UIntType *, std::false_type)
+{
+    return 0;
+}
+
+template <std::size_t N, typename RealType, typename UIntType>
+inline RealType u01_distribution_impl(const UIntType *u, std::true_type)
+{
+    static constexpr int W = std::numeric_limits<UIntType>::digits;
+    static constexpr int M = std::numeric_limits<RealType>::digits;
+    static constexpr int P = (M + W - 1) / W;
+    static constexpr int Q = 1 > P ? 1 : P;
+
+    return static_cast<RealType>(u[N]) *
+        U01Pow2Inv<RealType, (Q - N) * W>::value +
+        u01_distribution_impl<N + 1, RealType>(
+               u, std::integral_constant<bool, N + 1 < Q>());
+}
+
+template <std::size_t K, typename RealType, typename RNGType>
+inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+{
+    using UIntType = U01UIntType<RNGType, RealType>;
+
+    static constexpr int W = std::numeric_limits<UIntType>::digits;
+    static constexpr int M = std::numeric_limits<RealType>::digits;
+    static constexpr int P = (M + W - 1) / W;
+    static constexpr int Q = 1 > P ? 1 : P;
+
+    Array<UIntType, K * Q> s;
+    uniform_bits_distribution(rng, n * Q, s.data());
+    const UIntType *u = s.data();
+    for (std::size_t i = 0; i != n; ++i, u += Q)
+        r[i] = u01_distribution_impl<0, RealType>(u, std::true_type());
+}
+
+#endif // MCKL_U01_USE_FIXED_POINT
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01, u01)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CC, u01_cc)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CO, u01_co)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OC, u01_oc)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OO, u01_oo)
+
 } // namespace mckl::internal
 
 /// \brief Standard uniform distribution on [0, 1]
@@ -187,89 +247,11 @@ class U01Distribution
 
 #endif // MCKL_U01_USE_FIXED_POINT
 
-namespace internal
-{
-
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_cc)
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_co)
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_oc)
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_oo)
-
-#if MCKL_U01_USE_FIXED_POINT
-
-template <std::size_t K, typename RealType, typename RNGType>
-inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
-{
-    u01_co_distribution_impl<K>(rng, n, r);
-}
-
-#else // MCKL_U01_USE_FIXED_POINT
-
-template <std::size_t, typename RealType, typename UIntType>
-inline RealType u01_distribution_impl(const UIntType *, std::false_type)
-{
-    return 0;
-}
-
-template <std::size_t N, typename RealType, typename UIntType>
-inline RealType u01_distribution_impl(const UIntType *u, std::true_type)
-{
-    static constexpr int W = std::numeric_limits<UIntType>::digits;
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = (M + W - 1) / W;
-    static constexpr int Q = 1 > P ? 1 : P;
-
-    return static_cast<RealType>(u[N]) *
-        U01Pow2Inv<RealType, (Q - N) * W>::value +
-        u01_distribution_impl<N + 1, RealType>(
-               u, std::integral_constant<bool, N + 1 < Q>());
-}
-
-template <std::size_t K, typename RealType, typename RNGType>
-inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
-{
-    using UIntType = U01UIntType<RNGType, RealType>;
-
-    static constexpr int W = std::numeric_limits<UIntType>::digits;
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = (M + W - 1) / W;
-    static constexpr int Q = 1 > P ? 1 : P;
-
-    Array<UIntType, K * Q> s;
-    uniform_bits_distribution(rng, n * Q, s.data());
-    const UIntType *u = s.data();
-    for (std::size_t i = 0; i != n; ++i, u += Q)
-        r[i] = u01_distribution_impl<0, RealType>(u, std::true_type());
-}
-
-#endif // MCKL_U01_USE_FIXED_POINT
-
-} // namespace mckl::internal
-
-/// \brief Generate standard uniform random variates on [0, 1]
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(u01_cc)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_0(U01CC, u01_cc, RealType)
-
-/// \brief Generate standard uniform random variates on [0, 1)
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(u01_co)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_0(U01CO, u01_co, RealType)
-
-/// \brief Generate standard uniform random variates on (0, 1]
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(u01_oc)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_0(U01OC, u01_oc, RealType)
-
-/// \brief Generate standard uniform random variates on (0, 1)
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(u01_oo)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_0(U01OO, u01_oo, RealType)
-
-/// \brief Generate standard uniform random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(u01)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_0(U01, u01, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01CC, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01CO, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01OC, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01OO, RealType)
 
 } // namespace mckl
 

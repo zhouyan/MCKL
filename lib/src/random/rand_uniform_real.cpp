@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
+#include <mckl/random/uniform_real_distribution.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_uniform_real_##name(                                \
         mckl_rng rng, size_t n, double *r, double a, double b)                \
     {                                                                         \
-        ::mckl::uniform_real_distribution(                                    \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, a, b);               \
+        ::mckl::UniformRealDistribution<double> dist(a, b);                   \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

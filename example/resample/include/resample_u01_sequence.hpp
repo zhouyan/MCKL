@@ -64,7 +64,8 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
         r2.resize(K);
 
         watch1.start();
-        mckl::u01_distribution(rng1, std::min(L, K), r1.data());
+        mckl::U01Distribution<RealType> dist;
+        mckl::rand(rng1, dist, std::min(L, K), r1.data());
         u01seq(K, r1.data(), r1.data());
         watch1.stop();
 

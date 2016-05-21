@@ -29,7 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -46,7 +47,10 @@ extern "C" {
         mckl_rng rng, size_t n, int *r, double p)                             \
     {                                                                         \
         std::bernoulli_distribution dist(p);                                  \
-        MCKL_DEFINE_LIB_RANDOM_DIST(RNGType);                                 \
+        bool *b = new bool[n];                                                \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, b);      \
+        std::copy_n(b, n, r);                                                 \
+        delete[] b;                                                           \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

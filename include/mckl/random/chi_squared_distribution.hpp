@@ -47,6 +47,20 @@ inline bool chi_squared_distribution_check_param(RealType n)
     return n > 0;
 }
 
+template <typename RealType, typename RNGType>
+inline void chi_squared_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType df)
+{
+    gamma_distribution(rng, n, r, df / 2, static_cast<RealType>(2));
+}
+
+template <typename RealType, typename RNGType>
+inline void chi_squared_distribution(RNGType &rng, std::size_t n, RealType *r,
+    const typename ChiSquaredDistribution<RealType>::param_type &param)
+{
+    chi_squared_distribution(rng, n, r, param.n());
+}
+
 } // namespace mckl::internal
 
 /// \brief The \f$\chi^2\f$ distribution
@@ -78,20 +92,7 @@ class ChiSquaredDistribution
     }
 }; // class ChiSquaredDistribution
 
-/// \brief Generating \f$\chi^2\f$ random variates
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void chi_squared_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType df)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**chi_squared_distribution** used with RealType other than floating "
-        "point types");
-
-    gamma_distribution(rng, n, r, df / 2, static_cast<RealType>(2));
-}
-
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_1(ChiSquared, chi_squared, n)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(ChiSquared, RealType)
 
 } // namespace mckl
 

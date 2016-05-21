@@ -47,6 +47,24 @@ inline bool levy_distribution_check_param(RealType, RealType b)
     return b > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void levy_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    normal_distribution(
+        rng, n, r, const_zero<RealType>(), const_one<RealType>());
+    sqr(n, r, r);
+    inv(n, r, r);
+    fma(n, r, b, a, r);
+
+    LevyDistribution<RealType> dist;
+    for (std::size_t i = 0; i != n; ++i)
+        if (!std::isfinite(r[i]))
+            r[i] = dist(rng);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Levy, levy, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Levy distribution
@@ -77,31 +95,7 @@ class LevyDistribution
     }
 }; // class LevyDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void levy_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    normal_distribution(
-        rng, n, r, const_zero<RealType>(), const_one<RealType>());
-    sqr(n, r, r);
-    inv(n, r, r);
-    fma(n, r, b, a, r);
-
-    LevyDistribution<RealType> dist;
-    for (std::size_t i = 0; i != n; ++i)
-        if (!std::isfinite(r[i]))
-            r[i] = dist(rng);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating levy random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(levy, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Levy, levy, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Levy, RealType)
 
 } // namespace mckl
 

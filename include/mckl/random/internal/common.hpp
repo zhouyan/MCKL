@@ -39,6 +39,64 @@
 #include <mkl_vsl.h>
 #endif
 
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(Name, name)                    \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(RNGType &rng, std::size_t n, T *r)        \
+    {                                                                         \
+        const std::size_t K = BufferSize<T>::value;                           \
+        const std::size_t M = n / K;                                          \
+        const std::size_t L = n % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            name##_distribution_impl<K>(rng, K, r);                           \
+        name##_distribution_impl<K>(rng, L, r);                               \
+    }                                                                         \
+                                                                              \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(RNGType &rng, std::size_t N, T *r,        \
+        const typename Name##Distribution<T>::param_type &)                   \
+    {                                                                         \
+        name##_distribution(rng, N, r);                                       \
+    }
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Name, name, p1)                \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(RNGType &rng, std::size_t N, T *r, T p1)  \
+    {                                                                         \
+        const std::size_t K = BufferSize<T>::value;                           \
+        const std::size_t M = N / K;                                          \
+        const std::size_t L = N % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            name##_distribution_impl<K>(rng, K, r, p1);                       \
+        name##_distribution_impl<K>(rng, L, r, p1);                           \
+    }                                                                         \
+                                                                              \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(RNGType &rng, std::size_t N, T *r,        \
+        const typename Name##Distribution<T>::param_type &param)              \
+    {                                                                         \
+        name##_distribution(rng, N, r, param.p1());                           \
+    }
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Name, name, p1, p2)            \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(                                          \
+        RNGType &rng, std::size_t N, T *r, T p1, T p2)                        \
+    {                                                                         \
+        const std::size_t K = BufferSize<T>::value;                           \
+        const std::size_t M = N / K;                                          \
+        const std::size_t L = N % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            name##_distribution_impl<K>(rng, K, r, p1, p2);                   \
+        name##_distribution_impl<K>(rng, L, r, p1, p2);                       \
+    }                                                                         \
+                                                                              \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(RNGType &rng, std::size_t N, T *r,        \
+        const typename Name##Distribution<T>::param_type &param)              \
+    {                                                                         \
+        name##_distribution(rng, N, r, param.p1(), param.p2());               \
+    }
+
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_0(Name, T, t, Type)        \
     public:                                                                   \
     class param_type                                                          \
@@ -241,205 +299,6 @@
         friend distribution_type;                                             \
     }; // class param_type
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_3(                         \
-    Name, name, p1, v1, p2, v2, p3, v3)                                       \
-    public:                                                                   \
-    class param_type                                                          \
-    {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name                                                        \
-            "Distribution::param_type** used with RealType other than "       \
-            "floating point types");                                          \
-                                                                              \
-        public:                                                               \
-        using result_type = RealType;                                         \
-        using distribution_type = Name##Distribution<RealType>;               \
-                                                                              \
-        explicit param_type(                                                  \
-            result_type p1 = v1, result_type p2 = v2, result_type p3 = v3)    \
-            : p1##_(p1), p2##_(p2), p3##_(p3)                                 \
-        {                                                                     \
-            ::mckl::runtime_assert(                                           \
-                internal::name##_distribution_check_param(p1, p2, p3),        \
-                "**" #Name                                                    \
-                "Distribution** constructed with invalid arguments");         \
-        }                                                                     \
-                                                                              \
-        result_type p1() const { return p1##_; }                              \
-        result_type p2() const { return p2##_; }                              \
-        result_type p3() const { return p3##_; }                              \
-                                                                              \
-        friend bool operator==(                                               \
-            const param_type &param1, const param_type &param2)               \
-        {                                                                     \
-            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
-                return false;                                                 \
-            if (!internal::is_equal(param1.p2##_, param2.p2##_))              \
-                return false;                                                 \
-            if (!internal::is_equal(param1.p3##_, param2.p3##_))              \
-                return false;                                                 \
-            return true;                                                      \
-        }                                                                     \
-                                                                              \
-        friend bool operator!=(                                               \
-            const param_type &param1, const param_type &param2)               \
-        {                                                                     \
-            return !(param1 == param2);                                       \
-        }                                                                     \
-                                                                              \
-        template <typename CharT, typename Traits>                            \
-        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)   \
-        {                                                                     \
-            if (!os)                                                          \
-                return os;                                                    \
-                                                                              \
-            os << param.p1##_ << ' ';                                         \
-            os << param.p2##_ << ' ';                                         \
-            os << param.p3##_;                                                \
-                                                                              \
-            return os;                                                        \
-        }                                                                     \
-                                                                              \
-        template <typename CharT, typename Traits>                            \
-        friend std::basic_istream<CharT, Traits> &operator>>(                 \
-            std::basic_istream<CharT, Traits> &is, param_type &param)         \
-        {                                                                     \
-            if (!is)                                                          \
-                return is;                                                    \
-                                                                              \
-            result_type p1 = 0;                                               \
-            result_type p2 = 0;                                               \
-            result_type p3 = 0;                                               \
-            is >> std::ws >> p1;                                              \
-            is >> std::ws >> p2;                                              \
-            is >> std::ws >> p3;                                              \
-                                                                              \
-            if (is) {                                                         \
-                if (internal::name##_distribution_check_param(p1, p2, p3)) {  \
-                    param.p1##_ = p1;                                         \
-                    param.p2##_ = p2;                                         \
-                    param.p3##_ = p3;                                         \
-                } else {                                                      \
-                    is.setstate(std::ios_base::failbit);                      \
-                }                                                             \
-            }                                                                 \
-                                                                              \
-            return is;                                                        \
-        }                                                                     \
-                                                                              \
-        private:                                                              \
-        result_type p1##_;                                                    \
-        result_type p2##_;                                                    \
-        result_type p3##_;                                                    \
-                                                                              \
-        friend distribution_type;                                             \
-    }; // class param_type
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_4(                         \
-    Name, name, p1, v1, p2, v2, p3, v3, p4, v4)                               \
-    public:                                                                   \
-    class param_type                                                          \
-    {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #Name                                                        \
-            "Distribution::param_type** used with RealType other "            \
-            "than floating point types");                                     \
-                                                                              \
-        public:                                                               \
-        using result_type = RealType;                                         \
-        using distribution_type = Name##Distribution<RealType>;               \
-                                                                              \
-        explicit param_type(result_type p1 = v1, result_type p2 = v2,         \
-            result_type p3 = v3, result_type p4 = v4)                         \
-            : p1##_(p1), p2##_(p2), p3##_(p3), p4##_(p4)                      \
-        {                                                                     \
-            ::mckl::runtime_assert(                                           \
-                internal::name##_distribution_check_param(p1, p2, p3, p4),    \
-                "**" #Name                                                    \
-                "Distribution** constructed with invalid arguments");         \
-        }                                                                     \
-                                                                              \
-        result_type p1() const { return p1##_; }                              \
-        result_type p2() const { return p2##_; }                              \
-        result_type p3() const { return p3##_; }                              \
-        result_type p4() const { return p4##_; }                              \
-                                                                              \
-        friend bool operator==(                                               \
-            const param_type &param1, const param_type &param2)               \
-        {                                                                     \
-            if (!internal::is_equal(param1.p1##_, param2.p1##_))              \
-                return false;                                                 \
-            if (!internal::is_equal(param1.p2##_, param2.p2##_))              \
-                return false;                                                 \
-            if (!internal::is_equal(param1.p3##_, param2.p3##_))              \
-                return false;                                                 \
-            if (!internal::is_equal(param1.p4##_, param2.p4##_))              \
-                return false;                                                 \
-            return true;                                                      \
-        }                                                                     \
-                                                                              \
-        friend bool operator!=(                                               \
-            const param_type &param1, const param_type &param2)               \
-        {                                                                     \
-            return !(param1 == param2);                                       \
-        }                                                                     \
-                                                                              \
-        template <typename CharT, typename Traits>                            \
-        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
-            std::basic_ostream<CharT, Traits> &os, const param_type &param)   \
-        {                                                                     \
-            if (!os)                                                          \
-                return os;                                                    \
-                                                                              \
-            os << param.p1##_ << ' ';                                         \
-            os << param.p2##_ << ' ';                                         \
-            os << param.p3##_ << ' ';                                         \
-            os << param.p4##_;                                                \
-                                                                              \
-            return os;                                                        \
-        }                                                                     \
-                                                                              \
-        template <typename CharT, typename Traits>                            \
-        friend std::basic_istream<CharT, Traits> &operator>>(                 \
-            std::basic_istream<CharT, Traits> &is, param_type &param)         \
-        {                                                                     \
-            if (!is)                                                          \
-                return is;                                                    \
-                                                                              \
-            result_type p1 = 0;                                               \
-            result_type p2 = 0;                                               \
-            result_type p3 = 0;                                               \
-            result_type p4 = 0;                                               \
-            is >> std::ws >> p1;                                              \
-            is >> std::ws >> p2;                                              \
-            is >> std::ws >> p3;                                              \
-            is >> std::ws >> p4;                                              \
-                                                                              \
-            if (is) {                                                         \
-                if (internal::name##_distribution_check_param(                \
-                        p1, p2, p3, p4)) {                                    \
-                    param.p1##_ = p1;                                         \
-                    param.p2##_ = p2;                                         \
-                    param.p3##_ = p3;                                         \
-                    param.p4##_ = p4;                                         \
-                } else {                                                      \
-                    is.setstate(std::ios_base::failbit);                      \
-                }                                                             \
-            }                                                                 \
-                                                                              \
-            return is;                                                        \
-        }                                                                     \
-                                                                              \
-        private:                                                              \
-        result_type p1##_;                                                    \
-        result_type p2##_;                                                    \
-        result_type p3##_;                                                    \
-        result_type p4##_;                                                    \
-                                                                              \
-        friend distribution_type;                                             \
-    }; // class param_type
-
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                \
     public:                                                                   \
     using result_type = T;                                                    \
@@ -496,151 +355,6 @@
                                                                               \
     result_type p1() const { return param_.p1(); }                            \
     result_type p2() const { return param_.p2(); }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_3(                        \
-    Name, p1, v1, p2, v2, p3, v3)                                             \
-    public:                                                                   \
-    using result_type = RealType;                                             \
-    using distribution_type = Name##Distribution<RealType>;                   \
-                                                                              \
-    explicit Name##Distribution(                                              \
-        result_type p1 = v1, result_type p2 = v2, result_type p3 = v3)        \
-        : param_(p1, p2, p3)                                                  \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    explicit Name##Distribution(const param_type &param) : param_(param)      \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    explicit Name##Distribution(param_type &&param)                           \
-        : param_(std::move(param))                                            \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    result_type p1() const { return param_.p1(); }                            \
-    result_type p2() const { return param_.p2(); }                            \
-    result_type p3() const { return param_.p3(); }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_4(                        \
-    Name, p1, v1, p2, v2, p3, v3, p4, v4)                                     \
-    public:                                                                   \
-    using result_type = RealType;                                             \
-    using distribution_type = Name##Distribution<RealType>;                   \
-                                                                              \
-    explicit Name##Distribution(result_type p1 = v1, result_type p2 = v2,     \
-        result_type p3 = v3, result_type p4 = v4)                             \
-        : param_(p1, p2, p3, p4)                                              \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    explicit Name##Distribution(const param_type &param) : param_(param)      \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    explicit Name##Distribution(param_type &&param)                           \
-        : param_(std::move(param))                                            \
-    {                                                                         \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    result_type p1() const { return param_.p1(); }                            \
-    result_type p2() const { return param_.p2(); }                            \
-    result_type p3() const { return param_.p3(); }                            \
-    result_type p4() const { return param_.p4(); }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)                  \
-    public:                                                                   \
-    const param_type &param() const { return param_; }                        \
-                                                                              \
-    void param(const param_type &param)                                       \
-    {                                                                         \
-        param_ = param;                                                       \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    void pram(param_type &&param)                                             \
-    {                                                                         \
-        param_ = std::move(param);                                            \
-        reset();                                                              \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    result_type operator()(RNGType &rng)                                      \
-    {                                                                         \
-        return operator()(rng, param_);                                       \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    result_type operator()(RNGType &rng, const param_type &param)             \
-    {                                                                         \
-        return generate(rng, param);                                          \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    void operator()(RNGType &rng, std::size_t n, result_type *r)              \
-    {                                                                         \
-        operator()(rng, n, r, param_);                                        \
-    }                                                                         \
-                                                                              \
-    template <typename RNGType>                                               \
-    void operator()(                                                          \
-        RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
-    {                                                                         \
-        if (n < 100) {                                                        \
-            for (std::size_t i = 0; i != n; ++i)                              \
-                r[i] = operator()(rng, param);                                \
-        } else {                                                              \
-            name##_distribution(rng, n, r, param);                            \
-        }                                                                     \
-    }                                                                         \
-                                                                              \
-    friend bool operator==(                                                   \
-        const distribution_type &dist1, const distribution_type &dist2)       \
-    {                                                                         \
-        return dist1.param_ == dist2.param_ && dist1.is_equal(dist2);         \
-    }                                                                         \
-                                                                              \
-    friend bool operator!=(                                                   \
-        const distribution_type &dist1, const distribution_type &dist2)       \
-    {                                                                         \
-        return !(dist1 == dist2);                                             \
-    }                                                                         \
-                                                                              \
-    template <typename CharT, typename Traits>                                \
-    friend std::basic_ostream<CharT, Traits> &operator<<(                     \
-        std::basic_ostream<CharT, Traits> &os, const distribution_type &dist) \
-    {                                                                         \
-        if (!os)                                                              \
-            return os;                                                        \
-                                                                              \
-        os << dist.param_;                                                    \
-        dist.ostream(os);                                                     \
-                                                                              \
-        return os;                                                            \
-    }                                                                         \
-                                                                              \
-    template <typename CharT, typename Traits>                                \
-    friend std::basic_istream<CharT, Traits> &operator>>(                     \
-        std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
-    {                                                                         \
-        if (!is)                                                              \
-            return is;                                                        \
-                                                                              \
-        is >> std::ws >> dist.param_;                                         \
-        if (is)                                                               \
-            dist.istream(is);                                                 \
-                                                                              \
-        return is;                                                            \
-    }                                                                         \
-                                                                              \
-    private:                                                                  \
-    param_type param_;
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0                              \
     private:                                                                  \
@@ -729,106 +443,100 @@
         }                                                                     \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_3(T1, m1, T2, m2, T3, m3)      \
-    private:                                                                  \
-    T1 m1;                                                                    \
-    T2 m2;                                                                    \
-    T3 m3;                                                                    \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)                  \
+    public:                                                                   \
+    const param_type &param() const { return param_; }                        \
                                                                               \
-    bool is_equal(const distribution_type &other) const                       \
+    void param(const param_type &param)                                       \
     {                                                                         \
-        if (!internal::is_equal(m1, other.m1))                                \
-            return false;                                                     \
-        if (!internal::is_equal(m2, other.m2))                                \
-            return false;                                                     \
-        if (!internal::is_equal(m3, other.m3))                                \
-            return false;                                                     \
-        return true;                                                          \
+        param_ = param;                                                       \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    void pram(param_type &&param)                                             \
+    {                                                                         \
+        param_ = std::move(param);                                            \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    result_type operator()(RNGType &rng)                                      \
+    {                                                                         \
+        return operator()(rng, param_);                                       \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    result_type operator()(RNGType &rng, const param_type &param)             \
+    {                                                                         \
+        return generate(rng, param);                                          \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    void operator()(RNGType &rng, std::size_t n, result_type *r)              \
+    {                                                                         \
+        operator()(rng, n, r, param_);                                        \
+    }                                                                         \
+                                                                              \
+    template <typename RNGType>                                               \
+    void operator()(                                                          \
+        RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
+    {                                                                         \
+        if (n < 100) {                                                        \
+            for (std::size_t i = 0; i != n; ++i)                              \
+                r[i] = operator()(rng, param);                                \
+        } else {                                                              \
+            internal::name##_distribution(rng, n, r, param);                  \
+        }                                                                     \
+    }                                                                         \
+                                                                              \
+    friend bool operator==(                                                   \
+        const distribution_type &dist1, const distribution_type &dist2)       \
+    {                                                                         \
+        return dist1.param_ == dist2.param_ && dist1.is_equal(dist2);         \
+    }                                                                         \
+                                                                              \
+    friend bool operator!=(                                                   \
+        const distribution_type &dist1, const distribution_type &dist2)       \
+    {                                                                         \
+        return !(dist1 == dist2);                                             \
     }                                                                         \
                                                                               \
     template <typename CharT, typename Traits>                                \
-    void ostream(std::basic_ostream<CharT, Traits> &os) const                 \
+    friend std::basic_ostream<CharT, Traits> &operator<<(                     \
+        std::basic_ostream<CharT, Traits> &os, const distribution_type &dist) \
     {                                                                         \
         if (!os)                                                              \
-            return;                                                           \
+            return os;                                                        \
                                                                               \
-        os << ' ' << m1;                                                      \
-        os << ' ' << m2;                                                      \
-        os << ' ' << m3;                                                      \
+        os << dist.param_;                                                    \
+        dist.ostream(os);                                                     \
+                                                                              \
+        return os;                                                            \
     }                                                                         \
                                                                               \
     template <typename CharT, typename Traits>                                \
-    void istream(std::basic_istream<CharT, Traits> &is)                       \
+    friend std::basic_istream<CharT, Traits> &operator>>(                     \
+        std::basic_istream<CharT, Traits> &is, distribution_type &dist)       \
     {                                                                         \
         if (!is)                                                              \
-            return;                                                           \
+            return is;                                                        \
                                                                               \
-        T1 tmp1;                                                              \
-        T2 tmp2;                                                              \
-        T3 tmp3;                                                              \
-        is >> std::ws >> tmp1;                                                \
-        is >> std::ws >> tmp2;                                                \
-        is >> std::ws >> tmp3;                                                \
-        if (is) {                                                             \
-            m1 = std::move(tmp1);                                             \
-            m2 = std::move(tmp2);                                             \
-            m3 = std::move(tmp3);                                             \
-        }                                                                     \
-    }
+        is >> std::ws >> dist.param_;                                         \
+        if (is)                                                               \
+            dist.istream(is);                                                 \
+                                                                              \
+        return is;                                                            \
+    }                                                                         \
+                                                                              \
+    private:                                                                  \
+    param_type param_;
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_4(                             \
-    T1, m1, T2, m2, T3, m3, T4, m4)                                           \
-    private:                                                                  \
-    T1 m1;                                                                    \
-    T2 m2;                                                                    \
-    T3 m3;                                                                    \
-    T4 m4;                                                                    \
-                                                                              \
-    bool is_equal(const distribution_type &other) const                       \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Name, T)                         \
+    template <typename T, typename RNGType>                                   \
+    inline void rand(RNGType &rng, Name##Distribution<T> &distribution,       \
+        std::size_t N, T *r)                                                  \
     {                                                                         \
-        if (!internal::is_equal(m1, other.m1))                                \
-            return false;                                                     \
-        if (!internal::is_equal(m2, other.m2))                                \
-            return false;                                                     \
-        if (!internal::is_equal(m3, other.m3))                                \
-            return false;                                                     \
-        if (!internal::is_equal(m4, other.m4))                                \
-            return false;                                                     \
-        return true;                                                          \
-    }                                                                         \
-                                                                              \
-    template <typename CharT, typename Traits>                                \
-    void ostream(std::basic_ostream<CharT, Traits> &os) const                 \
-    {                                                                         \
-        if (!os)                                                              \
-            return;                                                           \
-                                                                              \
-        os << ' ' << m1;                                                      \
-        os << ' ' << m2;                                                      \
-        os << ' ' << m3;                                                      \
-        os << ' ' << m4;                                                      \
-    }                                                                         \
-                                                                              \
-    template <typename CharT, typename Traits>                                \
-    void istream(std::basic_istream<CharT, Traits> &is)                       \
-    {                                                                         \
-        if (!is)                                                              \
-            return;                                                           \
-                                                                              \
-        T1 tmp1;                                                              \
-        T2 tmp2;                                                              \
-        T3 tmp3;                                                              \
-        T4 tmp4;                                                              \
-        is >> std::ws >> tmp1;                                                \
-        is >> std::ws >> tmp2;                                                \
-        is >> std::ws >> tmp3;                                                \
-        is >> std::ws >> tmp4;                                                \
-        if (is) {                                                             \
-            m1 = std::move(tmp1);                                             \
-            m2 = std::move(tmp2);                                             \
-            m3 = std::move(tmp3);                                             \
-            m4 = std::move(tmp4);                                             \
-        }                                                                     \
+        distribution(rng, N, r);                                              \
     }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_0(Name, name, T, t, Type)             \
@@ -845,186 +553,6 @@
     MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_2(Name, name, p1, v1, p2, v2)  \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_2(Name, p1, v1, p2, v2)       \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_3(Name, name, p1, v1, p2, v2, p3, v3) \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_3(                             \
-        Name, name, p1, v1, p2, v2, p3, v3)                                   \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_3(                            \
-        Name, p1, v1, p2, v2, p3, v3)                                         \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_4(                                    \
-    Name, name, p1, v1, p2, v2, p3, v3, p4, v4)                               \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_4(                             \
-        Name, name, p1, v1, p2, v2, p3, v3, p4, v4)                           \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_3(                            \
-        Name, p1, v1, p2, v2, p3, v3, p4, v4)                                 \
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(name)                          \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t n, RealType *r) \
-    {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name                                                        \
-            "_distribution** used with RealType other than floating point "   \
-            "types");                                                         \
-                                                                              \
-        const std::size_t K = internal::BufferSize<RealType>::value;          \
-        const std::size_t M = n / K;                                          \
-        const std::size_t L = n % K;                                          \
-        for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            internal::name##_distribution_impl<K>(rng, K, r);                 \
-        internal::name##_distribution_impl<K>(rng, L, r);                     \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(name, p1)                      \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(                                          \
-        RNGType &rng, std::size_t N, RealType *r, RealType p1)                \
-    {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name                                                        \
-            "_distribution** used with RealType other than floating point "   \
-            "types");                                                         \
-                                                                              \
-        const std::size_t K = internal::BufferSize<RealType>::value;          \
-        const std::size_t M = N / K;                                          \
-        const std::size_t L = N % K;                                          \
-        for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            internal::name##_distribution_impl<K>(rng, K, r, p1);             \
-        internal::name##_distribution_impl<K>(rng, L, r, p1);                 \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(name, p1, p2)                  \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(                                          \
-        RNGType &rng, std::size_t N, RealType *r, RealType p1, RealType p2)   \
-    {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name                                                        \
-            "_distribution** used with RealType other than floating point "   \
-            "types");                                                         \
-                                                                              \
-        const std::size_t K = internal::BufferSize<RealType>::value;          \
-        const std::size_t M = N / K;                                          \
-        const std::size_t L = N % K;                                          \
-        for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            internal::name##_distribution_impl<K>(rng, K, r, p1, p2);         \
-        internal::name##_distribution_impl<K>(rng, L, r, p1, p2);             \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_3(name, p1, p2, p3)              \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
-        RealType p1, RealType p2, RealType p3)                                \
-    {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name                                                        \
-            "_distribution** used with RealType other than floating point "   \
-            "types");                                                         \
-                                                                              \
-        const std::size_t K = internal::BufferSize<RealType>::value;          \
-        const std::size_t M = N / K;                                          \
-        const std::size_t L = N % K;                                          \
-        for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            internal::name##_distribution_impl<K>(rng, K, r, p1, p2, p3);     \
-        internal::name##_distribution_impl<K>(rng, L, r, p1, p2, p3);         \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_4(name, p1, p2, p3, p4)          \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
-        RealType p1, RealType p2, RealType p3, RealType p4)                   \
-    {                                                                         \
-        static_assert(std::is_floating_point<RealType>::value,                \
-            "**" #name                                                        \
-            "_distribution** used with RealType other than floating point "   \
-            "types");                                                         \
-                                                                              \
-        const std::size_t K = internal::BufferSize<RealType>::value;          \
-        const std::size_t M = N / K;                                          \
-        const std::size_t L = N % K;                                          \
-        for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            internal::name##_distribution_impl<K>(rng, K, r, p1, p2, p3, p4); \
-        internal::name##_distribution_impl<K>(rng, L, r, p1, p2, p3, p4);     \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_0(Name, name, T)                 \
-    template <typename T, typename RNGType>                                   \
-    inline void name##_distribution(RNGType &rng, std::size_t N, T *r,        \
-        const typename Name##Distribution<T>::param_type &)                   \
-    {                                                                         \
-        name##_distribution(rng, N, r);                                       \
-    }                                                                         \
-                                                                              \
-    template <typename T, typename RNGType>                                   \
-    inline void rand(                                                         \
-        RNGType &rng, Name##Distribution<T> &dist, std::size_t N, T *r)       \
-    {                                                                         \
-        dist(rng, N, r);                                                      \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_1(Name, name, p1)                \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
-        const typename Name##Distribution<RealType>::param_type &param)       \
-    {                                                                         \
-        name##_distribution(rng, N, r, param.p1());                           \
-    }                                                                         \
-                                                                              \
-    template <typename RealType, typename RNGType>                            \
-    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
-        std::size_t N, RealType *r)                                           \
-    {                                                                         \
-        dist(rng, N, r);                                                      \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Name, name, p1, p2)            \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
-        const typename Name##Distribution<RealType>::param_type &param)       \
-    {                                                                         \
-        name##_distribution(rng, N, r, param.p1(), param.p2());               \
-    }                                                                         \
-                                                                              \
-    template <typename RealType, typename RNGType>                            \
-    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
-        std::size_t N, RealType *r)                                           \
-    {                                                                         \
-        dist(rng, N, r);                                                      \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_3(Name, name, p1, p2, p3)        \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
-        const typename Name##Distribution<RealType>::param_type &param)       \
-    {                                                                         \
-        name##_distribution(rng, N, r, param.p1(), param.p2(), param.p3());   \
-    }                                                                         \
-                                                                              \
-    template <typename RealType, typename RNGType>                            \
-    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
-        std::size_t N, RealType *r)                                           \
-    {                                                                         \
-        dist(rng, N, r);                                                      \
-    }
-
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_4(Name, name, p1, p2, p3, p4)    \
-    template <typename RealType, typename RNGType>                            \
-    inline void name##_distribution(RNGType &rng, std::size_t N, RealType *r, \
-        const typename Name##Distribution<RealType>::param_type &param)       \
-    {                                                                         \
-        name##_distribution(                                                  \
-            rng, N, r, param.p1(), param.p2(), param.p3, p4());               \
-    }                                                                         \
-                                                                              \
-    template <typename RealType, typename RNGType>                            \
-    inline void rand(RNGType &rng, Name##Distribution<RealType> &dist,        \
-        std::size_t N, RealType *r)                                           \
-    {                                                                         \
-        dist(rng, N, r);                                                      \
-    }
 
 namespace mckl
 {
@@ -1087,7 +615,7 @@ inline void rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 /// \ingroup Random
 template <typename RNGType, typename DistributionType>
 inline typename DistributionType::result_type rand(
-    RNGType &rng, const DistributionType &distribution)
+    RNGType &rng, DistributionType &distribution)
 {
     return distribution(rng);
 }
@@ -1095,16 +623,18 @@ inline typename DistributionType::result_type rand(
 /// \brief Generate random distribution numbers
 /// \ingroup Random
 template <typename RNGType, typename DistributionType>
-inline void rand(RNGType &rng, const DistributionType &distribution,
-    std::size_t n, typename DistributionType::result_type *r)
+inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
+    typename DistributionType::result_type *r)
 {
-    DistributionType dist(distribution);
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = dist(rng);
+        r[i] = distribution(rng);
 }
 
 template <typename, typename>
 class CounterEngine;
+
+template <typename = double>
+class ArcsineDistribution;
 
 template <typename = double>
 class BetaDistribution;
@@ -1163,8 +693,17 @@ class StudentTDistribution;
 template <typename = double>
 class U01Distribution;
 
-template <typename = double, typename = Open, typename = Closed>
-class U01LRDistribution;
+template <typename = double>
+class U01CCDistribution;
+
+template <typename = double>
+class U01CODistribution;
+
+template <typename = double>
+class U01OCDistribution;
+
+template <typename = double>
+class U01OODistribution;
 
 template <typename = unsigned>
 class UniformBitsDistribution;
@@ -1181,6 +720,10 @@ inline void rand(
 
 template <typename RealType, typename RNGType>
 inline void rand(
+    RNGType &, ArcsineDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rand(
     RNGType &, BetaDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
@@ -1190,6 +733,10 @@ inline void rand(
 template <typename RealType, typename RNGType>
 inline void rand(
     RNGType &, ChiSquaredDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, std::size_t Dim, typename RNGType>
+inline void rand(RNGType &, DirichletDistribution<RealType, Dim> &,
+    std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
 inline void rand(
@@ -1251,9 +798,21 @@ template <typename RealType, typename RNGType>
 inline void rand(
     RNGType &, U01Distribution<RealType> &, std::size_t, RealType *);
 
-template <typename RealType, typename RNGType, typename Lower, typename Upper>
-inline void rand(RNGType &, U01LRDistribution<RealType, Lower, Upper> &,
-    std::size_t, RealType *);
+template <typename RealType, typename RNGType>
+inline void rand(
+    RNGType &, U01CCDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rand(
+    RNGType &, U01CODistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rand(
+    RNGType &, U01OCDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rand(
+    RNGType &, U01OODistribution<RealType> &, std::size_t, RealType *);
 
 template <typename UIntType, typename RNGType>
 inline void rand(
@@ -1266,6 +825,9 @@ inline void rand(
 template <typename RealType, typename RNGType>
 inline void rand(
     RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
+
+namespace internal
+{
 
 template <typename RealType, typename RNGType>
 inline void beta_distribution(
@@ -1348,6 +910,8 @@ template <typename RealType, typename RNGType>
 inline void weibull_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
 
+} // namespace mckl::internal
+
 #if MCKL_HAS_MKL
 
 class MKLStream;
@@ -1358,6 +922,11 @@ class MKLEngine;
 template <MKL_INT BRNG, int Bits>
 inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
     typename MKLEngine<BRNG, Bits>::result_type *);
+
+#if MCKL_USE_MKL_VSL
+
+namespace internal
+{
 
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(
@@ -1460,6 +1029,10 @@ inline void weibull_distribution(
 template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+} // namespace mckl::internal
+
+#endif // MCKL_USE_MKL_VSL
 
 #endif // MCKL_HAS_MKL
 

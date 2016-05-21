@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/fisher_f_distribution.hpp>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_fisher_f_##name(                                    \
         mckl_rng rng, size_t n, double *r, double df1, double df2)            \
     {                                                                         \
-        ::mckl::fisher_f_distribution(                                        \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, df1, df2);           \
+        ::mckl::FisherFDistribution<double> dist(df1, df2);                   \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

@@ -103,7 +103,8 @@ inline void resample_trans_rep_index_test(
     for (std::size_t i = 0; i != n; ++i) {
         const std::size_t M = fixed ? N : runif(rng);
         idx.resize(M);
-        mckl::u01_distribution(rng, N, w.data());
+        mckl::U01Distribution<double> dist;
+        mckl::rand(rng, dist, N, w.data());
         weight.set(w.data());
 
         watch_resample.start();

@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
+#include <mckl/random/student_t_distribution.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_student_t_##name(                                   \
         mckl_rng rng, size_t n, double *r, double df)                         \
     {                                                                         \
-        ::mckl::student_t_distribution(                                       \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, df);                 \
+        ::mckl::StudentTDistribution<double> dist(df);                        \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

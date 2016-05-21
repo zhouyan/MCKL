@@ -47,6 +47,18 @@ inline bool cauchy_distribution_check_param(RealType, RealType b)
     return b > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void cauchy_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    u01_co_distribution(rng, n, r);
+    mul(n, const_pi<RealType>(), r, r);
+    tan(n, r, r);
+    fma(n, r, b, a, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Cauchy, cauchy, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Cauchy distribution
@@ -78,25 +90,7 @@ class CauchyDistribution
     }
 }; // class CauchyDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void cauchy_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    u01_co_distribution(rng, n, r);
-    mul(n, const_pi<RealType>(), r, r);
-    tan(n, r, r);
-    fma(n, r, b, a, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating Cauchy random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(cauchy, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Cauchy, cauchy, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Cauchy, RealType)
 
 } // namespace mckl
 

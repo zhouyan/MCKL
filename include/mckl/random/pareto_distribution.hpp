@@ -47,6 +47,17 @@ inline bool pareto_distribution_check_param(RealType a, RealType b)
     return a > 0 && b > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void pareto_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    exponential_distribution(rng, n, r, a);
+    exp(n, r, r);
+    mul(n, b, r, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Pareto, pareto, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Pareto distribution
@@ -74,24 +85,7 @@ class ParetoDistribution
     }
 }; // class ParetoDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void pareto_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    exponential_distribution(rng, n, r, a);
-    exp(n, r, r);
-    mul(n, b, r, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating pareto random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(pareto, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Pareto, pareto, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Pareto, RealType)
 
 } // namespace mckl
 

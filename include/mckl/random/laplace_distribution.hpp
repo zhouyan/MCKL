@@ -47,6 +47,28 @@ inline bool laplace_distribution_check_param(RealType, RealType b)
     return b > 0;
 }
 
+template <std::size_t K, typename RealType, typename RNGType>
+inline void laplace_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    Array<RealType, K> s;
+    u01_oo_distribution(rng, n, r);
+    sub(n, r, static_cast<RealType>(0.5), r);
+    for (std::size_t i = 0; i != n; ++i) {
+        if (r[i] > 0) {
+            r[i] = 1 - 2 * r[i];
+            s[i] = -b;
+        } else {
+            r[i] = 1 + 2 * r[i];
+            s[i] = b;
+        }
+    }
+    log(n, r, r);
+    fma(n, s.data(), r, a, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Laplace, laplace, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Laplace distribution
@@ -79,35 +101,7 @@ class LaplaceDistribution
     }
 }; // class LaplaceDistribution
 
-namespace internal
-{
-
-template <std::size_t K, typename RealType, typename RNGType>
-inline void laplace_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    Array<RealType, K> s;
-    u01_oo_distribution(rng, n, r);
-    sub(n, r, static_cast<RealType>(0.5), r);
-    for (std::size_t i = 0; i != n; ++i) {
-        if (r[i] > 0) {
-            r[i] = 1 - 2 * r[i];
-            s[i] = -b;
-        } else {
-            r[i] = 1 + 2 * r[i];
-            s[i] = b;
-        }
-    }
-    log(n, r, r);
-    fma(n, s.data(), r, a, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating laplace random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(laplace, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Laplace, laplace, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Laplace, RealType)
 
 } // namespace mckl
 

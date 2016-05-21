@@ -200,7 +200,8 @@ inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r)
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     if (N <= k) {
-        u01_distribution(rng, N, r);
+        U01Distribution<RealType> dist;
+        rand(rng, dist, N, r);
         std::sort(r, r + N);
         return;
     }

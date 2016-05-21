@@ -37,6 +37,60 @@
 namespace mckl
 {
 
+namespace internal
+{
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution_impl(
+    RNGType &rng, std::size_t n, UIntType *r, std::false_type)
+{
+    UniformBitsDistribution<UIntType> ubits;
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = ubits(rng);
+}
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution_impl(
+    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
+{
+    static constexpr int rbits = RNGTraits<RNGType>::bits;
+    static constexpr int ubits = std::numeric_limits<UIntType>::digits;
+    static constexpr std::size_t rate = ubits / rbits;
+    const std::size_t m = n * rate;
+    rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
+}
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
+{
+    static_assert(std::is_unsigned<UIntType>::value,
+        "**uniform_bits_distribution** used with UIntType other than unsigned "
+        "types");
+
+    static constexpr int rbits = RNGTraits<RNGType>::bits;
+    static constexpr int ubits = std::numeric_limits<UIntType>::digits;
+    static constexpr int tbits =
+        std::numeric_limits<typename RNGType::result_type>::digits;
+    static constexpr std::size_t ualign = alignof(UIntType);
+    static constexpr std::size_t talign = alignof(UIntType);
+
+    uniform_bits_distribution_impl(
+        rng, n, r,
+        std::integral_constant<
+            bool, (RNGType::min() == 0 && RNGTraits<RNGType>::is_full_range &&
+                      rbits == tbits && ubits >= tbits && ubits % tbits == 0 &&
+                      ualign >= talign && ualign % talign == 0)>());
+}
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r,
+    const typename UniformBitsDistribution<UIntType>::param_type &)
+{
+    uniform_bits_distribution(rng, n, r);
+}
+
+} // namespace mckl::internal
+
 /// \brief Uniform bits distribution
 /// \ingroup Distribution
 ///
@@ -120,54 +174,7 @@ class UniformBitsDistribution
     }
 }; // class UniformBitsDistribution
 
-namespace internal
-{
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(
-    RNGType &rng, std::size_t n, UIntType *r, std::false_type)
-{
-    UniformBitsDistribution<UIntType> ubits;
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = ubits(rng);
-}
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(
-    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
-{
-    static constexpr int rbits = RNGTraits<RNGType>::bits;
-    static constexpr int ubits = std::numeric_limits<UIntType>::digits;
-    static constexpr std::size_t rate = ubits / rbits;
-    const std::size_t m = n * rate;
-    rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
-}
-
-} // namespace mckl::internal
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
-{
-    static_assert(std::is_unsigned<UIntType>::value,
-        "**uniform_bits_distribution** used with UIntType other than unsigned "
-        "types");
-
-    static constexpr int rbits = RNGTraits<RNGType>::bits;
-    static constexpr int ubits = std::numeric_limits<UIntType>::digits;
-    static constexpr int tbits =
-        std::numeric_limits<typename RNGType::result_type>::digits;
-    static constexpr std::size_t ualign = alignof(UIntType);
-    static constexpr std::size_t talign = alignof(UIntType);
-
-    internal::uniform_bits_distribution_impl(
-        rng, n, r,
-        std::integral_constant<
-            bool, (RNGType::min() == 0 && RNGTraits<RNGType>::is_full_range &&
-                      rbits == tbits && ubits >= tbits && ubits % tbits == 0 &&
-                      ualign >= talign && ualign % talign == 0)>());
-}
-
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_0(UniformBits, uniform_bits, UIntType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(UniformBits, UIntType)
 
 } // namespace mckl
 

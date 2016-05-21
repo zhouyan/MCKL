@@ -47,6 +47,16 @@ inline bool lognormal_distribution_check_param(RealType, RealType s)
     return s > 0;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void lognormal_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType m, RealType s)
+{
+    normal_distribution(rng, n, r, m, s);
+    exp(n, r, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Lognormal, lognormal, m, s)
+
 } // namespace mckl::internal
 
 /// \brief Lognormal distribution
@@ -73,23 +83,7 @@ class LognormalDistribution
     }
 }; // class LognormalDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void lognormal_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType m, RealType s)
-{
-    normal_distribution(rng, n, r, m, s);
-    exp(n, r, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating lognormal random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(lognormal, m, s)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Lognormal, lognormal, m, s)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Lognormal, RealType)
 
 } // namespace mckl
 

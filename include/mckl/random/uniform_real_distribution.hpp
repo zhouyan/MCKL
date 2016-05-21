@@ -47,6 +47,16 @@ inline bool uniform_real_distribution_check_param(RealType a, RealType b)
     return a <= b;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void uniform_real_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    u01_co_distribution<RealType>(rng, n, r);
+    fma(n, r, b - a, a, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(UniformReal, uniform_real, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Uniform real distribution
@@ -74,23 +84,7 @@ class UniformRealDistribution
     }
 }; // class UniformRealDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    u01_co_distribution<RealType>(rng, n, r);
-    fma(n, r, b - a, a, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generate uniform real random variates with open/closed variants
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(uniform_real, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(UniformReal, uniform_real, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(UniformReal, RealType)
 
 } // namespace mckl
 

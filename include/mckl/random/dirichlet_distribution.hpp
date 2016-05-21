@@ -38,6 +38,50 @@
 namespace mckl
 {
 
+namespace internal
+{
+
+template <typename RealType>
+inline void dirichlet_distribution_avg(
+    std::size_t n, std::size_t dim, RealType *r)
+{
+    for (std::size_t i = 0; i != n; ++i, r += dim) {
+        RealType s = std::accumulate(r, r + dim, const_zero<RealType>());
+        mul(dim, 1 / s, r, r);
+    }
+}
+
+template <typename RealType, typename RNGType>
+inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
+    std::size_t dim, const RealType alpha)
+{
+    gamma_distribution(rng, n * dim, r, alpha, const_one<RealType>());
+    dirichlet_distribution_avg(n, dim, r);
+}
+
+template <typename RealType, typename RNGType>
+inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
+    std::size_t dim, const RealType *alpha)
+{
+    static_assert(std::is_floating_point<RealType>::value,
+        "**dirichlet_distribution** used with RealType other than floating "
+        "point types");
+
+    if (n * dim == 0)
+        return;
+
+    Vector<RealType> s(n);
+    for (std::size_t i = 0; i != dim; ++i) {
+        gamma_distribution(rng, n, s.data(), alpha[i], const_one<RealType>());
+        RealType *t = r + i;
+        for (std::size_t j = 0; j != n; ++j, t += dim)
+            *t = s[i];
+    }
+    dirichlet_distribution_avg(n, dim, r);
+}
+
+} // namespace internal
+
 template <typename RealType, std::size_t Dim>
 class DirichletDistribution
 {
@@ -243,10 +287,13 @@ class DirichletDistribution
     void operator()(
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
-        if (param.is_scalar_)
-            dirichlet_distribution(rng, n, r, param.dim(), param.alpha()[0]);
-        else
-            dirichlet_distribution(rng, n, r, param.dim(), param.alpha());
+        if (param.is_scalar_) {
+            internal::dirichlet_distribution(
+                rng, n, r, param.dim(), param.alpha()[0]);
+        } else {
+            internal::dirichlet_distribution(
+                rng, n, r, param.dim(), param.alpha());
+        }
     }
 
     friend bool operator==(
@@ -311,67 +358,19 @@ class DirichletDistribution
     }
 }; // class DirichletDistribution
 
-namespace internal
+template <typename RealType, std::size_t Dim, typename RNGType>
+inline void rand(RNGType &rng,
+    DirichletDistribution<RealType, Dim> &distribution, RealType *r)
 {
-
-template <typename RealType>
-inline void dirichlet_distribution_avg(
-    std::size_t n, std::size_t dim, RealType *r)
-{
-    for (std::size_t i = 0; i != n; ++i, r += dim) {
-        RealType s = std::accumulate(r, r + dim, const_zero<RealType>());
-        mul(dim, 1 / s, r, r);
-    }
-}
-
-} // namespace internal
-
-/// \brief Generating Dirichlet random varaites
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
-    std::size_t dim, const RealType alpha)
-{
-    gamma_distribution(rng, n * dim, r, alpha, const_one<RealType>());
-    internal::dirichlet_distribution_avg(n, dim, r);
-}
-
-/// \brief Generating Dirichlet random varaites
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
-    std::size_t dim, const RealType *alpha)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**dirichlet_distribution** used with RealType other than floating "
-        "point types");
-
-    if (n * dim == 0)
-        return;
-
-    Vector<RealType> s(n);
-    for (std::size_t i = 0; i != dim; ++i) {
-        gamma_distribution(rng, n, s.data(), alpha[i], const_one<RealType>());
-        RealType *t = r + i;
-        for (std::size_t j = 0; j != n; ++j, t += dim)
-            *t = s[i];
-    }
-    internal::dirichlet_distribution_avg(n, dim, r);
+    distribution(rng, r);
 }
 
 template <typename RealType, std::size_t Dim, typename RNGType>
-inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
-    const typename DirichletDistribution<RealType, Dim>::param_type &param)
+inline void rand(RNGType &rng,
+    DirichletDistribution<RealType, Dim> &distribution, std::size_t n,
+    RealType *r)
 {
-    DirichletDistribution<RealType, Dim> dist(param);
-    dist(rng, n, r);
-}
-
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(RNGType &rng, DirichletDistribution<RealType, Dim> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
+    distribution(rng, n, r);
 }
 
 } // namespace mckl

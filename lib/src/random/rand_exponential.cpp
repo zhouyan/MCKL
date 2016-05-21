@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/exponential_distribution.hpp>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_exponential_##name(                                 \
         mckl_rng rng, size_t n, double *r, double lambda)                     \
     {                                                                         \
-        ::mckl::exponential_distribution(                                     \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, lambda);             \
+        ::mckl::ExponentialDistribution<double> dist(lambda);                 \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

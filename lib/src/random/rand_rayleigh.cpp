@@ -29,7 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rayleigh_distribution.hpp>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -45,8 +47,8 @@ extern "C" {
     inline void mckl_rand_rayleigh_##name(                                    \
         mckl_rng rng, size_t n, double *r, double sigma)                      \
     {                                                                         \
-        ::mckl::rayleigh_distribution(                                        \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, sigma);              \
+        ::mckl::RayleighDistribution<double> dist(sigma);                     \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

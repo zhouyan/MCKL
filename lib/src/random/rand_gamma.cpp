@@ -29,7 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -45,8 +46,8 @@ extern "C" {
     inline void mckl_rand_gamma_##name(                                       \
         mckl_rng rng, size_t n, double *r, double alpha, double beta)         \
     {                                                                         \
-        ::mckl::gamma_distribution(                                           \
-            *reinterpret_cast<RNGType *>(rng.ptr), n, r, alpha, beta);        \
+        ::mckl::GammaDistribution<double> dist(alpha, beta);                  \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

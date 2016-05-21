@@ -47,6 +47,20 @@ inline bool logistic_distribution_check_param(RealType, RealType b)
     return b > 0;
 }
 
+template <std::size_t K, typename RealType, typename RNGType>
+inline void logistic_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    Array<RealType, K> s;
+    u01_oo_distribution(rng, n, r);
+    sub(n, const_one<RealType>(), r, s.data());
+    div(n, r, s.data(), r);
+    log(n, r, r);
+    fma(n, r, b, a, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Logistic, logistic, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Logistic distribution
@@ -78,27 +92,7 @@ class LogisticDistribution
     }
 }; // class LogisticDistribution
 
-namespace internal
-{
-
-template <std::size_t K, typename RealType, typename RNGType>
-inline void logistic_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    Array<RealType, K> s;
-    u01_oo_distribution(rng, n, r);
-    sub(n, const_one<RealType>(), r, s.data());
-    div(n, r, s.data(), r);
-    log(n, r, r);
-    fma(n, r, b, a, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating logistic random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(logistic, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Logistic, logistic, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Logistic, RealType)
 
 } // namespace mckl
 

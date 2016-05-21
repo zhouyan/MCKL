@@ -47,6 +47,19 @@ inline bool arcsine_distribution_check_param(RealType a, RealType b)
     return a < b;
 }
 
+template <std::size_t, typename RealType, typename RNGType>
+inline void arcsine_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+{
+    u01_co_distribution(rng, n, r);
+    mul(n, const_pi_by2<RealType>(), r, r);
+    sin(n, r, r);
+    sqr(n, r, r);
+    fma(n, r, b - a, a, r);
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Arcsine, arcsine, a, b)
+
 } // namespace mckl::internal
 
 /// \brief Arcsine distribution
@@ -76,26 +89,7 @@ class ArcsineDistribution
     }
 }; // class ArcsineDistribution
 
-namespace internal
-{
-
-template <std::size_t, typename RealType, typename RNGType>
-inline void arcsine_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
-{
-    u01_co_distribution(rng, n, r);
-    mul(n, const_pi_by2<RealType>(), r, r);
-    sin(n, r, r);
-    sqr(n, r, r);
-    fma(n, r, b - a, a, r);
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating Arcsine random variates
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(arcsine, a, b)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Arcsine, arcsine, a, b)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Arcsine, RealType)
 
 } // namespace mckl
 

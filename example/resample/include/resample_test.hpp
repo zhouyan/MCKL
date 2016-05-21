@@ -85,7 +85,8 @@ inline mckl::Vector<mckl::Vector<double>> resample_weight(
         std::size_t N = size[d];
         mckl::Vector<double> tmp(N);
         mckl::Weight w(N);
-        mckl::u01_distribution(rng, N, tmp.data());
+        mckl::U01Distribution<double> dist;
+        mckl::rand(rng, dist, N, tmp.data());
         w.set(tmp.data());
         w.read(tmp.data());
         weight.push_back(std::move(tmp));

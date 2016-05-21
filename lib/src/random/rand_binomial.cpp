@@ -29,7 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "libmcklrng.hpp"
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
 
 extern "C" {
 
@@ -46,7 +47,7 @@ extern "C" {
         mckl_rng rng, size_t n, int *r, int t, double p)                      \
     {                                                                         \
         std::binomial_distribution<int> dist(t, p);                           \
-        MCKL_DEFINE_LIB_RANDOM_DIST(RNGType);                                 \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 
 #include <mckl/random/internal/rng_define_macro_alias.hpp>

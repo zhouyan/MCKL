@@ -30,8 +30,8 @@
 //============================================================================
 
 #include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
 #include <mckl/resample/algorithm.hpp>
-#include "libmcklrng.hpp"
 
 extern "C" {
 

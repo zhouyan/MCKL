@@ -48,6 +48,58 @@ inline bool normal_distribution_check_param(RealType, RealType stddev)
     return stddev > 0;
 }
 
+template <std::size_t K, typename RealType, typename RNGType>
+inline void normal_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
+{
+    Array<RealType, K / 2> s;
+    const std::size_t nu = n / 2;
+    RealType *const u1 = r;
+    RealType *const u2 = r + nu;
+    u01_oc_distribution(rng, n, r);
+    log(nu, u1, s.data());
+    mul(nu, static_cast<RealType>(-2), s.data(), s.data());
+    sqrt(nu, s.data(), s.data());
+    mul(nu, const_pi_2<RealType>(), u2, u2);
+    sincos(nu, u2, u1, u2);
+    if (!is_one(stddev))
+        mul(nu, stddev, s.data(), s.data());
+    if (!is_zero(mean)) {
+        fma(nu, s.data(), u1, mean, u1);
+        fma(nu, s.data(), u2, mean, u2);
+    } else {
+        mul(nu, s.data(), u1, u1);
+        mul(nu, s.data(), u2, u2);
+    }
+}
+
+template <typename RealType, typename RNGType>
+inline void normal_distribution(
+    RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
+{
+    const std::size_t k = BufferSize<RealType>::value;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, r += k)
+        normal_distribution_impl<k>(rng, k, r, mean, stddev);
+    normal_distribution_impl<k>(rng, l, r, mean, stddev);
+    if (n % 2 != 0) {
+        U01OCDistribution<RealType> u01;
+        RealType u = u01(rng);
+        RealType v = u01(rng);
+        r[l - 1] = mean +
+            stddev * std::sqrt(-2 * std::log(u)) *
+                std::cos(const_pi_2<RealType>() * v);
+    }
+}
+
+template <typename RealType, typename RNGType>
+inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
+    const typename NormalDistribution<RealType>::param_type &param)
+{
+    normal_distribution(rng, n, r, param.mean(), param.stddev());
+}
+
 } // namespace mckl::internal
 
 /// \brief Normal distribution
@@ -93,63 +145,7 @@ class NormalDistribution
     }
 }; // class NormalDistribution
 
-namespace internal
-{
-
-template <std::size_t K, typename RealType, typename RNGType>
-inline void normal_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
-{
-    Array<RealType, K / 2> s;
-    const std::size_t nu = n / 2;
-    RealType *const u1 = r;
-    RealType *const u2 = r + nu;
-    u01_oc_distribution(rng, n, r);
-    log(nu, u1, s.data());
-    mul(nu, static_cast<RealType>(-2), s.data(), s.data());
-    sqrt(nu, s.data(), s.data());
-    mul(nu, const_pi_2<RealType>(), u2, u2);
-    sincos(nu, u2, u1, u2);
-    if (!is_one(stddev))
-        mul(nu, stddev, s.data(), s.data());
-    if (!is_zero(mean)) {
-        fma(nu, s.data(), u1, mean, u1);
-        fma(nu, s.data(), u2, mean, u2);
-    } else {
-        mul(nu, s.data(), u1, u1);
-        mul(nu, s.data(), u2, u2);
-    }
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating Normal random variates
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void normal_distribution(
-    RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
-{
-    static_assert(std::is_floating_point<RealType>::value,
-        "**normal_distribution** used with RealType other than floating point "
-        "types");
-
-    const std::size_t k = internal::BufferSize<RealType>::value;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        internal::normal_distribution_impl<k>(rng, k, r, mean, stddev);
-    internal::normal_distribution_impl<k>(rng, l, r, mean, stddev);
-    if (n % 2 != 0) {
-        U01OCDistribution<RealType> u01;
-        RealType u = u01(rng);
-        RealType v = u01(rng);
-        r[l - 1] = mean +
-            stddev * std::sqrt(-2 * std::log(u)) *
-                std::cos(const_pi_2<RealType>() * v);
-    }
-}
-
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND_2(Normal, normal, mean, stddev)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Normal, RealType)
 
 } // namespace mckl
 

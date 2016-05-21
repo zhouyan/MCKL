@@ -38,6 +38,103 @@
 namespace mckl
 {
 
+namespace internal
+{
+
+inline void normal_mv_distribution_mulchol(
+    std::size_t n, float *r, std::size_t dim, const float *chol)
+{
+    cblas_strmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
+        CblasNonUnit, static_cast<MCKL_BLAS_INT>(n),
+        static_cast<MCKL_BLAS_INT>(dim), 1, chol,
+        static_cast<MCKL_BLAS_INT>(dim), r, static_cast<MCKL_BLAS_INT>(dim));
+}
+
+inline void normal_mv_distribution_mulchol(
+    std::size_t n, double *r, std::size_t dim, const double *chol)
+{
+    cblas_dtrmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
+        CblasNonUnit, static_cast<MCKL_BLAS_INT>(n),
+        static_cast<MCKL_BLAS_INT>(dim), 1, chol,
+        static_cast<MCKL_BLAS_INT>(dim), r, static_cast<MCKL_BLAS_INT>(dim));
+}
+
+template <typename RealType, typename RNGType>
+inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
+    std::size_t dim, RealType mean, RealType chol)
+{
+    static_assert(is_one_of<RealType, float, double>::value,
+        "**normal_mv_distribution** used with RealType other than float or "
+        "double");
+
+    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+
+    normal_distribution(rng, n * dim, r, mean, chol);
+}
+
+template <typename RealType, typename RNGType>
+inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
+    std::size_t dim, RealType mean, const RealType *chol)
+{
+    static_assert(is_one_of<RealType, float, double>::value,
+        "**normal_mv_distribution** used with RealType other than float or "
+        "double");
+
+    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+
+    normal_distribution(
+        rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
+    Vector<RealType> cholf(dim * dim);
+    for (std::size_t i = 0; i != dim; ++i)
+        for (std::size_t j = 0; j <= i; ++j)
+            cholf[i * dim + j] = *chol++;
+    normal_mv_distribution_mulchol(n, r, dim, cholf.data());
+    if (!is_zero(mean))
+        add(n * dim, mean, r, r);
+}
+
+template <typename RealType, typename RNGType>
+inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
+    std::size_t dim, const RealType *mean, RealType chol)
+{
+    static_assert(is_one_of<RealType, float, double>::value,
+        "**normal_mv_distribution** used with RealType other than float or "
+        "double");
+
+    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+
+    normal_distribution(rng, n * dim, r, const_zero<RealType>(), chol);
+    for (std::size_t i = 0; i != n; ++i, r += dim)
+        add(dim, mean, r, r);
+}
+
+template <typename RealType, typename RNGType>
+inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
+    std::size_t dim, const RealType *mean, const RealType *chol)
+{
+    static_assert(is_one_of<RealType, float, double>::value,
+        "**normal_mv_distribution** used with RealType other than float or "
+        "double");
+
+    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+
+    normal_distribution(
+        rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
+    Vector<RealType> cholf(dim * dim);
+    for (std::size_t i = 0; i != dim; ++i)
+        for (std::size_t j = 0; j <= i; ++j)
+            cholf[i * dim + j] = *chol++;
+    normal_mv_distribution_mulchol(n, r, dim, cholf.data());
+    for (std::size_t i = 0; i != n; ++i, r += dim)
+        add(dim, mean, r, r);
+}
+
+} // namespace mckl::internal
+
 /// \brief Multivariate Normal distribution
 /// \ingroup Distribution
 ///
@@ -410,17 +507,17 @@ class NormalMVDistribution
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
         if (param.is_scalar_mean_ && param.is_scalar_chol_) {
-            normal_mv_distribution(
-                rng, n, r, param.dim(), param.mean()[0], param.chol[0]);
+            internal::normal_mv_distribution(
+                rng, n, r, param.dim(), param.mean()[0], param.chol()[0]);
         } else if (param.is_scalar_mean_ && !param.is_scalar_chol_) {
-            normal_mv_distribution(
-                rng, n, r, param.dim(), param.mean()[0], param.chol);
+            internal::normal_mv_distribution(
+                rng, n, r, param.dim(), param.mean()[0], param.chol());
         } else if (!param.is_scalar_mean_ && param.is_scalar_chol_) {
-            normal_mv_distribution(
-                rng, n, r, param.dim(), param.mean(), param.chol[0]);
+            internal::normal_mv_distribution(
+                rng, n, r, param.dim(), param.mean(), param.chol()[0]);
         } else if (!param.is_scalar_mean_ && !param.is_scalar_chol_) {
-            normal_mv_distribution(
-                rng, n, r, param.dim(), param.mean(), param.chol);
+            internal::normal_mv_distribution(
+                rng, n, r, param.dim(), param.mean(), param.chol());
         }
     }
 
@@ -508,124 +605,19 @@ class NormalMVDistribution
     }
 }; // class NormalMVDistribution
 
-namespace internal
+template <typename RealType, std::size_t Dim, typename RNGType>
+inline void rand(RNGType &rng,
+    NormalMVDistribution<RealType, Dim> &distribution, RealType *r)
 {
-
-inline void normal_mv_distribution_mulchol(
-    std::size_t n, float *r, std::size_t dim, const float *chol)
-{
-    cblas_strmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
-        CblasNonUnit, static_cast<MCKL_BLAS_INT>(n),
-        static_cast<MCKL_BLAS_INT>(dim), 1, chol,
-        static_cast<MCKL_BLAS_INT>(dim), r, static_cast<MCKL_BLAS_INT>(dim));
-}
-
-inline void normal_mv_distribution_mulchol(
-    std::size_t n, double *r, std::size_t dim, const double *chol)
-{
-    cblas_dtrmm(CblasRowMajor, CblasRight, CblasLower, CblasTrans,
-        CblasNonUnit, static_cast<MCKL_BLAS_INT>(n),
-        static_cast<MCKL_BLAS_INT>(dim), 1, chol,
-        static_cast<MCKL_BLAS_INT>(dim), r, static_cast<MCKL_BLAS_INT>(dim));
-}
-
-} // namespace mckl::internal
-
-/// \brief Generating multivariate Normal random varaites
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
-    std::size_t dim, RealType mean, RealType chol)
-{
-    static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
-    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
-
-    normal_distribution(rng, n * dim, r, mean, chol);
-}
-
-/// \brief Generating multivariate Normal random varaites
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
-    std::size_t dim, RealType mean, const RealType *chol)
-{
-    static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
-    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
-
-    normal_distribution(
-        rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
-    Vector<RealType> cholf(dim * dim);
-    for (std::size_t i = 0; i != dim; ++i)
-        for (std::size_t j = 0; j <= i; ++j)
-            cholf[i * dim + j] = *chol++;
-    internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
-    if (!internal::is_zero(mean))
-        add(n * dim, mean, r, r);
-}
-
-/// \brief Generating multivariate Normal random varaites
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
-    std::size_t dim, const RealType *mean, RealType chol)
-{
-    static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
-    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
-
-    normal_distribution(rng, n * dim, r, const_zero<RealType>(), chol);
-    for (std::size_t i = 0; i != n; ++i, r += dim)
-        add(dim, mean, r, r);
-}
-
-/// \brief Generating multivariate Normal random varaites
-/// \ingroup Distribution
-template <typename RealType, typename RNGType>
-inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
-    std::size_t dim, const RealType *mean, const RealType *chol)
-{
-    static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**normal_mv_distribution** used with RealType other than float or "
-        "double");
-
-    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
-
-    normal_distribution(
-        rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
-    Vector<RealType> cholf(dim * dim);
-    for (std::size_t i = 0; i != dim; ++i)
-        for (std::size_t j = 0; j <= i; ++j)
-            cholf[i * dim + j] = *chol++;
-    internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
-    for (std::size_t i = 0; i != n; ++i, r += dim)
-        add(dim, mean, r, r);
+    distribution(rng, r);
 }
 
 template <typename RealType, std::size_t Dim, typename RNGType>
-inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
-    const typename NormalMVDistribution<RealType, Dim>::param_type &param)
+inline void rand(RNGType &rng,
+    NormalMVDistribution<RealType, Dim> &distribution, std::size_t n,
+    RealType *r)
 {
-    NormalMVDistribution<RealType, Dim> dist(param);
-    dist(rng, n, r);
-}
-
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(RNGType &rng, NormalMVDistribution<RealType, Dim> &dist,
-    std::size_t n, RealType *r)
-{
-    dist(rng, n, r);
+    distribution(rng, n, r);
 }
 
 } // namespace mckl
