@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/lib/src/random/rand_bernoulli.cpp
+// MCKL/include/mckl/random/bernoulli_distribution.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,57 +29,68 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/mckl.h>
-#include <mckl/random/bernoulli_distribution.hpp>
-#include <mckl/random/rng.hpp>
+#ifndef MCKL_RANDOM_BERNOULLI_DISTRIBUTION_HPP
+#define MCKL_RANDOM_BERNOULLI_DISTRIBUTION_HPP
 
-extern "C" {
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/u01_distribution.hpp>
 
-#ifdef MCKL_RNG_DEFINE_MACRO
-#undef MCKL_RNG_DEFINE_MACRO
-#endif
-
-#ifdef MCKL_RNG_DEFINE_MACRO_NA
-#undef MCKL_RNG_DEFINE_MACRO_NA
-#endif
-
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    inline void mckl_rand_bernoulli_##name(                                   \
-        mckl_rng rng, size_t n, int *r, double p)                             \
-    {                                                                         \
-        ::mckl::BernoulliDistribution<int> dist(p);                           \
-        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
-    }
-
-#include <mckl/random/internal/rng_define_macro_alias.hpp>
-
-#include <mckl/random/internal/rng_define_macro.hpp>
-
-using mckl_rand_bernoulli_type = void (*)(mckl_rng, size_t, int *, double);
-
-#ifdef MCKL_RNG_DEFINE_MACRO
-#undef MCKL_RNG_DEFINE_MACRO
-#endif
-
-#ifdef MCKL_RNG_DEFINE_MACRO_NA
-#undef MCKL_RNG_DEFINE_MACRO_NA
-#endif
-
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name) mckl_rand_bernoulli_##name,
-#define MCKL_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
-
-static mckl_rand_bernoulli_type mckl_rand_bernoulli_dispatch[] = {
-
-#include <mckl/random/internal/rng_define_macro_alias.hpp>
-
-#include <mckl/random/internal/rng_define_macro.hpp>
-
-    nullptr}; // mckl_rand_bernoulli_dispatch
-
-void mckl_rand_bernoulli(mckl_rng rng, size_t n, int *r, double p)
+namespace mckl
 {
-    mckl_rand_bernoulli_dispatch[static_cast<std::size_t>(rng.type)](
-        rng, n, r, p);
+
+namespace internal
+{
+
+inline bool bernoulli_distribution_check_param(double p)
+{
+    return p >= 0 && p <= 1;
 }
 
-} // extern "C"
+template <std::size_t K, typename IntType, typename RNGType>
+inline void bernoulli_distribution_impl(
+    RNGType &rng, std::size_t n, IntType *r, double p)
+{
+    Array<double, K> s;
+    u01_co_distribution(rng, n, s.data());
+    std::fill_n(r, n, 0);
+    for (std::size_t i = 0; i != n; ++i)
+        if (s[i] < p)
+            r[i] = 1;
+}
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Bernoulli, bernoulli, InType, double, p)
+
+} // namespace mckl::internal
+
+/// \brief Bernoulli distribution
+/// \ingroup Distribution
+template <typename IntType>
+class BernoulliDistribution
+{
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Bernoulli, bool)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_1(
+        Bernoulli, bernoulli, IntType, double, p, 0.5)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
+
+    public:
+    result_type min() const { return 0; }
+
+    result_type max() const { return 1; }
+
+    void reset() {}
+
+    private:
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param)
+    {
+        U01CODistribution<double> u01;
+
+        return u01(rng) < param.p() ? 1 : 0;
+    }
+}; // class BernoulliDistribution
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Bernoulli, IntType)
+
+} // namespace mckl
+
+#endif // MCKL_RANDOM_CAUCHY_DISTRIBUTION_HPP

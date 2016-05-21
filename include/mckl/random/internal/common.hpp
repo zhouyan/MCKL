@@ -50,16 +50,22 @@
         "**" #Name                                                            \
         "Distribution** used with RealType other than float or double");
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Name)                 \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Name, MinType)        \
     static_assert(std::is_integral<IntType>::value,                           \
         "**" #Name                                                            \
-        "Distribution** used with IntType other than integer types");
+        "Distribution** used with IntType other than integer types");         \
+    static_assert(sizeof(IntType) >= sizeof(MinType),                         \
+        "**" #Name                                                            \
+        "Distribution** used with IntType smaller than " #MinType);
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(Name)                \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(Name, MinType)       \
     static_assert(std::is_unsigned<UIntType>::value,                          \
         "**" #Name                                                            \
         "Distribution** used with UIntType other than unsigned integer "      \
-        "types");
+        "types");                                                             \
+    static_assert(sizeof(IntType) >= sizeof(MinType),                         \
+        "**" #Name                                                            \
+        "Distribution** used with IntType smaller than " #MinType);
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Name)                \
     static_assert(std::is_floating_point<RealType>::value,                    \
@@ -577,6 +583,11 @@ namespace internal
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(CtrType, ctr_type, NullType)
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
+template <typename IntType>
+using IntDistributionRealType =
+    typename std::conditional<sizeof(IntType) <= 32, double,
+        long double>::type;
+
 } // namespace mckl::internal
 
 /// \brief Traits of RNG engines
@@ -728,6 +739,9 @@ class UniformRealDistribution;
 template <typename = double>
 class WeibullDistribution;
 
+template <typename = bool>
+class BernoulliDistribution;
+
 template <typename ResultType, typename Generator>
 inline void rand(
     CounterEngine<ResultType, Generator> &, std::size_t, ResultType *);
@@ -840,6 +854,10 @@ template <typename RealType, typename RNGType>
 inline void rand(
     RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
 
+template <typename IntType, typename RNGType>
+inline void rand(
+    RNGType &, BernoulliDistribution<IntType> &, std::size_t, IntType *);
+
 namespace internal
 {
 
@@ -923,6 +941,9 @@ inline void uniform_real_distribution(
 template <typename RealType, typename RNGType>
 inline void weibull_distribution(
     RNGType &, std::size_t, RealType *, RealType, RealType);
+
+template <typename IntType, typename RNGType>
+inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
 
 } // namespace mckl::internal
 
@@ -1043,6 +1064,10 @@ inline void weibull_distribution(
 template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void bernoulli_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
 
 } // namespace mckl::internal
 

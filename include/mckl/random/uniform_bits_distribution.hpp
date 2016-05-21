@@ -97,7 +97,7 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r,
 template <typename UIntType>
 class UniformBitsDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(UniformBits)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(UniformBits, short)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_0(UniformBits, uniform_bits, UIntType)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
