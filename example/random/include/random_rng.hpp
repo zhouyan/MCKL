@@ -224,7 +224,7 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::endl;
 }
 
-inline void random_rng(std::size_t N, std::size_t M)
+inline void random_rng(std::size_t N, std::size_t M, int, char **)
 {
     const int nwid = 20;
     const int swid = 8;

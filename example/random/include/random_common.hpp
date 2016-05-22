@@ -40,11 +40,19 @@
     {                                                                         \
         std::size_t N = NVal;                                                 \
         std::size_t M = MVal;                                                 \
-        if (argc > 1)                                                         \
-            N = static_cast<std::size_t>(std::atoi(argv[1]));                 \
-        if (argc > 2)                                                         \
-            M = static_cast<std::size_t>(std::atoi(argv[2]));                 \
-        random_##prg(N, M);                                                   \
+        --argc;                                                               \
+        ++argv;                                                               \
+        if (argc > 0) {                                                       \
+            N = static_cast<std::size_t>(std::atoi(*argv));                   \
+            --argc;                                                           \
+            ++argv;                                                           \
+        }                                                                     \
+        if (argc > 0) {                                                       \
+            M = static_cast<std::size_t>(std::atoi(*argv));                   \
+            --argc;                                                           \
+            ++argv;                                                           \
+        }                                                                     \
+        random_##prg(N, M, argc, argv);                                       \
                                                                               \
         return 0;                                                             \
     }

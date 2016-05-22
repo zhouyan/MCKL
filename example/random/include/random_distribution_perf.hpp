@@ -148,33 +148,44 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
 }
 
 template <typename MCKLDistType>
-inline void random_distribution_test_perf(
-    std::size_t N, std::size_t M, int nwid, int twid)
+inline void random_distribution_test_perf(std::size_t N, std::size_t M,
+    int nwid, int twid, const mckl::Vector<std::string> &distname)
 {
     RandomDistributionTrait<MCKLDistType> trait;
-    auto params = trait.params();
+    if (!distname.empty()) {
+        auto iter =
+            std::find(distname.begin(), distname.end(), trait.distname());
+        if (iter == distname.end())
+            return;
+    }
 
     mckl::Vector<std::string> names;
+    auto params = trait.params();
     for (const auto &param : params)
         random_distribution_test_perf<MCKLDistType>(N, M, param, nwid, twid);
 }
 
 template <typename RealType>
-inline void random_distribution_perf_real(
-    std::size_t N, std::size_t M, int nwid, int twid)
+inline void random_distribution_perf_real(std::size_t N, std::size_t M,
+    int nwid, int twid, const mckl::Vector<std::string> &distname)
 {
     MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(perf);
 }
 
 template <typename IntType>
-inline void random_distribution_perf_int(
-    std::size_t N, std::size_t M, int nwid, int twid)
+inline void random_distribution_perf_int(std::size_t N, std::size_t M,
+    int nwid, int twid, const mckl::Vector<std::string> &distname)
 {
     MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(perf);
 }
 
-inline void random_distribution_perf(std::size_t N, std::size_t M)
+inline void random_distribution_perf(
+    std::size_t N, std::size_t M, int argc, char **argv)
 {
+    mckl::Vector<std::string> distname;
+    for (int i = 0; i != argc; ++i)
+        distname.push_back(argv[i]);
+
     int nwid = 30;
     int twid = 12;
 
@@ -192,9 +203,9 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     std::cout << std::setw(twid + 3) << std::right << "Deterministics";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
-    random_distribution_perf_real<float>(N, M, nwid, twid);
-    random_distribution_perf_real<double>(N, M, nwid, twid);
-    random_distribution_perf_int<int>(N, M, nwid, twid);
-    random_distribution_perf_int<unsigned>(N, M, nwid, twid);
+    random_distribution_perf_real<float>(N, M, nwid, twid, distname);
+    random_distribution_perf_real<double>(N, M, nwid, twid, distname);
+    random_distribution_perf_int<int>(N, M, nwid, twid, distname);
+    random_distribution_perf_int<unsigned>(N, M, nwid, twid, distname);
     std::cout << std::string(lwid, '-') << std::endl;
 }

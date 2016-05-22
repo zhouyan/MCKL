@@ -90,7 +90,7 @@ inline void random_uniform_bits(std::size_t N, std::size_t M, int nwid,
     std::cout << std::endl;
 }
 
-inline void random_uniform_bits(std::size_t N, std::size_t M)
+inline void random_uniform_bits(std::size_t N, std::size_t M, int, char **)
 {
     const int nwid = 20;
     const int swid = 5;

@@ -185,7 +185,7 @@ inline void random_u01(
     std::cout << std::endl;
 }
 
-inline void random_u01(std::size_t N, std::size_t M)
+inline void random_u01(std::size_t N, std::size_t M, int, char **)
 {
     const int nwid = 45;
     const int swid = 15;

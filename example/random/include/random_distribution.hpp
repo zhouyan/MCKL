@@ -39,49 +39,50 @@
 
 #define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(test)               \
     random_distribution_test_##test<mckl::ArcsineDistribution<RealType>>(     \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::BetaDistribution<RealType>>(        \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::CauchyDistribution<RealType>>(      \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::ChiSquaredDistribution<RealType>>(  \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::ExponentialDistribution<RealType>>( \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<                                          \
-        mckl::ExtremeValueDistribution<RealType>>(N, M, nwid, twid);          \
+        mckl::ExtremeValueDistribution<RealType>>(                            \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::FisherFDistribution<RealType>>(     \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::GammaDistribution<RealType>>(       \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::LaplaceDistribution<RealType>>(     \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::LevyDistribution<RealType>>(        \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::LogisticDistribution<RealType>>(    \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::LognormalDistribution<RealType>>(   \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::NormalDistribution<RealType>>(      \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::ParetoDistribution<RealType>>(      \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::RayleighDistribution<RealType>>(    \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::StudentTDistribution<RealType>>(    \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::U01Distribution<RealType>>(         \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::UniformRealDistribution<RealType>>( \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::WeibullDistribution<RealType>>(     \
-        N, M, nwid, twid);
+        N, M, nwid, twid, distname);
 
 #define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(test)                \
     random_distribution_test_##test<mckl::GeometricDistribution<IntType>>(    \
-        N, M, nwid, twid);                                                    \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::UniformIntDistribution<IntType>>(   \
-        N, M, nwid, twid);
+        N, M, nwid, twid, distname);
 
 template <typename RNGType>
 class RNG01 : public RNGType
@@ -120,12 +121,12 @@ class RandomDistributionTraitBase
 
     static const std::size_t param_num = ParamNum;
 
-    virtual std::string dist_name() const = 0;
+    virtual std::string distname() const = 0;
 
     template <typename ParamType>
     std::string name(const std::array<ParamType, ParamNum> &param) const
     {
-        return name_dispatch(dist_name(), param);
+        return name_dispatch(distname(), param);
     }
 
     protected:
@@ -181,20 +182,20 @@ class RandomDistributionTraitBase
     private:
     template <typename ParamType>
     static std::string name_dispatch(
-        const std::string &dist_name, const std::array<ParamType, 0> &)
+        const std::string &distname, const std::array<ParamType, 0> &)
     {
         std::stringstream ss;
-        ss << dist_name << "<" << random_typename<ResultType>() << ">";
+        ss << distname << "<" << random_typename<ResultType>() << ">";
 
         return ss.str();
     }
 
     template <typename ParamType>
     static std::string name_dispatch(
-        const std::string &dist_name, const std::array<ParamType, 1> &param)
+        const std::string &distname, const std::array<ParamType, 1> &param)
     {
         std::stringstream ss;
-        ss << dist_name << "<" << random_typename<ResultType>() << ">("
+        ss << distname << "<" << random_typename<ResultType>() << ">("
            << param[0] << ")";
 
         return ss.str();
@@ -202,10 +203,10 @@ class RandomDistributionTraitBase
 
     template <typename ParamType>
     static std::string name_dispatch(
-        const std::string &dist_name, const std::array<ParamType, 2> &param)
+        const std::string &distname, const std::array<ParamType, 2> &param)
     {
         std::stringstream ss;
-        ss << dist_name << "<" << random_typename<ResultType>() << ">("
+        ss << distname << "<" << random_typename<ResultType>() << ">("
            << param[0] << "," << param[1] << ")";
 
         return ss.str();
@@ -223,7 +224,7 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
     using dist_type = mckl::ArcsineDistribution<RealType>;
     using std_type = dist_type;
 
-    std::string dist_name() const { return "Arcsine"; }
+    std::string distname() const { return "Arcsine"; }
 
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
@@ -252,7 +253,7 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     using dist_type = mckl::BetaDistribution<RealType>;
     using std_type = boost::random::beta_distribution<RealType>;
 
-    std::string dist_name() const { return "Beta"; }
+    std::string distname() const { return "Beta"; }
 
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
@@ -289,7 +290,7 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
     using dist_type = mckl::CauchyDistribution<RealType>;
     using std_type = std::cauchy_distribution<RealType>;
 
-    std::string dist_name() const { return "Cauchy"; }
+    std::string distname() const { return "Cauchy"; }
 
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
@@ -318,7 +319,7 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
     using dist_type = mckl::GammaDistribution<RealType>;
     using std_type = std::gamma_distribution<RealType>;
 
-    std::string dist_name() const { return "Gamma"; }
+    std::string distname() const { return "Gamma"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -350,7 +351,7 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
     using dist_type = mckl::ChiSquaredDistribution<RealType>;
     using std_type = std::chi_squared_distribution<RealType>;
 
-    std::string dist_name() const { return "ChiSquared"; }
+    std::string distname() const { return "ChiSquared"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -378,7 +379,7 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
     using dist_type = mckl::ExponentialDistribution<RealType>;
     using std_type = std::exponential_distribution<RealType>;
 
-    std::string dist_name() const { return "Exponential"; }
+    std::string distname() const { return "Exponential"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -404,7 +405,7 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
     using dist_type = mckl::ExtremeValueDistribution<RealType>;
     using std_type = std::extreme_value_distribution<RealType>;
 
-    std::string dist_name() const { return "ExtremeValue"; }
+    std::string distname() const { return "ExtremeValue"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -431,7 +432,7 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
     using dist_type = mckl::FisherFDistribution<RealType>;
     using std_type = std::fisher_f_distribution<RealType>;
 
-    std::string dist_name() const { return "FisherF"; }
+    std::string distname() const { return "FisherF"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -459,7 +460,7 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
     using dist_type = mckl::LaplaceDistribution<RealType>;
     using std_type = boost::random::laplace_distribution<RealType>;
 
-    std::string dist_name() const { return "Laplace"; }
+    std::string distname() const { return "Laplace"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -490,7 +491,7 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
     using dist_type = mckl::LevyDistribution<RealType>;
     using std_type = dist_type;
 
-    std::string dist_name() const { return "Levy"; }
+    std::string distname() const { return "Levy"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -519,7 +520,7 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
     using dist_type = mckl::LogisticDistribution<RealType>;
     using std_type = dist_type;
 
-    std::string dist_name() const { return "Logistic"; }
+    std::string distname() const { return "Logistic"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -546,7 +547,7 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
     using dist_type = mckl::LognormalDistribution<RealType>;
     using std_type = std::lognormal_distribution<RealType>;
 
-    std::string dist_name() const { return "Lognormal"; }
+    std::string distname() const { return "Lognormal"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -571,7 +572,7 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
     using dist_type = mckl::NormalDistribution<RealType>;
     using std_type = std::normal_distribution<RealType>;
 
-    std::string dist_name() const { return "Normal"; }
+    std::string distname() const { return "Normal"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -597,7 +598,7 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
     using dist_type = mckl::ParetoDistribution<RealType>;
     using std_type = dist_type;
 
-    std::string dist_name() const { return "Pareto"; }
+    std::string distname() const { return "Pareto"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -624,7 +625,7 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
     using dist_type = mckl::RayleighDistribution<RealType>;
     using std_type = dist_type;
 
-    std::string dist_name() const { return "Rayleigh"; }
+    std::string distname() const { return "Rayleigh"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -651,7 +652,7 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
     using dist_type = mckl::StudentTDistribution<RealType>;
     using std_type = std::student_t_distribution<RealType>;
 
-    std::string dist_name() const { return "StudentT"; }
+    std::string distname() const { return "StudentT"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -676,7 +677,7 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
     using dist_type = mckl::U01Distribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
-    std::string dist_name() const { return "U01"; }
+    std::string distname() const { return "U01"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &)
     {
@@ -698,7 +699,7 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     using dist_type = mckl::UniformRealDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
-    std::string dist_name() const { return "UniformReal"; }
+    std::string distname() const { return "UniformReal"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -724,7 +725,7 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
     using dist_type = mckl::WeibullDistribution<RealType>;
     using std_type = std::weibull_distribution<RealType>;
 
-    std::string dist_name() const { return "Weibull"; }
+    std::string distname() const { return "Weibull"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -751,7 +752,7 @@ class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
     using dist_type = mckl::GeometricDistribution<IntType>;
     using std_type = std::geometric_distribution<IntType>;
 
-    std::string dist_name() const { return "Geometric"; }
+    std::string distname() const { return "Geometric"; }
 
     mckl::Vector<std::array<double, 1>> params() const
     {
@@ -797,7 +798,7 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
     using dist_type = mckl::UniformIntDistribution<IntType>;
     using std_type = std::uniform_int_distribution<IntType>;
 
-    std::string dist_name() const { return "UniformInt"; }
+    std::string distname() const { return "UniformInt"; }
 
     mckl::Vector<std::array<IntType, 2>> params() const
     {
@@ -1126,45 +1127,56 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
 }
 
 template <typename MCKLDistType>
-inline void random_distribution_test_pval(
-    std::size_t N, std::size_t M, int nwid, int twid)
+inline void random_distribution_test_pval(std::size_t N, std::size_t M,
+    int nwid, int twid, const mckl::Vector<std::string> &distname)
 {
     RandomDistributionTrait<MCKLDistType> trait;
-    auto params = trait.params();
+    if (!distname.empty()) {
+        auto iter =
+            std::find(distname.begin(), distname.end(), trait.distname());
+        if (iter == distname.end())
+            return;
+    }
 
     mckl::Vector<std::string> names;
     std::array<mckl::Vector<double>, 6> pval;
+    auto params = trait.params();
     for (const auto &param : params)
         random_distribution_test_pval<MCKLDistType>(N, M, param, names, pval);
     random_distribution_summary_pval(names, pval, nwid, twid);
 }
 
 template <typename RealType>
-inline void random_distribution_pval_real(
-    std::size_t N, std::size_t M, int nwid, int twid)
+inline void random_distribution_pval_real(std::size_t N, std::size_t M,
+    int nwid, int twid, const mckl::Vector<std::string> &distname)
 {
     MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(pval);
 }
 
 template <typename IntType>
-inline void random_distribution_pval_int(
-    std::size_t N, std::size_t M, int nwid, int twid)
+inline void random_distribution_pval_int(std::size_t N, std::size_t M,
+    int nwid, int twid, const mckl::Vector<std::string> &distname)
 {
     MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(pval);
 }
 
-inline void random_distribution(std::size_t N, std::size_t M)
+inline void random_distribution(
+    std::size_t N, std::size_t M, int argc, char **argv)
 {
+    mckl::Vector<std::string> distname;
+    for (int i = 0; i != argc; ++i)
+        distname.push_back(argv[i]);
+
     N = std::max(N, static_cast<std::size_t>(10000));
     M = std::max(M, static_cast<std::size_t>(10));
 
     int nwid = 30;
     int twid = 12;
 
-    random_distribution_pval_real<float>(N, M, nwid, twid);
-    random_distribution_pval_real<double>(N, M, nwid, twid);
-    random_distribution_pval_int<int>(N, M, nwid, twid);
-    random_distribution_pval_int<unsigned>(N, M, nwid, twid);
+    random_distribution_pval_real<float>(N, M, nwid, twid, distname);
+    random_distribution_pval_real<double>(N, M, nwid, twid, distname);
+    random_distribution_pval_int<int>(N, M, nwid, twid, distname);
+    random_distribution_pval_int<unsigned>(N, M, nwid, twid, distname);
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
