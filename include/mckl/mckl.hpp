@@ -71,15 +71,19 @@
 /// \brief Parallel samplers using Intel TBB
 
 /// \defgroup Math Mathematics
-/// \brief Mathematical utilities
+/// \brief Elementary mathematical functions
 
 /// \defgroup Constants Constants
 /// \ingroup Math
-/// \brief Mathematical constants
+/// \brief Constants
 
-/// \defgroup vMath Vector math functions
+/// \defgroup Special Special functions
 /// \ingroup Math
-/// \brief Math functions on vectors
+/// \brief Special functions
+
+/// \defgroup vMath Vectorized functions
+/// \ingroup Math
+/// \brief Vectorized functions
 
 /// \defgroup Random Random number generating
 /// \brief Random number generating engines and utilities

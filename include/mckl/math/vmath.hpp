@@ -573,15 +573,15 @@ MCKL_DEFINE_MATH_VMATH_1(std::atanh, atanh)
 /// \ingroup vMath
 /// @{
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{Erf}(a_i)\f$
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{erf}(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(std::erf, erf)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = \mathrm{Erfc}(a_i) = \mathrm{Erf}(1 - a_i)\f$
+/// \f$y_i = \mathrm{erfc}(a_i) = \mathrm{erfc}(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(std::erfc, erfc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = 1 - \mathrm{Erfc}(a_i / \sqrt{2}) / 2\f$, the standard Normal CDF
+/// \f$y_i = 1 - \mathrm{erfc}(a_i / \sqrt{2}) / 2\f$, the standard Normal CDF
 template <typename T>
 inline void cdfnorm(std::size_t n, const T *a, T *y)
 {
@@ -597,6 +597,13 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     erf(l, y, y);
     fma(l, static_cast<T>(0.5), static_cast<T>(0.5), y, y);
 }
+
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{erf}^{-1}(a_i)\f$
+MCKL_DEFINE_MATH_VMATH_1(erfinv, erfinv)
+
+/// \brief For \f$i = 1,\ldots,n\f$, compute
+/// \f$y_i = \mathrm{erfc}^{-1}(a_i)\f$
+MCKL_DEFINE_MATH_VMATH_1(erfcinv, erfcinv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
