@@ -581,7 +581,7 @@ MCKL_DEFINE_MATH_VMATH_1(std::erf, erf)
 MCKL_DEFINE_MATH_VMATH_1(std::erfc, erfc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = 1 - \mathrm{erfc}(a_i / \sqrt{2}) / 2\f$, the standard Normal CDF
+/// \f$y_i = (1 + \mathrm{erfc}(a_i / \sqrt{2})) / 2\f$
 template <typename T>
 inline void cdfnorm(std::size_t n, const T *a, T *y)
 {
@@ -598,12 +598,30 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     fma(l, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
 }
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = \mathrm{erf}^{-1}(a_i)\f$
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{erf}^{-1}(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(erfinv, erfinv)
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute
+/// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \mathrm{erfc}^{-1}(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(erfcinv, erfcinv)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \sqrt{2}\mathrm{erf}^{-1}(2a_i - 1)\f$
+template <typename T>
+inline void cdfnorminv(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = internal::BufferSize<T>::value;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        fma(k, a, -static_cast<T>(2), static_cast<T>(2), y);
+        erfcinv(k, y, y);
+        mul(k, const_sqrt_2<T>(), y, y);
+    }
+    fma(l, a, -static_cast<T>(2), static_cast<T>(2), y);
+    erfcinv(l, y, y);
+    mul(l, const_sqrt_2<T>(), y, y);
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
