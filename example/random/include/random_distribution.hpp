@@ -495,10 +495,8 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        boost::math::normal_distribution<RealType> normal(0, 1);
         return this->partition_quantile(n, [&](double p) {
-            RealType q = boost::math::quantile(
-                normal, 1 - static_cast<RealType>(p) / 2);
+            double q = mckl::const_sqrt_2<double>() * mckl::erfinv(1 - p);
             return dist.a() + dist.b() / static_cast<RealType>(q * q);
         });
     }
@@ -551,8 +549,10 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_boost(n,
-            boost::math::lognormal_distribution<RealType>(dist.m(), dist.s()));
+        return this->partition_quantile(n, [&](double p) {
+            double q = mckl::const_sqrt_2<double>() * mckl::erfinv(2 * p - 1);
+            return std::exp(dist.m() + dist.s() * static_cast<RealType>(q));
+        });
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -576,9 +576,10 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_boost(
-            n, boost::math::normal_distribution<RealType>(
-                   dist.mean(), dist.stddev()));
+        return this->partition_quantile(n, [&](double p) {
+            double q = mckl::const_sqrt_2<double>() * mckl::erfinv(2 * p - 1);
+            return dist.mean() + dist.stddev() * static_cast<RealType>(q);
+        });
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const

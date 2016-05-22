@@ -32,7 +32,7 @@
 #ifndef MCKL_MATH_SPECIAL_FUNCTION_HPP
 #define MCKL_MATH_SPECIAL_FUNCTION_HPP
 
-#include <mckl/internal/config.hpp>
+#include <mckl/internal/config.h>
 #include <mckl/math/erf.hpp>
 
 #endif // MCKL_MATH_SPECIAL_FUNCTION_HPP
