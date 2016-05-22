@@ -146,7 +146,7 @@ class RandomDistributionTraitBase
     mckl::Vector<ResultType> partition_boost(
         std::size_t n, BoostDistType &&dist) const
     {
-        return partition_quantile<ResultType>(n, [&](double p) {
+        return partition_quantile(n, [&](double p) {
             return boost::math::quantile(
                 std::forward<BoostDistType>(dist), static_cast<ResultType>(p));
         });
@@ -1161,8 +1161,8 @@ inline void random_distribution(std::size_t N, std::size_t M)
     int nwid = 30;
     int twid = 12;
 
-    // random_distribution_pval_real<float>(N, M, nwid, twid);
-    // random_distribution_pval_real<double>(N, M, nwid, twid);
+    random_distribution_pval_real<float>(N, M, nwid, twid);
+    random_distribution_pval_real<double>(N, M, nwid, twid);
     random_distribution_pval_int<int>(N, M, nwid, twid);
     random_distribution_pval_int<unsigned>(N, M, nwid, twid);
 }

@@ -59,44 +59,56 @@ template <typename RealType>
 class GammaDistributionConstant
 {
     public:
-    GammaDistributionConstant(RealType alpha, RealType beta)
-    {
-        reset(alpha, beta);
-    }
-
-    void reset(RealType alpha, RealType)
+    GammaDistributionConstant(RealType alpha = 1, RealType = 1)
     {
         if (alpha < static_cast<RealType>(0.6))
-            algorithm = GammaDistributionAlgorithmT;
+            algorithm_ = GammaDistributionAlgorithmT;
         else if (alpha < 1)
-            algorithm = GammaDistributionAlgorithmW;
+            algorithm_ = GammaDistributionAlgorithmW;
         else if (alpha > 1)
-            algorithm = GammaDistributionAlgorithmN;
+            algorithm_ = GammaDistributionAlgorithmN;
         else
-            algorithm = GammaDistributionAlgorithmE;
+            algorithm_ = GammaDistributionAlgorithmE;
 
-        d = c = 0;
-        switch (algorithm) {
+        d_ = c_ = 0;
+        switch (algorithm_) {
             case GammaDistributionAlgorithmT:
-                d = 1 - alpha;
-                c = 1 / alpha;
+                d_ = 1 - alpha;
+                c_ = 1 / alpha;
                 break;
             case GammaDistributionAlgorithmW:
-                d = std::pow(alpha, alpha / (1 - alpha)) * (1 - alpha);
-                c = 1 / alpha;
+                d_ = std::pow(alpha, alpha / (1 - alpha)) * (1 - alpha);
+                c_ = 1 / alpha;
                 break;
             case GammaDistributionAlgorithmN:
-                d = alpha - const_one<RealType>() / 3;
-                c = 1 / (3 * std::sqrt(d));
+                d_ = alpha - const_one<RealType>() / 3;
+                c_ = 1 / (3 * std::sqrt(d_));
                 break;
             case GammaDistributionAlgorithmE:
                 break;
         }
     }
 
-    RealType d;
-    RealType c;
-    GammaDistributionAlgorithm algorithm;
+    RealType d() const { return d_; }
+    RealType c() const { return c_; }
+    GammaDistributionAlgorithm algorithm() const { return algorithm_; }
+
+    friend bool operator==(const GammaDistributionConstant<RealType> &c1,
+        const GammaDistributionConstant<RealType> &c2)
+    {
+        if (!is_equal(c1.d_, c2.d_))
+            return false;
+        if (!is_equal(c1.c_, c2.c_))
+            return false;
+        if (!is_equal(c1.algorithm_, c2.algorithm_))
+            return false;
+        return true;
+    }
+
+    private:
+    RealType d_;
+    RealType c_;
+    GammaDistributionAlgorithm algorithm_;
 }; // class GammaDistributionConstant
 
 template <std::size_t K, typename RealType, typename RNGType>
@@ -104,8 +116,8 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
-    const RealType d = constant.d;
-    const RealType c = constant.c;
+    const RealType d = constant.d();
+    const RealType c = constant.c();
     Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
@@ -140,8 +152,8 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
-    const RealType d = constant.d;
-    const RealType c = constant.c;
+    const RealType d = constant.d();
+    const RealType c = constant.c();
     Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
@@ -170,8 +182,8 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
-    const RealType d = constant.d;
-    const RealType c = constant.c;
+    const RealType d = constant.d();
+    const RealType c = constant.c();
     Array<RealType, K * 5> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
@@ -230,7 +242,7 @@ inline std::size_t gamma_distribution_impl(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
-    switch (constant.algorithm) {
+    switch (constant.algorithm()) {
         case GammaDistributionAlgorithmT:
             return gamma_distribution_impl_t<K>(
                 rng, n, r, alpha, beta, constant);
@@ -252,7 +264,7 @@ inline void gamma_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     const std::size_t k = BufferSize<RealType>::value;
-    const GammaDistributionConstant<RealType> constant(alpha);
+    const GammaDistributionConstant<RealType> constant(alpha, beta);
     while (n > k) {
         std::size_t m =
             gamma_distribution_impl<k>(rng, k, r, alpha, beta, constant);
@@ -295,20 +307,18 @@ class GammaDistribution
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
 
-    void reset() { constant_.reset(alpha(), beta()); }
+    void reset()
+    {
+        constant_ =
+            internal::GammaDistributionConstant<RealType>(alpha(), beta());
+    }
 
     private:
     internal::GammaDistributionConstant<RealType> constant_;
 
     bool is_equal(const distribution_type &other) const
     {
-        if (!is_equal(constant_.d, other.constant_.d))
-            return false;
-        if (!is_equal(constant_.c, other.constant_.c))
-            return false;
-        if (!is_equal(constant_.algorithm, other.constant_.algorithm))
-            return false;
-        return true;
+        return constant_ == other.constant_;
     }
 
     template <typename CharT, typename Traits>
@@ -339,7 +349,7 @@ class GammaDistribution
         const internal::GammaDistributionConstant<RealType> &constant)
     {
         result_type r = 0;
-        switch (constant.algorithm) {
+        switch (constant.algorithm()) {
             case internal::GammaDistributionAlgorithmT:
                 r = generate_t(rng, param, constant);
                 break;
@@ -365,12 +375,12 @@ class GammaDistribution
         while (true) {
             result_type u = 1 - u01(rng);
             result_type e = -std::log(u01(rng));
-            if (u > constant.d) {
-                u = -std::log(constant.c * (1 - u));
+            if (u > constant.d()) {
+                u = -std::log(constant.c() * (1 - u));
                 e += u;
-                u = constant.d + param.alpha() * u;
+                u = constant.d() + param.alpha() * u;
             }
-            result_type r = std::exp(constant.c * std::log(u));
+            result_type r = std::exp(constant.c() * std::log(u));
             if (std::abs(r) < e)
                 return r;
         }
@@ -387,8 +397,8 @@ class GammaDistribution
         do {
             u = -std::log(u01(rng));
             e = -std::log(u01(rng));
-            r = std::exp(constant.c * std::log(u));
-        } while (u + e < constant.d + r);
+            r = std::exp(constant.c() * std::log(u));
+        } while (u + e < constant.d() + r);
 
         return r;
     }
@@ -406,17 +416,17 @@ class GammaDistribution
             result_type w = 0;
             do {
                 w = rnorm(rng);
-                v = 1 + constant.c * w;
+                v = 1 + constant.c() * w;
             } while (v <= 0);
             v = v * v * v;
 
             e = 1 - static_cast<result_type>(0.0331) * (w * w) * (w * w);
             if (u < e)
-                return constant.d * v;
+                return constant.d() * v;
 
-            e = w * w / 2 + constant.d * (1 - v + std::log(v));
+            e = w * w / 2 + constant.d() * (1 - v + std::log(v));
             if (std::log(u) < e)
-                return constant.d * v;
+                return constant.d() * v;
         }
     }
 

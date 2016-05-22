@@ -65,6 +65,12 @@ inline std::string random_typename<double>()
 }
 
 template <>
+inline std::string random_typename<long double>()
+{
+    return "long double";
+}
+
+template <>
 inline std::string random_typename<int>()
 {
     return "int";

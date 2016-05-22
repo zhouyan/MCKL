@@ -119,8 +119,6 @@ inline void random_uniform_bits(std::size_t N, std::size_t M)
 #endif
 
 #define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    random_uniform_bits<RNGType, std::uint8_t>(                               \
-        N, M, nwid, swid, twid, #Name);                                       \
     random_uniform_bits<RNGType, std::uint16_t>(                              \
         N, M, nwid, swid, twid, #Name);                                       \
     random_uniform_bits<RNGType, std::uint32_t>(                              \

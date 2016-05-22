@@ -192,8 +192,8 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     std::cout << std::setw(twid + 3) << std::right << "Deterministics";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
-    // random_distribution_perf_real<float>(N, M, nwid, twid);
-    // random_distribution_perf_real<double>(N, M, nwid, twid);
+    random_distribution_perf_real<float>(N, M, nwid, twid);
+    random_distribution_perf_real<double>(N, M, nwid, twid);
     random_distribution_perf_int<int>(N, M, nwid, twid);
     random_distribution_perf_int<unsigned>(N, M, nwid, twid);
     std::cout << std::string(lwid, '-') << std::endl;
