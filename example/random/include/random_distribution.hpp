@@ -34,7 +34,6 @@
 
 #include <mckl/random/distribution.hpp>
 #include <boost/math/distributions.hpp>
-#include <boost/random.hpp>
 #include "random_common.hpp"
 
 #define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(test)               \
@@ -251,7 +250,7 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
 {
     public:
     using dist_type = mckl::BetaDistribution<RealType>;
-    using std_type = boost::random::beta_distribution<RealType>;
+    using std_type = dist_type;
 
     std::string distname() const { return "Beta"; }
 
@@ -458,7 +457,7 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
 {
     public:
     using dist_type = mckl::LaplaceDistribution<RealType>;
-    using std_type = boost::random::laplace_distribution<RealType>;
+    using std_type = dist_type;
 
     std::string distname() const { return "Laplace"; }
 

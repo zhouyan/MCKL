@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # ============================================================================
-#  MCKL/manual/tab/rng_engine.pl
+#  MCKL/manual/tab/random_rng.pl
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -38,14 +38,14 @@ do 'tab.pl';
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
 
-my @engines = qw(STD Philox Threefry AES128 AES192 AES256 ARS RDRAND MKL);
+my @rngs = qw(STD Philox Threefry AES128 AES192 AES256 ARS RDRAND MKL);
 
 my @clang_txt = &read('clang');
 my @gcc_txt = &read('gcc');
 my @intel_txt = &read('intel');
 
-foreach (@engines) {
-    open my $texfile, '>', "rng_engine_\L$_.tex";
+foreach (@rngs) {
+    open my $texfile, '>', "random_rng_\L$_.tex";
     print $texfile &table(
         &filter($_, @clang_txt),
         &filter($_, @gcc_txt),
@@ -54,29 +54,29 @@ foreach (@engines) {
 
 sub read
 {
-    open my $txtfile, '<', "rng_engine_$_[0].txt";
+    open my $txtfile, '<', "random_rng_$_[0].txt";
     my @txt = <$txtfile>;
     @txt
 }
 
 sub filter
 {
-    my $engine = shift @_;
+    my $rng = shift @_;
     my $record;
     foreach (@_) {
         next if (!/Passed|Failed/);
 
-        my ($rng, $cpB1, $cpB2) = (split)[0, 5, 6];
-        if ($engine eq 'STD') {
-            next unless "@std" =~ /$rng/;
-        } elsif ($engine eq 'MKL') {
-            next unless $rng =~ /MKL/;
+        my ($name, $cpB1, $cpB2) = (split)[0, 5, 6];
+        if ($rng eq 'STD') {
+            next unless "@std" =~ /$name/;
+        } elsif ($rng eq 'MKL') {
+            next unless $name =~ /MKL/;
         } else {
-            next unless $rng =~ /$engine/;
-            next if $rng =~ /MKL/;
+            next unless $name =~ /$rng/;
+            next if $name =~ /MKL/;
         }
 
-        $record .= $rng . ' ';
+        $record .= $name . ' ';
         $record .= $cpB1 . ' ';
         $record .= $cpB2 . "\n";
     }
@@ -85,7 +85,7 @@ sub filter
 
 sub table
 {
-    my @rng;
+    my @name;
     my @cpB1;
     my @cpB2;
     my $wid = 0;
@@ -94,11 +94,11 @@ sub table
         my $index = 0;
         foreach (@lines) {
             my @record = split;
-            $rng[$index] = '\verb|' . $record[0] . '|';
+            $name[$index] = '\verb|' . $record[0] . '|';
             $cpB1[$index] .= &format($record[1]);
             $cpB2[$index] .= &format($record[2]);
-            if ($wid < length($rng[-1])) {
-                $wid = length($rng[-1]);
+            if ($wid < length($name[-1])) {
+                $wid = length($name[-1]);
             }
             $index++;
         }
@@ -117,9 +117,9 @@ sub table
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
-    foreach (@rng) {
+    foreach (@name) {
         $table .= ' ' x 2;
-        $table .= sprintf "%-${wid}s", $rng[$index];
+        $table .= sprintf "%-${wid}s", $name[$index];
         $table .= $cpB1[$index];
         $table .= $cpB2[$index];
         $table .= " \\\\\n";
