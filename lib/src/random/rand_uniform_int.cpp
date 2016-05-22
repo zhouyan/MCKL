@@ -31,6 +31,7 @@
 
 #include <mckl/mckl.h>
 #include <mckl/random/rng.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 
 extern "C" {
 
@@ -46,7 +47,7 @@ extern "C" {
     inline void mckl_rand_uniform_int_##name(                                 \
         mckl_rng rng, size_t n, int *r, int a, int b)                         \
     {                                                                         \
-        std::uniform_int_distribution<int> dist(a, b);                        \
+        ::mckl::UniformIntDistribution<int> dist(a, b);                       \
         ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 

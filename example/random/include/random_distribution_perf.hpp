@@ -31,12 +31,12 @@
 
 #include "random_distribution.hpp"
 
-template <typename MCKLDistType, typename RealType, std::size_t ParamNum>
+template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
 inline void random_distribution_test_perf(std::size_t N, std::size_t M,
-    const std::array<RealType, ParamNum> &param, int nwid, int twid)
+    const std::array<ParamType, ParamNum> &param, int nwid, int twid)
 {
-    using trait_type = DistTrait<MCKLDistType>;
-    using STDDistType = typename trait_type::std_type;
+    using result_type = typename MCKLDistType::result_type;
+    using std_type = typename RandomDistributionTrait<MCKLDistType>::std_type;
 
     mckl::RNG rng;
     RNG01<mckl::RNG> rng01;
@@ -45,21 +45,21 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
 #endif
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
     MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));
-    STDDistType dist_std(random_distribution_init<STDDistType>(param));
+    std_type dist_std(random_distribution_init<std_type>(param));
     bool pass = true;
 
-    mckl::Vector<RealType> r(N);
+    mckl::Vector<result_type> r(N);
     mckl::rand(rng01, dist_mckl, N, r.data());
     for (std::size_t i = 0; i != N; ++i) {
         pass = pass && std::isfinite(r[i]);
         pass = pass && std::isfinite(dist_mckl(rng01));
     }
 
-    mckl::Vector<RealType> r1;
-    mckl::Vector<RealType> r2;
-    mckl::Vector<RealType> r3;
+    mckl::Vector<result_type> r1;
+    mckl::Vector<result_type> r2;
+    mckl::Vector<result_type> r3;
 #if MCKL_HAS_MKL
-    mckl::Vector<RealType> r4;
+    mckl::Vector<result_type> r4;
 #endif
     r1.reserve(N);
     r2.reserve(N);
@@ -135,7 +135,7 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
 #endif
     }
 
-    trait_type trait;
+    RandomDistributionTrait<MCKLDistType> trait;
     std::cout << std::setw(nwid) << std::left << trait.name(param);
     std::cout << std::setw(twid) << std::right << c1;
     std::cout << std::setw(twid) << std::right << c2;
@@ -151,7 +151,7 @@ template <typename MCKLDistType>
 inline void random_distribution_test_perf(
     std::size_t N, std::size_t M, int nwid, int twid)
 {
-    DistTrait<MCKLDistType> trait;
+    RandomDistributionTrait<MCKLDistType> trait;
     auto params = trait.params();
 
     mckl::Vector<std::string> names;
@@ -160,10 +160,17 @@ inline void random_distribution_test_perf(
 }
 
 template <typename RealType>
-inline void random_distribution_perf(
+inline void random_distribution_perf_real(
     std::size_t N, std::size_t M, int nwid, int twid)
 {
-    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST(perf);
+    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(perf);
+}
+
+template <typename IntType>
+inline void random_distribution_perf_int(
+    std::size_t N, std::size_t M, int nwid, int twid)
+{
+    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(perf);
 }
 
 inline void random_distribution_perf(std::size_t N, std::size_t M)
@@ -185,7 +192,9 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     std::cout << std::setw(twid + 3) << std::right << "Deterministics";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
-    random_distribution_perf<float>(N, M, nwid, twid);
-    random_distribution_perf<double>(N, M, nwid, twid);
+    random_distribution_perf_real<float>(N, M, nwid, twid);
+    random_distribution_perf_real<double>(N, M, nwid, twid);
+    random_distribution_perf_int<int>(N, M, nwid, twid);
+    random_distribution_perf_int<unsigned>(N, M, nwid, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }

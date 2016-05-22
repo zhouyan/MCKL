@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/uniform_real_distribution.hpp
+// MCKL/include/mckl/random/uniform_int_distribution.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_UNIFORM_REAL_DISTRIBUTION_HPP
-#define MCKL_RANDOM_UNIFORM_REAL_DISTRIBUTION_HPP
+#ifndef MCKL_RANDOM_UNIFORM_INT_DISTRIBUTION_HPP
+#define MCKL_RANDOM_UNIFORM_INT_DISTRIBUTION_HPP
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/u01_distribution.hpp>
@@ -41,33 +41,44 @@ namespace mckl
 namespace internal
 {
 
-template <typename RealType>
-inline bool uniform_real_distribution_check_param(RealType a, RealType b)
+template <typename IntType>
+inline bool uniform_int_distribution_check_param(IntType a, IntType b)
 {
-    return a < b;
+    return a <= b;
 }
 
-template <std::size_t, typename RealType, typename RNGType>
-inline void uniform_real_distribution_impl(
-    RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
+template <std::size_t K, typename IntType, typename RNGType>
+inline void uniform_int_distribution_impl(
+    RNGType &rng, std::size_t n, IntType *r, IntType a, IntType b)
 {
-    u01_co_distribution(rng, n, r);
-    fma(n, r, b - a, a, r);
+    if (a == b) {
+        std::fill_n(r, n, a);
+        return;
+    }
+
+    Array<double, K> s;
+    u01_co_distribution(rng, n, s.data());
+    fma(n, s.data(), static_cast<double>(b) - static_cast<double>(a) + 1.0,
+        static_cast<double>(a), s.data());
+    floor(n, s.data(), s.data());
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = static_cast<IntType>(s[i]);
 }
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    UniformReal, uniform_real, RealType, RealType, a, RealType, b)
+    UniformInt, uniform_int, IntType, IntType, a, IntType, b)
 
 } // namespace mckl::internal
 
-/// \brief Uniform real distribution
+/// \brief Uniform integer distribution
 /// \ingroup Distribution
-template <typename RealType>
-class UniformRealDistribution
+template <typename IntType>
+class UniformIntDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(UniformReal)
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(UniformReal, uniform_real, RealType,
-        result_type, a, 0, result_type, b, 1)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(UniformInt, short)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_2(UniformInt, uniform_int, IntType,
+        result_type, a, 0, result_type, b,
+        std::numeric_limits<result_type>::max())
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:
@@ -81,14 +92,19 @@ class UniformRealDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        U01CODistribution<RealType> u01;
+        U01CODistribution<double> u01;
+        double u = u01(rng);
+        u = static_cast<double>(param.a()) +
+            (static_cast<double>(param.b()) - static_cast<double>(param.a()) +
+                1.0) *
+                u;
 
-        return param.a() + (param.b() - param.a()) * u01(rng);
+        return static_cast<result_type>(std::floor(u));
     }
-}; // class UniformRealDistribution
+}; // class UniformIntDistribution
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(UniformReal, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(UniformInt, IntType)
 
 } // namespace mckl
 
-#endif // MCKL_RANDOM_UNIFORM_REAL_DISTRIBUTION_HPP
+#endif // MCKL_RANDOM_UNIFORM_INT_DISTRIBUTION_HPP

@@ -96,9 +96,9 @@ inline std::string random_u01_function_name()
     std::stringstream ss;
     ss << "u01<uint";
     ss << std::numeric_limits<UIntType>::digits << "_t, ";
-    ss << random_type_name<RealType>() << ", ";
-    ss << random_type_name<Lower>() << ", ";
-    ss << random_type_name<Upper>() << ">";
+    ss << random_typename<RealType>() << ", ";
+    ss << random_typename<Lower>() << ", ";
+    ss << random_typename<Upper>() << ">";
 
     return ss.str();
 }

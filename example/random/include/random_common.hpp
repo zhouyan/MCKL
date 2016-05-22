@@ -50,34 +50,40 @@
     }
 
 template <typename>
-inline std::string random_type_name();
+inline std::string random_typename();
 
 template <>
-inline std::string random_type_name<float>()
+inline std::string random_typename<float>()
 {
     return "float";
 }
 
 template <>
-inline std::string random_type_name<double>()
+inline std::string random_typename<double>()
 {
     return "double";
 }
 
 template <>
-inline std::string random_type_name<long double>()
+inline std::string random_typename<int>()
 {
-    return "long double";
+    return "int";
 }
 
 template <>
-inline std::string random_type_name<mckl::Closed>()
+inline std::string random_typename<unsigned>()
+{
+    return "unsigned";
+}
+
+template <>
+inline std::string random_typename<mckl::Closed>()
 {
     return "Closed";
 }
 
 template <>
-inline std::string random_type_name<mckl::Open>()
+inline std::string random_typename<mckl::Open>()
 {
     return "Open";
 }

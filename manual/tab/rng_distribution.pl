@@ -36,7 +36,7 @@ use v5.16;
 do 'tab.pl';
 
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
-Pareto Rayleigh UniformReal Weibull);
+Pareto Rayleigh UniformReal Weibull UniformInt);
 
 my @normal = qw(Normal Lognormal Levy);
 

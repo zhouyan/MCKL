@@ -63,7 +63,7 @@
         "**" #Name                                                            \
         "Distribution** used with UIntType other than unsigned integer "      \
         "types");                                                             \
-    static_assert(sizeof(IntType) >= sizeof(MinType),                         \
+    static_assert(sizeof(UIntType) >= sizeof(MinType),                        \
         "**" #Name                                                            \
         "Distribution** used with IntType smaller than " #MinType);
 
@@ -742,6 +742,9 @@ class WeibullDistribution;
 template <typename = bool>
 class BernoulliDistribution;
 
+template <typename = int>
+class UniformIntDistribution;
+
 template <typename ResultType, typename Generator>
 inline void rand(
     CounterEngine<ResultType, Generator> &, std::size_t, ResultType *);
@@ -858,6 +861,10 @@ template <typename IntType, typename RNGType>
 inline void rand(
     RNGType &, BernoulliDistribution<IntType> &, std::size_t, IntType *);
 
+template <typename IntType, typename RNGType>
+inline void rand(
+    RNGType &, UniformIntDistribution<IntType> &, std::size_t, IntType *);
+
 namespace internal
 {
 
@@ -944,6 +951,10 @@ inline void weibull_distribution(
 
 template <typename IntType, typename RNGType>
 inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
+
+template <typename IntType, typename RNGType>
+inline void uniform_int_distribution(
+    RNGType &, std::size_t, IntType *, IntType, IntType);
 
 } // namespace mckl::internal
 
@@ -1068,6 +1079,10 @@ inline void weibull_distribution(
 template <MKL_INT BRNG, int Bits>
 inline void bernoulli_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void uniform_int_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, int *, int, int);
 
 } // namespace mckl::internal
 

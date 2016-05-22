@@ -1531,6 +1531,14 @@ inline void bernoulli_distribution(
     rng.stream().bernoulli(static_cast<MKL_INT>(n), r, p);
 }
 
+template <MKL_INT BRNG, int Bits>
+inline void uniform_int_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, int a, int b)
+{
+    size_check<MKL_INT>(n, "uniform_int_distribution");
+    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b + 1);
+}
+
 } // namespace mckl::internal
 
 #endif // MCKL_USE_MKL_VSL
