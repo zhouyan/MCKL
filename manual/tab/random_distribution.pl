@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # ============================================================================
-#  MCKL/manual/tab/rng_distribution.pl
+#  MCKL/manual/tab/random_distribution.pl
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -35,19 +35,19 @@ use v5.16;
 
 do 'tab.pl';
 
-my @inverse_real = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
+my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
 
-my @inverse_int = qw(Geometric UniformInt);
+my @int = qw(Geometric UniformInt);
 
 my @normal = qw(Normal Lognormal Levy);
 
-my @nostd = qw(Arcsine, Logistic Pareto Rayleigh Levy);
+my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh);
 
 my %distribution;
 my %cpE;
 my $txt;
-open my $txtfile, '<', 'rng_distribution.txt';
+open my $txtfile, '<', 'random_distribution.txt';
 while (<$txtfile>) {
     if (/<(double|int)>\(.*(Passed|Failed)/) {
         $txt .= $_;
@@ -67,12 +67,12 @@ while (<$txtfile>) {
             $cpE .= &format($_)
         }
         $cpE .= "\n";
-        if ("@inverse_real" =~ /$basename/) {
-            $distribution{'inverse_real'} .= $name;
-            $cpE{'inverse_real'} .= $cpE;
-        } elsif ("@inverse_int" =~ /$basename/) {
-            $distribution{'inverse_int'} .= $name;
-            $cpE{'inverse_int'} .= $cpE;
+        if ("@inverse" =~ /$basename/) {
+            $distribution{'inverse'} .= $name;
+            $cpE{'inverse'} .= $cpE;
+        } elsif ("@int" =~ /$basename/) {
+            $distribution{'int'} .= $name;
+            $cpE{'int'} .= $cpE;
         } elsif ("@normal" =~ /$basename/) {
             $distribution{'normal'} .= $name;
             $cpE{'normal'} .= $cpE;
@@ -82,7 +82,7 @@ while (<$txtfile>) {
         }
     }
 }
-open $txtfile, '>', 'rng_distribution.txt';
+open $txtfile, '>', 'random_distribution.txt';
 print $txtfile $txt;
 
 while (my ($basename, $name) = each %distribution) {
@@ -113,6 +113,6 @@ while (my ($basename, $name) = each %distribution) {
     }
     $table .= ' ' x 2 . '\bottomrule' . "\n";
     $table .= '\end{tabularx}' . "\n";
-    open my $texfile, '>', "rng_distribution_\L$basename.tex";
+    open my $texfile, '>', "random_distribution_\L$basename.tex";
     print $texfile $table;
 }

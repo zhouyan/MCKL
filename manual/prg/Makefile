@@ -29,8 +29,6 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-.PHONY : all clean libmckl
-
 CC := clang
 CFLAGS := $(CFLAGS) -O3 -DNDEBUG
 CFLAGS := $(CFLAGS) -I ../../include

@@ -23,7 +23,7 @@ manual/prg/pf_seq
 manual/prg/pf_tbb
 manual/prg/program_option
 manual/prg/progress
-manual/tab/rng_distribution_*.tex
-manual/tab/rng_engine_*.tex
+manual/tab/random_distribution_*.tex
+manual/tab/random_rng_*.tex
 manual/tex/*.aux
 manual/tex/inc.tex
