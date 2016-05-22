@@ -584,7 +584,7 @@ class MKLStream
 
     /// \brief `viRngPoisson`
     int poisson(MKL_INT n, int *r, double lambda,
-        MKL_INT method = VSL_RNG_METHOD_POISSON_PTPE)
+        MKL_INT method = VSL_RNG_METHOD_POISSON_POISNORM)
     {
         return internal::mkl_error_check(
             ::viRngPoisson(method, ptr_, n, r, lambda), "MKLStream::poisson",
@@ -1529,6 +1529,14 @@ inline void bernoulli_distribution(
 {
     size_check<MKL_INT>(n, "bernoulli_distribution");
     rng.stream().bernoulli(static_cast<MKL_INT>(n), r, p);
+}
+
+template <MKL_INT BRNG, int Bits>
+inline void geometric_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, double p)
+{
+    size_check<MKL_INT>(n, "geometric_distribution");
+    rng.stream().geometric(static_cast<MKL_INT>(n), r, p);
 }
 
 template <MKL_INT BRNG, int Bits>

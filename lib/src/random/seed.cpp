@@ -30,6 +30,7 @@
 //============================================================================
 
 #include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
 #include <mckl/random/seed.hpp>
 
 namespace mckl

@@ -59,6 +59,7 @@
 
 #include <mckl/random/bernoulli_distribution.hpp>
 #include <mckl/random/discrete_distribution.hpp>
+#include <mckl/random/geometric_distribution.hpp>
 #include <mckl/random/uniform_int_distribution.hpp>
 
 #endif // MCKL_RANDOM_DISTRIBUTION_HPP

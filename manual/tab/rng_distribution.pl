@@ -35,8 +35,10 @@ use v5.16;
 
 do 'tab.pl';
 
-my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
-Pareto Rayleigh UniformReal Weibull UniformInt);
+my @inverse_real = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
+Pareto Rayleigh UniformReal Weibull);
+
+my @inverse_int = qw(Geometric UniformInt);
 
 my @normal = qw(Normal Lognormal Levy);
 
@@ -47,7 +49,7 @@ my %cpE;
 my $txt;
 open my $txtfile, '<', 'rng_distribution.txt';
 while (<$txtfile>) {
-    if (/<double>\(.*(Passed|Failed)/) {
+    if (/<(double|int)>\(.*(Passed|Failed)/) {
         $txt .= $_;
         my @record = split;
         my $name = shift @record;
@@ -65,9 +67,12 @@ while (<$txtfile>) {
             $cpE .= &format($_)
         }
         $cpE .= "\n";
-        if ("@inverse" =~ /$basename/) {
-            $distribution{'inverse'} .= $name;
-            $cpE{'inverse'} .= $cpE;
+        if ("@inverse_real" =~ /$basename/) {
+            $distribution{'inverse_real'} .= $name;
+            $cpE{'inverse_real'} .= $cpE;
+        } elsif ("@inverse_int" =~ /$basename/) {
+            $distribution{'inverse_int'} .= $name;
+            $cpE{'inverse_int'} .= $cpE;
         } elsif ("@normal" =~ /$basename/) {
             $distribution{'normal'} .= $name;
             $cpE{'normal'} .= $cpE;

@@ -30,6 +30,7 @@
 //============================================================================
 
 #include <mckl/mckl.h>
+#include <mckl/random/geometric_distribution.hpp>
 #include <mckl/random/rng.hpp>
 
 extern "C" {
@@ -46,7 +47,7 @@ extern "C" {
     inline void mckl_rand_geometric_##name(                                   \
         mckl_rng rng, size_t n, int *r, double p)                             \
     {                                                                         \
-        std::geometric_distribution<int> dist(p);                             \
+        ::mckl::GeometricDistribution<int> dist(p);                           \
         ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
     }
 

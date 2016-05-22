@@ -30,6 +30,7 @@
 //============================================================================
 
 #include <mckl/mckl.h>
+#include <mckl/random/gamma_distribution.hpp>
 #include <mckl/random/rng.hpp>
 
 extern "C" {

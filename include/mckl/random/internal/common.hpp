@@ -498,7 +498,7 @@
     void operator()(                                                          \
         RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
-        if (n < 16) {                                                         \
+        if (n < 100) {                                                        \
             for (std::size_t i = 0; i != n; ++i)                              \
                 r[i] = operator()(rng, param);                                \
         } else {                                                              \
@@ -636,7 +636,7 @@ inline void rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
         r[i] = rng();
 }
 
-/// \brief Generate random distribution numbers
+/// \brief Generate distribution random variates
 /// \ingroup Random
 template <typename RNGType, typename DistributionType>
 inline typename DistributionType::result_type rand(
@@ -645,7 +645,7 @@ inline typename DistributionType::result_type rand(
     return distribution(rng);
 }
 
-/// \brief Generate random distribution numbers
+/// \brief Generate distribution random variates
 /// \ingroup Random
 template <typename RNGType, typename DistributionType>
 inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
@@ -741,6 +741,9 @@ class WeibullDistribution;
 
 template <typename = bool>
 class BernoulliDistribution;
+
+template <typename = int>
+class GeometricDistribution;
 
 template <typename = int>
 class UniformIntDistribution;
@@ -863,6 +866,10 @@ inline void rand(
 
 template <typename IntType, typename RNGType>
 inline void rand(
+    RNGType &, GeometricDistribution<IntType> &, std::size_t, IntType *);
+
+template <typename IntType, typename RNGType>
+inline void rand(
     RNGType &, UniformIntDistribution<IntType> &, std::size_t, IntType *);
 
 namespace internal
@@ -951,6 +958,9 @@ inline void weibull_distribution(
 
 template <typename IntType, typename RNGType>
 inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
+
+template <typename IntType, typename RNGType>
+inline void geometric_distribution(RNGType &, std::size_t, IntType *, double);
 
 template <typename IntType, typename RNGType>
 inline void uniform_int_distribution(
@@ -1078,6 +1088,10 @@ inline void weibull_distribution(
 
 template <MKL_INT BRNG, int Bits>
 inline void bernoulli_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void geometric_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
 
 template <MKL_INT BRNG, int Bits>

@@ -78,6 +78,8 @@
         N, M, nwid, twid);
 
 #define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(test)                \
+    random_distribution_test_##test<mckl::GeometricDistribution<IntType>>(    \
+        N, M, nwid, twid);                                                    \
     random_distribution_test_##test<mckl::UniformIntDistribution<IntType>>(   \
         N, M, nwid, twid);
 
@@ -105,15 +107,15 @@ class RNG01 : public RNGType
     }
 }; // class RNG01
 
-template <std::size_t ParamNum>
+template <typename ResultType, std::size_t ParamNum>
 class RandomDistributionTraitBase
 {
     public:
     RandomDistributionTraitBase() = default;
     RandomDistributionTraitBase(
-        const RandomDistributionTraitBase<ParamNum> &) = default;
-    RandomDistributionTraitBase<ParamNum> &operator=(
-        const RandomDistributionTraitBase<ParamNum> &) = default;
+        const RandomDistributionTraitBase<ResultType, ParamNum> &) = default;
+    RandomDistributionTraitBase<ResultType, ParamNum> &operator=(
+        const RandomDistributionTraitBase<ResultType, ParamNum> &) = default;
     virtual ~RandomDistributionTraitBase() {}
 
     static const std::size_t param_num = ParamNum;
@@ -127,7 +129,7 @@ class RandomDistributionTraitBase
     }
 
     protected:
-    template <typename ResultType, typename QuantileType>
+    template <typename QuantileType>
     mckl::Vector<ResultType> partition_quantile(
         std::size_t n, QuantileType &&quantile) const
     {
@@ -140,7 +142,7 @@ class RandomDistributionTraitBase
         return partition;
     }
 
-    template <typename ResultType, typename BoostDistType>
+    template <typename BoostDistType>
     mckl::Vector<ResultType> partition_boost(
         std::size_t n, BoostDistType &&dist) const
     {
@@ -182,7 +184,7 @@ class RandomDistributionTraitBase
         const std::string &dist_name, const std::array<ParamType, 0> &)
     {
         std::stringstream ss;
-        ss << dist_name << "<" << random_typename<ParamType>() << ">";
+        ss << dist_name << "<" << random_typename<ResultType>() << ">";
 
         return ss.str();
     }
@@ -192,7 +194,7 @@ class RandomDistributionTraitBase
         const std::string &dist_name, const std::array<ParamType, 1> &param)
     {
         std::stringstream ss;
-        ss << dist_name << "<" << random_typename<ParamType>() << ">("
+        ss << dist_name << "<" << random_typename<ResultType>() << ">("
            << param[0] << ")";
 
         return ss.str();
@@ -203,7 +205,7 @@ class RandomDistributionTraitBase
         const std::string &dist_name, const std::array<ParamType, 2> &param)
     {
         std::stringstream ss;
-        ss << dist_name << "<" << random_typename<ParamType>() << ">("
+        ss << dist_name << "<" << random_typename<ResultType>() << ">("
            << param[0] << "," << param[1] << ")";
 
         return ss.str();
@@ -215,7 +217,7 @@ class RandomDistributionTrait;
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::ArcsineDistribution<RealType>;
@@ -226,7 +228,7 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             double r = std::sin(mckl::const_pi_by2<double>() * p);
             return dist.a() +
                 (dist.b() - dist.a()) * static_cast<RealType>(r * r);
@@ -236,7 +238,7 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -244,7 +246,7 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::BetaDistribution<RealType>;
@@ -255,7 +257,7 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
     {
-        return partition_boost<RealType>(
+        return this->partition_boost(
             n, boost::math::beta_distribution<RealType>(
                    dist.alpha(), dist.beta()));
     }
@@ -263,17 +265,17 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0.5, 0.5);
-        add_param(params, 1, 1);
-        add_param(params, 1, 0.5);
-        add_param(params, 1, 1.5);
-        add_param(params, 0.5, 1);
-        add_param(params, 1.5, 1);
-        add_param(params, 1.5, 1.5);
-        add_param(params, 0.3, 0.3);
-        add_param(params, 0.9, 0.9);
-        add_param(params, 1.5, 0.5);
-        add_param(params, 0.5, 1.5);
+        this->add_param(params, 0.5, 0.5);
+        this->add_param(params, 1, 1);
+        this->add_param(params, 1, 0.5);
+        this->add_param(params, 1, 1.5);
+        this->add_param(params, 0.5, 1);
+        this->add_param(params, 1.5, 1);
+        this->add_param(params, 1.5, 1.5);
+        this->add_param(params, 0.3, 0.3);
+        this->add_param(params, 0.9, 0.9);
+        this->add_param(params, 1.5, 0.5);
+        this->add_param(params, 0.5, 1.5);
 
         return params;
     }
@@ -281,7 +283,7 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::CauchyDistribution<RealType>;
@@ -292,7 +294,7 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return dist.a() +
                 dist.b() * static_cast<RealType>(
                                std::tan(mckl::const_pi<double>() * (p - 0.5)));
@@ -302,7 +304,7 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -310,7 +312,7 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::GammaDistribution<RealType>;
@@ -320,7 +322,7 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_boost<RealType>(
+        return this->partition_boost(
             n, boost::math::gamma_distribution<RealType>(
                    dist.alpha(), dist.beta()));
     }
@@ -328,13 +330,13 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 1, 1);
-        add_param(params, 0.1, 1);
-        add_param(params, 0.5, 1);
-        add_param(params, 0.7, 1);
-        add_param(params, 0.9, 1);
-        add_param(params, 1.5, 1);
-        add_param(params, 15, 1);
+        this->add_param(params, 1, 1);
+        this->add_param(params, 0.1, 1);
+        this->add_param(params, 0.5, 1);
+        this->add_param(params, 0.7, 1);
+        this->add_param(params, 0.9, 1);
+        this->add_param(params, 1.5, 1);
+        this->add_param(params, 15, 1);
 
         return params;
     }
@@ -342,7 +344,7 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
-    : public RandomDistributionTraitBase<1>
+    : public RandomDistributionTraitBase<RealType, 1>
 {
     public:
     using dist_type = mckl::ChiSquaredDistribution<RealType>;
@@ -352,18 +354,17 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_boost<RealType>(
+        return this->partition_boost(
             n, boost::math::chi_squared_distribution<RealType>(dist.n()));
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
     {
-        RandomDistributionTrait<mckl::GammaDistribution<RealType>>
-            gamma_traits;
-        mckl::Vector<std::array<RealType, 2>> pgamma = gamma_traits.params();
+        RandomDistributionTrait<mckl::GammaDistribution<RealType>> gamma_trait;
+        mckl::Vector<std::array<RealType, 2>> pgamma = gamma_trait.params();
         mckl::Vector<std::array<RealType, 1>> params;
         for (std::size_t i = 0; i != pgamma.size(); ++i)
-            add_param(params, pgamma[i][0] * 2);
+            this->add_param(params, pgamma[i][0] * 2);
 
         return params;
     }
@@ -371,7 +372,7 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
-    : public RandomDistributionTraitBase<1>
+    : public RandomDistributionTraitBase<RealType, 1>
 {
     public:
     using dist_type = mckl::ExponentialDistribution<RealType>;
@@ -381,7 +382,7 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return -static_cast<RealType>(std::log(1 - p)) / dist.lambda();
         });
     }
@@ -389,7 +390,7 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
     mckl::Vector<std::array<RealType, 1>> params() const
     {
         mckl::Vector<std::array<RealType, 1>> params;
-        add_param(params, 1);
+        this->add_param(params, 1);
 
         return params;
     }
@@ -397,7 +398,7 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::ExtremeValueDistribution<RealType>;
@@ -407,7 +408,7 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return dist.a() -
                 dist.b() * static_cast<RealType>(std::log(-std::log(p)));
         });
@@ -416,7 +417,7 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -424,7 +425,7 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::FisherFDistribution<RealType>;
@@ -434,7 +435,7 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_boost<RealType>(n,
+        return this->partition_boost(n,
             boost::math::fisher_f_distribution<RealType>(dist.m(), dist.n()));
     }
 
@@ -444,7 +445,7 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
         mckl::Vector<std::array<RealType, 2>> params;
         for (std::size_t i = 0; i != df.size(); ++i)
             for (std::size_t j = 0; j != df.size(); ++j)
-                add_param(params, df[i], df[j]);
+                this->add_param(params, df[i], df[j]);
 
         return params;
     }
@@ -452,7 +453,7 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::LaplaceDistribution<RealType>;
@@ -462,7 +463,7 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             double q = p - 0.5;
             return q > 0 ?
                 dist.a() -
@@ -475,7 +476,7 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -483,7 +484,7 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::LevyDistribution<RealType>;
@@ -494,7 +495,7 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
         boost::math::normal_distribution<RealType> normal(0, 1);
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             RealType q = boost::math::quantile(
                 normal, 1 - static_cast<RealType>(p) / 2);
             return dist.a() + dist.b() / static_cast<RealType>(q * q);
@@ -504,7 +505,7 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -512,7 +513,7 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::LogisticDistribution<RealType>;
@@ -522,7 +523,7 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return dist.a() +
                 dist.b() * static_cast<RealType>(std::log(p / (1 - p)));
         });
@@ -531,7 +532,7 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -539,7 +540,7 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::LognormalDistribution<RealType>;
@@ -549,14 +550,14 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_boost<RealType>(n,
+        return this->partition_boost(n,
             boost::math::lognormal_distribution<RealType>(dist.m(), dist.s()));
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -564,7 +565,7 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::NormalDistribution<RealType>;
@@ -574,7 +575,7 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_boost<RealType>(
+        return this->partition_boost(
             n, boost::math::normal_distribution<RealType>(
                    dist.mean(), dist.stddev()));
     }
@@ -582,7 +583,7 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 0, 1);
+        this->add_param(params, 0, 1);
 
         return params;
     }
@@ -590,7 +591,7 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::ParetoDistribution<RealType>;
@@ -600,7 +601,7 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return dist.b() /
                 std::exp(static_cast<RealType>(std::log(1 - p)) / dist.a());
         });
@@ -609,7 +610,7 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 1, 1);
+        this->add_param(params, 1, 1);
 
         return params;
     }
@@ -617,7 +618,7 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
-    : public RandomDistributionTraitBase<1>
+    : public RandomDistributionTraitBase<RealType, 1>
 {
     public:
     using dist_type = mckl::RayleighDistribution<RealType>;
@@ -627,7 +628,7 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return std::sqrt(-2 * static_cast<RealType>(std::log(1 - p)) *
                 dist.sigma() * dist.sigma());
         });
@@ -636,7 +637,7 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
     mckl::Vector<std::array<RealType, 1>> params() const
     {
         mckl::Vector<std::array<RealType, 1>> params;
-        add_param(params, 1);
+        this->add_param(params, 1);
 
         return params;
     }
@@ -644,7 +645,7 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
-    : public RandomDistributionTraitBase<1>
+    : public RandomDistributionTraitBase<RealType, 1>
 {
     public:
     using dist_type = mckl::StudentTDistribution<RealType>;
@@ -654,21 +655,22 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_boost<RealType>(
+        return this->partition_boost(
             n, boost::math::students_t_distribution<RealType>(dist.n()));
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
     {
         RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
-            chi_traits;
-        return chi_traits.params();
+            chi_trait;
+
+        return chi_trait.params();
     }
 };
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::U01Distribution<RealType>>
-    : public RandomDistributionTraitBase<0>
+    : public RandomDistributionTraitBase<RealType, 0>
 {
     public:
     using dist_type = mckl::U01Distribution<RealType>;
@@ -678,7 +680,7 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &)
     {
-        return partition_quantile<RealType>(
+        return this->partition_quantile(
             n, [&](double p) { return static_cast<RealType>(p); });
     }
 
@@ -690,7 +692,7 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::UniformRealDistribution<RealType>;
@@ -700,7 +702,7 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return dist.a() + static_cast<RealType>(p) * (dist.b() - dist.a());
         });
     }
@@ -708,7 +710,7 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, -0.5, 0.5);
+        this->add_param(params, -0.5, 0.5);
 
         return params;
     }
@@ -716,7 +718,7 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<RealType, 2>
 {
     public:
     using dist_type = mckl::WeibullDistribution<RealType>;
@@ -726,7 +728,7 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return partition_quantile<RealType>(n, [&](double p) {
+        return this->partition_quantile(n, [&](double p) {
             return dist.b() * std::pow(-static_cast<RealType>(std::log(1 - p)),
                                   1 / dist.a());
         });
@@ -735,15 +737,61 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        add_param(params, 1, 1);
+        this->add_param(params, 1, 1);
 
         return params;
     }
 };
 
 template <typename IntType>
+class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
+    : public RandomDistributionTraitBase<IntType, 1>
+{
+    public:
+    using dist_type = mckl::GeometricDistribution<IntType>;
+    using std_type = std::geometric_distribution<IntType>;
+
+    std::string dist_name() const { return "Geometric"; }
+
+    mckl::Vector<std::array<double, 1>> params() const
+    {
+        mckl::Vector<std::array<double, 1>> params;
+        this->add_param(params, 0.5);
+
+        return params;
+    }
+
+    mckl::Vector<IntType> partition(std::size_t n, const dist_type &dist)
+    {
+        const IntType k = static_cast<IntType>(
+            std::ceil((std::log(5.0 / n) - std::log(dist.p())) /
+                std::log(1 - dist.p())));
+
+        mckl::Vector<IntType> partition;
+        for (IntType i = 0; i <= k; ++i)
+            partition.push_back(i);
+
+        return partition;
+    }
+
+    mckl::Vector<double> pmf(std::size_t n, const dist_type &dist)
+    {
+        const IntType k = static_cast<IntType>(
+            std::ceil((std::log(5.0 / n) - std::log(dist.p())) /
+                std::log(1 - dist.p())));
+
+        mckl::Vector<double> pmf;
+        pmf.push_back(dist.p());
+        for (IntType i = 1; i <= k; ++i)
+            pmf.push_back(pmf.back() * (1 - dist.p()));
+
+        return pmf;
+    }
+};
+
+template <typename IntType>
 class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
-    : public RandomDistributionTraitBase<2>
+    : public RandomDistributionTraitBase<IntType, 2>
 {
     public:
     using dist_type = mckl::UniformIntDistribution<IntType>;
@@ -761,18 +809,26 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
         IntType a = dist.a();
         IntType b = dist.b();
         mckl::Vector<IntType> partition;
-        partition.reserve(static_cast<std::size_t>(b - a));
         for (IntType i = a; i < b; ++i)
             partition.push_back(i);
 
         return partition;
     }
 
+    mckl::Vector<double> pmf(std::size_t, const dist_type &dist)
+    {
+        IntType a = dist.a();
+        IntType b = dist.b();
+        const double p = 1.0 / (b - a + 1);
+
+        return mckl::Vector<double>(static_cast<std::size_t>(b - a), p);
+    }
+
     private:
     mckl::Vector<std::array<IntType, 2>> params(std::true_type) const
     {
         mckl::Vector<std::array<IntType, 2>> params;
-        add_param(params, -10, 10);
+        this->add_param(params, -10, 10);
 
         return params;
     }
@@ -780,7 +836,7 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
     mckl::Vector<std::array<IntType, 2>> params(std::false_type) const
     {
         mckl::Vector<std::array<IntType, 2>> params;
-        add_param(params, 0, 20);
+        this->add_param(params, 0, 20);
 
         return params;
     }
@@ -804,15 +860,18 @@ inline DistType random_distribution_init(const std::array<ParamType, 2> &param)
     return DistType(param[0], param[1]);
 }
 
-template <typename ResultType, typename MCKLDistType>
-inline double random_distribution_chi2(
-    std::size_t n, const ResultType *r, const MCKLDistType &dist)
+template <typename MCKLDistType>
+inline double random_distribution_chi2(std::size_t n,
+    const typename MCKLDistType::result_type *r, const MCKLDistType &dist,
+    std::true_type)
 {
-    mckl::Vector<ResultType> rval(r, r + n);
+    using result_type = typename MCKLDistType::result_type;
+
+    mckl::Vector<result_type> rval(r, r + n);
     std::sort(rval.begin(), rval.end());
 
-    RandomDistributionTrait<MCKLDistType> traits;
-    mckl::Vector<ResultType> partition(traits.partition(n, dist));
+    RandomDistributionTrait<MCKLDistType> trait;
+    mckl::Vector<result_type> partition(trait.partition(n, dist));
 
     const std::size_t k = partition.size() + 1;
     mckl::Vector<double> count(k);
@@ -837,9 +896,56 @@ inline double random_distribution_chi2(
     return boost::math::cdf(chi2, s);
 }
 
-template <typename ResultType, typename MCKLDistType>
-inline double random_distribution_ksad(
-    std::size_t n, const ResultType *r, const MCKLDistType &dist)
+template <typename MCKLDistType>
+inline double random_distribution_chi2(std::size_t n,
+    const typename MCKLDistType::result_type *r, const MCKLDistType &dist,
+    std::false_type)
+{
+    using result_type = typename MCKLDistType::result_type;
+
+    mckl::Vector<result_type> rval(r, r + n);
+    std::sort(rval.begin(), rval.end());
+
+    RandomDistributionTrait<MCKLDistType> trait;
+    mckl::Vector<result_type> partition(trait.partition(n, dist));
+    mckl::Vector<double> pmf(trait.pmf(n, dist));
+
+    const std::size_t k = partition.size() + 1;
+    mckl::Vector<double> count(k);
+    std::size_t j = 0;
+    for (std::size_t i = 0; i != k - 1; ++i) {
+        std::size_t c = 0;
+        while (j != rval.size() && rval[j] == partition[i]) {
+            ++c;
+            ++j;
+        }
+        count[i] = static_cast<double>(c);
+    }
+    count.back() = static_cast<double>(rval.size() - j);
+    pmf.push_back(1 - std::accumulate(pmf.begin(), pmf.end(), 0.0));
+
+    mckl::mul(k, static_cast<double>(n), pmf.data(), pmf.data());
+    mckl::sub(k, count.data(), pmf.data(), count.data());
+    mckl::sqr(k, count.data(), count.data());
+    mckl::div(k, count.data(), pmf.data(), count.data());
+    const double s = std::accumulate(count.begin(), count.end(), 0.0);
+    boost::math::chi_squared_distribution<double> chi2(
+        static_cast<double>(k - 1));
+
+    return boost::math::cdf(chi2, s);
+}
+
+template <typename MCKLDistType>
+inline double random_distribution_chi2(std::size_t n,
+    const typename MCKLDistType::result_type *r, const MCKLDistType &dist)
+{
+    return random_distribution_chi2(n, r, dist,
+        std::is_floating_point<typename MCKLDistType::result_type>());
+}
+
+template <typename MCKLDistType>
+inline double random_distribution_ksad(std::size_t n,
+    const typename MCKLDistType::result_type *r, const MCKLDistType &dist)
 {
     const std::size_t k = 10;
     const std::size_t m = n / k;
@@ -1055,8 +1161,8 @@ inline void random_distribution(std::size_t N, std::size_t M)
     int nwid = 30;
     int twid = 12;
 
-    random_distribution_pval_real<float>(N, M, nwid, twid);
-    random_distribution_pval_real<double>(N, M, nwid, twid);
+    // random_distribution_pval_real<float>(N, M, nwid, twid);
+    // random_distribution_pval_real<double>(N, M, nwid, twid);
     random_distribution_pval_int<int>(N, M, nwid, twid);
     random_distribution_pval_int<unsigned>(N, M, nwid, twid);
 }
