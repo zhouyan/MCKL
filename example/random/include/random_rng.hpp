@@ -151,8 +151,18 @@ inline std::string random_rng_size(
 
 template <typename RNGType>
 inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
-    int twid, const std::string &name)
+    int twid, const std::string &name,
+    const mckl::Vector<std::string> &rngname)
 {
+    if (!rngname.empty()) {
+        auto iter = std::find_if(
+            rngname.begin(), rngname.end(), [&name](const std::string &rname) {
+                return name.find(rname) != std::string::npos;
+            });
+        if (iter == rngname.end())
+            return;
+    }
+
     RNGType rng;
     bool pass = random_rng_kat(rng);
     mckl::UniformBitsDistribution<std::uint64_t> rbits;
@@ -224,8 +234,12 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::endl;
 }
 
-inline void random_rng(std::size_t N, std::size_t M, int, char **)
+inline void random_rng(std::size_t N, std::size_t M, int argc, char **argv)
 {
+    mckl::Vector<std::string> rngname;
+    for (int i = 0; i != argc; ++i)
+        rngname.push_back(argv[i]);
+
     const int nwid = 20;
     const int swid = 8;
     const int twid = 15;
@@ -251,7 +265,7 @@ inline void random_rng(std::size_t N, std::size_t M, int, char **)
 #endif
 
 #define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    random_rng<RNGType>(N, M, nwid, swid, twid, #Name);
+    random_rng<RNGType>(N, M, nwid, swid, twid, #Name, rngname);
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;

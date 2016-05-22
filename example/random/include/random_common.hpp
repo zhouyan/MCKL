@@ -43,14 +43,20 @@
         --argc;                                                               \
         ++argv;                                                               \
         if (argc > 0) {                                                       \
-            N = static_cast<std::size_t>(std::atoi(*argv));                   \
-            --argc;                                                           \
-            ++argv;                                                           \
+            std::size_t n = static_cast<std::size_t>(std::atoi(*argv));       \
+            if (n != 0) {                                                     \
+                N = n;                                                        \
+                --argc;                                                       \
+                ++argv;                                                       \
+            }                                                                 \
         }                                                                     \
         if (argc > 0) {                                                       \
-            M = static_cast<std::size_t>(std::atoi(*argv));                   \
-            --argc;                                                           \
-            ++argv;                                                           \
+            std::size_t m = static_cast<std::size_t>(std::atoi(*argv));       \
+            if (m != 0) {                                                     \
+                M = m;                                                        \
+                --argc;                                                       \
+                ++argv;                                                       \
+            }                                                                 \
         }                                                                     \
         random_##prg(N, M, argc, argv);                                       \
                                                                               \
