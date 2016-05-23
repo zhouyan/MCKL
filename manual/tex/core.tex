@@ -70,19 +70,19 @@ This is not a general purpose matrix class for use such as linear algebra. It
 is more of a container with a few additional methods. Below is some common
 operations can be done on \verb|state|,
 \begin{Verbatim}
-  state.size();          // Get the sample size
-  state.dim();           // Get the dimension
-  state.resize(N);       // Change the sample size
-  state(i, j);           // The element at row i, column j
-  state.at(i, j);        // Same as above but with assertion
+  state.size();    // Get sample size
+  state.dim();     // Get dimension
+  state.resize(N); // Set sample size
+  state(i, j);     // The element at row i, column j
+  state.at(i, j);  // Same as above but with assertion
 \end{Verbatim}
 If the template parameter \verb|Dim| is equal to zero, then it is assumed that
 the dimension is dynamic and may change later. In this case, there are
 additional methods,
 \begin{Verbatim}
   StateMatrix<RowMajor, Dynamic, double> state(N, d);
-  state.resize(N, d);  // Change the sample size and dimension
-  state.resize_dim(d); // Change the dimension
+  state.resize(N, d);  // Set sample size and dimension
+  state.resize_dim(d); // Set dimension
 \end{Verbatim}
 The enumerator \verb|Dynamic| above has the value zero. Note that, these
 methods are only available when the template parameter \verb|Dim| is zero.
@@ -107,14 +107,16 @@ template parameter \verb|Layout|. Therefore, to iterate over a specific row,
 \begin{Verbatim}
   auto rowptr = state.row_data(i);
   auto stride = state.row_stride();
-  for (size_type j = 0; j != state.dim(); ++j, rowptr += stride)
+  auto d = state.dim();
+  for (size_type j = 0; j != d; ++j, rowptr += stride)
       /* *rowptr is the as state(i, j) */;
 \end{Verbatim}
 And similarly, to iterate over a specific column,
 \begin{Verbatim}
   auto colptr = state.col_data(j);
   auto stride = state.col_stride();
-  for (size_type i = 0; i != state.dim(); ++i, colptr += stride)
+  auto n = state.size();
+  for (size_type i = 0; i != n; ++i, colptr += stride)
       /* *colptr is the as state(i, j) */;
 \end{Verbatim}
 One can also retrieve a whole row or column through an output iterator. For
@@ -128,8 +130,8 @@ example, to read the column $1$ and $3$ into a vector,
 There is a similar \verb|read_row| method. To read the whole matrix into a
 vector,
 \begin{Verbatim}
-  std::vector<ValueType> matrix(state.size() * state.dim());
-  state.read(RowMajor, matrix.begin());
+  std::vector<ValueType> mat(state.size() * state.dim());
+  state.read(RowMajor, mat.begin());
 \end{Verbatim}
 The first parameter is matrix layout of the output matrix. There are two more
 methods, whose purpose will become clear later. The first is,
@@ -157,8 +159,8 @@ The weights $\{W^i\}_{i=1}^N$ is abstracted by the class \verb|Weight|. For
 example,
 \begin{Verbatim}
   Weight w(N);
-  w.size();    // Get the sample size
-  w.resize(N); // Change the sample size
+  w.size();    // Get sample size
+  w.resize(N); // Set sample size
 \end{Verbatim}
 One important property of \verb|Weight| is that, $\{W^i\}_{i=1}^N$ is always
 normalized. For example, after the construction or resizing, the weights are
@@ -438,7 +440,8 @@ template inside \verb|T|. For example,
       class particle_index_type : public idx_base<S>
       {
           public:
-          particle_index_type(size_type i, Particle<S> *pptr) :
+          particle_index_type(
+              size_type i, Particle<S> *pptr) :
               idx_base<S>(i, pptr)
           {
           }
@@ -446,10 +449,10 @@ template inside \verb|T|. For example,
   };
 \end{Verbatim}
 The class \verb|ParticleIndex<T>| derives from \verb|T::particle_index_type<T>|
-if such a member class template exists. Otherwise, it has methods as described
-earlier for any type \verb|T|. Therefore, it is possible to give
-\verb|ParticleIndex<T>| methods that are more convenient for a particular
-problem. We will see examples later in Section~\ref{sec:Example (PF)}.
+if such a member type exists. Otherwise, it has methods as described earlier
+for any type \verb|T|. Therefore, it is possible to give it methods that are
+more convenient for a particular problem. We will see examples later in
+Section~\ref{sec:Example (PF)}.
 
 The \verb|ParticleIndex| type can also be used like an random access iterator.
 For example,
@@ -498,8 +501,11 @@ This is equivalent to
 More importantly, it allows the use of \verb|Particle| with algorithms. For
 example,
 \begin{Verbatim}
-  auto s = std::accumulate(particle.begin(), particle.end(), 0.0,
-      [](double s, ParticleIndex<T> idx) { return s + idx(0); });
+  auto s = std::accumulate(
+      particle.begin(), particle.end(), 0.0,
+      [](double s, ParticleIndex<T> idx) {
+          return s + idx(0);
+      });
 \end{Verbatim}
 
 \section{Sampler}

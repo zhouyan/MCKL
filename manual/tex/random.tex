@@ -698,47 +698,9 @@ available, otherwise defined to be \verb|RNGSetVector|. It is used by the
       using rng_set_type = RNGSetScalar<RNG>;
   };
 \end{Verbatim}
-will replace the type of the \rng set contained in \verb|Particle<T>|. Below is
-a more advanced example of replacing \verb|rng_set_type| when using OpenMP for
-parallelization.
-\begin{Verbatim}
-  template <typename RNGType>
-  class RNGSetOMP
-  {
-      public:
-      RNGSetOMP(std::size_t)
-          : rng_(/* maximum number of OpenMP threads */)
-      {
-          seed();
-      }
-
-      void resize(std::size_t) {}
-
-      void seed()
-      {
-          Seed::instance()(rng_.size(), rng_.begin());
-      }
-
-      RNGType &operator[](std::size_t)
-      {
-          return rng_[omp_get_thread_num()];
-      }
-
-      private:
-      std::vector<RNGType> rng_;
-  };
-
-  class T
-  {
-      public:
-      using rng_set_type = RNGSetOMP<RNG>;
-  };
-\end{Verbatim}
-In this example, only a small number of \rng{} engines are created and it is
-(mostly) thread-safe. However, there are quite a few situations where this
-class is not suitable, with serialized nested parallel region being a primary
-one. The library does not provide the above implementation by default. There
-are too many cases that it can be misused.
+will replace the type of the \rng set contained in \verb|Particle<T>|. One can
+also define their own replacement type, as long as it has the same interface as
+the builtin ones.
 
 \section{Distributions}
 \label{sec:Distributions}
@@ -797,61 +759,61 @@ such that $R = 2^M$, then \verb|std::indepdent_bits_engine| will be used.
 \subsection{Standard uniform distribution}
 \label{sub:Standard uniform distribution}
 
-All continuous distributions are built upon the standard uniform distribution.
-And thus the performance and quality of the algorithm transferring random
-integers to random floating point numbers on the set $[0, 1]$ are of critical
-importance. The library provides five distributions, listed in
-Table~\ref{tab:Standard uniform distributions}. They are all class template
-with a single template type parameter \verb|RealType|, which is the floating
-point result type. For each distribution, the random integers produced by
-\rng{}s are transferred to 32- or 64-bit intermediate random integers through
-\verb|UniformBitsDistribution| before they are further converted to floating
-numbers. The integer type depends on \verb|RealType|, the range of the integers
-produced by the \rng{}, $R$, and the configuration macros
-\verb|MCKL_U01_USE_64BITS_DOUBLE|. The exact relations are listed in
-Table~\ref{tab:Intermediate integer types of uniform distributions}. In the
-remaining of this section, let $W$ be the number of bits of the intermediate
-random integers, and $M$ be the number of significant bits (including the
-implicit one) of \verb|RealType|. We also denote the input random integers as
-$U$ and the output random real numbers as $X$.
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{LL}
-    \toprule
-    Distribution & Support \\
-    \midrule
-    \verb|U01CCDistribution| & $[0, 1]$ \\
-    \verb|U01CODistribution| & $[0, 1)$ \\
-    \verb|U01OCDistribution| & $(0, 1]$ \\
-    \verb|U01OODistribution| & $(0, 1)$ \\
-    \verb|U01Distribution|   & $[0, 1)$ \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Standard uniform distributions}
-  \label{tab:Standard uniform distributions}
-\end{table}
+The library provides five standard uniform distributions, discussed shortly.
+They are all class template with a single template type parameter
+\verb|RealType|. The random integers produced by \rng{}s are transferred to 32-
+or 64-bit random integers through \verb|UniformBitsDistribution| before they
+are mapped to floating point numbers within the interval $[0, 1]$. The integer
+type depends on \verb|RealType|, the range of the \rng{}, $R$, and
+\verb|MCKL_U01_USE_64BITS_DOUBLE|, a configuration macro. The exact relations
+are listed in Table~\ref{tab:Intermediate integer types of uniform
+  distributions}. In the following, let $W$ be the number of bits of the
+integer type, and $M$ be the number of significant bits (including the implicit
+one) of \verb|RealType|. We also denote the input random integers as $U$ and
+the output random real numbers as $X$.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LlL}
     \toprule
     \verb|RealType| & Conditions & Integer type \\
     \midrule
-    \verb|float| & $\log_2 R \ge 64$ & \verb|std::uint64_t| \\
-                 & Otherwise         & \verb|std::uint32_t| \\
-    \verb|double| & $\log_2 R \ge 64$ & \verb|std::uint64_t| \\
+    \verb|float|  & $\log_2 R \ge 64$   & \verb|std::uint64_t| \\
+                  & Otherwise           & \verb|std::uint32_t| \\
+    \verb|double| & $\log_2 R \ge 64$   & \verb|std::uint64_t| \\
     & \verb|MCKL_U01_USE_64BITS_DOUBLE| & \verb|std::uint64_t| \\
-    & Otherwise & \verb|std::uint32_t| \\
-    \verb|long double| & Always & \verb|std::uint64_t| \\
+    & Otherwise                         & \verb|std::uint32_t| \\
+    \verb|long double| & Always         & \verb|std::uint64_t| \\
     \bottomrule
   \end{tabularx}
   \caption{Intermediate integer types of uniform distributions}
   \label{tab:Intermediate integer types of uniform distributions}
 \end{table}
 
+\subsubsection{\texttt{U01Distribution}}
+
+The class template,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class U01Distribution;
+\end{Verbatim}
+implements the uniform distribution on $[0, 1)$. If the configuration macro
+\verb|MCKL_U01_USE_FIXED_POINT| is true, which is the default, then it is an
+alias to \verb|U01CODistribution| (see below). Otherwise, it is implemented
+through the mapping,
+\begin{align*}
+  P &= \Floor{(W + M - 1) / W} \\
+  K &= \max\{1, P\} \\
+  X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
+\end{align*}
+
 \subsubsection{\texttt{U01CCDistribution}}
 
-This distribution produce random real numbers on $[0, 1]$, with the lower and
-upper bounds inclusive. The specific algorithm is as the following,
+The class template,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class U01CCDistribution;
+\end{Verbatim}
+implements the uniform distribuiton on $[0, 1]$ through the mapping,
 \begin{align*}
   P &= \min\{W - 1, M\} \\
   V &= \begin{cases}
@@ -865,9 +827,12 @@ The minimum and maximum are $0$ and $1$, respectively.
 
 \subsubsection{\texttt{U01CODistribution}}
 
-This distribution produce random real numbers on $[0, 1)$, with the lower bound
-inclusive and the upper bound never produced. The specific algorithm is as the
-following,
+The class template,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class U01CODistribution;
+\end{Verbatim}
+implements the uniform distribuiton on $[0, 1)$ through the mapping,
 \begin{align*}
   P &= \min\{W, M\} \\
   V &= \Floor{U / 2^{W - P}} \\
@@ -877,9 +842,12 @@ The minimum and maximum are $0$ and $1 - 2^{-P}$, respectively.
 
 \subsubsection{\texttt{U01OCDistribution}}
 
-This distribution produce random real numbers on $(0, 1]$, with the upper bound
-inclusive and the lower bound never produced. The specific algorithm is as the
-following,
+The class template,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class U01OCDistribution;
+\end{Verbatim}
+implements the uniform distribuiton on $(0, 1]$ through the mapping,
 \begin{align*}
   P &= \min\{W, M\} \\
   V &= \Floor{U / 2^{W - P}} \\
@@ -889,8 +857,12 @@ The minimum and maximum are $2^{-P}$ and $1$, respectively.
 
 \subsubsection{\texttt{U01OODistribution}}
 
-This distribution produce random real numbers on $(0, 1)$, with the lower and
-upper bounds never produced. The specific algorithm is as the following,
+The class template,
+\begin{Verbatim}
+  template <typename RealType = double>
+  class U01CODistribution;
+\end{Verbatim}
+implements the uniform distribuiton on $(0, 1)$ through the mapping,
 \begin{align*}
   P &= \min\{W + 1, M\} \\
   V &= \Floor{U / 2^{W + 1 - P}} \\
@@ -898,50 +870,35 @@ upper bounds never produced. The specific algorithm is as the following,
 \end{align*}
 The minimum and maximum are $2^{-P}$ and $1 - 2^{-P}$, respectively.
 
-\subsubsection{\texttt{U01Distribution}}
+\subsubsection{Performance and accuracy considerations}
 
-It is now clear that the above four distributions actually produce ``fixed
-point'' instead of ``floating point'' numbers. The output $X$ can be
-represented exactly by the target \verb|RealType|. They have two advantages.
-First, when it is important that the lower or upper bound is never produced, to
-avoid underflow, overflow or other undefined behaviors in subsequent
-calculations, they provide such assurance. Second, they usually can be executed
-with only a couple of instructions by modern processors. And thus can have
-better performance.
+The first four distributions actually produce ``fixed point'' numbers. The
+output $X$ can be represented exactly by the target \verb|RealType|. They have
+two advantages. First, when it is important that the lower or upper bound is
+never produced, to avoid underflow, overflow or other undefined behaviors in
+subsequent calculations, they provide such assurance. The implementation of the
+other distributions discussed later rely on these behaviors. Second, they
+usually can be executed with only a couple of instructions by modern
+processors. And thus can have better performance.
 
 The main drawback is accuracy. If \verb|RealType| is \verb|float| or
-\verb|long double|, then the difference is minimal, since the intermediate
-random integers have more bits than the significant of the target floating
-point type. The situation is a bit more tricky in the case of \verb|double| and
-the intermediate random integers are 32-bit. In this case,
-\verb|U01CODistribution| can only produce $2^{32}$ distinctive values while
-\verb|double| can represent much more values exactly within the range $[0, 1)$.
-In contrast, the standard library will use at least 53 random bits. This will
-not matter in most realistic applications. In fact, random numbers produced by
+\verb|long double|, then the difference is minimal, since the random integers
+have more bits than the significant of the target floating point type. The
+situation is a bit more tricky in the case of \verb|double| and the
+intermediate random integers are 32-bit. In this case, \verb|U01CODistribution|
+can only produce $2^{32}$ distinctive values while \verb|double| can represent
+much more values exactly within the range $[0, 1)$. In contrast, the standard
+library will use at least 53 random bits. This will not matter in most
+realistic applications. In fact, random numbers produced by
 \verb|U01CODistribution| passes all tests in the {\lnfigures\tbfigures
   TestU01}%
 \footnote{\url{http://www.iro.umontreal.ca/~simardr/testu01/tu01.html}} library
 that \verb|std::uniform_real_distribution| would pass, for a good \rng. In
 other words, the quality of the \rng is the dominating factor.
 
-However, there are situations where one do want the extra precision. For
-example, the library implement the Normal distribution using the standard
-Box-Muller method \parencite{Box:1958hv}, for performance consideration. Better
-accuracy at the tail can only be archived by using procedures that can produce
-values closer to zero than $2^{-32}$. In this case, there are two solutions.
-The first is to define the configuration macro
-\verb|MCKL_U01_USE_FIXED_POINT| to zero, and thus \verb|U01Distribution| is no
-longer the same as \verb|U01CODistribution|. Instead, it behaves similarly to
-\verb|std::generate_canonical|. More specifically,
-\begin{align*}
-  P &= \Floor{(W + M - 1) / W} \\
-  K &= \max\{1, P\} \\
-  X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
-\end{align*}
-Alternatively, one can define \verb|MCKL_U01_USE_64BITS_DOUBLE| to a non-zero
-value, such that the intermediate random integers will always be 64-bit for
-\verb|double| output. This configuration macro also affects all other four
-distributions discussed earlier.
+However, there are situations where one do want the extra precision. In this
+case, one can define \verb|MCKL_U01_USE_64BITS_DOUBLE| to a non-zero value,
+such that the random integers will always be 64-bit for \verb|double| output.
 
 \subsection{Continuous distributions}
 \label{sub:Continuous distributions}
