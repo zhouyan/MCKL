@@ -583,10 +583,32 @@ namespace internal
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(CtrType, ctr_type, NullType)
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
-template <typename IntType>
-using IntDistributionRealType =
-    typename std::conditional<sizeof(IntType) <= 32, double,
-        long double>::type;
+template <typename IntType, typename RealType>
+inline IntType ftoi(RealType x, std::true_type)
+{
+    static constexpr RealType maxval =
+        static_cast<RealType>(std::numeric_limits<IntType>::max());
+
+    return static_cast<IntType>(std::min(maxval, x));
+}
+
+template <typename IntType, typename RealType>
+inline IntType ftoi(RealType x, std::false_type)
+{
+    static constexpr RealType maxval =
+        static_cast<RealType>(std::numeric_limits<IntType>::max() / 2);
+
+    return static_cast<IntType>(std::min(maxval, x));
+}
+
+template <typename IntType, typename RealType>
+inline IntType ftoi(RealType x)
+{
+    static constexpr int W = std::numeric_limits<IntType>::digits;
+    static constexpr int M = std::numeric_limits<RealType>::digits;
+
+    return ftoi<IntType>(x, std::integral_constant<bool, W <= M>());
+}
 
 } // namespace mckl::internal
 

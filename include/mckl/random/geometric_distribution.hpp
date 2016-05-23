@@ -50,16 +50,13 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void geometric_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, double p)
 {
-    static constexpr double dmax =
-        static_cast<double>(std::numeric_limits<IntType>::max());
-
     Array<double, K> s;
     u01_oc_distribution(rng, n, s.data());
     log(n, s.data(), s.data());
     mul(n, 1 / std::log(1 - p), s.data(), s.data());
     floor(n, s.data(), s.data());
     for (std::size_t i = 0; i != n; ++i)
-        r[i] = static_cast<IntType>(std::min(dmax, s[i]));
+        r[i] internal::ftoi<IntType>(s[i]);
 }
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Geometric, geometric, InType, double, p)
@@ -87,16 +84,13 @@ class GeometricDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        static constexpr double dmax =
-            static_cast<double>(std::numeric_limits<IntType>::max());
-
         U01OCDistribution<double> u01;
 
         const double lnpinv =
             param == param_ ? lnpinv_ : 1 / std::log(1 - param.p());
         const double r = std::floor(std::log(u01(rng)) * lnpinv);
 
-        return static_cast<IntType>(std::min(dmax, r));
+        return internal::ftoi<IntType>(r);
     }
 }; // class GeometricDistribution
 
