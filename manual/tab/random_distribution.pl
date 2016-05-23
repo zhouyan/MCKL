@@ -33,7 +33,7 @@
 
 use v5.16;
 
-do 'tab.pl';
+do 'format.pl';
 
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
@@ -100,7 +100,7 @@ while (my ($basename, $name) = each %distribution) {
     $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= 'Distribution & \std & \mckl & Batch & \mkl';
+    $table .= 'Distribution & \std & \mckl & \textsc{batch} & \mkl';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;

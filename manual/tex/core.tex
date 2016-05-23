@@ -192,8 +192,8 @@ One may also draw an integer $0 \le k < N$ according to the weights by,
 \begin{Verbatim}
   w.draw(rng);
 \end{Verbatim}
-where \verb|rng| is a \cppoo{} \rng engine object. Last, one can obtain a
-pointer to the raw data,
+where \verb|rng| is a \cpp{} \rng engine object. Last, one can obtain a pointer
+to the raw data,
 \begin{Verbatim}
   w.data();
 \end{Verbatim}
@@ -218,7 +218,7 @@ A particle system, abstracted by the class template,
 is essentially formed by three parts. The first is an object of type \verb|T|,
 that abstracts the states $\{X^i\}_{i=1}^N$. The second is a type \verb|Weight|
 object that abstracts the weights $\{W^i\}_{i=1}^N$. And the third is a
-collection of \cppoo{} \rng engines. There are some restrictions on the type
+collection of \cpp{} \rng engines. There are some restrictions on the type
 \verb|T|. The constructor of \verb|Particle| is as the following,
 \begin{Verbatim}
   template <typename... Args>
@@ -814,23 +814,23 @@ is shown in Algorithm~\ref{alg:pf}.
   \begin{algorithmic}
     \hrule\vskip1ex
     \STATE \emph{Initialization}
-    \STATE\STATESKIP Set $t\leftarrow0$.
-    \STATE\STATESKIP Sample
+    \STATE\stateskip Set $t\leftarrow0$.
+    \STATE\stateskip Sample
     $\xpos^{0,i},\ypos^{0,i}\sim\calN(0,4)$ and
     $\xvel^{0,i},\yvel^{0,i}\sim\calN(0,1)$.
-    \STATE\STATESKIP Weight $W_0^i \propto \exp\{\ell(X_0^i|Y_0)\}$
+    \STATE\stateskip Weight $W_0^i \propto \exp\{\ell(X_0^i|Y_0)\}$
     where $\ell$ is the log-likelihood function.
 
     \STATE \emph{Iteration}
-    \STATE\STATESKIP Set $t\leftarrow t + 1$.
-    \STATE\STATESKIP Sample
+    \STATE\stateskip Set $t\leftarrow t + 1$.
+    \STATE\stateskip Sample
     \begin{align*}
       \xpos^{t,i}&\sim\calN(\xpos^{t-1,i} + \Delta\xvel^{t-1,i}, 0.02) &
       \xvel^{t,i}&\sim\calN(\xvel^{t-1,i}, 0.001) \\
       \ypos^{t,i}&\sim\calN(\ypos^{t-1,i} + \Delta\yvel^{t-1,i}, 0.02) &
       \yvel^{t,i}&\sim\calN(\yvel^{t-1,i}, 0.001)
     \end{align*}
-    \STATE\STATESKIP Weight $W_t^i \propto W_{t-1}^i\exp\{\ell(X_t^i|Y_t)\}$.
+    \STATE\stateskip Weight $W_t^i \propto W_{t-1}^i\exp\{\ell(X_t^i|Y_t)\}$.
 
     \STATE \emph{Repeat the \emph{Iteration} step until all data are processed}.
     \vskip1ex\hrule

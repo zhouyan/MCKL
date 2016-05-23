@@ -33,7 +33,7 @@
 
 use v5.16;
 
-do 'tab.pl';
+do 'format.pl';
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
@@ -109,11 +109,13 @@ sub table
     $table .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= '& \multicolumn{3}{c}{Loop} ';
-    $table .= '& \multicolumn{3}{c}{Batch}';
+    $table .= '& \multicolumn{3}{c}{\textsc{loop}} ';
+    $table .= '& \multicolumn{3}{c}{\textsc{batch}}';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
-    $table .= ' ' x 2 . '\rng & \llvm & \gnu & Intel & \llvm & \gnu & Intel';
+    $table .= ' ' x 2 . '\rng';
+    $table .= ' & \llvm & \gcc & \textsc{icc}';
+    $table .= ' & \llvm & \gcc & \textsc{icc}';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
