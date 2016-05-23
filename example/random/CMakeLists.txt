@@ -33,6 +33,8 @@ PROJECT(MCKLExample-random CXX)
 
 MCKL_ADD_EXAMPLE(random)
 
+MCKL_ADD_TEST(random distribution)
+MCKL_ADD_TEST(random distribution_perf)
 MCKL_ADD_TEST(random rng)
 MCKL_ADD_TEST(random u01)
 MCKL_ADD_TEST(random uniform_bits)
@@ -40,11 +42,6 @@ MCKL_ADD_TEST(random uniform_bits)
 IF(MKL_FOUND)
     MCKL_ADD_TEST(random mkl_brng)
 ENDIF(MKL_FOUND)
-
-IF(Boost_FOUND)
-    MCKL_ADD_TEST(random distribution)
-    MCKL_ADD_TEST(random distribution_perf)
-ENDIF(Boost_FOUND)
 
 MCKL_ADD_FILE(random random_Philox2x32.txt)
 MCKL_ADD_FILE(random random_Philox2x64.txt)

@@ -33,7 +33,6 @@
 #define MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 
 #include <mckl/random/distribution.hpp>
-#include <boost/math/distributions.hpp>
 #include "random_common.hpp"
 
 #define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(test)               \
@@ -142,16 +141,6 @@ class RandomDistributionTraitBase
         return partition;
     }
 
-    template <typename BoostDistType>
-    mckl::Vector<ResultType> partition_boost(
-        std::size_t n, BoostDistType &&dist) const
-    {
-        return partition_quantile(n, [&](double p) {
-            return boost::math::quantile(
-                std::forward<BoostDistType>(dist), static_cast<ResultType>(p));
-        });
-    }
-
     template <typename ParamType>
     static void add_param(mckl::Vector<std::array<ParamType, 0>> &params)
     {
@@ -257,9 +246,11 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
     {
-        return this->partition_boost(
-            n, boost::math::beta_distribution<RealType>(
-                   dist.alpha(), dist.beta()));
+        return this->partition_quantile(n, [&](double p) {
+            return static_cast<RealType>(
+                random_betaiinv(static_cast<double>(dist.alpha()),
+                    static_cast<double>(dist.beta()), p));
+        });
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -322,9 +313,11 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_boost(
-            n, boost::math::gamma_distribution<RealType>(
-                   dist.alpha(), dist.beta()));
+        return this->partition_quantile(n, [&](double p) {
+            return static_cast<RealType>(
+                random_gammapinv(static_cast<double>(dist.alpha()), p) *
+                static_cast<double>(dist.beta()));
+        });
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -354,8 +347,10 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_boost(
-            n, boost::math::chi_squared_distribution<RealType>(dist.n()));
+        return this->partition_quantile(n, [&](double p) {
+            return static_cast<RealType>(
+                random_gammapinv(static_cast<double>(dist.n()) / 2, p) * 2);
+        });
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
@@ -435,8 +430,12 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_boost(n,
-            boost::math::fisher_f_distribution<RealType>(dist.m(), dist.n()));
+        return this->partition_quantile(n, [&](double p) {
+            RealType q = static_cast<RealType>(
+                random_betaiinv(static_cast<double>(dist.m()) / 2,
+                    static_cast<double>(dist.n()) / 2, p));
+            return dist.n() * q / (dist.m() - dist.m() * q);
+        });
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -656,8 +655,14 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_boost(
-            n, boost::math::students_t_distribution<RealType>(dist.n()));
+        return this->partition_quantile(n, [&](double p) {
+            RealType q = static_cast<RealType>(
+                random_betaiinv(static_cast<double>(dist.n()) * 0.5, 0.5,
+                    2 * std::min(p, 1 - p)));
+            RealType t = std::sqrt(dist.n() * (1 - q) / q);
+
+            return p > 0.5 ? t : -t;
+        });
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
@@ -891,10 +896,8 @@ inline double random_distribution_chi2(std::size_t n,
     mckl::sub(k, count.data(), np, count.data());
     mckl::sqr(k, count.data(), count.data());
     const double s = std::accumulate(count.begin(), count.end(), 0.0) / np;
-    boost::math::chi_squared_distribution<double> chi2(
-        static_cast<double>(k - 1));
 
-    return boost::math::cdf(chi2, s);
+    return random_gammap(0.5 * (k - 1), 0.5 * s);
 }
 
 template <typename MCKLDistType>
@@ -930,10 +933,8 @@ inline double random_distribution_chi2(std::size_t n,
     mckl::sqr(k, count.data(), count.data());
     mckl::div(k, count.data(), pmf.data(), count.data());
     const double s = std::accumulate(count.begin(), count.end(), 0.0);
-    boost::math::chi_squared_distribution<double> chi2(
-        static_cast<double>(k - 1));
 
-    return boost::math::cdf(chi2, s);
+    return random_gammap(0.5 * (k - 1), 0.5 * s);
 }
 
 template <typename MCKLDistType>
