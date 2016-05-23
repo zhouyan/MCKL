@@ -42,7 +42,7 @@
 #define MCKL_U01_USE_FIXED_POINT 1
 #endif
 
-/// \brief Use 64-bits intermediate random integers for double precison output
+/// \brief Use 64-bit intermediate random integers for double precison output
 /// \ingroup Config
 #ifndef MCKL_U01_USE_64BITS_DOUBLE
 #define MCKL_U01_USE_64BITS_DOUBLE 0

@@ -84,19 +84,19 @@
 namespace mckl
 {
 
-/// \brief The default 32-bits RNG
+/// \brief The default 32-bit RNG
 /// \ingroup Random
 using RNG = MCKL_RNG_TYPE;
 
-/// \brief The default 64-bits RNG
+/// \brief The default 64-bit RNG
 /// \ingroup Random
 using RNG_64 = MCKL_RNG_64_TYPE;
 
-/// \brief The 32-bits RNG with smallest state
+/// \brief The 32-bit RNG with smallest state
 /// \ingroup Random
 using RNGMini = MCKL_RNG_MINI_TYPE;
 
-/// \brief The 64-bits RNG with smallest state
+/// \brief The 64-bit RNG with smallest state
 /// \ingroup Random
 using RNGMini_64 = MCKL_RNG_MINI_64_TYPE;
 

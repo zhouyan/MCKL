@@ -137,13 +137,13 @@ applications.
 Two usage cases are considered. The first is the performance of generating
 random integers one by one,
 \begin{Verbatim}
-  UniformBitsDistribution<std::uint64_t> rbits;
+  UniformBitsDistribution<std::uint64_t> ubits;
   for (std:size_t i = 0; i != n; ++i)
-      r[i] = rbits(rng);
+      r[i] = ubits(rng);
 \end{Verbatim}
 The second is the vectorized performance,
 \begin{Verbatim}
-  rand(rng, rbits, n, r.data());
+  rand(rng, ubits, n, r.data());
 \end{Verbatim}
 In both cases, we repeat the simulations 100 times, each time with the number
 of elements $n$ chosen randomly between 5,000 and 10,000. The total number of
@@ -256,12 +256,12 @@ $\{\{y_i\}_{i\ge0}^j\}_{j\ge0}$ appear random. See \textcite{Salmon:2011um} for
 more details.
 
 Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s implemented
-in the library, along with the bits of the counter and the key. They all
-output 32-bits unsigned integers uniform on the set $\{0,\dots,2^{32}-1\}$. For
-64-bits output, a suffix \verb|_64| may be appended to the corresponding \rng
-engine names. For example, \verb|Threefry4x64| and \verb|Threefry4x64_64| both
-generate the same 256-bits random integers internally. The only difference is
-that \verb|operator()| of the former returns 32 or those 256 bits each time it
+in the library, along with the bits of the counter and the key. They all output
+32-bit unsigned integers uniform on the set $\{0,\dots,2^{32}-1\}$. For 64-bit
+output, a suffix \verb|_64| may be appended to the corresponding \rng engine
+names. For example, \verb|Threefry4x64| and \verb|Threefry4x64_64| both
+generate the same 256-bit random integers internally. The only difference is
+that \verb|operator()| of the former returns 32 of those 256 bits each time it
 is executed, while the later returns 64 bits.
 
 All \rng{}s in Table~\ref{tab:Counter-based RNG} are actually type aliases.
@@ -357,7 +357,7 @@ keys. The parameter \verb|Rounds| is the number of rounds of \aes encryption to
 be performed. See the reference manual for details of how to define the key
 sequence class. The \aesni encryption instructions have a latency of seven or
 eight cycles, while they can be issued at every cycle. Therefore better
-performance can be achieved if multiple 128-bits random integers are generated
+performance can be achieved if multiple 128-bit random integers are generated
 at the same time. This is specified by the template parameter \verb|Blocks|.
 Larger blocks, up to eight, might improve performance. But this is at the cost
 of larger state size. Without going into details, there are four types of
@@ -414,7 +414,7 @@ used in counter mode. The last is the \ars algorithm introduced by
 \textcite{Salmon:2011um}. The last template parameter \verb|Constants| of
 \verb|ARSKeySeq| and \verb|ARSEngine| is a trait class that defines the
 constants of the Weyl's sequence. See \textcite{Salmon:2011um} for details. The
-defaults are taken from the paper. To use an alternative pair of 64-bits
+defaults are taken from the paper. To use an alternative pair of 64-bit
 integers as the constants, one can define and use a trait class as the
 following,
 \begin{Verbatim}
@@ -458,7 +458,7 @@ aliases are defined for convenience. For example,
 \end{Verbatim}
 The engine \verb|ARS| is the library's default \rng if \aesni instructions are
 supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
-algorithms, as well as both 32- and 64-bits output versions. These aliases are
+algorithms, as well as both 32- and 64-bit output versions. These aliases are
 listed in Table~\ref{tab:Counter-based RNG}. The performance of these engines
 depends on a few factors, such as \cpu types, compilers, operating systems,
 etc. See Tables~\appref{tab:Performance of AES128Engine}
@@ -500,7 +500,7 @@ configuration macros listed in Table~\ref{tab:Configuration macros for
 \verb|Rounds|, nor any limitation on \verb|T| except that it has to be an
 unsigned integer type. See \textcite{Salmon:2011um} on the most general form of
 the algorithm. However, the library only provides default constants for 32- and
-64-bits unsigned integer type \verb|T| and \verb|K| taking the values \verb|2|
+64-bit unsigned integer type \verb|T| and \verb|K| taking the values \verb|2|
 or \verb|4|. These four engines are defined as type aliases for convenience,
 \begin{Verbatim}
   template <typename ResultType>
@@ -519,10 +519,10 @@ or \verb|4|. These four engines are defined as type aliases for convenience,
   using Philox4x64Engine = PhiloxEngine<
       ResultType, std::uint64_t, 4>;
 \end{Verbatim}
-Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
+Type aliases for 32- and 64-bit \verb|ResultType| are also defined, as listed
 in Table~\ref{tab:Counter-based RNG}. To use the engine with \verb|K| taking
-values larger than four, or \verb|T| being unsigned integer type with bits
-other than 32 or 64, one needs to provide a suitable trait class,
+values larger than four, or \verb|T| being unsigned integer type with number of
+bits other than 32 or 64, one needs to provide a suitable trait class,
 \verb|Constant|. It is similar to that of \verb|ARSEngine|. See the reference
 manual of \verb|PhiloxConstants| for an example of how to define it. The
 performance data is in Table~\appref{tab:Performance of PhiloxEngine}.
@@ -556,10 +556,10 @@ configuration macros listed in Table~\ref{tab:Configuration macros for
   counter-based RNG}. Similar to the implementation of the Philox algorithm,
 there is no limit on the template parameter \verb|K| or \verb|Rounds| as long
 as a suitable trait class \verb|Constant| is provided. The library provides
-default constants for 64-bits unsigned integer type \verb|T| and \verb|K|
-taking the values \verb|4|, \verb|8| and \verb|16|, taken from the
+default constants for 64-bit unsigned integer type \verb|T| and \verb|K| taking
+the values \verb|4|, \verb|8| and \verb|16|, taken from the
 skein\footnote{\url{http://www.skein-hash.info}} hash algorithm, for which the
-Threefish algorithm was originally developed for. Defaults for 32-bits \verb|T|
+Threefish algorithm was originally developed for. Defaults for 32-bit \verb|T|
 or \verb|K| taking the value \verb|2| are also provided, taken from
 \textcite{Salmon:2011um}. Type aliases for these configurations are defined for
 convenience,
@@ -588,7 +588,7 @@ convenience,
   using Threefry16x64Engine = ThreefryEngine<
       ResultType, std::uint64_t, 16>;
 \end{Verbatim}
-Type aliases for 32- and 64-bits \verb|ResultType| are also defined, as listed
+Type aliases for 32- and 64-bit \verb|ResultType| are also defined, as listed
 in Table~\ref{tab:Counter-based RNG}. The performance data is in
 Table~\appref{tab:Performance of ThreefryEngine}.
 
@@ -684,7 +684,7 @@ suitable for counter-based \rng{}s.
 
 If the \rdrand instructions are supported, the library also implements three
 \rng{}s, \verb|RDRAND16|, \verb|RDRAND32| and \verb|RDRAND64|. They output 16-,
-32-, and 64-bits random integers, respectively. The \rdrand instruction may not
+32-, and 64-bit random integers, respectively. The \rdrand instruction may not
 return a random integer at all. The \rng engine will keep trying until it
 succeeds. One can limit the maximum number of trials by defining the
 configuration macro \verb|MCKL_RDRAND_NTRIAL_MAX|. A value of zero, the
@@ -701,8 +701,8 @@ a wrapper class \verb|MKLEngine| that makes them accessible as \cppoo engines.
 They are listed in Table~\ref{tab:MKL RNG}. Note that, \mkl{} \rng{}s perform
 the best when they are used to generate vectors of random numbers. These
 wrappers use a buffer to store such vectors. And thus they have much larger
-state space than usual \rng{}s. Each \rng engines output by default 32-bits
-integers. Similar to the counter-based \rng{}s, 64-bits variants are also
+state space than usual \rng{}s. Each \rng engines output by default 32-bit
+integers. Similar to the counter-based \rng{}s, 64-bit variants are also
 defined. The performance data is in Table~\appref{tab:Performance of MKL RNG}.
 
 \begin{table}
@@ -854,8 +854,8 @@ must have size at least of that of \verb|short|. That is, let $W$ be the number
 of bits of \verb|UIntType|, then the output is uniform on the set
 $\{0,\dots,2^W - 1\}$. For example,
 \begin{Verbatim}
-  UniformBitsDistribution<std::uint32_t> rbits;
-  rbits(rng); // Return 32-bits random integers
+  UniformBitsDistribution<std::uint32_t> ubits;
+  ubits(rng); // Return 32-bit random integers
 \end{Verbatim}
 Let $\rmin$ and $\rmax$ be the minimum and maximum of the random integers
 generated by \verb|rng|. Let $R = \rmax - \rmin + 1$. Let $r_i$ be consecutive
@@ -883,7 +883,7 @@ importance. The library provides five distributions, listed in
 Table~\ref{tab:Standard uniform distributions}. They are all class template
 with a single template type parameter \verb|RealType|, which is the floating
 point result type. For each distribution, the random integers produced by
-\rng{}s are transferred to 32- or 64-bits intermediate random integers through
+\rng{}s are transferred to 32- or 64-bit intermediate random integers through
 \verb|UniformBitsDistribution| before they are further converted to floating
 numbers. The integer type depends on \verb|RealType|, the range of the integers
 produced by the \rng{}, $R$, and the configuration macros
@@ -992,7 +992,7 @@ The main drawback is accuracy. If \verb|RealType| is \verb|float| or
 \verb|long double|, then the difference is minimal, since the intermediate
 random integers have more bits than the significant of the target floating
 point type. The situation is a bit more tricky in the case of \verb|double| and
-the intermediate random integers are 32-bits. In this case,
+the intermediate random integers are 32-bit. In this case,
 \verb|U01CODistribution| can only produce $2^{32}$ distinctive values while
 \verb|double| can represent much more values exactly within the range $[0, 1)$.
 In contrast, the standard library will use at least 53 random bits. This will
@@ -1018,7 +1018,7 @@ longer the same as \verb|U01CODistribution|. Instead, it behaves similarly to
   X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{align*}
 Alternatively, one can define \verb|MCKL_U01_USE_64BITS_DOUBLE| to a non-zero
-value, such that the intermediate random integers will always be 64-bits for
+value, such that the intermediate random integers will always be 64-bit for
 \verb|double| output. This configuration macro also affects all other four
 distributions discussed earlier.
 
