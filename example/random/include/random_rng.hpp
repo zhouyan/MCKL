@@ -165,7 +165,7 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
 
     RNGType rng;
     bool pass = random_rng_kat(rng);
-    mckl::UniformBitsDistribution<std::uint64_t> rbits;
+    mckl::UniformBitsDistribution<std::uint64_t> ubits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
 
     RNGType rng1;
@@ -192,11 +192,11 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
 
             watch1.start();
             for (std::size_t j = 0; j != K; ++j)
-                r1[j] = rbits(rng1);
+                r1[j] = mckl::rand(rng1, ubits);
             watch1.stop();
 
             watch2.start();
-            mckl::rand(rng2, rbits, K, r2.data());
+            mckl::rand(rng2, ubits, K, r2.data());
             watch2.stop();
             pass = pass && (r1 == r2 || rng != rng);
 
@@ -211,9 +211,9 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
 
             std::stringstream ss;
             ss << rng;
-            mckl::rand(rng, rbits, K, r1.data());
+            mckl::rand(rng, ubits, K, r1.data());
             ss >> rng;
-            mckl::rand(rng, rbits, K, r2.data());
+            mckl::rand(rng, ubits, K, r2.data());
             pass = pass && (r1 == r2 || rng != rng);
         }
         double bytes = static_cast<double>(sizeof(std::uint64_t) * num);

@@ -41,6 +41,9 @@ to~\ref{sec:MKL RNG}, and the later in Section~\ref{sec:Distributions}. Apart
 from these, the library also provides facilities for vectorized random number
 generating (Section~\ref{sec:Vectorized random number generating}) and using
 multiple \rng{}s in parallel programs (Section~\ref{sec:Multiple RNG streams}).
+There are also some performance data in Appendix~\appref{chap:Performance of
+  random number generators} and~\appref{chap:Performance of distribution
+  generators}.
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
@@ -108,85 +111,10 @@ To write generic functions, it is recommended to use the function \verb|rand|
 instead of the member methods, since the former also works with classes not
 defined by this library, such as those in the standard library.
 
-\subsection{Performance measurement}
-\label{sub:Performance measurement}
-
-All performance results shown later in this chapter is measured in single core
-cycles per bytes (cpB) for \rng{}s, or cycles per element (cpE) for
-distributions (\verb|double| precision). The processor used to measure the
-performance is an Intel Core i7-4960\textsc{hg} \cpu. Three compilers are
-tested. The \llvm clang (version~3.8), the \gnu{} \gcc (version~6.1), and the
-Intel \cpp compiler (version~2016 update~3). When multiple compilers are
-tested, they are labeled ``\llvm'', ``\gnu'', and ``Intel'', respectively in
-tables. If only results from one compiler are shown, then unless stated
-otherwise, it is the \llvm clang compiler. The operating system is Mac OS X
-(version~11.1). Depending on the \cpu, the compiler, and the operating system,
-performance may vary considerably. The library does not attempt to optimize for
-any particular platform. However, given accelerated vectorized mathematical
-functions (seed Section~\ref{sec:Vectorized functions}), for any given
-platform, the relative performance advantage to alternatives, such as the
-standard library, is usually substantial.
-
-For \rng engines, we measure the performance of generating random bits instead
-of the raw output from the engines. All internal usages of \rng{}s in the
-library first transfer the raw output to unsigned integers uniform on the set
-$\{0,\dots,2^W-1\}$, $W\in\{32,64\}$ (see Section~\ref{sub:Uniform bits
-  distribution}). Direct use of the raw output from \rng engines is rare in
-applications.
-
-Two usage cases are considered. The first is the performance of generating
-random integers one by one,
-\begin{Verbatim}
-  UniformBitsDistribution<std::uint64_t> ubits;
-  for (std:size_t i = 0; i != n; ++i)
-      r[i] = ubits(rng);
-\end{Verbatim}
-The second is the vectorized performance,
-\begin{Verbatim}
-  rand(rng, ubits, n, r.data());
-\end{Verbatim}
-In both cases, we repeat the simulations 100 times, each time with the number
-of elements $n$ chosen randomly between 5,000 and 10,000. The total number of
-cycles of the 100 simulations are recorded, and then divided by the total
-number of bytes generated. This gives the performance measurement in cpB. This
-experiment is repeated ten times, and the best results are shown. The two cases
-are labeled ``Loop'' and ``\verb|rand|'', respectively.
-
-For the performance of distributions, we measure four methods of drawing random
-numbers from the same distribution. The procedures is similar, except now we
-measure the performance in cpE. First, if the distribution is available in the
-standard library, we measure the following case,
-\begin{Verbatim}
-  std::normal_distribution<double> rnorm_std(0, 1);
-  for (std::size_t i = 0; i = n; ++i)
-      r[i] = rnorm_std(rng);
-\end{Verbatim}
-Second, we measure the performance of the library's implementation,
-\begin{Verbatim}
-  NormalDistribution<double> rnorm_mckl(0, 1);
-  for (std::size_t i = 0; i = n; ++i)
-      r[i] = rnorm_mckl(rng);
-\end{Verbatim}
-The third is the vectorized performance,
-\begin{Verbatim}
-  rand(rng, rnorm_mckl, n, r.data());
-\end{Verbatim}
-For all the three above, the \rng is \verb|ARSx8| (Section~\ref{sub:AES-NI
-  instructions based RNG}). The last is when \rng is \verb|MKL_SFMT19937|
-(Section~\ref{sec:MKL RNG}),
-\begin{Verbatim}
-  MKL_SFMT19937 rng_mkl;
-  rand(rng_mkl, rnorm_mckl, n, r.data());
-\end{Verbatim}
-In this case, not only the \rng itself is faster, the distribution might also
-use \mkl routines. The four cases are labeled ``\std'', ``\mckl'',
-``\verb|rand|'' and ``\mkl'', respectively.
-
 \section{Counter-based \protect\rng}
 \label{sec:Counter-based RNG}
 
-The standard library provides a set of \rng engines (performance data in
-Table~\appref{tab:Performance of standard library RNG}). Unfortunately, none of
+The standard library provides a set of \rng engines. Unfortunately, none of
 them are suitable for parallel computing without considerable efforts. To
 illustrate the problem, consider the situation where there are two threads that
 need to generate random numbers. And thus two \rng engine instances need to be
@@ -461,14 +389,12 @@ supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
 algorithms, as well as both 32- and 64-bit output versions. These aliases are
 listed in Table~\ref{tab:Counter-based RNG}. The performance of these engines
 depends on a few factors, such as \cpu types, compilers, operating systems,
-etc. See Tables~\appref{tab:Performance of AES128Engine}
-to~\appref{tab:Performance of ARSEngine} for performance data. In any case, the
-performance is good enough even for the most demanding applications. The
-library does not attempt to optimize the algorithm for any particular platform.
-In realistic applications, the performance of \rng is unlikely to become a
-bottle neck. Note that, the best performance is obtained with the vectorized
-\verb|rand| function (see Section~\ref{sec:Vectorized random number
-  generating}).
+etc. In any case, the performance is good enough even for the most demanding
+applications. The library does not attempt to optimize the algorithm for any
+particular platform. In realistic applications, the performance of \rng is
+unlikely to become a bottle neck. Note that, the best performance is obtained
+with the vectorized \verb|rand| function (see Section~\ref{sec:Vectorized
+  random number generating}).
 
 \subsection{Philox}
 \label{sub:Philox}
@@ -524,8 +450,7 @@ in Table~\ref{tab:Counter-based RNG}. To use the engine with \verb|K| taking
 values larger than four, or \verb|T| being unsigned integer type with number of
 bits other than 32 or 64, one needs to provide a suitable trait class,
 \verb|Constant|. It is similar to that of \verb|ARSEngine|. See the reference
-manual of \verb|PhiloxConstants| for an example of how to define it. The
-performance data is in Table~\appref{tab:Performance of PhiloxEngine}.
+manual of \verb|PhiloxConstants| for an example of how to define it.
 
 \subsection{Threefry}
 \label{sub:Threefry}
@@ -589,8 +514,7 @@ convenience,
       ResultType, std::uint64_t, 16>;
 \end{Verbatim}
 Type aliases for 32- and 64-bit \verb|ResultType| are also defined, as listed
-in Table~\ref{tab:Counter-based RNG}. The performance data is in
-Table~\appref{tab:Performance of ThreefryEngine}.
+in Table~\ref{tab:Counter-based RNG}.
 
 \subsection{\texttt{RNG} and \texttt{RNGMini}}
 \label{sub:RNG and RNGMini}
@@ -690,8 +614,7 @@ succeeds. One can limit the maximum number of trials by defining the
 configuration macro \verb|MCKL_RDRAND_NTRIAL_MAX|. A value of zero, the
 default, means the number of trials is unlimited. If it is a positive number,
 and if after the specified number of trials no random integer is return by the
-\rdrand instruction, zero is returned. The performance data is in
-Table~\appref{tab:Performance of non-deterministic RNG}.
+\rdrand instruction, zero is returned.
 
 \section{\protect\mkl{} \protect\rng}
 \label{sec:MKL RNG}
@@ -703,7 +626,7 @@ the best when they are used to generate vectors of random numbers. These
 wrappers use a buffer to store such vectors. And thus they have much larger
 state space than usual \rng{}s. Each \rng engines output by default 32-bit
 integers. Similar to the counter-based \rng{}s, 64-bit variants are also
-defined. The performance data is in Table~\appref{tab:Performance of MKL RNG}.
+defined.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
@@ -835,10 +758,8 @@ Sections~\ref{sub:Continuous distributions} and~\ref{sub:Discrete
   distributions} we list continuous and discrete distributions, respectively.
 In these two sections, the \pdf or \pmf and class declaration of each
 distribution are shown first, and then we briefly discuss the algorithm used
-for implementation. There are also performance data for these distributions in
-Appendix~\appref{chap:Performance data}. Last, in Section~\ref{sub:Multivariate
-  distributions} we briefly discusses a few multivariate distributions
-implemented in the library.
+for implementation. Last, in Section~\ref{sub:Multivariate distributions} we
+briefly discusses a few multivariate distributions implemented in the library.
 
 \subsection{Uniform bits distribution}
 \label{sub:Uniform bits distribution}
