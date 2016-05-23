@@ -113,4 +113,43 @@ inline std::string random_pass(bool pass)
     return pass ? "Passed" : "Failed";
 }
 
+template <typename RealType>
+inline RealType random_erfcinv_refine(RealType x, RealType z)
+{
+    static constexpr RealType a = static_cast<RealType>(1.12837916709551257);
+
+    RealType err = std::erfc(x) - z;
+
+    return x + err / (a * std::exp(-(x * x)) - x * err);
+}
+
+template <typename RealType>
+inline RealType random_erfcinv(RealType y)
+{
+    if (y >= 2)
+        return -mckl::const_inf<RealType>();
+    if (y <= 0)
+        return mckl::const_inf<RealType>();
+
+    static constexpr RealType a = static_cast<RealType>(0.70771);
+    static constexpr RealType b = static_cast<RealType>(2.30753);
+    static constexpr RealType c = static_cast<RealType>(0.27061);
+    static constexpr RealType d = static_cast<RealType>(0.99229);
+    static constexpr RealType e = static_cast<RealType>(0.04481);
+
+    RealType z = y < 1 ? y : 2 - y;
+    RealType t = std::sqrt(-2 * std::log(0.5 * z));
+    RealType x = -a * ((b + t * c) / (1 + t * (d + t * e)) - t);
+    x = random_erfcinv_refine(x, z);
+    x = random_erfcinv_refine(x, z);
+
+    return y < 1 ? x : -x;
+}
+
+template <typename RealType>
+inline RealType random_erfinv(RealType y)
+{
+    return random_erfcinv(1 - y);
+}
+
 #endif // MCKL_EXAMPLE_RANDOM_COMMON_HPP
