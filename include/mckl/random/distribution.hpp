@@ -33,16 +33,18 @@
 #define MCKL_RANDOM_DISTRIBUTION_HPP
 
 #include <mckl/internal/config.h>
-
 #include <mckl/random/arcsine_distribution.hpp>
+#include <mckl/random/bernoulli_distribution.hpp>
 #include <mckl/random/beta_distribution.hpp>
 #include <mckl/random/cauchy_distribution.hpp>
 #include <mckl/random/chi_squared_distribution.hpp>
 #include <mckl/random/dirichlet_distribution.hpp>
+#include <mckl/random/discrete_distribution.hpp>
 #include <mckl/random/exponential_distribution.hpp>
 #include <mckl/random/extreme_value_distribution.hpp>
 #include <mckl/random/fisher_f_distribution.hpp>
 #include <mckl/random/gamma_distribution.hpp>
+#include <mckl/random/geometric_distribution.hpp>
 #include <mckl/random/laplace_distribution.hpp>
 #include <mckl/random/levy_distribution.hpp>
 #include <mckl/random/logistic_distribution.hpp>
@@ -55,12 +57,8 @@
 #include <mckl/random/student_t_distribution.hpp>
 #include <mckl/random/u01_distribution.hpp>
 #include <mckl/random/uniform_bits_distribution.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
 #include <mckl/random/weibull_distribution.hpp>
-
-#include <mckl/random/bernoulli_distribution.hpp>
-#include <mckl/random/discrete_distribution.hpp>
-#include <mckl/random/geometric_distribution.hpp>
-#include <mckl/random/uniform_int_distribution.hpp>
 
 #endif // MCKL_RANDOM_DISTRIBUTION_HPP
