@@ -130,6 +130,28 @@
         name##_distribution(rng, N, r, param.p1(), param.p2());               \
     }
 
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_4(                               \
+    Name, name, T, T1, p1, T2, p2, T3, p3, T4, p4)                            \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(                                          \
+        RNGType &rng, std::size_t N, T *r, T1 p1, T2 p2, T3 p3 T4 p4)         \
+    {                                                                         \
+        const std::size_t K = BufferSize<T>::value;                           \
+        const std::size_t M = N / K;                                          \
+        const std::size_t L = N % K;                                          \
+        for (std::size_t i = 0; i != M; ++i, r += K)                          \
+            name##_distribution_impl<K>(rng, K, r, p1, p2, p3, p4);           \
+        name##_distribution_impl<K>(rng, L, r, p1, p2, p3, p4);               \
+    }                                                                         \
+                                                                              \
+    template <typename T, typename RNGType>                                   \
+    inline void name##_distribution(RNGType &rng, std::size_t N, T *r,        \
+        const typename Name##Distribution<T>::param_type &param)              \
+    {                                                                         \
+        name##_distribution(                                                  \
+            rng, N, r, param.p1(), param.p2(), param.p3(), param.p4());       \
+    }
+
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_0(Name, T)                 \
     public:                                                                   \
     class param_type                                                          \
@@ -319,6 +341,105 @@
         friend distribution_type;                                             \
     }; // class param_type
 
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_4(                         \
+    Name, name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)            \
+    public:                                                                   \
+    class param_type                                                          \
+    {                                                                         \
+        public:                                                               \
+        using result_type = T;                                                \
+        using distribution_type = Name##Distribution<T>;                      \
+                                                                              \
+        explicit param_type(T1 p1 = v1, T2 p2 = v2, T3 p3 = v3, T4 p4 = v4)   \
+            : p1##_(p1), p2##_(p2), p3##_(p3), p4##_(p4)                      \
+        {                                                                     \
+            ::mckl::runtime_assert(                                           \
+                ::mckl::internal::name##_distribution_check_param(            \
+                    p1, p2, p3, p4),                                          \
+                "**" #Name                                                    \
+                "Distribution** constructed with invalid arguments");         \
+        }                                                                     \
+                                                                              \
+        T1 p1() const { return p1##_; }                                       \
+        T2 p2() const { return p2##_; }                                       \
+        T3 p3() const { return p3##_; }                                       \
+        T4 p4() const { return p4##_; }                                       \
+                                                                              \
+        friend bool operator==(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            if (!::mckl::internal::is_equal(param1.p1##_, param2.p1##_))      \
+                return false;                                                 \
+            if (!::mckl::internal::is_equal(param1.p2##_, param2.p2##_))      \
+                return false;                                                 \
+            if (!::mckl::internal::is_equal(param1.p3##_, param2.p3##_))      \
+                return false;                                                 \
+            if (!::mckl::internal::is_equal(param1.p4##_, param2.p4##_))      \
+                return false;                                                 \
+            return true;                                                      \
+        }                                                                     \
+                                                                              \
+        friend bool operator!=(                                               \
+            const param_type &param1, const param_type &param2)               \
+        {                                                                     \
+            return !(param1 == param2);                                       \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_ostream<CharT, Traits> &operator<<(                 \
+            std::basic_ostream<CharT, Traits> &os, const param_type &param)   \
+        {                                                                     \
+            if (!os)                                                          \
+                return os;                                                    \
+                                                                              \
+            os << param.p1##_ << ' ';                                         \
+            os << param.p2##_ << ' ';                                         \
+            os << param.p3##_ << ' ';                                         \
+            os << param.p4##_;                                                \
+                                                                              \
+            return os;                                                        \
+        }                                                                     \
+                                                                              \
+        template <typename CharT, typename Traits>                            \
+        friend std::basic_istream<CharT, Traits> &operator>>(                 \
+            std::basic_istream<CharT, Traits> &is, param_type &param)         \
+        {                                                                     \
+            if (!is)                                                          \
+                return is;                                                    \
+                                                                              \
+            T1 p1 = 0;                                                        \
+            T2 p2 = 0;                                                        \
+            T3 p3 = 0;                                                        \
+            T4 p4 = 0;                                                        \
+            is >> std::ws >> p1;                                              \
+            is >> std::ws >> p2;                                              \
+            is >> std::ws >> p3;                                              \
+            is >> std::ws >> p4;                                              \
+                                                                              \
+            if (is) {                                                         \
+                if (::mckl::internal::name##_distribution_check_param(        \
+                        p1, p2, p3, p4)) {                                    \
+                    param.p1##_ = p1;                                         \
+                    param.p2##_ = p2;                                         \
+                    param.p3##_ = p3;                                         \
+                    param.p4##_ = p4;                                         \
+                } else {                                                      \
+                    is.setstate(std::ios_base::failbit);                      \
+                }                                                             \
+            }                                                                 \
+                                                                              \
+            return is;                                                        \
+        }                                                                     \
+                                                                              \
+        private:                                                              \
+        T1 p1##_;                                                             \
+        T2 p2##_;                                                             \
+        T3 p3##_;                                                             \
+        T4 p4##_;                                                             \
+                                                                              \
+        friend distribution_type;                                             \
+    }; // class param_type
+
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                \
     public:                                                                   \
     using result_type = T;                                                    \
@@ -372,6 +493,35 @@
                                                                               \
     T1 p1() const { return param_.p1(); }                                     \
     T2 p2() const { return param_.p2(); }
+
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_4(                        \
+    Name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)                  \
+    public:                                                                   \
+    using result_type = T;                                                    \
+    using distribution_type = Name##Distribution<T>;                          \
+                                                                              \
+    explicit Name##Distribution(                                              \
+        T1 p1 = v1, T2 p2 = v2, T3 p3 = v3, T4 p4 = v4)                       \
+        : param_(p1, p2, p3, p4)                                              \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(const param_type &param) : param_(param)      \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    explicit Name##Distribution(param_type &&param)                           \
+        : param_(std::move(param))                                            \
+    {                                                                         \
+        reset();                                                              \
+    }                                                                         \
+                                                                              \
+    T1 p1() const { return param_.p1(); }                                     \
+    T2 p2() const { return param_.p2(); }                                     \
+    T3 p3() const { return param_.p3(); }                                     \
+    T4 p4() const { return param_.p4(); }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0                              \
     private:                                                                  \
@@ -574,6 +724,14 @@
         Name, T, T1, p1, v1, T2, p2, v2)                                      \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
 
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_4(                                    \
+    Name, name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)            \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_4(                             \
+        Name, name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)        \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_4(                            \
+        Name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)              \
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
+
 namespace mckl
 {
 
@@ -735,6 +893,9 @@ template <typename = double>
 class RayleighDistribution;
 
 template <typename = double>
+class StableDistribution;
+
+template <typename = double>
 class StudentTDistribution;
 
 template <typename = double>
@@ -848,6 +1009,10 @@ inline void rand(
 
 template <typename RealType, typename RNGType>
 inline void rand(
+    RNGType &, StableDistribution<RealType> &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void rand(
     RNGType &, StudentTDistribution<RealType> &, std::size_t, RealType *);
 
 template <typename RealType, typename RNGType>
@@ -956,6 +1121,10 @@ inline void pareto_distribution(
 template <typename RealType, typename RNGType>
 inline void rayleigh_distribution(
     RNGType &, std::size_t, RealType *, RealType);
+
+template <typename RealType, typename RNGType>
+inline void stable_distribution(RNGType &, std::size_t, RealType *, RealType,
+    RealType, RealType, RealType);
 
 template <typename RealType, typename RNGType>
 inline void student_t_distribution(

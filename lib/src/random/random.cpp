@@ -63,6 +63,7 @@
 #include "rand_normal_mv.cpp"
 #include "rand_pareto.cpp"
 #include "rand_rayleigh.cpp"
+#include "rand_stable.cpp"
 #include "rand_student_t.cpp"
 #include "rand_u01.cpp"
 #include "rand_u01_cc.cpp"

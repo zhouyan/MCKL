@@ -115,13 +115,13 @@ void mckl_seed_load_f(const char *filename);
 /// \addtogroup C_API_Random_Distribution
 /// @{
 
-/// \brief `mckl::uniform_bits_distribution`
+/// \brief `mckl::UniformBitsDistribution<unsigned>`
 void mckl_rand(mckl_rng rng, size_t n, unsigned *r);
 
-/// \brief `mckl::uniform_bits_distribution`
+/// \brief `mckl::UniformBitsDistribution<unsigned long long>`
 void mckl_rand_64(mckl_rng rng, size_t n, unsigned long long *r);
 
-/// \brief `std::bernoulli_distribution`
+/// \brief `mckl::BernoulliDistribution<int>`
 void mckl_rand_bernoulli(mckl_rng rng, size_t n, int *r, double p);
 
 /// \brief `std::binomial_distribution<int>`
@@ -139,10 +139,10 @@ void mckl_rand_discrete(mckl_rng rng, size_t n, int *r, size_t m,
 void mckl_rand_discrete_64(mckl_rng rng, size_t n, long long *r, size_t m,
     const double *weight, int normalized);
 
-/// \brief `std::geometric_distribution<int>`
+/// \brief `mckkl::GeometricDistribution<int>`
 void mckl_rand_geometric(mckl_rng rng, size_t n, int *r, double p);
 
-/// \brief `std::geometric_distribution<long long>`
+/// \brief `mckl::GeometricDistribution<long long>`
 void mckl_rand_geometric_64(mckl_rng rng, size_t n, long long *r, double p);
 
 /// \brief `std::negative_binomial_distribution<int>`
@@ -159,92 +159,96 @@ void mckl_rand_poisson(mckl_rng rng, size_t n, int *r, double mean);
 /// \brief `std::poisson_distribution<long long>`
 void mckl_rand_poisson_64(mckl_rng rng, size_t n, long long *r, double mean);
 
-/// \brief `std::uniform_int_distribution<long long>`
+/// \brief `mckl::UniformIntDistribution<long long>`
 void mckl_rand_uniform_int(mckl_rng rng, size_t n, int *r, int a, int b);
 
-/// \brief `std::uniform_int_distribution<long long>`
+/// \brief `mckl::UniformIntDistribution<long long>`
 void mckl_rand_uniform_int_64(
     mckl_rng rng, size_t n, long long *r, long long a, long long b);
 
-/// \brief `mckl::arcsine_distribution<double>`
+/// \brief `mckl::ArcsineDistribution<double>`
 void mckl_rand_arcsine(
     mckl_rng rng, size_t n, double *r, double alpha, double beta);
 
-/// \brief `mckl::beta_distribution<double>`
+/// \brief `mckl::BetaDistribution<double>`
 void mckl_rand_beta(
     mckl_rng rng, size_t n, double *r, double alpha, double beta);
 
-/// \brief `mckl::cauchy_distribution<double>`
+/// \brief `mckl::CauchyDistribution<double>`
 void mckl_rand_cauchy(mckl_rng rng, size_t n, double *r, double a, double b);
 
-/// \brief `mckl::chi_squared_distribution<double>`
+/// \brief `mckl::ChiSquaredDistribution<double>`
 void mckl_rand_chi_squared(mckl_rng rng, size_t n, double *r, double df);
 
-/// \brief `mckl::exponential_distribution<double>`
+/// \brief `mckl::ExponentialDistribution<double>`
 void mckl_rand_exponential(mckl_rng rng, size_t n, double *r, double lambda);
 
-/// \brief `mckl::extreme_value_distribution<double>`
+/// \brief `mckl::ExtremeValueDistribution<double>`
 void mckl_rand_extreme_value(
     mckl_rng rng, size_t n, double *r, double a, double b);
 
-/// \brief `mckl::fisher_f_distribution<double>`
+/// \brief `mckl::FisherFDistribution<double>`
 void mckl_rand_fisher_f(
     mckl_rng rng, size_t n, double *r, double df1, double df2);
 
-/// \brief `mckl::gamma_distribution<double>`
+/// \brief `mckl::GammaDistribution<double>`
 void mckl_rand_gamma(
     mckl_rng rng, size_t n, double *r, double alpha, double beta);
 
-/// \brief `mckl::laplace_distribution<double>`
+/// \brief `mckl::LaplaceDistribution<double>`
 void mckl_rand_laplace(mckl_rng rng, size_t n, double *r, double a, double b);
 
-/// \brief `mckl::levy_distribution<double>`
+/// \brief `mckl::LevyDistribution<double>`
 void mckl_rand_levy(mckl_rng rng, size_t n, double *r, double a, double b);
 
-/// \brief `mckl::logistic_distribution<double>`
+/// \brief `mckl::LogisticDistribution<double>`
 void mckl_rand_logistic(mckl_rng rng, size_t n, double *r, double a, double b);
 
-/// \brief `mckl::lognormal_distribution<double>`
+/// \brief `mckl::LognormalDistribution<double>`
 void mckl_rand_lognormal(
     mckl_rng rng, size_t n, double *r, double m, double s);
 
-/// \brief `mckl::normal_distribution<double>`
+/// \brief `mckl::NormalDistribution<double>`
 void mckl_rand_normal(
     mckl_rng rng, size_t n, double *r, double mean, double stddev);
 
-/// \brief `mckl::normal_mv_distribution<double>`
+/// \brief `mckl::NormalMVDistribution<double>`
 void mckl_rand_normal_mv(mckl_rng rng, size_t n, double *r, size_t dim,
     const double *mean, const double *chol);
 
-/// \brief `mckl::pareto_distribution<double>`
+/// \brief `mckl::ParetoDistribution<double>`
 void mckl_rand_pareto(mckl_rng rng, size_t n, double *r, double a, double b);
 
-/// \brief `mckl::rayleigh_distribution<double>`
+/// \brief `mckl::RayleighDistribution<double>`
 void mckl_rand_rayleigh(mckl_rng rng, size_t n, double *r, double b);
 
-/// \brief `mckl::student_t_distribution<double>`
+/// \brief `mckl::StableDistribution<double>`
+void mckl_rand_stable(mckl_rng rng, size_t n, double *r, double alpha,
+    double beta, double a, double b);
+
+/// \brief `mckl::StudentTDistribution<double>`
 void mckl_rand_student_t(mckl_rng rng, size_t n, double *r, double df);
 
-/// \brief `mckl::u01_distribution<double>`
+/// \brief `mckl::U01Distribution<double>`
 void mckl_rand_u01(mckl_rng rng, size_t n, double *r);
 
-/// \brief `mckl::u01_cc_distribution<double>`
+/// \brief `mckl::U01CCDistribution<double>`
 void mckl_rand_u01_cc(mckl_rng rng, size_t n, double *r);
 
-/// \brief `mckl::u01_co_distribution<double>`
+/// \brief `mckl::U01CODistribution<double>`
 void mckl_rand_u01_co(mckl_rng rng, size_t n, double *r);
 
-/// \brief `mckl::u01_oc_distribution<double>`
+/// \brief `mckl::U01OCDistribution<double>`
 void mckl_rand_u01_oc(mckl_rng rng, size_t n, double *r);
 
-/// \brief `mckl::u01_oo_distribution<double>`
+/// \brief `mckl::U01OODistribution<double>`
 void mckl_rand_u01_oo(mckl_rng rng, size_t n, double *r);
 
-/// \brief `mckl::uniform_real_distribution<double>`
+/// \brief `mckl::UniformRealDistribution<double>`
 void mckl_rand_uniform_real(
     mckl_rng rng, size_t n, double *r, double a, double b);
 
-/// \brief `mckl::weibull_distribution<double>`
+/// \brief `mckl::WeibullDistribution<double>`
 void mckl_rand_weibull(mckl_rng rng, size_t n, double *r, double a, double b);
 
 /// @} C_API_Random_Distribution

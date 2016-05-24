@@ -67,6 +67,8 @@
         N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::RayleighDistribution<RealType>>(    \
         N, M, nwid, twid, distname);                                          \
+    random_distribution_test_##test<mckl::StableDistribution<RealType>>(      \
+        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::StudentTDistribution<RealType>>(    \
         N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::U01Distribution<RealType>>(         \
@@ -148,22 +150,34 @@ class RandomDistributionTraitBase
         params.push_back(tmp);
     }
 
-    template <typename ParamType, typename ValueType1>
-    static void add_param(
-        mckl::Vector<std::array<ParamType, 1>> &param, ValueType1 p1)
+    template <typename ParamType, typename P1>
+    static void add_param(mckl::Vector<std::array<ParamType, 1>> &param, P1 p1)
     {
         std::array<ParamType, 1> tmp;
         tmp[0] = static_cast<ParamType>(p1);
         param.push_back(tmp);
     }
 
-    template <typename ParamType, typename ValueType1, typename ValueType2>
-    static void add_param(mckl::Vector<std::array<ParamType, 2>> &param,
-        ValueType1 p1, ValueType2 p2)
+    template <typename ParamType, typename P1, typename P2>
+    static void add_param(
+        mckl::Vector<std::array<ParamType, 2>> &param, P1 p1, P2 p2)
     {
         std::array<ParamType, 2> tmp;
         tmp[0] = static_cast<ParamType>(p1);
         tmp[1] = static_cast<ParamType>(p2);
+        param.push_back(tmp);
+    }
+
+    template <typename ParamType, typename P1, typename P2, typename P3,
+        typename P4>
+    static void add_param(mckl::Vector<std::array<ParamType, 4>> &param, P1 p1,
+        P2 p2, P3 p3, P4 p4)
+    {
+        std::array<ParamType, 4> tmp;
+        tmp[0] = static_cast<ParamType>(p1);
+        tmp[1] = static_cast<ParamType>(p2);
+        tmp[2] = static_cast<ParamType>(p3);
+        tmp[3] = static_cast<ParamType>(p4);
         param.push_back(tmp);
     }
 
@@ -173,7 +187,7 @@ class RandomDistributionTraitBase
         const std::string &distname, const std::array<ParamType, 0> &)
     {
         std::stringstream ss;
-        ss << distname << "<" << random_typename<ResultType>() << ">";
+        ss << distname << '<' << random_typename<ResultType>() << '>';
 
         return ss.str();
     }
@@ -183,8 +197,8 @@ class RandomDistributionTraitBase
         const std::string &distname, const std::array<ParamType, 1> &param)
     {
         std::stringstream ss;
-        ss << distname << "<" << random_typename<ResultType>() << ">("
-           << param[0] << ")";
+        ss << distname << '<' << random_typename<ResultType>() << ">("
+           << param[0] << ')';
 
         return ss.str();
     }
@@ -194,8 +208,20 @@ class RandomDistributionTraitBase
         const std::string &distname, const std::array<ParamType, 2> &param)
     {
         std::stringstream ss;
-        ss << distname << "<" << random_typename<ResultType>() << ">("
-           << param[0] << "," << param[1] << ")";
+        ss << distname << '<' << random_typename<ResultType>() << ">("
+           << param[0] << ',' << param[1] << ')';
+
+        return ss.str();
+    }
+
+    template <typename ParamType>
+    static std::string name_dispatch(
+        const std::string &distname, const std::array<ParamType, 4> &param)
+    {
+        std::stringstream ss;
+        ss << distname << '<' << random_typename<ResultType>() << ">("
+           << param[0] << ',' << param[1] << ',' << param[2] << ',' << param[3]
+           << ')';
 
         return ss.str();
     }
@@ -644,6 +670,44 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
 };
 
 template <typename RealType>
+class RandomDistributionTrait<mckl::StableDistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 4>
+{
+    public:
+    using dist_type = mckl::StableDistribution<RealType>;
+    using std_type = dist_type;
+
+    std::string distname() const { return "Stable"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        if (mckl::internal::is_equal(dist.alpha(), static_cast<RealType>(2))) {
+            RandomDistributionTrait<mckl::NormalDistribution<RealType>> trait;
+            return trait.partition(
+                n, mckl::NormalDistribution<RealType>(
+                       0, std::sqrt(static_cast<RealType>(2))));
+        } else if (mckl::internal::is_one(dist.alpha())) {
+            RandomDistributionTrait<mckl::CauchyDistribution<RealType>> trait;
+            return trait.partition(
+                n, mckl::CauchyDistribution<RealType>(0, 1));
+        } else {
+            RandomDistributionTrait<mckl::LevyDistribution<RealType>> trait;
+            return trait.partition(n, mckl::LevyDistribution<RealType>(0, 1));
+        }
+    }
+
+    mckl::Vector<std::array<RealType, 4>> params() const
+    {
+        mckl::Vector<std::array<RealType, 4>> params;
+        this->add_param(params, 2, 0, 0, 1);
+        this->add_param(params, 1, 0, 0, 1);
+        this->add_param(params, 0.5, 1, 0, 1);
+
+        return params;
+    }
+};
+
+template <typename RealType>
 class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
 {
@@ -866,6 +930,12 @@ inline DistType random_distribution_init(const std::array<ParamType, 2> &param)
     return DistType(param[0], param[1]);
 }
 
+template <typename DistType, typename ParamType>
+inline DistType random_distribution_init(const std::array<ParamType, 4> &param)
+{
+    return DistType(param[0], param[1], param[2], param[3]);
+}
+
 template <typename MCKLDistType>
 inline double random_distribution_chi2(std::size_t n,
     const typename MCKLDistType::result_type *r, const MCKLDistType &dist,
@@ -1008,8 +1078,8 @@ inline void random_distribution_summary_pval(double pval, int twid)
 {
     std::stringstream ss;
     if (pval < 50)
-        ss << "*";
-    ss << pval << "%";
+        ss << '*';
+    ss << pval << '%';
     std::cout << std::setw(twid) << std::right << ss.str();
 }
 

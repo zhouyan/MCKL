@@ -57,8 +57,10 @@ The third is the vectorized performance,
   rand(rng, rnorm_mckl, n, r.data());
 \end{Verbatim}
 For all the three above, the \rng is \verb|ARSx8| (Section~\ref{sub:AES-NI
-  instructions based RNG}). The last is when \rng is \verb|MKL_SFMT19937|
-(Section~\ref{sec:MKL RNG}),
+  instructions based RNG}). The last is when there are \mkl routines for
+generating random variates from the distribution directly (e.g., Normal
+distribution) or indirectly (e.g., Student's $t$-distribution). In this case,
+we use the \rng{} \verb|MKL_SFMT19937| (see Section~\ref{sec:MKL RNG}),
 \begin{Verbatim}
   MKL_SFMT19937 rng_mkl;
   rand(rng_mkl, rnorm_mckl, n, r.data());
@@ -105,6 +107,12 @@ respectively, in tables below.
   \input{tab/random_distribution_normal}%
   \caption{Performance of Normal and related distributions}
   \label{tab:Performance of Normal and related distributions}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_stable}%
+  \caption{Performance of Stable distribution}
+  \label{tab:Performance of Stable stribution}
 \end{table}
 
 \begin{table}

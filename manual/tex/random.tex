@@ -628,6 +628,24 @@ state space than usual \rng{}s. Each \rng engines output by default 32-bit
 integers. Similar to the counter-based \rng{}s, 64-bit variants are also
 defined.
 
+When there are \mkl routines for generating distribution random variates for
+one of the distributions discussed later in Section~\ref{sec:Distributions},
+the library will automatically use \mkl routines for vectorized random number
+generating if the \rng{} is one of that listed in Table~\ref{tab:MKL RNG}. For
+example,
+\begin{Verbatim}
+  MKL_SFMT19937 rng;
+  NormalDistribution<double> normal;
+  normal(rng, n, r);       // Use MKL
+  rand(rng, normal, n, r); // Use MKL
+\end{Verbatim}
+Note that, this is only applicable when the distribution is a class in this
+library. It will not work with classes such as \verb|std::normal_distribution|.
+This is also applicable when the distribution is not directly supported by
+\mkl, but can be easily generated using other distributions, e.g., the
+Student's $t$-distribution. In addition, it is also applicable if a
+distribution is a special case of one of the distributions supported by \mkl.
+
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
     \toprule
@@ -1132,6 +1150,40 @@ The implementation uses the inverse method.
   class RayleighDistribution;
 \end{Verbatim}
 The implementation uses the inverse method.
+
+\subsubsection{Stable distribution}
+\begin{align*}
+  &f(x;\alpha,\beta,a,b) = \frac{1}{2\pi}\int_{\infty}^{\infty}
+  \varphi(t;\alpha,\beta,a,b)\EE^{-ixt}\intd t\\
+  &\varphi(t;\alpha,\beta,a,b) = \exp\{ita - \Abs{bt}^{\alpha}(1 -
+  i\beta\mathrm{sgn}(t)\Phi(t;\alpha))\} \\
+  &\Phi(t;\alpha) = \begin{cases}
+    \tan\Round[big]{\frac{\pi}{2}\alpha} & \alpha \ne 1 \\
+    -\frac{2}{\pi}\log\Abs{t}            & \alpha = 1
+  \end{cases} \\
+  & x \in \Real \qquad 0 < \alpha \le 2, -1 \le \beta \le 1, a \in \Real, b > 0
+\end{align*}
+\begin{Verbatim}
+  template <typename RealType = double>
+  class StableDistribution;
+\end{Verbatim}
+The implementation uses the method in \textcite{Chambers:1976dv}. Note that,
+some other distributions implemented in the library, such as the Cauchy
+distribution ($\alpha = 1$, $\beta = 0$), the Levy distribution ($\alpha =
+1/2$, $\beta = 1$), and the Normal distribution ($\alpha = 2$), are all special
+cases of the stable distribution. It is possible to use implementations of
+those distributions to speed up the stable distribution in special cases.
+However, the library does not do so. Every distributions implemented in the
+library goes through some basic statistical tests to ensure correctness.
+Without tractable distribution functions in general, the stable distribution is
+somehow more difficult to test than others. Therefore, we use these special
+cases to tests the implementation, which is generic with respect to parameter
+values. In applications, for generating random numbers from distributions of
+those special cases, use the dedicated classes instead of this one. There are
+also a few distributions not implemented by the library, but are special cases
+of the stable distributions, such as the Landau distribution ($\alpha = 1$,
+$\beta = 1$) and Holtsmark distribution ($\alpha = 3/2$, $\beta = 0$), to name
+just two of them.
 
 \subsubsection{Student's $t$-distribution}
 

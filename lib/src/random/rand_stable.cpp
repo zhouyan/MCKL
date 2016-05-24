@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/distribution.hpp
+// MCKL/lib/src/random/rand_stable.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,38 +29,59 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_DISTRIBUTION_HPP
-#define MCKL_RANDOM_DISTRIBUTION_HPP
-
-#include <mckl/internal/config.h>
-
-#include <mckl/random/arcsine_distribution.hpp>
-#include <mckl/random/beta_distribution.hpp>
-#include <mckl/random/cauchy_distribution.hpp>
-#include <mckl/random/chi_squared_distribution.hpp>
-#include <mckl/random/dirichlet_distribution.hpp>
-#include <mckl/random/exponential_distribution.hpp>
-#include <mckl/random/extreme_value_distribution.hpp>
-#include <mckl/random/fisher_f_distribution.hpp>
-#include <mckl/random/gamma_distribution.hpp>
-#include <mckl/random/laplace_distribution.hpp>
-#include <mckl/random/levy_distribution.hpp>
-#include <mckl/random/logistic_distribution.hpp>
-#include <mckl/random/lognormal_distribution.hpp>
-#include <mckl/random/normal_distribution.hpp>
-#include <mckl/random/normal_mv_distribution.hpp>
-#include <mckl/random/pareto_distribution.hpp>
-#include <mckl/random/rayleigh_distribution.hpp>
+#include <mckl/mckl.h>
+#include <mckl/random/rng.hpp>
 #include <mckl/random/stable_distribution.hpp>
-#include <mckl/random/student_t_distribution.hpp>
-#include <mckl/random/u01_distribution.hpp>
-#include <mckl/random/uniform_bits_distribution.hpp>
-#include <mckl/random/uniform_real_distribution.hpp>
-#include <mckl/random/weibull_distribution.hpp>
 
-#include <mckl/random/bernoulli_distribution.hpp>
-#include <mckl/random/discrete_distribution.hpp>
-#include <mckl/random/geometric_distribution.hpp>
-#include <mckl/random/uniform_int_distribution.hpp>
+extern "C" {
 
-#endif // MCKL_RANDOM_DISTRIBUTION_HPP
+#ifdef MCKL_RNG_DEFINE_MACRO
+#undef MCKL_RNG_DEFINE_MACRO
+#endif
+
+#ifdef MCKL_RNG_DEFINE_MACRO_NA
+#undef MCKL_RNG_DEFINE_MACRO_NA
+#endif
+
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    inline void mckl_rand_stable_##name(mckl_rng rng, size_t n, double *r,    \
+        double alpha, double beta, double a, double b)                        \
+    {                                                                         \
+        ::mckl::StableDistribution<double> dist(alpha, beta, a, b);           \
+        ::mckl::rand(*reinterpret_cast<RNGType *>(rng.ptr), dist, n, r);      \
+    }
+
+#include <mckl/random/internal/rng_define_macro_alias.hpp>
+
+#include <mckl/random/internal/rng_define_macro.hpp>
+
+using mckl_rand_stable_type = void (*)(
+    mckl_rng, size_t, double *, double, double, double, double);
+
+static mckl_rand_stable_type mckl_rand_stable_dispatch[] = {
+
+#ifdef MCKL_RNG_DEFINE_MACRO
+#undef MCKL_RNG_DEFINE_MACRO
+#endif
+
+#ifdef MCKL_RNG_DEFINE_MACRO_NA
+#undef MCKL_RNG_DEFINE_MACRO_NA
+#endif
+
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name) mckl_rand_stable_##name,
+#define MCKL_RNG_DEFINE_MACRO_NA(RNGType, Name, name) nullptr,
+
+#include <mckl/random/internal/rng_define_macro_alias.hpp>
+
+#include <mckl/random/internal/rng_define_macro.hpp>
+
+    nullptr}; // mckl_rand_stable_dispatch
+
+void mckl_rand_stable(mckl_rng rng, size_t n, double *r, double alpha,
+    double beta, double a, double b)
+{
+    mckl_rand_stable_dispatch[static_cast<std::size_t>(rng.type)](
+        rng, n, r, alpha, beta, a, b);
+}
+
+} // extern "C"

@@ -42,7 +42,9 @@ my @int = qw(Geometric UniformInt);
 
 my @normal = qw(Normal Lognormal Levy);
 
-my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh);
+my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh Stable);
+
+my @nomkl = qw(Arcsine Pareto Stable);
 
 my %distribution;
 my %cpE;
@@ -63,8 +65,13 @@ while (<$txtfile>) {
         } else {
             $cpE .= &format(shift @record);
         }
-        foreach (@record[0..2]) {
-            $cpE .= &format($_)
+        $cpE .= &format(shift @record);
+        $cpE .= &format(shift @record);
+        if ("@nomkl" =~ /$basename/) {
+            shift @record;
+            $cpE .= sprintf ' & %-4s', '--';
+        } else {
+            $cpE .= &format(shift @record);
         }
         $cpE .= "\n";
         if ("@inverse" =~ /$basename/) {
