@@ -732,14 +732,14 @@ in the standard library. As stated in Section~\ref{sec:Vectorized random number
 random number generating. In the following sections, we introduce each of them.
 Section~\ref{sub:Uniform bits distribution} discusses the uniform bits
 distribution, which is actually a low level distribution indirectly used by all
-other distributions. Section~\ref{sub:Standard uniform distribution} shows a
-few different standard uniform distributions. And in
-Sections~\ref{sub:Continuous distributions} and~\ref{sub:Discrete
-  distributions} we list continuous and discrete distributions, respectively.
-In these two sections, the \pdf or \pmf and class declaration of each
-distribution are shown first, and then we briefly discuss the algorithm used
-for implementation. Last, in Section~\ref{sub:Multivariate distributions} we
-briefly discusses a few multivariate distributions implemented in the library.
+other distributions. Section~\ref{sub:Standard uniform distribution} shows few
+different standard uniform distributions. And in Sections~\ref{sub:Continuous
+  distributions} and~\ref{sub:Discrete distributions} we list continuous and
+discrete distributions, respectively. In these two sections, the \pdf or \pmf
+and class declaration of each distribution are shown first, and then we briefly
+discuss the algorithm used for implementation. Last, in
+Section~\ref{sub:Multivariate distributions} we briefly discusses a few
+multivariate distributions implemented in the library.
 
 \subsection{Uniform bits distribution}
 \label{sub:Uniform bits distribution}
@@ -1273,9 +1273,13 @@ success probability $p$.
   template <typename IntType = int>
   class UniformIntDistribution;
 \end{Verbatim}
-The implementation uses the fact that if $U$ is a standard uniform random
-variable, than $\Floor{a + (b - a + 1) U}$ is a uniform distribution on the set
-$\{a,\dots,b\}$.
+The specific algorithm used depends on the parameters. If $a = b$, then it
+simply returns $a$. If $b - a + 1 = 2^W$ where $W$ is the number of bits of
+\verb|IntType|, then \verb|UniformBitsDistribution| is used (see
+Section~\ref{sub:Uniform bits distribution}). If $\max\{|a|, b\} < 2^{32}$,
+then it uses the fact that if $U$ is a standard uniform random variable, then
+$\Floor{a + (b - a + 1) U}$ is uniform on the set $\{a,\dots,b\}$. Otherwise,
+it uses \verb|std::uniform_int_distribution|.
 
 \subsection{Multivariate distributions}
 \label{sub:Multivariate distributions}

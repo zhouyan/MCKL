@@ -1544,7 +1544,15 @@ inline void uniform_int_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, int a, int b)
 {
     size_check<MKL_INT>(n, "uniform_int_distribution");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b + 1);
+    if (b < std::numeric_limits<int>::max()) {
+        rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b + 1);
+    } else if (a > 0) {
+        rng.stream().uniform(static_cast<MKL_INT>(n), r, a - 1, b);
+        add(n, 1, r, r);
+    } else {
+        rng.stream().uniform_bits32(
+            static_cast<MKL_INT>(n), reinterpret_cast<unsigned *>(r));
+    }
 }
 
 } // namespace mckl::internal

@@ -42,27 +42,97 @@ namespace internal
 {
 
 template <typename IntType>
+inline bool uniform_int_distribution_use_double_big(
+    IntType a, IntType b, std::true_type)
+{
+    static constexpr IntType imax = const_one<IntType>() << 32;
+
+    return a > -imax && b < imax;
+}
+
+template <typename IntType>
+inline bool uniform_int_distribution_use_double_big(
+    IntType, IntType b, std::false_type)
+{
+    static constexpr IntType imax = const_one<IntType>() << 32;
+
+    return b < imax;
+}
+
+template <typename IntType>
+inline bool uniform_int_distribution_use_double(
+    IntType, IntType, std::true_type)
+{
+    return true;
+}
+
+template <typename IntType>
+inline bool uniform_int_distribution_use_double(
+    IntType a, IntType b, std::false_type)
+{
+    return uniform_int_distribution_use_double_big(
+        a, b, std::is_signed<IntType>());
+}
+
+template <typename IntType>
+inline bool uniform_int_distribution_use_double(IntType a, IntType b)
+{
+    return uniform_int_distribution_use_double(
+        a, b, std::integral_constant<bool,
+                  std::numeric_limits<IntType>::digits <= 32>());
+}
+
+template <typename IntType>
 inline bool uniform_int_distribution_check_param(IntType a, IntType b)
 {
     return a <= b;
 }
 
 template <std::size_t K, typename IntType, typename RNGType>
+inline void uniform_int_distribution_impl(RNGType &rng, std::size_t n,
+    IntType *r, IntType a, IntType b, std::true_type)
+{
+    double ra = static_cast<double>(a);
+    double rb = static_cast<double>(b);
+    Array<double, K> s;
+    double *const u = s.data();
+    u01_co_distribution(rng, n, u);
+    fma(n, u, rb - ra + const_one<double>(), ra, u);
+    floor(n, u, u);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = static_cast<IntType>(u[i]);
+}
+
+template <std::size_t, typename IntType, typename RNGType>
+inline void uniform_int_distribution_impl(RNGType &rng, std::size_t n,
+    IntType *r, IntType a, IntType b, std::false_type)
+{
+    std::uniform_int_distribution<IntType> uniform(a, b);
+    rand(rng, uniform, n, r);
+}
+
+template <std::size_t K, typename IntType, typename RNGType>
 inline void uniform_int_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, IntType a, IntType b)
 {
+    using UIntType = typename std::make_unsigned<IntType>::type;
+
+    static constexpr IntType imin = std::numeric_limits<IntType>::min();
+    static constexpr IntType imax = std::numeric_limits<IntType>::max();
+
     if (a == b) {
         std::fill_n(r, n, a);
         return;
     }
 
-    Array<double, K> s;
-    u01_co_distribution(rng, n, s.data());
-    fma(n, s.data(), static_cast<double>(b) - static_cast<double>(a) + 1.0,
-        static_cast<double>(a), s.data());
-    floor(n, s.data(), s.data());
-    for (std::size_t i = 0; i != n; ++i)
-        r[i] = static_cast<IntType>(s[i]);
+    if (a == imin && b == imax) {
+        uniform_bits_distribution(rng, n, reinterpret_cast<UIntType *>(r));
+        return;
+    }
+
+    uniform_int_distribution_use_double(a, b) ?
+        uniform_int_distribution_impl<K>(rng, n, r, a, b, std::true_type()) :
+        uniform_int_distribution_impl<K>(rng, n, r, a, b, std::false_type());
 }
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
@@ -92,14 +162,45 @@ class UniformIntDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
+        using UIntType = typename std::make_unsigned<result_type>::type;
+
+        static constexpr result_type imin =
+            std::numeric_limits<result_type>::min();
+        static constexpr result_type imax =
+            std::numeric_limits<result_type>::max();
+
+        if (param.a() == param.b())
+            return param.a();
+
+        UniformBitsDistribution<UIntType> ubits;
+        if (param.a() == imin && param.b() == imax)
+            return static_cast<result_type>(ubits(rng));
+
+        return internal::uniform_int_distribution_use_double(
+                   param.a(), param.b()) ?
+            generate(rng, param, std::true_type()) :
+            generate(rng, param, std::false_type());
+    }
+
+    template <typename RNGType>
+    result_type generate(RNGType &rng, const param_type &param, std::true_type)
+    {
         U01CODistribution<double> u01;
-        double u = u01(rng);
-        u = static_cast<double>(param.a()) +
-            (static_cast<double>(param.b()) - static_cast<double>(param.a()) +
-                1.0) *
-                u;
+        double ra = static_cast<double>(param.a());
+        double rb = static_cast<double>(param.b());
+        double u = ra + (rb - ra + const_one<double>()) * u01(rng);
 
         return static_cast<result_type>(std::floor(u));
+    }
+
+    template <typename RNGType>
+    result_type generate(
+        RNGType &rng, const param_type &param, std::false_type)
+    {
+        std::uniform_int_distribution<result_type> uniform(
+            param.a(), param.b());
+
+        return uniform(rng);
     }
 }; // class UniformIntDistribution
 
