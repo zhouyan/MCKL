@@ -52,7 +52,7 @@ example, consider the weight step in the simple particle filter in
 section~\ref{sec:Example (PF)}. Recall the simple \verb|PFWeight| function in
 section~\ref{sub:Implementation (PF)},
 \begin{Verbatim}
-  inline void PFWeight(std::size_t iter, Particle<PF> &particle)
+  void PFWeight(std::size_t iter, Particle<PF> &particle)
   {
       Vector<double> weight(particle.size());
       for (auto idx : particle)
@@ -245,7 +245,7 @@ Instead it points to a $d$-vector specific for each particle. For example,
 recall the estimation function \verb|PFEstimate| in
 section~\ref{sub:Implementation (PF)}.
 \begin{Verbatim}
-  inline void PFEstimate(
+  void PFEstimate(
       std::size_t,
       std::size_t,
       Particle<PF> &particle,
@@ -263,7 +263,10 @@ This can be parallelized as the following,
   {
       public:
       void eval_each(
-          std::size_t, std::size_t, ParticleIndex<PF> idx, double *r)
+          std::size_t,
+          std::size_t,
+          ParticleIndex<PF> idx,
+          double *r)
       {
           *r++ = idx.pos_x();
           *r++ = idx.pos_y();

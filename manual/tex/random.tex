@@ -111,7 +111,7 @@ To write generic functions, it is recommended to use the function \verb|rand|
 instead of the member methods, since the former also works with classes not
 defined by this library, such as those in the standard library.
 
-\section{Counter-based \protect\rng}
+\section{Counter-based \texorpdfstring{\protect\rng}{RNG}}
 \label{sec:Counter-based RNG}
 
 The standard library provides a set of \rng engines. Unfortunately, none of
@@ -256,7 +256,8 @@ to later.
   \label{tab:Configuration macros for counter-based RNG}
 \end{table}
 
-\subsection{\protect\aesni instructions based \protect\rng}
+\subsection{\texorpdfstring{\protect\aesni}{AES-NI} instructions based
+  \texorpdfstring{\protect\rng}{RNG}}
 \label{sub:AES-NI instructions based RNG}
 
 The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
@@ -523,11 +524,11 @@ Note that, not all \rng{}s implemented by the library is available on all
 platforms. The library also defines two type aliases \verb|RNG| and
 \verb|RNG_64|, which are one of the \rng{}s listed in
 Table~\ref{tab:Counter-based RNG}. The preference is in the order listed in
-Table~\ref{tab:Default RNG}. The user can define the configuration macro
-\verb|MCKL_RNG_TYPE| to override the choice of \verb|RNG| made by the library.
-Similarly, the \verb|MCKL_RNG_64_TYPE| macro can be used to override the choice
-of \verb|RNG_64|. These \rng engines are meant for general purpose usage. They
-have reasonable long period and large key space.
+Table~\ref{tab:Type aliases RNG and RNG_64}. The user can define the
+configuration macro \verb|MCKL_RNG_TYPE| to override the choice of \verb|RNG|
+made by the library. Similarly, the \verb|MCKL_RNG_64_TYPE| macro can be used
+to override the choice of \verb|RNG_64|. These \rng engines are meant for
+general purpose usage. They have reasonable long period and large key space.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}
@@ -540,8 +541,8 @@ have reasonable long period and large key space.
                   & \verb|Threefry_64| & Always available      \\
     \bottomrule
   \end{tabularx}
-  \caption{Default \protect\rng}
-  \label{tab:Default RNG}
+  \caption{Type aliases \protect\texttt{RNG} and \protect\texttt{RNG\_64}}
+  \label{tab:Type aliases RNG and RGN_64}
 \end{table}
 
 The library also defines two type aliases \verb|RNGMini| and \verb|RNGMini_64|,
@@ -550,7 +551,7 @@ library. By default they are \verb|Philox2x32| and \verb|Philox2x32_64|. The
 choice can be overridden by configuration macros \verb|MCKL_RNG_MINI_TYPE| and
 \verb|MCKL_RNG_MINI_64_TYPE|, respectively.
 
-\subsection{Seeding counter-based \protect\rng}
+\subsection{Seeding counter-based \texorpdfstring{\protect\rng}{RNG}}
 \label{sub:Seeding counter-based RNG}
 
 The singleton class template \verb|SeedGenerator| can be used to generate
@@ -572,8 +573,7 @@ of the seed values. It can be any unsigned integer type. Classes such as
 where \verb|MCKL_SEED_RESULT_TYPE| is a configuration macro which is defined to
 \verb|unsigned| by default.
 
-One can save and set the seed generator using standard \cpp streams. For
-example,
+One can save and set the seed generator using standard streams. For example,
 \begin{Verbatim}
   std::ifstream is("seed.txt");
   if (is)
@@ -603,7 +603,7 @@ Note that, the seeds generated are not random at all. For any deterministic
 seeds does not always lead to independent streams. This seed generator is only
 suitable for counter-based \rng{}s.
 
-\section{Non-deterministic \protect\rng}
+\section{Non-deterministic \texorpdfstring{\protect\rng}{RNG}}
 \label{sec:Non-deterministic RNG}
 
 If the \rdrand instructions are supported, the library also implements three
@@ -616,7 +616,7 @@ default, means the number of trials is unlimited. If it is a positive number,
 and if after the specified number of trials no random integer is return by the
 \rdrand instruction, zero is returned.
 
-\section{\protect\mkl{} \protect\rng}
+\section{\texorpdfstring{\protect\rng{} \protect\rng}{MKL RNG}}
 \label{sec:MKL RNG}
 
 The \mkl library provides some high performance \rng{}s. The library implements
@@ -646,7 +646,7 @@ defined.
   \label{tab:MKL RNG}
 \end{table}
 
-\section{Multiple \protect\rng streams}
+\section{Multiple \texorpdfstring{\protect\rng}{RNG} streams}
 \label{sec:Multiple RNG streams}
 
 Earlier in Section~\ref{sec:Particle} we introduced that \verb|particle.rng(i)|

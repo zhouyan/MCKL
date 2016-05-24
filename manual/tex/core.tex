@@ -36,12 +36,12 @@ In this chapter, we introduce the core concepts of the library. There are five
 of them. At the center is a class that represent the state space, that is the
 value of the states $\{X_t^i\}_{i=1}^{N_t}$. This class may also contain other
 members that is specific for the model, such as the data. Next is the weights
-$\{W_t^i\}_{i=1}^{N_t}$. Together with the states, they form a particle system.
-A sampler operates on a particle system to produce samples iteratively. A
-sampler might also use some monitors to calculate some estimates
-$\varphi(\{X_t^i,W_t^i\}_{i=1}^{N_t})$ as it progresses. These concepts are all
-abstracted in the library. For brevity, in the following we will drop the time
-dependent index $t$.
+$\{W_t^i\}_{i=1}^{N_t}$. They form a particle system,
+$\{X_t^i,W_t^i\}_{i=1}^{N_t}$. A sampler operates on a particle system to
+produce samples iteratively. A sampler might also use some monitors to
+calculate some estimates $\varphi(\{X_t^i,W_t^i\}_{i=1}^{N_t})$ as it
+progresses. These concepts are all abstracted in the library. For brevity, in
+the following we will drop the time dependent index $t$.
 
 \section{State}
 \label{sec:State}
@@ -61,7 +61,7 @@ default implementation,
 \end{Verbatim}
 where \verb|Layout| is either \verb|RowMajor| or \verb|ColMajor|, which
 specifies the matrix layout, \verb|Dim| is the dimension of $X$, i.e., $d$ and
-\verb|ValueType| shall be a \cpp type that represents values in $\calX$. For
+\verb|ValueType| shall be a type that represents values in $\calX$. For
 example, if $E\subseteq\Real^d$, then one can use the following class,
 \begin{Verbatim}
   StateMatrix<RowMajor, d, double> state(N);
@@ -139,18 +139,18 @@ methods, whose purpose will become clear later. The first is,
   void duplicate(size_type src, size_type dst);
 \end{Verbatim}
 Let the value of \verb|src| and \verb|dst| be $p$ and $q$, respectively. This
-method set the value of $X^p$ to that of $X^q$. In other words, $X^p$ is
-duplicated while $X^q$ is eliminated. The other method is,
+method set $X^p \leftarrow X^q$. In other words, $X^p$ is duplicated while
+$X^q$ is eliminated. The other method is,
 \begin{Verbatim}
   template <typename IntType, typename InputIter>
   void select(IntType N, InputIter index);
 \end{Verbatim}
 where \verb|index| is an $N$-vector, say $\{a_i\}_{i=1}^N$. This method select
-samples to form a new collection $\{\hat{X}^i\}_{i=1}^N$ such that $\hat{X}^i =
-X^{a_i}$. The sample size $N$ does not have to be the same as the original, say
-$M$. This is closely related to the selection step of \smc algorithms. Let $r_i
-= \sum_{j = 1}^N\bbI_{\{i\}}(a_j)$. Then it is required that $a_i = i$ for all
-$r_i > 0$, $i = 1,\dots,\min\{N, M\}$.
+samples to form a new collection $\{\hat{X}^i\}_{i=1}^N$  by setting $\hat{X}^i
+\leftarrow X^{a_i}$ for $i = 1,\dots,N$. The sample size $N$ does not have to
+be the same as the original, say $M$. This is closely related to the selection
+step of \smc algorithms. Let $r_i = \sum_{j = 1}^N\bbI_{\{i\}}(a_j)$. Then it
+is required that $a_i = i$ for all $r_i > 0$, $i = 1,\dots,\min\{N, M\}$.
 
 \section{Weight}
 \label{sec:Weight}
@@ -171,11 +171,10 @@ the weights to be equal by,
 \end{Verbatim}
 The weights can be manipulated in various way. Let \verb|v| be an input
 iterator pointing to an $N$-vector $\{v^i\}_{i=1}^N$. To set $W^i \propto v^i$,
-use
 \begin{Verbatim}
   w.set(v);
 \end{Verbatim}
-To set $\log W^i = v^i + \mathrm{constant}$, use
+To set $ W^i \propto W^i\exp\{v^i\}$,
 \begin{Verbatim}
   w.set_log(v);
 \end{Verbatim}
@@ -184,9 +183,8 @@ To set weights incrementally, use
   w.mul(v);
   w.add_log(v);
 \end{Verbatim}
-which sets $W^i \propto W^i v^i$ and $\log W^i = \log W^i + v^i +
-\mathrm{constant}$, respectively. The value of \ess of the weights can be
-obtained by,
+which set $W^i \propto W^iv^i$ and $W^i \propto W^i \exp\{v^i\}$, respectively.
+The value of \ess of the weights can be obtained by,
 \begin{Verbatim}
   w.ess();
 \end{Verbatim}
@@ -194,8 +192,8 @@ One may also draw an integer $0 \le k < N$ according to the weights by,
 \begin{Verbatim}
   w.draw(rng);
 \end{Verbatim}
-where \verb|rng| is a \cpp{} \rng engine object. Last, one can obtain a pointer
-to the raw data,
+where \verb|rng| is a \rng engine object. Last, one can obtain a pointer to the
+raw data,
 \begin{Verbatim}
   w.data();
 \end{Verbatim}
@@ -220,8 +218,8 @@ A particle system, abstracted by the class template,
 is essentially formed by three parts. The first is an object of type \verb|T|,
 that abstracts the states $\{X^i\}_{i=1}^N$. The second is a type \verb|Weight|
 object that abstracts the weights $\{W^i\}_{i=1}^N$. And the third is a
-collection of \cpp{} \rng engines. There are some restrictions on the type
-\verb|T|. The constructor of \verb|Particle| is as the following,
+collection of \rng engines. There are some restrictions on the type \verb|T|.
+The constructor of \verb|Particle| is as the following,
 \begin{Verbatim}
   template <typename... Args>
   explicit Particle(size_type N, Args &&... args)
@@ -309,7 +307,7 @@ behave similarly to that of \verb|StateMatrix|. Below is descriptions of each
 method for resizing a particle system. They differ in how they generate the
 index vector $\{a_i\}_{i=1}^N$. We will let $M$ denote the original sample
 size. Also, for clarity, in the mathematical description of the vectors, we are
-using indices starting with $1$, while in the actual \cpp program, the indices
+using indices starting with $1$, while in the actual program, the indices
 starts with zero, as usual.
 
 \subsubsection{Resize with given index vectors}
@@ -469,14 +467,14 @@ Other comparison operators such as \verb|!=|, \verb|<|, etc., are also
 defined. Note that, comparing or subtracting two indices from two different
 particles systems is meaningless. This will result in runtime errors unless
 debugging is disabled (see Section~\appref{sec:Error handling}). The increment
-and decrement operators follow usual \cpp prefix and postfix semantics.
-However, it is important to note that, \verb|ParticleIndex| \emph{is not} an
-iterator even though it shares many common methods. Recall that,
-\verb|Particle| does not have methods to access $X^i$ directly. And therefore
-it is not possible to dereference a \verb|ParticleIndex| object to get a
-reference to $X^i$. Instead, dereferencing an \verb|ParticleIndex| object will
-return a reference to itself. This is similar for the member access operator
-and the index operator. For example,
+and decrement operators follow usual prefix and postfix semantics. However, it
+is important to note that, \verb|ParticleIndex| \emph{is not} an iterator even
+though it shares many common methods. Recall that, \verb|Particle| does not
+have methods to access $X^i$ directly. And therefore it is not possible to
+dereference a \verb|ParticleIndex| object to get a reference to $X^i$. Instead,
+dereferencing an \verb|ParticleIndex| object will return a reference to itself.
+This is similar for the member access operator and the index operator. For
+example,
 \begin{Verbatim}
   *idx;       // => idx
   idx->rng(); // => idx.rng();
@@ -849,29 +847,23 @@ is shown in Algorithm~\ref{alg:pf}.
 \label{sub:Implementation (PF)}
 
 We will work through a complete implementation using a top-down approach.
-First, we show the \verb|main| function.
+First, we show the contents \verb|main| function.
 \begin{Verbatim}
-  int main()
-  {
-      const std::size_t N = 1000;
+  const std::size_t N = 1000;
+  Sampler<PF> sampler(N);
 
-      Sampler<PF> sampler(N);
+  sampler.resample_method(Stratified, 0.5)
+      .eval(PFInit, SamplerInit)
+      .eval(PFMove, SamplerMove)
+      .eval(PFWeight, SamplerInit | SamplerMove)
+      .monitor("pos", Monitor<PF>(2, PFEstimate));
 
-      sampler.resample_method(Stratified, 0.5)
-          .eval(PFInit, SamplerInit)
-          .eval(PFMove, SamplerMove)
-          .eval(PFWeight, SamplerInit | SamplerMove)
-          .monitor("pos", Monitor<PF>(2, PFEstimate));
+  sampler.initialize();
+  sampler.iterate(sampler.particle().state().n() - 1);
 
-      sampler.initialize();
-      sampler.iterate(sampler.particle().state().n() - 1);
-
-      std::ofstream out("pf.out");
-      out << sampler;
-      out.close();
-
-      return 0;
-  }
+  std::ofstream out("pf.out");
+  out << sampler;
+  out.close();
 \end{Verbatim}
 In a real application, the sample size $N$ is likely to be determined by some
 user input. For brevity, we simply used a constant here. Within the \verb|main|
@@ -977,10 +969,12 @@ which is a simple translation of the mathematical formulation,
 
 The function that sample the state values from the prior is as the following,
 \begin{Verbatim}
-  inline void PFInit(std::size_t, Particle<PF> &particle)
+  void PFInit(std::size_t, Particle<PF> &particle)
   {
-      std::normal_distribution<double> rpos(0, 2);
-      std::normal_distribution<double> rvel(0, 1);
+      const double sd_pos = 2;
+      const double sd_vel = 1;
+      std::normal_distribution<double> rpos(0, sd_pos);
+      std::normal_distribution<double> rvel(0, sd_vel);
       auto &rng = particle.rng();
 
       for (auto idx : particle) {
@@ -995,10 +989,12 @@ We construct two Normal distribution objects using for the position and
 velocity components of the states. And initialize each particle with them. The
 function to sample new states in each iteration later is similar,
 \begin{Verbatim}
-  inline void PFMove(std::size_t, Particle<PF> &particle)
+  void PFMove(std::size_t, Particle<PF> &particle)
   {
-      std::normal_distribution<double> rpos(0, std::sqrt(0.02));
-      std::normal_distribution<double> rvel(0, std::sqrt(0.001));
+      const double sd_pos = std::sqrt(0.02);
+      const double sd_vel = std::sqrt(0.001);
+      std::normal_distribution<double> rpos(0, sd_pos);
+      std::normal_distribution<double> rvel(0, sd_vel);
       auto &rng = particle.rng();
       const double delta = 0.1;
 
@@ -1019,7 +1015,7 @@ In each iteration, we will weight the particles using its log-likelihood. This
 will be computed with the \verb|log_likelihood| method of
 \verb|particle_index_type| defined earlier,
 \begin{Verbatim}
-  inline void PFWeight(std::size_t iter, Particle<PF> &particle)
+  void PFWeight(std::size_t iter, Particle<PF> &particle)
   {
       std::vector<double> weight(particle.size());
       for (auto idx : particle)
@@ -1037,7 +1033,7 @@ And thus the function above is correct for both initialization and iterations.
 Last, we would like to record the value of $\varphi_t(X_t^i) =
 (\xpos^{t,i},\ypos^{t,i})^{\transpose}$. This is done by defining the function,
 \begin{Verbatim}
-  inline void PFEstimate(
+  void PFEstimate(
       std::size_t,
       std::size_t,
       Particle<PF>
