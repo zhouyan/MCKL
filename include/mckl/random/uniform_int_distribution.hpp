@@ -172,9 +172,16 @@ class UniformIntDistribution
         if (param.a() == param.b())
             return param.a();
 
-        UniformBitsDistribution<UIntType> ubits;
-        if (param.a() == imin && param.b() == imax)
-            return static_cast<result_type>(ubits(rng));
+        if (param.a() == imin && param.b() == imax) {
+            UniformBitsDistribution<UIntType> ubits;
+            union {
+                UIntType u;
+                result_type r;
+            } buf;
+            buf.u = ubits(rng);
+
+            return buf.r;
+        }
 
         return internal::uniform_int_distribution_use_double(
                    param.a(), param.b()) ?
