@@ -55,7 +55,7 @@ versions. The first operates on \rng engines and generates random integers,
   template <typename RNGType>
   inline void rand(
       RNGType &rng,
-      std::size_t n,
+      size_t n,
       typename RNGType::result_type *r);
 \end{Verbatim}
 The effect of the function call,
@@ -64,7 +64,7 @@ The effect of the function call,
 \end{Verbatim}
 is equivalent to the loop,
 \begin{Verbatim}
-  for (std::size_t i = 0; i != n; ++i)
+  for (size_t i = 0; i != n; ++i)
       r[i] = rng();
 \end{Verbatim}
 The results will always be the same unless a non-deterministic \rng is used.
@@ -78,7 +78,7 @@ numbers,
   inline void rand(
       RNGType &rng,
       const DistributionType &distribution,
-      std::size_t n,
+      size_t n,
       typename DistributionType::result_type *r);
 \end{Verbatim}
 For example,
@@ -88,7 +88,7 @@ For example,
 \end{Verbatim}
 This is similar to the following loop,
 \begin{Verbatim}
-  for (std::size_t i = 0; i != n; ++i)
+  for (size_t i = 0; i != n; ++i)
       r[i] = normal(rng);
 \end{Verbatim}
 Depending on the type of \verb|rng| and the distribution (including its
@@ -138,10 +138,10 @@ sub-streams for each thread. For example,
 where $n$ is the number of random numbers required by each thread. The $k$\ith
 thread only uses the random numbers in the sub-stream $\{r_i\}_{nk < i \le
   n(k+1)}$. For this to work, the \rng needs a fast \verb|discard|
-implementation, preferably with $\calO(1)$ cost. In addition, one needs to
-manage \rng{}s explicitly for each thread, which prevents this method to be
-used in environments where threads are created implicitly, such as using \tbb
-for parallelization.
+implementation, preferably with $O(1)$ cost. In addition, one needs to manage
+\rng{}s explicitly for each thread, which prevents this method to be used in
+environments where threads are created implicitly, such as using \tbb for
+parallelization.
 
 The second solution is to use a leap-frog algorithm, such that each thread will
 use the elements $\{r_{iK + k}\}_{i>0}$ of the stream, where $K$ is the total
@@ -209,9 +209,9 @@ to later.
 
 \begin{table}
   \tbfigures
-  \begin{tabularx}{\textwidth}{p{3in}LL}
+  \begin{tabularx}{\textwidth}{p{2.6in}LL}
     \toprule
-    Class & Counter bits & Key bits \\
+    \rng engine & Counter bits & Key bits \\
     \midrule
     \verb|AES128x1|, \verb|ARS128x2|, \verb|AES128x4|, \verb|AES128x8|
     & 128 & 128 \\
@@ -264,10 +264,7 @@ The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
 instructions based \rng{}s in \textcite{Salmon:2011um} are implemented in the
 following generator,
 \begin{Verbatim}
-  template <
-      typename KeySeqType,
-      std::size_t Rounds,
-      std::size_t Blocks>
+  template <typename KeySeqType, size_t Rounds, size_t Blocks>
   class AESNIGenerator;
 \end{Verbatim}
 The corresponding \rng engine is,
@@ -275,8 +272,8 @@ The corresponding \rng engine is,
   template <
       typename ResultType,
       typename KeySeqType,
-      std::size_t Rounds,
-      std::size_t Blocks>
+      size_t Rounds,
+      size_t Blocks>
   using AESNIEngine = CounterEngine<
           ResultType,
           AESNIGenerator<KeySeqType, Rounds, Blocks>>;
@@ -292,15 +289,15 @@ Larger blocks, up to eight, might improve performance. But this is at the cost
 of larger state size. Without going into details, there are four types of
 sequence of round keys implemented by the library,
 \begin{Verbatim}
-  template <std::size_t Rounds>
+  template <size_t Rounds>
   using AES128KeySeq = internal::AESKeySeq<
       Rounds, internal::AES128KeySeqGenerator>;
 
-  template <std::size_t Rounds>
+  template <size_t Rounds>
   using AES192KeySeq = internal::AESKeySeq<
       Rounds, internal::AES192KeySeqGenerator>;
 
-  template <std::size_t Rounds>
+  template <size_t Rounds>
   using AES256KeySeq = internal::AESKeySeq<
       Rounds, internal::AES256KeySeqGenerator>;
 
@@ -311,29 +308,29 @@ and correspondingly four \rng engines,
 \begin{Verbatim}
   template <
       typename ResultType,
-      std::size_t Rounds = MCKL_AES128_ROUNDS,
-      std::size_t Blocks = MCKL_AESNI_BLOCKS>
+      size_t Rounds = MCKL_AES128_ROUNDS,
+      size_t Blocks = MCKL_AESNI_BLOCKS>
   using AES128Engine = AESNIEngine<
       ResultType, AES128KeySeq<Rounds>, Rounds, Blocks>;
 
   template <
       typename ResultType,
-      std::size_t Rounds = MCKL_AES192_ROUNDS,
-      std::size_t Blocks = MCKL_AESNI_BLOCKS>
+      size_t Rounds = MCKL_AES192_ROUNDS,
+      size_t Blocks = MCKL_AESNI_BLOCKS>
   using AES192Engine = AESNIEngine<
       ResultType, AES192KeySeq<Rounds>, Rounds, Blocks>;
 
   template <
       typename ResultType,
-      std::size_t Rounds = MCKL_AES256_ROUNDS,
-      std::size_t Blocks = MCKL_AESNI_BLOCKS>
+      size_t Rounds = MCKL_AES256_ROUNDS,
+      size_t Blocks = MCKL_AESNI_BLOCKS>
   using AES256Engine = AESNIEngine<
       ResultType, AES256KeySeq<Rounds>, Rounds, Blocks>;
 
   template <
       typename ResultType,
-      std::size_t Rounds = MCKL_ARS_ROUNDS,
-      std::size_t Blocks = MCKL_AESNI_BLOCKS,
+      size_t Rounds = MCKL_ARS_ROUNDS,
+      size_t Blocks = MCKL_AESNI_BLOCKS,
       typename Constants = ARSConstants>
   using ARSEngine = AESNIEngine<
       ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
@@ -347,7 +344,7 @@ defaults are taken from the paper. To use an alternative pair of 64-bit
 integers as the constants, one can define and use a trait class as the
 following,
 \begin{Verbatim}
-  template <std::size_t>
+  template <size_t>
   struct NewWeylConstant;
 
   template<>
@@ -364,7 +361,7 @@ following,
 
   struct NewConstants
   {
-      template <std::size_t I>
+      template <size_t I>
       using weyl = NewWeylConstant<I>;
   };
 
@@ -373,7 +370,7 @@ following,
 Alternative methods are also possible. The only requirement is that, the
 following statement,
 \begin{Verbatim}
-  template <std::size_t I>
+  template <size_t I>
   using weyl = typename Constants::template weyl<I>;
 \end{Verbatim}
 shall define the type \verb|weyl| such that it has a static constant expression
@@ -405,8 +402,8 @@ following generator,
 \begin{Verbatim}
   template <
       typename T,
-      std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_PHILOX_ROUNDS,
+      size_t K = MCKL_PHILOX_VECTOR_LENGTH,
+      size_t Rounds = MCKL_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
   class PhiloxGenerator;
 \end{Verbatim}
@@ -415,8 +412,8 @@ The corresponding \rng engine is,
   template <
       typename ResultType,
       typename T = ResultType,
-      std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_PHILOX_ROUNDS,
+      size_t K = MCKL_PHILOX_VECTOR_LENGTH,
+      size_t Rounds = MCKL_PHILOX_ROUNDS,
       typename Constants = PhiloxConstants<T, K>>
   using PhiloxEngine = CounterEngine<
       ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
@@ -461,8 +458,8 @@ following generator,
 \begin{Verbatim}
   template <
       typename T,
-      std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
+      size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
+      size_t Rounds = MCKL_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
   class ThreefryGenerator;
 \end{Verbatim}
@@ -471,8 +468,8 @@ The corresponding \rng engine is,
   template <
       typename ResultType,
       typename T = ResultType,
-      std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
-      std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
+      size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
+      size_t Rounds = MCKL_THREEFRY_ROUNDS,
       typename Constants = ThreefryConstants<T, K>>
   using ThreefryEngine = CounterEngine<
       ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
@@ -533,7 +530,7 @@ general purpose usage. They have reasonable long period and large key space.
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}
     \toprule
-    Alias  & Class & Availability \\
+    Alias  & \rng engine & Availability \\
     \midrule
     \verb|RNG|    & \verb|ARS|         & \verb|MCKL_HAS_AESNI| \\
                   & \verb|Threefry|    & Always available      \\
@@ -649,7 +646,7 @@ distribution is a special case of one of the distributions supported by \mkl.
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
     \toprule
-    Class & \mkl{} \brng \\
+    \rng engine & \mkl{} \brng \\
     \midrule
     \verb|MKL_MCG59|         & \verb|VSL_BRNG_MCG59|         \\
     \verb|MKL_MT19937|       & \verb|VSL_BRNG_MT19937|       \\
@@ -684,13 +681,12 @@ reference to the same \rng. It is only useful when an \verb|RNGSet| interface
 is required while the thread-safety and other issues are not important.
 
 The second implementation is \verb|RNGSetVector|. It is an array of \rng{}s
-with length $N$. It has memory cost $\calO(N)$. Many of the counter-based
-\rng{}s have small state size and thus for moderate $N$, this cost is not an
-issue. The method calls \verb|rng_set[i]| and \verb|rng_set[j]| return
-independent \rng{}s if $i \ne j$. This implementation has the advantage that
-the behavior of an algorithm can be entirely deterministic even when the
-scheduling of parallel execution is dynamic, since each sample has its own
-\rng.
+with length $N$. It has memory cost $O(N)$. Many of the counter-based \rng{}s
+have small state size and thus for moderate $N$, this cost is not an issue. The
+method calls \verb|rng_set[i]| and \verb|rng_set[j]| return independent \rng{}s
+if $i \ne j$. This implementation has the advantage that the behavior of an
+algorithm can be entirely deterministic even when the scheduling of parallel
+execution is dynamic, since each sample has its own \rng.
 
 Last, if \tbb is available, there is a third implementation \verb|RNGSetTBB|,
 which uses thread-local storage (\tls). It has much smaller memory footprint
@@ -698,7 +694,7 @@ than \verb|RNGSetVector| while maintains better thread-safety. The performance
 impact of using \tls is minimal unless the computation at the calling site is
 trivial. For example,
 \begin{Verbatim}
-  void eval_each(std::size_t, ParticleIndex<T> idx)
+  void eval_each(size_t, ParticleIndex<T> idx)
   {
       auto &rng = idx.rng();
       // using rng to initialize state
@@ -1301,7 +1297,7 @@ through the class template,
 \begin{Verbatim}
   template <
       typename RealType = double,
-      std::size_t Dim = Dynamic>
+      size_t Dim = Dynamic>
   class DirichletDistribution;
 \end{Verbatim}
 The template parameter \verb|Dim| is the dimension of the distribution. If it
@@ -1343,9 +1339,7 @@ The library implements the multivariate Normal distribution with \pdf,
 where $\mu_{1:d}$ is the mean vector and $\Sigma$ is covariance matrix, through
 the class template,
 \begin{Verbatim}
-  template <
-      typename RealType = double,
-      std::size_t Dim = Dynamic>
+  template <typename RealType = double, size_t Dim = Dynamic>
   class NormalMVDistribution;
 \end{Verbatim}
 At the time of writing, only \verb|float| and \verb|double| are supported types

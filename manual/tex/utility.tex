@@ -45,7 +45,7 @@ class template,
 \begin{Verbatim}
   template <
       typename T,
-      std::size_t Alignment = AlignmentTrait<T>::value,
+      size_t Alignment = AlignmentTrait<T>::value,
       typename Memory = AlignedMemory>
   class Allocator;
 \end{Verbatim}
@@ -56,9 +56,7 @@ pointer returned by the \verb|allocate| method will be a multiple of
 will result in compile-time error. The last template parameter \verb|Memory|
 shall have two static methods,
 \begin{Verbatim}
-  static void *aligned_malloc(
-      std::size_t n,
-      std::size_t alignment);
+  static void *aligned_malloc(size_t n, size_t alignment);
   static void aligned_free(void *ptr);
 \end{Verbatim}
 The method \verb|aligned_malloc| shall behave similar to \verb|std::malloc|
@@ -109,8 +107,8 @@ situations,
 \begin{Verbatim}
   template <
       typename T,
-      std::size_t N,
-      std::size_t Alignment = AlignmentTrait<T>::value>
+      size_t N,
+      size_t Alignment = AlignmentTrait<T>::value>
   class alignas(Alignment) Array;
 \end{Verbatim}
 It is a derived class and can be implicitly converted to the standard
@@ -140,8 +138,8 @@ interface,
 \begin{Verbatim}
   void operator()(
       MatrixLayout layout,
-      std::size_t n,
-      std::size_t p,
+      size_t n,
+      size_t p,
       const RealType *x,
       const RealType *w,
       RealType *mean,
@@ -237,7 +235,7 @@ this purpose. As its name suggests, it works much like a physical stop watch.
 Here is a simple example
 \begin{Verbatim}
   StopWatch watch;
-  for (std::size_t i = 0; i != n; ++i) {
+  for (int i = 0; i != n; ++i) {
       // Some computation
       watch.start();
       // Computation to be benchmarked;

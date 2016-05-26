@@ -70,9 +70,7 @@ use the memory allocation functions from the \mkl library,
   class AlignedMemoryMKL
   {
       public:
-      static void *aligned_malloc(
-          std::size_t n,
-          std::size_t alignment)
+      static void *aligned_malloc(size_t n, size_t alignment)
       {
           return mkl_malloc(n > 0 ? n : 1, alignment);
       }

@@ -79,7 +79,7 @@ inline bool resample_trans_rep_index_check(
     return true;
 }
 
-template <mckl::ResampleScheme Scheme>
+template <typename ResampleType>
 inline void resample_trans_rep_index_test(
     std::size_t N, std::size_t n, const std::string &scheme, bool fixed)
 {
@@ -96,9 +96,9 @@ inline void resample_trans_rep_index_test(
     mckl::Weight weight(N);
     mckl::Vector<std::size_t> rep(N);
     mckl::Vector<std::size_t> idx;
-    mckl::ResampleType<Scheme> resample;
     mckl::StopWatch watch_resample;
     mckl::StopWatch watch_trans;
+    ResampleType resample;
     bool passed = true;
     for (std::size_t i = 0; i != n; ++i) {
         const std::size_t M = fixed ? N : runif(rng);
