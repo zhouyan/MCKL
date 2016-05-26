@@ -43,13 +43,13 @@ distribution is available in the standard library, we measure the following
 case,
 \begin{Verbatim}
   std::normal_distribution<double> rnorm_std(0, 1);
-  for (std::size_t i = 0; i = n; ++i)
+  for (size_t i = 0; i = n; ++i)
       r[i] = rand(rng, rnorm_std);
 \end{Verbatim}
 Second, we measure the performance of the library's implementation,
 \begin{Verbatim}
   NormalDistribution<double> rnorm_mckl(0, 1);
-  for (std::size_t i = 0; i = n; ++i)
+  for (size_t i = 0; i = n; ++i)
       r[i] = rand(rng, rnorm_mckl);
 \end{Verbatim}
 The third is the vectorized performance,

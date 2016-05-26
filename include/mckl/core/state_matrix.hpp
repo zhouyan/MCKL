@@ -77,6 +77,9 @@ class StateMatrixDim<Dynamic>
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 class StateMatrixBase : private internal::StateMatrixDim<Dim>
 {
+    static_assert(Layout == RowMajor || Layout == ColMajor,
+        "**StateMatrix** used with Layout other than RowMajor or ColMajor");
+
     public:
     using size_type = std::size_t;
     using value_type = T;

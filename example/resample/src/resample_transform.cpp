@@ -41,28 +41,34 @@ int main(int argc, char **argv)
     if (argc > 2)
         n = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    resample_trans_rep_index_test<mckl::Multinomial>(
+    resample_trans_rep_index_test<mckl::ResampleMultinomial>(
         N, n, "Multinomial", true);
-    resample_trans_rep_index_test<mckl::Multinomial>(
+    resample_trans_rep_index_test<mckl::ResampleMultinomial>(
         N, n, "Multinomial", false);
 
-    resample_trans_rep_index_test<mckl::Stratified>(N, n, "Stratified", true);
-    resample_trans_rep_index_test<mckl::Stratified>(N, n, "Stratified", false);
+    resample_trans_rep_index_test<mckl::ResampleStratified>(
+        N, n, "Stratified", true);
+    resample_trans_rep_index_test<mckl::ResampleStratified>(
+        N, n, "Stratified", false);
 
-    resample_trans_rep_index_test<mckl::Systematic>(N, n, "Systematic", true);
-    resample_trans_rep_index_test<mckl::Systematic>(N, n, "Systematic", false);
+    resample_trans_rep_index_test<mckl::ResampleSystematic>(
+        N, n, "Systematic", true);
+    resample_trans_rep_index_test<mckl::ResampleSystematic>(
+        N, n, "Systematic", false);
 
-    resample_trans_rep_index_test<mckl::Residual>(N, n, "Residual", true);
-    resample_trans_rep_index_test<mckl::Residual>(N, n, "Residual", false);
+    resample_trans_rep_index_test<mckl::ResampleResidual>(
+        N, n, "Residual", true);
+    resample_trans_rep_index_test<mckl::ResampleResidual>(
+        N, n, "Residual", false);
 
-    resample_trans_rep_index_test<mckl::ResidualStratified>(
+    resample_trans_rep_index_test<mckl::ResampleResidualStratified>(
         N, n, "ResidualStratified", true);
-    resample_trans_rep_index_test<mckl::ResidualStratified>(
+    resample_trans_rep_index_test<mckl::ResampleResidualStratified>(
         N, n, "ResidualStratified", false);
 
-    resample_trans_rep_index_test<mckl::ResidualSystematic>(
+    resample_trans_rep_index_test<mckl::ResampleResidualSystematic>(
         N, n, "ResidualSystematic", true);
-    resample_trans_rep_index_test<mckl::ResidualSystematic>(
+    resample_trans_rep_index_test<mckl::ResampleResidualSystematic>(
         N, n, "ResidualSystematic", false);
 
     return 0;
