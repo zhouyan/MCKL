@@ -182,7 +182,9 @@ class Log2 : public Log2L<U, std::numeric_limits<UIntType>::digits - 1>
 }; // class Log2
 
 template <typename T>
-class BufferSize : public std::integral_constant<std::size_t, 8192 / sizeof(T)>
+class BufferSize
+    : public std::integral_constant<std::size_t,
+          8192 / (sizeof(T) < sizeof(float) ? sizeof(float) : sizeof(T))>
 {
 }; // class BufferSize;
 

@@ -52,6 +52,7 @@
 #include <mckl/random/normal_distribution.hpp>
 #include <mckl/random/normal_mv_distribution.hpp>
 #include <mckl/random/pareto_distribution.hpp>
+#include <mckl/random/poisson_distribution.hpp>
 #include <mckl/random/rayleigh_distribution.hpp>
 #include <mckl/random/stable_distribution.hpp>
 #include <mckl/random/student_t_distribution.hpp>

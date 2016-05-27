@@ -1540,6 +1540,14 @@ inline void geometric_distribution(
 }
 
 template <MKL_INT BRNG, int Bits>
+inline void poisson_distribution(
+    MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, double mean)
+{
+    size_check<MKL_INT>(n, "poisson_distribution");
+    rng.stream().poisson(static_cast<MKL_INT>(n), r, mean);
+}
+
+template <MKL_INT BRNG, int Bits>
 inline void uniform_int_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, int a, int b)
 {

@@ -929,6 +929,9 @@ template <typename = int>
 class GeometricDistribution;
 
 template <typename = int>
+class PoissonDistribution;
+
+template <typename = int>
 class UniformIntDistribution;
 
 template <typename ResultType, typename Generator>
@@ -1057,6 +1060,10 @@ inline void rand(
 
 template <typename IntType, typename RNGType>
 inline void rand(
+    RNGType &, PoissonDistribution<IntType> &, std::size_t, IntType *);
+
+template <typename IntType, typename RNGType>
+inline void rand(
     RNGType &, UniformIntDistribution<IntType> &, std::size_t, IntType *);
 
 namespace internal
@@ -1152,6 +1159,9 @@ inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
 
 template <typename IntType, typename RNGType>
 inline void geometric_distribution(RNGType &, std::size_t, IntType *, double);
+
+template <typename IntType, typename RNGType>
+inline void poisson_distribution(RNGType &, std::size_t, IntType *, double);
 
 template <typename IntType, typename RNGType>
 inline void uniform_int_distribution(
@@ -1283,6 +1293,10 @@ inline void bernoulli_distribution(
 
 template <MKL_INT BRNG, int Bits>
 inline void geometric_distribution(
+    MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
+
+template <MKL_INT BRNG, int Bits>
+inline void poisson_distribution(
     MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
 
 template <MKL_INT BRNG, int Bits>
