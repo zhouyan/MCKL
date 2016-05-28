@@ -81,8 +81,6 @@
 #define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(test)                \
     random_distribution_test_##test<mckl::GeometricDistribution<IntType>>(    \
         N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::PoissonDistribution<IntType>>(      \
-        N, M, nwid, twid, distname);                                          \
     random_distribution_test_##test<mckl::UniformIntDistribution<IntType>>(   \
         N, M, nwid, twid, distname);
 
@@ -862,67 +860,6 @@ class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
 };
 
 template <typename IntType>
-class RandomDistributionTrait<mckl::PoissonDistribution<IntType>>
-    : public RandomDistributionTraitBase<IntType, 1>
-{
-    public:
-    using dist_type = mckl::PoissonDistribution<IntType>;
-    using std_type = std::poisson_distribution<IntType>;
-
-    std::string distname() const { return "Poisson"; }
-
-    mckl::Vector<std::array<double, 1>> params() const
-    {
-        mckl::Vector<std::array<double, 1>> params;
-        this->add_param(params, 0.1);
-        this->add_param(params, 1);
-        this->add_param(params, 9);
-
-        return params;
-    }
-
-    mckl::Vector<IntType> partition(std::size_t n, const dist_type &dist)
-    {
-        mckl::Vector<IntType> partition;
-        IntType k = 0;
-        double p = std::exp(-dist.mean());
-        while (p * n < 5) {
-            ++k;
-            p *= dist.mean() / k;
-        }
-        partition.push_back(k);
-        while (p * n >= 5) {
-            ++k;
-            p *= dist.mean() / k;
-            partition.push_back(k);
-        }
-
-        return partition;
-    }
-
-    mckl::Vector<double> pmf(std::size_t n, const dist_type &dist)
-    {
-        mckl::Vector<double> pmf;
-        IntType k = 0;
-        double p = std::exp(-dist.mean());
-        double q = p;
-        while (p * n < 5) {
-            ++k;
-            p *= dist.mean() / k;
-            q += p;
-        }
-        pmf.push_back(q);
-        while (p * n >= 5) {
-            ++k;
-            p *= dist.mean() / k;
-            pmf.push_back(p);
-        }
-
-        return pmf;
-    }
-};
-
-template <typename IntType>
 class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
     : public RandomDistributionTraitBase<IntType, 2>
 {
@@ -1052,7 +989,7 @@ inline double random_distribution_chi2(std::size_t n,
     std::size_t j = 0;
     for (std::size_t i = 0; i != k - 1; ++i) {
         std::size_t c = 0;
-        while (j != rval.size() && rval[j] <= partition[i]) {
+        while (j != rval.size() && rval[j] == partition[i]) {
             ++c;
             ++j;
         }
