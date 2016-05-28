@@ -48,9 +48,9 @@ There are also some performance data in Appendix~\appref{chap:Performance of
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
 
-Before we discuss other features, we first introduce a generic function
-\verb|rand|, which provides vectorized random number generating. There are two
-versions. The first operates on \rng engines and generates random integers,
+The generic function \verb|rand| provides vectorized random number generating.
+There are two versions. The first operates on \rng engines and generates random
+integers,
 \begin{Verbatim}
   template <typename RNGType>
   inline void rand(
