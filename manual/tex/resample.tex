@@ -111,7 +111,7 @@ indices.
 
 The library implements all algorithms discussed in \cite{Douc:2005wa} and two
 extensions to the those algorithms. Samplers can be constructed with builtin
-algorithms as seen in Section~\ref{sec:Sampler}. All builtin algorithms are
+algorithms as seen in Section~\ref{sec:Sampler}. Builtin algorithms are
 implemented in the following class template,
 \begin{Verbatim}
   template <typename U01SeqType, bool Residual>
@@ -161,7 +161,7 @@ section. The algorithm proceeds as the following to generate $r_{1:N}$,
   1,\dots,N$.
   \STATE $r_i \leftarrow r_i + \sum_{j=1}^R\bbI_{[V_{i-1},V_i)}(U_j)$
 \end{algorithmic}
-All builtin schemes differ only in their choices of the template parameters
+Builtin schemes differ in their choices of the template parameters
 \verb|U01SeqType| and \verb|Residual|. There are three implementations in the
 library of the uniform sequence,
 \begin{Verbatim}

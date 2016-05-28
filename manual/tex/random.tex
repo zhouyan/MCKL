@@ -776,9 +776,9 @@ that the distribution does exactly nothing and returns the results of
 The library provides five standard uniform distributions. They are all class
 templates with a single template type parameter \verb|RealType|. The random
 integers produced by \rng{}s are transferred to 32- or 64-bit random integers
-through \verb|UniformBitsDistribution| before they are mapped to floating point
-numbers within the interval $[0, 1]$. The integer type depends on
-\verb|RealType|, the range of the \rng{}, $R$, and
+through the class \verb|UniformBitsDistribution| before they are mapped to
+floating point numbers within the interval $[0, 1]$. The integer type depends
+on \verb|RealType|, the range of the \rng{}, $R$, and
 \verb|MCKL_U01_USE_64BITS_DOUBLE|, a configuration macro. The exact relations
 are listed in Table~\ref{tab:Intermediate integer types of uniform
   distributions}. In the following, let $W$ be the number of bits of the
@@ -810,7 +810,7 @@ The class template,
   template <typename RealType = double>
   class U01Distribution;
 \end{Verbatim}
-implements the uniform distribution on $[0, 1)$. If the configuration macro
+implements the uniform distribution on $[0, 1)$. If
 \verb|MCKL_U01_USE_FIXED_POINT| is true, which is the default, then it is an
 alias to \verb|U01CODistribution| (see below). Otherwise, it is implemented
 through the mapping,
@@ -1275,7 +1275,7 @@ simply returns $a$. If $b - a + 1 = 2^W$ where $W$ is the number of bits of
 Section~\ref{sub:Uniform bits distribution}). If $\max\{|a|, b\} < 2^{32}$,
 then it uses the fact that if $U$ is a standard uniform random variable, then
 $\Floor{a + (b - a + 1) U}$ is uniform on the set $\{a,\dots,b\}$. Otherwise,
-it uses \verb|std::uniform_int_distribution|.
+\verb|std::uniform_int_distribution| is used.
 
 \subsection{Multivariate distributions}
 \label{sub:Multivariate distributions}

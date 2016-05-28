@@ -845,8 +845,8 @@ The constructor will initialize the observations,
 \end{Verbatim}
 Again, in a real application, the data is unlikely to be initialized in this
 way. The method \verb|n| simply return the size of \verb|obs_x_|. Last, we
-would like to extend the \verb|ParticleIndex<PF>| class, by defining the member
-class template \verb|particle_index_type|,
+would like to extend the \verb|ParticleIndex<PF>| class, by defining a
+\verb|particle_index_type| member class template,
 \begin{Verbatim}
   template <typename T>
   using PFIndexBase = PFBase::particle_index_type<T>;

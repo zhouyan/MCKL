@@ -468,14 +468,14 @@ It can also be iterated, similar to \verb|Particle|. For example,
 
 \subsection{Using \texttt{eval\_range} with \tbb}
 
-When using the \tbb backend, special care need to be taken when using the
-\verb|eval_range| implementation. The purpose of using \verb|eval_range|
-instead of \verb|eval_each| is to process vectors as a whole. For optimal
-performance, the vectors cannot be too short. Otherwise, the performance will
-only be worse than using a loop. Therefore it is important to control the grain
-size. Therefore, it is recommended that if one does want to use
-\verb|eval_range|, then one should also redefine the interface operator. For
-example,
+Special care needs to be taken when using the \tbb backend and
+\verb|eval_range| together. The purpose of using it instead of \verb|eval_each|
+is to process vectors as a whole or to only execute some costly operations only
+once.. For optimal performance, the vectors cannot be too short. Otherwise, the
+performance will only be worse than using a loop. Therefore it is important to
+control the grain size. Therefore, it is recommended that if one does want to
+use \verb|eval_range|, then one should also redefine the interface operator.
+For example,
 \begin{Verbatim}
   class Eval : public SamplerEvalSMP<T>
   {

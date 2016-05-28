@@ -244,15 +244,10 @@ The default is \verb|16|. The value must be a power of two and positive.
 
 \paragraph{\texttt{MCKL\_ALIGNED\_MEMORY\_TYPE}} The default type of the
 \verb|Memroy| template parameter of \verb|Allocator| (see
-Section~\ref{sec:Aligned memory allocation}). The default is
-\verb|AlignedMemroyTBB| if \verb|MCKL_USE_TBB_MALLOC| is true. Otherwise it is
-defined to \verb|AlignedMemorySYS| if \verb|MCKL_HAS_POSIX| is true or the
-\msvc compiler is used. Otherwise, it is \verb|AlignedMemorySTD|. To use other
-memory allocation libraries, one usually does not need to define a new class.
-Most such libraries provides proxies to transparently replace system allocation
-functions such as \verb|posix_memalign| and \verb|_aligned_malloc| etc. And
-thus it is sufficient to define this macro to \verb|AlignedMemorySYS| and link
-to the proper libraries.
+Section~\ref{sec:Aligned memory allocation}). The default depends on the other
+configuration macros. If \verb|MCKL_USE_TBB_MALLOC| is true, then the
+default is \verb|AlignedMemoryTBB|. Otherwise it is \verb|AlignedMemorySYS| if
+it is defined. Otherwise \verb|AlignedMemmorySTD| is used as a last resort.
 
 \paragraph{\texttt{MCKL\_CONSTRUCT\_SCALAR}} Determine if scalar types shall be
 zero initialized upon allocation by \verb|Allocator|. The default is \verb|0|.
@@ -296,7 +291,7 @@ defined. Otherwise, it is \verb|0|. Runtime assertions are hard errors. The
 program will be terminated by \verb|std::exit| upon failure of assertions.
 These are usually errors that will cause undefined behaviors.
 
-\paragraph{\texttt{MCKL\_RUNTIME\_ASSERT\_AS\_EXCEPTION}} Determine if all
-runtime assertions shall be turned into exceptions. The exception type is
+\paragraph{\texttt{MCKL\_RUNTIME\_ASSERT\_AS\_EXCEPTION}} Determine if runtime
+assertions shall be turned into exceptions. The exception type is
 \verb|RuntimeAssert|. The default is \verb|0|. It has no affect is
 \verb|MCKL_NO_RUNTIME_ASSERT| is true.
