@@ -37,7 +37,7 @@ Monte Carlo algorithms. Similar to the standard library header \verb|<random>|,
 there are mainly two parts of this system. The first is a set of \rng{} engines
 that generate random integers. The other is a set of distribution generators.
 The former are documented in Sections~\ref{sec:Counter-based RNG}
-to~\ref{sec:MKL RNG}, and the later in Section~\ref{sec:Distributions}. Apart
+to~\ref{sec:MKL RNG}, and the later in Section~\ref{sec:Distribution}. Apart
 from these, the library also provides facilities for vectorized random number
 generating (Section~\ref{sec:Vectorized random number generating}) and using
 multiple \rng{}s in parallel programs (Section~\ref{sec:Multiple RNG streams}).
@@ -160,7 +160,7 @@ number of threads at compile-time, which prevents it to be used in any
 applications using dynamic parallelization. And similar to the first solution,
 it cannot be used when threads are created implicitly.
 
-The development by \textcite{Salmon:2011um} made high performance parallel \rng
+The development by \cite{Salmon:2011um} made high performance parallel \rng
 much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
 such that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i =
 f_k(c_i)\}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
@@ -178,9 +178,9 @@ provides an easy way to setup a large number of sub-streams.
 Of course, not any sequence of counters and keys are suitable. The \rng{}s are
 still deterministic. Since $f_k$ for any given $k$ is a bijection, the sequence
 of counter $\{c_i = f_k^{-1}(i)\}_{i\ge0}$ will of course produce a very
-regular sequence $\{y_i = i\}_{i\ge0}$. However, for regular sequences, such
-as $\{c_i = i\}_{i\ge0}$ and $\{k_j = j\}_{j\ge0}$, the resulting sequences
-$\{\{y_i\}_{i\ge0}^j\}_{j\ge0}$ appear random. See \textcite{Salmon:2011um} for
+regular sequence $\{y_i = i\}_{i\ge0}$. However, for regular sequences, such as
+$\{c_i = i\}_{i\ge0}$ and $\{k_j = j\}_{j\ge0}$, the resulting sequences
+$\{\{y_i\}_{i\ge0}^j\}_{j\ge0}$ appear random. See \cite{Salmon:2011um} for
 more details.
 
 Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s implemented
@@ -261,7 +261,7 @@ to later.
 \label{sub:AES-NI instructions based RNG}
 
 The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
-instructions based \rng{}s in \textcite{Salmon:2011um} are implemented in the
+instructions based \rng{}s in \cite{Salmon:2011um} are implemented in the
 following generator,
 \begin{Verbatim}
   template <typename KeySeqType, size_t Rounds, size_t Blocks>
@@ -337,7 +337,7 @@ and correspondingly four \rng engines,
 \end{Verbatim}
 The first three are equivalent to \aes-128, \aes-192 and \aes-256 block ciphers
 used in counter mode. The last is the \ars algorithm introduced by
-\textcite{Salmon:2011um}. The last template parameter \verb|Constants| of
+\cite{Salmon:2011um}. The last template parameter \verb|Constants| of
 \verb|ARSKeySeq| and \verb|ARSEngine| is a trait class that defines the
 constants of the Weyl's sequence. See \textcite{Salmon:2011um} for details. The
 defaults are taken from the paper. To use an alternative pair of 64-bit
@@ -397,8 +397,8 @@ with the vectorized \verb|rand| function (see Section~\ref{sec:Vectorized
 \subsection{Philox}
 \label{sub:Philox}
 
-The Philox algorithm in \textcite{Salmon:2011um} is implemented in the
-following generator,
+The Philox algorithm in \cite{Salmon:2011um} is implemented in the following
+generator,
 \begin{Verbatim}
   template <
       typename T,
@@ -422,8 +422,8 @@ The default vector length and the number of rounds can be changed by
 configuration macros listed in Table~\ref{tab:Configuration macros for
   counter-based RNG}. There is no limit on the template parameter \verb|K| or
 \verb|Rounds|, nor any limitation on \verb|T| except that it has to be an
-unsigned integer type. See \textcite{Salmon:2011um} on the most general form of
-the algorithm. However, the library only provides default constants for 32- and
+unsigned integer type. See \cite{Salmon:2011um} on the most general form of the
+algorithm. However, the library only provides default constants for 32- and
 64-bit unsigned integer type \verb|T| and \verb|K| taking the values \verb|2|
 or \verb|4|. These four engines are defined as type aliases for convenience,
 \begin{Verbatim}
@@ -453,8 +453,8 @@ manual of \verb|PhiloxConstants| for an example of how to define it.
 \subsection{Threefry}
 \label{sub:Threefry}
 
-The Threefry algorithm in \textcite{Salmon:2011um} is implemented in the
-following generator,
+The Threefry algorithm in \cite{Salmon:2011um} is implemented in the following
+generator,
 \begin{Verbatim}
   template <
       typename T,
@@ -484,7 +484,7 @@ the values \verb|4|, \verb|8| and \verb|16|, taken from the
 skein\footnote{\url{http://www.skein-hash.info}} hash algorithm, for which the
 Threefish algorithm was originally developed for. Defaults for 32-bit \verb|T|
 or \verb|K| taking the value \verb|2| are also provided, taken from
-\textcite{Salmon:2011um}. Type aliases for these configurations are defined for
+\cite{Salmon:2011um}. Type aliases for these configurations are defined for
 convenience,
 \begin{Verbatim}
   template <typename ResultType>
@@ -626,8 +626,8 @@ integers. Similar to the counter-based \rng{}s, 64-bit variants are also
 defined.
 
 When there are \mkl routines for generating distribution random variates for
-one of the distributions discussed later in Section~\ref{sec:Distributions},
-the library will automatically use \mkl routines for vectorized random number
+one of the distributions discussed later in Section~\ref{sec:Distribution}, the
+library will automatically use \mkl routines for vectorized random number
 generating if the \rng{} is one of that listed in Table~\ref{tab:MKL RNG}. For
 example,
 \begin{Verbatim}
@@ -716,26 +716,26 @@ will replace the type of the \rng set contained in \verb|Particle<T>|. One can
 also define their own replacement type, as long as it has the same interface as
 the builtin ones.
 
-\section{Distributions}
-\label{sec:Distributions}
+\section{Distribution}
+\label{sec:Distribution}
 
 The library provides implementations of some common distributions. Some of them
 are the same as those in the standard library with \verb|CamelCase| names. For
 example, \verb|NormalDistribuiton| can be used as a drop-in replacement of
-\verb|std::normal_distribuiton|. This includes all of the distributions defined
-in the standard library. As stated in Section~\ref{sec:Vectorized random number
-  generating}, all the distributions defined in the library support vectorized
-random number generating. In the following sections, we introduce each of them.
-Section~\ref{sub:Uniform bits distribution} discusses the uniform bits
-distribution, which is actually a low level distribution indirectly used by all
-other distributions. Section~\ref{sub:Standard uniform distribution} shows few
-different standard uniform distributions. And in Sections~\ref{sub:Continuous
-  distributions} and~\ref{sub:Discrete distributions} we list continuous and
-discrete distributions, respectively. In these two sections, the \pdf or \pmf
-and class declaration of each distribution are shown first, and then we briefly
-discuss the algorithm used for implementation. Last, in
-Section~\ref{sub:Multivariate distributions} we briefly discusses a few
-multivariate distributions implemented in the library.
+\verb|std::normal_distribuiton|. This includes all of the continuous
+distributions in the standard library. As stated in Section~\ref{sec:Vectorized
+  random number generating}, all the distributions defined in the library
+support vectorized random number generating. In the following sections, we
+introduce each of them. Section~\ref{sub:Uniform bits distribution} discusses
+the uniform bits distribution, which is actually a low level distribution
+indirectly used by all other distributions. Section~\ref{sub:Standard uniform
+  distribution} shows few different standard uniform distributions. And in
+Sections~\ref{sub:Continuous distributions} and~\ref{sub:Discrete
+  distributions} we list continuous and discrete distributions, respectively.
+In these two sections, the \pdf or \pmf and class declaration of each
+distribution are shown first, and then we briefly discuss the algorithm used
+for implementation. Last, in Section~\ref{sub:Multivariate distributions} we
+briefly discusses a few multivariate distributions implemented in the library.
 
 \subsection{Uniform bits distribution}
 \label{sub:Uniform bits distribution}
@@ -946,7 +946,7 @@ The implementation uses the inverse method.
 \end{Verbatim}
 The specific algorithm used depends on the parameters. If $\alpha = 1/2$ and
 $\beta = 1/2$, or $\alpha = 1$ or $\beta = 1$, then the inverse method is used.
-If $\alpha > 1$ and $\beta > 1$, the method in \textcite{Cheng:1978jl} is used.
+If $\alpha > 1$ and $\beta > 1$, the method in \cite{Cheng:1978jl} is used.
 Otherwise, let $K = 0.852$, $C = -0.956$, and $D = \beta + K\alpha^2 + C$. If
 $\alpha < 1$, $\beta < 1$ and $D \le 0$, then Jöhnk's method
 \parencite[sec.~3.5]{Devroye:1986gi} is used. In all other cases, one of the
@@ -1041,8 +1041,8 @@ implementation of the $\chi^2$-distribution.
 The specific algorithm used depends on the parameters. If $\alpha = 1$, it
 becomes the exponential distribution. If $0 < \alpha < 0.6$, it is generated
 through transformation of exponential power distribution
-\parencite[sec~2.6]{Devroye:1986gi}. If $0.6\le\alpha<1$, then rejection method
-from the Weibull distribution is used \parencite[sec.~3.4]{Devroye:1986gi}. If
+\cite[sec~2.6]{Devroye:1986gi}. If $0.6\le\alpha<1$, then rejection method from
+the Weibull distribution is used \parencite[sec.~3.4]{Devroye:1986gi}. If
 $\alpha > 1$, then the method in \textcite{Marsaglia:2000vq} is used.
 
 \subsubsection{Laplace distribution}
@@ -1113,7 +1113,7 @@ and scale $s$. See below for the implementation of the Normal distribution.
   template <typename RealType = double>
   class NormalDistribution;
 \end{Verbatim}
-The implementation uses the Box-Muller method \parencite{Box:1958hv}.
+The implementation uses the Box-Muller method \cite{Box:1958hv}.
 
 \subsubsection{Pareto distribution}
 
@@ -1157,23 +1157,23 @@ The implementation uses the inverse method.
   template <typename RealType = double>
   class StableDistribution;
 \end{Verbatim}
-The implementation uses the method in \textcite{Chambers:1976dv}. Note that,
-some other distributions implemented in the library, such as the Cauchy
-distribution ($\alpha = 1$, $\beta = 0$), the Levy distribution ($\alpha =
-1/2$, $\beta = 1$), and the Normal distribution ($\alpha = 2$), are all special
-cases of the stable distribution. It is possible to use implementations of
-those distributions to speed up the stable distribution in special cases.
-However, the library does not do so. Every distribution implemented in the
-library goes through some basic statistical tests to ensure correctness.
-Without a tractable distribution function in general, the stable distribution
-is somehow more difficult to test than others. Therefore, we use these special
-cases to tests the implementation, which is generic with respect to parameter
-values. In applications, for generating random numbers from distributions of
-those special cases, use the dedicated classes instead of this one. There are
-also a few distributions not implemented by the library, but are special cases
-of the stable distribution, such as the Landau distribution ($\alpha = 1$,
-$\beta = 1$) and Holtsmark distribution ($\alpha = 3/2$, $\beta = 0$), to name
-just two of them.
+The implementation uses the method in \cite{Chambers:1976dv}. Note that, some
+other distributions implemented in the library, such as the Cauchy distribution
+($\alpha = 1$, $\beta = 0$), the Levy distribution ($\alpha = 1/2$, $\beta =
+1$), and the Normal distribution ($\alpha = 2$), are all special cases of the
+stable distribution. It is possible to use implementations of those
+distributions to speed up the stable distribution in special cases. However,
+the library does not do so. Every distribution implemented in the library goes
+through some basic statistical tests to ensure correctness. Without a tractable
+distribution function in general, the stable distribution is somehow more
+difficult to test than others. Therefore, we use these special cases to tests
+the implementation, which is generic with respect to parameter values. In
+applications, for generating random numbers from distributions of those special
+cases, use the dedicated classes instead of this one. There are also a few
+distributions not implemented by the library, but are special cases of the
+stable distribution, such as the Landau distribution ($\alpha = 1$, $\beta =
+1$) and Holtsmark distribution ($\alpha = 3/2$, $\beta = 0$), to name just two
+of them.
 
 \subsubsection{Student's $t$-distribution}
 
