@@ -746,7 +746,7 @@ is shown in Algorithm~\ref{alg:pf}.
 
 \begin{algorithm}[t]
   \begin{algorithmic}
-    \hrule\vskip1ex
+    \tophrule
     \STATE \COMMENT{Initialization}
     \STATE Set $t\leftarrow0$.
     \STATE Sample $\xpos^{0,i},\ypos^{0,i}\sim\calN(0,4)$ and
@@ -765,8 +765,7 @@ is shown in Algorithm~\ref{alg:pf}.
     \end{align*}
     \STATE Weight $W_i^t \propto W_i^{t - 1}\exp\{\ell(X_i^t|Y_t)\}$.
     \UNTIL{All data are processed}
-
-    \vskip1ex\hrule
+    \bottomhrule
   \end{algorithmic}
   \caption{Particle filter for the almost constant velocity model}
   \label{alg:pf}
