@@ -914,7 +914,7 @@ unless stated otherwise.
 
 \begin{equation*}
   f(x;\alpha,\beta) = \frac{1}{\pi\sqrt{(x - \alpha)(\beta - x)}} \qquad
-  x \in [a, b],\; a \in (0,\infty),\; b \in (0,\infty)
+  x \in [a, b],\quad a \in (0,\infty),\quad b \in (0,\infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -928,7 +928,7 @@ The implementation uses the inverse method.
   f(x;\alpha,\beta) =
   \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}
   x^{\alpha - 1}(1 - x)^{\beta - 1} \qquad
-  x \in (0, 1),\; \alpha \in (0,\infty),\; \beta \in (0,\infty)
+  x \in (0, 1),\quad \alpha \in (0,\infty),\quad \beta \in (0,\infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -949,7 +949,7 @@ other cases, the vectorized generating shall provide considerable speedup.
 \begin{equation*}
   f(x;a,b) =
   \frac{1}{\pi b\Round[Big]{1 + \Round[Big]{\frac{x - a}{b}}^2}} \qquad
-  x \in \Real,\; a \in \Real,\; b \in (0,\infty)
+  x \in \Real,\quad a \in \Real,\quad b \in (0,\infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -961,7 +961,7 @@ The implementation uses the inverse method.
 
 \begin{equation*}
   f(x;n) = \frac{x^{n/2 - 1}\EE^{-x/2}}{2^{n/2}\Gamma(n/2)} \qquad
-  x \in (0,\infty),\; n \in (0,\infty)
+  x \in (0,\infty),\quad n \in (0,\infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -975,7 +975,7 @@ for the implementation of the Gamma distribution.
 
 \begin{equation*}
   f(x;\lambda) = \lambda\EE^{-\lambda x} \qquad
-  x \in [0,\infty),\; \lambda \in (0,\infty)
+  x \in [0,\infty),\quad \lambda \in (0,\infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -989,7 +989,7 @@ The implementation uses the inverse method.
   f(x;a,b) =
   \frac{1}{b}\exp\Curly[Big]{
     \frac{a - x}{b} - \exp\Curly[Big]{\frac{a - x}{b}}} \qquad
-  x \in \Real,\; a \in \Real,\; b \in (0, \infty)
+  x \in \Real,\quad a \in \Real,\quad b \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1005,7 +1005,7 @@ The implementation uses the inverse method.
     \Gamma\Round[Big]{\frac{m}{2}}\Gamma\Round[Big]{\frac{n}{2}}}
   \Round[Big]{\frac{m}{n}}^{m/2} x^{m / 2 - 1}
   \Round[Big]{1 + \frac{m}{n}x}^{-(m + n) / 2} \\
-  & x \in [0, \infty),\; m \in (0, \infty),\; n \in (0, \infty)
+  & x \in [0, \infty),\quad m \in (0, \infty),\quad n \in (0, \infty)
 \end{align*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1022,7 +1022,7 @@ implementation of the $\chi^2$-distribution.
 \begin{equation*}
   f(x;\alpha,\beta) =
   \frac{\EE^{-x/\beta}}{\Gamma(\alpha)}\beta^{-\alpha}x^{\alpha-1} \qquad
-  x \in (0, \infty),\; \alpha \in (0, \infty),\; \beta \in (0, \infty)
+  x \in (0, \infty),\quad \alpha \in (0, \infty),\quad \beta \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1039,7 +1039,7 @@ $\alpha > 1$, then the method in \textcite{Marsaglia:2000vq} is used.
 
 \begin{equation*}
   f(x;a,b) = \frac{1}{2b}\exp\Curly[Big]{-\frac{\Abs{x - a}}{b}} \qquad
-  x \in \Real,\; b \in (0, \infty)
+  x \in \Real,\quad b \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1053,7 +1053,7 @@ The implementation uses the inverse method.
   f(x;a,b) =
   \sqrt{\frac{b}{2\pi}}
   \frac{\exp\Curly[Big]{-\frac{b}{2(x - a)}}}{(x - a)^{3/2}} \qquad
-  x \in [a, \infty),\; a \in \Real,\; b \in (0, \infty)
+  x \in [a, \infty),\quad a \in \Real,\quad b \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1067,7 +1067,7 @@ scale $b$. See below for the implementation of the Normal distribution.
 
 \begin{equation*}
   f(x;a,b) = \frac{1}{4b}\mathrm{sech}^2\Round[Big]{\frac{x - a}{2b}} \qquad
-  x \in \Real,\; a \in \Real,\; b \in (0, \infty)
+  x \in \Real,\quad a \in \Real,\quad b \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1081,7 +1081,7 @@ The implementation uses the inverse method.
   f(x;m,s) =
   \frac{1}{x\sigma\sqrt{2\pi}}
   \exp\Curly[Big]{-\frac{(\ln x - m)^2}{2\sigma^2}} \qquad
-  x \in (0, \infty),\; m \in \Real,\; s \in (0, \infty)
+  x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1097,7 +1097,7 @@ and scale $s$. See below for the implementation of the Normal distribution.
   f(x;\mu,\sigma) =
   \frac{1}{\sqrt{2\pi\sigma^2}}
   \exp\Curly[Big]{-\frac{(x-\mu)^2}{2\sigma^2}} \qquad
-  x \in \Real,\; \mu \in \Real,\; \sigma \in (0, \infty)
+  x \in \Real,\quad \mu \in \Real,\quad \sigma \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1109,7 +1109,7 @@ The implementation uses the Box-Muller method \cite{Box:1958hv}.
 
 \begin{equation*}
   f(x;a,b) = \frac{a b^a}{x^{a + 1}} \qquad
-  x \in [b, \infty),\; a \in [0, \infty),\; b \in [0, \infty)
+  x \in [b, \infty),\quad a \in [0, \infty),\quad b \in [0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1122,7 +1122,7 @@ The implementation uses the inverse method.
 \begin{equation*}
   f(x;\sigma) =
   \frac{x}{\sigma^2}\exp\Curly[Big]{-\frac{x^2}{2\sigma^2}} \qquad
-  x \in [0, \infty),\; \sigma \in (0, \infty)
+  x \in [0, \infty),\quad \sigma \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1140,8 +1140,9 @@ The implementation uses the inverse method.
     \tan\Round[big]{\frac{\pi}{2}\alpha} & \alpha \ne 1 \\
     -\frac{2}{\pi}\log\Abs{t}            & \alpha = 1
   \end{cases} \\
-  & x \in \Real,\;
-  \alpha \in (0, 2],\; \beta \in [-1, 1],\; a \in \Real,\; b \in (0, \infty)
+  & x \in \Real,\quad
+  \alpha \in (0, 2],\quad \beta \in [-1, 1],\quad
+  a \in \Real,\quad b \in (0, \infty)
 \end{align*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1172,7 +1173,7 @@ of them.
   \frac{\Gamma\Round[Big]{\frac{n + 1}{2}}}
   {\sqrt{n\pi}\Gamma\Round[Big]{\frac{n}{2}}}
   \Round[Big]{1 + \frac{x^2}{n}}^{-(n + 1)/2} \qquad
-  x \in \Real,\; n \in (0, \infty)
+  x \in \Real,\quad n \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1188,7 +1189,7 @@ implementations of the Normal distribution and the $\chi^2$-distribution.
 
 \begin{equation*}
   f(x;a,b) = \frac{1}{b - a} \qquad
-  x \in [a, b),\; a \in \Real,\; b \in (a, \infty)
+  x \in [a, b),\quad a \in \Real,\quad b \in (a, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1201,7 +1202,7 @@ The implementation uses the inverse method.
 \begin{equation*}
   f(x;a,b) = \frac{a}{b}\Round[Big]{\frac{x}{b}}^{a - 1}
   \exp\Curly[Big]{-\Round[Big]{\frac{x}{b}}^a} \qquad
-  x \in [0, \infty),\; a \in (0, \infty),\; b \in (0, \infty)
+  x \in [0, \infty),\quad a \in (0, \infty),\quad b \in (0, \infty)
 \end{equation*}
 \begin{Verbatim}
   template <typename RealType = double>
@@ -1222,7 +1223,7 @@ of \verb|short|, unless stated otherwise.
     1 - p &\text{if } k = 0\\
     p     &\text{if } k = 1
   \end{cases} \qquad
-  k \in \{0, 1\},\; p \in [0, 1]
+  k \in \{0, 1\},\quad p \in [0, 1]
 \end{equation*}
 \begin{Verbatim}
   template <typename IntType = bool>
@@ -1239,7 +1240,7 @@ probability $p$. This is not a drop-in replacement for
 
 \begin{equation*}
   \Prob(X = k;p) = p(1-p)^k \qquad
-  k \in \Natural,\; p \in (0, 1]
+  k \in \Natural,\quad p \in (0, 1]
 \end{equation*}
 \begin{Verbatim}
   template <typename IntType = int>
@@ -1253,7 +1254,8 @@ success probability $p$.
 
 \begin{equation*}
   \Prob(X = k;a,b) = \frac{1}{b - a + 1} \qquad
-  k \in \{a,\dots,b\},\; a \in \Integer,\; b \in \{x \in \Integer: x \ge a\}
+  k \in \{a,\dots,b\},\quad
+  a \in \Integer,\quad b \in \{x \in \Integer: x \ge a\}
 \end{equation*}
 \begin{Verbatim}
   template <typename IntType = int>
