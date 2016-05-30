@@ -42,20 +42,18 @@ from these, the library also provides facilities for vectorized random number
 generating (Section~\ref{sec:Vectorized random number generating}) and using
 multiple \rng{}s in parallel programs (Section~\ref{sec:Multiple RNG streams}).
 There are also some performance data in Appendices~\appref{chap:Performance of
-  RNG} and~\appref{chap:Performance of distribution}
+RNG} and~\appref{chap:Performance of distribution}
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
 
 The generic function \verb|rand| provides vectorized random number generating.
-There are two versions. The first operates on \rng engines and generates random
-integers,
+There are two main variants. The first operates on \rng engines and generates
+random integers,
 \begin{Verbatim}
   template <typename RNGType>
-  inline void rand(
-      RNGType &rng,
-      size_t n,
-      typename RNGType::result_type *r);
+  void rand(
+      RNGType &rng, size_t n, typename RNGType::result_type *r);
 \end{Verbatim}
 The effect of the function call,
 \begin{Verbatim}
@@ -66,19 +64,16 @@ is equivalent to the loop,
   for (size_t i = 0; i != n; ++i)
       r[i] = rng();
 \end{Verbatim}
-The results will always be the same unless a non-deterministic \rng is used.
-For some \rng{}s implemented in the library, the vectorized version may have
-considerable performance advantage.
-
-The second version of \verb|rand| is for generating distribution random
-numbers,
+The results will always be the same unless a non-deterministic \rng is used
+(see Section~\ref{sec:Non-deterministic RNG}). For some \rng{}s implemented in
+the library, the vectorized function may have considerable performance
+advantage. The second variant of \verb|rand| is for generating distribution
+random variates,
 \begin{Verbatim}
   template <typename RNGType, typename DistributionType>
-  inline void rand(
-      RNGType &rng,
-      const DistributionType &distribution,
-      size_t n,
-      typename DistributionType::result_type *r);
+  void rand(
+      RNGType &rng, const DistributionType &distribution,
+      size_t n, typename DistributionType::result_type *r);
 \end{Verbatim}
 For example,
 \begin{Verbatim}
@@ -91,20 +86,20 @@ This is similar to the following loop,
       r[i] = normal(rng);
 \end{Verbatim}
 Depending on the type of \verb|rng| and the distribution (including its
-parameters), the vectorized version may have superior performance. However, the
-results will not be exactly the same as using a loop.
+parameters), the vectorized function may have superior performance. However,
+the results will not be exactly the same as using a loop.
 
-For consistency, the library also defines the function \verb|rand| for
-generating only one random number,
+For consistency, the library also defines variants of the function \verb|rand|
+for generating only one random number,
 \begin{Verbatim}
-  rand(rng);               // rng();
-  rand(rng, distribution); // distribution(rng);
+  rand(rng);               // => rng();
+  rand(rng, distribution); // => distribution(rng);
 \end{Verbatim}
 And each \rng engine and distribution generator also has methods for vectorized
 generating,
 \begin{Verbatim}
-  rng(n, r);               // rand(rng, n, r);
-  distribution(rng, n, r); // rand(rng, distribution, n, r);
+  rng(n, r);               // => rand(rng, n, r);
+  distribution(rng, n, r); // => rand(rng, distribution, n, r);
 \end{Verbatim}
 To write generic functions, it is recommended to use the function \verb|rand|
 instead of the member methods, since the former also works with classes not
@@ -129,9 +124,7 @@ There are two standard solutions to this problem. The first is to use
 sub-streams for each thread. For example,
 \begin{Verbatim}
   std::mt19937 rng;
-
-  // Thread k
-  std::mt19937 rng_k = rng;
+  std::mt19937 rng_k = rng; // Thread k
   rng_k.discard(n * k);
 \end{Verbatim}
 where $n$ is the number of random numbers required by each thread. The $k$\ith
@@ -143,14 +136,12 @@ environments where threads are created implicitly, such as using \tbb for
 parallelization.
 
 The second solution is to use a leap-frog algorithm, such that each thread will
-use the elements $\{r_{iK + k}\}_{i>0}$ of the stream, where $K$ is the total
+use the subset $\{r_{iK + k}\}_{i>0}$ of the stream, where $K$ is the total
 number of threads. This is not directly supported in the standard library, but
 can be emulated,
 \begin{Verbatim}
   std::mt19937 rng;
-
-  // Thread k
-  std::mt19937 tmp = rng;
+  std::mt19937 tmp = rng; // Thread k
   tmp.discard(k);
   std::discard_block_engine<std::mt19937, K, 1> rng_k(tmp);
 \end{Verbatim}
@@ -383,7 +374,7 @@ aliases are defined for convenience. For example,
 \end{Verbatim}
 The engine \verb|ARS| is the library's default \rng if \aesni instructions are
 supported. Aliases for block sizes 1, 2, 4 and 8 are defined for all four
-algorithms, as well as both 32- and 64-bit output versions. These aliases are
+algorithms, as well as both 32- and 64-bit output variants. These aliases are
 listed in Table~\ref{tab:Counter-based RNG}. The performance of these engines
 depends on a few factors, such as \cpu types, compilers, operating systems,
 etc. In any case, the performance is good enough even for the most demanding
@@ -391,7 +382,7 @@ applications. The library does not attempt to optimize the algorithm for any
 particular platform. In realistic applications, the performance of \rng is
 unlikely to become a bottle neck. Note that, the best performance is obtained
 with the vectorized \verb|rand| function (see Section~\ref{sec:Vectorized
-  random number generating}).
+random number generating}).
 
 \subsection{Philox}
 \label{sub:Philox}
@@ -720,8 +711,8 @@ the builtin ones.
 
 The library provides implementations of some common distributions. Some of them
 are the same as those in the standard library with \verb|CamelCase| names. For
-example, \verb|NormalDistribuiton| can be used as a drop-in replacement of
-\verb|std::normal_distribuiton|. This includes all of the continuous
+example, \verb|NormalDistribution| can be used as a drop-in replacement of
+\verb|std::normal_distribution|. This includes all of the continuous
 distributions in the standard library. As stated in Section~\ref{sec:Vectorized
   random number generating}, all the distributions defined in the library
 support vectorized random number generating. In the following sections, we
@@ -826,7 +817,7 @@ The class template,
   template <typename RealType = double>
   class U01CCDistribution;
 \end{Verbatim}
-implements the uniform distribuiton on $[0, 1]$ through the mapping,
+implements the uniform distribution on $[0, 1]$ through the mapping,
 \begin{align*}
   P &= \min\{W - 1, M\} \\
   V &= \begin{cases}
@@ -845,7 +836,7 @@ The class template,
   template <typename RealType = double>
   class U01CODistribution;
 \end{Verbatim}
-implements the uniform distribuiton on $[0, 1)$ through the mapping,
+implements the uniform distribution on $[0, 1)$ through the mapping,
 \begin{align*}
   P &= \min\{W, M\} \\
   V &= \Floor{U / 2^{W - P}} \\
@@ -860,7 +851,7 @@ The class template,
   template <typename RealType = double>
   class U01OCDistribution;
 \end{Verbatim}
-implements the uniform distribuiton on $(0, 1]$ through the mapping,
+implements the uniform distribution on $(0, 1]$ through the mapping,
 \begin{align*}
   P &= \min\{W, M\} \\
   V &= \Floor{U / 2^{W - P}} \\
@@ -875,7 +866,7 @@ The class template,
   template <typename RealType = double>
   class U01CODistribution;
 \end{Verbatim}
-implements the uniform distribuiton on $(0, 1)$ through the mapping,
+implements the uniform distribution on $(0, 1)$ through the mapping,
 \begin{align*}
   P &= \min\{W + 1, M\} \\
   V &= \Floor{U / 2^{W + 1 - P}} \\
@@ -1306,7 +1297,7 @@ constructed by,
   DirichletDistribution<double, Dim> dirichlet(alpha);
 \end{Verbatim}
 and if it is zero (recall that \verb|Dynamic| is just an enumerator with value
-zero), then the dimension has to be specified at runtime. The distribuiton
+zero), then the dimension has to be specified at runtime. The distribution
 generator can be constructed by,
 \begin{Verbatim}
   DirichletDistribution<double> dirichlet(dim, alpha);
