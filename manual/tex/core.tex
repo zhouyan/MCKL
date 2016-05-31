@@ -665,7 +665,8 @@ The sampler can be initialized,
 This will perform a few things. First, any record of previous operations on the
 sampler will be cleared. The iteration number $t$ will be set to zero. And
 then, there are three evaluation stages and three monitoring stages. They are
-performed in the following order.
+performed in the following order:
+
 \begin{enumerate}
   \item \verb|SamplerInit|
   \item \verb|MonitorMove|
@@ -674,6 +675,7 @@ performed in the following order.
   \item \verb|SamplerMCMC|
   \item \verb|MonitorMCMC|
 \end{enumerate}
+
 Each evaluation object, added to the sampler through,
 \begin{Verbatim}
   Sampler<T> &eval(const eval_type &e, SamplerStage stage);

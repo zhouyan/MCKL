@@ -141,10 +141,10 @@ only has effects if \verb|MCKL_HAS_INT128| is true. The default is
 \label{sec:Third-party libraries}
 
 The following macros determine if certain third-party libraries are available.
-All macros with the prefix \verb|MCKL_HAS_| are define to \verb|0| by default.
-All macros with the prefix \verb|MCKL_USE_| are defined to \verb|1| if the
-corresponding \verb|MCKL_HAS_| macro is true. Otherwise it is defined to
-\verb|0|, unless stated otherwise.
+All macros with the prefix \verb|MCKL_HAS_| are define to 0 by default. All
+macros with the prefix \verb|MCKL_USE_| are defined to 1 if the corresponding
+\verb|MCKL_HAS_| macro is true. Otherwise it is defined to 0, unless stated
+otherwise.
 
 \paragraph{\texttt{MCKL\_HAS\_OMP}} Determine if OpenMP is supported.
 
@@ -234,13 +234,13 @@ Section~\ref{sec:Counter-based RNG} and~\ref{sec:Multiple RNG streams}.
 
 \paragraph{\texttt{MCKL\_ALIGNMENT}} The default alignment for scalar types,
 such as \verb|int|. More specifically, this affects types such that
-\verb|std::is_scalar<T>| true. The default is \verb|32|. This is sufficient for
-modern \simd operations. This will affect the memory allocated by
-\verb|Vector<T>| on the heap and \verb|Array<T>| on the stack. The value must
-be a power of two and positive.
+\verb|std::is_scalar<T>| true. The default is~32. This is sufficient for modern
+\simd operations. This will affect the memory allocated by \verb|Vector<T>| on
+the heap and \verb|Array<T>| on the stack. The value must be a power of two and
+positive.
 
 \paragraph{\texttt{MCKL\_ALIGNMENT\_MIN}} The minimum alignment for all types.
-The default is \verb|16|. The value must be a power of two and positive.
+The default is 16. The value must be a power of two and positive.
 
 \paragraph{\texttt{MCKL\_ALIGNED\_MEMORY\_TYPE}} The default type of the
 \verb|Memroy| template parameter of \verb|Allocator| (see
@@ -250,9 +250,9 @@ default is \verb|AlignedMemoryTBB|. Otherwise it is \verb|AlignedMemorySYS| if
 it is defined. Otherwise \verb|AlignedMemmorySTD| is used as a last resort.
 
 \paragraph{\texttt{MCKL\_CONSTRUCT\_SCALAR}} Determine if scalar types shall be
-zero initialized upon allocation by \verb|Allocator|. The default is \verb|0|.
-This departures from the behavior of \verb|std::allocator|, with which the
-memory is always value initialized. For example,
+zero initialized upon allocation by \verb|Allocator|. The default is 0. This
+departures from the behavior of \verb|std::allocator|, with which the memory is
+always value initialized. For example,
 \begin{Verbatim}
   std::vector<int> v(n);
 \end{Verbatim}
@@ -261,7 +261,7 @@ will initialize all values to zero. In contrast,
   Vector<int> v(n);
 \end{Verbatim}
 will leave the memory uninitialized. To get zero initialized vectors, one can
-either define this macro to \verb|1|, or more efficiently,
+either define this macro to 1, or more efficiently,
 \begin{Verbatim}
   Vector<int> v(n);
   std::fill(v.begin(), v.end(), 0); // or
@@ -286,12 +286,12 @@ initialized and the second will be value initialized.
 \label{sec:Error handling}
 
 \paragraph{\texttt{MCKL\_NO\_RUNTIME\_ASSERT}} Determine if all runtime
-assertions shall be disabled. The default is \verb|1| if \verb|NDEBUG| is
-defined. Otherwise, it is \verb|0|. Runtime assertions are hard errors. The
-program will be terminated by \verb|std::exit| upon failure of assertions.
-These are usually errors that will cause undefined behaviors.
+assertions shall be disabled. The default is 1 if \verb|NDEBUG| is defined.
+Otherwise, it is 0. Runtime assertions are hard errors. The program will be
+terminated by \verb|std::exit| upon failure of assertions. These are usually
+errors that will cause undefined behaviors.
 
 \paragraph{\texttt{MCKL\_RUNTIME\_ASSERT\_AS\_EXCEPTION}} Determine if runtime
 assertions shall be turned into exceptions. The exception type is
-\verb|RuntimeAssert|. The default is \verb|0|. It has no affect is
+\verb|RuntimeAssert|. The default is 0. It has no affect is
 \verb|MCKL_NO_RUNTIME_ASSERT| is true.

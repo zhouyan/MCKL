@@ -151,6 +151,7 @@ interface,
 It computes the sample covariance matrix $\Sigma$,
 where $x$ is the $n$ by $p$ matrix of samples, and $w$ is the $n$-vector of
 weights. Below we given detailed description of each parameter,
+
 \begin{description}
   \item[\texttt{layout}] The storage layout of sample matrix $x$.
   \item[\texttt{n}] The number of samples.
@@ -170,6 +171,7 @@ weights. Below we given detailed description of each parameter,
   \item[\texttt{cov\_packed}] If true, then the covariance matrix is
     packed.
 \end{description}
+
 The last three parameters specify the storage scheme of the covariance matrix.
 See any reference of \blas or \lapack for explanation of the scheme. Below is
 an example of the class in use,

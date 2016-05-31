@@ -231,15 +231,15 @@ to later.
     \toprule
     Macro & Default \\
     \midrule
-    \verb|MCKL_AES128_ROUNDS|          & \verb|10| \\
-    \verb|MCKL_AES192_ROUNDS|          & \verb|12| \\
-    \verb|MCKL_AES256_ROUNDS|          & \verb|14| \\
-    \verb|MCKL_ARS_ROUNDS|             & \verb|5|  \\
-    \verb|MCKL_AESNI_BLOCKS|           & \verb|8|  \\
-    \verb|MCKL_PHILOX_ROUNDS|          & \verb|10| \\
-    \verb|MCKL_PHILOX_VECTOR_LENGTH|   & \verb|4|  \\
-    \verb|MCKL_THREEFRY_ROUNDS|        & \verb|20| \\
-    \verb|MCKL_THREEFRY_VECTOR_LENGTH| & \verb|4|  \\
+    \verb|MCKL_AES128_ROUNDS|          & 10 \\
+    \verb|MCKL_AES192_ROUNDS|          & 12 \\
+    \verb|MCKL_AES256_ROUNDS|          & 14 \\
+    \verb|MCKL_ARS_ROUNDS|             & 5  \\
+    \verb|MCKL_AESNI_BLOCKS|           & 8  \\
+    \verb|MCKL_PHILOX_ROUNDS|          & 10 \\
+    \verb|MCKL_PHILOX_VECTOR_LENGTH|   & 4  \\
+    \verb|MCKL_THREEFRY_ROUNDS|        & 20 \\
+    \verb|MCKL_THREEFRY_VECTOR_LENGTH| & 4  \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros for counter-based \protect\rng}
@@ -414,8 +414,8 @@ configuration macros listed in Table~\ref{tab:Configuration macros for
 \verb|Rounds|, nor any limitation on \verb|T| except that it has to be an
 unsigned integer type. See \cite{Salmon:2011um} on the most general form of the
 algorithm. However, the library only provides default constants for 32- and
-64-bit unsigned integer type \verb|T| and \verb|K| taking the values \verb|2|
-or \verb|4|. These four engines are defined as type aliases for convenience,
+64-bit unsigned integer type \verb|T| and \verb|K| taking the values~2 or~4.
+These four engines are defined as type aliases for convenience,
 \begin{Verbatim}
   template <typename ResultType>
   using Philox2x32Engine = PhiloxEngine<
@@ -470,12 +470,13 @@ configuration macros listed in Table~\ref{tab:Configuration macros for
 there is no limit on the template parameter \verb|K| or \verb|Rounds| as long
 as a suitable trait class \verb|Constant| is provided. The library provides
 default constants for 64-bit unsigned integer type \verb|T| and \verb|K| taking
-the values \verb|4|, \verb|8| and \verb|16|, taken from the
+the values 4, 8 and~16, taken from the
 skein\footnote{\url{http://www.skein-hash.info}} hash algorithm, for which the
 Threefish algorithm was originally developed for. Defaults for 32-bit \verb|T|
-or \verb|K| taking the value \verb|2| are also provided, taken from
+or \verb|K| taking the value~2 are also provided, taken from
 \cite{Salmon:2011um}. Type aliases for these configurations are defined for
-convenience,
+convenience, Type aliases for 32- and 64-bit \verb|ResultType| are also
+defined, as listed in Table~\ref{tab:Counter-based RNG}.
 \begin{Verbatim}
   template <typename ResultType>
   using Threefry2x32Engine = ThreefryEngine<
@@ -501,42 +502,6 @@ convenience,
   using Threefry16x64Engine = ThreefryEngine<
       ResultType, std::uint64_t, 16>;
 \end{Verbatim}
-Type aliases for 32- and 64-bit \verb|ResultType| are also defined, as listed
-in Table~\ref{tab:Counter-based RNG}.
-
-\subsection{\texttt{RNG} and \texttt{RNGMini}}
-\label{sub:RNG and RNGMini}
-
-Note that, not all \rng{}s implemented by the library is available on all
-platforms. The library also defines two type aliases \verb|RNG| and
-\verb|RNG_64|, which are one of the \rng{}s listed in
-Table~\ref{tab:Counter-based RNG}. The preference is in the order listed in
-Table~\ref{tab:Type aliases RNG and RNG_64}. The user can define the
-configuration macro \verb|MCKL_RNG_TYPE| to override the choice of \verb|RNG|
-made by the library. Similarly, the \verb|MCKL_RNG_64_TYPE| macro can be used
-to override the choice of \verb|RNG_64|. These \rng engines are meant for
-general purpose usage. They have reasonable long period and large key space.
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
-    \toprule
-    Alias  & \rng engine & Availability \\
-    \midrule
-    \verb|RNG|    & \verb|ARS|         & \verb|MCKL_HAS_AESNI| \\
-                  & \verb|Threefry|    & Always available      \\
-    \verb|RNG_64| & \verb|ARS_64|      & \verb|MCKL_HAS_AESNI| \\
-                  & \verb|Threefry_64| & Always available      \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Type aliases \protect\texttt{RNG} and \protect\texttt{RNG\_64}}
-  \label{tab:Type aliases RNG and RNG_64}
-\end{table}
-
-The library also defines two type aliases \verb|RNGMini| and \verb|RNGMini_64|,
-which have the smallest state size among all \rng engines defined by the
-library. By default they are \verb|Philox2x32| and \verb|Philox2x32_64|. The
-choice can be overridden by configuration macros \verb|MCKL_RNG_MINI_TYPE| and
-\verb|MCKL_RNG_MINI_64_TYPE|, respectively.
 
 \subsection{Seeding counter-based \texorpdfstring{\protect\rng}{RNG}}
 \label{sub:Seeding counter-based RNG}
@@ -1077,12 +1042,12 @@ The implementation uses the inverse method.
 
 \subsubsection{Log-normal distribution}
 
-\begin{equation*}
-  f(x;m,s) =
+\begin{align*}
+  & f(x;m,s) =
   \frac{1}{x\sigma\sqrt{2\pi}}
-  \exp\Curly[Big]{-\frac{(\ln x - m)^2}{2\sigma^2}} \qquad
-  x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty)
-\end{equation*}
+  \exp\Curly[Big]{-\frac{(\ln x - m)^2}{2\sigma^2}} \\
+  & x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty)
+\end{align*}
 \begin{Verbatim}
   template <typename RealType = double>
   class LognormalDistribution;
@@ -1266,8 +1231,8 @@ simply returns $a$. If $b - a + 1 = 2^W$ where $W$ is the number of bits of
 \verb|IntType|, then \verb|UniformBitsDistribution| is used (see
 Section~\ref{sub:Uniform bits distribution}). If $\max\{|a|, b\} < 2^{32}$,
 then it uses the fact that if $U$ is a standard uniform random variable, then
-$\Floor{a + (b - a + 1) U}$ is uniform on the set $\{a,\dots,b\}$. Otherwise,
-\verb|std::uniform_int_distribution| is used.
+$\Floor{a + (b - a + 1) U}$ is uniform on the set $\{a,\dots,b\}$. Otherwise
+the standard library is used.
 
 \subsection{Multivariate distributions}
 \label{sub:Multivariate distributions}
