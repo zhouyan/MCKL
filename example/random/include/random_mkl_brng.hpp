@@ -134,6 +134,10 @@ inline void random_mkl_brng()
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
+#ifdef MCKL_RNG_DEFINE_MACRO_NA
+#undef MCKL_RNG_DEFINE_MACRO_NA
+#endif
+
 #define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
     {                                                                         \
         int brng = mckl::mkl_brng<RNGType>();                                 \

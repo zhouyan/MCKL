@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/common.hpp
+// MCKL/include/mckl/math/erf.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,52 +29,46 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMMON_HPP
-#define MCKL_INTERNAL_COMMON_HPP
+#ifndef MCKL_MATH_ERF_HPP
+#define MCKL_MATH_ERF_HPP
 
 #include <mckl/internal/basic.hpp>
-#include <mckl/math.hpp>
-#include <mckl/utility/aligned_memory.hpp>
+#include <mckl/math/constants.hpp>
 
 namespace mckl
 {
 
-namespace internal
+/// \brief Inverse complement error function
+/// \ingroup Special
+inline double erfcinv(double y)
 {
+    if (y >= 2)
+        return -const_inf<double>();
+    if (y <= 0)
+        return const_inf<double>();
 
-template <typename T, std::size_t N>
-using StaticVector =
-    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
+    static constexpr double a = 0.70771;
+    static constexpr double b = 2.30753;
+    static constexpr double c = 0.27061;
+    static constexpr double d = 0.99229;
+    static constexpr double e = 0.04481;
+    static constexpr double f = 1.12837916709551257;
 
-class StirlingMatrix2
-{
-    public:
-    StirlingMatrix2(std::size_t n, std::size_t m)
-        : ncol_(m + 1), data_((n + 1) * (m + 1))
-    {
-        std::fill(data_.begin(), data_.end(), 0);
-        get(0, 0) = 1;
-        for (std::size_t j = 1; j <= m; ++j) {
-            get(j, j) = 1;
-            for (std::size_t i = j + 1; i <= n; ++i)
-                get(i, j) = j * get(i - 1, j) + get(i - 1, j - 1);
-        }
+    double z = y < 1 ? y : 2 - y;
+    double t = std::sqrt(-2 * std::log(0.5 * z));
+    double x = -a * ((b + t * c) / (1 + t * (d + t * e)) - t);
+    for (int i = 0; i != 2; ++i) {
+        double err = std::erfc(x) - z;
+        x += err / (f * std::exp(-(x * x)) - x * err);
     }
 
-    double operator()(std::size_t i, std::size_t j) const
-    {
-        return data_[i * ncol_ + j];
-    }
+    return y < 1 ? x : -x;
+}
 
-    private:
-    std::size_t ncol_;
-    Vector<double> data_;
-
-    double &get(std::size_t i, std::size_t j) { return data_[i * ncol_ + j]; }
-}; // class StirlingMatrix
-
-} // namespace mckl::internal
+/// \brief Inverse error function
+/// \ingroup Special
+inline double erfinv(double y) { return erfcinv(1 - y); }
 
 } // namespace mckl
 
-#endif // MCKL_INTERNAL_COMMON_HPP
+#endif // MCKL_MATH_ERF_HPP

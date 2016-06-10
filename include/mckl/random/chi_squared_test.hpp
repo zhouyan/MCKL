@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/common.hpp
+// MCKL/include/mckl/random/chi_squared_test.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,52 +29,70 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMMON_HPP
-#define MCKL_INTERNAL_COMMON_HPP
+#ifndef MCKL_RANDOM_CHI_SQUARED_TEST_HPP
+#define MCKL_RANDOM_CHI_SQUARED_TEST_HPP
 
-#include <mckl/internal/basic.hpp>
-#include <mckl/math.hpp>
-#include <mckl/utility/aligned_memory.hpp>
+#include <mckl/random/internal/common.hpp>
 
 namespace mckl
 {
 
-namespace internal
-{
-
-template <typename T, std::size_t N>
-using StaticVector =
-    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
-
-class StirlingMatrix2
+/// \brief Tests based on the \f$\chi^2\f$-distribution
+/// \ingroup RandomTest
+template <typename Derived>
+class ChiSquaredTest
 {
     public:
-    StirlingMatrix2(std::size_t n, std::size_t m)
-        : ncol_(m + 1), data_((n + 1) * (m + 1))
+    using result_type = double;
+
+    bool pass(double alpha, double s) const
     {
-        std::fill(data_.begin(), data_.end(), 0);
-        get(0, 0) = 1;
-        for (std::size_t j = 1; j <= m; ++j) {
-            get(j, j) = 1;
-            for (std::size_t i = j + 1; i <= n; ++i)
-                get(i, j) = j * get(i - 1, j) + get(i - 1, j - 1);
-        }
+        double p = cdf(s);
+
+        return std::min(p, 1 - p) > 0.5 * alpha;
     }
 
-    double operator()(std::size_t i, std::size_t j) const
+    double pdf(double s, bool use_log = false) const
     {
-        return data_[i * ncol_ + j];
+        double k =
+            0.5 * static_cast<const Derived *>(this)->degree_of_freedom();
+        double lpdf = -k * const_ln_2<double>() - std::lgamma(k) +
+            (k - 1) * std::log(s) - 0.5 * s;
+
+        return use_log ? lpdf : std::exp(lpdf);
+    }
+
+    double cdf(double s) const
+    {
+        return gammap(
+            0.5 * static_cast<const Derived *>(this)->degree_of_freedom(),
+            0.5 * s);
+    }
+
+    protected:
+    double stat(std::size_t m, const double *count, const double *np) const
+    {
+        return stat_dispatch(m, count, np);
+    }
+
+    double stat(std::size_t m, const double *count, double np) const
+    {
+        return stat_dispatch(m, count, np);
     }
 
     private:
-    std::size_t ncol_;
-    Vector<double> data_;
+    template <typename NPType>
+    double stat_dispatch(std::size_t m, const double *count, NPType np) const
+    {
+        Vector<double> tmp(m);
+        sub(m, count, np, tmp.data());
+        sqr(m, tmp.data(), tmp.data());
+        div(m, tmp.data(), np, tmp.data());
 
-    double &get(std::size_t i, std::size_t j) { return data_[i * ncol_ + j]; }
-}; // class StirlingMatrix
-
-} // namespace mckl::internal
+        return std::accumulate(tmp.begin(), tmp.end(), 0.0);
+    }
+}; // class ChiSquaredTest
 
 } // namespace mckl
 
-#endif // MCKL_INTERNAL_COMMON_HPP
+#endif // MCKL_RANDOM_CHI_SQUARED_TEST_HPP

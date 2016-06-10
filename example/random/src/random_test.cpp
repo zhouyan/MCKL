@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/common.hpp
+// MCKL/example/random/src/random_test.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,52 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMMON_HPP
-#define MCKL_INTERNAL_COMMON_HPP
+#include "random_test.hpp"
 
-#include <mckl/internal/basic.hpp>
-#include <mckl/math.hpp>
-#include <mckl/utility/aligned_memory.hpp>
-
-namespace mckl
-{
-
-namespace internal
-{
-
-template <typename T, std::size_t N>
-using StaticVector =
-    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
-
-class StirlingMatrix2
-{
-    public:
-    StirlingMatrix2(std::size_t n, std::size_t m)
-        : ncol_(m + 1), data_((n + 1) * (m + 1))
-    {
-        std::fill(data_.begin(), data_.end(), 0);
-        get(0, 0) = 1;
-        for (std::size_t j = 1; j <= m; ++j) {
-            get(j, j) = 1;
-            for (std::size_t i = j + 1; i <= n; ++i)
-                get(i, j) = j * get(i - 1, j) + get(i - 1, j - 1);
-        }
-    }
-
-    double operator()(std::size_t i, std::size_t j) const
-    {
-        return data_[i * ncol_ + j];
-    }
-
-    private:
-    std::size_t ncol_;
-    Vector<double> data_;
-
-    double &get(std::size_t i, std::size_t j) { return data_[i * ncol_ + j]; }
-}; // class StirlingMatrix
-
-} // namespace mckl::internal
-
-} // namespace mckl
-
-#endif // MCKL_INTERNAL_COMMON_HPP
+MCKL_EXAMPLE_RANDOM_MAIN(test, 100000, 10)

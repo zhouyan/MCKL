@@ -114,8 +114,8 @@ inline void random_uniform_bits(std::size_t N, std::size_t M, int, char **)
 #undef MCKL_RNG_DEFINE_MACRO
 #endif
 
-#ifdef MCKL_RNG_DEFINE_MACRO_MKL
-#undef MCKL_RNG_DEFINE_MACRO_MKL
+#ifdef MCKL_RNG_DEFINE_MACRO_NA
+#undef MCKL_RNG_DEFINE_MACRO_NA
 #endif
 
 #define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \

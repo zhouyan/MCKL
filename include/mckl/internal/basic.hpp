@@ -43,6 +43,7 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <bitset>
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -66,11 +67,14 @@
 #include <new>
 #include <numeric>
 #include <random>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <thread>
 #include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -181,8 +185,61 @@ class Log2 : public Log2L<U, std::numeric_limits<UIntType>::digits - 1>
 {
 }; // class Log2
 
-template <typename T>
-class BufferSize : public std::integral_constant<std::size_t, 8192 / sizeof(T)>
+template <unsigned long long B, unsigned N, bool = N % 2 == 0>
+class PowL
+{
+    static constexpr unsigned long long b = PowL<B, N / 2>::value;
+
+    public:
+    static constexpr unsigned long long value = b * b;
+}; // class PowL
+
+template <unsigned long long B, unsigned N>
+class PowL<B, N, false>
+{
+    public:
+    static constexpr unsigned long long value = B * PowL<B, N - 1>::value;
+}; // class PowL
+
+template <unsigned long long B>
+class PowL<B, 0, true>
+{
+    public:
+    static constexpr unsigned long long value = 1;
+}; // class PowL
+
+template <typename UIntType, unsigned long long B, unsigned N>
+class Pow
+{
+    public:
+    static constexpr UIntType value = static_cast<UIntType>(PowL<B, N>::value);
+}; // class Pow
+
+template <typename UIntType, unsigned N>
+class Factorial
+{
+    public:
+    static constexpr UIntType value = N * Factorial<UIntType, N - 1>::value;
+}; // class Factorial
+
+template <typename UIntType>
+class Factorial<UIntType, 1>
+{
+    public:
+    static constexpr UIntType value = 1;
+}; // class Factorial
+
+template <typename UIntType>
+class Factorial<UIntType, 0>
+{
+    public:
+    static constexpr UIntType value = 1;
+}; // class Factorial
+
+template <typename T, std::size_t K = 1>
+class BufferSize
+    : public std::integral_constant<std::size_t,
+          8192 / (sizeof(T) * K) == 0 ? 1 : 8192 / (sizeof(T) * K)>
 {
 }; // class BufferSize;
 
@@ -297,34 +354,6 @@ inline std::basic_istream<CharT, Traits> &istream(
         vec = std::move(tmp);
 
     return is;
-}
-
-template <typename CharT, typename Traits, typename T, std::size_t N>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
-{
-    return ostream(os, ary);
-}
-
-template <typename CharT, typename Traits, typename T, std::size_t N>
-inline std::basic_istream<CharT, Traits> &operator>>(
-    std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
-{
-    return istream(is, ary);
-}
-
-template <typename CharT, typename Traits, typename T, typename Alloc>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
-{
-    return ostream(os, vec);
-}
-
-template <typename CharT, typename Traits, typename T, typename Alloc>
-inline std::basic_istream<CharT, Traits> &operator>>(
-    std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
-{
-    return istream(is, vec);
 }
 
 } // namespace mckl::internal

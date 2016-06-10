@@ -33,7 +33,10 @@
 #define MCKL_MATH_HPP
 
 #include <mckl/internal/config.h>
+#include <mckl/math/beta.hpp>
 #include <mckl/math/constants.hpp>
+#include <mckl/math/erf.hpp>
+#include <mckl/math/gamma.hpp>
 #include <mckl/math/vmath.hpp>
 
 #endif // MCKL_MATH_HPP
