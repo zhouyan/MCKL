@@ -32,6 +32,9 @@
 #ifndef MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 #define MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 
+#include <mckl/math/beta.hpp>
+#include <mckl/math/erf.hpp>
+#include <mckl/math/gamma.hpp>
 #include <mckl/random/distribution.hpp>
 #include "random_common.hpp"
 
@@ -130,17 +133,27 @@ class RandomDistributionTraitBase
     }
 
     protected:
-    template <typename QuantileType>
+    template <typename QuantileType, typename DistType>
     mckl::Vector<ResultType> partition_quantile(
-        std::size_t n, QuantileType &&quantile) const
+        std::size_t n, QuantileType &&quantile, const DistType &dist) const
     {
         const std::size_t k = n < 2000 ? n / 100 : 20; // The number of cells
         const double p = 1.0 / k;
         mckl::Vector<ResultType> partition(k - 1);
         for (std::size_t i = 0; i != k - 1; ++i)
             partition[i] = quantile(p * (i + 1));
+        partition.push_back(dist.max());
 
         return partition;
+    }
+
+    mckl::Vector<double> probability_quantile(std::size_t n) const
+    {
+        const std::size_t k = n < 2000 ? n / 100 : 20; // The number of cells
+        double p = 1.0 / k;
+        mckl::Vector<double> probability(k, p);
+
+        return probability;
     }
 
     template <typename ParamType>
@@ -243,11 +256,18 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
     {
-        return this->partition_quantile(n, [&](double p) {
-            double r = std::sin(mckl::const_pi_by2<double>() * p);
-            return dist.a() +
-                (dist.b() - dist.a()) * static_cast<RealType>(r * r);
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                double r = std::sin(mckl::const_pi_by2<double>() * p);
+                return dist.a() +
+                    (dist.b() - dist.a()) * static_cast<RealType>(r * r);
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -272,11 +292,18 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
     {
-        return this->partition_quantile(n, [&](double p) {
-            return static_cast<RealType>(
-                random_betaiinv(static_cast<double>(dist.alpha()),
-                    static_cast<double>(dist.beta()), p));
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return static_cast<RealType>(
+                    mckl::betaiinv(static_cast<double>(dist.alpha()),
+                        static_cast<double>(dist.beta()), p));
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -311,11 +338,18 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
     mckl::Vector<RealType> partition(
         std::size_t n, const dist_type &dist) const
     {
-        return this->partition_quantile(n, [&](double p) {
-            return dist.a() +
-                dist.b() * static_cast<RealType>(
-                               std::tan(mckl::const_pi<double>() * (p - 0.5)));
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return dist.a() +
+                    dist.b() * static_cast<RealType>(std::tan(
+                                   mckl::const_pi<double>() * (p - 0.5)));
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -339,11 +373,18 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return static_cast<RealType>(
-                random_gammapinv(static_cast<double>(dist.alpha()), p) *
-                static_cast<double>(dist.beta()));
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return static_cast<RealType>(
+                    mckl::gammapinv(static_cast<double>(dist.alpha()), p) *
+                    static_cast<double>(dist.beta()));
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -373,10 +414,17 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return static_cast<RealType>(
-                random_gammapinv(static_cast<double>(dist.n()) / 2, p) * 2);
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return static_cast<RealType>(
+                    mckl::gammapinv(static_cast<double>(dist.n()) / 2, p) * 2);
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
@@ -403,9 +451,16 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return -static_cast<RealType>(std::log(1 - p)) / dist.lambda();
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return -static_cast<RealType>(std::log(1 - p)) / dist.lambda();
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
@@ -429,10 +484,17 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return dist.a() -
-                dist.b() * static_cast<RealType>(std::log(-std::log(p)));
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return dist.a() -
+                    dist.b() * static_cast<RealType>(std::log(-std::log(p)));
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -456,12 +518,19 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            RealType q = static_cast<RealType>(
-                random_betaiinv(static_cast<double>(dist.m()) / 2,
-                    static_cast<double>(dist.n()) / 2, p));
-            return dist.n() * q / (dist.m() - dist.m() * q);
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                RealType q = static_cast<RealType>(
+                    mckl::betaiinv(static_cast<double>(dist.m()) / 2,
+                        static_cast<double>(dist.n()) / 2, p));
+                return dist.n() * q / (dist.m() - dist.m() * q);
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -488,14 +557,21 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            double q = p - 0.5;
-            return q > 0 ?
-                dist.a() -
-                    dist.b() * static_cast<RealType>(std::log(1 - 2 * q)) :
-                dist.a() +
-                    dist.b() * static_cast<RealType>(std::log(1 + 2 * q));
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                double q = p - 0.5;
+                return q > 0 ?
+                    dist.a() -
+                        dist.b() * static_cast<RealType>(std::log(1 - 2 * q)) :
+                    dist.a() +
+                        dist.b() * static_cast<RealType>(std::log(1 + 2 * q));
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -519,10 +595,17 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            double q = mckl::const_sqrt_2<double>() * random_erfinv(1 - p);
-            return dist.a() + dist.b() / static_cast<RealType>(q * q);
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                double q = mckl::const_sqrt_2<double>() * mckl::erfinv(1 - p);
+                return dist.a() + dist.b() / static_cast<RealType>(q * q);
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -546,10 +629,17 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return dist.a() +
-                dist.b() * static_cast<RealType>(std::log(p / (1 - p)));
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return dist.a() +
+                    dist.b() * static_cast<RealType>(std::log(p / (1 - p)));
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -573,10 +663,19 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            double q = mckl::const_sqrt_2<double>() * random_erfinv(2 * p - 1);
-            return std::exp(dist.m() + dist.s() * static_cast<RealType>(q));
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                double q =
+                    mckl::const_sqrt_2<double>() * mckl::erfinv(2 * p - 1);
+                return std::exp(
+                    dist.m() + dist.s() * static_cast<RealType>(q));
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -600,10 +699,18 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            double q = mckl::const_sqrt_2<double>() * random_erfinv(2 * p - 1);
-            return dist.mean() + dist.stddev() * static_cast<RealType>(q);
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                double q =
+                    mckl::const_sqrt_2<double>() * mckl::erfinv(2 * p - 1);
+                return dist.mean() + dist.stddev() * static_cast<RealType>(q);
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -627,10 +734,18 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return dist.b() /
-                std::exp(static_cast<RealType>(std::log(1 - p)) / dist.a());
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return dist.b() /
+                    std::exp(
+                           static_cast<RealType>(std::log(1 - p)) / dist.a());
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -654,10 +769,17 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return std::sqrt(-2 * static_cast<RealType>(std::log(1 - p)) *
-                dist.sigma() * dist.sigma());
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return std::sqrt(-2 * static_cast<RealType>(std::log(1 - p)) *
+                    dist.sigma() * dist.sigma());
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
@@ -696,6 +818,11 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
         }
     }
 
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
     mckl::Vector<std::array<RealType, 4>> params() const
     {
         mckl::Vector<std::array<RealType, 4>> params;
@@ -719,14 +846,21 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            RealType q = static_cast<RealType>(
-                random_betaiinv(static_cast<double>(dist.n()) * 0.5, 0.5,
-                    2 * std::min(p, 1 - p)));
-            RealType t = std::sqrt(dist.n() * (1 - q) / q);
+        return this->partition_quantile(n,
+            [&](double p) {
+                RealType q = static_cast<RealType>(
+                    mckl::betaiinv(static_cast<double>(dist.n()) * 0.5, 0.5,
+                        2 * std::min(p, 1 - p)));
+                RealType t = std::sqrt(dist.n() * (1 - q) / q);
 
-            return p > 0.5 ? t : -t;
-        });
+                return p > 0.5 ? t : -t;
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 1>> params() const
@@ -748,10 +882,15 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
 
     std::string distname() const { return "U01"; }
 
-    mckl::Vector<RealType> partition(std::size_t n, const dist_type &)
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
         return this->partition_quantile(
-            n, [&](double p) { return static_cast<RealType>(p); });
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 0>> params() const
@@ -772,9 +911,17 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return dist.a() + static_cast<RealType>(p) * (dist.b() - dist.a());
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return dist.a() +
+                    static_cast<RealType>(p) * (dist.b() - dist.a());
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -798,10 +945,18 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        return this->partition_quantile(n, [&](double p) {
-            return dist.b() * std::pow(-static_cast<RealType>(std::log(1 - p)),
-                                  1 / dist.a());
-        });
+        return this->partition_quantile(n,
+            [&](double p) {
+                return dist.b() *
+                    std::pow(-static_cast<RealType>(std::log(1 - p)),
+                           1 / dist.a());
+            },
+            dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
     }
 
     mckl::Vector<std::array<RealType, 2>> params() const
@@ -840,22 +995,25 @@ class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
         mckl::Vector<IntType> partition;
         for (IntType i = 0; i <= k; ++i)
             partition.push_back(i);
+        partition.push_back(dist.max());
 
         return partition;
     }
 
-    mckl::Vector<double> pmf(std::size_t n, const dist_type &dist)
+    mckl::Vector<double> probability(std::size_t n, const dist_type &dist)
     {
         const IntType k = static_cast<IntType>(
             std::ceil((std::log(5.0 / n) - std::log(dist.p())) /
                 std::log(1 - dist.p())));
 
-        mckl::Vector<double> pmf;
-        pmf.push_back(dist.p());
+        mckl::Vector<double> probability;
+        probability.push_back(dist.p());
         for (IntType i = 1; i <= k; ++i)
-            pmf.push_back(pmf.back() * (1 - dist.p()));
+            probability.push_back(probability.back() * (1 - dist.p()));
+        probability.push_back(
+            1 - std::accumulate(probability.begin(), probability.end(), 0.0));
 
-        return pmf;
+        return probability;
     }
 };
 
@@ -879,19 +1037,19 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
         IntType a = dist.a();
         IntType b = dist.b();
         mckl::Vector<IntType> partition;
-        for (IntType i = a; i < b; ++i)
+        for (IntType i = a; i <= b; ++i)
             partition.push_back(i);
 
         return partition;
     }
 
-    mckl::Vector<double> pmf(std::size_t, const dist_type &dist)
+    mckl::Vector<double> probability(std::size_t, const dist_type &dist)
     {
         IntType a = dist.a();
         IntType b = dist.b();
         const double p = 1.0 / (b - a + 1);
 
-        return mckl::Vector<double>(static_cast<std::size_t>(b - a), p);
+        return mckl::Vector<double>(static_cast<std::size_t>(b - a + 1), p);
     }
 
     private:
@@ -938,81 +1096,38 @@ inline DistType random_distribution_init(const std::array<ParamType, 4> &param)
 
 template <typename MCKLDistType>
 inline double random_distribution_chi2(std::size_t n,
-    const typename MCKLDistType::result_type *r, const MCKLDistType &dist,
-    std::true_type)
-{
-    using result_type = typename MCKLDistType::result_type;
-
-    mckl::Vector<result_type> rval(r, r + n);
-    std::sort(rval.begin(), rval.end());
-
-    RandomDistributionTrait<MCKLDistType> trait;
-    mckl::Vector<result_type> partition(trait.partition(n, dist));
-
-    const std::size_t k = partition.size() + 1;
-    mckl::Vector<double> count(k);
-    std::size_t j = 0;
-    for (std::size_t i = 0; i != k - 1; ++i) {
-        std::size_t c = 0;
-        while (j != rval.size() && rval[j] <= partition[i]) {
-            ++c;
-            ++j;
-        }
-        count[i] = static_cast<double>(c);
-    }
-    count.back() = static_cast<double>(rval.size() - j);
-
-    const double np = static_cast<double>(n) / k;
-    mckl::sub(k, count.data(), np, count.data());
-    mckl::sqr(k, count.data(), count.data());
-    const double s = std::accumulate(count.begin(), count.end(), 0.0) / np;
-
-    return random_gammap(0.5 * (k - 1), 0.5 * s);
-}
-
-template <typename MCKLDistType>
-inline double random_distribution_chi2(std::size_t n,
-    const typename MCKLDistType::result_type *r, const MCKLDistType &dist,
-    std::false_type)
-{
-    using result_type = typename MCKLDistType::result_type;
-
-    mckl::Vector<result_type> rval(r, r + n);
-    std::sort(rval.begin(), rval.end());
-
-    RandomDistributionTrait<MCKLDistType> trait;
-    mckl::Vector<result_type> partition(trait.partition(n, dist));
-    mckl::Vector<double> pmf(trait.pmf(n, dist));
-
-    const std::size_t k = partition.size() + 1;
-    mckl::Vector<double> count(k);
-    std::size_t j = 0;
-    for (std::size_t i = 0; i != k - 1; ++i) {
-        std::size_t c = 0;
-        while (j != rval.size() && rval[j] == partition[i]) {
-            ++c;
-            ++j;
-        }
-        count[i] = static_cast<double>(c);
-    }
-    count.back() = static_cast<double>(rval.size() - j);
-    pmf.push_back(1 - std::accumulate(pmf.begin(), pmf.end(), 0.0));
-
-    mckl::mul(k, static_cast<double>(n), pmf.data(), pmf.data());
-    mckl::sub(k, count.data(), pmf.data(), count.data());
-    mckl::sqr(k, count.data(), count.data());
-    mckl::div(k, count.data(), pmf.data(), count.data());
-    const double s = std::accumulate(count.begin(), count.end(), 0.0);
-
-    return random_gammap(0.5 * (k - 1), 0.5 * s);
-}
-
-template <typename MCKLDistType>
-inline double random_distribution_chi2(std::size_t n,
     const typename MCKLDistType::result_type *r, const MCKLDistType &dist)
 {
-    return random_distribution_chi2(n, r, dist,
-        std::is_floating_point<typename MCKLDistType::result_type>());
+    using result_type = typename MCKLDistType::result_type;
+
+    RandomDistributionTrait<MCKLDistType> trait;
+    auto partition = trait.partition(n, dist);
+    auto probability = trait.probability(n, dist);
+    std::size_t k = partition.size();
+
+    mckl::Vector<result_type> rval(n);
+    mckl::Vector<std::size_t> count(k);
+    std::copy_n(r, n, rval.begin());
+    std::sort(rval.begin(), rval.end());
+    std::size_t j = 0;
+    for (std::size_t i = 0; i != k; ++i) {
+        std::size_t c = 0;
+        result_type p = static_cast<result_type>(partition[i]);
+        while (j != n && rval[j] <= p) {
+            ++c;
+            ++j;
+        }
+        count[i] = c;
+    }
+
+    double s = 0;
+    for (std::size_t i = 0; i != k; ++i) {
+        double c = static_cast<double>(count[i]);
+        double p = static_cast<double>(probability[i]);
+        s += c * c / p;
+    }
+
+    return mckl::gammap(0.5 * (k - 1), 0.5 * (s / n - n));
 }
 
 template <typename MCKLDistType>

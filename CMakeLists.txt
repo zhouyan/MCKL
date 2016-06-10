@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
 
 ##############################################################################
 # Disable in source build

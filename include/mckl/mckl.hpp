@@ -45,7 +45,7 @@
 /// \brief Constructing samplers with operations on the whole particle set
 
 /// \defgroup Algorithm Algorithm
-/// \brief Monte Calro algorithms
+/// \brief Monte Carlo algorithms
 
 /// \defgroup MH Metropolis-Hastings
 /// \ingroup Algorithm
@@ -94,7 +94,7 @@
 
 /// \defgroup Distribution Distribution
 /// \ingroup Random
-/// \brief Distribution random varaites
+/// \brief Distribution random variates
 
 /// \defgroup MKL Intel Math Kernel Library
 /// \ingroup Random
@@ -102,11 +102,11 @@
 
 /// \defgroup Philox Philox
 /// \ingroup Random
-/// \brief Random number generating using Random123 Philox RNG
+/// \brief Random number generating using Random123 Philox algorithm
 
 /// \defgroup Threefry Threefry
 /// \ingroup Random
-/// \brief Random number generating using Random123 Threefry RNG
+/// \brief Random number generating using Random123 Threefry algorithm
 
 /// \defgroup RDRAND Intel DRNG
 /// \ingroup Random
@@ -115,6 +115,10 @@
 /// \defgroup U01 U01
 /// \ingroup Random
 /// \brief Converting random integers to uniform floating points
+
+/// \defgroup RandomTest Randomness tests
+/// \ingroup Random
+/// \brief Testing randomness of standard uniform distribution
 
 /// \defgroup RandomC Random number generating in C and OpenCL
 /// \brief Random number generating in C and OpenCL

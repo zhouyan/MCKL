@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/common.hpp
+// MCKL/include/mckl/random/permutation_test.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,52 +29,59 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMMON_HPP
-#define MCKL_INTERNAL_COMMON_HPP
+#ifndef MCKL_RANDOM_PERMUTATION_TEST_HPP
+#define MCKL_RANDOM_PERMUTATION_TEST_HPP
 
-#include <mckl/internal/basic.hpp>
-#include <mckl/math.hpp>
-#include <mckl/utility/aligned_memory.hpp>
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/chi_squared_test.hpp>
 
 namespace mckl
 {
 
-namespace internal
+/// \brief Permutation test
+/// \ingroup RandomTest
+///
+/// \tparam T Length of the tuple
+template <std::size_t T>
+class PermutationTest : public ChiSquaredTest<PermutationTest<T>>
 {
+    static_assert(T > 0, "**PermutationTest** used with T equal to zero");
 
-template <typename T, std::size_t N>
-using StaticVector =
-    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
+    static_assert(T <= 20, "**PermutationTest** used with T larger than 20");
 
-class StirlingMatrix2
-{
     public:
-    StirlingMatrix2(std::size_t n, std::size_t m)
-        : ncol_(m + 1), data_((n + 1) * (m + 1))
+    /// \brief Construct a Permutation test
+    ///
+    /// \param n The number of tuples
+    PermutationTest(std::size_t n)
+        : n_(n), np_(static_cast<double>(n) / M_), count_(M_)
     {
-        std::fill(data_.begin(), data_.end(), 0);
-        get(0, 0) = 1;
-        for (std::size_t j = 1; j <= m; ++j) {
-            get(j, j) = 1;
-            for (std::size_t i = j + 1; i <= n; ++i)
-                get(i, j) = j * get(i - 1, j) + get(i - 1, j - 1);
-        }
     }
 
-    double operator()(std::size_t i, std::size_t j) const
+    template <typename RNGType, typename DistributionType>
+    double operator()(RNGType &rng, DistributionType &distribution)
     {
-        return data_[i * ncol_ + j];
+        std::array<typename DistributionType::result_type, T> r;
+        std::fill(count_.begin(), count_.end(), 0);
+        for (std::size_t i = 0; i != n_; ++i) {
+            rand(rng, distribution, T, r.data());
+            count_[internal::permutation_index<T>(r.data())] += 1;
+        }
+
+        return this->stat(M_, count_.data(), np_);
     }
+
+    double degree_of_freedom() const { return M_ - 1; }
 
     private:
-    std::size_t ncol_;
-    Vector<double> data_;
+    static constexpr std::size_t M_ =
+        internal::Factorial<std::size_t, T>::value;
 
-    double &get(std::size_t i, std::size_t j) { return data_[i * ncol_ + j]; }
-}; // class StirlingMatrix
-
-} // namespace mckl::internal
+    std::size_t n_;
+    double np_;
+    Vector<double> count_;
+}; // class PermutationTest
 
 } // namespace mckl
 
-#endif // MCKL_INTERNAL_COMMON_HPP
+#endif // MCKL_RANDOM_PERMUTATION_TEST_HPP

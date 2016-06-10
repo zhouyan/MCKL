@@ -620,7 +620,7 @@
         reset();                                                              \
     }                                                                         \
                                                                               \
-    void pram(param_type &&param)                                             \
+    void param(param_type &&param)                                            \
     {                                                                         \
         param_ = std::move(param);                                            \
         reset();                                                              \
@@ -740,6 +740,118 @@ namespace internal
 
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(CtrType, ctr_type, NullType)
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
+
+template <std::size_t N, std::size_t D, std::size_t T>
+inline std::size_t serial_index(const std::size_t *, std::false_type)
+{
+    return 0;
+}
+
+template <std::size_t N, std::size_t D, std::size_t T>
+inline std::size_t serial_index(const std::size_t *s, std::true_type)
+{
+    return Pow<std::size_t, D, T - 1 - N>::value * s[N] +
+        serial_index<N + 1, D, T>(
+               s, std::integral_constant<bool, N + 1 < T>());
+}
+
+template <std::size_t D, std::size_t T, typename ResultType>
+inline std::size_t serial_index(const ResultType *r)
+{
+    std::array<std::size_t, T> s;
+    for (std::size_t i = 0; i != T; ++i)
+        s[i] = std::min(static_cast<std::size_t>(r[i]), D - 1);
+
+    return serial_index<0, D, T>(
+        s.data(), std::integral_constant<bool, 0 < T>());
+}
+
+template <std::size_t N, typename ResultType>
+inline std::size_t permutation_imax(ResultType *r)
+{
+    ResultType v = r[0];
+    std::size_t s = 0;
+    for (std::size_t i = 1; i < N; ++i) {
+        if (v < r[i]) {
+            v = r[i];
+            s = i;
+        }
+    }
+
+    return s;
+}
+
+template <std::size_t N, typename ResultType>
+inline void permutation_sort(ResultType *, std::size_t &, std::false_type)
+{
+}
+
+template <std::size_t N, typename ResultType>
+inline void permutation_sort(ResultType *r, std::size_t &f, std::true_type)
+{
+    std::size_t s = permutation_imax<N>(r);
+    f = N * f + s;
+    r[s] = r[N - 1];
+    permutation_sort<N - 1>(r, f, std::integral_constant<bool, 2 < N>());
+}
+
+template <std::size_t T, typename ResultType>
+inline std::size_t permutation_index(ResultType *r)
+{
+    std::size_t f = 0;
+    permutation_sort<T>(r, f, std::integral_constant<bool, 1 < T>());
+
+    return f;
+}
+
+inline void group_np(double n, const Vector<double> &np_all,
+    Vector<double> &np, std::size_t &kmin, std::size_t &kmax)
+{
+    double npmin = 10;
+
+    std::size_t K = np_all.size();
+    if (K <= 2) {
+        np = np_all;
+        kmin = 0;
+        kmax = K - 1;
+        return;
+    }
+
+    kmin = 0;
+    while (kmin < K) {
+        if (np_all[kmin] >= npmin)
+            break;
+        ++kmin;
+    }
+    kmax = kmin + 1;
+    while (kmax < K && np_all[kmax] >= npmin)
+        ++kmax;
+    --kmax;
+    if (kmin == kmax)
+        --kmin;
+    np.clear();
+    np.reserve(kmax - kmin + 1);
+    np.push_back(0);
+    std::size_t k = 0;
+    while (k <= kmin) {
+        np[0] += np_all[k];
+        ++k;
+    }
+    while (k <= kmax) {
+        np.push_back(np_all[k]);
+        ++k;
+    }
+    np.back() += n - std::accumulate(np.begin(), np.end(), 0.0);
+}
+
+template <typename IntType, IntType D, typename RealType>
+inline IntType ftoi(RealType r)
+{
+    std::size_t u = static_cast<IntType>(r);
+    u = u < D ? u : D - 1;
+
+    return u;
+}
 
 template <typename IntType, typename RealType>
 inline IntType ftoi(RealType x, std::true_type)

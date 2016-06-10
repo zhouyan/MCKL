@@ -36,6 +36,7 @@ MCKL_ADD_EXAMPLE(random)
 MCKL_ADD_TEST(random distribution)
 MCKL_ADD_TEST(random distribution_perf)
 MCKL_ADD_TEST(random rng)
+MCKL_ADD_TEST(random test)
 MCKL_ADD_TEST(random u01)
 MCKL_ADD_TEST(random uniform_bits)
 

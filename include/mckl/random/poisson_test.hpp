@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/common.hpp
+// MCKL/include/mckl/random/poisson_test.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,52 +29,54 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMMON_HPP
-#define MCKL_INTERNAL_COMMON_HPP
+#ifndef MCKL_RANDOM_POISSON_TEST_HPP
+#define MCKL_RANDOM_POISSON_TEST_HPP
 
-#include <mckl/internal/basic.hpp>
-#include <mckl/math.hpp>
-#include <mckl/utility/aligned_memory.hpp>
+#include <mckl/random/internal/common.hpp>
 
 namespace mckl
 {
 
-namespace internal
-{
-
-template <typename T, std::size_t N>
-using StaticVector =
-    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
-
-class StirlingMatrix2
+/// \brief Tests based on the Poisson distribution
+/// \ingroup RandomTest
+template <typename Derived>
+class PoissonTest
 {
     public:
-    StirlingMatrix2(std::size_t n, std::size_t m)
-        : ncol_(m + 1), data_((n + 1) * (m + 1))
+    using result_type = std::size_t;
+
+    bool pass(double alpha, std::size_t s) const
     {
-        std::fill(data_.begin(), data_.end(), 0);
-        get(0, 0) = 1;
-        for (std::size_t j = 1; j <= m; ++j) {
-            get(j, j) = 1;
-            for (std::size_t i = j + 1; i <= n; ++i)
-                get(i, j) = j * get(i - 1, j) + get(i - 1, j - 1);
-        }
+        double l = cdf(s);
+        double r = s > 0 ? 1 - cdf(s - 1) : 1;
+        double p = 0;
+        if (r < l)
+            p = r;
+        else if (l < 0.5)
+            p = 1 - l;
+        else
+            p = 0.5;
+
+        return std::min(p, 1 - p) > 0.5 * alpha;
     }
 
-    double operator()(std::size_t i, std::size_t j) const
+    double pdf(std::size_t s, bool use_log = false) const
     {
-        return data_[i * ncol_ + j];
+        double mean = static_cast<const Derived *>(this)->mean();
+        double lpdf = s * std::log(mean) - mean -
+            std::lgamma(static_cast<double>(s + 1));
+
+        return use_log ? lpdf : std::exp(lpdf);
     }
 
-    private:
-    std::size_t ncol_;
-    Vector<double> data_;
+    double cdf(std::size_t s) const
+    {
+        double mean = static_cast<const Derived *>(this)->mean();
 
-    double &get(std::size_t i, std::size_t j) { return data_[i * ncol_ + j]; }
-}; // class StirlingMatrix
-
-} // namespace mckl::internal
+        return 1 - gammap(static_cast<double>(s + 1), mean);
+    }
+}; // class PoissonTest
 
 } // namespace mckl
 
-#endif // MCKL_INTERNAL_COMMON_HPP
+#endif // MCKL_RANDOM_POISSON_TEST_HPP

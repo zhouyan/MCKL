@@ -630,7 +630,7 @@ class AESKeySeq
 
         alignas(16) std::array<std::uint64_t, 2 * (Rounds + 1)> ks;
         std::memcpy(ks.data(), seq.key_seq_.data(), 16 * (Rounds + 1));
-        os << ks;
+        ostream(os, ks);
 
         return os;
     }
@@ -644,7 +644,7 @@ class AESKeySeq
             return is;
 
         alignas(16) std::array<std::uint64_t, 2 * (Rounds + 1)> ks;
-        is >> ks;
+        istream(is, ks);
         if (is)
             std::memcpy(seq.key_seq_.data(), ks.data(), 16 * (Rounds + 1));
 
@@ -945,7 +945,7 @@ class ARSKeySeqImpl
 
         alignas(16) key_type k;
         _mm_store_si128(reinterpret_cast<__m128i *>(k.data()), seq.key_);
-        os << k;
+        ostream(os, k);
 
         return os;
     }
@@ -958,7 +958,7 @@ class ARSKeySeqImpl
             return is;
 
         alignas(16) key_type k = {{0}};
-        is >> k;
+        istream(is, k);
         if (is) {
             seq.key_ =
                 _mm_load_si128(reinterpret_cast<const __m128i *>(k.data()));
