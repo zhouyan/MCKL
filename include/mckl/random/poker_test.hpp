@@ -65,10 +65,10 @@ class PokerTest : public ChiSquaredTest<PokerTest<D, T>>
         internal::group_np(static_cast<double>(n), np_all, np_, tmin_, tmax_);
     }
 
-    template <typename RNGType, typename U01Type>
-    double operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename U01DistributionType>
+    double operator()(RNGType &rng, U01DistributionType &u01)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         const std::size_t k = internal::BufferSize<result_type, T>::value;
         const std::size_t m = n_ / k;
@@ -97,12 +97,13 @@ class PokerTest : public ChiSquaredTest<PokerTest<D, T>>
     Vector<double> np_;
     Vector<double> count_;
 
-    template <typename RNGType, typename U01Type>
-    void generate(RNGType &rng, U01Type &u01, std::size_t n,
-        typename U01Type::result_type *r)
+    template <typename RNGType, typename U01DistributionType>
+    void generate(RNGType &rng, U01DistributionType &u01, std::size_t n,
+        typename U01DistributionType::result_type *r)
     {
         rand(rng, u01, n * T, r);
-        mul(n * T, static_cast<typename U01Type::result_type>(D), r, r);
+        mul(n * T, static_cast<typename U01DistributionType::result_type>(D),
+            r, r);
         for (std::size_t i = 0; i != n; ++i, r += T) {
             std::size_t t = index(r);
             if (t <= tmin_)

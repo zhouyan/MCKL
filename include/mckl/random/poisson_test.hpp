@@ -45,7 +45,7 @@ class PoissonTest
     public:
     using result_type = std::size_t;
 
-    bool pass(double alpha, std::size_t s) const
+    bool pass(double alpha, result_type s) const
     {
         double l = cdf(s);
         double r = s > 0 ? 1 - cdf(s - 1) : 1;
@@ -60,16 +60,16 @@ class PoissonTest
         return std::min(p, 1 - p) > 0.5 * alpha;
     }
 
-    double pdf(std::size_t s, bool use_log = false) const
+    double pdf(result_type s) const
     {
         double mean = static_cast<const Derived *>(this)->mean();
         double lpdf = s * std::log(mean) - mean -
             std::lgamma(static_cast<double>(s + 1));
 
-        return use_log ? lpdf : std::exp(lpdf);
+        return std::exp(lpdf);
     }
 
-    double cdf(std::size_t s) const
+    double cdf(result_type s) const
     {
         double mean = static_cast<const Derived *>(this)->mean();
 

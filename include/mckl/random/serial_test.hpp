@@ -57,10 +57,10 @@ class SerialTestImpl<D, T, false>
     {
     }
 
-    template <typename RNGType, typename U01Type>
-    double operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename U01DistributionType>
+    double operator()(RNGType &rng, U01DistributionType &u01)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         std::fill(count_.begin(), count_.end(), 0);
 
@@ -84,12 +84,13 @@ class SerialTestImpl<D, T, false>
     double np_;
     Vector<double> count_;
 
-    template <typename RNGType, typename U01Type>
-    void generate(RNGType &rng, U01Type &u01, std::size_t n,
-        typename U01Type::result_type *r)
+    template <typename RNGType, typename U01DistributionType>
+    void generate(RNGType &rng, U01DistributionType &u01, std::size_t n,
+        typename U01DistributionType::result_type *r)
     {
         rand(rng, u01, n * T, r);
-        mul(n * T, static_cast<typename U01Type::result_type>(D), r, r);
+        mul(n * T, static_cast<typename U01DistributionType::result_type>(D),
+            r, r);
         for (std::size_t i = 0; i != n; ++i, r += T)
             count_[serial_index<D, T>(r)] += 1;
     }
@@ -115,10 +116,10 @@ class SerialTestImpl<D, T, true>
             n >= T, "**SerialTest** constructed with n less then T");
     }
 
-    template <typename RNGType, typename U01Type>
-    double operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename U01DistributionType>
+    double operator()(RNGType &rng, U01DistributionType &u01)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         std::fill(count1_.begin(), count1_.end(), 0);
         std::fill(count2_.begin(), count2_.end(), 0);

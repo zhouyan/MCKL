@@ -86,10 +86,10 @@ class GapTest : public ChiSquaredTest<GapTest<NTrialMax>>
         np_.push_back(n - std::accumulate(np_.begin(), np_.end(), 0.0));
     }
 
-    template <typename RNGType, typename DistributionType>
-    double operator()(RNGType &rng, DistributionType &distribution)
+    template <typename RNGType, typename U01DistributionType>
+    double operator()(RNGType &rng, U01DistributionType &u01)
     {
-        using result_type = typename DistributionType::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         const std::size_t t = np_.size() - 1;
         count_.resize(np_.size());
@@ -101,7 +101,7 @@ class GapTest : public ChiSquaredTest<GapTest<NTrialMax>>
             while (true) {
                 if (r >= NTrialMax)
                     return 0;
-                result_type u = distribution(rng);
+                result_type u = u01(rng);
                 if (u >= alpha_ && u < beta_) {
                     count_[std::min(r, t)] += 1;
                     ++s;

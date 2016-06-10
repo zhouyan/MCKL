@@ -51,12 +51,16 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
     static_assert(T > 0, "**BirthdaySpacingsTest** used with T equal to zero");
 
     public:
-    BirthdaySpacingsTest(std::size_t n) : n_(n) {}
-
-    template <typename RNGType, typename U01Type>
-    std::size_t operator()(RNGType &rng, U01Type &u01)
+    BirthdaySpacingsTest(std::size_t n) : n_(n)
     {
-        using result_type = typename U01Type::result_type;
+        mean_ = std::exp(3 * std::log(static_cast<double>(n)) -
+            std::log(static_cast<double>(K_)) - 2 * const_ln_2<double>());
+    }
+
+    template <typename RNGType, typename U01DistributionType>
+    std::size_t operator()(RNGType &rng, U01DistributionType &u01)
+    {
+        using result_type = typename U01DistributionType::result_type;
 
         const std::size_t k = internal::BufferSize<result_type, T>::value;
         const std::size_t m = n_ / k;
@@ -83,27 +87,22 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
         return e;
     }
 
-    double mean() const
-    {
-        double n = static_cast<double>(n_);
-        double k = static_cast<double>(K_);
-
-        return std::exp(
-            3 * std::log(n) - std::log(k) - 2 * const_ln_2<double>());
-    }
+    double mean() const { return mean_; }
 
     private:
     static constexpr std::size_t K_ = internal::Pow<std::size_t, D, T>::value;
 
     std::size_t n_;
+    double mean_;
     Vector<std::size_t> spacings_;
 
-    template <typename RNGType, typename U01Type>
-    void generate(RNGType &rng, U01Type &u01, std::size_t n,
-        typename U01Type::result_type *r, std::size_t *s)
+    template <typename RNGType, typename U01DistributionType>
+    void generate(RNGType &rng, U01DistributionType &u01, std::size_t n,
+        typename U01DistributionType::result_type *r, std::size_t *s)
     {
         rand(rng, u01, n * T, r);
-        mul(n * T, static_cast<typename U01Type::result_type>(D), r, r);
+        mul(n * T, static_cast<typename U01DistributionType::result_type>(D),
+            r, r);
         for (std::size_t i = 0; i != n; ++i, r += T)
             s[i] = internal::serial_index<D, T>(r);
     }
