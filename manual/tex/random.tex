@@ -714,7 +714,7 @@ the output random real numbers as $X$.
   \label{tab:Intermediate integer types of uniform distributions}
 \end{table}
 
-\subsubsection{\texttt{U01Distribution}}
+\subsubsection{\texorpdfstring{\texttt{U01Distribution}}{U01Distribution}}
 
 The class template,
 \begin{Verbatim}
@@ -731,7 +731,7 @@ through the mapping,
   X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{align*}
 
-\subsubsection{\texttt{U01CCDistribution}}
+\subsubsection{\texorpdfstring{\texttt{U01CCDistribution}}{U01CCDistribution}}
 
 The class template,
 \begin{Verbatim}
@@ -750,7 +750,7 @@ implements the uniform distribution on $[0, 1]$ through the mapping,
 \end{align*}
 The minimum and maximum are $0$ and $1$, respectively.
 
-\subsubsection{\texttt{U01CODistribution}}
+\subsubsection{\texorpdfstring{\texttt{U01CODistribution}}{U01CODistribution}}
 
 The class template,
 \begin{Verbatim}
@@ -765,7 +765,7 @@ implements the uniform distribution on $[0, 1)$ through the mapping,
 \end{align*}
 The minimum and maximum are $0$ and $1 - 2^{-P}$, respectively.
 
-\subsubsection{\texttt{U01OCDistribution}}
+\subsubsection{\texorpdfstring{\texttt{U01OCDistribution}}{U01OCDistribution}}
 
 The class template,
 \begin{Verbatim}
@@ -780,7 +780,7 @@ implements the uniform distribution on $(0, 1]$ through the mapping,
 \end{align*}
 The minimum and maximum are $2^{-P}$ and $1$, respectively.
 
-\subsubsection{\texttt{U01OODistribution}}
+\subsubsection{\texorpdfstring{\texttt{U01OODistribution}}{U01OODistribution}}
 
 The class template,
 \begin{Verbatim}
@@ -877,7 +877,7 @@ other cases, the vectorized generating shall provide considerable speedup.
 \end{Verbatim}
 The implementation uses the inverse method.
 
-\subsubsection{$\chi^2$-distribution}
+\subsubsection{\texorpdfstring{$\chi^2$}{Chi-squared}-distribution}
 
 \begin{equation*}
   f(x;n) = \frac{x^{n/2 - 1}\EE^{-x/2}}{2^{n/2}\Gamma(n/2)} \qquad
@@ -917,7 +917,7 @@ The implementation uses the inverse method.
 \end{Verbatim}
 The implementation uses the inverse method.
 
-\subsubsection{Fisher's $F$-distribution}
+\subsubsection{Fisher's \texorpdfstring{$F$}{F}-distribution}
 
 \begin{align*}
   & f(x;m,n) =
@@ -1086,7 +1086,7 @@ stable distribution, such as the Landau distribution ($\alpha = 1$, $\beta =
 1$) and Holtsmark distribution ($\alpha = 3/2$, $\beta = 0$), to name just two
 of them.
 
-\subsubsection{Student's $t$-distribution}
+\subsubsection{Student's \texorpdfstring{$t$}{t}-distribution}
 
 \begin{equation*}
   f(x;n) =
@@ -1444,7 +1444,7 @@ accept the number of samples and number runs, respectively. The former will
 generate $n$ random numbers. The later will always terminate, but may take a
 very long time if the sequence if deficient.
 
-\subsection{Maximum-of-$t$ test}
+\subsection{Maximum-of-\texorpdfstring{$t$}{t} test}
 \label{Maximum-of-t test}
 
 The class template,
