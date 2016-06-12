@@ -32,17 +32,17 @@
 \chapter{Random number generating}
 \label{chap:Random number generating}
 
-The library has a comprehensive \rng system to facilitate implementation of
-Monte Carlo algorithms. Similar to the standard library header \verb|<random>|,
-there are mainly two parts of this system. The first is a set of \rng{} engines
-that generate random integers. The other is a set of distribution generators.
-The former are documented in Sections~\ref{sec:Counter-based RNG}
-to~\ref{sec:MKL RNG}, and the later in Section~\ref{sec:Distribution}. Apart
-from these, the library also provides facilities for vectorized random number
-generating (Section~\ref{sec:Vectorized random number generating}) and using
-multiple \rng{}s in parallel programs (Section~\ref{sec:Multiple RNG streams}).
-There are also some performance data in Appendices~\appref{chap:Performance of
-RNG} and~\appref{chap:Performance of distribution}. Last, in
+The library has a comprehensive \rng system for implementing Monte Carlo
+algorithms. Similar to the standard library header \verb|<random>|, there are
+mainly two parts of this system. The first is a set of \rng{} engines that
+generate random integers. The other is a set of distribution generators. The
+former are documented in Sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL
+RNG}, and the later in Section~\ref{sec:Distribution}. There are also some
+performance data in Appendices~\appref{chap:Performance of RNG}
+and~\appref{chap:Performance of distribution} for them. Apart from these, the
+library also provides facilities for vectorized random number generating
+(Section~\ref{sec:Vectorized random number generating}) and using multiple
+\rng{}s in parallel programs (Section~\ref{sec:Multiple RNG streams}). Last, in
 Section~\ref{sec:Randomness tests}, a few randomness tests are discussed.
 
 \section{Vectorized random number generating}
