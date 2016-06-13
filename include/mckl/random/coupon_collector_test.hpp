@@ -66,10 +66,10 @@ class CouponCollectorTest
         internal::group_np(static_cast<double>(n), np_all, np_, tmin_, tmax_);
     }
 
-    template <typename RNGType, typename U01Type>
-    double operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename U01DistributionType>
+    double operator()(RNGType &rng, U01DistributionType &u01)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         const std::size_t k = internal::BufferSize<result_type>::value;
         Vector<result_type> r(k);

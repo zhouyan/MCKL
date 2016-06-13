@@ -45,24 +45,24 @@ class ChiSquaredTest
     public:
     using result_type = double;
 
-    bool pass(double alpha, double s) const
+    bool pass(double alpha, result_type s) const
     {
         double p = cdf(s);
 
         return std::min(p, 1 - p) > 0.5 * alpha;
     }
 
-    double pdf(double s, bool use_log = false) const
+    double pdf(result_type s) const
     {
         double k =
             0.5 * static_cast<const Derived *>(this)->degree_of_freedom();
         double lpdf = -k * const_ln_2<double>() - std::lgamma(k) +
             (k - 1) * std::log(s) - 0.5 * s;
 
-        return use_log ? lpdf : std::exp(lpdf);
+        return std::exp(lpdf);
     }
 
-    double cdf(double s) const
+    double cdf(result_type s) const
     {
         return gammap(
             0.5 * static_cast<const Derived *>(this)->degree_of_freedom(),

@@ -75,24 +75,24 @@ class RunTestImpl<false, Up> : public ChiSquaredTest<RunTestImpl<false, Up>>
     public:
     RunTestImpl(std::size_t n) : n_(n) {}
 
-    template <typename RNGType, typename U01Type>
-    double operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename DistributionType>
+    double operator()(RNGType &rng, DistributionType &distribution)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename DistributionType::result_type;
 
         std::array<double, 6> count;
         std::fill(count.begin(), count.end(), 0);
 
         const std::size_t t = 5;
         std::size_t s = 0;
-        result_type v = u01(rng);
+        result_type v = distribution(rng);
         while (s < n_) {
             std::size_t r = 0;
             while (true) {
                 ++r;
                 ++s;
                 result_type u = v;
-                v = u01(rng);
+                v = distribution(rng);
                 if (RunTestCheck<Up>::eval(u, v))
                     break;
                 if (s == n_)
@@ -150,28 +150,28 @@ class RunTestImpl<true, Up> : public ChiSquaredTest<RunTestImpl<true, Up>>
     public:
     RunTestImpl(std::size_t n) : n_(n) {}
 
-    template <typename RNGType, typename U01Type>
-    double operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename DistributionType>
+    double operator()(RNGType &rng, DistributionType &distribution)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename DistributionType::result_type;
 
         const std::size_t t = 5;
         std::array<double, 6> count;
         std::fill(count.begin(), count.end(), 0);
 
         double s = 0;
-        result_type v = u01(rng);
+        result_type v = distribution(rng);
         while (s < n_) {
             std::size_t r = 0;
             while (true) {
                 if (r > n_)
                     return 0;
                 result_type u = v;
-                v = u01(rng);
+                v = distribution(rng);
                 if (RunTestCheck<Up>::eval(u, v)) {
                     count[std::min(r, t)] += 1;
                     ++s;
-                    v = u01(rng);
+                    v = distribution(rng);
                     break;
                 }
                 ++r;

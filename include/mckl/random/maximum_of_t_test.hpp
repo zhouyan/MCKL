@@ -53,10 +53,10 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
     public:
     MaximumOfTTest(std::size_t n) : n_(n), count_(D) {}
 
-    template <typename RNGType, typename U01Type>
-    double operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename U01DistributionType>
+    double operator()(RNGType &rng, U01DistributionType &u01)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         std::fill(count_.begin(), count_.end(), 0);
 
@@ -78,11 +78,12 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
     std::size_t n_;
     Vector<double> count_;
 
-    template <typename RNGType, typename U01Type>
-    void generate(RNGType &rng, U01Type &u01, std::size_t n,
-        typename U01Type::result_type *r, typename U01Type::result_type *s)
+    template <typename RNGType, typename U01DistributionType>
+    void generate(RNGType &rng, U01DistributionType &u01, std::size_t n,
+        typename U01DistributionType::result_type *r,
+        typename U01DistributionType::result_type *s)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         rand(rng, u01, n * T, r);
         for (std::size_t i = 0; i != n; ++i, r += T)

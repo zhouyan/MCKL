@@ -63,10 +63,10 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
         mean_ = K_ * (p / K_ - 1 + std::pow(1 - 1.0 / K_, p));
     }
 
-    template <typename RNGType, typename U01Type>
-    std::size_t operator()(RNGType &rng, U01Type &u01)
+    template <typename RNGType, typename U01DistributionType>
+    std::size_t operator()(RNGType &rng, U01DistributionType &u01)
     {
-        using result_type = typename U01Type::result_type;
+        using result_type = typename U01DistributionType::result_type;
 
         const std::size_t k = internal::BufferSize<result_type, T>::value;
         const std::size_t m = n_ / k;
@@ -93,13 +93,14 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
     std::size_t n_;
     double mean_;
 
-    template <typename RNGType, typename U01Type>
-    void generate(RNGType &rng, U01Type &u01, std::size_t n,
-        typename U01Type::result_type *r, std::size_t &s,
+    template <typename RNGType, typename U01DistributionType>
+    void generate(RNGType &rng, U01DistributionType &u01, std::size_t n,
+        typename U01DistributionType::result_type *r, std::size_t &s,
         occurs_type &occurs) const
     {
         rand(rng, u01, n * T, r);
-        mul(n * T, static_cast<typename U01Type::result_type>(D), r, r);
+        mul(n * T, static_cast<typename U01DistributionType::result_type>(D),
+            r, r);
         for (std::size_t i = 0; i != n; ++i, r += T)
             count(internal::serial_index<D, T>(r), s, occurs);
     }

@@ -665,7 +665,8 @@ The sampler can be initialized,
 This will perform a few things. First, any record of previous operations on the
 sampler will be cleared. The iteration number $t$ will be set to zero. And
 then, there are three evaluation stages and three monitoring stages. They are
-performed in the following order.
+performed in the following order:
+
 \begin{enumerate}
   \item \verb|SamplerInit|
   \item \verb|MonitorMove|
@@ -674,6 +675,7 @@ performed in the following order.
   \item \verb|SamplerMCMC|
   \item \verb|MonitorMCMC|
 \end{enumerate}
+
 Each evaluation object, added to the sampler through,
 \begin{Verbatim}
   Sampler<T> &eval(const eval_type &e, SamplerStage stage);
@@ -805,7 +807,7 @@ It then initialized and iterated $n - 1$ times, where $n$ is the total number
 of observations. In the end, we write a summary of the sampler into the file
 \verb|pf.est|.
 
-\subsubsection{The \texttt{PF} class}
+\subsubsection{The \texorpdfstring{\texttt{PF}}{PF} class}
 
 First all of, we need a class to represent the state space, which is $\Real^4$.
 A sensible base class is thus,
@@ -889,7 +891,8 @@ which is a simple translation of the mathematical formulation,
   }
 \end{Verbatim}
 
-\subsubsection{The \texttt{PFInit} and \texttt{PFMove} functions}
+\subsubsection{The \texorpdfstring{\texttt{PFInit}}{PFInit} and
+\texorpdfstring{\texttt{PFMove}}{PFMove} functions}
 
 The function that sample the state values from the prior is as the following,
 \begin{Verbatim}
@@ -933,7 +936,7 @@ function to sample new states in each iteration later is similar,
 Both of these two functions are really simple translations of the mathematical
 formulation of the algorithm.
 
-\subsubsection{The \texttt{PFWeight} function}
+\subsubsection{The \texorpdfstring{\texttt{PFWeight}}{PFWeight} function}
 
 In each iteration, we will weight the particles using its log-likelihood. This
 will be computed with the \verb|log_likelihood| method of
@@ -952,7 +955,7 @@ weights to the particle system. Note that, each time the \verb|initialize|
 method of \verb|Sampler| is called, the weights will be set to be equal first.
 And thus the function above is correct for both initialization and iterations.
 
-\subsubsection{The \texttt{PFEstimate} function}
+\subsubsection{The \texorpdfstring{\texttt{PFEstimate}}{PFEstimate} function}
 
 Last, we would like to record the value of $\varphi^t(X_i^t) =
 (\xpos^{t,i},\ypos^{t,i})^{\transpose}$. This is done by defining the function,

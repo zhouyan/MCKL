@@ -37,6 +37,7 @@
 #include <mckl/random/rng.hpp>
 #include <mckl/random/rng_set.hpp>
 #include <mckl/random/seed.hpp>
+#include <mckl/random/test.hpp>
 #include <mckl/random/u01.hpp>
 
 #endif // MCKL_RANDOM_HPP

@@ -40,6 +40,7 @@ generate a new system $\hat{S}_{1:M}$ such that,
 \end{equation*}
 for test function $\varphi$. Regardless of other statistical properties, in
 practice, such an algorithm can be decomposed into three steps,
+
 \begin{enumerate}
   \item Generate an $N$-vector of replication numbers $r_{1:N}$, such that
     $\sum_{i=1}^N r_i = M$, and $0 \le r_i \le M$ for $i=1,\dots,N$.
@@ -47,6 +48,7 @@ practice, such an algorithm can be decomposed into three steps,
     \bbI_{\{i\}}(a_j) = r_i$, and $1 \le a_i \le N$ for $i = 1,\dots,M$.
   \item Set $\hat{X}_i = X_{a_i}$ for $i = 1,\dots,M$.
 \end{enumerate}
+
 Given the results of the first step, the second step can be implemented with a
 deterministic algorithm. And the final results will be determined up to
 re-ordering. Therefore, it is the first step that determines the statistical
@@ -70,8 +72,7 @@ that is compatible with the type above. It has a single constructor,
 \begin{Verbatim}
   explicit ResampleEval(const eval_type &eval);
 \end{Verbatim}
-where \verb|eval_type| (not to be confused with the type of the same name in
-\verb|Sampler|) is defined as the following,
+where \verb|eval_type| is defined as the following,
 \begin{Verbatim}
   using eval_type = std::function<void(
           size_t,

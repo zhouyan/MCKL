@@ -74,8 +74,6 @@ IF(DOXYGEN_FOUND)
         ${PROJECT_BINARY_DIR}/config/main.md)
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/news.md.in
         ${PROJECT_BINARY_DIR}/config/news.md)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/front.tex.in
-        ${PROJECT_SOURCE_DIR}/manual/tex/front.tex)
     ADD_CUSTOM_TARGET(doxygen
         DEPENDS
         ${PROJECT_BINARY_DIR}/config/Doxyfile
