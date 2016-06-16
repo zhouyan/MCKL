@@ -32,6 +32,7 @@
 #ifndef MCKL_MATH_CONSTANTS_HPP
 #define MCKL_MATH_CONSTANTS_HPP
 
+#include <mckl/internal/config.h>
 #include <limits>
 #include <type_traits>
 

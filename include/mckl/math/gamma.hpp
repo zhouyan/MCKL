@@ -32,8 +32,11 @@
 #ifndef MCKL_MATH_GAMMA_HPP
 #define MCKL_MATH_GAMMA_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
 #include <mckl/math/constants.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 namespace mckl
 {

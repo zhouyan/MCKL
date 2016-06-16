@@ -32,8 +32,10 @@
 #ifndef MCKL_MATH_ERF_HPP
 #define MCKL_MATH_ERF_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
 #include <mckl/math/constants.hpp>
+
+#include <cmath>
 
 namespace mckl
 {

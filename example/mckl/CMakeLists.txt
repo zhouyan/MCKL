@@ -64,7 +64,6 @@ MCKL_ADD_HEADER_TEST(mckl/core/state_matrix TRUE)
 MCKL_ADD_HEADER_TEST(mckl/core/weight       TRUE)
 
 MCKL_ADD_HEADER_TEST(mckl/internal/assert  TRUE)
-MCKL_ADD_HEADER_TEST(mckl/internal/basic   TRUE)
 MCKL_ADD_HEADER_TEST(mckl/internal/cblas   TRUE)
 MCKL_ADD_HEADER_TEST(mckl/internal/common  TRUE)
 MCKL_ADD_HEADER_TEST(mckl/internal/defines TRUE)

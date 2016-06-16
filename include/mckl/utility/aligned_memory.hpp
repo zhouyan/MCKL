@@ -32,7 +32,9 @@
 #ifndef MCKL_UTILITY_ALIGNED_MEMORY_HPP
 #define MCKL_UTILITY_ALIGNED_MEMORY_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
+
+#include <cstdlib>
 
 #if MCKL_HAS_POSIX
 #include <stdlib.h>
@@ -341,7 +343,7 @@ class Allocator : public std::allocator<T>
 
     pointer allocate(size_type n, const void * = nullptr)
     {
-        n = std::max(n, static_cast<size_type>(1));
+        n = n > 1 ? n : 1;
         size_type bytes = n * sizeof(value_type);
         if (bytes < n)
             throw std::bad_alloc();

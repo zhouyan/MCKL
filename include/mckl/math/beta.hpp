@@ -32,9 +32,12 @@
 #ifndef MCKL_MATH_BETA_HPP
 #define MCKL_MATH_BETA_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
 #include <mckl/math/constants.hpp>
 #include <mckl/math/gamma.hpp>
+
+#include <algorithm>
+#include <limits>
 
 namespace mckl
 {
