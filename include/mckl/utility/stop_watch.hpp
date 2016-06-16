@@ -180,7 +180,7 @@ class StopWatchClockAdapter
     double nanoseconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::nano>>(time_)
+            std::chrono::duration<double, std::nano>>(time_)
             .count();
     }
 
@@ -188,7 +188,7 @@ class StopWatchClockAdapter
     double microseconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::micro>>(time_)
+            std::chrono::duration<double, std::micro>>(time_)
             .count();
     }
 
@@ -196,7 +196,7 @@ class StopWatchClockAdapter
     double milliseconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::milli>>(time_)
+            std::chrono::duration<double, std::milli>>(time_)
             .count();
     }
 
@@ -204,7 +204,7 @@ class StopWatchClockAdapter
     double seconds() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::ratio<1>>>(time_)
+            std::chrono::duration<double, std::ratio<1>>>(time_)
             .count();
     }
 
@@ -212,7 +212,7 @@ class StopWatchClockAdapter
     double minutes() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::ratio<60>>>(time_)
+            std::chrono::duration<double, std::ratio<60>>>(time_)
             .count();
     }
 
@@ -220,7 +220,7 @@ class StopWatchClockAdapter
     double hours() const
     {
         return std::chrono::duration_cast<
-                   std::chrono::duration<double, std::ratio<3600>>>(time_)
+            std::chrono::duration<double, std::ratio<3600>>>(time_)
             .count();
     }
 

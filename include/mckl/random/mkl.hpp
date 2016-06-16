@@ -1171,9 +1171,9 @@ inline constexpr int mkl_nseeds(std::true_type)
 template <typename RNGType>
 inline constexpr int mkl_nseeds()
 {
-    return mkl_nseeds<RNGType>(std::integral_constant<
-        bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
-                  std::is_same<KeyType<RNGType>, NullType>::value)>());
+    return mkl_nseeds<RNGType>(std::integral_constant<bool,
+        (std::is_same<CtrType<RNGType>, NullType>::value ||
+            std::is_same<KeyType<RNGType>, NullType>::value)>());
 }
 
 template <typename RNGType>
@@ -1229,11 +1229,10 @@ inline int mkl_init(
     RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
 
     if (method == VSL_INIT_METHOD_STANDARD) {
-        return mkl_init(
-            rng, n, param,
-            std::integral_constant<
-                bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
-                          std::is_same<KeyType<RNGType>, NullType>::value)>());
+        return mkl_init(rng, n, param,
+            std::integral_constant<bool,
+                (std::is_same<CtrType<RNGType>, NullType>::value ||
+                    std::is_same<KeyType<RNGType>, NullType>::value)>());
     }
 
     if (method == VSL_INIT_METHOD_LEAPFROG)

@@ -738,7 +738,7 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
             [&](double p) {
                 return dist.b() /
                     std::exp(
-                           static_cast<RealType>(std::log(1 - p)) / dist.a());
+                        static_cast<RealType>(std::log(1 - p)) / dist.a());
             },
             dist);
     }
@@ -948,8 +948,8 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
         return this->partition_quantile(n,
             [&](double p) {
                 return dist.b() *
-                    std::pow(-static_cast<RealType>(std::log(1 - p)),
-                           1 / dist.a());
+                    std::pow(
+                        -static_cast<RealType>(std::log(1 - p)), 1 / dist.a());
             },
             dist);
     }

@@ -364,8 +364,8 @@ class Allocator : public std::allocator<T>
     void construct(U *ptr)
     {
         construct_dispatch(ptr,
-            std::integral_constant<bool, (MCKL_CONSTRUCT_SCALAR != 0 ||
-                                             !std::is_scalar<U>::value)>());
+            std::integral_constant<bool,
+                (MCKL_CONSTRUCT_SCALAR != 0 || !std::is_scalar<U>::value)>());
     }
 
     template <typename U, typename Arg, typename... Args>

@@ -145,7 +145,7 @@ inline RealType u01_distribution_impl(const UIntType *u, std::true_type)
     return static_cast<RealType>(u[N]) *
         U01Pow2Inv<RealType, (Q - N) * W>::value +
         u01_distribution_impl<N + 1, RealType>(
-               u, std::integral_constant<bool, N + 1 < Q>());
+            u, std::integral_constant<bool, N + 1 < Q>());
 }
 
 template <std::size_t K, typename RealType, typename RNGType>

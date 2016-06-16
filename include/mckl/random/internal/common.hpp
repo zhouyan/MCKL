@@ -752,7 +752,7 @@ inline std::size_t serial_index(const std::size_t *s, std::true_type)
 {
     return Pow<std::size_t, D, T - 1 - N>::value * s[N] +
         serial_index<N + 1, D, T>(
-               s, std::integral_constant<bool, N + 1 < T>());
+            s, std::integral_constant<bool, N + 1 < T>());
 }
 
 template <std::size_t D, std::size_t T, typename ResultType>

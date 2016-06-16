@@ -70,12 +70,11 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
     static constexpr std::size_t ualign = alignof(UIntType);
     static constexpr std::size_t talign = alignof(UIntType);
 
-    uniform_bits_distribution_impl(
-        rng, n, r,
-        std::integral_constant<
-            bool, (RNGType::min() == 0 && RNGTraits<RNGType>::is_full_range &&
-                      rbits == tbits && ubits >= tbits && ubits % tbits == 0 &&
-                      ualign >= talign && ualign % talign == 0)>());
+    uniform_bits_distribution_impl(rng, n, r,
+        std::integral_constant<bool,
+            (RNGType::min() == 0 && RNGTraits<RNGType>::is_full_range &&
+                rbits == tbits && ubits >= tbits && ubits % tbits == 0 &&
+                ualign >= talign && ualign % talign == 0)>());
 }
 
 template <typename UIntType, typename RNGType>
