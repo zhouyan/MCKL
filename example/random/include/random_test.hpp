@@ -178,23 +178,23 @@ inline void random_test(std::size_t N, std::size_t M, int, char **)
     random_test(M, nwid, swid, twid, rng, mckl::PokerTest<16, 16>(N),
         "Poker (n = 10^5, d = 2^4, t = 2^4)");
 
-    random_test(M, nwid, swid, twid, rng, mckl::RunTest<false>(N),
-        "Run (n = 10^5, Up = false)");
-    random_test(M, nwid, swid, twid, rng, mckl::RunTest<true>(N),
-        "Run (n = 10^5, Up = true)");
-    random_test(M, nwid, swid, twid, rng, mckl::RunTest<false>(N),
-        "RunIndep (n = 10^5, Up = false)");
-    random_test(M, nwid, swid, twid, rng, mckl::RunTest<true>(N),
-        "RunIndep (n = 10^5, Up = true)");
+    random_test(M, nwid, swid, twid, rng, mckl::RunTest<false, false>(N),
+        "Run (n = 10^5, Independent = false, Up = false)");
+    random_test(M, nwid, swid, twid, rng, mckl::RunTest<false, true>(N),
+        "Run (n = 10^5, Independent = false, Up = true)");
+    random_test(M, nwid, swid, twid, rng, mckl::RunTest<true, false>(N),
+        "Run (n = 10^5, Independent = true, Up = false)");
+    random_test(M, nwid, swid, twid, rng, mckl::RunTest<true, true>(N),
+        "Run (n = 10^5, Independent = true, Up = true)");
 
-    random_test(M, nwid, swid, twid, rng, mckl::SerialTest<64, 2>(N),
-        "Serial (n = 10^5, d = 2^6, t = 2)");
-    random_test(M, nwid, swid, twid, rng, mckl::SerialTest<16, 3>(N),
-        "Serial (n = 10^5, d = 2^4, t = 3)");
-    random_test(M, nwid, swid, twid, rng, mckl::SerialOverTest<64, 2>(N),
-        "SerialOver (n = 10^5, d = 2^6, t = 2, overlap = true)");
-    random_test(M, nwid, swid, twid, rng, mckl::SerialOverTest<16, 3>(N),
-        "SerialOver (n = 10^5, d = 2^4, t = 3)");
+    random_test(M, nwid, swid, twid, rng, mckl::SerialTest<64, 2, false>(N),
+        "Serial (n = 10^5, d = 2^6, t = 2, overlap = false)");
+    random_test(M, nwid, swid, twid, rng, mckl::SerialTest<16, 3, false>(N),
+        "Serial (n = 10^5, d = 2^4, t = 3, overlap = false)");
+    random_test(M, nwid, swid, twid, rng, mckl::SerialTest<64, 2, true>(N),
+        "Serial (n = 10^5, d = 2^6, t = 2, overlap = true)");
+    random_test(M, nwid, swid, twid, rng, mckl::SerialTest<16, 3, true>(N),
+        "Serial (n = 10^5, d = 2^4, t = 3, overlap = true)");
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_TEST_HPP

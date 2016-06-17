@@ -199,16 +199,9 @@ class SerialTestImpl<D, T, true>
 ///
 /// \tparam D Multiplier
 /// \tparam T Length of the tuple
-template <std::size_t D, std::size_t T>
-using SerialTest = internal::SerialTestImpl<D, T, false>;
-
-/// \brief Serial test with overlapping tuples
-/// \ingroup RandomTest
-///
-/// \tparam D Multiplier
-/// \tparam T Length of the tuple
-template <std::size_t D, std::size_t T>
-using SerialOverTest = internal::SerialTestImpl<D, T, 1 < T>;
+/// \tparam Overlap Using overlapping tuples
+template <std::size_t D, std::size_t T, bool Overlap>
+using SerialTest = internal::SerialTestImpl<D, T, Overlap && 1 < T>;
 
 } // namespace mckl
 
