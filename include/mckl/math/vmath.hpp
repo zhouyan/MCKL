@@ -37,6 +37,9 @@
 #include <mckl/internal/assert.hpp>
 #include <mckl/math/constants.hpp>
 
+#include <algorithm>
+#include <cmath>
+
 #if MCKL_USE_MKL_VML
 
 #include <mkl_vml.h>
