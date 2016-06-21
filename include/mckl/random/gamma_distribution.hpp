@@ -116,9 +116,9 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
+    alignas(32) std::array<RealType, K * 3> s;
     const RealType d = constant.d();
     const RealType c = constant.c();
-    Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const x = s.data() + n * 2;
@@ -152,9 +152,9 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
+    alignas(32) std::array<RealType, K * 3> s;
     const RealType d = constant.d();
     const RealType c = constant.c();
-    Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const x = s.data() + n * 2;
@@ -182,9 +182,9 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
+    alignas(32) std::array<RealType, K * 5> s;
     const RealType d = constant.d();
     const RealType c = constant.c();
-    Array<RealType, K * 5> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const v = s.data() + n * 2;

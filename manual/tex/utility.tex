@@ -89,9 +89,9 @@ alignment is sufficient for modern \simd operations, such as \avx. For other
 types, the alignment is the maximum of \verb|alignof(T)| and
 \verb|MCKL_ALIGNMENT_MIN|, whose default is 16.
 
-Two container types are defined for convenience. The first is a drop-in
-replacement for \verb|std::vector|. It is merely a type alias with a different
-default allocator,
+A vector container type are defined for convenience, as a drop-in replacement
+for \verb|std::vector|. It is merely a type alias with a different default
+allocator,
 \begin{Verbatim}
   template <typename T>
   using Vector = std::vector<T, Allocator<T>>;
@@ -102,19 +102,6 @@ class, as long as the template is defined correctly. For example,
   template <typename T, typename Alloc>
   void func(std::vector<T, Alloc> &vec);
 \end{Verbatim}
-The second can be used as a drop-in replaced of \verb|std::array| in most
-situations,
-\begin{Verbatim}
-  template <
-      typename T,
-      size_t N,
-      size_t Alignment = AlignmentTrait<T>::value>
-  class alignas(Alignment) Array;
-\end{Verbatim}
-It is a derived class and can be implicitly converted to the standard
-library class. The data is in the base class, and thus there will be no loss of
-contents. Unlike the standard library versions, they will allocate memory with
-bigger alignment for scalar types, on the heap and stack, respectively.
 
 \section{Sample covariance}
 \label{sec:Sample covariance}

@@ -52,7 +52,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void normal_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType mean, RealType stddev)
 {
-    Array<RealType, K / 2> s;
+    alignas(32) std::array<RealType, K / 2> s;
     const std::size_t nu = n / 2;
     RealType *const u1 = r;
     RealType *const u2 = r + nu;

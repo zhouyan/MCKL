@@ -92,9 +92,9 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void uniform_int_distribution_impl(RNGType &rng, std::size_t n,
     IntType *r, IntType a, IntType b, std::true_type)
 {
+    alignas(32) std::array<double, K> s;
     double ra = static_cast<double>(a);
     double rb = static_cast<double>(b);
-    Array<double, K> s;
     double *const u = s.data();
     u01_co_distribution(rng, n, u);
     fma(n, u, rb - ra + const_one<double>(), ra, u);

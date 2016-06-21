@@ -462,20 +462,6 @@ class AllocatorAlignment<Allocator<T, Alignment, Memory>>
 template <typename T, typename Alloc = Allocator<T>>
 using Vector = std::vector<T, Alloc>;
 
-/// \brief std::array with proper alignment
-/// \ingroup AlignedMemory
-template <typename T, std::size_t N,
-    std::size_t Alignment = AlignmentTrait<T>::value>
-class alignas(Alignment) Array : public std::array<T, N>
-{
-    static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
-        "**Array** used with Alignment other than a power of two positive "
-        "integer");
-
-    static_assert(Alignment >= sizeof(void *),
-        "**Array** used with Alignment less than sizeof(void *)");
-}; // class Array
-
 } // namespace mckl
 
 #endif // MCKL_UTILITY_ALIGNED_MEMORY_HPP

@@ -83,7 +83,7 @@
     {                                                                         \
         using UIntType = U01UIntType<RNGType, RealType>;                      \
                                                                               \
-        Array<UIntType, K> s;                                                 \
+        alignas(32) std::array<UIntType, K> s;                                \
         uniform_bits_distribution(rng, n, s.data());                          \
         name<UIntType, RealType>(n, s.data(), r);                             \
     }
@@ -158,7 +158,7 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     static constexpr int P = (M + W - 1) / W;
     static constexpr int Q = 1 > P ? 1 : P;
 
-    Array<UIntType, K * Q> s;
+    alignas(32) std::array<UIntType, K * Q> s;
     uniform_bits_distribution(rng, n * Q, s.data());
     const UIntType *u = s.data();
     for (std::size_t i = 0; i != n; ++i, u += Q)

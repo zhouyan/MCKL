@@ -236,8 +236,7 @@ Section~\ref{sec:Counter-based RNG} and~\ref{sec:Multiple RNG streams}.
 such as \verb|int|. More specifically, this affects types such that
 \verb|std::is_scalar<T>| true. The default is~32. This is sufficient for modern
 \simd operations. This will affect the memory allocated by \verb|Vector<T>| on
-the heap and \verb|Array<T>| on the stack. The value must be a power of two and
-positive.
+the heap. The value must be a power of two and positive.
 
 \paragraph{\texttt{MCKL\_ALIGNMENT\_MIN}} The minimum alignment for all types.
 The default is 16. The value must be a power of two and positive.
