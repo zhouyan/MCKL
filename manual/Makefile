@@ -29,12 +29,14 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
+.PHONY : all tab fig clean
+
 all :
 	latexmk -silent -f manual.tex >/dev/null
 
 tab :
-	cd tab; ./rng_engine.pl
-	cd tab; ./rng_distribution.pl
+	cd tab; ./random_rng.pl
+	cd tab; ./random_distribution.pl
 
 fig :
 	make -C prg pf.pdf

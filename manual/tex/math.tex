@@ -35,13 +35,13 @@
 \section{Constants}
 \label{sec:Constants}
 
-The library defines some mathematical constants in the form of constant
-expression functions. For example, to get the value of $\pi$ with a desired
-precision, one can use the following,
+\mckl defines some mathematical constants in the form of constant expression
+functions. For example, to get the value of $\pi$ with a desired precision, one
+can use the following,
 \begin{Verbatim}
-  constexpr float pi_f = const_pi<float>();
-  constexpr double pi_d = const_pi<double>();
-  constexpr long double pi_l = const_pi<long double>();
+constexpr float pi_f = const_pi<float>();
+constexpr double pi_d = const_pi<double>();
+constexpr long double pi_l = const_pi<long double>();
 \end{Verbatim}
 The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
@@ -51,48 +51,48 @@ Table~\ref{tab:Mathematical constants}.
 \section{Vectorized functions}
 \label{sec:Vectorized functions}
 
-The library provides a set of vectorized elementary mathematical functions.
-For example, to perform additions of two vectors,
+\mckl provides a set of vectorized elementary mathematical functions. For
+example, to perform additions of two vectors,
 \begin{Verbatim}
-  size_t n = 1000;
-  Vector<double> a(n), b(n), y(n);
-  // Fill vectors a and b
-  add(n, a.data(), b.data(), y.data());
+size_t n = 1000;
+Vector<double> a(n), b(n), y(n);
+// Fill vectors a and b
+add(n, a.data(), b.data(), y.data());
 \end{Verbatim}
 This is equivalent to,
 \begin{Verbatim}
-  for (size_t i = 0; i != n; ++i)
-      y[i] = a[i] + b[i];
+for (size_t i = 0; i != n; ++i)
+    y[i] = a[i] + b[i];
 \end{Verbatim}
 The functions defined are listed in Tables~\ref{tab:Arithmetic functions}
 to~\ref{tab:Rounding functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
 (except for \verb|sincos| and \verb|modf|, which have two output parameters).
-For all functions, the output is always a vector. If there are more than one
-input parameters, then some of them, but not all, can be scalars. For example,
-for the function call \verb|fma(n, a, b, c, y)| in Table~\ref{tab:Arithmetic
-  functions}, the input parameters are \verb|a|, \verb|b|, and \verb|c|. Some
-of them, not all, can be scalars instead of pointers to vectors. The output
-parameter \verb|y| has to be a pointer to a vector. Therefore, there are seven
-versions of this function for each type of the value. Note that, mixed
-precision is not allowed. For example,
+For all functions, the output parameters are always vectors. If there are more
+than one input parameters, then some of them, but not all, can be scalars. For
+example, for the function call \verb|fma(n, a, b, c, y)| in
+Table~\ref{tab:Arithmetic functions}, the input parameters are \verb|a|,
+\verb|b|, and \verb|c|. Some of them, not all, can be scalars instead of
+pointers to vectors. The output parameter \verb|y| has to be a pointer to a
+vector. Therefore, there are seven versions of this function for each type of
+the parameters. Note that, mixed precision is not allowed. For example,
 \begin{Verbatim}
-  Vector<double> a(n);
-  Vector<double> b(n);
-  Vector<double> y(n);
-  fma(n, a.data(), b.data(), 2, y.data());
+Vector<double> a(n);
+Vector<double> b(n);
+Vector<double> y(n);
+fma(n, a.data(), b.data(), 2, y.data());
 \end{Verbatim}
-will cause compile-time error because the fourth argument ``2'' is an integer
-while the others are floating points. The correct call shall be,
+will cause compile-time error because the fourth argument ``\verb|2|'' is an
+integer while the others are floating points. The correct call shall be,
 \begin{Verbatim}
-  fma(n, a.data(), b.data(), 2.0, y.data());
+fma(n, a.data(), b.data(), 2.0, y.data());
 \end{Verbatim}
 Without any third-party libraries, these functions do not provide performance
-gain compared to the simple loop. When \mkl is present, some functions can have
-substantial performance improvement when all input arguments are vectors. The
-performance of vectorized random number generating introduced later in
-Section~\ref{sec:Vectorized random number generating} heavily depends on these
-functions.
+advantage compared to simple loops. When \mkl is available, some functions can
+have substantial performance improvement when all input arguments are vectors
+of types \verb|float| or \verb|double|. The performance of vectorized random
+number generating introduced later in Section~\ref{sec:Vectorized random number
+generating} heavily depends on these functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{p{1.2in}Lp{1.2in}L}

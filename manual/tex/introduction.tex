@@ -46,3 +46,45 @@
 
 \section{Organization of headers}
 \label{sec:Organization of headers}
+
+\mckl is a header-only library. All headers files are under the \verb|mckl|
+directory. To include all functionalities,
+\begin{Verbatim}
+#include <mckl/mckl.hpp>
+\end{Verbatim}
+There are a few other headers that include a subset of functions of \mckl, each
+documented in a subsequent chapter in this manual. They are listed in
+Table~\ref{tab:headers}. These headers does not define anything other than
+including other headers that each implement a specific feature. If only one a
+few features are needed, then one can include only headers that implement those
+features to save compilation time. For example,
+\begin{Verbatim}
+#include <mckl/random/threefry.hpp>
+\end{Verbatim}
+includes only the header that implements \rng engines based on the Threefry
+algorithm in~\cite{Salmon:2011um} (see Section~\ref{sub:Threefry}). See the
+reference manual\footnote{\url{http://zhouyan.github.io/MCKLDoc/master}} for
+the header file for each class and function defined in \mckl.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Header & Documents \\
+    \midrule
+    \verb|mckl/core.hpp|     & Chapter~\ref{chap:Core concepts}             \\
+    \verb|mckl/smp.hpp|      & Chapter~\ref{chap:Symmetric multiprocessing} \\
+    \verb|mckl/resample.hpp| & Chapter~\ref{chap:Resampling}                \\
+    \verb|mckl/math.hpp|     & Chapter~\ref{chap:Mathemtical functions}     \\
+    \verb|mckl/random.hpp|   & Chapter~\ref{chap:Random number generating}  \\
+    \verb|mckl/random/rng.hpp|
+    & Sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL RNG} \\
+    \verb|mckl/random/distribution.hpp|
+    & Section~\ref{sec:Distribution} \\
+    \verb|mckl/random/test.hpp|
+    & Section~\ref{sec:Randomness tests} \\
+    \verb|mckl/utility|      & Chapter~\ref{chap:Utilities}                 \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Top-level headers}
+  \label{tab:headers}
+\end{table}

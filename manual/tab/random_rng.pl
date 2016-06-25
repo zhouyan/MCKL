@@ -114,8 +114,8 @@ sub table
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
     $table .= ' ' x 2 . '\rng';
-    $table .= ' & \llvm & \gcc & \textsc{icc}';
-    $table .= ' & \llvm & \gcc & \textsc{icc}';
+    $table .= ' & \llvm & \gcc & \textsc{intel}';
+    $table .= ' & \llvm & \gcc & \textsc{intel}';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;

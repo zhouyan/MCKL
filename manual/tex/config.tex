@@ -65,27 +65,27 @@ class (see Section~\ref{sec:Aligned memory allocation} for details), and then
 define the macro \verb|MCKL_ALIGNED_MEOMRY_TYPE| to this class. For example, to
 use the memory allocation functions from the \mkl library,
 \begin{Verbatim}
-  #include <mkl.h>
+#include <mkl.h>
 
-  class AlignedMemoryMKL
-  {
-      public:
-      static void *aligned_malloc(size_t n, size_t alignment)
-      {
-          return mkl_malloc(n > 0 ? n : 1, alignment);
-      }
+class AlignedMemoryMKL
+{
+    public:
+    static void *aligned_malloc(size_t n, size_t alignment)
+    {
+        return mkl_malloc(n > 0 ? n : 1, alignment);
+    }
 
-      static void aligned_free(void *ptr)
-      {
-          mkl_free(ptr);
-      }
-  };
+    static void aligned_free(void *ptr)
+    {
+        mkl_free(ptr);
+    }
+};
 
-  // Use a fully qualified name in macro
-  // This will avoid any possible name conflicts
-  #define MCKL_ALIGNED_MEMORY_TYPE ::AlignedMemoryMKL
+// Use a fully qualified name in macro
+// This will avoid any possible name conflicts
+#define MCKL_ALIGNED_MEMORY_TYPE ::AlignedMemoryMKL
 
-  // Include MCKL headers
+// Include MCKL headers
 \end{Verbatim}
 In summary, the \verb|MCKL_HAS_| macros affect what will be \emph{defined} by
 the library. The \verb|MCKL_USE_| macros affect what will be \emph{used} by the
@@ -118,7 +118,7 @@ instructions in Section~\ref{sub:AES-NI instructions based RNG} are only
 defined if this macro is true. One can include the following header directly to
 bypass this check,
 \begin{Verbatim}
-  #include <mckl/random/aesni.hpp>
+#include <mckl/random/aesni.hpp>
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_RDRAND}} Determine if the \rdrand instructions
@@ -127,7 +127,7 @@ instructions in Section~\ref{sec:Non-deterministic RNG} are only defined if
 this macro is true. One can include the following header directly to bypass
 this check,
 \begin{Verbatim}
-  #include <mckl/random/rdrand.hpp>
+#include <mckl/random/rdrand.hpp>
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_INT128}} Determine if the compiler supports
@@ -141,10 +141,10 @@ only has effects if \verb|MCKL_HAS_INT128| is true. The default is
 \label{sec:Third-party libraries}
 
 The following macros determine if certain third-party libraries are available.
-All macros with the prefix \verb|MCKL_HAS_| are define to 0 by default. All
-macros with the prefix \verb|MCKL_USE_| are defined to 1 if the corresponding
-\verb|MCKL_HAS_| macro is true. Otherwise it is defined to 0, unless stated
-otherwise.
+All macros with the prefix \verb|MCKL_HAS_| are define to false by default. All
+macros with the prefix \verb|MCKL_USE_| are defined to true if and only if the
+corresponding \verb|MCKL_HAS_| macro is true. Otherwise it is defined to false,
+unless stated otherwise.
 
 \paragraph{\texttt{MCKL\_HAS\_OMP}} Determine if OpenMP is supported.
 
@@ -161,13 +161,13 @@ available. The functions in Section~\ref{sec:Store objects in HDF5 format} are
 only defined if this macro is true. One can include the following header
 directly to bypass this check,
 \begin{Verbatim}
-  #include <mckl/utility/hdf5.hpp>
+#include <mckl/utility/hdf5.hpp>
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_TBB}} Determine if the \tbb library is available.
 The class template \verb|RNGSetTBB| in Section~\ref{sec:Multiple RNG streams}
 and the class \verb|AlignedMemoryTBB| in Section~\ref{sec:Aligned memory
-  allocation}. are only defined if this macro is true.
+allocation}. are only defined if this macro is true.
 
 \paragraph{\texttt{MCKL\_USE\_TBB}} Allow the library to use the \tbb library
 for parallelization. Currently this macro has no affect. The use of \tbb for
@@ -184,7 +184,7 @@ Section~\ref{sec:Programming models}.
 The \rng{}s in Section~\ref{sec:MKL RNG} are only defined if this macro is
 true. One can include the following header directly to bypass this check,
 \begin{Verbatim}
-  #include <mckl/random/mkl.hpp>
+#include <mckl/random/mkl.hpp>
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_CBLAS}} Allow the library to use the
@@ -199,20 +199,21 @@ component of \mkl.
 component of \mkl.
 
 \paragraph{\texttt{MCKL\_USE\_CBLAS}} Allow the library to the standard C
-interface of \blas. The default is \verb|MCKL_USE_MKL_CBLAS|. Manually define
-this macro to true if the header file \verb|cblas.h| is available and a
-compatible runtime library is linked. When this macro is tested to be false,
-the library will declare the \blas Fortran routines in C itself (see below).
+interface of \blas. The default is true if and only if
+\verb|MCKL_USE_MKL_CBLAS| is true. Manually defining this macro to true if the
+header file \verb|cblas.h| is available and a compatible runtime library is
+linked. When this macro is tested to be false, the library will declare the
+\blas Fortran routines in C itself (see below).
 
 \paragraph{\texttt{MCKL\_BLAS\_NAME} and
-  \texttt{MCKL\_BLAS\_NAME\_NO\_UNDERSCORE}} These two macros determine how
-shall the \blas Fortran routines be declared in C. The default behavior is to
-append an underscore to the function name. For example, \verb|dgemv| in Fortran
+\texttt{MCKL\_BLAS\_NAME\_NO\_UNDERSCORE}} These two macros determine how shall
+the \blas Fortran routines be declared in C. The default behavior is to append
+an underscore to the function name. For example, \verb|dgemv| in Fortran
 becomes \verb|dgemv_| in C. If there should be no underscore, define the second
 macro. If the name mangling is more complicated, one can define the
 \verb|MCKL_BLAS_NAME| macro directly. For example,
 \begin{Verbatim}
-  #define MCKL_BLAS_NAME(x) _##x
+#define MCKL_BLAS_NAME(x) _##x
 \end{Verbatim}
 These macros only have effects if \verb|MCKL_USE_CBLAS| is false.
 
@@ -244,27 +245,27 @@ The default is 16. The value must be a power of two and positive.
 \paragraph{\texttt{MCKL\_ALIGNED\_MEMORY\_TYPE}} The default type of the
 \verb|Memroy| template parameter of \verb|Allocator| (see
 Section~\ref{sec:Aligned memory allocation}). The default depends on the other
-configuration macros. If \verb|MCKL_USE_TBB_MALLOC| is true, then the
-default is \verb|AlignedMemoryTBB|. Otherwise it is \verb|AlignedMemorySYS| if
-it is defined. Otherwise \verb|AlignedMemmorySTD| is used as a last resort.
+configuration macros. If \verb|MCKL_USE_TBB_MALLOC| is true, then the default
+is \verb|AlignedMemoryTBB|. Otherwise it is \verb|AlignedMemorySYS| if it is
+defined. Otherwise \verb|AlignedMemmorySTD| is used as a last resort.
 
 \paragraph{\texttt{MCKL\_CONSTRUCT\_SCALAR}} Determine if scalar types shall be
-zero initialized upon allocation by \verb|Allocator|. The default is 0. This
-departures from the behavior of \verb|std::allocator|, with which the memory is
-always value initialized. For example,
+zero initialized upon allocation by \verb|Allocator|. The default is false.
+This departures from the behavior of \verb|std::allocator|, with which the
+memory is always value initialized. For example,
 \begin{Verbatim}
-  std::vector<int> v(n);
+std::vector<int> v(n);
 \end{Verbatim}
 will initialize all values to zero. In contrast,
 \begin{Verbatim}
-  Vector<int> v(n);
+Vector<int> v(n);
 \end{Verbatim}
 will leave the memory uninitialized. To get zero initialized vectors, one can
 either define this macro to 1, or more efficiently,
 \begin{Verbatim}
-  Vector<int> v(n);
-  std::fill(v.begin(), v.end(), 0); // or
-  std::memset(v.data(), 0, sizeof(int) * v.size());
+Vector<int> v(n);
+std::fill(v.begin(), v.end(), 0); // or
+std::memset(v.data(), 0, sizeof(int) * v.size());
 \end{Verbatim}
 The two methods are equivalent in most standard library implementations. It is
 strongly recommended that to leave this macro defined to zero. The constructor
@@ -272,11 +273,11 @@ of \verb|std::vector|, with which \verb|Vector| is an alias to, calls the
 \verb|construct| member of \verb|Allocator| to initialize elements one by one,
 which is a huge waste of time. The library does not rely on zero initialization
 itself. Note that, this macro only affect \emph{default initialization of
-  scalars}. For class types etc., and other constructor of \verb|std::vector|,
+scalars}. For class types etc., and other constructor of \verb|std::vector|,
 such as
 \begin{Verbatim}
-  Vector<ClassType> c(n);
-  Vector<int> v(n, 2);
+Vector<ClassType> c(n);
+Vector<int> v(n, 2);
 \end{Verbatim}
 the behavior will be as expected. That is, the first will be default
 initialized and the second will be value initialized.
@@ -286,11 +287,11 @@ initialized and the second will be value initialized.
 
 \paragraph{\texttt{MCKL\_NO\_RUNTIME\_ASSERT}} Determine if all runtime
 assertions shall be disabled. The default is 1 if \verb|NDEBUG| is defined.
-Otherwise, it is 0. Runtime assertions are hard errors. The program will be
+Otherwise, it is false. Runtime assertions are hard errors. The program will be
 terminated by \verb|std::exit| upon failure of assertions. These are usually
 errors that will cause undefined behaviors.
 
 \paragraph{\texttt{MCKL\_RUNTIME\_ASSERT\_AS\_EXCEPTION}} Determine if runtime
 assertions shall be turned into exceptions. The exception type is
-\verb|RuntimeAssert|. The default is 0. It has no affect is
+\verb|RuntimeAssert|. The default is false. This macro has no affect if
 \verb|MCKL_NO_RUNTIME_ASSERT| is true.

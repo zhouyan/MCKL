@@ -43,4 +43,4 @@ plt <- plt + xlab("$X$")
 plt <- plt + ylab("$Y$")
 plt <- plt + theme_bw() + theme(legend.position = "top")
 
-print.tikz("pf", plt, width=4.25)
+print.tikz("pf", plt, width=5, ratio = 1)
