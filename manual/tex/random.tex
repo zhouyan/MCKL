@@ -632,20 +632,20 @@ the builtin ones.
 
 The library provides implementations of some common distributions. Some of them
 are the same as those in the standard library with \verb|CamelCase| names. For
-example, \verb|NormalDistribution| can be used as a drop-in replacement of
+example, \verb|NormalDistribution| can be used in place of
 \verb|std::normal_distribution|. This includes all of the continuous
 distributions in the standard library. As stated in Section~\ref{sec:Vectorized
-  random number generating}, all the distributions defined in the library
-support vectorized random number generating. In the following sections, we
-introduce each of them. Section~\ref{sub:Uniform bits distribution} discusses
-the uniform bits distribution, which is actually a low level distribution
-indirectly used by all other distributions. Section~\ref{sub:Standard uniform
-  distribution} shows few different standard uniform distributions. And in
+random number generating}, all the distributions defined in the library support
+vectorized random number generating. In the following sections, we introduce
+each of them. Section~\ref{sub:Uniform bits distribution} discusses the uniform
+bits distribution, which is actually a low level distribution indirectly used
+by all other distributions. Section~\ref{sub:Standard uniform distribution}
+shows few different standard uniform distributions. And in
 Sections~\ref{sub:Continuous distributions} and~\ref{sub:Discrete
-  distributions} we list continuous and discrete distributions, respectively.
-In these two sections, the \pdf or \pmf and class declaration of each
-distribution are shown first, and then we briefly discuss the algorithm used
-for implementation. Last, in Section~\ref{sub:Multivariate distributions} we
+distributions} we list continuous and discrete distributions, respectively. In
+these two sections, the \pdf or \pmf and class declaration of each distribution
+are shown first, and then we briefly discuss the algorithm used for
+implementation. Last, in Section~\ref{sub:Multivariate distributions} we
 briefly discusses a few multivariate distributions implemented in the library.
 
 \subsection{Uniform bits distribution}

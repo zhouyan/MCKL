@@ -29,14 +29,12 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-CC := clang
-CFLAGS := $(CFLAGS) -O3 -DNDEBUG
+CFLAGS := $(CFLAGS) -std=c99 -O3 -DNDEBUG
 CFLAGS := $(CFLAGS) -I ../../include
 CFLAGS := $(CFLAGS) -L ../../build/clang-Release/lib
 CFLAGS := $(CFLAGS) -Wl,-rpath -Wl,../../build/clang-Release/lib
 
-CXX := clang++
-CXXFLAGS := $(CXXFLAGS) -std=c++14 -O3 -DNDEBUG
+CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3 -DNDEBUG
 CXXFLAGS := $(CXXFLAGS) -I ../../include
 CXXFLAGS := $(CXXFLAGS) -DMCKL_HAS_MKL
 CXXFLAGS := $(CXXFLAGS) -DMCKL_HAS_TBB

@@ -60,35 +60,38 @@ class GMMModel
 
     std::size_t r() const { return r_; }
 
-    auto prior_mu() const
+    NormalDistribution<double> prior_mu() const
     {
         return NormalDistribution<double>(xi_, 1 / std::sqrt(kappa_));
     }
 
-    auto prior_lambda() const { return GammaDistribution<double>(nu_, chi_); }
+    GammaDistribution<double> prior_lambda() const
+    {
+        return GammaDistribution<double>(nu_, chi_);
+    }
 
-    auto prior_omega() const
+    DirichletDistribution<double> prior_omega() const
     {
         return DirichletDistribution<double>(r_, rho_);
     }
 
-    auto proposal_mu(double sd) const
+    NormalMVProposal<double> proposal_mu(double sd) const
     {
         return NormalMVProposal<double>(
             r_, sd, -const_inf<double>(), const_inf<double>());
     }
 
-    auto proposal_lambda(double sd) const
+    NormalMVProposal<double> proposal_lambda(double sd) const
     {
         return NormalMVProposal<double>(r_, sd, 0.0, const_inf<double>());
     }
 
-    auto proposal_omega(double sd) const
+    NormalMVLogitProposal<double> proposal_omega(double sd) const
     {
         return NormalMVLogitProposal<double>(r_, sd);
     }
 
-    auto mh() const { return MH<double>(r_); }
+    MH<double> mh() const { return MH<double>(r_); }
 
     double log_prior(
         const double *mu, const double *lambda, const double *omega) const

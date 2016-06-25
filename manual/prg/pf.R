@@ -29,8 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-library(ggplot2)
-library(tikzDevice)
+library(ggtikz)
 
 est <- read.table("pf.est", header = TRUE)
 obs <- read.table("pf.data", header = FALSE)
@@ -44,9 +43,4 @@ plt <- plt + xlab("$X$")
 plt <- plt + ylab("$Y$")
 plt <- plt + theme_bw() + theme(legend.position = "top")
 
-tikz("pf.tex", width = 4.5, height = 4.5, standAlone = TRUE)
-print(plt)
-dev.off()
-system("latexmk -silent -f pf.tex &>/dev/null")
-system("latexmk -c pf.tex &>/dev/null")
-system("rm -f pf.tex")
+print.tikz("pf", plt, width=4.25)
