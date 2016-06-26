@@ -94,7 +94,9 @@ sub table
         my $index = 0;
         foreach (@lines) {
             my @record = split;
-            $name[$index] = '\verb|' . $record[0] . '|';
+            my $name = $record[0];
+            $name =~ s/_/\\_/g;
+            $name[$index] = '\texttt{' . $name . '}';
             $cpB1[$index] .= &format($record[1]);
             $cpB2[$index] .= &format($record[2]);
             if ($wid < length($name[-1])) {

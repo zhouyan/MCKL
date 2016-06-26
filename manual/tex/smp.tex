@@ -132,8 +132,8 @@ may be substantially more complicated. And the extra effort to decompose the
 implementation into these three functions will be minimal and there can be
 considerable performance advantage.
 
-\subsection{The \texorpdfstring{\texttt{SamplerEvalSMP}}{SamplerEvalSMP} class}
-\label{sub:The SamplerEvalSMP class}
+\subsection{Mutations and weighting}
+\label{sub:Mutations and weighting}
 
 We have already seen the |SamplerEvalSMP| class template. The full declaration
 of the template is as below,
@@ -215,8 +215,8 @@ class Eval : SamplerEvalSMP<T>
 };
 \end{Verbatim}
 
-\subsection{The \texorpdfstring{\texttt{MonitorEvalSMP}}{MonitorEvalSMP} class}
-\label{sub:he MonitorEvalSMP class}
+\subsection{Estimation}
+\label{sub:Estimation}
 
 A function or class that is convertible to |eval_type| of |Monitor| can also be
 parallelized. This is done through the following class template,
@@ -449,9 +449,6 @@ for (auto idx : range)
     /* process ParticleIndex<T> object idx */;
 \end{Verbatim}
 
-\subsection{Using \texorpdfstring{\texttt{eval\_range}}{eval\_range} with
-\texorpdfstring{\tbb}{TBB}}
-
 Special care needs to be taken when using the \tbb backend and |eval_range|
 together. The purpose of using it instead of |eval_each| is to process vectors
 as a whole or to only execute some costly operations only once.. For optimal
@@ -478,10 +475,10 @@ functionality as \tbb for other backends in the near future.
 \section{Random number generating}
 \label{sec:Random number generating}
 
-As we have already mentioned in Section~\ref{sub:The SamplerEvalSMP class},
-care has to be taken when generating random numbers in a multi-threaded
-environment. The |Particle| class maintain a collection of \rng engines for
-this purpose. For example,
+As we have already mentioned in Section~\ref{sub:Mutations and weighting}, care
+has to be taken when generating random numbers in a multi-threaded environment.
+The |Particle| class maintain a collection of \rng engines for this purpose.
+For example,
 \begin{Verbatim}
 void eval_each(size_t iter, ParticleIndex<T> &idx)
 {

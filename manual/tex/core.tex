@@ -561,6 +561,9 @@ of iterations.
 \section{Sampler}
 \label{sec:Sampler}
 
+\subsection{Construction and configuration}
+\label{sec:Construction and configuration}
+
 A sampler is formed by the particle system together with all the operations on
 it. It is abstracted by the class template,
 \begin{Verbatim}
@@ -787,7 +790,7 @@ through the |eval| and |monitor| methods as shown above. It then initialized
 and iterated $n - 1$ times, where $n$ is the total number of observations. In
 the end, we write a summary of the sampler into the file |pf.est|.
 
-\subsubsection{The \texorpdfstring{\texttt{PF}}{PF} class}
+\subsubsection{State}
 
 First all of, we need a class to represent the state space, which is $\Real^4$.
 A sensible base class is thus,
@@ -870,8 +873,7 @@ double log_likelihood(size_t iter)
 }
 \end{Verbatim}
 
-\subsubsection{The \texorpdfstring{\texttt{PFInit}}{PFInit} and
-\texorpdfstring{\texttt{PFMove}}{PFMove} functions}
+\subsubsection{Initialization and iteration}
 
 The function that sample the state values from the prior is as the following,
 \begin{Verbatim}
@@ -915,7 +917,7 @@ void PFMove(size_t, Particle<PF> &particle)
 Both of these two functions are really simple translations of the mathematical
 formulation of the algorithm.
 
-\subsubsection{The \texorpdfstring{\texttt{PFWeight}}{PFWeight} function}
+\subsubsection{Weighting}
 
 In each iteration, we will weight the particles using its log-likelihood. This
 will be computed with the |log_likelihood| method of |particle_index_type|
@@ -934,7 +936,7 @@ weights to the particle system. Note that, each time the |initialize| method of
 |Sampler| is called, the weights will be set to be equal first. And thus the
 function above is correct for both initialization and iterations.
 
-\subsubsection{The \texorpdfstring{\texttt{PFEstimate}}{PFEstimate} function}
+\subsubsection{Estimation}
 
 Last, we would like to record the value of $\varphi^t(X_i^t) =
 (\xpos^{t,i},\ypos^{t,i})^{\transpose}$. This is done by defining the function,

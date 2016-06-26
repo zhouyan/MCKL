@@ -56,7 +56,8 @@ while (<$txtfile>) {
         my @record = split;
         my $name = shift @record;
         $name =~ s/(.*)<double>(.*)/$1$2/;
-        $name = '\verb|' . $name . "|\n";
+        $name =~ s/_/\\_/g;
+        $name = '\texttt{' . $name . "}\n";
         my $basename = $1;
         my $cpE;
         if ("@nostd" =~ /$basename/) {

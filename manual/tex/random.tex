@@ -684,7 +684,7 @@ $U$ and the output random real numbers as $X$.
   \label{tab:Intermediate integer types of uniform distributions}
 \end{table}
 
-\subsubsection{\texorpdfstring{\texttt{U01Distribution}}{U01Distribution}}
+\subsubsection{Standard form}
 
 The class template,
 \begin{Verbatim}
@@ -700,7 +700,7 @@ below). Otherwise, it is implemented through the mapping,
   X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{align*}
 
-\subsubsection{\texorpdfstring{\texttt{U01CCDistribution}}{U01CCDistribution}}
+\subsubsection{Closed-closed interval}
 
 The class template,
 \begin{Verbatim}
@@ -719,7 +719,7 @@ implements the uniform distribution on $[0, 1]$ through the mapping,
 \end{align*}
 The minimum and maximum are $0$ and $1$, respectively.
 
-\subsubsection{\texorpdfstring{\texttt{U01CODistribution}}{U01CODistribution}}
+\subsubsection{Closed-open interval}
 
 The class template,
 \begin{Verbatim}
@@ -734,7 +734,7 @@ implements the uniform distribution on $[0, 1)$ through the mapping,
 \end{align*}
 The minimum and maximum are $0$ and $1 - 2^{-P}$, respectively.
 
-\subsubsection{\texorpdfstring{\texttt{U01OCDistribution}}{U01OCDistribution}}
+\subsubsection{Open-closed interval}
 
 The class template,
 \begin{Verbatim}
@@ -749,7 +749,7 @@ implements the uniform distribution on $(0, 1]$ through the mapping,
 \end{align*}
 The minimum and maximum are $2^{-P}$ and $1$, respectively.
 
-\subsubsection{\texorpdfstring{\texttt{U01OODistribution}}{U01OODistribution}}
+\subsubsection{Open-open interval}
 
 The class template,
 \begin{Verbatim}
