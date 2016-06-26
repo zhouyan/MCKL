@@ -1,6 +1,7 @@
 *.swp
 .DS_Store
 build
+manual/fig/pf.pdf
 manual/manual.aux
 manual/manual.bbl
 manual/manual.bcf
