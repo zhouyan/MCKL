@@ -283,10 +283,10 @@ initialized and the second will be value initialized.
 \label{sec:Error handling}
 
 \paragraph{\texttt{MCKL\_NO\_RUNTIME\_ASSERT}} Determine if all runtime
-assertions shall be disabled. The default is 1 if |NDEBUG| is defined.
-Otherwise, it is false. Runtime assertions are hard errors. The program will be
-terminated by |std::exit| upon failure of assertions. These are usually errors
-that will cause undefined behaviors.
+assertions shall be disabled. The default is true if and only if |NDEBUG| is
+defined. Otherwise, it is false. Runtime assertions are hard errors. The
+program will be terminated by |std::exit| upon failure of assertions. These are
+usually errors that will cause undefined behaviors.
 
 \paragraph{\texttt{MCKL\_RUNTIME\_ASSERT\_AS\_EXCEPTION}} Determine if runtime
 assertions shall be turned into exceptions. The exception type is

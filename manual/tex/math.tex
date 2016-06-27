@@ -82,8 +82,8 @@ Vector<double> b(n);
 Vector<double> y(n);
 fma(n, a.data(), b.data(), 2, y.data());
 \end{Verbatim}
-will cause compile-time error because the fourth argument ``|2|'' is an integer
-while the others are floating points. The correct call shall be,
+will cause compile-time error because the fourth argument is an integer while
+the others are floating points. The correct call shall be,
 \begin{Verbatim}
 fma(n, a.data(), b.data(), 2.0, y.data());
 \end{Verbatim}
