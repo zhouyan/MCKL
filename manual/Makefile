@@ -40,6 +40,7 @@ tab :
 
 fig :
 	make -C prg pf.pdf
+	mkdir -p fig
 	cp prg/pf.pdf fig/pf.pdf
 
 clean:
