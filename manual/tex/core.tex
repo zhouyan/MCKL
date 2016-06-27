@@ -51,7 +51,7 @@ everything it depends on. If there exists an integer $d\ge1$ and some space
 $\calX$ such that $E\subseteq\calX^d$. Then, we can represent the states as an
 $N$ by $d$ matrix. The element at row $i$ and column $j$ is thus the $j$\ith
 component of $X_i$. The library provides a class template to abstract this type
-of state space,
+of state space\index{StateMatrix@\texttt{StateMatrix}},
 \begin{Verbatim}
 template <MatrixLayout Layout, size_t Dim, typename ValueType>
 class StateMatrix;
@@ -731,13 +731,12 @@ is shown in Algorithm~\ref{alg:pf}.
 
 \begin{algorithm}[t]
   \begin{algorithmic}
-    \UndefineShortVerb{\|}
     \tophrule
     \STATE \COMMENT{Initialization}
     \STATE Set $t\leftarrow0$.
     \STATE Sample $\xpos^{0,i},\ypos^{0,i}\sim\calN(0,4)$ and
     $\xvel^{0,i},\yvel^{0,i}\sim\calN(0,1)$.
-    \STATE Weight $W_i^0 \propto \exp\{\ell(X_i^0|Y_0)\}$
+    \STATE Weight $W_i^0 \propto \exp\{\ell(X_i^0 \vert Y_0)\}$
 
     \REPEAT
     \STATE \COMMENT{Iteration}
@@ -749,7 +748,7 @@ is shown in Algorithm~\ref{alg:pf}.
       \ypos^{t,i}&\sim\calN(\ypos^{t-1,i} + \Delta\yvel^{t-1,i}, 0.02) &
       \yvel^{t,i}&\sim\calN(\yvel^{t-1,i}, 0.001)
     \end{align*}
-    \STATE Weight $W_i^t \propto W_i^{t - 1}\exp\{\ell(X_i^t|Y_t)\}$.
+    \STATE Weight $W_i^t \propto W_i^{t - 1}\exp\{\ell(X_i^t \vert Y_t)\}$.
     \UNTIL{All data are processed}
     \bottomhrule
   \end{algorithmic}

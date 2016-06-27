@@ -7,6 +7,9 @@ manual/manual.bcf
 manual/manual.blg
 manual/manual.fdb_latexmk
 manual/manual.fls
+manual/manual.idx
+manual/manual.ilg
+manual/manual.ind
 manual/manual.log
 manual/manual.lot
 manual/manual.out
