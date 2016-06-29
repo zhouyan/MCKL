@@ -44,15 +44,15 @@ tables below.
 
 Two usage cases of \rng{}s are considered. The first is generating random
 integers within a loop,
-\begin{Verbatim}
-  UniformBitsDistribution<std::uint64_t> ubits;
-  for (std:size_t i = 0; i != n; ++i)
-      r[i] = rand(rng, ubits);
-\end{Verbatim}
+\begin{verbatim}
+UniformBitsDistribution<std::uint64_t> ubits;
+for (std:size_t i = 0; i != n; ++i)
+    r[i] = rand(rng, ubits);
+\end{verbatim}
 The second is the vectorized performance,
-\begin{Verbatim}
-  rand(rng, ubits, n, r.data());
-\end{Verbatim}
+\begin{verbatim}
+rand(rng, ubits, n, r.data());
+\end{verbatim}
 In both cases, we repeat the simulations 100 times, each time with the number
 of elements $n$ chosen randomly between 5,000 and 10,000. The total number of
 cycles of the 100 simulations are recorded, and then divided by the total

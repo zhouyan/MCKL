@@ -64,7 +64,7 @@ case, one can implement a aligned memory class (see section~\ref{sec:Aligned
 memory allocation} for details), and then define the macro
 |MCKL_ALIGNED_MEOMRY_TYPE| to this class. For example, to use the memory
 allocation functions from the \mkl library,
-\begin{Verbatim}
+\begin{verbatim}
 #include <mkl.h>
 
 class AlignedMemoryMKL
@@ -86,7 +86,7 @@ class AlignedMemoryMKL
 #define MCKL_ALIGNED_MEMORY_TYPE ::AlignedMemoryMKL
 
 // Include MCKL headers
-\end{Verbatim}
+\end{verbatim}
 In summary, the |MCKL_HAS_| macros affect what will be \emph{defined} by the
 library. The |MCKL_USE_| macros affect what will be \emph{used} by the library.
 And other macros give direct control of the library's implementations. In most
@@ -117,18 +117,18 @@ are supported by the \cpu and the compiler. The \rng{}s based on these
 instructions in section~\ref{sub:AES-NI instructions based RNG} are only
 defined if this macro is true. One can include the following header directly to
 bypass this check,
-\begin{Verbatim}
+\begin{verbatim}
 #include <mckl/random/aesni.hpp>
-\end{Verbatim}
+\end{verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_RDRAND}} Determine if the \rdrand instructions
 are supported by the \cpu and the compiler. The \rng{}s based on these
 instructions in section~\ref{sec:Non-deterministic RNG} are only defined if
 this macro is true. One can include the following header directly to bypass
 this check,
-\begin{Verbatim}
+\begin{verbatim}
 #include <mckl/random/rdrand.hpp>
-\end{Verbatim}
+\end{verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_INT128}} Determine if the compiler supports
 128-bit integer types.
@@ -159,9 +159,9 @@ higher) is supported.
 available. The functions in section~\ref{sec:Store objects in HDF5 format} are
 only defined if this macro is true. One can include the following header
 directly to bypass this check,
-\begin{Verbatim}
+\begin{verbatim}
 #include <mckl/utility/hdf5.hpp>
-\end{Verbatim}
+\end{verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_TBB}} Determine if the \tbb library is available.
 The class template |RNGSetTBB| in section~\ref{sec:Multiple RNG streams} and
@@ -182,9 +182,9 @@ as the default multiple \rng stream management method.
 \paragraph{\texttt{MCKL\_HAS\_MKL}} Determine if the \mkl library is available.
 The \rng{}s in section~\ref{sec:MKL RNG} are only defined if this macro is
 true. One can include the following header directly to bypass this check,
-\begin{Verbatim}
+\begin{verbatim}
 #include <mckl/random/mkl.hpp>
-\end{Verbatim}
+\end{verbatim}
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_CBLAS}} Allow the library to use the
 |mkl_cblas.h| header and assuming that corresponding runtime library will be
@@ -211,9 +211,9 @@ an underscore to the function name. For example, |dgemv| in Fortran becomes
 |dgemv_| in C. If there should be no underscore, define the second macro. If
 the name mangling is more complicated, one can define the |MCKL_BLAS_NAME|
 macro directly. For example,
-\begin{Verbatim}
+\begin{verbatim}
 #define MCKL_BLAS_NAME(x) _##x
-\end{Verbatim}
+\end{verbatim}
 These macros only have effects if |MCKL_USE_CBLAS| is false.
 
 \paragraph{\texttt{MCKL\_BLAS\_INT}} The integer type of \blas routines. The
@@ -251,20 +251,20 @@ Otherwise it is |AlignedMemorySYS| if it is defined. Otherwise
 zero initialized upon allocation by |Allocator|. The default is false. This
 departures from the behavior of |std::allocator|, with which the memory is
 always value initialized. For example,
-\begin{Verbatim}
+\begin{verbatim}
 std::vector<int> v(n);
-\end{Verbatim}
+\end{verbatim}
 will initialize all values to zero. In contrast,
-\begin{Verbatim}
+\begin{verbatim}
 Vector<int> v(n);
-\end{Verbatim}
+\end{verbatim}
 will leave the memory uninitialized. To get zero initialized vectors, one can
 either define this macro to 1, or more efficiently,
-\begin{Verbatim}
+\begin{verbatim}
 Vector<int> v(n);
 std::fill(v.begin(), v.end(), 0); // or
 std::memset(v.data(), 0, sizeof(int) * v.size());
-\end{Verbatim}
+\end{verbatim}
 The two methods are equivalent in most standard library implementations. It is
 strongly recommended that to leave this macro defined to zero. The constructor
 of |std::vector|, with which |Vector| is an alias to, calls the |construct|
@@ -272,10 +272,10 @@ member of |Allocator| to initialize elements one by one, which is a huge waste
 of time. The library does not rely on zero initialization itself. Note that,
 this macro only affect \emph{default initialization of scalars}. For class
 types etc., and other constructor of |std::vector|, such as
-\begin{Verbatim}
+\begin{verbatim}
 Vector<ClassType> c(n);
 Vector<int> v(n, 2);
-\end{Verbatim}
+\end{verbatim}
 the behavior will be as expected. That is, the first will be default
 initialized and the second will be value initialized.
 

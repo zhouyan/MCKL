@@ -38,11 +38,11 @@
 \mckl defines some mathematical constants in the form of constant expression
 functions. For example, to get the value of $\pi$ with a desired precision, one
 can use the following,
-\begin{Verbatim}
+\begin{verbatim}
 constexpr float pi_f = const_pi<float>();
 constexpr double pi_d = const_pi<double>();
 constexpr long double pi_l = const_pi<long double>();
-\end{Verbatim}
+\end{verbatim}
 The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
@@ -53,17 +53,17 @@ table~\ref{tab:Mathematical constants}.
 
 \mckl provides a set of vectorized elementary mathematical functions. For
 example, to perform additions of two vectors,
-\begin{Verbatim}
+\begin{verbatim}
 size_t n = 1000;
 Vector<double> a(n), b(n), y(n);
 // Fill vectors a and b
 add(n, a.data(), b.data(), y.data());
-\end{Verbatim}
+\end{verbatim}
 This is equivalent to,
-\begin{Verbatim}
+\begin{verbatim}
 for (size_t i = 0; i != n; ++i)
     y[i] = a[i] + b[i];
-\end{Verbatim}
+\end{verbatim}
 The functions defined are listed in tables~\ref{tab:Arithmetic functions}
 to~\ref{tab:Rounding functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
@@ -76,17 +76,17 @@ can be scalars instead of pointers to vectors. The output parameter |y| has to
 be a pointer to a vector. Therefore, there are seven versions of this function
 for each type of the parameters. Note that, mixed precision is not allowed. For
 example,
-\begin{Verbatim}
+\begin{verbatim}
 Vector<double> a(n);
 Vector<double> b(n);
 Vector<double> y(n);
 fma(n, a.data(), b.data(), 2, y.data());
-\end{Verbatim}
+\end{verbatim}
 will cause compile-time error because the fourth argument is an integer while
 the others are floating points. The correct call shall be,
-\begin{Verbatim}
+\begin{verbatim}
 fma(n, a.data(), b.data(), 2.0, y.data());
-\end{Verbatim}
+\end{verbatim}
 Without any third-party libraries, these functions do not provide performance
 advantage compared to simple loops. When \mkl is available, some functions can
 have substantial performance improvement when all input arguments are vectors

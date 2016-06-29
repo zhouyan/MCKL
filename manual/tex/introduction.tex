@@ -49,18 +49,18 @@
 
 \mckl is a header-only library. All headers files are under the "mckl"
 directory. To include all functionalities,
-\begin{Verbatim}
+\begin{verbatim}
 #include <mckl/mckl.hpp>
-\end{Verbatim}
+\end{verbatim}
 There are a few other headers that include a subset of functions of \mckl, each
 documented in a subsequent chapter in this manual. They are listed in
 table~\ref{tab:headers}. These headers does not define anything other than
 including other headers that each implement a specific feature. If only one a
 few features are needed, then one can include only headers that implement those
 features to save compilation time. For example,
-\begin{Verbatim}
+\begin{verbatim}
 #include <mckl/random/threefry.hpp>
-\end{Verbatim}
+\end{verbatim}
 includes only the header that implements \rng engines based on the Threefry
 algorithm in~\cite{Salmon:2011um} (see section~\ref{sub:Threefry}). See the
 reference manual\footnote{\url{http://zhouyan.github.io/MCKLDoc/master}} for
@@ -79,10 +79,11 @@ the header file for each class and function defined in \mckl.
     \texttt{mckl/random/rng.hpp}
     & Sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL RNG} \\
     \texttt{mckl/random/distribution.hpp}
-    & Section~\ref{sec:Distribution} \\
+    & Sections~\ref{sec:Uniform bits distribution}
+    to~\ref{sec:Multivariate distribution} \\
     \texttt{mckl/random/test.hpp}
     & Section~\ref{sec:Randomness tests} \\
-    \texttt{mckl/utility}      & Chapter~\ref{chap:Utilities}                 \\
+    \texttt{mckl/utility} & Chapter~\ref{chap:Utilities} \\
     \bottomrule
   \end{tabularx}
   \caption{Top-level headers}

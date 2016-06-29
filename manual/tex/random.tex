@@ -37,13 +37,14 @@ Similar to the standard library header |<random>|, there are mainly two parts
 of this system. The first is a set of \rng{} engines that generate random
 integers. The other is a set of distribution generators. The former are
 documented in sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL RNG}, and
-the later in section~\ref{sec:Distribution}. There are also some performance
-data in Appendices~\appref{chap:Performance of RNG}
-and~\appref{chap:Performance of distribution} for them. Apart from these, the
-library also provides facilities for vectorized random number generating
-(section~\ref{sec:Vectorized random number generating}) and using multiple
-\rng{}s in parallel programs (section~\ref{sec:Multiple RNG streams}). Last, in
-section~\ref{sec:Randomness tests}, a few randomness tests are discussed.
+the later in sections~\ref{sec:Uniform bits distribution}
+to~\ref{sec:Multivariate distribution}. There are also some performance data
+in Appendices~\appref{chap:Performance of RNG} and~\appref{chap:Performance of
+distribution} for them. Apart from these, the library also provides facilities
+for vectorized random number generating (section~\ref{sec:Vectorized random
+number generating}) and using multiple \rng{}s in parallel programs
+(section~\ref{sec:Multiple RNG streams}). Last, in section~\ref{sec:Randomness
+tests}, a few randomness tests are discussed.
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
@@ -51,59 +52,59 @@ section~\ref{sec:Randomness tests}, a few randomness tests are discussed.
 The generic function |rand| provides vectorized random number generating. There
 are two main variants. The first operates on \rng engines and generates random
 integers,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RNGType>
 void rand(RNGType &rng, size_t n, typename RNGType::result_type *r);
-\end{Verbatim}
+\end{verbatim}
 The effect of the function call,
-\begin{Verbatim}
+\begin{verbatim}
 rand(rng, n, r);
-\end{Verbatim}
+\end{verbatim}
 is equivalent to the loop,
-\begin{Verbatim}
+\begin{verbatim}
 for (size_t i = 0; i != n; ++i)
     r[i] = rng();
-\end{Verbatim}
+\end{verbatim}
 The results will always be the same unless a non-deterministic \rng is used
 (see section~\ref{sec:Non-deterministic RNG}). For some \rng{}s implemented in
 \mckl, the vectorized function may have considerable performance advantage. The
 second variant of |rand| is for generating distribution random variates,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RNGType, typename DistributionType>
 void rand(
     RNGType &rng,
     const DistributionType &distribution,
     size_t n,
     typename DistributionType::result_type *r);
-\end{Verbatim}
+\end{verbatim}
 For example,
-\begin{Verbatim}
+\begin{verbatim}
 NormalDistribution<double> normal;
 rand(rng, normal, n, r);
-\end{Verbatim}
+\end{verbatim}
 This is similar to the following loop,
-\begin{Verbatim}
+\begin{verbatim}
 for (size_t i = 0; i != n; ++i)
     r[i] = normal(rng);
-\end{Verbatim}
+\end{verbatim}
 Depending on the type of |rng| and the distribution (including its parameters),
 the vectorized function may have superior performance. However, the results
 will not be exactly the same as using a loop, except for uniform distributions
-(section~\ref{sub:Uniform bits distribution} and~\ref{sub:Standard uniform
+(sections~\ref{sec:Uniform bits distribution} and~\ref{sec:Standard uniform
 distribution}), which will produce the exactly the same results.
 
 For consistency, \mckl also defines variants of the function |rand| for
 generating only one random number,
-\begin{Verbatim}
+\begin{verbatim}
 rand(rng);               // => rng();
 rand(rng, distribution); // => distribution(rng);
-\end{Verbatim}
+\end{verbatim}
 And each \rng engine and distribution generator also has methods for vectorized
 generating,
-\begin{Verbatim}
+\begin{verbatim}
 rng(n, r);               // => rand(rng, n, r);
 distribution(rng, n, r); // => rand(rng, distribution, n, r);
-\end{Verbatim}
+\end{verbatim}
 To write generic functions, it is recommended to use the function |rand|
 instead of the member methods, since the former also works with classes not
 defined by \mckl, such as those in the standard library.
@@ -139,10 +140,10 @@ later returns 64 bits.
 
 All \rng{}s in table~\ref{tab:Counter-based RNG} are actually type aliases.
 More generally \mckl defines the following class template as the interface,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename ResultType, typename Generator>
 class CounterEngine;
-\end{Verbatim}
+\end{verbatim}
 where |ResultType| shall be an unsigned integer type and |Generator| is the
 class that actually implements the algorithm. See the reference manual for
 details of the generator type. For most users, those implemented in the library
@@ -208,16 +209,16 @@ to later.
 The \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
 instructions based \rng{}s in~\cite{Salmon:2011um} are implemented in the
 following generator,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename KeySeqType, size_t Rounds, size_t Blocks>
 class AESNIGenerator;
-\end{Verbatim}
+\end{verbatim}
 The corresponding \rng engine is,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename ResultType, typename KeySeqType, size_t Rounds, size_t Blocks>
 using AESNIEngine =
     CounterEngine<ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
-\end{Verbatim}
+\end{verbatim}
 where |KeySeqType| is the class used to generate the sequences of round keys.
 The parameter |Rounds| is the number of rounds of \aes encryption to be
 performed. See the reference manual for details of how to define the key
@@ -228,7 +229,7 @@ at the same time. This is specified by the template parameter |Blocks|. Larger
 blocks, up to eight, might improve performance. But this is at the cost of
 larger state size. Without going into details, there are four types of sequence
 of round keys implemented by \mckl,
-\begin{Verbatim}
+\begin{verbatim}
 template <size_t Rounds>
 using AES128KeySeq = internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
 
@@ -240,9 +241,9 @@ using AES256KeySeq = internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator
 
 template <typename Constants = ARSConstants>
 using ARSKeySeq = internal::ARSKeySeqImpl<Constants>;
-\end{Verbatim}
+\end{verbatim}
 and correspondingly four \rng engines,
-\begin{Verbatim}
+\begin{verbatim}
 template <
     typename ResultType,
     size_t Rounds = MCKL_AES128_ROUNDS,
@@ -267,7 +268,7 @@ template <
     size_t Blocks = MCKL_AESNI_BLOCKS,
     typename Constants = ARSConstants>
 using ARSEngine = AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
-\end{Verbatim}
+\end{verbatim}
 The first three are equivalent to \aes-128, \aes-192 and \aes-256 block ciphers
 used in counter mode. The last is the \ars algorithm introduced
 by~\cite{Salmon:2011um}. The last template parameter |Constants| of |ARSKeySeq|
@@ -275,7 +276,7 @@ and |ARSEngine| is a trait class that defines the constants of the Weyl's
 sequence. See~\cite{Salmon:2011um} for details. The defaults are taken from the
 paper. To use an alternative pair of 64-bit integers as the constants, one can
 define and use a trait class as the following,
-\begin{Verbatim}
+\begin{verbatim}
 template <size_t>
 struct NewWeylConstant;
 
@@ -298,22 +299,22 @@ struct NewConstants
 };
 
 using NewARS = ARSEngine<ResultType, Rounds, NewConstants>;
-\end{Verbatim}
+\end{verbatim}
 Alternative methods are also possible. The only requirement is that, the
 following statement,
-\begin{Verbatim}
+\begin{verbatim}
 template <size_t I>
 using weyl = typename Constants::template weyl<I>;
-\end{Verbatim}
+\end{verbatim}
 shall define the type |weyl| such that it has a static constant expression
 member data |value| that is the |I|\ith Weyl constant. A few type aliases are
 defined for convenience. For example,
-\begin{Verbatim}
+\begin{verbatim}
 using ARSx8    = ARSEngine<std::uint32_t, MCKL_ARS_ROUNDS, 8>;
 using ARSx8_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 8>;
 using ARS      = ARSEngine<std::uint32_t>;
 using ARS_64   = ARSEngine<std::uint64_t>;
-\end{Verbatim}
+\end{verbatim}
 The engine |ARS| is the default \rng if \aesni instructions are supported.
 Aliases for block sizes 1, 2, 4 and 8 are defined for all four algorithms, as
 well as both 32- and 64-bit output variants. These aliases are listed in
@@ -330,16 +331,16 @@ bottle neck. Note that, the best performance is obtained with the vectorized
 
 The Philox algorithm in~\cite{Salmon:2011um} is implemented in the following
 generator,
-\begin{Verbatim}
+\begin{verbatim}
 template <
     typename T,
     size_t K = MCKL_PHILOX_VECTOR_LENGTH,
     size_t Rounds = MCKL_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>
 class PhiloxGenerator;
-\end{Verbatim}
+\end{verbatim}
 The corresponding \rng engine is,
-\begin{Verbatim}
+\begin{verbatim}
 template <
     typename ResultType,
     typename T = ResultType,
@@ -348,7 +349,7 @@ template <
     typename Constants = PhiloxConstants<T, K>>
 using PhiloxEngine =
     CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
-\end{Verbatim}
+\end{verbatim}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
 counter-based RNG}. There is no limit on the template parameter |K| or
@@ -357,7 +358,7 @@ integer type. See~\cite{Salmon:2011um} on the most general form of the
 algorithm. However, \mckl only provides default constants for 32- and 64-bit
 unsigned integer type |T| and |K| taking the values~2 or~4. These four engines
 are defined as type aliases for convenience,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename ResultType>
 using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
 
@@ -369,7 +370,7 @@ using Philox2x64Engine = PhiloxEngine<ResultType, std::uint64_t, 2>;
 
 template <typename ResultType>
 using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
-\end{Verbatim}
+\end{verbatim}
 Type aliases for 32- and 64-bit |ResultType| are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. To use the engine with |K| taking values
 larger than four, or |T| being unsigned integer type with number of bits other
@@ -382,16 +383,16 @@ for an example of how to define it.
 
 The Threefry algorithm in~\cite{Salmon:2011um} is implemented in the following
 generator,
-\begin{Verbatim}
+\begin{verbatim}
 template <
     typename T,
     size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
     size_t Rounds = MCKL_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
 class ThreefryGenerator;
-\end{Verbatim}
+\end{verbatim}
 The corresponding \rng engine is,
-\begin{Verbatim}
+\begin{verbatim}
 template <
     typename ResultType,
     typename T = ResultType,
@@ -400,7 +401,7 @@ template <
     typename Constants = ThreefryConstants<T, K>>
 using ThreefryEngine =
     CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
-\end{Verbatim}
+\end{verbatim}
 The default vector length and the number of rounds can be changed by
 configuration macros listed in table~\ref{tab:Configuration macros for
 counter-based RNG}. Similar to the implementation of the Philox algorithm,
@@ -413,7 +414,7 @@ for which the Threefish algorithm was originally developed for. Defaults for
 from~\cite{Salmon:2011um}. Type aliases for these configurations are defined
 for convenience, Type aliases for 32- and 64-bit |ResultType| are also defined,
 as listed in table~\ref{tab:Counter-based RNG}.
-\begin{Verbatim}
+\begin{verbatim}
 template <typename ResultType>
 using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
 
@@ -431,32 +432,32 @@ using Threefry8x64Engine = ThreefryEngine<ResultType, std::uint64_t, 8>;
 
 template <typename ResultType>
 using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
-\end{Verbatim}
+\end{verbatim}
 
 \subsection{Seeding counter-based \texorpdfstring{\protect\rng}{RNG}}
 \label{sub:Seeding counter-based RNG}
 
 The singleton class template |SeedGenerator| can be used to generate
 distinctive seeds sequentially. For example,
-\begin{Verbatim}
+\begin{verbatim}
 auto &seed = SeedGenerator<void, unsigned>::instance();
 RNG rng1(seed.get()); // Construct rng1
 RNG rng2(seed.get()); // Construct rng2 with another seed
-\end{Verbatim}
+\end{verbatim}
 The first argument to the template can be any type. For different types,
 different instances of |SeedGenerator| will be created. Thus, the seeds
 generated by two generators, |SeedGenerator<T1>| and |SeedGenerator<T2>|, will
 be independent. The second parameter is the type of the seed values. It can be
 any unsigned integer type. Classes such as |Particle<T>| will use the generator
 of the following type,
-\begin{Verbatim}
+\begin{verbatim}
 using Seed = SeedGenerator<NullType, MCKL_SEED_RESULT_TYPE>;
-\end{Verbatim}
+\end{verbatim}
 where |MCKL_SEED_RESULT_TYPE| is a configuration macro which is defined to
 |unsigned| by default.
 
 One can save and set the seed generator using standard streams. For example,
-\begin{Verbatim}
+\begin{verbatim}
 std::ifstream is("seed.txt");
 if (is)
     is >> Seed::instance();    // Read seed from a file
@@ -467,15 +468,15 @@ is.close();
 std::ofstream os("seed.txt");
 os << Seed::instance();        // Write the seed to a file
 os.close();
-\end{Verbatim}
+\end{verbatim}
 This way, if the simulation program needs to be repeated multiple times, each
 time it will use a different set of seeds. A single seed generator is enough
 for a single program. However, it is more difficult to ensure that each
 computing node has a distinctive set of seeds in a distributed system. A simple
 solution is to use the |modulo| method of |SeedGenerator|. For example,
-\begin{Verbatim}
+\begin{verbatim}
 Seed::instance().modulo(n, r);
-\end{Verbatim}
+\end{verbatim}
 where $n$ is the number of processes and $r$ is the rank of the current node.
 After this call, all seeds generated will belong to the equivalent class $s
 \equiv r \mod n$. Therefore, no two nodes will ever generate the same seeds.
@@ -509,16 +510,16 @@ usual \rng{}s. Each \rng engines output by default 32-bit integers. Similar to
 the counter-based \rng{}s, 64-bit variants are also defined.
 
 When there are \mkl routines for generating distribution random variates for
-one of the distributions discussed later in section~\ref{sec:Distribution}, the
-library will automatically use \mkl routines for vectorized random number
-generating if the \rng{} is one of that listed in table~\ref{tab:MKL RNG}. For
-example,
-\begin{Verbatim}
+one of the distributions discussed later in sections~\ref{sec:Continuous
+distribution} and~\ref{sec:Discrete distribution}, the library will
+automatically use \mkl routines for vectorized random number generating if the
+\rng{} is one of that listed in table~\ref{tab:MKL RNG}. For example,
+\begin{verbatim}
 MKL_SFMT19937 rng;
 NormalDistribution<double> normal;
 normal(rng, n, r);       // Use MKL
 rand(rng, normal, n, r); // Use MKL
-\end{Verbatim}
+\end{verbatim}
 Note that, this is only applicable when the distribution is a class in this
 library. It will not work with classes such as |std::normal_distribution|. This
 is also applicable when the distribution is not directly supported by \mkl, but
@@ -551,12 +552,12 @@ Earlier in section~\ref{sec:Particle} we introduced that |particle.rng(i)|
 returns an independent \rng instance. This is actually done through a class
 template called |RNGSet|. Three of them are implemented in \mckl. They all have
 the same interface,
-\begin{Verbatim}
+\begin{verbatim}
 RNGSet<RNG> rng_set(N); // A set of N RNGs
 rng_set.resize(n);      // Change the size of the set
 rng_set[i];             // Get a reference to the i-th RNG
 rng_set.seed();         // Seed each RNG in the set with Seed::instance()
-\end{Verbatim}
+\end{verbatim}
 The first implementation is |RNGSetScalar|. As its name suggests, it is only a
 wrapper of a single \rng. All calls to |rng_set[i]| returns a reference to the
 same \rng. It is only useful when an |RNGSet| interface is required while the
@@ -575,67 +576,46 @@ uses thread-local storage (\tls). It has much smaller memory footprint than
 |RNGSetVector| while maintains better thread-safety. The performance impact of
 using \tls is minimal unless the computation at the calling site is trivial.
 For example,
-\begin{Verbatim}
+\begin{verbatim}
 void eval_each(size_t, ParticleIndex<T> idx)
 {
     auto &rng = idx.rng();
     // using rng to initialize state
     // do some computation, likely far more costly than TLS
 }
-\end{Verbatim}
+\end{verbatim}
 The type alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is available,
 otherwise defined to be |RNGSetVector|. It is used by the |Particle| class
 template. One can replace the type of \rng set used by |Particle<T>| with a
 member type of |T|. For example,
-\begin{Verbatim}
+\begin{verbatim}
 class T
 {
     public:
     using rng_set_type = RNGSetScalar<RNG>;
 };
-\end{Verbatim}
+\end{verbatim}
 will replace the type of the \rng set contained in |Particle<T>|. One can also
 define their own replacement type, as long as it has the same interface as the
 builtin ones.
 
-\section{Distribution}
-\label{sec:Distribution}
-
-\mckl provides implementations of some common distributions. Some of them are
-the same as those in the standard library with |CamelCase| names. For example,
-|NormalDistribution| can be used in place of |std::normal_distribution|. This
-includes all of the continuous distributions in the standard library. As stated
-in section~\ref{sec:Vectorized random number generating}, all the distributions
-defined in \mckl support vectorized random number generating. In the following
-sections, we introduce each of them. Section~\ref{sub:Uniform bits
-distribution} discusses the uniform bits distribution, which is actually a low
-level distribution indirectly used by all other distributions.
-section~\ref{sub:Standard uniform distribution} shows few different standard
-uniform distributions. And in sections~\ref{sub:Continuous distributions}
-and~\ref{sub:Discrete distributions} we list continuous and discrete
-distributions, respectively. In these two sections, the \pdf or \pmf and class
-declaration of each distribution are shown first, and then we briefly discuss
-the algorithm used for implementation. Last, in section~\ref{sub:Multivariate
-distributions} we briefly discusses a few multivariate distributions
-implemented in \mckl.
-
-\subsection{Uniform bits distribution}
-\label{sub:Uniform bits distribution}
+\section{Uniform bits distribution}
+\label{sec:Uniform bits distribution}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename UIntType>
 class UniformBitsDistribution;
-\end{Verbatim}
+\end{verbatim}
 is similar to the standard library's |std::independent_bits_engine|, except
 that it always generates full size random integers and |UIntType| must have
 size at least of that of |short|. That is, let $W$ be the number of bits of
 |UIntType|, then the output is uniform on the set $\{0,\dots,2^W - 1\}$. For
 example,
-\begin{Verbatim}
+\begin{verbatim}
 UniformBitsDistribution<std::uint32_t> ubits;
 ubits(rng); // Return 32-bit random integers
-\end{Verbatim}
+\end{verbatim}
 Let $\rmin$ and $\rmax$ be the minimum and maximum of the random integers
 generated by |rng|. Let $R = \rmax - \rmin + 1$. Let $r_i$ be consecutive
 output of |rng()|. If there exists an integer $V > 0$ such that $R = 2^V$, then
@@ -652,8 +632,8 @@ that the distribution does exactly nothing and returns the results of |rng()|
 directly. If there does not exist an integer $V > 0$ such that $R = 2^V$, then
 |std::indepdent_bits_engine| will be used.
 
-\subsection{Standard uniform distribution}
-\label{sub:Standard uniform distribution}
+\section{Standard uniform distribution}
+\label{sec:Standard uniform distribution}
 
 \mckl provides five standard uniform distributions. They are all class
 templates with a single template type parameter |RealType|. The random integers
@@ -662,10 +642,10 @@ the class |UniformBitsDistribution| before they are mapped to floating point
 numbers within the interval $[0, 1]$. The integer type depends on |RealType|,
 the range of the \rng{}, $R$, and |MCKL_U01_USE_64BITS_DOUBLE|, a configuration
 macro. The exact relations are listed in table~\ref{tab:Intermediate integer
-types of uniform distributions}. In the following, let $W$ be the number of
-bits of the integer type, and $M$ be the number of significant bits (including
-the implicit one) of |RealType|. We also denote the input random integers as
-$U$ and the output random real numbers as $X$.
+types of uniform distribution}. In the following, let $W$ be the number of bits
+of the integer type, and $M$ be the number of significant bits (including the
+implicit one) of |RealType|. We also denote the input random integers as $U$
+and the output random real numbers as $X$.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LlL}
@@ -680,33 +660,35 @@ $U$ and the output random real numbers as $X$.
     \texttt{long double} & Always & \texttt{std::uint64\_t} \\
     \bottomrule
   \end{tabularx}
-  \caption{Intermediate integer types of uniform distributions}
-  \label{tab:Intermediate integer types of uniform distributions}
+  \caption{Intermediate integer types of uniform distribution}
+  \label{tab:Intermediate integer types of uniform distribution}
 \end{table}
 
-\subsubsection{Standard form}
+\subsection{Standard form}
+\label{sub:Standard form}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RealType = double>
 class U01Distribution;
-\end{Verbatim}
+\end{verbatim}
 implements the uniform distribution on $[0, 1)$. If |MCKL_U01_USE_FIXED_POINT|
 is true, which is the default, then it is an alias to |U01CODistribution| (see
 below). Otherwise, it is implemented through the mapping,
-\begin{align*}
-  P &= \Floor{(W + M - 1) / W} \\
-  K &= \max\{1, P\} \\
-  X &= \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
-\end{align*}
+\begin{equation*}
+  P = \Floor{(W + M - 1) / W},\qquad
+  K = \max\{1, P\},\qquad
+  X = \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
+\end{equation*}
 
-\subsubsection{Closed-closed interval}
+\subsection{Closed-closed interval}
+\label{sub:Closed-closed interval}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RealType = double>
 class U01CCDistribution;
-\end{Verbatim}
+\end{verbatim}
 implements the uniform distribution on $[0, 1]$ through the mapping,
 \begin{align*}
   P &= \min\{W - 1, M\} \\
@@ -715,56 +697,60 @@ implements the uniform distribution on $[0, 1]$ through the mapping,
     \Floor{(U \bmod 2^{W - 1}) / 2^{W - P -2}} &\text{otherwise}
   \end{cases} \\
   Z &= (V \bmod 2) + V \\
-  X &= 2^{-(P + 1)} Z
+  X &= 2^{-(P + 1)} Z.
 \end{align*}
 The minimum and maximum are $0$ and $1$, respectively.
 
-\subsubsection{Closed-open interval}
+\subsection{Closed-open interval}
+\label{sub:Closed-open interval}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RealType = double>
 class U01CODistribution;
-\end{Verbatim}
+\end{verbatim}
 implements the uniform distribution on $[0, 1)$ through the mapping,
-\begin{align*}
-  P &= \min\{W, M\} \\
-  V &= \Floor{U / 2^{W - P}} \\
-  X &= 2^{-P} V
-\end{align*}
+\begin{equation*}
+  P = \min\{W, M\},\qquad
+  V = \Floor{U / 2^{W - P}},\qquad
+  X = 2^{-P} V
+\end{equation*}
 The minimum and maximum are $0$ and $1 - 2^{-P}$, respectively.
 
-\subsubsection{Open-closed interval}
+\subsection{Open-closed interval}
+\label{sub:Open-closed interval}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RealType = double>
 class U01OCDistribution;
-\end{Verbatim}
+\end{verbatim}
 implements the uniform distribution on $(0, 1]$ through the mapping,
-\begin{align*}
-  P &= \min\{W, M\} \\
-  V &= \Floor{U / 2^{W - P}} \\
-  X &= 2^{-P} V + 2^{-P}
-\end{align*}
+\begin{equation*}
+  P = \min\{W, M\},\qquad
+  V = \Floor{U / 2^{W - P}},\qquad
+  X = 2^{-P} V + 2^{-P}
+\end{equation*}
 The minimum and maximum are $2^{-P}$ and $1$, respectively.
 
-\subsubsection{Open-open interval}
+\subsection{Open-open interval}
+\label{sub:Open-open interval}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RealType = double>
 class U01CODistribution;
-\end{Verbatim}
+\end{verbatim}
 implements the uniform distribution on $(0, 1)$ through the mapping,
-\begin{align*}
-  P &= \min\{W + 1, M\} \\
-  V &= \Floor{U / 2^{W + 1 - P}} \\
-  X &= 2^{-(P - 1)} V + 2^{-P}
-\end{align*}
+\begin{equation*}
+  P = \min\{W + 1, M\},\qquad
+  V = \Floor{U / 2^{W + 1 - P}},\qquad
+  X = 2^{-(P - 1)} V + 2^{-P}
+\end{equation*}
 The minimum and maximum are $2^{-P}$ and $1 - 2^{-P}$, respectively.
 
-\subsubsection{Performance and accuracy considerations}
+\subsection{Performance and accuracy considerations}
+\label{sub:Performance and accuracy considerations}
 
 The last four distributions actually produce ``fixed point'' numbers. The
 output $X$ can be represented exactly by the target |RealType|. They have two
@@ -792,36 +778,39 @@ However, there are situations where one does want the extra precision. In this
 case, one can define |MCKL_U01_USE_64BITS_DOUBLE| to a non-zero value, such
 that the random integers will always be 64-bit for |double| output.
 
-\subsection{Continuous distributions}
-\label{sub:Continuous distributions}
+\section{Continuous distribution}
+\label{sec:Continuous distribution}
 
-All continuous distributions support all three types of floating point numbers,
-unless stated otherwise.
+\subsection{Arcsine distribution}
+\label{sub:Arcsine distribution}
 
-\subsubsection{Arcsine distribution}
-
-\begin{equation*}
-  f(x;\alpha,\beta) = \frac{1}{\pi\sqrt{(x - \alpha)(\beta - x)}} \qquad
-  x \in [a, b],\quad a \in (0,\infty),\quad b \in (0,\infty)
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class ArcsineDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;\alpha,\beta) = \frac{1}{\pi\sqrt{(x - \alpha)(\beta - x)}},\qquad
+  x \in [a, b],\quad a \in (0,\infty),\quad b \in (0,\infty),
+\end{equation*}
+using the inverse method.
 
-\subsubsection{Beta distribution}
+\subsection{Beta distribution}
+\label{sub:Beta distribution}
 
+The class template,
+\begin{verbatim}
+template <typename RealType = double>
+class BetaDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
   f(x;\alpha,\beta) =
   \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}
-  x^{\alpha - 1}(1 - x)^{\beta - 1} \qquad
-  x \in (0, 1),\quad \alpha \in (0,\infty),\quad \beta \in (0,\infty)
+  x^{\alpha - 1}(1 - x)^{\beta - 1},\qquad
+  x \in (0, 1),\quad \alpha \in (0,\infty),\quad \beta \in (0,\infty).
 \end{equation*}
-\begin{Verbatim}
-template <typename RealType = double>
-class BetaDistribution;
-\end{Verbatim}
 The specific algorithm used depends on the parameters. If $\alpha = 1/2$ and
 $\beta = 1/2$, or $\alpha = 1$ or $\beta = 1$, then the inverse method is used.
 If $\alpha > 1$ and $\beta > 1$, the method in~\cite{Cheng:1978jl} is used.
@@ -832,73 +821,87 @@ switching algorithms in~\cite{Atkinson:1979es} is used. Note that, there is no
 vectorized implementation at the moment for the switching algorithms. In other
 cases, the vectorized generating shall provide considerable speedup.
 
-\subsubsection{Cauchy distribution}
+\subsection{Cauchy distribution}
+\label{sub:Cauchy distribution}
 
-\begin{equation*}
-  f(x;a,b) =
-  \frac{1}{\pi b\Round[Big]{1 + \Round[Big]{\frac{x - a}{b}}^2}} \qquad
-  x \in \Real,\quad a \in \Real,\quad b \in (0,\infty)
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class CauchyDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
-
-\subsubsection{\texorpdfstring{$\chi^2$}{Chi-squared}-distribution}
-
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
-  f(x;n) = \frac{x^{n/2 - 1}\EE^{-x/2}}{2^{n/2}\Gamma(n/2)} \qquad
-  x \in (0,\infty),\quad n \in (0,\infty)
+  f(x;a,b) =
+  \frac{1}{\pi b\Round[Big]{1 + \Round[Big]{\frac{x - a}{b}}^2}},\qquad
+  x \in \Real,\quad a \in \Real,\quad b \in (0,\infty),
 \end{equation*}
-\begin{Verbatim}
+using the inverse method.
+
+\subsection{\texorpdfstring{$\chi^2$}{Chi-squared}-distribution}
+\label{Chi-squared-distribution}
+
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class ChiSquaredDistribution;
-\end{Verbatim}
-The implementation uses the fact that if $X$ is a Gamma random variable with
-shape $n / 2$ and scale $2$, then $X$ is also $\chi^2$-distributed. See below
-for the implementation of the Gamma distribution.
-
-\subsubsection{Exponential distribution}
-
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
-  f(x;\lambda) = \lambda\EE^{-\lambda x} \qquad
-  x \in [0,\infty),\quad \lambda \in (0,\infty)
+  f(x;n) = \frac{x^{n/2 - 1}\EE^{-x/2}}{2^{n/2}\Gamma(n/2)},\qquad
+  x \in (0,\infty),\quad n \in (0,\infty),
 \end{equation*}
-\begin{Verbatim}
+The implementation uses the fact that if $X$ is a Gamma random variable with
+shape $n / 2$ and scale $2$, then $X$ is also $\chi^2$-distributed.
+
+\subsection{Exponential distribution}
+\label{sub:Exponential distribution}
+
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class ExponentialDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;\lambda) = \lambda\EE^{-\lambda x},\qquad
+  x \in [0,\infty),\quad \lambda \in (0,\infty),
+\end{equation*}
+using the inverse method.
 
-\subsubsection{Extreme value distribution}
+\subsection{Extreme value distribution}
+\label{sub:Extreme value distribution}
 
+The class template,
+\begin{verbatim}
+template <typename RealType = double>
+class ExtremeValueDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
   f(x;a,b) =
   \frac{1}{b}\exp\Curly[Big]{
-    \frac{a - x}{b} - \exp\Curly[Big]{\frac{a - x}{b}}} \qquad
-  x \in \Real,\quad a \in \Real,\quad b \in (0, \infty)
+    \frac{a - x}{b} - \exp\Curly[Big]{\frac{a - x}{b}}},\qquad
+  x \in \Real,\quad a \in \Real,\quad b \in (0, \infty),
 \end{equation*}
-\begin{Verbatim}
+using the inverse method.
+
+\subsection{Fisher's \texorpdfstring{$F$}{F}-distribution}
+\label{sub:Fisher's F-distribution}
+
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
-class ExtremeValueDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
-
-\subsubsection{Fisher's \texorpdfstring{$F$}{F}-distribution}
-
+class FisherFDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{align*}
   & f(x;m,n) =
   \frac{\Gamma\Round[Big]{\frac{m + n}{2}}}{
     \Gamma\Round[Big]{\frac{m}{2}}\Gamma\Round[Big]{\frac{n}{2}}}
   \Round[Big]{\frac{m}{n}}^{m/2} x^{m / 2 - 1}
   \Round[Big]{1 + \frac{m}{n}x}^{-(m + n) / 2} \\
-  & x \in [0, \infty),\quad m \in (0, \infty),\quad n \in (0, \infty)
+  & x \in [0, \infty),\quad m \in (0, \infty),\quad n \in (0, \infty).
 \end{align*}
-\begin{Verbatim}
-template <typename RealType = double>
-class FisherFDistribution;
-\end{Verbatim}
 The implementation uses the fact that if $U$ and $V$ are $\chi^2$-distributed
 random variables with degrees of freedom $m$ and $n$, respectively, and they
 are independent, then
@@ -906,19 +909,22 @@ are independent, then
   X = \frac{U / V}{m / n}
 \end{equation*}
 is a Fisher's $F$-distributed random variable with the respective degrees of
-freedom. See above for the implementation of the $\chi^2$-distribution.
+freedom.
 
-\subsubsection{Gamma distribution}
+\subsection{Gamma distribution}
+\label{sub:Gamma distribution}
 
-\begin{equation*}
-  f(x;\alpha,\beta) =
-  \frac{\EE^{-x/\beta}}{\Gamma(\alpha)}\beta^{-\alpha}x^{\alpha-1} \qquad
-  x \in (0, \infty),\quad \alpha \in (0, \infty),\quad \beta \in (0, \infty)
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class GammaDistribution;
-\end{Verbatim}
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;\alpha,\beta) =
+  \frac{\EE^{-x/\beta}}{\Gamma(\alpha)}\beta^{-\alpha}x^{\alpha-1},\qquad
+  x \in (0, \infty),\quad \alpha \in (0, \infty),\quad \beta \in (0, \infty).
+\end{equation*}
 The specific algorithm used depends on the parameters. If $\alpha = 1$, it
 becomes the exponential distribution. If $0 < \alpha < 0.6$, it is generated
 through transformation of exponential power
@@ -927,111 +933,137 @@ rejection method from the Weibull distribution is
 used~\cite[sec.~3.4]{Devroye:1986gi}. If $\alpha > 1$, then the method
 in~\cite{Marsaglia:2000vq} is used.
 
-\subsubsection{Laplace distribution}
+\subsection{Laplace distribution}
+\label{sub:Laplace distribution}
 
-\begin{equation*}
-  f(x;a,b) = \frac{1}{2b}\exp\Curly[Big]{-\frac{\Abs{x - a}}{b}} \qquad
-  x \in \Real,\quad b \in (0, \infty)
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class LaplaceDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;a,b) = \frac{1}{2b}\exp\Curly[Big]{-\frac{\Abs{x - a}}{b}},\qquad
+  x \in \Real,\quad b \in (0, \infty),
+\end{equation*}
+using the inverse method.
 
-\subsubsection{Levy distribution}
+\subsection{Levy distribution}
+\label{sub:Levy distribution}
 
+The class template,
+\begin{verbatim}
+template <typename RealType = double>
+class LevyDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
   f(x;a,b) =
   \sqrt{\frac{b}{2\pi}}
-  \frac{\exp\Curly[Big]{-\frac{b}{2(x - a)}}}{(x - a)^{3/2}} \qquad
-  x \in [a, \infty),\quad a \in \Real,\quad b \in (0, \infty)
+  \frac{\exp\Curly[Big]{-\frac{b}{2(x - a)}}}{(x - a)^{3/2}},\qquad
+  x \in [a, \infty),\quad a \in \Real,\quad b \in (0, \infty).
 \end{equation*}
-\begin{Verbatim}
-template <typename RealType = double>
-class LevyDistribution;
-\end{Verbatim}
 The implementation uses the fact that if $Z$ is a standard Normal random
 variable, then
 \begin{equation*}
   X = a + b / Z^2
 \end{equation*}
-is Levy distributed with location $a$ and scale $b$. See below for the
-implementation of the Normal distribution.
+is Levy distributed with location $a$ and scale $b$.
 
-\subsubsection{Logistic distribution}
+\subsection{Logistic distribution}
+\label{sub:Logistic distribution}
 
-\begin{equation*}
-  f(x;a,b) = \frac{1}{4b}\mathrm{sech}^2\Round[Big]{\frac{x - a}{2b}} \qquad
-  x \in \Real,\quad a \in \Real,\quad b \in (0, \infty)
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class LaplaceDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;a,b) = \frac{1}{4b}\mathrm{sech}^2\Round[Big]{\frac{x - a}{2b}},\qquad
+  x \in \Real,\quad a \in \Real,\quad b \in (0, \infty),
+\end{equation*}
+using the inverse method.
 
-\subsubsection{Log-normal distribution}
+\subsection{Log-normal distribution}
+\label{sub:Log-normal distribution}
 
-\begin{align*}
-  & f(x;m,s) =
-  \frac{1}{x\sigma\sqrt{2\pi}}
-  \exp\Curly[Big]{-\frac{(\ln x - m)^2}{2\sigma^2}} \\
-  & x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty)
-\end{align*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class LognormalDistribution;
-\end{Verbatim}
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;m,s) =
+  \frac{1}{x\sigma\sqrt{2\pi}}
+  \exp\Curly[Big]{-\frac{(\ln x - m)^2}{2\sigma^2}},\qquad
+  x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty).
+\end{equation*}
 The implementation uses the fact that if $Z$ is a standard Normal random
 variable, then
 \begin{equation*}
   X = \exp\{m + sZ\}
 \end{equation*}
-is Log-normal distributed with location $m$
-and scale $s$. See below for the implementation of the Normal distribution.
+is Log-normal distributed with location $m$ and scale $s$.
 
-\subsubsection{Normal distribution}
+\subsection{Normal distribution}
+\label{sub:Normal distribution}
 
+The class template,
+\begin{verbatim}
+template <typename RealType = double>
+class NormalDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
   f(x;\mu,\sigma) =
   \frac{1}{\sqrt{2\pi\sigma^2}}
-  \exp\Curly[Big]{-\frac{(x-\mu)^2}{2\sigma^2}} \qquad
-  x \in \Real,\quad \mu \in \Real,\quad \sigma \in (0, \infty)
+  \exp\Curly[Big]{-\frac{(x-\mu)^2}{2\sigma^2}},\qquad
+  x \in \Real,\quad \mu \in \Real,\quad \sigma \in (0, \infty),
 \end{equation*}
-\begin{Verbatim}
-template <typename RealType = double>
-class NormalDistribution;
-\end{Verbatim}
-The implementation uses the Box-Muller method~\cite{Box:1958hv}.
+using the Box-Muller method~\cite{Box:1958hv}.
 
-\subsubsection{Pareto distribution}
+\subsection{Pareto distribution}
+\label{sub:Pareto distribution}
 
-\begin{equation*}
-  f(x;a,b) = \frac{a b^a}{x^{a + 1}} \qquad
-  x \in [b, \infty),\quad a \in [0, \infty),\quad b \in [0, \infty)
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class ParetoDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
-
-\subsubsection{Rayleigh distribution}
-
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
-  f(x;\sigma) =
-  \frac{x}{\sigma^2}\exp\Curly[Big]{-\frac{x^2}{2\sigma^2}} \qquad
-  x \in [0, \infty),\quad \sigma \in (0, \infty)
+  f(x;a,b) = \frac{a b^a}{x^{a + 1}},\qquad
+  x \in [b, \infty),\quad a \in [0, \infty),\quad b \in [0, \infty),
 \end{equation*}
-\begin{Verbatim}
+using the inverse method.
+
+\subsection{Rayleigh distribution}
+\label{sub:Rayleigh distribution}
+
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class RayleighDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;\sigma) =
+  \frac{x}{\sigma^2}\exp\Curly[Big]{-\frac{x^2}{2\sigma^2}},\qquad
+  x \in [0, \infty),\quad \sigma \in (0, \infty),
+\end{equation*}
+using the inverse method.
 
-\subsubsection{Stable distribution}
+\subsection{Stable distribution}
+\label{sub:Stable distribution}
 
+The class template,
+\begin{verbatim}
+template <typename RealType = double>
+class StableDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{align*}
   &f(x;\alpha,\beta,a,b) =
   \frac{1}{2\pi}\int_{\infty}^{\infty}
@@ -1044,12 +1076,8 @@ The implementation uses the inverse method.
   \end{cases} \\
   & x \in \Real,\quad
   \alpha \in (0, 2],\quad \beta \in [-1, 1],\quad
-  a \in \Real,\quad b \in (0, \infty)
+  a \in \Real,\quad b \in (0, \infty).
 \end{align*}
-\begin{Verbatim}
-template <typename RealType = double>
-class StableDistribution;
-\end{Verbatim}
 The implementation uses the method in~\cite{Chambers:1976dv}. Note that, some
 other distributions implemented in \mckl, such as the Cauchy distribution
 ($\alpha = 1$, $\beta = 0$), the Levy distribution ($\alpha = 1/2$, $\beta =
@@ -1067,70 +1095,77 @@ implemented by \mckl, but are special cases of the stable distribution, such as
 the Landau distribution ($\alpha = 1$, $\beta = 1$) and Holtsmark distribution
 ($\alpha = 3/2$, $\beta = 0$), to name just two of them.
 
-\subsubsection{Student's \texorpdfstring{$t$}{t}-distribution}
+\subsection{Student's \texorpdfstring{$t$}{t}-distribution}
+\label{sub:Student's t-distribution}
 
+The class template,
+\begin{verbatim}
+template <typename RealType = double>
+class StudentTDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
   f(x;n) =
   \frac{\Gamma\Round[Big]{\frac{n + 1}{2}}}
   {\sqrt{n\pi}\Gamma\Round[Big]{\frac{n}{2}}}
-  \Round[Big]{1 + \frac{x^2}{n}}^{-(n + 1)/2} \qquad
-  x \in \Real,\quad n \in (0, \infty)
+  \Round[Big]{1 + \frac{x^2}{n}}^{-(n + 1)/2},\qquad
+  x \in \Real,\quad n \in (0, \infty).
 \end{equation*}
-\begin{Verbatim}
-template <typename RealType = double>
-class StudentTDistribution;
-\end{Verbatim}
 The implementation uses the fact that if $Z$ is a standard Normal random
 variable, $V$ is a $\chi^2$-distributed random variable with degree of freedom
 $n$, and they are independent, then
 \begin{equation*}
   X = \frac{Z}{\sqrt{V / n}}
 \end{equation*}
-is Student's $t$-distributed with the respective degree of freedom. See above
-for the implementations of the Normal distribution and the
-$\chi^2$-distribution.
+is Student's $t$-distributed with the respective degree of freedom.
 
-\subsubsection{Uniform distribution}
+\subsection{Uniform real distribution}
+\label{sub:Uniform real distribution}
 
-\begin{equation*}
-  f(x;a,b) = \frac{1}{b - a} \qquad
-  x \in [a, b),\quad a \in \Real,\quad b \in (a, \infty)
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class UniformRealDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  f(x;a,b) = \frac{1}{b - a},\qquad
+  x \in [a, b),\quad a \in \Real,\quad b \in (a, \infty),
+\end{equation*}
+using the inverse method.
 
-\subsubsection{Weibull distribution}
+\subsection{Weibull distribution}
+\label{sub:Weibull distribution}
 
-\begin{align*}
-  &f(x;a,b) = \frac{a}{b}\Round[Big]{\frac{x}{b}}^{a - 1}
-  \exp\Curly[Big]{-\Round[Big]{\frac{x}{b}}^a} \\
-  &x \in [0, \infty),\quad a \in (0, \infty),\quad b \in (0, \infty)
-\end{align*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename RealType = double>
 class WeibullDistribution;
-\end{Verbatim}
-The implementation uses the inverse method.
-
-\subsection{Discrete distributions}
-\label{sub:Discrete distributions}
-
-All discrete distributions support all integer types with sizes at least that
-of |short|, unless stated otherwise.
-
-\subsubsection{Bernoulli distribution}
-
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
-  \Prob(X = k;p) = kp + (1 - k)(1 - p) \qquad
-  k \in \{0, 1\},\quad p \in [0, 1]
+  f(x;a,b) = \frac{a}{b}\Round[Big]{\frac{x}{b}}^{a - 1}
+  \exp\Curly[Big]{-\Round[Big]{\frac{x}{b}}^a},\qquad
+  x \in [0, \infty),\quad a \in (0, \infty),\quad b \in (0, \infty),
 \end{equation*}
-\begin{Verbatim}
+using the inverse method.
+
+\section{Discrete distribution}
+\label{sec:Discrete distribution}
+
+\subsection{Bernoulli distribution}
+\label{sub:Bernoulli distribution}
+
+The class template,
+\begin{verbatim}
 template <typename IntType = bool>
 class BernoulliDistribution;
-\end{Verbatim}
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  \Prob(X = k;p) = kp + (1 - k)(1 - p),\qquad
+  k \in \{0, 1\},\quad p \in [0, 1].
+\end{equation*}
 Unlike other discrete distributions, the Bernoulli distribution supports any
 integer type, including those with sizes smaller than that of |short|. The
 implementation uses the simple fact that if $U$ is a standard uniform random
@@ -1138,16 +1173,19 @@ variable, than $\bbI_{[0,p)}(U)$ is Bernoulli distributed with success
 probability $p$. This is not a drop-in replacement for
 |std::bernoulli_distribution|, which is not a class template.
 
-\subsubsection{Geometric distribution}
+\subsection{Geometric distribution}
+\label{sub:Geometric distribution}
 
-\begin{equation*}
-  \Prob(X = k;p) = p(1-p)^k \qquad
-  k \in \Natural,\quad p \in (0, 1]
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename IntType = int>
 class GeometricDistribution;
-\end{Verbatim}
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  \Prob(X = k;p) = p(1-p)^k,\qquad
+  k \in \Natural,\quad p \in (0, 1].
+\end{equation*}
 The implementation uses the fact that if $U$ is a standard uniform random
 variable, than
 \begin{equation*}
@@ -1155,20 +1193,23 @@ variable, than
 \end{equation*}
 is a Geometric random variable with success probability $p$.
 
-\subsubsection{Uniform distribution}
+\subsection{Uniform distribution}
+\label{sub:Uniform distribution}
 
-\begin{equation*}
-  \Prob(X = k;a,b) = \frac{1}{b - a + 1} \qquad
-  k \in \{a,\dots,b\},\quad
-  a \in \Integer,\quad b \in \{x \in \Integer: x \ge a\}
-\end{equation*}
-\begin{Verbatim}
+The class template,
+\begin{verbatim}
 template <typename IntType = int>
 class UniformIntDistribution;
-\end{Verbatim}
+\end{verbatim}
+implements the distribution with \pdf,
+\begin{equation*}
+  \Prob(X = k;a,b) = \frac{1}{b - a + 1},\qquad
+  k \in \{a,\dots,b\},\quad
+  a \in \Integer,\quad b \in \{x \in \Integer: x \ge a\}.
+\end{equation*}
 The specific algorithm used depends on the parameters. If $a = b$, then it
 simply returns $a$. If $b - a + 1 = 2^W$ where $W$ is the number of bits of
-|IntType|, then |UniformBitsDistribution| is used (see section~\ref{sub:Uniform
+|IntType|, then |UniformBitsDistribution| is used (see section~\ref{sec:Uniform
 bits distribution}). If $\max\{\Abs{a}, b\} < 2^{32}$, then it uses the fact
 that if $U$ is a standard uniform random variable, then
 \begin{equation*}
@@ -1176,81 +1217,83 @@ that if $U$ is a standard uniform random variable, then
 \end{equation*}
 is uniform on the set $\{a,\dots,b\}$. Otherwise the standard library is used.
 
-\subsection{Multivariate distributions}
-\label{sub:Multivariate distributions}
+\section{Multivariate distribution}
+\label{sec:Multivariate distribution}
 
-\subsubsection{Dirichlet distribution}
+\subsection{Dirichlet distribution}
+\label{sub:Dirichlet distribution}
 
-\mckl implements the Dirichlet distribution with \pdf,
+The class template,
+\begin{verbatim}
+template <typename RealType = double, size_t Dim = Dynamic>
+class DirichletDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
   f(x_{1:d};\alpha_{1:d}) = \frac{1}{\mathrm{B}(\alpha_{1:d})}
-  \prod_{i=1}^d x_i^{\alpha_i - 1}
+  \prod_{i=1}^d x_i^{\alpha_i - 1},
 \end{equation*}
 where
 \begin{equation*}
   \mathrm{B}(\alpha_{1:d}) =
   \frac{\prod_{i=1}^d\Gamma(\alpha_i)}
-  {\Gamma\Round[Big]{\sum_{i=1}^d\alpha_i}}
+  {\Gamma\Round[Big]{\sum_{i=1}^d\alpha_i}}.
 \end{equation*}
-through the class template,
-\begin{Verbatim}
-template <typename RealType = double, size_t Dim = Dynamic>
-class DirichletDistribution;
-\end{Verbatim}
 The template parameter |Dim| is the dimension of the distribution. If it is
 positive, then the dimension is fixed. The distribution generator can be
 constructed by,
-\begin{Verbatim}
+\begin{verbatim}
 DirichletDistribution<double, Dim> dirichlet(alpha);
-\end{Verbatim}
+\end{verbatim}
 and if it is zero (recall that |Dynamic| is just an enumerator with value
 zero), then the dimension has to be specified at runtime. The distribution
 generator can be constructed by,
-\begin{Verbatim}
+\begin{verbatim}
 DirichletDistribution<double> dirichlet(dim, alpha);
-\end{Verbatim}
+\end{verbatim}
 The parameter |alpha| can be either a pointer to a $d$-vector or a scalar. If
 it is a scalar, say $\alpha$, then $\alpha_i = \alpha$ for $i = 1,\dots,d$. To
 generate one random variate,
-\begin{Verbatim}
+\begin{verbatim}
 dirichlet(rng, r);
 rand(rng, dirichlet, r);
-\end{Verbatim}
+\end{verbatim}
 where the output parameter |r| is a pointer to a $d$-vector. Vectorized
 generating is also possible. For example,
-\begin{Verbatim}
+\begin{verbatim}
 dirichlet(rng, n, r);
 rand(rng, dirichlet, n, r);
-\end{Verbatim}
+\end{verbatim}
 where the output parameter |r| is a pointer to an $n$ by $d$ matrix of row
 major order.
 
-\subsubsection{Multivariate Normal distribution}
+\subsection{Multivariate Normal distribution}
+\label{sub:Multivariate Normal distribution}
 
-\mckl implements the multivariate Normal distribution with \pdf,
+The class template,
+\begin{verbatim}
+template <typename RealType = double, size_t Dim = Dynamic>
+class NormalMVDistribution;
+\end{verbatim}
+implements the distribution with \pdf,
 \begin{equation*}
   f(x_{1:d};\mu_{1:d},\Sigma) = \frac{1}{\sqrt{(2\pi)^d\Abs{\Sigma}}}
   \exp\Curly[Big]{-\frac{1}{2}
-    (x_{1:d} - \mu_{1:d})^{\transpose}\Sigma^{-1}(x_{1:d} - \mu_{1:d})}
+    (x_{1:d} - \mu_{1:d})^{\transpose}\Sigma^{-1}(x_{1:d} - \mu_{1:d})},
 \end{equation*}
-where $\mu_{1:d}$ is the mean vector and $\Sigma$ is covariance matrix, through
-the class template,
-\begin{Verbatim}
-template <typename RealType = double, size_t Dim = Dynamic>
-class NormalMVDistribution;
-\end{Verbatim}
+where $\mu_{1:d}$ is the mean vector and $\Sigma$ is covariance matrix.
 At the time of writing, only |float| and |double| are supported types for the
 template parameter |RealType|. The second template parameter |Dim| specify the
 dimension of the distribution, $d$. If |Dim| is positive, then the dimension is
 fixed. The distribution generator can be constructed by,
-\begin{Verbatim}
+\begin{verbatim}
 NormalMVDistribution<double, Dim> normal_mv(mean, chol);
-\end{Verbatim}
+\end{verbatim}
 Otherwise, if |Dim| is zero, the dimension has to be specified at runtime. The
 distribution generator can be constructed by,
-\begin{Verbatim}
+\begin{verbatim}
 NormalMVDistribution<double> normal_mv(d, mean, chol);
-\end{Verbatim}
+\end{verbatim}
 In either case, the parameter |mean| is a pointer to the mean vector of length
 $d$, and |chol| is a pointer to the lower triangular of the Cholesky
 decomposition of the covariance matrix packed row by row. For those unfamiliar
@@ -1264,16 +1307,16 @@ elements equal to $\mu$. If |chol| is a scalar, say $\sigma$, then it is
 assumed that $L = \sigma I_d$ and thus the covariance matrix is $\Sigma =
 \sigma^2 I_d$, where $I_d$ is the identity matrix. To generate a single
 multivariate Normal random number,
-\begin{Verbatim}
+\begin{verbatim}
 normal_mv(rng, r);
 rand(rng, normal_mv, r);
-\end{Verbatim}
+\end{verbatim}
 where the output parameter |r| is a pointer to a $d$-vector. Vectorized
 generating is also possible. For example,
-\begin{Verbatim}
+\begin{verbatim}
 normal_mv(rng, n, r);
 rand(rng, normal_mv, n, r);
-\end{Verbatim}
+\end{verbatim}
 where the output parameter |r| is a pointer to an $n$ by $d$ matrix of row
 major order.
 
@@ -1284,21 +1327,21 @@ major order.
 nowhere near as comprehensive as the \testu library~\cite{Lecuyer:2007hv}.
 However, they are easier to use with \cpp{} \rng engines and distributions. All
 tests below follows the same interfaces. They have the following operator,
-\begin{Verbatim}
+\begin{verbatim}
 template <typename RNGType, typename DistributionType>
 result_type operator()(RNGType &rng, DistributionType &distribution);
-\end{Verbatim}
+\end{verbatim}
 that accepts the \rng engine and distribution as input and returns the value of
 the test statistic. They also have two methods that return the values of \pdf
 and \cdf of the test statistic under the null hypothesis, respectively,
-\begin{Verbatim}
+\begin{verbatim}
 double pdf(result_type s) const;
 double cdf(result_type s) const;
-\end{Verbatim}
+\end{verbatim}
 Last, they have the following method,
-\begin{Verbatim}
+\begin{verbatim}
 bool pass(double alpha, result_type s) const;
-\end{Verbatim}
+\end{verbatim}
 that returns if the test passes at significance level $\alpha$ given the test
 statistic.
 
@@ -1315,20 +1358,20 @@ $X_{1:n}$, $X_i = (U_{iT},\dots,U_{(i+1)T})$.
 \label{sub:Serial test}
 
 The templates,
-\begin{Verbatim}
+\begin{verbatim}
 template <std::size_t D, std::size_t T>
 using SerialTest = internal::SerialTestImpl<D, T, false>;
 
 template <std::size_t D, std::size_t T>
 using SerialOverTest = internal::SerialTestImpl<D, T, 1 < T>;
-\end{Verbatim}
+\end{verbatim}
 are aliases to implementations of the serial tests with independent or
 overlapping tuples as described by~\cite[pp.~62]{Knuth:1997us}
 and~\cite[ex.~24, pp.~78]{Knuth:1997us}, respectively. The constructors,
-\begin{Verbatim}
+\begin{verbatim}
 SerialTest<D, T> test(n);
 SerialOverTest<D, T> test_over(n);
-\end{Verbatim}
+\end{verbatim}
 accept the number of tuples as the argument. The tests generate $nT$ and $n$
 random numbers, respectively. The equidistribution test using the
 $\chi^2$-statistic~\cite[pp.~61]{Knuth:1997us} is a special case of this test
@@ -1338,14 +1381,14 @@ with $T = 1$.
 \label{sub:Gap test}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <std::size_t NTrialMax = std::numeric_limits<std::size_t>::max()>
 class GapTest;
-\end{Verbatim}
+\end{verbatim}
 implements the gap test~\cite[pp.~62]{Knuth:1997us}. The constructor,
-\begin{Verbatim}
+\begin{verbatim}
 GapTest(std::size_t n, double alpha, double beta);
-\end{Verbatim}
+\end{verbatim}
 accepts the number of gaps, the lower and upper bound of the gap. The gap test
 may not terminate given a deficient sequence. The template parameter
 |NTrialMax| is the maximum number of random numbers to be generated for each
@@ -1357,31 +1400,31 @@ test will fail to pass in this case.
 \label{sub:Poker test}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <std::size_t D, std::size_t T>
 class PokerTest;
-\end{Verbatim}
+\end{verbatim}
 implements the (simplified) poker test~\cite[pp.~63]{Knuth:1997us}. The
 constructor,
-\begin{Verbatim}
+\begin{verbatim}
 PokerTest(std::size_t n);
-\end{Verbatim}
+\end{verbatim}
 accepts the number of tuples.
 
 \subsection{Coupon collector's test}
 \label{sub:Coupon collector's test}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <
     std::size_t D, std::size_t NTrialMax = std::numeric_limits<std::size_t>::max()>
 class CouponCollectorTest;
-\end{Verbatim}
+\end{verbatim}
 implements the coupon collector's test~\cite[pp.~64]{Knuth:1997us}. The
 constructor,
-\begin{Verbatim}
+\begin{verbatim}
 CouponCollectorTest(std::size_t n);
-\end{Verbatim}
+\end{verbatim}
 accepts the number of tuples. Similar to the gap test, the test may not
 terminate given a deficient sequence. The template parameter |NTrialMax| is the
 maximum number of trials to generate one complete set.
@@ -1390,34 +1433,34 @@ maximum number of trials to generate one complete set.
 \label{sub:Permutation test}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <std::size_t T>
 class PermutationTest;
-\end{Verbatim}
+\end{verbatim}
 implements the permutation test~\cite[pp.~65]{Knuth:1997us}. The constructor,
-\begin{Verbatim}
+\begin{verbatim}
 PermutationTest(std::size_t n);
-\end{Verbatim}
+\end{verbatim}
 accepts the number of tuples.
 
 \subsection{Run test}
 \label{sub:Run test}
 
 The templates,
-\begin{Verbatim}
+\begin{verbatim}
 template <bool Up = true>
 using RunTest = internal::RunTestImpl<false, Up>;
 
 template <bool Up = true>
 using RunIndepTest = internal::RunTestImpl<false, Up>;
-\end{Verbatim}
+\end{verbatim}
 are aliases to implementations of the run tests with dependent or
 independent tuples as described by~\cite[pp.~66]{Knuth:1997us}
 and~\cite[ex.~14, pp.~77]{Knuth:1997us}, respectively. The constructors,
-\begin{Verbatim}
+\begin{verbatim}
 RunTest<Up> test(n);
 RunIndepTest<Up> test_indep(n);
-\end{Verbatim}
+\end{verbatim}
 accept the number of samples and number runs, respectively. The former will
 generate $n$ random numbers. The later will always terminate, but may take a
 very long time if the sequence if deficient.
@@ -1426,30 +1469,30 @@ very long time if the sequence if deficient.
 \label{Maximum-of-t test}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <std::size_t D, std::size_t T>
 class MaximumOfTTest;
-\end{Verbatim}
+\end{verbatim}
 implements the maximum-of-$t$ test~\cite[pp.~70]{Knuth:1997us}. The test is
 based on the euquidistribution test using the $\chi^2$-statistic with $D$
 categories~\cite[pp.~61]{Knuth:1997us}. The constructor,
-\begin{Verbatim}
+\begin{verbatim}
 MaximumOfTTest(std::size_t n);
-\end{Verbatim}
+\end{verbatim}
 accepts the number of tuples.
 
 \subsection{Collision test}
 \label{Collision test}
 
 The class template,
-\begin{Verbatim}
+\begin{verbatim}
 template <std::size_t D, std::size_t T>
 class CollisionTest;
-\end{Verbatim}
+\end{verbatim}
 implements the collision test~\cite[pp.~70]{Knuth:1997us}. The constructor,
-\begin{Verbatim}
+\begin{verbatim}
 Collision(std::size_t n);
-\end{Verbatim}
+\end{verbatim}
 accepts the number of tuples. The implementation is simplified by using the
 asymptotic distribution of the number of collisions, a Poisson distribution
 with mean,
@@ -1464,15 +1507,15 @@ $n \ll k$.
 \label{sub:Birthday spacings test}
 
 The class templates,
-\begin{Verbatim}
+\begin{verbatim}
 template <std::size_t D, std::size_t T>
 class BirthdaySpacingsTest;
-\end{Verbatim}
+\end{verbatim}
 implements the birthday spacings test~\cite[pp.~71]{Knuth:1997us}. The
 constructor,
-\begin{Verbatim}
+\begin{verbatim}
 BirthdaySpacingsTest(std::size_t n);
-\end{Verbatim}
+\end{verbatim}
 accepts the number of tuples. Similar to the collision test, it use approximate
 a Poisson distribution with mean,
 \begin{equation*}
