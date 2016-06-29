@@ -278,7 +278,7 @@ auto &rng_j = particle.rng(j);
 \end{Verbatim}
 are called from two different threads, then |rng_i| and |rng_j| will be
 instances of two independent \rng engines. The details are in
-Section~\ref{sec:Multiple RNG streams}. The |Particle| class also contains an
+section~\ref{sec:Multiple RNG streams}. The |Particle| class also contains an
 \rng engine independent of any particle,
 \begin{Verbatim}
 auto &rng = particle.rng();
@@ -444,7 +444,7 @@ class T : public Base
 The class |ParticleIndex<T>| derives from |T::particle_index_type<T>| if such a
 member type exists. Otherwise, it has methods as described earlier for any type
 |T|. Therefore, it is possible to give it methods that are more convenient for
-a particular problem. We will see examples later in Section~\ref{sec:Example
+a particular problem. We will see examples later in section~\ref{sec:Example
 (PF)}.
 
 The |ParticleIndex| type can also be used like an random access iterator. For
@@ -461,7 +461,7 @@ idx == jdx; // => i == j;
 Other comparison operators such as |!=|, |<|, etc., are also defined. Note
 that, comparing or subtracting two indices from two different particles systems
 is meaningless. This will result in runtime errors unless debugging is disabled
-(see Section~\appref{sec:Error handling}). The increment and decrement
+(see section~\appref{sec:Error handling}). The increment and decrement
 operators follow usual prefix and postfix semantics. However, it is important
 to note that, |ParticleIndex| \emph{is not} an iterator even though it shares
 many common methods. Recall that, |Particle| does not have methods to access
@@ -619,7 +619,7 @@ Sampler<T> &resample_method(
     ResampleScheme scheme, double threshold = resample_threshold_always());
 \end{Verbatim}
 which uses a builtin resampling scheme of the library (see
-Section~\ref{sec:Algorithm}). Or alternatively,
+section~\ref{sec:Algorithm}). Or alternatively,
 \begin{Verbatim}
 Sampler<T> &resample_method(
     const eval_type &res_eval, double threshold = resample_threshold_always());
@@ -972,9 +972,9 @@ ESS   Resampled       Size    pos.0   pos.1
 152.535       1       1000    -1.31156        2.99123
 \end{Verbatim}
 One can read this text file into a statistical program, for exmaple
-R\footnote{\url{http://r-project.org}}, to produce Figure~\ref{fig:pf}. More
+R\footnote{\url{http://r-project.org}}, to produce figure~\ref{fig:pf}. More
 advanced methods for saving summaries and histories of a sampler is given in
-Section~\ref{sec:Store objects in HDF5 format}, using the \hdf format.
+section~\ref{sec:Store objects in HDF5 format}, using the \hdf format.
 
 \begin{figure}
   \includegraphics{fig/pf}

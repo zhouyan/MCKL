@@ -57,7 +57,7 @@ properties of the new particle system.
 \section{Using resampling with sampler}
 \label{sec:Using resampling with sampler}
 
-Recall Section~\ref{sec:Sampler}, any object that is convertible to,
+Recall section~\ref{sec:Sampler}, any object that is convertible to,
 \begin{Verbatim}
 using eval_type = std::function<void(size_t, Particle<T> &)>;
 \end{Verbatim}
@@ -102,7 +102,7 @@ beginning of this chapter,
   a_i = i \quad \text{if} \quad  r_i > 0 \quad
   \text{for } i = 1,\dots,\min\{N, M\}
 \end{equation*}
-In fact, the |select| method of |StateMatrix| in Section~\ref{sec:State} makes
+In fact, the |select| method of |StateMatrix| in section~\ref{sec:State} makes
 the assumptions of this property about its input indices.
 
 \section{Algorithm}
@@ -110,7 +110,7 @@ the assumptions of this property about its input indices.
 
 The library implements all algorithms discussed in~\cite{Douc:2005wa} and two
 extensions to the those algorithms. Samplers can be constructed with builtin
-algorithms as seen in Section~\ref{sec:Sampler}. Builtin algorithms are
+algorithms as seen in section~\ref{sec:Sampler}. Builtin algorithms are
 implemented in the following class template,
 \begin{Verbatim}
 template <typename U01SeqType, bool Residual>

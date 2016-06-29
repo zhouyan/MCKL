@@ -47,7 +47,7 @@ macro.
 
 A concrete example of the relations among these three types of configuration
 macros is the memory allocation functions used by the library. The details is
-in Section~\ref{sec:Aligned memory allocation}. In short, they library has
+in section~\ref{sec:Aligned memory allocation}. In short, they library has
 three implementations for aligned memory allocation. The preferred method is to
 use functions from the \tbb library. It is defined through a class called
 |AlignedMemoryTBB|. This class is only defined if and only if |MCKL_HAS_TBB| is
@@ -60,7 +60,7 @@ still defined, but it will not be used by the library. Instead the library will
 now prefer operating system dependent memory allocation functions such as
 |posix_memalign|. Now, suppose this is still undesirable, and one wants to use
 a memory allocation function not directly supported by the library. In this
-case, one can implement a aligned memory class (see Section~\ref{sec:Aligned
+case, one can implement a aligned memory class (see section~\ref{sec:Aligned
 memory allocation} for details), and then define the macro
 |MCKL_ALIGNED_MEOMRY_TYPE| to this class. For example, to use the memory
 allocation functions from the \mkl library,
@@ -114,7 +114,7 @@ compatible.
 
 \paragraph{\texttt{MCKL\_HAS\_AES\_NI}} Determine if the \aesni instructions
 are supported by the \cpu and the compiler. The \rng{}s based on these
-instructions in Section~\ref{sub:AES-NI instructions based RNG} are only
+instructions in section~\ref{sub:AES-NI instructions based RNG} are only
 defined if this macro is true. One can include the following header directly to
 bypass this check,
 \begin{Verbatim}
@@ -123,7 +123,7 @@ bypass this check,
 
 \paragraph{\texttt{MCKL\_HAS\_RDRAND}} Determine if the \rdrand instructions
 are supported by the \cpu and the compiler. The \rng{}s based on these
-instructions in Section~\ref{sec:Non-deterministic RNG} are only defined if
+instructions in section~\ref{sec:Non-deterministic RNG} are only defined if
 this macro is true. One can include the following header directly to bypass
 this check,
 \begin{Verbatim}
@@ -150,13 +150,13 @@ unless stated otherwise.
 \paragraph{\texttt{MCKL\_USE\_OMP}} Allow the library to use OpenMP for
 parallelization. Currently this macro has no affect. The use of OpenMP for
 parallelization is explicitly through |SamplerEvalOMP| etc., see
-Section~\ref{sec:Programming models}.
+section~\ref{sec:Programming models}.
 
 \paragraph{\texttt{MCKL\_HAS\_OPENCL}} Determine if OpenCL (version~1.2 or
 higher) is supported.
 
 \paragraph{\texttt{MCKL\_HAS\_HDF5}} Determine if the \hdf library is
-available. The functions in Section~\ref{sec:Store objects in HDF5 format} are
+available. The functions in section~\ref{sec:Store objects in HDF5 format} are
 only defined if this macro is true. One can include the following header
 directly to bypass this check,
 \begin{Verbatim}
@@ -164,14 +164,14 @@ directly to bypass this check,
 \end{Verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_TBB}} Determine if the \tbb library is available.
-The class template |RNGSetTBB| in Section~\ref{sec:Multiple RNG streams} and
-the class |AlignedMemoryTBB| in Section~\ref{sec:Aligned memory allocation} are
+The class template |RNGSetTBB| in section~\ref{sec:Multiple RNG streams} and
+the class |AlignedMemoryTBB| in section~\ref{sec:Aligned memory allocation} are
 only defined if this macro is true.
 
 \paragraph{\texttt{MCKL\_USE\_TBB}} Allow the library to use the \tbb library
 for parallelization. Currently this macro has no affect. The use of \tbb for
 parallelization is explicitly through |SamplerEvalTBB| etc., see
-Section~\ref{sec:Programming models}.
+section~\ref{sec:Programming models}.
 
 \paragraph{\texttt{MCKL\_USE\_TBB\_MALLOC}} Allow the library to use
 |AlignedMemoryTBB| as the default memory allocation method.
@@ -180,7 +180,7 @@ Section~\ref{sec:Programming models}.
 as the default multiple \rng stream management method.
 
 \paragraph{\texttt{MCKL\_HAS\_MKL}} Determine if the \mkl library is available.
-The \rng{}s in Section~\ref{sec:MKL RNG} are only defined if this macro is
+The \rng{}s in section~\ref{sec:MKL RNG} are only defined if this macro is
 true. One can include the following header directly to bypass this check,
 \begin{Verbatim}
 #include <mckl/random/mkl.hpp>
@@ -191,7 +191,7 @@ true. One can include the following header directly to bypass this check,
 linked for \blas support.
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_VML}} Allow the library to accelerate the
-vector functions in Section~\ref{sec:Vectorized functions} using the \vml
+vector functions in section~\ref{sec:Vectorized functions} using the \vml
 component of \mkl.
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_VSL}} Allow the library to use the \vsl
@@ -226,7 +226,7 @@ then one should redefine this macro to the correct type.
 \label{sec:RNG engines}
 
 Configuration macros related to \rng{}s engines are discussed in
-Section~\ref{sec:Counter-based RNG} and~\ref{sec:Multiple RNG streams}.
+section~\ref{sec:Counter-based RNG} and~\ref{sec:Multiple RNG streams}.
 
 \section{Memory allocation}
 \label{sec:Memory allocation}
@@ -241,7 +241,7 @@ heap. The value must be a power of two and positive.
 The default is 16. The value must be a power of two and positive.
 
 \paragraph{\texttt{MCKL\_ALIGNED\_MEMORY\_TYPE}} The default type of the
-|Memroy| template parameter of |Allocator| (see Section~\ref{sec:Aligned memory
+|Memroy| template parameter of |Allocator| (see section~\ref{sec:Aligned memory
 allocation}). The default depends on the other configuration macros. If
 |MCKL_USE_TBB_MALLOC| is true, then the default is |AlignedMemoryTBB|.
 Otherwise it is |AlignedMemorySYS| if it is defined. Otherwise

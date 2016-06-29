@@ -46,7 +46,7 @@ constexpr long double pi_l = const_pi<long double>();
 The compiler will evaluate these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
-Table~\ref{tab:Mathematical constants}.
+table~\ref{tab:Mathematical constants}.
 
 \section{Vectorized functions}
 \label{sec:Vectorized functions}
@@ -64,13 +64,13 @@ This is equivalent to,
 for (size_t i = 0; i != n; ++i)
     y[i] = a[i] + b[i];
 \end{Verbatim}
-The functions defined are listed in Tables~\ref{tab:Arithmetic functions}
+The functions defined are listed in tables~\ref{tab:Arithmetic functions}
 to~\ref{tab:Rounding functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
 (except for |sincos| and |modf|, which have two output parameters). For all
 functions, the output parameters are always vectors. If there are more than one
 input parameters, then some of them, but not all, can be scalars. For example,
-for the function call |fma(n, a, b, c, y)| in Table~\ref{tab:Arithmetic
+for the function call |fma(n, a, b, c, y)| in table~\ref{tab:Arithmetic
 functions}, the input parameters are |a|, |b|, and |c|. Some of them, not all,
 can be scalars instead of pointers to vectors. The output parameter |y| has to
 be a pointer to a vector. Therefore, there are seven versions of this function
@@ -91,7 +91,7 @@ Without any third-party libraries, these functions do not provide performance
 advantage compared to simple loops. When \mkl is available, some functions can
 have substantial performance improvement when all input arguments are vectors
 of types |float| or |double|. The performance of vectorized random number
-generating introduced later in Section~\ref{sec:Vectorized random number
+generating introduced later in section~\ref{sec:Vectorized random number
 generating} heavily depends on these functions.
 
 \begin{table}
