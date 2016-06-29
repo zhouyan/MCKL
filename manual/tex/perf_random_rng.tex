@@ -45,7 +45,7 @@ tables below.
 Two usage cases of \rng{}s are considered. The first is generating random
 integers within a loop,
 \begin{verbatim}
-UniformBitsDistribution<std::uint64_t> ubits;
+UniformBitsDistribution<uint64_t> ubits;
 for (std:size_t i = 0; i != n; ++i)
     r[i] = rand(rng, ubits);
 \end{verbatim}

@@ -461,14 +461,14 @@ idx == jdx; // => i == j;
 Other comparison operators such as |!=|, |<|, etc., are also defined. Note
 that, comparing or subtracting two indices from two different particles systems
 is meaningless. This will result in runtime errors unless debugging is disabled
-(see section~\appref{sec:Error handling}). The increment and decrement
-operators follow usual prefix and postfix semantics. However, it is important
-to note that, |ParticleIndex| \emph{is not} an iterator even though it shares
-many common methods. Recall that, |Particle| does not have methods to access
-$X_i$ directly. And therefore it is not possible to dereference a
-|ParticleIndex| object to get a reference to $X_i$. Instead, dereferencing an
-|ParticleIndex| object will return a reference to itself. This is similar for
-the member access operator and the index operator. For example,
+(see section~\ref{sec:Error handling}). The increment and decrement operators
+follow usual prefix and postfix semantics. However, it is important to note
+that, |ParticleIndex| \emph{is not} an iterator even though it shares many
+common methods. Recall that, |Particle| does not have methods to access $X_i$
+directly. And therefore it is not possible to dereference a |ParticleIndex|
+object to get a reference to $X_i$. Instead, dereferencing an |ParticleIndex|
+object will return a reference to itself. This is similar for the member access
+operator and the index operator. For example,
 \begin{verbatim}
 *idx;       // => idx
 idx->rng(); // => idx.rng();

@@ -38,8 +38,8 @@ of this system. The first is a set of \rng{} engines that generate random
 integers. The other is a set of distribution generators. The former are
 documented in sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL RNG}, and
 the later in sections~\ref{sec:Uniform bits distribution}
-to~\ref{sec:Multivariate distribution}. There are also some performance data
-in Appendices~\appref{chap:Performance of RNG} and~\appref{chap:Performance of
+to~\ref{sec:Multivariate distribution}. There are also some performance data in
+appendices~\ref{chap:Performance of RNG} and~\ref{chap:Performance of
 distribution} for them. Apart from these, the library also provides facilities
 for vectorized random number generating (section~\ref{sec:Vectorized random
 number generating}) and using multiple \rng{}s in parallel programs
@@ -283,13 +283,13 @@ struct NewWeylConstant;
 template<>
 struct NewWeylConstant<0>
 {
-    static constexpr std::uint64_t value = FIRST_CONSTANT;
+    static constexpr uint64_t value = FIRST_CONSTANT;
 };
 
 template<>
 struct NewWeylConstant<1>
 {
-    static constexpr std::uint64_t value = SECOND_CONSTANT;
+    static constexpr uint64_t value = SECOND_CONSTANT;
 };
 
 struct NewConstants
@@ -310,10 +310,10 @@ shall define the type |weyl| such that it has a static constant expression
 member data |value| that is the |I|\ith Weyl constant. A few type aliases are
 defined for convenience. For example,
 \begin{verbatim}
-using ARSx8    = ARSEngine<std::uint32_t, MCKL_ARS_ROUNDS, 8>;
-using ARSx8_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 8>;
-using ARS      = ARSEngine<std::uint32_t>;
-using ARS_64   = ARSEngine<std::uint64_t>;
+using ARSx8    = ARSEngine<uint32_t, MCKL_ARS_ROUNDS, 8>;
+using ARSx8_64 = ARSEngine<uint64_t, MCKL_ARS_ROUNDS, 8>;
+using ARS      = ARSEngine<uint32_t>;
+using ARS_64   = ARSEngine<uint64_t>;
 \end{verbatim}
 The engine |ARS| is the default \rng if \aesni instructions are supported.
 Aliases for block sizes 1, 2, 4 and 8 are defined for all four algorithms, as
@@ -360,16 +360,16 @@ unsigned integer type |T| and |K| taking the values~2 or~4. These four engines
 are defined as type aliases for convenience,
 \begin{verbatim}
 template <typename ResultType>
-using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
+using Philox2x32Engine = PhiloxEngine<ResultType, uint32_t, 2>;
 
 template <typename ResultType>
-using Philox4x32Engine = PhiloxEngine<ResultType, std::uint32_t, 4>;
+using Philox4x32Engine = PhiloxEngine<ResultType, uint32_t, 4>;
 
 template <typename ResultType>
-using Philox2x64Engine = PhiloxEngine<ResultType, std::uint64_t, 2>;
+using Philox2x64Engine = PhiloxEngine<ResultType, uint64_t, 2>;
 
 template <typename ResultType>
-using Philox4x64Engine = PhiloxEngine<ResultType, std::uint64_t, 4>;
+using Philox4x64Engine = PhiloxEngine<ResultType, uint64_t, 4>;
 \end{verbatim}
 Type aliases for 32- and 64-bit |ResultType| are also defined, as listed in
 table~\ref{tab:Counter-based RNG}. To use the engine with |K| taking values
@@ -416,22 +416,22 @@ for convenience, Type aliases for 32- and 64-bit |ResultType| are also defined,
 as listed in table~\ref{tab:Counter-based RNG}.
 \begin{verbatim}
 template <typename ResultType>
-using Threefry2x32Engine = ThreefryEngine<ResultType, std::uint32_t, 2>;
+using Threefry2x32Engine = ThreefryEngine<ResultType, uint32_t, 2>;
 
 template <typename ResultType>
-using Threefry4x32Engine = ThreefryEngine<ResultType, std::uint32_t, 4>;
+using Threefry4x32Engine = ThreefryEngine<ResultType, uint32_t, 4>;
 
 template <typename ResultType>
-using Threefry2x64Engine = ThreefryEngine<ResultType, std::uint64_t, 2>;
+using Threefry2x64Engine = ThreefryEngine<ResultType, uint64_t, 2>;
 
 template <typename ResultType>
-using Threefry4x64Engine = ThreefryEngine<ResultType, std::uint64_t, 4>;
+using Threefry4x64Engine = ThreefryEngine<ResultType, uint64_t, 4>;
 
 template <typename ResultType>
-using Threefry8x64Engine = ThreefryEngine<ResultType, std::uint64_t, 8>;
+using Threefry8x64Engine = ThreefryEngine<ResultType, uint64_t, 8>;
 
 template <typename ResultType>
-using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
+using Threefry16x64Engine = ThreefryEngine<ResultType, uint64_t, 16>;
 \end{verbatim}
 
 \subsection{Seeding counter-based \texorpdfstring{\protect\rng}{RNG}}
@@ -613,7 +613,7 @@ size at least of that of |short|. That is, let $W$ be the number of bits of
 |UIntType|, then the output is uniform on the set $\{0,\dots,2^W - 1\}$. For
 example,
 \begin{verbatim}
-UniformBitsDistribution<std::uint32_t> ubits;
+UniformBitsDistribution<uint32_t> ubits;
 ubits(rng); // Return 32-bit random integers
 \end{verbatim}
 Let $\rmin$ and $\rmax$ be the minimum and maximum of the random integers
@@ -652,12 +652,12 @@ and the output random real numbers as $X$.
     \toprule
     \texttt{RealType} & Conditions & Integer type \\
     \midrule
-    \texttt{float}  & $\log_2 R \ge 64$ & \texttt{std::uint64\_t} \\
-                    & Otherwise         & \texttt{std::uint32\_t} \\
-    \texttt{double} & $\log_2 R \ge 64$ & \texttt{std::uint64\_t} \\
-    & \texttt{MCKL\_U01\_USE\_64BITS\_DOUBLE} & \texttt{std::uint64\_t} \\
-    & Otherwise & \texttt{std::uint32\_t} \\
-    \texttt{long double} & Always & \texttt{std::uint64\_t} \\
+    \texttt{float}  & $\log_2 R \ge 64$ & \texttt{uint64\_t} \\
+                    & Otherwise         & \texttt{uint32\_t} \\
+    \texttt{double} & $\log_2 R \ge 64$ & \texttt{uint64\_t} \\
+    & \texttt{MCKL\_U01\_USE\_64BITS\_DOUBLE} & \texttt{uint64\_t} \\
+    & Otherwise & \texttt{uint32\_t} \\
+    \texttt{long double} & Always & \texttt{uint64\_t} \\
     \bottomrule
   \end{tabularx}
   \caption{Intermediate integer types of uniform distribution}
@@ -1357,22 +1357,18 @@ $X_{1:n}$, $X_i = (U_{iT},\dots,U_{(i+1)T})$.
 \subsection{Serial test}
 \label{sub:Serial test}
 
-The templates,
+The template,
 \begin{verbatim}
-template <std::size_t D, std::size_t T>
-using SerialTest = internal::SerialTestImpl<D, T, false>;
-
-template <std::size_t D, std::size_t T>
-using SerialOverTest = internal::SerialTestImpl<D, T, 1 < T>;
+template <size_t D, size_t T, bool Overlap>
+using SerialTest = internal::SerialTestImpl<D, T, Overlap && 1 < T>;
 \end{verbatim}
-are aliases to implementations of the serial tests with independent or
+is an alias to implementations of the serial tests with independent or
 overlapping tuples as described by~\cite[pp.~62]{Knuth:1997us}
-and~\cite[ex.~24, pp.~78]{Knuth:1997us}, respectively. The constructors,
+and~\cite[ex.~24, pp.~78]{Knuth:1997us}, respectively. The constructor,
 \begin{verbatim}
-SerialTest<D, T> test(n);
-SerialOverTest<D, T> test_over(n);
+SerialTest<D, T, Overlap> test(n);
 \end{verbatim}
-accept the number of tuples as the argument. The tests generate $nT$ and $n$
+accepts the number of tuples as the argument. The tests generate $nT$ and $n$
 random numbers, respectively. The equidistribution test using the
 $\chi^2$-statistic~\cite[pp.~61]{Knuth:1997us} is a special case of this test
 with $T = 1$.
@@ -1382,12 +1378,12 @@ with $T = 1$.
 
 The class template,
 \begin{verbatim}
-template <std::size_t NTrialMax = std::numeric_limits<std::size_t>::max()>
+template <size_t NTrialMax = std::numeric_limits<size_t>::max()>
 class GapTest;
 \end{verbatim}
 implements the gap test~\cite[pp.~62]{Knuth:1997us}. The constructor,
 \begin{verbatim}
-GapTest(std::size_t n, double alpha, double beta);
+GapTest(size_t n, double alpha, double beta);
 \end{verbatim}
 accepts the number of gaps, the lower and upper bound of the gap. The gap test
 may not terminate given a deficient sequence. The template parameter
@@ -1401,13 +1397,13 @@ test will fail to pass in this case.
 
 The class template,
 \begin{verbatim}
-template <std::size_t D, std::size_t T>
+template <size_t D, size_t T>
 class PokerTest;
 \end{verbatim}
 implements the (simplified) poker test~\cite[pp.~63]{Knuth:1997us}. The
 constructor,
 \begin{verbatim}
-PokerTest(std::size_t n);
+PokerTest(size_t n);
 \end{verbatim}
 accepts the number of tuples.
 
@@ -1416,14 +1412,13 @@ accepts the number of tuples.
 
 The class template,
 \begin{verbatim}
-template <
-    std::size_t D, std::size_t NTrialMax = std::numeric_limits<std::size_t>::max()>
+template <size_t D, size_t NTrialMax = std::numeric_limits<size_t>::max()>
 class CouponCollectorTest;
 \end{verbatim}
 implements the coupon collector's test~\cite[pp.~64]{Knuth:1997us}. The
 constructor,
 \begin{verbatim}
-CouponCollectorTest(std::size_t n);
+CouponCollectorTest(size_t n);
 \end{verbatim}
 accepts the number of tuples. Similar to the gap test, the test may not
 terminate given a deficient sequence. The template parameter |NTrialMax| is the
@@ -1434,12 +1429,12 @@ maximum number of trials to generate one complete set.
 
 The class template,
 \begin{verbatim}
-template <std::size_t T>
+template <size_t T>
 class PermutationTest;
 \end{verbatim}
 implements the permutation test~\cite[pp.~65]{Knuth:1997us}. The constructor,
 \begin{verbatim}
-PermutationTest(std::size_t n);
+PermutationTest(size_t n);
 \end{verbatim}
 accepts the number of tuples.
 
@@ -1448,36 +1443,32 @@ accepts the number of tuples.
 
 The templates,
 \begin{verbatim}
-template <bool Up = true>
-using RunTest = internal::RunTestImpl<false, Up>;
-
-template <bool Up = true>
-using RunIndepTest = internal::RunTestImpl<false, Up>;
+template <bool Indepenent, bool Up = true>
+using RunTest = internal::RunTestImpl<Independent, Up>;
 \end{verbatim}
-are aliases to implementations of the run tests with dependent or
-independent tuples as described by~\cite[pp.~66]{Knuth:1997us}
-and~\cite[ex.~14, pp.~77]{Knuth:1997us}, respectively. The constructors,
+is an alias to implementations of the run tests with dependent or independent
+tuples as described by~\cite[pp.~66]{Knuth:1997us} and~\cite[ex.~14,
+pp.~77]{Knuth:1997us}, respectively. The constructors,
 \begin{verbatim}
-RunTest<Up> test(n);
-RunIndepTest<Up> test_indep(n);
+RunTest<Independent, Up> test(n);
 \end{verbatim}
-accept the number of samples and number runs, respectively. The former will
-generate $n$ random numbers. The later will always terminate, but may take a
-very long time if the sequence if deficient.
+accept the number of samples and number runs, respectively. The independent
+test will generate $n$ random numbers. The dependent test will always
+terminate, but may take a very long time if the sequence is deficient.
 
 \subsection{Maximum-of-\texorpdfstring{$t$}{t} test}
 \label{Maximum-of-t test}
 
 The class template,
 \begin{verbatim}
-template <std::size_t D, std::size_t T>
+template <size_t D, size_t T>
 class MaximumOfTTest;
 \end{verbatim}
 implements the maximum-of-$t$ test~\cite[pp.~70]{Knuth:1997us}. The test is
 based on the euquidistribution test using the $\chi^2$-statistic with $D$
 categories~\cite[pp.~61]{Knuth:1997us}. The constructor,
 \begin{verbatim}
-MaximumOfTTest(std::size_t n);
+MaximumOfTTest(size_t n);
 \end{verbatim}
 accepts the number of tuples.
 
@@ -1486,12 +1477,12 @@ accepts the number of tuples.
 
 The class template,
 \begin{verbatim}
-template <std::size_t D, std::size_t T>
+template <size_t D, size_t T>
 class CollisionTest;
 \end{verbatim}
 implements the collision test~\cite[pp.~70]{Knuth:1997us}. The constructor,
 \begin{verbatim}
-Collision(std::size_t n);
+Collision(size_t n);
 \end{verbatim}
 accepts the number of tuples. The implementation is simplified by using the
 asymptotic distribution of the number of collisions, a Poisson distribution
@@ -1508,13 +1499,13 @@ $n \ll k$.
 
 The class templates,
 \begin{verbatim}
-template <std::size_t D, std::size_t T>
+template <size_t D, size_t T>
 class BirthdaySpacingsTest;
 \end{verbatim}
 implements the birthday spacings test~\cite[pp.~71]{Knuth:1997us}. The
 constructor,
 \begin{verbatim}
-BirthdaySpacingsTest(std::size_t n);
+BirthdaySpacingsTest(size_t n);
 \end{verbatim}
 accepts the number of tuples. Similar to the collision test, it use approximate
 a Poisson distribution with mean,
