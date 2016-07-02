@@ -504,10 +504,7 @@ of interest to monitor its value as the algorithm progresses. In the library,
 this is done through the class template |Monitor|. It has the following
 constructor,
 \begin{verbatim}
-Monitor(
-    size_t dim,
-    const eval_type &eval,
-    bool record_only = false,
+Monitor(size_t dim, const eval_type &eval, bool record_only = false,
     MonitorStage stage = MonitorMCMC);
 \end{verbatim}
 The first parameter |dim| is the dimension of $\varphi$, $d$. The second is a
@@ -618,8 +615,10 @@ following method,
 Sampler<T> &resample_method(
     ResampleScheme scheme, double threshold = resample_threshold_always());
 \end{verbatim}
-which uses a builtin resampling scheme of the library (see
-section~\ref{sec:Algorithm}). Or alternatively,
+which uses a builtin resampling scheme of the library, listed in
+table~\ref{tab:Resample scheme}. See section~\ref{Algorithm (Resample)} for
+details of the algorithms. Alternatively, any evaluation object can be used for
+resampling,
 \begin{verbatim}
 Sampler<T> &resample_method(
     const eval_type &res_eval, double threshold = resample_threshold_always());
@@ -627,6 +626,29 @@ Sampler<T> &resample_method(
 In either case, the parameter |threshold| specifies the condition under which
 the resampling step will be actually performed. Let its value be $\alpha$,
 resampling is performed if and only if $\ess < \alpha N$.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    \texttt{ResampleScheme} & Algorithm \\
+    \midrule
+    \texttt{Multinomial}
+    & Multinomial resampling \\
+    \texttt{Stratified}
+    & Stratified resampling \\
+    \texttt{Systematic}
+    & Systematic resampling \\
+    \texttt{ResidualMultinomial}
+    & Residual resampling \\
+    \texttt{ResidualStratified}
+    & Stratified resampling on residuals \\
+    \texttt{ResidualSystematic}
+    & Systematic resampling on residuals \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Built-in resampling schemes}
+  \label{tab:Built-in resampling schemes}
+\end{table}
 
 Multiple monitors can be added to a sampler. For example,
 \begin{verbatim}
@@ -667,10 +689,7 @@ will be evaluated at the |SamplerInit|, etc., steps if the corresponding stage
 is set (i.e., the value of |stage & SamplerInit| is non-zero). Similarly, every
 monitor, constructed by,
 \begin{verbatim}
-Monitor(
-    size_t dim,
-    const eval_type &eval,
-    bool record_only = false,
+Monitor(size_t dim, const eval_type &eval, bool record_only = false,
     MonitorStage stage = MonitorMCMC);
 \end{verbatim}
 will be evaluated if the corresponding stage is the same (e.g., |stage|

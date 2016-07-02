@@ -32,23 +32,21 @@
 \chapter{Resampling}
 \label{chap:Resampling}
 
-Given a particle system $S_{1:N}$, $S_i = (X_i,W_i)$, a resampling algorithm
-generates a new system $\hat{S}_{1:M}$ such that,
+Given a particle system $S_{1:N}$, where $S_i = (X_i,W_i)$ for $i = 1,\dots,N$,
+a resampling algorithm generates a new system $\hat{S}_{1:M}$ such that,
 \begin{equation*}
   \Exp\Square[Big]{\sum_{i=1}^M{\hat{W}_i\varphi(\hat{X}_i)}} =
-  \Exp\Square[Big]{\sum_{i=1}^N{W_i\varphi(X_i)}}
+  \Exp\Square[Big]{\sum_{i=1}^N{W_i\varphi(X_i)}},
 \end{equation*}
 for test function $\varphi$. Regardless of other statistical properties, in
 practice, such an algorithm can be decomposed into three steps,
-
 \begin{enumerate}
   \item Generate an $N$-vector of replication numbers $r_{1:N}$, such that
     $\sum_{i=1}^N r_i = M$, and $0 \le r_i \le M$ for $i=1,\dots,N$.
   \item Generate an $M$-vector of indices $a_{1:M}$ such that $\sum_{j=1}^M
     \bbI_{\{i\}}(a_j) = r_i$, and $1 \le a_i \le N$ for $i = 1,\dots,M$.
-  \item Set $\hat{X}_i = X_{a_i}$ for $i = 1,\dots,M$.
+  \item Set $\hat{X}_i = X_{a_i}$ and $\hat{W}_i = 1 / M$ for $i = 1,\dots,M$.
 \end{enumerate}
-
 Given the results of the first step, the second step can be implemented with a
 deterministic algorithm. And the final results will be determined up to
 re-ordering. Therefore, it is the first step that determines the statistical
@@ -61,8 +59,8 @@ Recall section~\ref{sec:Sampler}, any object that is convertible to,
 \begin{verbatim}
 using eval_type = std::function<void(size_t, Particle<T> &)>;
 \end{verbatim}
-can be added as a resampling evaluation object to a |Sampler| object. The
-library defines the following class template,
+can be added as a resampling evaluation object to a |Sampler| object. \mckl
+defines the following class template,
 \begin{verbatim}
 template <typename T>
 class ResampleEval;
@@ -73,16 +71,13 @@ explicit ResampleEval(const eval_type &eval);
 \end{verbatim}
 where |eval_type| is defined as the following,
 \begin{verbatim}
-using eval_type = std::function<void(
-        size_t,
-        size_t,
-        typename Particle<T>::rng_type &,
-        const double *,
-        typename Particle<T>::size_type *)>;
+using eval_type = std::function<void(size_t, size_t,
+    typename Particle<T>::rng_type &, const double *,
+    typename Particle<T>::size_type *)>;
 \end{verbatim}
 An evaluation object that is convertible to the above will be used to generate
-the $N$-vector of replication numbers $r_{1:N}$. When called, it will be passed
-the following arguments,
+the $N$-vector of replication numbers $r_{1:N}$. When called, the following
+arguments will be passed to it,
 \begin{verbatim}
 eval(N, M, rng, w, r);
 \end{verbatim}
@@ -106,9 +101,9 @@ In fact, the |select| method of |StateMatrix| in section~\ref{sec:State} makes
 the assumptions of this property about its input indices.
 
 \section{Algorithm}
-\label{sec:Algorithm}
+\label{sec:Algorithm (Resample)}
 
-The library implements all algorithms discussed in~\cite{Douc:2005wa} and two
+\mckl implements all algorithms discussed in~\cite{Douc:2005wa} and two
 extensions to the those algorithms. Samplers can be constructed with builtin
 algorithms as seen in section~\ref{sec:Sampler}. Builtin algorithms are
 implemented in the following class template,
@@ -134,7 +129,7 @@ U01SeqType u01seq;
 u01seq(rng, R, u);
 \end{verbatim}
 After the call, it shall generate a sequence $0 \le U_1 \le \dots\le U_R < 1$.
-The library provides three implementations, which will be discussed in the next
+\mckl provides three implementations, which will be discussed in the next
 section. The algorithm proceeds as the following to generate $r_{1:N}$,
 \halfskip
 \begin{algorithmic}
@@ -155,7 +150,7 @@ section. The algorithm proceeds as the following to generate $r_{1:N}$,
 \end{algorithmic}
 \halfskip
 Builtin schemes differ in their choices of the template parameters |U01SeqType|
-and |Residual|. There are three implementations in the library of the uniform
+and |Residual|. There are three implementations in \mckl of the uniform
 sequence,
 \begin{verbatim}
 class U01SequenceSorted;
