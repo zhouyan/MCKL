@@ -35,7 +35,7 @@
 The performance of distributions in sections~\ref{sec:Continuous distribution}
 and~\ref{sec:Discrete distribution} are measured in single core cycles per
 element (cpE). The processor used is Intel Core i7-4960\textsc{hq}. The
-operating system is Mac OS X (version~10.11.4). The compiler is \llvm{} clang
+operating system is Mac OS X (version~10.11.4). The compiler is \llvm clang
 (version Apple~7.3.0). The \mkl library is used for vectorized mathematical
 functions.
 
@@ -61,7 +61,7 @@ For all the three above, the \rng is |ARSx8| (section~\ref{sub:AES-NI
 instructions based RNG}). The last is when there are \mkl routines for
 generating random variates from the distribution directly (e.g., Normal
 distribution) or indirectly (e.g., Student's $t$-distribution). In this case,
-we use the \rng{} |MKL_SFMT19937| (see section~\ref{sec:MKL RNG}),
+we use the \rng |MKL_SFMT19937| (see section~\ref{sec:MKL RNG}),
 \begin{verbatim}
 MKL_SFMT19937 rng_mkl;
 rand(rng_mkl, rnorm_mckl, n, r.data());

@@ -101,7 +101,7 @@ To write generic functions, it is recommended to use the function |rand|
 instead of the member methods, since the former also works with classes not
 defined by \mckl, such as those in the standard library.
 
-\section{Multiple \texorpdfstring{\protect\rng}{RNG} streams}
+\section{Multiple \texorpdfstring{\rng}{RNG} streams}
 \label{sec:Multiple RNG streams}
 
 Earlier in section~\ref{sec:Particle} we introduced that |particle.rng(i)|
@@ -156,7 +156,7 @@ class T
 One can also define their own replacement type, as long as it has the same
 interface as the builtin ones.
 
-\section{Counter-based \texorpdfstring{\protect\rng}{RNG}}
+\section{Counter-based \texorpdfstring{\rng}{RNG}}
 \label{sec:Counter-based RNG}
 
 The standard library provides a set of \rng engines. Unfortunately, none of
@@ -222,7 +222,7 @@ to later.
     \texttt{Threefry16x64} & 1024 & 1024 \\
     \bottomrule
   \end{tabularx}
-  \caption{Counter-based \protect\rng}
+  \caption{Counter-based \rng}
   \label{tab:Counter-based RNG}
 \end{table}
 
@@ -242,12 +242,12 @@ to later.
     \texttt{MCKL\_THREEFRY\_VECTOR\_LENGTH} & 4  \\
     \bottomrule
   \end{tabularx}
-  \caption{Configuration macros for counter-based \protect\rng}
+  \caption{Configuration macros for counter-based \rng}
   \label{tab:Configuration macros for counter-based RNG}
 \end{table}
 
-\subsection{\texorpdfstring{\protect\aesni}{AES-NI} instructions based
-  \texorpdfstring{\protect\rng}{RNG}}
+\subsection{\texorpdfstring{\aesni}{AES-NI} instructions based
+\texorpdfstring{\rng}{RNG}}
 \label{sub:AES-NI instructions based RNG}
 
 \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
@@ -458,7 +458,7 @@ template <typename ResultType>
 using Threefry16x64Engine = ThreefryEngine<ResultType, uint64_t, 16>;
 \end{verbatim}
 
-\subsection{Seeding counter-based \texorpdfstring{\protect\rng}{RNG}}
+\subsection{Seeding counter-based \texorpdfstring{\rng}{RNG}}
 \label{sub:Seeding counter-based RNG}
 
 The singleton class template |SeedGenerator| can be used to generate
@@ -509,7 +509,7 @@ Note that, the seeds generated are not random at all. For any deterministic
 seeds does not always lead to independent streams. This seed generator is only
 suitable for counter-based \rng{}s.
 
-\section{Non-deterministic \texorpdfstring{\protect\rng}{RNG}}
+\section{Non-deterministic \texorpdfstring{\rng}{RNG}}
 \label{sec:Non-deterministic RNG}
 
 If \rdrand\footnote{\url{https://en.wikipedia.org/wiki/RdRand}} instructions
@@ -523,12 +523,12 @@ trials is unlimited. If it is a positive number, and if after the specified
 number of trials no random integer is returned by \rdrand instructions, zero is
 returned.
 
-\section{\texorpdfstring{\protect\rng{} \protect\rng}{MKL RNG}}
+\section{\texorpdfstring{\mkl \rng}{MKL RNG}}
 \label{sec:MKL RNG}
 
 \mkl provides some high performance \rng{}s. \mckl implements a wrapper class
 |MKLEngine| that makes them accessible as \cpp engines. They are listed in
-table~\ref{tab:MKL RNG}. Note that, \mkl{} \rng{}s perform the best when they
+table~\ref{tab:MKL RNG}. Note that, \mkl \rng{}s perform the best when they
 are used to generate vectors of random numbers. These wrappers use a buffer to
 store such vectors. And thus they have much larger state space than usual
 \rng{}s. Each \rng engine outputs by default~32-bit integers. Similar to the
@@ -538,7 +538,7 @@ When there are \mkl routines for generating distribution random variates for
 one of the distributions discussed later in sections~\ref{sec:Continuous
 distribution} and~\ref{sec:Discrete distribution}, the library will
 automatically use these routines for vectorized random number generating if the
-\rng{} is one of that listed in table~\ref{tab:MKL RNG} (and their~64-bit
+\rng is one of that listed in table~\ref{tab:MKL RNG} (and their~64-bit
 variants). For example,
 \begin{verbatim}
 MKL_SFMT19937 rng;
@@ -557,7 +557,7 @@ $\chi^2$-distribution.
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
     \toprule
-    \rng engine & \mkl{} \brng \\
+    \rng engine & \mkl \brng \\
     \midrule
     \texttt{MKL\_MCG59}         & \texttt{VSL\_BRNG\_MCG59}         \\
     \texttt{MKL\_MT19937}       & \texttt{VSL\_BRNG\_MT19937}       \\
@@ -568,7 +568,7 @@ $\chi^2$-distribution.
     \texttt{MKL\_PHILOX4X32X10} & \texttt{VSL\_BRNG\_PHILOX4X32X10} \\
     \bottomrule
   \end{tabularx}
-  \caption{\protect\mkl{} \protect\rng}
+  \caption{\mkl \rng}
   \label{tab:MKL RNG}
 \end{table}
 
@@ -1301,7 +1301,7 @@ major order.
 
 \mckl implements a few classical randomness tests in~\cite{Knuth:1997us}. It is
 nowhere near as comprehensive as the \testu library~\cite{Lecuyer:2007hv}.
-However, they are easier to use with \cpp{} \rng engines and distributions. All
+However, they are easier to use with \cpp \rng engines and distributions. All
 tests below follows the same interfaces. They have the following operator,
 \begin{verbatim}
 template <typename RNGType, typename DistributionType>

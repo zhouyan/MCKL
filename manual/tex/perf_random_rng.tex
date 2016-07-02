@@ -29,7 +29,7 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\chapter{Performance of \texorpdfstring{\protect{rng}}{RNG}}
+\chapter{Performance of \texorpdfstring{\rng}{RNG}}
 \label{chap:Performance of RNG}
 
 The performance of \rng{}s in sections~\ref{sec:Counter-based RNG}
@@ -37,7 +37,7 @@ to~\ref{sec:Non-deterministic RNG} are measured in single core cycles per byte
 (cpB). The processor used is Intel Core i7-4960\textsc{hq}. The operating
 system is Mac OS X (version~10.11.4).
 
-Three compilers are tested. The \llvm clang (version Apple~7.3.0), the \gnu{}
+Three compilers are tested. The \llvm clang (version Apple~7.3.0), the \gnu
 \gcc (version~5.3) and the Intel \cpp compiler (version~2016 update~3). They
 are labeled ``\llvm'', ``\gcc'', and ``\textsc{intel}'', respectively, in
 tables below.
@@ -63,8 +63,8 @@ tables below.
 
 \begin{table}
   \input{tab/random_rng_std}%
-  \caption{Performance of \protect\rng{}s in the standard library}
-  \label{tab:Performance of standard library RNG}
+  \caption{Performance of \rng in the standard library}
+  \label{tab:Performance of RNG in the standard library RNG}
 \end{table}
 
 \begin{table}
@@ -105,12 +105,12 @@ tables below.
 
 \begin{table}
   \input{tab/random_rng_rdrand}%
-  \caption{Performance of non-deterministic \protect\rng{}s}
+  \caption{Performance of non-deterministic \rng}
   \label{tab:Performance of non-deterministic RNG}
 \end{table}
 
 \begin{table}
   \input{tab/random_rng_mkl}%
-  \caption{Performance of \protect\mkl{} \protect\rng{}s}
+  \caption{Performance of \mkl \rng}
   \label{tab:Performance of MKL RNG}
 \end{table}
