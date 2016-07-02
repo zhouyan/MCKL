@@ -41,6 +41,8 @@ plt <- qplot(x = X, y = Y, data = dat, geom = "path")
 plt <- plt + aes(group = Source, color = Source, linetype = Source)
 plt <- plt + xlab("$X$")
 plt <- plt + ylab("$Y$")
+plt <- plt + scale_x_math()
+plt <- plt + scale_y_math()
 plt <- plt + theme_bw() + theme(legend.position = "top")
 
 print.tikz("pf", plt, width=5, ratio = 1)
