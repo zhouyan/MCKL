@@ -36,6 +36,7 @@
 
 #include <mckl/internal/assert.hpp>
 #include <mckl/math/constants.hpp>
+#include <mckl/math/erf.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -585,6 +586,13 @@ MCKL_DEFINE_MATH_VMATH_1(std::erf, erf)
 /// \f$y_i = \mathrm{erfc}(a_i) = \mathrm{erfc}(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(std::erfc, erfc)
 
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{erf}^{-1}(a_i)\f$
+MCKL_DEFINE_MATH_VMATH_1(mckl::erfinv, erfinv)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \mathrm{erfc}(a_i) = \mathrm{erfc}^{-1}(a_i)\f$
+MCKL_DEFINE_MATH_VMATH_1(mckl::erfcinv, erfcinv)
+
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = (1 + \mathrm{erfc}(a_i / \sqrt{2})) / 2\f$
 template <typename T>
@@ -601,6 +609,24 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     mul(l, const_sqrt_1by2<T>(), a, y);
     erf(l, y, y);
     fma(l, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute
+/// \f$y_i = \sqrt{2}\mathrm{erfc}^{-1}(2 - 2a_i)\f$
+template <typename T>
+inline void cdfnorminv(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        fma(k, a, static_cast<T>(-2), static_cast<T>(2), y);
+        erfcinv(k, y, y);
+        mul(k, const_sqrt_2<T>(), y, y);
+    }
+    fma(l, a, static_cast<T>(-2), static_cast<T>(2), y);
+    erfcinv(l, y, y);
+    mul(l, const_sqrt_2<T>(), y, y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$
