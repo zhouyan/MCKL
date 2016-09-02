@@ -635,6 +635,12 @@ MCKL_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$
 MCKL_DEFINE_MATH_VMATH_1(std::tgamma, tgamma)
 
+/// @} vSpecial
+
+/// \defgroup vRounding Rounding functions
+/// \ingroup vMath
+/// @{
+
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \lfloor a_i \rfloor\f$
 MCKL_DEFINE_MATH_VMATH_1(std::floor, floor)
 
@@ -656,7 +662,7 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
         *z = std::modf(*a, y);
 }
 
-/// @} vSpecial
+/// @} vRounding
 
 } // namespace mckl
 
