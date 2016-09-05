@@ -51,6 +51,7 @@
         internal::size_check<MKL_INT>(n, #name);                              \
         ::vs##func(static_cast<MKL_INT>(n), a, y);                            \
     }                                                                         \
+                                                                              \
     inline void name(std::size_t n, const double *a, double *y)               \
     {                                                                         \
         internal::size_check<MKL_INT>(n, #name);                              \
@@ -63,6 +64,7 @@
         internal::size_check<MKL_INT>(n, #name);                              \
         ::vs##func(static_cast<MKL_INT>(n), a, b, y);                         \
     }                                                                         \
+                                                                              \
     inline void name(                                                         \
         std::size_t n, const double *a, const double *b, double *y)           \
     {                                                                         \
@@ -78,6 +80,7 @@ MCKL_DEFINE_MATH_VMATH_VML_2(Sub, sub)
 MCKL_DEFINE_MATH_VMATH_VML_1(Sqr, sqr)
 MCKL_DEFINE_MATH_VMATH_VML_2(Mul, mul)
 MCKL_DEFINE_MATH_VMATH_VML_1(Abs, abs)
+
 inline void linear_frac(std::size_t n, const float *a, const float *b,
     float beta_a, float beta_b, float mu_a, float mu_b, float *y)
 {
@@ -85,6 +88,7 @@ inline void linear_frac(std::size_t n, const float *a, const float *b,
     ::vsLinearFrac(
         static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
 }
+
 inline void linear_frac(std::size_t n, const double *a, const double *b,
     double beta_a, double beta_b, double mu_a, double mu_b, double *y)
 {
@@ -102,16 +106,19 @@ MCKL_DEFINE_MATH_VMATH_VML_1(InvCbrt, invcbrt)
 MCKL_DEFINE_MATH_VMATH_VML_1(Pow2o3, pow2o3)
 MCKL_DEFINE_MATH_VMATH_VML_1(Pow3o2, pow3o2)
 MCKL_DEFINE_MATH_VMATH_VML_2(Pow, pow)
+
 inline void pow(std::size_t n, const float *a, float b, float *y)
 {
     internal::size_check<MKL_INT>(n, "pow");
     ::vsPowx(static_cast<MKL_INT>(n), a, b, y);
 }
+
 inline void pow(std::size_t n, const double *a, double b, double *y)
 {
     internal::size_check<MKL_INT>(n, "pow");
     ::vdPowx(static_cast<MKL_INT>(n), a, b, y);
 }
+
 MCKL_DEFINE_MATH_VMATH_VML_2(Hypot, hypot)
 
 MCKL_DEFINE_MATH_VMATH_VML_1(Exp, exp)
@@ -122,16 +129,19 @@ MCKL_DEFINE_MATH_VMATH_VML_1(Log1p, log1p)
 
 MCKL_DEFINE_MATH_VMATH_VML_1(Cos, cos)
 MCKL_DEFINE_MATH_VMATH_VML_1(Sin, sin)
+
 inline void sincos(std::size_t n, const float *a, float *y, float *z)
 {
     internal::size_check<MKL_INT>(n, "sincos");
     ::vsSinCos(static_cast<MKL_INT>(n), a, y, z);
 }
+
 inline void sincos(std::size_t n, const double *a, double *y, double *z)
 {
     internal::size_check<MKL_INT>(n, "sincos");
     ::vdSinCos(static_cast<MKL_INT>(n), a, y, z);
 }
+
 MCKL_DEFINE_MATH_VMATH_VML_1(Tan, tan)
 MCKL_DEFINE_MATH_VMATH_VML_1(Acos, acos)
 MCKL_DEFINE_MATH_VMATH_VML_1(Asin, asin)
@@ -152,17 +162,19 @@ MCKL_DEFINE_MATH_VMATH_VML_1(ErfInv, erfinv)
 MCKL_DEFINE_MATH_VMATH_VML_1(ErfcInv, erfcinv)
 MCKL_DEFINE_MATH_VMATH_VML_1(CdfNormInv, cdfnorminv)
 MCKL_DEFINE_MATH_VMATH_VML_1(LGamma, lgamma)
-MCKL_DEFINE_MATH_VMATH_VML_1(TGamma, tgamm)
+MCKL_DEFINE_MATH_VMATH_VML_1(TGamma, tgamma)
 
 MCKL_DEFINE_MATH_VMATH_VML_1(Floor, floor)
 MCKL_DEFINE_MATH_VMATH_VML_1(Ceil, ceil)
 MCKL_DEFINE_MATH_VMATH_VML_1(Trunc, trunc)
 MCKL_DEFINE_MATH_VMATH_VML_1(Round, round)
+
 inline void modf(std::size_t n, const float *a, float *y, float *z)
 {
     internal::size_check<MKL_INT>(n, "modf");
     ::vsModf(static_cast<MKL_INT>(n), a, y, z);
 }
+
 inline void modf(std::size_t n, const double *a, double *y, double *z)
 {
     internal::size_check<MKL_INT>(n, "modf");
