@@ -115,7 +115,7 @@ int mckl_stop_watch_stop(mckl_stop_watch stop_watch);
 void mckl_stop_watch_reset(mckl_stop_watch stop_watch);
 
 /// \brief `mckl::StopWatch::cycles`
-double mckl_stop_watch_cycles(mckl_stop_watch stop_watch);
+unsigned long long mckl_stop_watch_cycles(mckl_stop_watch stop_watch);
 
 /// \brief `mckl::StopWatch::nanoseconds`
 double mckl_stop_watch_nanoseconds(mckl_stop_watch stop_watch);

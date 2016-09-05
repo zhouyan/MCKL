@@ -66,7 +66,7 @@ void mckl_stop_watch_reset(mckl_stop_watch stop_watch)
     reinterpret_cast<::mckl::StopWatch *>(stop_watch.ptr)->reset();
 }
 
-double mckl_stop_watch_cycles(mckl_stop_watch stop_watch)
+unsigned long long mckl_stop_watch_cycles(mckl_stop_watch stop_watch)
 {
     return reinterpret_cast<::mckl::StopWatch *>(stop_watch.ptr)->cycles();
 }
