@@ -127,11 +127,11 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
                 r2[j] = dist_mckl(rng2);
             pass = pass && r1 == r2;
         }
-        c1 = std::min(c1, watch1.cycles() / num);
-        c2 = std::min(c2, watch2.cycles() / num);
-        c3 = std::min(c3, watch3.cycles() / num);
+        c1 = std::min(c1, 1.0 * watch1.cycles() / num);
+        c2 = std::min(c2, 1.0 * watch2.cycles() / num);
+        c3 = std::min(c3, 1.0 * watch3.cycles() / num);
 #if MCKL_HAS_MKL
-        c4 = std::min(c4, watch4.cycles() / num);
+        c4 = std::min(c4, 1.0 * watch4.cycles() / num);
 #endif
     }
 

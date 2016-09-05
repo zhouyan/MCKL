@@ -74,8 +74,8 @@ inline void random_uniform_bits(std::size_t N, std::size_t M, int nwid,
     double bytes = static_cast<double>(sizeof(UIntType) * num);
     double g1 = bytes / watch1.nanoseconds();
     double g2 = bytes / watch2.nanoseconds();
-    double c1 = watch1.cycles() / bytes;
-    double c2 = watch2.cycles() / bytes;
+    double c1 = 1.0 * watch1.cycles() / bytes;
+    double c2 = 1.0 * watch2.cycles() / bytes;
 
     std::cout << std::setw(nwid) << std::left << name;
     std::cout << std::setw(swid) << std::right << (full ? "Yes" : "No");

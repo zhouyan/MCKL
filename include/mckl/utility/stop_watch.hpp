@@ -156,7 +156,7 @@ class StopWatchClockAdapter
         if (!running_)
             return false;
 
-        cycles_ += static_cast<double>(internal::rdtsc() - cycles_start_);
+        cycles_ += internal::rdtsc() - cycles_start_;
         typename clock_type::time_point time_stop = clock_type::now();
         time_ += time_stop - time_start_;
         running_ = false;
@@ -174,7 +174,7 @@ class StopWatchClockAdapter
     }
 
     /// \brief Return the accumulated cycles
-    double cycles() const { return cycles_; }
+    std::uint64_t cycles() const { return cycles_; }
 
     /// \brief Return the accumulated elapsed time in nanoseconds
     double nanoseconds() const
@@ -227,7 +227,7 @@ class StopWatchClockAdapter
     private:
     typename clock_type::duration time_;
     typename clock_type::time_point time_start_;
-    double cycles_;
+    std::uint64_t cycles_;
     std::uint64_t cycles_start_;
     bool running_;
 }; // class StopWatchClockAdapter

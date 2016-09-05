@@ -219,8 +219,8 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
         double bytes = static_cast<double>(sizeof(std::uint64_t) * num);
         g1 = std::max(g1, bytes / watch1.nanoseconds());
         g2 = std::max(g2, bytes / watch2.nanoseconds());
-        c1 = std::min(c1, watch1.cycles() / bytes);
-        c2 = std::min(c2, watch2.cycles() / bytes);
+        c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
+        c2 = std::min(c2, 1.0 * watch2.cycles() / bytes);
     }
 
     std::cout << std::setw(nwid) << std::left << name;

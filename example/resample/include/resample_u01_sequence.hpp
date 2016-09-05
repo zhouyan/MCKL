@@ -79,8 +79,8 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
     std::stringstream ss;
     ss << error / std::numeric_limits<RealType>::epsilon() << " eps";
 
-    double c1 = watch1.cycles() / num;
-    double c2 = watch2.cycles() / num;
+    double c1 = 1.0 * watch1.cycles() / num;
+    double c2 = 1.0 * watch2.cycles() / num;
     if (std::is_same<RealType, float>::value)
         std::cout << std::setw(twid) << std::left << "float";
     if (std::is_same<RealType, double>::value)
