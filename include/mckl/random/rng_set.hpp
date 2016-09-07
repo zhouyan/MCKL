@@ -102,7 +102,7 @@ class RNGSetVector
 
         size_type m = rng_.size();
         rng_.resize(n);
-        Seed::instance()(n - m, rng_.begin() + m);
+        Seed::instance()(n - m, rng_.data() + m);
     }
 
     void seed() { Seed::instance()(rng_.size(), rng_.begin()); }
