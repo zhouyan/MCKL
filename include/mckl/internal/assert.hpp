@@ -57,8 +57,11 @@ class RuntimeAssert : public std::runtime_error
 }; // class RuntimeAssert
 
 #if MCKL_NO_RUNTIME_ASSERT
+
 inline void runtime_assert(bool, const char *, bool) {}
+
 #else // MCKL_NO_RUNTIME_ASSERT
+
 inline void runtime_assert(bool cond, const char *msg, bool soft = false)
 {
 #if MCKL_RUNTIME_ASSERT_AS_EXCEPTION
@@ -74,6 +77,7 @@ inline void runtime_assert(bool cond, const char *msg, bool soft = false)
         assert(cond);
 #endif // MCKL_RUNTIME_ASSERT_AS_EXCEPTION
 }
+
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 inline void runtime_assert(
@@ -86,16 +90,25 @@ namespace internal
 {
 
 #if MCKL_NO_RUNTIME_ASSERT
+
 template <typename IntType, typename SizeType>
 inline void size_check(SizeType, const char *)
 {
 }
-#else  // MCKL_NO_RUNTIME_ASSERT
+
+#else // MCKL_NO_RUNTIME_ASSERT
+
 template <typename IntType, typename SizeType>
-inline void size_check(SizeType n, const char *f)
+inline void size_check(SizeType, const char *, std::false_type)
+{
+}
+
+template <typename IntType, typename SizeType>
+inline void size_check(SizeType n, const char *f, std::true_type)
 {
     static constexpr std::uintmax_t nmax =
         static_cast<std::uintmax_t>(std::numeric_limits<IntType>::max());
+
     std::string msg;
     msg += "**";
     msg += f;
@@ -103,6 +116,18 @@ inline void size_check(SizeType n, const char *f)
 
     runtime_assert((static_cast<std::uintmax_t>(n) <= nmax), msg.c_str());
 }
+
+template <typename IntType, typename SizeType>
+inline void size_check(SizeType n, const char *f)
+{
+    static constexpr std::uintmax_t nmax =
+        static_cast<std::uintmax_t>(std::numeric_limits<IntType>::max());
+    static constexpr std::uintmax_t smax =
+        static_cast<std::uintmax_t>(std::numeric_limits<SizeType>::max());
+
+    size_check<IntType>(n, f, std::integral_constant<bool, (nmax < smax)>());
+}
+
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 template <typename T>
