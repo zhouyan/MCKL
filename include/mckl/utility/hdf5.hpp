@@ -492,8 +492,7 @@ inline void hdf5store(const std::vector<T, Alloc> &vector,
 /// // 3 6
 /// hdf5store_matrix<double>(ColMajor, 3, 2, data, "col.hdf5", "data");
 /// ~~~
-/// When the results are read by other program, for example R, a transpose
-/// may
+/// When the results are read by other program, for example R, a transpose may
 /// be needed. For instance,
 /// ~~~{.r}
 /// library(rhdf5)

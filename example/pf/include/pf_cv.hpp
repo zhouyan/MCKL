@@ -241,9 +241,27 @@ class PFCVEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
     }
 }; // class PFCVEval
 
+template <typename T>
+inline double pf_cv_error(const mckl::Sampler<T> &sampler, std::size_t n,
+    const mckl::Vector<double> &tx, const mckl::Vector<double> &ty)
+{
+    mckl::Vector<double> rx(n);
+    mckl::Vector<double> ry(n);
+    sampler.monitor("pos").read_record(0, rx.data());
+    sampler.monitor("pos").read_record(1, ry.data());
+    mckl::sub(n, tx.data(), rx.data(), rx.data());
+    mckl::sub(n, ty.data(), ry.data(), ry.data());
+    mckl::sqr(n, rx.data(), rx.data());
+    mckl::sqr(n, ry.data(), ry.data());
+    mckl::add(n, rx.data(), ry.data(), rx.data());
+    mckl::sqrt(n, rx.data(), rx.data());
+
+    return std::accumulate(rx.begin(), rx.end(), 0.0);
+}
+
 template <typename Backend, mckl::ResampleScheme Scheme,
     mckl::MatrixLayout Layout, typename RNGSetType>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
+inline void pf_cv_run(std::size_t N, std::size_t M)
 {
     using T = PFCV<Layout, RNGSetType>;
 
@@ -258,6 +276,7 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
         "pos", mckl::Monitor<T>(2, PFCVEval<Backend, Layout, RNGSetType>()));
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
+
     sampler.initialize();
 
     const std::size_t n = sampler.particle().state().n();
@@ -275,29 +294,21 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
     mckl::hdf5store(sampler.particle(), h5file, "Particle/Iter.0", true);
 #endif
 
-    mckl::StopWatch watch;
     for (std::size_t i = 1; i < n; ++i) {
-        watch.start();
         sampler.iterate();
-        watch.stop();
 #if MCKL_HAS_HDF5
         mckl::hdf5store(sampler.particle(), h5file,
             "Particle/Iter." + std::to_string(i), true);
 #endif
     }
-
 #if MCKL_HAS_HDF5
     mckl::hdf5store(sampler, h5file, "Sampler", true);
     mckl::hdf5store(sampler.monitor("pos"), h5file, "Monitor", true);
 #endif
+
     std::ofstream txt(basename + ".txt");
     txt << sampler << std::endl;
     txt.close();
-
-    mckl::Vector<double> rx(n);
-    mckl::Vector<double> ry(n);
-    sampler.monitor("pos").read_record(0, rx.data());
-    sampler.monitor("pos").read_record(1, ry.data());
 
     mckl::Vector<double> tx;
     mckl::Vector<double> ty;
@@ -308,83 +319,75 @@ inline void pf_cv_run(std::size_t N, int nwid, int twid)
         tx.push_back(x);
         ty.push_back(y);
     }
-    mckl::sub(n, tx.data(), rx.data(), rx.data());
-    mckl::sub(n, ty.data(), ry.data(), ry.data());
-    mckl::sqr(n, rx.data(), rx.data());
-    mckl::sqr(n, ry.data(), ry.data());
-    mckl::add(n, rx.data(), ry.data(), rx.data());
-    mckl::sqrt(n, rx.data(), rx.data());
-    double error = std::accumulate(rx.begin(), rx.end(), 0.0) / n;
-    double time = watch.seconds();
 
-    std::cout << std::setw(nwid) << std::left << N;
-    std::cout << std::setw(twid) << std::left << smp;
-    std::cout << std::setw(twid + 5) << std::left << res;
-    std::cout << std::setw(twid) << std::left << rc;
-    std::cout << std::setw(twid) << std::left << rs;
-    std::cout << std::setw(twid) << std::right << std::fixed << error;
-    std::cout << std::setw(twid) << std::right << std::fixed << time;
-    std::cout << std::endl;
+    std::ofstream os;
+    os.open("pf_cv.txt", std::ios_base::app);
+    os.precision(16);
+    for (std::size_t i = 0; i != M; ++i) {
+        mckl::StopWatch watch;
+        watch.start();
+        sampler.initialize().iterate(n - 1);
+        watch.stop();
+
+        os << N << '\t';
+        os << smp << '\t';
+        os << res << '\t';
+        os << rc << '\t';
+        os << rs << '\t';
+        os << pf_cv_error(sampler, n, tx, ty) << '\t';
+        os << watch.seconds() << '\n';
+    }
+    os.close();
 }
 
 template <typename Backend, mckl::ResampleScheme Scheme,
     mckl::MatrixLayout Layout>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
+inline void pf_cv_run(std::size_t N, std::size_t M)
 {
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetVector<>>(N, nwid, twid);
+    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetVector<>>(N, M);
 #if MCKL_HAS_TBB
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBB<>>(N, nwid, twid);
+    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBB<>>(N, M);
 #endif
 }
 
 template <typename Backend, mckl::ResampleScheme Scheme>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
+inline void pf_cv_run(std::size_t N, std::size_t M)
 {
-    pf_cv_run<Backend, Scheme, mckl::RowMajor>(N, nwid, twid);
-    pf_cv_run<Backend, Scheme, mckl::ColMajor>(N, nwid, twid);
+    pf_cv_run<Backend, Scheme, mckl::RowMajor>(N, M);
+    pf_cv_run<Backend, Scheme, mckl::ColMajor>(N, M);
 }
 
 template <typename Backend>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
+inline void pf_cv_run(std::size_t N, std::size_t M)
 {
-    pf_cv_run<Backend, mckl::Multinomial>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::Residual>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::ResidualStratified>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::ResidualSystematic>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::Stratified>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::Systematic>(N, nwid, twid);
+    pf_cv_run<Backend, mckl::Multinomial>(N, M);
+    pf_cv_run<Backend, mckl::Residual>(N, M);
+    pf_cv_run<Backend, mckl::ResidualStratified>(N, M);
+    pf_cv_run<Backend, mckl::ResidualSystematic>(N, M);
+    pf_cv_run<Backend, mckl::Stratified>(N, M);
+    pf_cv_run<Backend, mckl::Systematic>(N, M);
 }
 
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
+inline void pf_cv(std::size_t N, std::size_t M)
 {
-    pf_cv_run<mckl::BackendSEQ>(N, nwid, twid);
-    pf_cv_run<mckl::BackendSTD>(N, nwid, twid);
+    std::ofstream os("pf_cv.txt");
+    os << "N\t";
+    os << "Backend\t";
+    os << "ResampleScheme\t";
+    os << "MatrixLayout\t";
+    os << "RNGSetType\t";
+    os << "Error\t";
+    os << "Time\n";
+    os.close();
+
+    pf_cv_run<mckl::BackendSEQ>(N, M);
+    pf_cv_run<mckl::BackendSTD>(N, M);
 #if MCKL_HAS_OMP
-    pf_cv_run<mckl::BackendOMP>(N, nwid, twid);
+    pf_cv_run<mckl::BackendOMP>(N, M);
 #endif
 #if MCKL_HAS_TBB
-    pf_cv_run<mckl::BackendTBB>(N, nwid, twid);
+    pf_cv_run<mckl::BackendTBB>(N, M);
 #endif
-}
-
-inline void pf_cv(std::size_t N)
-{
-    const int nwid = 10;
-    const int twid = 15;
-    const std::size_t lwid = nwid + twid * 6 + 5;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::setw(nwid) << std::left << "N";
-    std::cout << std::setw(twid) << std::left << "Backend";
-    std::cout << std::setw(twid + 5) << std::left << "ResampleScheme";
-    std::cout << std::setw(twid) << std::left << "MatrixLayout";
-    std::cout << std::setw(twid) << std::left << "rng_set_type";
-    std::cout << std::setw(twid) << std::right << "Error";
-    std::cout << std::setw(twid) << std::right << "Time (s)";
-    std::cout << std::endl;
-    std::cout << std::string(lwid, '-') << std::endl;
-    pf_cv_run(N, nwid, twid);
-    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_PFCV_HPP

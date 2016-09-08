@@ -128,7 +128,19 @@ pf_cv_est <- function() {
     list(plot = plt, plot.list = plt.list)
 }
 
+dat <- read.table("pf_cv.txt", header = TRUE)
+dat$group = paste(dat$RNGSetType, dat$MatrixLayout)
+plt <- ggplot(dat)
+plt <- plt + aes(x = Error)
+plt <- plt + aes(group = group)
+plt <- plt + aes(color = RNGSetType)
+plt <- plt + aes(linetype = MatrixLayout)
+plt <- plt + geom_density()
+plt <- plt + scale_x_log10()
+plt <- plt + facet_grid(ResampleScheme ~ Backend, scale = "free_y")
+
 pdf("pf_cv.pdf", width = 14.4, height = 9)
+print(plt)
 est <- pf_cv_est()
 print(est$plot)
 for (p in est$plot.list) print(p)
