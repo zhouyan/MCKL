@@ -124,13 +124,6 @@ inline void u01_trans_sorted(std::size_t N, const RealType *u01, RealType *r)
         return;
 
     const std::size_t k = internal::BufferSize<RealType>::value;
-    if (N <= k) {
-        if (u01 != r)
-            std::copy_n(u01, N, r);
-        std::sort(r, r + N);
-        return;
-    }
-
     const std::size_t m = N / k;
     std::size_t n0 = 0;
     RealType lmax = 0;
@@ -199,13 +192,6 @@ inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r)
         return;
 
     const std::size_t k = internal::BufferSize<RealType>::value;
-    if (N <= k) {
-        U01Distribution<RealType> dist;
-        rand(rng, dist, N, r);
-        std::sort(r, r + N);
-        return;
-    }
-
     const std::size_t m = N / k;
     std::size_t n0 = 0;
     RealType lmax = 0;
