@@ -134,6 +134,12 @@ std::string pf_rng_set_name<mckl::RNGSetTBB<>>()
 {
     return "RNGSetTBB";
 }
+
+template <>
+std::string pf_rng_set_name<mckl::RNGSetTBBKPI<>>()
+{
+    return "RNGSetTBBKPI";
+}
 #endif
 
 #endif // MCKL_EXAMPLE_PF_HPP

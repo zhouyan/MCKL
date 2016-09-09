@@ -64,7 +64,7 @@ class RNGSetScalar
     using rng_type = RNGType;
     using size_type = std::size_t;
 
-    explicit RNGSetScalar(size_type = 0) : { seed(); }
+    explicit RNGSetScalar(size_type = 0) { seed(); }
 
     size_type size() const { return 1; }
 

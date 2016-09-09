@@ -227,8 +227,8 @@ class PFCVWeight : public mckl::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
 }; // class PFCVWeight
 
 template <typename Backend, mckl::MatrixLayout Layout, typename RNGSetType>
-class PFCVEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
-                     PFCVEval<Backend, Layout, RNGSetType>, Backend>
+class PFCVMEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
+                      PFCVMEval<Backend, Layout, RNGSetType>, Backend>
 {
     public:
     using T = PFCV<Layout, RNGSetType>;
@@ -239,12 +239,24 @@ class PFCVEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
         res[0] = idx.pos_x();
         res[1] = idx.pos_y();
     }
-}; // class PFCVEval
+}; // class PFCVMEval
 
 template <typename T>
-inline double pf_cv_error(const mckl::Sampler<T> &sampler,
-    const mckl::Vector<double> &tx, const mckl::Vector<double> &ty)
+inline double pf_cv_error(const mckl::Sampler<T> &sampler)
 {
+    static mckl::Vector<double> tx;
+    static mckl::Vector<double> ty;
+
+    if (tx.size() == 0) {
+        double x = 0;
+        double y = 0;
+        std::ifstream truth("pf_cv.truth");
+        while (truth >> x >> y) {
+            tx.push_back(x);
+            ty.push_back(y);
+        }
+    }
+
     const std::size_t n = tx.size();
     mckl::Vector<double> rx(n);
     mckl::Vector<double> ry(n);
@@ -262,34 +274,33 @@ inline double pf_cv_error(const mckl::Sampler<T> &sampler,
 
 template <typename Backend, mckl::ResampleScheme Scheme,
     mckl::MatrixLayout Layout, typename RNGSetType>
-inline void pf_cv_run(std::size_t N, std::size_t M)
+inline void pf_cv_run(std::size_t N)
 {
     using T = PFCV<Layout, RNGSetType>;
+    using init = PFCVInit<Backend, Layout, RNGSetType>;
+    using move = PFCVMove<Backend, Layout, RNGSetType>;
+    using weight = PFCVWeight<Backend, Layout, RNGSetType>;
+    using meval = PFCVMEval<Backend, Layout, RNGSetType>;
 
-    mckl::Seed::instance().set(101);
     mckl::Sampler<T> sampler(N);
     sampler.resample_method(Scheme, 0.5);
-    sampler.eval(PFCVInit<Backend, Layout, RNGSetType>(), mckl::SamplerInit);
-    sampler.eval(PFCVMove<Backend, Layout, RNGSetType>(), mckl::SamplerMove);
-    sampler.eval(PFCVWeight<Backend, Layout, RNGSetType>(),
-        mckl::SamplerInit | mckl::SamplerMove);
-    sampler.monitor(
-        "pos", mckl::Monitor<T>(2, PFCVEval<Backend, Layout, RNGSetType>()));
+    sampler.eval(init(), mckl::SamplerInit);
+    sampler.eval(move(), mckl::SamplerMove);
+    sampler.eval(weight(), mckl::SamplerInit | mckl::SamplerMove);
+    sampler.monitor("pos", mckl::Monitor<T>(2, meval()));
     sampler.monitor("pos").name(0) = "pos.x";
     sampler.monitor("pos").name(1) = "pos.y";
-
-    sampler.initialize();
 
     const std::size_t n = sampler.particle().state().n();
     const std::string smp(pf_backend_name<Backend>());
     const std::string res(pf_scheme_name<Scheme>());
     const std::string rc(pf_layout_name<Layout>());
     const std::string rs(pf_rng_set_name<RNGSetType>());
+    const std::string base = "pf_cv." + smp + "." + res + "." + rc + "." + rs;
 
-    std::string basename = "pf_cv." + smp + "." + res + "." + rc + "." + rs;
-
+    sampler.initialize();
 #if MCKL_HAS_HDF5
-    std::string h5file = basename + ".h5";
+    std::string h5file = base + ".h5";
     mckl::hdf5store(h5file);
     mckl::hdf5store(h5file, "Particle", true);
     mckl::hdf5store(sampler.particle(), h5file, "Particle/Iter.0", true);
@@ -307,69 +318,52 @@ inline void pf_cv_run(std::size_t N, std::size_t M)
     mckl::hdf5store(sampler.monitor("pos"), h5file, "Monitor", true);
 #endif
 
-    std::ofstream txt(basename + ".txt");
+    std::ofstream txt(base + ".txt");
     txt << sampler << std::endl;
     txt.close();
-
-    mckl::Vector<double> tx;
-    mckl::Vector<double> ty;
-    double x = 0;
-    double y = 0;
-    std::ifstream truth("pf_cv.truth");
-    while (truth >> x >> y) {
-        tx.push_back(x);
-        ty.push_back(y);
-    }
 
     std::ofstream os;
     os.open("pf_cv.txt", std::ios_base::app);
     os.precision(16);
-    for (std::size_t i = 0; i != M; ++i) {
-        mckl::StopWatch watch;
-        watch.start();
-        sampler.initialize().iterate(n - 1);
-        watch.stop();
-
-        os << N << '\t';
-        os << smp << '\t';
-        os << res << '\t';
-        os << rc << '\t';
-        os << rs << '\t';
-        os << pf_cv_error(sampler, tx, ty) << '\t';
-        os << watch.seconds() << '\n';
-    }
+    os << N << '\t';
+    os << smp << '\t';
+    os << res << '\t';
+    os << rc << '\t';
+    os << rs << '\t';
+    os << pf_cv_error(sampler) << '\n';
     os.close();
 }
 
 template <typename Backend, mckl::ResampleScheme Scheme,
     mckl::MatrixLayout Layout>
-inline void pf_cv_run(std::size_t N, std::size_t M)
+inline void pf_cv_run(std::size_t N)
 {
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetVector<>>(N, M);
+    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetVector<>>(N);
 #if MCKL_HAS_TBB
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBB<>>(N, M);
+    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBB<>>(N);
+    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBBKPI<>>(N);
 #endif
 }
 
 template <typename Backend, mckl::ResampleScheme Scheme>
-inline void pf_cv_run(std::size_t N, std::size_t M)
+inline void pf_cv_run(std::size_t N)
 {
-    pf_cv_run<Backend, Scheme, mckl::RowMajor>(N, M);
-    pf_cv_run<Backend, Scheme, mckl::ColMajor>(N, M);
+    pf_cv_run<Backend, Scheme, mckl::RowMajor>(N);
+    pf_cv_run<Backend, Scheme, mckl::ColMajor>(N);
 }
 
 template <typename Backend>
-inline void pf_cv_run(std::size_t N, std::size_t M)
+inline void pf_cv_run(std::size_t N)
 {
-    pf_cv_run<Backend, mckl::Multinomial>(N, M);
-    pf_cv_run<Backend, mckl::Residual>(N, M);
-    pf_cv_run<Backend, mckl::ResidualStratified>(N, M);
-    pf_cv_run<Backend, mckl::ResidualSystematic>(N, M);
-    pf_cv_run<Backend, mckl::Stratified>(N, M);
-    pf_cv_run<Backend, mckl::Systematic>(N, M);
+    pf_cv_run<Backend, mckl::Multinomial>(N);
+    pf_cv_run<Backend, mckl::Residual>(N);
+    pf_cv_run<Backend, mckl::ResidualStratified>(N);
+    pf_cv_run<Backend, mckl::ResidualSystematic>(N);
+    pf_cv_run<Backend, mckl::Stratified>(N);
+    pf_cv_run<Backend, mckl::Systematic>(N);
 }
 
-inline void pf_cv(std::size_t N, std::size_t M)
+inline void pf_cv(std::size_t N)
 {
     std::ofstream os("pf_cv.txt");
     os << "N\t";
@@ -377,17 +371,16 @@ inline void pf_cv(std::size_t N, std::size_t M)
     os << "ResampleScheme\t";
     os << "MatrixLayout\t";
     os << "RNGSetType\t";
-    os << "Error\t";
-    os << "Time\n";
+    os << "Error\n";
     os.close();
 
-    pf_cv_run<mckl::BackendSEQ>(N, M);
-    pf_cv_run<mckl::BackendSTD>(N, M);
+    pf_cv_run<mckl::BackendSEQ>(N);
+    pf_cv_run<mckl::BackendSTD>(N);
 #if MCKL_HAS_OMP
-    pf_cv_run<mckl::BackendOMP>(N, M);
+    pf_cv_run<mckl::BackendOMP>(N);
 #endif
 #if MCKL_HAS_TBB
-    pf_cv_run<mckl::BackendTBB>(N, M);
+    pf_cv_run<mckl::BackendTBB>(N);
 #endif
 }
 

@@ -54,7 +54,7 @@ exe <- paste("pf_cv", smp, sep = ".")
 res <- c("Multinomial", "Stratified", "Systematic", "Residual",
     "ResidualStratified", "ResidualSystematic")
 rc <- c("RowMajor", "ColMajor")
-rs <- c("RNGSetVector", "RNGSetTBB")
+rs <- c("RNGSetVector", "RNGSetTBB", "RNGSetTBBKPI")
 runs <- expand.grid(exe, res, rc, rs)
 runs <- paste(runs$Var1, runs$Var2, runs$Var3, runs$Var4, sep = ".")
 
@@ -137,10 +137,8 @@ print(plt)
 
 for (p in names(err.list)) {
     e <- err.list[[p]]
-    if (e > 0.05) {
-        t <- paste(p, " (Error = ", e, ")")
-        print(plt %+% dat.list[[p]] + ggtitle(t))
-    }
+    t <- paste(p, " (Error = ", e, ")")
+    print(plt %+% dat.list[[p]] + ggtitle(t))
 }
 
 ##############################################################################

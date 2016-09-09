@@ -33,15 +33,11 @@
 
 int main(int argc, char **argv)
 {
-    std::size_t N = 1000;
+    std::size_t N = 10000;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
 
-    std::size_t M = 1000;
-    if (argc > 2)
-        M = static_cast<std::size_t>(std::atoi(argv[2]));
-
-    pf_cv(N, M);
+    pf_cv(N);
 
     return 0;
 }
