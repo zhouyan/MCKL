@@ -101,11 +101,9 @@ class SeedGenerator
     /// \brief Get a seed
     result_type get()
     {
-        ++seed_;
-        if (seed_ >= max_)
-            seed_ = 1;
+        result_type s = seed_.fetch_add(1);
 
-        return seed_ * divisor_ + remainder_;
+        return (s % max_ + 1) * divisor_ + remainder_;
     }
 
     /// \brief The maximum of the seed
