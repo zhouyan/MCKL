@@ -849,7 +849,7 @@ class AES256KeySeqGenerator
     using key_type = std::array<std::uint64_t, 4>;
 
     template <std::size_t Rp1>
-    static key_type key(std::array<__m128i, Rp1> &rk)
+    static key_type key(const std::array<__m128i, Rp1> &rk)
     {
         key_type key;
         _mm_storeu_si128(
