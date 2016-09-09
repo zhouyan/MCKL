@@ -32,116 +32,117 @@
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(rhdf5))
 
+##############################################################################
+
 theme_set(theme_bw())
+pdf("pf_cv.pdf", width = 14.4, height = 9)
+
+##############################################################################
+
+dat <- read.table("pf_cv.txt", header = TRUE)
+plt <- ggplot(dat)
+plt <- plt + aes(x = MatrixLayout, y = Error)
+plt <- plt + aes(group = RNGSetType, fill = RNGSetType)
+plt <- plt + geom_bar(stat = "identity", position = "dodge")
+plt <- plt + facet_grid(ResampleScheme ~ Backend, scale = "free_y")
+print(plt)
+
+##############################################################################
 
 smp <- paste0("Backend", c("SEQ", "STD", "OMP", "TBB"))
 exe <- paste("pf_cv", smp, sep = ".")
-res <- c(
-    "Multinomial",
-    "Stratified",
-    "Systematic",
-    "Residual",
-    "ResidualStratified",
-    "ResidualSystematic")
+res <- c("Multinomial", "Stratified", "Systematic", "Residual",
+    "ResidualStratified", "ResidualSystematic")
 rc <- c("RowMajor", "ColMajor")
 rs <- c("RNGSetVector", "RNGSetTBB")
 runs <- expand.grid(exe, res, rc, rs)
 runs <- paste(runs$Var1, runs$Var2, runs$Var3, runs$Var4, sep = ".")
 
-pf_cv_est <- function() {
-    src.level <- c("Estimates", "Observation")
-    obs <- read.table("pf_cv.data", header = FALSE)
-    dat <- data.frame(
-        Position.X = obs[,1], Position.Y = obs[,2],
-        Group = rep("Observation", dim(obs)[1]),
-        Source = rep("Observation", dim(obs)[1]))
-    plt.list <- list()
+truth <- read.table("pf_cv.truth", header = FALSE)
+n <- dim(truth)[1]
 
-    pf_cv <- function (filename, est)
-    {
-        dat <- data.frame(
-            Position.X = c(obs[,1], est$pos.x),
-            Position.Y = c(obs[,2], est$pos.y),
-            Source = c(
-                rep("Observation", dim(obs)[1]),
-                rep("Estimates",   dim(est)[1])))
-        dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
-        plt <- qplot(x = Position.X, y = Position.Y, data = dat,
-            group = Source, color = Source, linetype = Source, geom = "path")
-        plt <- plt + ggtitle(filename)
+lvl <- c("Estimates", "Truth")
+grp <- rep(lvl, each = n)
+src <- factor(grp, ordered = TRUE, levels = lvl)
+est <- rep("Estimates", n)
 
-        dat <- data.frame(
-            Position.X = est$pos.x, Position.Y = est$pos.y,
-            Group = rep(filename, dim(est)[1]),
-            Source = rep("Estimates", dim(est)[1]))
+err.list <- list()
+dat.list <- list()
+dat <- data.frame(
+    Position.X = truth[,1],
+    Position.Y = truth[,2],
+    Group = rep("Truth", n),
+    Source = rep("Truth", n))
 
-        list(plt = plt, dat = dat)
-    }
+pf_cv <- function(filename, sampler)
+{
+    err.x <- sampler$pos.x - truth[,1]
+    err.y <- sampler$pos.y - truth[,2]
+    error <- mean(sqrt(err.x * err.x + err.y * err.y))
+    .GlobalEnv$err.list[[filename]] <- error
 
-    for (run in runs) {
-        pf_cv.txt <- paste0(run, ".txt")
-        if (file.exists(pf_cv.txt)) {
-            tmp <- pf_cv(pf_cv.txt, read.table(pf_cv.txt, header = TRUE))
-            plt.list[[pf_cv.txt]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
-        }
+    .GlobalEnv$dat.list[[filename]] <- data.frame(
+        Position.X = c(sampler$pos.x, truth[,1]),
+        Position.Y = c(sampler$pos.y, truth[,2]),
+        Group = grp,
+        Source = src)
 
-        pf_cv.h5 <- paste0(run, ".h5")
-        if (file.exists(pf_cv.h5)) {
-            pf_cv.s <- paste(pf_cv.h5, "(Sampler)")
-            tmp <- pf_cv(pf_cv.s, as.data.frame(h5read(pf_cv.h5, "Sampler")))
-            plt.list[[pf_cv.s]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
-
-            pf_cv.m <- paste(pf_cv.h5, "(Monitor)")
-            tmp <- pf_cv(pf_cv.m, as.data.frame(h5read(pf_cv.h5, "Monitor")))
-            plt.list[[pf_cv.m]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
-
-            pf_cv.p <- paste(pf_cv.h5, "(Particle)")
-            particle <- h5read(pf_cv.h5, "Particle")
-            pos.x <- numeric()
-            pos.y <- numeric()
-            for (i in 0:(length(particle) - 1)) {
-                name <- paste0("Iter.", i)
-                s <- particle[[name]]$State
-                w <- particle[[name]]$Weight
-                if (dim(s)[1] > dim(s)[2]) {
-                    pos.x <- c(pos.x, sum(w * s[,1]))
-                    pos.y <- c(pos.y, sum(w * s[,2]))
-                } else {
-                    pos.x <- c(pos.x, sum(w * s[1,]))
-                    pos.y <- c(pos.y, sum(w * s[2,]))
-                }
-            }
-            tmp <- pf_cv(pf_cv.p, as.data.frame(cbind(pos.x, pos.y)))
-            plt.list[[pf_cv.p]] <- tmp$plt
-            dat <- rbind(dat, tmp$dat)
-        }
-    }
-
-    dat$Source <- factor(dat$Source, ordered = TRUE, levels = src.level)
-    plt <- qplot(x = Position.X, y = Position.Y, data = dat,
-        group = Group, color = Source, linetype= Source, geom = "path")
-    plt <- plt + ggtitle("pf_cv")
-
-    list(plot = plt, plot.list = plt.list)
+    .GlobalEnv$dat <- rbind(.GlobalEnv$dat, data.frame(
+            Position.X = sampler$pos.x,
+            Position.Y = sampler$pos.y,
+            Group = rep(filename, n),
+            Source = est))
 }
 
-dat <- read.table("pf_cv.txt", header = TRUE)
-dat$group = paste(dat$RNGSetType, dat$MatrixLayout)
-plt <- ggplot(dat)
-plt <- plt + aes(x = Error)
-plt <- plt + aes(group = group)
-plt <- plt + aes(color = RNGSetType)
-plt <- plt + aes(linetype = MatrixLayout)
-plt <- plt + geom_density()
-plt <- plt + scale_x_log10()
-plt <- plt + facet_grid(ResampleScheme ~ Backend, scale = "free_y")
+for (run in runs) {
+    pf_cv.txt <- paste0(run, ".txt")
+    if (file.exists(pf_cv.txt)) {
+        pf_cv(pf_cv.txt, read.table(pf_cv.txt, header = TRUE))
+    }
 
-pdf("pf_cv.pdf", width = 14.4, height = 9)
+    pf_cv.h5 <- paste0(run, ".h5")
+    if (file.exists(pf_cv.h5)) {
+        pf_cv.s <- paste(pf_cv.h5, "(Sampler)")
+        pf_cv(pf_cv.s, as.data.frame(h5read(pf_cv.h5, "Sampler")))
+
+        pf_cv.m <- paste(pf_cv.h5, "(Monitor)")
+        pf_cv(pf_cv.m, as.data.frame(h5read(pf_cv.h5, "Monitor")))
+
+        pf_cv.p <- paste(pf_cv.h5, "(Particle)")
+        particle <- h5read(pf_cv.h5, "Particle")
+        pos.x <- numeric()
+        pos.y <- numeric()
+        for (i in 0:(length(particle) - 1)) {
+            name <- paste0("Iter.", i)
+            s <- particle[[name]]$State
+            w <- particle[[name]]$Weight
+            if (dim(s)[1] > dim(s)[2]) {
+                pos.x <- c(pos.x, sum(w * s[,1]))
+                pos.y <- c(pos.y, sum(w * s[,2]))
+            } else {
+                pos.x <- c(pos.x, sum(w * s[1,]))
+                pos.y <- c(pos.y, sum(w * s[2,]))
+            }
+        }
+        pf_cv(pf_cv.p, as.data.frame(cbind(pos.x, pos.y)))
+    }
+}
+dat$Source <- factor(dat$Source, ordered = TRUE, levels = lvl)
+
+plt <- ggplot(dat)
+plt <- plt + aes(x = Position.X, y = Position.Y)
+plt <- plt + aes(group = Group, color = Source, linetype = Source)
+plt <- plt + geom_path()
 print(plt)
-est <- pf_cv_est()
-print(est$plot)
-for (p in est$plot.list) print(p)
+
+for (p in names(err.list)) {
+    e <- err.list[[p]]
+    if (e > 0.05) {
+        t <- paste(p, " (Error = ", e, ")")
+        print(plt %+% dat.list[[p]] + ggtitle(t))
+    }
+}
+
+##############################################################################
+
 garbage <- dev.off()
