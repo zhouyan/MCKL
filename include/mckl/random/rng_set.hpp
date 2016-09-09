@@ -37,7 +37,7 @@
 #include <mckl/random/seed.hpp>
 
 #if MCKL_HAS_TBB
-#include <tbb/combinable.h>
+#include <tbb/enumerable_thread_specific.h>
 #endif
 
 /// \brief Default RNG set type
@@ -64,9 +64,9 @@ class RNGSetScalar
     using rng_type = RNGType;
     using size_type = std::size_t;
 
-    explicit RNGSetScalar(size_type N = 0) : size_(N) { seed(); }
+    explicit RNGSetScalar(size_type = 0) : { seed(); }
 
-    size_type size() const { return size_; }
+    size_type size() const { return 1; }
 
     void resize(std::size_t) {}
 
@@ -115,17 +115,19 @@ class RNGSetVector
 
 #if MCKL_HAS_TBB
 
-/// \brief Thread-local storage RNG set using tbb::combinable
+/// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// \ingroup Random
-template <typename RNGType = RNG>
-class RNGSetTBB
+template <typename RNGType = RNG,
+    typename Alloc = ::tbb::cache_aligned_allocator<RNGType>,
+    ::tbb::ets_key_usage_type ETSKeyType = ::tbb::ets_no_key>
+class RNGSetTBBEnumerable
 {
     public:
     using rng_type = RNGType;
     using size_type = std::size_t;
 
-    explicit RNGSetTBB(size_type N = 0)
-        : size_(N), rng_([]() {
+    explicit RNGSetTBBEnumerable(size_type = 0)
+        : rng_([]() {
             rng_type rng;
             Seed::instance()(rng);
             return rng;
@@ -134,7 +136,7 @@ class RNGSetTBB
         seed();
     }
 
-    size_type size() const { return size_; }
+    size_type size() const { return rng_.size(); }
 
     void resize(std::size_t) {}
 
@@ -144,8 +146,22 @@ class RNGSetTBB
 
     private:
     std::size_t size_;
-    ::tbb::combinable<rng_type> rng_;
-}; // class RNGSetTBB
+    ::tbb::enumerable_thread_specific<rng_type, Alloc, ETSKeyType> rng_;
+}; // class RNGSetTBBEnumerable
+
+/// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
+/// without native TLS keys
+/// \ingroup Random
+template <typename RNGType = RNG>
+using RNGSetTBB = RNGSetTBBEnumerable<RNG,
+    ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_no_key>;
+
+/// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
+/// with native TLS keys
+/// \ingroup Random
+template <typename RNGType = RNG>
+using RNGSetTBBKPI = RNGSetTBBEnumerable<RNG,
+    ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_key_per_instance>;
 
 #endif // MCKL_HAS_TBB
 

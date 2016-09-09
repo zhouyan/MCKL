@@ -130,7 +130,7 @@ class SeedGenerator
 
         divisor_ = divisor;
         remainder_ = remainder;
-        max_ = std::numeric_limits<result_type>::max() / divisor;
+        max_ = maxs;
 
         set(seed_);
     }
