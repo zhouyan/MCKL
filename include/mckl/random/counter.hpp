@@ -237,6 +237,10 @@ class CounterEngine
 
     void seed(const key_type &key) { reset(key); }
 
+    key_type key() const { return generator_.key(); }
+
+    ctr_type ctr() const { return ctr_; }
+
     void key(const key_type &k) { reset(k); }
 
     void ctr(const ctr_type &c)

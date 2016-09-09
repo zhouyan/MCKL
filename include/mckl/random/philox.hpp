@@ -416,6 +416,8 @@ class PhiloxGenerator
 
     static constexpr std::size_t size() { return sizeof(T) * K; }
 
+    key_type key() const { return key_; }
+
     void reset(const key_type &key) { key_ = key; }
 
     template <typename ResultType>

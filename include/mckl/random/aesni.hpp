@@ -97,6 +97,8 @@ class AESNIGenerator
 
     static constexpr std::size_t size() { return Blocks * sizeof(__m128i); }
 
+    key_type key() const { return key_seq_.key(); }
+
     void reset(const key_type &key) { key_seq_.reset(key); }
 
     void enc(const ctr_type &ctr, ctr_type &buffer) const
@@ -591,6 +593,8 @@ class AESKeySeq
     public:
     using key_type = typename KeySeqGenerator::key_type;
 
+    key_type key() const { return KeySeqGenerator::key(key_seq_); }
+
     void reset(const key_type &key)
     {
         KeySeqGenerator generator;
@@ -661,6 +665,16 @@ class AES128KeySeqGenerator
     using key_type = std::array<std::uint64_t, 2>;
 
     template <std::size_t Rp1>
+    static key_type key(const std::array<__m128i, Rp1> &rk)
+    {
+        key_type key;
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
+
+        return key;
+    }
+
+    template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
         xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
@@ -706,9 +720,23 @@ class AES192KeySeqGenerator
     using key_type = std::array<std::uint64_t, 3>;
 
     template <std::size_t Rp1>
+    static key_type key(const std::array<__m128i, Rp1> &rk)
+    {
+        key_type key;
+        std::array<std::uint64_t, 2> tmp;
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(tmp.data()), std::get<1>(rk));
+        key.back() = tmp.front();
+
+        return key;
+    }
+
+    template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        std::array<std::uint64_t, 2> tmp = {{0, std::get<2>(key)}};
+        std::array<std::uint64_t, 2> tmp = {{std::get<2>(key), 0}};
         xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
         xmm7_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(tmp.data()));
         std::get<0>(rk) = xmm1_;
@@ -821,6 +849,18 @@ class AES256KeySeqGenerator
     using key_type = std::array<std::uint64_t, 4>;
 
     template <std::size_t Rp1>
+    static key_type key(std::array<__m128i, Rp1> &rk)
+    {
+        key_type key;
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(key.data() + 2), std::get<1>(rk));
+
+        return key;
+    }
+
+    template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
         xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
@@ -900,6 +940,14 @@ class ARSKeySeqImpl
     using key_type = std::array<std::uint64_t, 2>;
 
     ARSKeySeqImpl() : key_(_mm_setzero_si128()) {}
+
+    key_type key() const
+    {
+        key_type key;
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(key.data()), key_);
+
+        return key;
+    }
 
     void reset(const key_type &key)
     {

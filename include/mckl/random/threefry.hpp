@@ -468,6 +468,14 @@ class ThreefryGenerator
 
     static constexpr std::size_t size() { return sizeof(T) * K; }
 
+    key_type key() const
+    {
+        key_type key;
+        std::copy_n(par_.begin(), K, key.begin());
+
+        return key;
+    }
+
     void reset(const key_type &key)
     {
         std::copy(key.begin(), key.end(), par_.begin());

@@ -242,9 +242,10 @@ class PFCVEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
 }; // class PFCVEval
 
 template <typename T>
-inline double pf_cv_error(const mckl::Sampler<T> &sampler, std::size_t n,
+inline double pf_cv_error(const mckl::Sampler<T> &sampler,
     const mckl::Vector<double> &tx, const mckl::Vector<double> &ty)
 {
+    const std::size_t n = tx.size();
     mckl::Vector<double> rx(n);
     mckl::Vector<double> ry(n);
     sampler.monitor("pos").read_record(0, rx.data());
@@ -256,7 +257,7 @@ inline double pf_cv_error(const mckl::Sampler<T> &sampler, std::size_t n,
     mckl::add(n, rx.data(), ry.data(), rx.data());
     mckl::sqrt(n, rx.data(), rx.data());
 
-    return std::accumulate(rx.begin(), rx.end(), 0.0);
+    return std::accumulate(rx.begin(), rx.end(), 0.0) / n;
 }
 
 template <typename Backend, mckl::ResampleScheme Scheme,
@@ -334,7 +335,7 @@ inline void pf_cv_run(std::size_t N, std::size_t M)
         os << res << '\t';
         os << rc << '\t';
         os << rs << '\t';
-        os << pf_cv_error(sampler, n, tx, ty) << '\t';
+        os << pf_cv_error(sampler, tx, ty) << '\t';
         os << watch.seconds() << '\n';
     }
     os.close();
