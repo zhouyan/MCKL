@@ -101,9 +101,10 @@ output for |cis| and \emph{vice versa} for |abs| and |arg|.
 Without any third-party libraries, these functions do not provide performance
 advantage compared to simple loops. When \mkl is available, some functions can
 have substantial performance improvement when all input arguments are vectors
-of types |float| or |double|. The performance of vectorized random number
-generating introduced later in section~\ref{sec:Vectorized random number
-generating} heavily depends on these functions.
+of types |float| or |double|, or their complex counterparts. The performance of
+vectorized random number generating introduced later in
+section~\ref{sec:Vectorized random number generating} heavily depends on these
+functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{p{1.25in}Lp{1.25in}L}
@@ -254,7 +255,7 @@ generating} heavily depends on these functions.
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}
     \toprule
-    Function & Operation & Input data type\\
+    Function & Operation & Input data type \\
     \midrule
     \texttt{cosh(n, a, y)}  & $y = \cosh(a)$             & Real, Complex \\
     \texttt{sinh(n, a, y)}  & $y = \sinh(a)$             & Real, Complex \\
@@ -271,7 +272,7 @@ generating} heavily depends on these functions.
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}
     \toprule
-    Function & Operation & Input data type\\
+    Function & Operation & Input data type \\
     \midrule
     \texttt{erf(n, a, y)}     & $y = \mathrm{erf}(a)$  & Real \\
     \texttt{erfc(n, a, y)}    & $y = \mathrm{erfc}(a)$ & Real \\
@@ -288,7 +289,7 @@ generating} heavily depends on these functions.
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}
     \toprule
-    Function & Operation \\
+    Function & Operation & Input data type \\
     \midrule
     \texttt{floor(n, a, y)} & $y = \Floor{a}$                      & Real \\
     \texttt{ceil(n, a, y)}  & $y = \Ceil{a}$                       & Real \\
