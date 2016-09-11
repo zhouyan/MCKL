@@ -34,19 +34,19 @@ all : random_distribution random_rng_llvm random_rng_gnu random_rng_intel
 	./random_rng.pl
 
 random_distribution :
-	ninja -C ../../build/llvm-release-sys \
+	time ninja -C ../../build/llvm-release-sys \
 	    random_distribution_perf-check > random_distribution.txt
 
 random_rng_llvm :
-	ninja -C ../../build/llvm-release-sys \
+	time ninja -C ../../build/llvm-release-sys \
 	    random_rng-check > random_rng_llvm.txt
 
 random_rng_gnu :
-	ninja -C ../../build/gnu-release-sys \
+	time ninja -C ../../build/gnu-release-sys \
 	    random_rng-check > random_rng_gnu.txt
 
 random_rng_intel :
-	ninja -C ../../build/intel-release-sys \
+	time ninja -C ../../build/intel-release-sys \
 	    random_rng-check > random_rng_intel.txt
 
 clean :
