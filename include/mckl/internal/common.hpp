@@ -49,6 +49,7 @@
 #include <bitset>
 #include <cassert>
 #include <cmath>
+#include <complex>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
