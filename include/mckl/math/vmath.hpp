@@ -419,16 +419,16 @@ MCKL_DEFINE_MATH_VMATH_BVS(*, mul)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i\f$
 MCKL_DEFINE_MATH_VMATH_BSV(*, mul)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \overline{b_i}\f$
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}_i\f$
 MCKL_DEFINE_MATH_VMATH_2(internal::mulbyconj, mulbyconj)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \overline{b}\f$
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}\f$
 MCKL_DEFINE_MATH_VMATH_2VS(internal::mulbyconj, mulbyconj)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a \overline{b_i}\f$
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a \bar{b}_i\f$
 MCKL_DEFINE_MATH_VMATH_2SV(internal::mulbyconj, mulbyconj)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = \overline{a_i}\f$
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = \bar{a}_i\f$
 MCKL_DEFINE_MATH_VMATH_1(std::conj, conj)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
@@ -860,7 +860,7 @@ MCKL_DEFINE_MATH_VMATH_1(std::floor, floor)
 MCKL_DEFINE_MATH_VMATH_1(std::ceil, ceil)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
-/// \f$y_i = \mathrm{sgn}(a_i)\lfloor|a_i|\rfoor\f$
+/// \f$y_i = \mathrm{sgn}(a_i)\lfloor|a_i|\rfloor\f$
 MCKL_DEFINE_MATH_VMATH_1(std::trunc, trunc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute rounding

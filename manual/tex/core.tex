@@ -616,9 +616,9 @@ Sampler<T> &resample_method(
     ResampleScheme scheme, double threshold = resample_threshold_always());
 \end{verbatim}
 which uses a builtin resampling scheme of the library, listed in
-table~\ref{tab:Resample scheme}. See section~\ref{Algorithm (Resample)} for
-details of the algorithms. Alternatively, any evaluation object can be used for
-resampling,
+table~\ref{tab:Built-in resampling schemes}. See section~\ref{sec:Algorithm
+(Resample)} for details of the algorithms. Alternatively, any evaluation object
+can be used for resampling,
 \begin{verbatim}
 Sampler<T> &resample_method(
     const eval_type &res_eval, double threshold = resample_threshold_always());

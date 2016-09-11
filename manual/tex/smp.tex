@@ -451,26 +451,31 @@ for (auto idx : range)
 
 Special care needs to be taken when using the \tbb backend and |eval_range|
 together. The purpose of using it instead of |eval_each| is to process vectors
-as a whole or to only execute some costly operations only once.. For optimal
+as a whole or to only execute some costly operations only once. For optimal
 performance, the vectors cannot be too short. Otherwise, the performance will
-only be worse than using a loop. Therefore it is important to control the grain
-size. Therefore, it is recommended that if one does want to use |eval_range|,
-then one should also redefine the interface operator. For example,
+only be worse than using a loop. It is important to control the grain size.
+Therefore, it is recommended that if one does want to use |eval_range|, then
+one should also redefine the interface operator. For example,
 \begin{verbatim}
 class Eval : public SamplerEvalSMP<T>
 {
     public:
+    Eval(std::size_t G) : G_(G) {}
+
     void operator()(size_t iter, Particle<T> &particle)
     {
-        run(iter, particle, G);
+        run(iter, particle, G_);
     }
 
     void eval_range(size_t iter, const ParticleRang<T> &range);
+
+    private:
+    std::size_t G_
 };
 \end{verbatim}
 where $G$ is the grain size. Even though the grain size has no effect for
 backends other than \tbb at the moment, it is planned to provide similar
-functionality as \tbb for other backends in the near future.
+functionality as \tbb for other backends in the future.
 
 \section{Random number generating}
 \label{sec:Random number generating}
