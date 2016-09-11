@@ -40,12 +40,13 @@
 
 #include <algorithm>
 #include <cmath>
+#include <complex>
 
 #if MCKL_USE_MKL_VML
 
 #include <mkl_vml.h>
 
-#define MCKL_DEFINE_MATH_VMATH_VML_1(func, name)                              \
+#define MCKL_DEFINE_MATH_VMATH_VML_1R(func, name)                             \
     inline void name(std::size_t n, const float *a, float *y)                 \
     {                                                                         \
         internal::size_check<MKL_INT>(n, #name);                              \
@@ -58,7 +59,26 @@
         ::vd##func(static_cast<MKL_INT>(n), a, y);                            \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_VML_2(func, name)                              \
+#define MCKL_DEFINE_MATH_VMATH_VML_1C(func, name)                             \
+    inline void name(                                                         \
+        std::size_t n, const std::complex<float> *a, std::complex<float> *y)  \
+    {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
+        ::vc##func(static_cast<MKL_INT>(n),                                   \
+            reinterpret_cast<const ::MKL_Complex8 *>(a),                      \
+            reinterpret_cast<::MKL_Complex8 *>(y));                           \
+    }                                                                         \
+                                                                              \
+    inline void name(std::size_t n, const std::complex<double> *a,            \
+        std::complex<double> *y)                                              \
+    {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
+        ::vz##func(static_cast<MKL_INT>(n),                                   \
+            reinterpret_cast<const ::MKL_Complex16 *>(a),                     \
+            reinterpret_cast<::MKL_Complex16 *>(y));                          \
+    }
+
+#define MCKL_DEFINE_MATH_VMATH_VML_2R(func, name)                             \
     inline void name(std::size_t n, const float *a, const float *b, float *y) \
     {                                                                         \
         internal::size_check<MKL_INT>(n, #name);                              \
@@ -72,14 +92,68 @@
         ::vd##func(static_cast<MKL_INT>(n), a, b, y);                         \
     }
 
+#define MCKL_DEFINE_MATH_VMATH_VML_2C(func, name)                             \
+    inline void name(std::size_t n, const std::complex<float> *a,             \
+        const std::complex<float> *b, std::complex<float> *y)                 \
+    {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
+        ::vc##func(static_cast<MKL_INT>(n),                                   \
+            reinterpret_cast<const ::MKL_Complex8 *>(a),                      \
+            reinterpret_cast<const ::MKL_Complex8 *>(b),                      \
+            reinterpret_cast<::MKL_Complex8 *>(y));                           \
+    }                                                                         \
+                                                                              \
+    inline void name(std::size_t n, const std::complex<double> *a,            \
+        const std::complex<double> *b, std::complex<double> *y)               \
+    {                                                                         \
+        internal::size_check<MKL_INT>(n, #name);                              \
+        ::vz##func(static_cast<MKL_INT>(n),                                   \
+            reinterpret_cast<const ::MKL_Complex16 *>(a),                     \
+            reinterpret_cast<const ::MKL_Complex16 *>(b),                     \
+            reinterpret_cast<::MKL_Complex16 *>(y));                          \
+    }
+
 namespace mckl
 {
 
-MCKL_DEFINE_MATH_VMATH_VML_2(Add, add)
-MCKL_DEFINE_MATH_VMATH_VML_2(Sub, sub)
-MCKL_DEFINE_MATH_VMATH_VML_1(Sqr, sqr)
-MCKL_DEFINE_MATH_VMATH_VML_2(Mul, mul)
-MCKL_DEFINE_MATH_VMATH_VML_1(Abs, abs)
+MCKL_DEFINE_MATH_VMATH_VML_2R(Add, add)
+MCKL_DEFINE_MATH_VMATH_VML_2C(Add, add)
+MCKL_DEFINE_MATH_VMATH_VML_2R(Sub, sub)
+MCKL_DEFINE_MATH_VMATH_VML_2C(Sub, sub)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Sqr, sqr)
+MCKL_DEFINE_MATH_VMATH_VML_2R(Mul, mul)
+MCKL_DEFINE_MATH_VMATH_VML_2C(Mul, mul)
+MCKL_DEFINE_MATH_VMATH_VML_2C(MulByConj, mulbyconj)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Conj, conj)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Abs, abs)
+
+inline void abs(std::size_t n, const std::complex<float> *a, float *y)
+{
+    internal::size_check<MKL_INT>(n, "abs");
+    ::vcAbs(static_cast<MKL_INT>(n),
+        reinterpret_cast<const ::MKL_Complex8 *>(a), y);
+}
+
+inline void abs(std::size_t n, const std::complex<double> *a, double *y)
+{
+    internal::size_check<MKL_INT>(n, "abs");
+    ::vzAbs(static_cast<MKL_INT>(n),
+        reinterpret_cast<const ::MKL_Complex16 *>(a), y);
+}
+
+inline void arg(std::size_t n, const std::complex<float> *a, float *y)
+{
+    internal::size_check<MKL_INT>(n, "arg");
+    ::vcArg(static_cast<MKL_INT>(n),
+        reinterpret_cast<const ::MKL_Complex8 *>(a), y);
+}
+
+inline void arg(std::size_t n, const std::complex<double> *a, double *y)
+{
+    internal::size_check<MKL_INT>(n, "arg");
+    ::vzArg(static_cast<MKL_INT>(n),
+        reinterpret_cast<const ::MKL_Complex16 *>(a), y);
+}
 
 inline void linear_frac(std::size_t n, const float *a, const float *b,
     float beta_a, float beta_b, float mu_a, float mu_b, float *y)
@@ -97,15 +171,18 @@ inline void linear_frac(std::size_t n, const double *a, const double *b,
         static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
 }
 
-MCKL_DEFINE_MATH_VMATH_VML_1(Inv, inv)
-MCKL_DEFINE_MATH_VMATH_VML_2(Div, div)
-MCKL_DEFINE_MATH_VMATH_VML_1(Sqrt, sqrt)
-MCKL_DEFINE_MATH_VMATH_VML_1(InvSqrt, invsqrt)
-MCKL_DEFINE_MATH_VMATH_VML_1(Cbrt, cbrt)
-MCKL_DEFINE_MATH_VMATH_VML_1(InvCbrt, invcbrt)
-MCKL_DEFINE_MATH_VMATH_VML_1(Pow2o3, pow2o3)
-MCKL_DEFINE_MATH_VMATH_VML_1(Pow3o2, pow3o2)
-MCKL_DEFINE_MATH_VMATH_VML_2(Pow, pow)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Inv, inv)
+MCKL_DEFINE_MATH_VMATH_VML_2R(Div, div)
+MCKL_DEFINE_MATH_VMATH_VML_2C(Div, div)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Sqrt, sqrt)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Sqrt, sqrt)
+MCKL_DEFINE_MATH_VMATH_VML_1R(InvSqrt, invsqrt)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Cbrt, cbrt)
+MCKL_DEFINE_MATH_VMATH_VML_1R(InvCbrt, invcbrt)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Pow2o3, pow2o3)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Pow3o2, pow3o2)
+MCKL_DEFINE_MATH_VMATH_VML_2R(Pow, pow)
+MCKL_DEFINE_MATH_VMATH_VML_2C(Pow, pow)
 
 inline void pow(std::size_t n, const float *a, float b, float *y)
 {
@@ -119,16 +196,41 @@ inline void pow(std::size_t n, const double *a, double b, double *y)
     ::vdPowx(static_cast<MKL_INT>(n), a, b, y);
 }
 
-MCKL_DEFINE_MATH_VMATH_VML_2(Hypot, hypot)
+inline void pow(std::size_t n, const std::complex<float> *a,
+    std::complex<float> b, std::complex<float> *y)
+{
+    internal::size_check<MKL_INT>(n, "pow");
+    ::MKL_Complex8 c = {b.real(), b.imag()};
+    ::vcPowx(static_cast<MKL_INT>(n),
+        reinterpret_cast<const ::MKL_Complex8 *>(a), c,
+        reinterpret_cast<::MKL_Complex8 *>(y));
+}
 
-MCKL_DEFINE_MATH_VMATH_VML_1(Exp, exp)
-MCKL_DEFINE_MATH_VMATH_VML_1(Expm1, expm1)
-MCKL_DEFINE_MATH_VMATH_VML_1(Ln, log)
-MCKL_DEFINE_MATH_VMATH_VML_1(Log10, log10)
-MCKL_DEFINE_MATH_VMATH_VML_1(Log1p, log1p)
+inline void pow(std::size_t n, const std::complex<double> *a,
+    std::complex<double> b, std::complex<double> *y)
+{
+    internal::size_check<MKL_INT>(n, "pow");
+    ::MKL_Complex16 c = {b.real(), b.imag()};
+    ::vzPowx(static_cast<MKL_INT>(n),
+        reinterpret_cast<const ::MKL_Complex16 *>(a), c,
+        reinterpret_cast<::MKL_Complex16 *>(y));
+}
 
-MCKL_DEFINE_MATH_VMATH_VML_1(Cos, cos)
-MCKL_DEFINE_MATH_VMATH_VML_1(Sin, sin)
+MCKL_DEFINE_MATH_VMATH_VML_2R(Hypot, hypot)
+
+MCKL_DEFINE_MATH_VMATH_VML_1R(Exp, exp)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Exp, exp)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Expm1, expm1)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Ln, log)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Ln, log)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Log10, log10)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Log10, log10)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Log1p, log1p)
+
+MCKL_DEFINE_MATH_VMATH_VML_1R(Cos, cos)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Cos, cos)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Sin, sin)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Sin, sin)
 
 inline void sincos(std::size_t n, const float *a, float *y, float *z)
 {
@@ -142,32 +244,55 @@ inline void sincos(std::size_t n, const double *a, double *y, double *z)
     ::vdSinCos(static_cast<MKL_INT>(n), a, y, z);
 }
 
-MCKL_DEFINE_MATH_VMATH_VML_1(Tan, tan)
-MCKL_DEFINE_MATH_VMATH_VML_1(Acos, acos)
-MCKL_DEFINE_MATH_VMATH_VML_1(Asin, asin)
-MCKL_DEFINE_MATH_VMATH_VML_1(Atan, atan)
-MCKL_DEFINE_MATH_VMATH_VML_2(Atan2, atan2)
+inline void cis(std::size_t n, const float *a, std::complex<float> *y)
+{
+    internal::size_check<MKL_INT>(n, "cis");
+    ::vcCIS(static_cast<MKL_INT>(n), a, reinterpret_cast<::MKL_Complex8 *>(y));
+}
 
-MCKL_DEFINE_MATH_VMATH_VML_1(Cosh, cosh)
-MCKL_DEFINE_MATH_VMATH_VML_1(Sinh, sinh)
-MCKL_DEFINE_MATH_VMATH_VML_1(Tanh, tanh)
-MCKL_DEFINE_MATH_VMATH_VML_1(Acosh, acosh)
-MCKL_DEFINE_MATH_VMATH_VML_1(Asinh, asinh)
-MCKL_DEFINE_MATH_VMATH_VML_1(Atanh, atanh)
+inline void cis(std::size_t n, const double *a, std::complex<double> *y)
+{
+    internal::size_check<MKL_INT>(n, "cis");
+    ::vzCIS(
+        static_cast<MKL_INT>(n), a, reinterpret_cast<::MKL_Complex16 *>(y));
+}
 
-MCKL_DEFINE_MATH_VMATH_VML_1(Erf, erf)
-MCKL_DEFINE_MATH_VMATH_VML_1(Erfc, erfc)
-MCKL_DEFINE_MATH_VMATH_VML_1(CdfNorm, cdfnorm)
-MCKL_DEFINE_MATH_VMATH_VML_1(ErfInv, erfinv)
-MCKL_DEFINE_MATH_VMATH_VML_1(ErfcInv, erfcinv)
-MCKL_DEFINE_MATH_VMATH_VML_1(CdfNormInv, cdfnorminv)
-MCKL_DEFINE_MATH_VMATH_VML_1(LGamma, lgamma)
-MCKL_DEFINE_MATH_VMATH_VML_1(TGamma, tgamma)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Tan, tan)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Tan, tan)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Acos, acos)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Acos, acos)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Asin, asin)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Asin, asin)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Atan, atan)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Atan, atan)
+MCKL_DEFINE_MATH_VMATH_VML_2R(Atan2, atan2)
 
-MCKL_DEFINE_MATH_VMATH_VML_1(Floor, floor)
-MCKL_DEFINE_MATH_VMATH_VML_1(Ceil, ceil)
-MCKL_DEFINE_MATH_VMATH_VML_1(Trunc, trunc)
-MCKL_DEFINE_MATH_VMATH_VML_1(Round, round)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Cosh, cosh)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Cosh, cosh)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Sinh, sinh)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Sinh, sinh)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Tanh, tanh)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Tanh, tanh)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Acosh, acosh)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Acosh, acosh)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Asinh, asinh)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Asinh, asinh)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Atanh, atanh)
+MCKL_DEFINE_MATH_VMATH_VML_1C(Atanh, atanh)
+
+MCKL_DEFINE_MATH_VMATH_VML_1R(Erf, erf)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Erfc, erfc)
+MCKL_DEFINE_MATH_VMATH_VML_1R(CdfNorm, cdfnorm)
+MCKL_DEFINE_MATH_VMATH_VML_1R(ErfInv, erfinv)
+MCKL_DEFINE_MATH_VMATH_VML_1R(ErfcInv, erfcinv)
+MCKL_DEFINE_MATH_VMATH_VML_1R(CdfNormInv, cdfnorminv)
+MCKL_DEFINE_MATH_VMATH_VML_1R(LGamma, lgamma)
+MCKL_DEFINE_MATH_VMATH_VML_1R(TGamma, tgamma)
+
+MCKL_DEFINE_MATH_VMATH_VML_1R(Floor, floor)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Ceil, ceil)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Trunc, trunc)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Round, round)
 
 inline void modf(std::size_t n, const float *a, float *y, float *z)
 {
@@ -244,6 +369,17 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 namespace mckl
 {
 
+namespace internal
+{
+
+template <typename T>
+inline T mulbyconj(T a, T b)
+{
+    return a * std::conj(b);
+}
+
+} // namespace mckl::internal
+
 /// \defgroup vArithmetic Arithmetic functions
 /// \ingroup vMath
 /// @{
@@ -283,8 +419,36 @@ MCKL_DEFINE_MATH_VMATH_BVS(*, mul)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i\f$
 MCKL_DEFINE_MATH_VMATH_BSV(*, mul)
 
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \overline{b_i}\f$
+MCKL_DEFINE_MATH_VMATH_2(internal::mulbyconj, mulbyconj)
+
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \overline{b}\f$
+MCKL_DEFINE_MATH_VMATH_2VS(internal::mulbyconj, mulbyconj)
+
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a \overline{b_i}\f$
+MCKL_DEFINE_MATH_VMATH_2SV(internal::mulbyconj, mulbyconj)
+
+/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = \overline{a_i}\f$
+MCKL_DEFINE_MATH_VMATH_1(std::conj, conj)
+
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
 MCKL_DEFINE_MATH_VMATH_1(std::abs, abs)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
+template <typename T>
+inline void abs(std::size_t n, const std::complex<T> *a, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::abs(a[i]);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arg(a_i)\f$
+template <typename T>
+inline void arg(std::size_t n, const std::complex<T> *a, T *y)
+{
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::arg(a[i]);
+}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = (\beta_a a_i + \mu_a) / (\beta_b b_i + \mu_b)\f$
@@ -548,6 +712,29 @@ inline void sincos(std::size_t n, const T *a, T *y, T *z)
     }
     sin(l, a, y);
     cos(l, a, z);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cos(a_i) + i\sin(a_i)\f$
+template <typename T>
+inline void cis(std::size_t n, const T *a, std::complex<T> *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    alignas(32) T s[k];
+    alignas(32) T c[k];
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        sincos(k, a, s, c);
+        for (std::size_t j = 0; j != k; ++j) {
+            y[j].real() = c[j];
+            y[j].imag() = s[j];
+        }
+    }
+    sincos(l, a, s, c);
+    for (std::size_t j = 0; j != l; ++j) {
+        y[j].real() = c[j];
+        y[j].imag() = s[j];
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$
