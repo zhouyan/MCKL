@@ -47,7 +47,7 @@ my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh Stable);
 my @nomkl = qw(Arcsine Pareto Stable);
 
 my %distribution;
-my %cpE;
+my %cpe;
 my $txt;
 open my $txtfile, '<', 'random_distribution.txt';
 while (<$txtfile>) {
@@ -59,34 +59,34 @@ while (<$txtfile>) {
         $name =~ s/_/\\_/g;
         $name = '\texttt{' . $name . "}\n";
         my $basename = $1;
-        my $cpE;
+        my $cpe;
         if ("@nostd" =~ /$basename/) {
             shift @record;
-            $cpE .= sprintf ' & %-4s', '--';
+            $cpe .= sprintf ' & %-4s', '--';
         } else {
-            $cpE .= &format(shift @record);
+            $cpe .= &format(shift @record);
         }
-        $cpE .= &format(shift @record);
-        $cpE .= &format(shift @record);
+        $cpe .= &format(shift @record);
+        $cpe .= &format(shift @record);
         if ("@nomkl" =~ /$basename/) {
             shift @record;
-            $cpE .= sprintf ' & %-4s', '--';
+            $cpe .= sprintf ' & %-4s', '--';
         } else {
-            $cpE .= &format(shift @record);
+            $cpe .= &format(shift @record);
         }
-        $cpE .= "\n";
+        $cpe .= "\n";
         if ("@inverse" =~ /$basename/) {
             $distribution{'inverse'} .= $name;
-            $cpE{'inverse'} .= $cpE;
+            $cpe{'inverse'} .= $cpe;
         } elsif ("@int" =~ /$basename/) {
             $distribution{'int'} .= $name;
-            $cpE{'int'} .= $cpE;
+            $cpe{'int'} .= $cpe;
         } elsif ("@normal" =~ /$basename/) {
             $distribution{'normal'} .= $name;
-            $cpE{'normal'} .= $cpE;
+            $cpe{'normal'} .= $cpe;
         } else {
             $distribution{$basename} .= $name;
-            $cpE{$basename} .= $cpE;
+            $cpe{$basename} .= $cpe;
         }
     }
 }
@@ -95,7 +95,7 @@ print $txtfile $txt;
 
 while (my ($basename, $name) = each %distribution) {
     my @dist = split "\n", $distribution{$basename};
-    my @cpE = split "\n", $cpE{$basename};
+    my @cpe = split "\n", $cpe{$basename};
     my $wid = 0;
     foreach (@dist) {
         if ($wid < length($_)) {
@@ -115,7 +115,7 @@ while (my ($basename, $name) = each %distribution) {
     foreach (@dist) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $dist[$index];
-        $table .= $cpE[$index];
+        $table .= $cpe[$index];
         $table .= " \\\\\n";
         $index++;
     }

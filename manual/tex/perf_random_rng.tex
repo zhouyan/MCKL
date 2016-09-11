@@ -34,13 +34,13 @@
 
 The performance of \rng{}s in sections~\ref{sec:Counter-based RNG}
 to~\ref{sec:Non-deterministic RNG} are measured in single core cycles per byte
-(cpB). The processor used is Intel Core i7-4960\textsc{hq}. The operating
-system is Mac OS X (version~10.11.4).
+(\cpb). The processor used is Intel Core i7-4960\textsc{hq}. The operating
+system is Mac OS X (version~10.11.6).
 
 Three compilers are tested. The \llvm clang (version Apple~7.3.0), the \gnu
-\gcc (version~5.3) and the Intel \cpp compiler (version~2016 update~3). They
-are labeled ``\llvm'', ``\gcc'', and ``\textsc{intel}'', respectively, in
-tables below.
+\gcc (version~6.2.0) and the Intel \cpp compiler (version~17.0.0). They are
+labeled ``\llvm'', ``\gnu'', and ``\textsc{intel}'', respectively, in tables
+below.
 
 Two usage cases of \rng{}s are considered. The first is generating random
 integers within a loop,
@@ -56,7 +56,7 @@ rand(rng, ubits, n, r.data());
 In both cases, we repeat the simulations 100 times, each time with the number
 of elements $n$ chosen randomly between 5,000 and 10,000. The total number of
 cycles of the 100 simulations are recorded, and then divided by the total
-number of bytes generated. This gives the performance measurement in cpB. This
+number of bytes generated. This gives the performance measurement in \cpb. This
 experiment is repeated ten times, and the best results are shown. The two cases
 are labeled ``\textsc{loop}` and ``\textsc{batch}'', respectively, in the
 tables below.

@@ -29,22 +29,25 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-all : random_distribution random_rng_clang random_rng_gcc random_rng_intel
+all : random_distribution random_rng_llvm random_rng_gnu random_rng_intel
 	./random_distribution.pl
 	./random_rng.pl
 
 random_distribution :
-	ninja -C ../../build/clang-Release random_distribution_perf-check \
-	    > random_distribution.txt
+	ninja -C ../../build/llvm-release-sys \
+	    random_distribution_perf-check > random_distribution.txt
 
-random_rng_clang :
-	ninja -C ../../build/clang-Release random_rng-check > random_rng_clang.txt
+random_rng_llvm :
+	ninja -C ../../build/llvm-release-sys \
+	    random_rng-check > random_rng_llvm.txt
 
-random_rng_gcc :
-	ninja -C ../../build/gcc-Release random_rng-check > random_rng_gcc.txt
+random_rng_gnu :
+	ninja -C ../../build/gnu-release-sys \
+	    random_rng-check > random_rng_gnu.txt
 
 random_rng_intel :
-	ninja -C ../../build/intel-Release random_rng-check > random_rng_intel.txt
+	ninja -C ../../build/intel-release-sys \
+	    random_rng-check > random_rng_intel.txt
 
 clean :
 	rm -f *.tex

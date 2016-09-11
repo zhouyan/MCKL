@@ -40,15 +40,15 @@ ranlux48_base ranlux24 ranlux48 knuth_b);
 
 my @rngs = qw(STD Philox Threefry AES128 AES192 AES256 ARS RDRAND MKL);
 
-my @clang_txt = &read('clang');
-my @gcc_txt = &read('gcc');
+my @llvm_txt = &read('llvm');
+my @gnu_txt = &read('gnu');
 my @intel_txt = &read('intel');
 
 foreach (@rngs) {
     open my $texfile, '>', "random_rng_\L$_.tex";
     print $texfile &table(
-        &filter($_, @clang_txt),
-        &filter($_, @gcc_txt),
+        &filter($_, @llvm_txt),
+        &filter($_, @gnu_txt),
         &filter($_, @intel_txt));
 }
 
@@ -66,7 +66,7 @@ sub filter
     foreach (@_) {
         next if (!/Passed|Failed/);
 
-        my ($name, $cpB1, $cpB2) = (split)[0, 5, 6];
+        my ($name, $cpb1, $cpb2) = (split)[0, 5, 6];
         if ($rng eq 'STD') {
             next unless "@std" =~ /$name/;
         } elsif ($rng eq 'MKL') {
@@ -77,8 +77,8 @@ sub filter
         }
 
         $record .= $name . ' ';
-        $record .= $cpB1 . ' ';
-        $record .= $cpB2 . "\n";
+        $record .= $cpb1 . ' ';
+        $record .= $cpb2 . "\n";
     }
     $record
 }
@@ -86,8 +86,8 @@ sub filter
 sub table
 {
     my @name;
-    my @cpB1;
-    my @cpB2;
+    my @cpb1;
+    my @cpb2;
     my $wid = 0;
     foreach (@_) {
         my @lines = split "\n", $_;
@@ -97,8 +97,8 @@ sub table
             my $name = $record[0];
             $name =~ s/_/\\_/g;
             $name[$index] = '\texttt{' . $name . '}';
-            $cpB1[$index] .= &format($record[1]);
-            $cpB2[$index] .= &format($record[2]);
+            $cpb1[$index] .= &format($record[1]);
+            $cpb2[$index] .= &format($record[2]);
             if ($wid < length($name[-1])) {
                 $wid = length($name[-1]);
             }
@@ -116,16 +116,16 @@ sub table
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
     $table .= ' ' x 2 . '\rng';
-    $table .= ' & \llvm & \gcc & \textsc{intel}';
-    $table .= ' & \llvm & \gcc & \textsc{intel}';
+    $table .= ' & \llvm & \gnu & \textsc{intel}';
+    $table .= ' & \llvm & \gnu & \textsc{intel}';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
     foreach (@name) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $name[$index];
-        $table .= $cpB1[$index];
-        $table .= $cpB2[$index];
+        $table .= $cpb1[$index];
+        $table .= $cpb2[$index];
         $table .= " \\\\\n";
         $index++;
     }

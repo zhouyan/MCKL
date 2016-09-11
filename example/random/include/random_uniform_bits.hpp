@@ -105,8 +105,8 @@ inline void random_uniform_bits(std::size_t N, std::size_t M, int, char **)
     std::cout << std::setw(swid) << std::right << "U";
     std::cout << std::setw(twid) << std::right << "GB/s (Loop)";
     std::cout << std::setw(twid) << std::right << "GB/s (Batch)";
-    std::cout << std::setw(twid) << std::right << "cpB (Loop)";
-    std::cout << std::setw(twid) << std::right << "cpB (Batch)";
+    std::cout << std::setw(twid) << std::right << "CPB (Loop)";
+    std::cout << std::setw(twid) << std::right << "CPB (Batch)";
     std::cout << std::setw(twid) << std::right << "Deterministics";
     std::cout << std::endl;
 
