@@ -201,6 +201,22 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
             y[i] = func(a[i], b[i]);                                          \
     }
 
+#define MCKL_DEFINE_MATH_VMATH_2VS(func, name)                                \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, const T *a, T b, T *y)                    \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a[i], b);                                             \
+    }
+
+#define MCKL_DEFINE_MATH_VMATH_2SV(func, name)                                \
+    template <typename T>                                                     \
+    inline void name(std::size_t n, T a, const T *b, T *y)                    \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = func(a, b[i]);                                             \
+    }
+
 #define MCKL_DEFINE_MATH_VMATH_B(op, name)                                    \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, const T *b, T *y)             \
@@ -209,7 +225,7 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
             y[i] = a[i] op b[i];                                              \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_VS(op, name)                                   \
+#define MCKL_DEFINE_MATH_VMATH_BVS(op, name)                                  \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, T b, T *y)                    \
     {                                                                         \
@@ -217,7 +233,7 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
             y[i] = a[i] op b;                                                 \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_SV(op, name)                                   \
+#define MCKL_DEFINE_MATH_VMATH_BSV(op, name)                                  \
     template <typename T>                                                     \
     inline void name(std::size_t n, T a, const T *b, T *y)                    \
     {                                                                         \
@@ -236,19 +252,19 @@ namespace mckl
 MCKL_DEFINE_MATH_VMATH_B(+, add)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b\f$
-MCKL_DEFINE_MATH_VMATH_VS(+, add)
+MCKL_DEFINE_MATH_VMATH_BVS(+, add)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a + b_i\f$
-MCKL_DEFINE_MATH_VMATH_SV(+, add)
+MCKL_DEFINE_MATH_VMATH_BSV(+, add)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b_i\f$
 MCKL_DEFINE_MATH_VMATH_B(-, sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b\f$
-MCKL_DEFINE_MATH_VMATH_VS(-, sub)
+MCKL_DEFINE_MATH_VMATH_BVS(-, sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a - b_i\f$
-MCKL_DEFINE_MATH_VMATH_SV(-, sub)
+MCKL_DEFINE_MATH_VMATH_BSV(-, sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^2\f$
 template <typename T>
@@ -262,10 +278,10 @@ inline void sqr(std::size_t n, const T *a, T *y)
 MCKL_DEFINE_MATH_VMATH_B(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b\f$
-MCKL_DEFINE_MATH_VMATH_VS(*, mul)
+MCKL_DEFINE_MATH_VMATH_BVS(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i\f$
-MCKL_DEFINE_MATH_VMATH_SV(*, mul)
+MCKL_DEFINE_MATH_VMATH_BSV(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
 MCKL_DEFINE_MATH_VMATH_1(std::abs, abs)
@@ -388,10 +404,10 @@ inline void inv(std::size_t n, const T *a, T *y)
 MCKL_DEFINE_MATH_VMATH_B(/, div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b\f$
-MCKL_DEFINE_MATH_VMATH_VS(/, div)
+MCKL_DEFINE_MATH_VMATH_BVS(/, div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a / b_i\f$
-MCKL_DEFINE_MATH_VMATH_SV(/, div)
+MCKL_DEFINE_MATH_VMATH_BSV(/, div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i}\f$
 MCKL_DEFINE_MATH_VMATH_1(std::sqrt, sqrt)
@@ -404,11 +420,11 @@ inline void invsqrt(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        sqrt(k, a, y);
-        inv(k, y, y);
+        inv(k, a, y);
+        sqrt(k, y, y);
     }
-    sqrt(l, a, y);
-    inv(l, y, y);
+    inv(l, a, y);
+    sqrt(l, y, y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
@@ -465,15 +481,19 @@ inline void pow3o2(std::size_t n, const T *a, T *y)
 MCKL_DEFINE_MATH_VMATH_2(std::pow, pow)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^b\f$
-template <typename T>
-inline void pow(std::size_t n, const T *a, T b, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::pow(a[i], b);
-}
+MCKL_DEFINE_MATH_VMATH_2VS(std::pow, pow)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a^{b_i}\f$
+MCKL_DEFINE_MATH_VMATH_2SV(std::pow, pow)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
 MCKL_DEFINE_MATH_VMATH_2(std::hypot, hypot)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b^2}\f$
+MCKL_DEFINE_MATH_VMATH_2VS(std::hypot, hypot)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a^2 + b_i^2}\f$
+MCKL_DEFINE_MATH_VMATH_2SV(std::hypot, hypot)
 
 /// @} vPower
 
@@ -486,21 +506,6 @@ MCKL_DEFINE_MATH_VMATH_1(std::exp, exp)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 2^{a_i}\f$
 MCKL_DEFINE_MATH_VMATH_1(std::exp2, exp2)
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 10^{a_i}\f$
-template <typename T>
-inline void exp10(std::size_t n, const T *a, T *y)
-{
-    const std::size_t k = 1024;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        mul(k, const_ln_10<T>(), a, y);
-        exp(k, y, y);
-    }
-    mul(l, const_ln_10<T>(), a, y);
-    exp(l, y, y);
-}
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
 MCKL_DEFINE_MATH_VMATH_1(std::expm1, expm1)
@@ -560,6 +565,14 @@ MCKL_DEFINE_MATH_VMATH_1(std::atan, atan)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b_i)\f$ with
 /// signs to determine the quadrant
 MCKL_DEFINE_MATH_VMATH_2(std::atan2, atan2)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b)\f$ with
+/// signs to determine the quadrant
+MCKL_DEFINE_MATH_VMATH_2VS(std::atan2, atan2)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a / b_i)\f$ with
+/// signs to determine the quadrant
+MCKL_DEFINE_MATH_VMATH_2SV(std::atan2, atan2)
 
 /// @} vTrigonometric
 
