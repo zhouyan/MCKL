@@ -49,17 +49,24 @@ namespace mckl
 ///
 /// \details
 /// The sequence of seeds are belongs to the equivalent class \f$s \mod D
-/// \equiv R\f$ where \f$D > 0\f$, \f$R \ge 0\f$. The defaults are \f$1\f$ and
-/// \f$0\f$ respectively. Each time `get()` is called, a new seed is returned.
+/// \equiv R\f$ where \f$D > 0\f$, \f$R \ge 0\f$. The defaults are \f$D = 1\f$
+/// and \f$R = 0\f$. Each time `get()` is called, a new seed is returned.
 ///
 /// The method `operator()(RNGType &rng)` is equivalent to
 /// `rng.seed(static_cast<typename RNGType::result_type>(get()))`.
+///
+/// \note
+/// If \f$D = 1\f$ (and \f$R = 0\f$), then there will be exactly two seeds
+/// equal
+/// to `1` in any sequence of length \f$2^N\f$, where \f$N\f$ is the number of
+/// digits in the unsigned integer type. They are either one at the beginning
+/// and one at the end, or consecutive.
 template <typename ID, typename ResultType = MCKL_SEED_RESULT_TYPE>
 class SeedGenerator
 {
     static_assert(std::is_unsigned<ResultType>::value,
-        "**SeedGenerator** USED WITH ResultType OTHER THAN UNSIGEND INTEGER "
-        "TYPES");
+        "**SeedGenerator** used with ResultType other than unsigned integer "
+        "types");
 
     public:
     using result_type = ResultType;
@@ -119,14 +126,14 @@ class SeedGenerator
     void modulo(result_type divisor, result_type remainder)
     {
         runtime_assert(divisor > remainder,
-            "**SeedGenerator::modulo** the "
-            "remainder is not smaller than "
-            "the divisor");
+            "**SeedGenerator::modulo** the remainder is not smaller than the "
+            "divisor");
 
-        result_type maxs = std::numeric_limits<result_type>::max() / divisor;
+        result_type maxs =
+            (std::numeric_limits<result_type>::max() - remainder) / divisor;
         runtime_assert(maxs > 1,
-            "**SeedGenerator::modulo** the maximum of "
-            "the internal seed will be no larger than 1");
+            "**SeedGenerator::modulo** the maximum of the internal seed will "
+            "be no larger than 1");
 
         divisor_ = divisor;
         remainder_ = remainder;
