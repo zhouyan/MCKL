@@ -291,13 +291,14 @@ functions.
     \toprule
     Function & Operation & Input data type \\
     \midrule
-    \texttt{floor(n, a, y)} & $y = \Floor{a}$                      & Real \\
-    \texttt{ceil(n, a, y)}  & $y = \Ceil{a}$                       & Real \\
-    \texttt{trunc(n, a, y)} & $y = \mathrm{sgn}(a)\Floor{\Abs{a}}$ & Real \\
-    \texttt{round(n, a, y)} & $y = \text{nearest integer of }a$    & Real \\
+    \texttt{floor(n, a, y)} & $y = \Floor{a}$                       & Real \\
+    \texttt{ceil(n, a, y)}  & $y = \Ceil{a}$                        & Real \\
+    \texttt{trunc(n, a, y)} & $y = \mathrm{sgn}(a)\Floor{\Abs{a}}$  & Real \\
+    \texttt{round(n, a, y)} & $y = \text{nearest integer of }a$     & Real \\
+    \texttt{nearbyint(n, a, y)} & $y = \text{nearest integer of }a$ & Real \\
+    \texttt{rint(n, a, y)}  & $y = \text{nearest integer of }a$     & Real \\
     \texttt{modf(n, a, y, z)} &
-    $y = \mathrm{sign}(a)\Floor{\Abs{a}}$,
-    $z = \mathrm{sign}(a)\Abs{a - y}$ & Real \\
+    $y = \mathrm{sign}(a)\Floor{\Abs{a}}$, $z = a - y$ & Real \\
     \bottomrule
   \end{tabularx}
   \caption{Rounding functions}

@@ -293,6 +293,8 @@ MCKL_DEFINE_MATH_VMATH_VML_1R(Floor, floor)
 MCKL_DEFINE_MATH_VMATH_VML_1R(Ceil, ceil)
 MCKL_DEFINE_MATH_VMATH_VML_1R(Trunc, trunc)
 MCKL_DEFINE_MATH_VMATH_VML_1R(Round, round)
+MCKL_DEFINE_MATH_VMATH_VML_1R(NearbyInt, nearbyint)
+MCKL_DEFINE_MATH_VMATH_VML_1R(Rint, rint)
 
 inline void modf(std::size_t n, const float *a, float *y, float *z)
 {
@@ -863,10 +865,19 @@ MCKL_DEFINE_MATH_VMATH_1(std::ceil, ceil)
 /// \f$y_i = \mathrm{sgn}(a_i)\lfloor|a_i|\rfloor\f$
 MCKL_DEFINE_MATH_VMATH_1(std::trunc, trunc)
 
-/// \brief For \f$i=1,\ldots,n\f$, compute rounding
+/// \brief For \f$i=1,\ldots,n\f$, compute the nearest integers, rounding away
+/// from zero
 MCKL_DEFINE_MATH_VMATH_1(std::round, round)
 
-/// \brief For \f$i=1,\ldots,n\f$, compute integeral and fraction parts
+/// \brief For \f$i=1,\ldots,n\f$, compute the nearest integers, using the
+/// current rounding mode
+MCKL_DEFINE_MATH_VMATH_1(std::nearbyint, nearbyint)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute the nearest integers, using the
+/// current rounding mode
+MCKL_DEFINE_MATH_VMATH_1(std::rint, rint)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute the integeral and fraction parts
 template <typename T>
 inline void modf(std::size_t n, const T *a, T *y, T *z)
 {
