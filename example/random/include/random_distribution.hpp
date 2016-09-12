@@ -1302,7 +1302,7 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     random_distribution_pval(chi2, ksad, pval);
 
 #if MCKL_HAS_MKL
-    mckl::MKL_SFMT19937 random_mkl;
+    mckl::MKL_MT2203 random_mkl;
     for (std::size_t i = 0; i != M; ++i) {
         mckl::rand(random_mkl, dist_mckl, N, r.data());
         chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);

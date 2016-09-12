@@ -41,7 +41,7 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
     mckl::RNG rng;
     RNG01<mckl::RNG> rng01;
 #if MCKL_HAS_MKL
-    mckl::MKL_SFMT19937 random_mkl;
+    mckl::MKL_MT2203 random_mkl;
 #endif
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
     MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));

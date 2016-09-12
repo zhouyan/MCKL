@@ -61,9 +61,9 @@ For all the three above, the \rng is |ARSx8| (section~\ref{sub:AES-NI
 instructions based RNG}). The last is when there are \mkl routines for
 generating random variates from the distribution directly (e.g., Normal
 distribution) or indirectly (e.g., Student's $t$-distribution). In this case,
-we use the \rng |MKL_SFMT19937| (see section~\ref{sec:MKL RNG}),
+we use the \rng |MKL_MT2203| (see section~\ref{sec:MKL RNG}),
 \begin{verbatim}
-MKL_SFMT19937 rng_mkl;
+MKL_MT2203 rng_mkl;
 rand(rng_mkl, rnorm_mckl, n, r.data());
 \end{verbatim}
 In all cases, we repeat the simulations 100 times, each time with the number of
