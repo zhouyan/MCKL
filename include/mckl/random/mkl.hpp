@@ -42,11 +42,14 @@ namespace internal
 {
 
 #if MCKL_NO_RUNTIME_ASSERT
+
 inline int mkl_error_check(int status, const char *, const char *)
 {
     return status;
 }
-#else  // MCKL_NO_RUNTIME_ASSERT
+
+#else // MCKL_NO_RUNTIME_ASSERT
+
 inline int mkl_error_check(int status, const char *cpp, const char *c)
 {
     if (status == VSL_ERROR_OK)
@@ -66,6 +69,7 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
 
     return status;
 }
+
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 } // namespace mckl::internal

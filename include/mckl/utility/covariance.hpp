@@ -43,7 +43,7 @@ template <typename RealType = double>
 class Covariance
 {
     static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**Covariance** USED WITH RealType OTHER THAN float OR double");
+        "**Covariance** used with RealType other than float or double");
 
     public:
     using result_type = RealType;

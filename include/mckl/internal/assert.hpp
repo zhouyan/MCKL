@@ -112,7 +112,7 @@ inline void size_check(SizeType n, const char *f, std::true_type)
     std::string msg;
     msg += "**";
     msg += f;
-    msg += "** INPUT SIZE TOO BIG";
+    msg += "** input size too large";
 
     runtime_assert((static_cast<std::uintmax_t>(n) <= nmax), msg.c_str());
 }
