@@ -201,6 +201,12 @@ class SeedGenerator
 /// \ingroup Random
 using Seed = SeedGenerator<NullType>;
 
+template <typename RNGType>
+inline void seed(RNGType &rng)
+{
+    Seed::instance()(rng);
+}
+
 } // namespace mckl
 
 #endif // MCKL_RANDOM_SEED_HPP

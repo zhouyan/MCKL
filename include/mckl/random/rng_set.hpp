@@ -64,13 +64,13 @@ class RNGSetScalar
     using rng_type = RNGType;
     using size_type = std::size_t;
 
-    explicit RNGSetScalar(size_type = 0) { seed(); }
+    explicit RNGSetScalar(size_type = 0) { reset(); }
 
     size_type size() const { return 1; }
 
     void resize(std::size_t) {}
 
-    void seed() { Seed::instance()(rng_); }
+    void reset() { Seed::instance()(rng_); }
 
     rng_type &operator[](size_type) { return rng_; }
 
@@ -88,7 +88,7 @@ class RNGSetVector
     using rng_type = RNGType;
     using size_type = typename Vector<rng_type>::size_type;
 
-    explicit RNGSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
+    explicit RNGSetVector(size_type N = 0) : rng_(N, rng_type()) { reset(); }
 
     size_type size() const { return rng_.size(); }
 
@@ -105,7 +105,7 @@ class RNGSetVector
         Seed::instance()(n - m, rng_.data() + m);
     }
 
-    void seed() { Seed::instance()(rng_.size(), rng_.begin()); }
+    void reset() { Seed::instance()(rng_.size(), rng_.begin()); }
 
     rng_type &operator[](size_type id) { return rng_[id % size()]; }
 
@@ -129,18 +129,18 @@ class RNGSetTBBEnumerable
     explicit RNGSetTBBEnumerable(size_type = 0)
         : rng_([]() {
             rng_type rng;
-            Seed::instance()(rng);
+            seed(rng);
             return rng;
         })
     {
-        seed();
+        reset();
     }
 
     size_type size() const { return rng_.size(); }
 
     void resize(std::size_t) {}
 
-    void seed() { rng_.clear(); }
+    void reset() { rng_.clear(); }
 
     rng_type &operator[](size_type) { return rng_.local(); }
 
@@ -153,14 +153,14 @@ class RNGSetTBBEnumerable
 /// without native TLS keys
 /// \ingroup Random
 template <typename RNGType = RNG>
-using RNGSetTBB = RNGSetTBBEnumerable<RNG,
+using RNGSetTBB = RNGSetTBBEnumerable<RNGType,
     ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_no_key>;
 
 /// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// with native TLS keys
 /// \ingroup Random
 template <typename RNGType = RNG>
-using RNGSetTBBKPI = RNGSetTBBEnumerable<RNG,
+using RNGSetTBBKPI = RNGSetTBBEnumerable<RNGType,
     ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_key_per_instance>;
 
 #endif // MCKL_HAS_TBB
