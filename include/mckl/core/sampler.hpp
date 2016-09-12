@@ -110,7 +110,7 @@ class Sampler
     Sampler<T> clone() const
     {
         Sampler<T> sampler(*this);
-        sampler.particle().rng_set().seed();
+        sampler.particle().rng_set().reset();
         Seed::instance()(sampler.particle().rng());
 
         return sampler;

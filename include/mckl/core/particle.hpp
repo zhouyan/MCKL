@@ -359,7 +359,7 @@ class Particle
     Particle<T> clone() const
     {
         Particle<T> particle(*this);
-        particle.rng_set_.seed();
+        particle.rng_set_.reset();
         Seed::instance()(particle.rng_);
 
         return particle;
