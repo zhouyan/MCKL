@@ -31,8 +31,8 @@
 
 CFLAGS := $(CFLAGS) -std=c99 -O3 -DNDEBUG
 CFLAGS := $(CFLAGS) -I ../../include
-CFLAGS := $(CFLAGS) -L ../../build/llvm-Release-sys/lib
-CFLAGS := $(CFLAGS) -Wl,-rpath -Wl,../../build/llvm-Release-sys/lib
+CFLAGS := $(CFLAGS) -L ../../build/llvm-debug-sys/lib
+CFLAGS := $(CFLAGS) -Wl,-rpath -Wl,../../build/llvm-debug-sys/lib
 
 CXXFLAGS := $(CXXFLAGS) -std=c++11 -O3 -DNDEBUG
 CXXFLAGS := $(CXXFLAGS) -I ../../include
@@ -44,7 +44,7 @@ LDFLAGS := $(LDFLAGS) -lmkl_rt -ltbb -ltbbmalloc -lm
 all : gmm pf_seq pf_tbb
 
 libmckl :
-	ninja -C ../../build/llvm-release-sys libmckl_shared
+	ninja -C ../../build/llvm-debug-sys libmckl_shared
 
 gmm : gmm.cpp
 	$(CXX) $(CXXFLAGS) -o gmm gmm.cpp $(LDFLAGS)

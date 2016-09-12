@@ -45,4 +45,4 @@ plt <- plt + scale_x_math()
 plt <- plt + scale_y_math()
 plt <- plt + theme_bw() + theme(legend.position = "top")
 
-print.tikz("pf", plt, width=5, ratio = 1)
+print.tikz("pf", plt, width = 5, ratio = 1)
