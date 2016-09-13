@@ -345,7 +345,7 @@ class Particle
         , state_(0)
         , weight_(0)
         , rng_set_(0)
-        , rng_(Seed<rng_type>::instance().create())
+        , rng_(Seed<rng_type>::instance()())
     {
     }
 
@@ -355,7 +355,7 @@ class Particle
         , state_(N, std::forward<Args>(args)...)
         , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
-        , rng_(Seed<rng_type>::instance().create())
+        , rng_(Seed<rng_type>::instance()())
     {
     }
 

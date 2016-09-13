@@ -950,6 +950,8 @@ inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
 template <typename, typename>
 class CounterEngine;
 
+template <typename> class Seed;
+
 template <typename = double>
 class ArcsineDistribution;
 

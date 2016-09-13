@@ -44,7 +44,7 @@ namespace mckl
 /// \details
 /// The sequence of seeds are belongs to the equivalent class \f$s \mod D
 /// \equiv R\f$ where \f$D > 0\f$, \f$R \ge 0\f$. The defaults are \f$D = 1\f$
-/// and \f$R = 0\f$. Each time `get()` is called, a new seed is returned.
+/// and \f$R = 0\f$. Each time `operator()` is called, a new seed is used.
 ///
 /// \note
 /// If \f$D = 1\f$ (and \f$R = 0\f$), then there will be exactly two seeds
@@ -69,7 +69,7 @@ class Seed
     }
 
     /// \brief Create a new RNG using a new seed
-    rng_type create() { return rng_type(get()); }
+    rng_type operator()() { return rng_type(get()); }
 
     /// \brief Seed a single RNG
     void operator()(rng_type &rng) { rng.seed(get()); }
@@ -78,14 +78,8 @@ class Seed
     template <typename OutputIter>
     OutputIter operator()(std::size_t n, OutputIter first)
     {
-        static_assert(
-            std::is_same<rng_type,
-                typename std::remove_cv<typename std::iterator_traits<
-                    OutputIter>::value_type>::type>::value,
-            "**Seed** used with an unsupported RNG type");
-
         for (std::size_t i = 0; i != n; ++i, ++first)
-            first->seed(get());
+            operator()(*first);
 
         return first;
     }
@@ -94,14 +88,8 @@ class Seed
     template <typename OutputIter>
     OutputIter operator()(OutputIter first, OutputIter last)
     {
-        static_assert(
-            std::is_same<rng_type,
-                typename std::remove_cv<typename std::iterator_traits<
-                    OutputIter>::value_type>::type>::value,
-            "**Seed** used with an unsupported RNG type");
-
         while (first != last) {
-            first->seed(get());
+            operator()(*first);
             ++first;
         }
 
@@ -111,16 +99,8 @@ class Seed
     /// \brief Set the seed to `s % max() * divisor() + remainder()`
     void set(result_type s) { seed_ = s % max_; }
 
-    /// \brief Get a seed
-    result_type get()
-    {
-        result_type s = seed_.fetch_add(1);
-
-        return (s % max_ + 1) * divisor_ + remainder_;
-    }
-
     /// \brief The maximum of the seed
-    result_type max() const { return max_; }
+    result_type max() const { return (max_ + 1) * divisor_ + remainder_; }
 
     /// \brief The divisor of the output seed
     result_type divisor() const { return divisor_; }
@@ -197,6 +177,13 @@ class Seed
     Seed() : seed_(0), max_(0), divisor_(1), remainder_(0)
     {
         modulo(divisor_, remainder_);
+    }
+
+    result_type get()
+    {
+        result_type s = seed_.fetch_add(1);
+
+        return (s % max_ + 1) * divisor_ + remainder_;
     }
 }; // class Seed
 
