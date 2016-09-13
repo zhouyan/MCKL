@@ -919,11 +919,6 @@ inline typename RNGType::result_type rand(RNGType &rng)
     return rng();
 }
 
-/// \brief Seed an RNG automatically
-/// \ingroup Random
-template <typename RNGType>
-inline void seed(RNGType &);
-
 /// \brief Generate random integers
 /// \ingroup Random
 template <typename RNGType>
@@ -1282,9 +1277,6 @@ class MKLStream;
 
 template <MKL_INT, int>
 class MKLEngine;
-
-template <MKL_INT BRNG, int Bits>
-inline void seed(MKLEngine<BRNG, Bits> &);
 
 template <MKL_INT BRNG, int Bits>
 inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,

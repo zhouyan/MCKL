@@ -83,35 +83,6 @@ void mckl_rng_load_f(mckl_rng rng, const char *filename);
 
 /// @} C_API_Random_RNG
 
-/// \addtogroup C_API_Random_Seed
-/// @{
-
-/// \brief `mckl::Seed::operator()`
-void mckl_seed(mckl_rng rng);
-
-/// \brief `mckl::Seed::get`
-unsigned mckl_seed_get(void);
-
-/// \brief `mckl::Seed::set`
-void mckl_seed_set(unsigned seed);
-
-/// \brief `mckl::Seed::modulo`
-void mckl_seed_modulo(unsigned div, unsigned rem);
-
-/// \brief `mckl::Seed::operator<<`
-size_t mckl_seed_save(void *mem);
-
-/// \brief `mckl::Seed::operator>>`
-void mckl_seed_load(const void *mem);
-
-/// \brief `mckl::Seed::operator<<` directly to an external file
-void mckl_seed_save_f(const char *filename);
-
-/// \brief `mckl::Seed::operator>>` directly from an external file
-void mckl_seed_load_f(const char *filename);
-
-/// @} C_API_Random_Seed
-
 /// \addtogroup C_API_Random_Distribution
 /// @{
 

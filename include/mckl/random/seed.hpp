@@ -35,16 +35,10 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/counter.hpp>
 
-/// \brief Default result type of Seed
-/// \ingroup Config
-#ifndef MCKL_SEED_RESULT_TYPE
-#define MCKL_SEED_RESULT_TYPE unsigned
-#endif
-
 namespace mckl
 {
 
-/// \brief Seed generator
+/// \brief Seeding RNG engines
 /// \ingroup Random
 ///
 /// \details
@@ -52,52 +46,64 @@ namespace mckl
 /// \equiv R\f$ where \f$D > 0\f$, \f$R \ge 0\f$. The defaults are \f$D = 1\f$
 /// and \f$R = 0\f$. Each time `get()` is called, a new seed is returned.
 ///
-/// The method `operator()(RNGType &rng)` is equivalent to
-/// `rng.seed(static_cast<typename RNGType::result_type>(get()))`.
-///
 /// \note
 /// If \f$D = 1\f$ (and \f$R = 0\f$), then there will be exactly two seeds
-/// equal
-/// to `1` in any sequence of length \f$2^N\f$, where \f$N\f$ is the number of
-/// digits in the unsigned integer type. They are either one at the beginning
-/// and one at the end, or consecutive.
-template <typename ID, typename ResultType = MCKL_SEED_RESULT_TYPE>
-class SeedGenerator
+/// equal to `1` in any sequence of length \f$2^N\f$, where \f$N\f$ is the
+/// number of digits in the unsigned integer type. They are either one at the
+/// beginning and one at the end, or consecutive.
+template <typename RNGType>
+class Seed
 {
-    static_assert(std::is_unsigned<ResultType>::value,
-        "**SeedGenerator** used with ResultType other than unsigned integer "
-        "types");
-
     public:
-    using result_type = ResultType;
+    using rng_type = RNGType;
+    using result_type = typename rng_type::result_type;
 
-    SeedGenerator(const SeedGenerator<ID, ResultType> &) = delete;
+    Seed(const Seed<RNGType> &) = delete;
+    Seed<RNGType> &operator=(const Seed<RNGType> &) = delete;
 
-    SeedGenerator<ID, ResultType> &operator=(
-        const SeedGenerator<ID, ResultType> &) = delete;
-
-    static SeedGenerator<ID, ResultType> &instance()
+    static Seed<RNGType> &instance()
     {
-        static SeedGenerator<ID, ResultType> seed;
+        static Seed<RNGType> seed;
 
         return seed;
     }
 
+    /// \brief Create a new RNG using a new seed
+    rng_type create() { return rng_type(get()); }
+
     /// \brief Seed a single RNG
-    template <typename RNGType>
-    void operator()(RNGType &rng)
-    {
-        rng.seed(static_cast<typename RNGType::result_type>(get()));
-    }
+    void operator()(rng_type &rng) { rng.seed(get()); }
 
     /// \brief Seed a sequence of RNGs
     template <typename OutputIter>
     OutputIter operator()(std::size_t n, OutputIter first)
     {
-        using RNGType = typename std::iterator_traits<OutputIter>::value_type;
+        static_assert(
+            std::is_same<rng_type,
+                typename std::remove_cv<typename std::iterator_traits<
+                    OutputIter>::value_type>::type>::value,
+            "**Seed** used with an unsupported RNG type");
 
         for (std::size_t i = 0; i != n; ++i, ++first)
-            first->seed(static_cast<typename RNGType::result_type>(get()));
+            first->seed(get());
+
+        return first;
+    }
+
+    /// \brief Seed a sequence of RNGs
+    template <typename OutputIter>
+    OutputIter operator()(OutputIter first, OutputIter last)
+    {
+        static_assert(
+            std::is_same<rng_type,
+                typename std::remove_cv<typename std::iterator_traits<
+                    OutputIter>::value_type>::type>::value,
+            "**Seed** used with an unsupported RNG type");
+
+        while (first != last) {
+            first->seed(get());
+            ++first;
+        }
 
         return first;
     }
@@ -126,14 +132,13 @@ class SeedGenerator
     void modulo(result_type divisor, result_type remainder)
     {
         runtime_assert(divisor > remainder,
-            "**SeedGenerator::modulo** the remainder is not smaller than the "
-            "divisor");
+            "**Seed::modulo** the remainder is not smaller than the divisor");
 
         result_type maxs =
             (std::numeric_limits<result_type>::max() - remainder) / divisor;
         runtime_assert(maxs > 1,
-            "**SeedGenerator::modulo** the maximum of the internal seed will "
-            "be no larger than 1");
+            "**Seed::modulo** the maximum of the internal seed will be no "
+            "larger than 1");
 
         divisor_ = divisor;
         remainder_ = remainder;
@@ -144,8 +149,7 @@ class SeedGenerator
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ID, ResultType> &sg)
+        std::basic_ostream<CharT, Traits> &os, const Seed<RNGType> &sg)
     {
         if (!os)
             return os;
@@ -160,8 +164,7 @@ class SeedGenerator
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ID, ResultType> &sg)
+        std::basic_istream<CharT, Traits> &is, Seed<RNGType> &sg)
     {
         if (!is)
             return is;
@@ -191,21 +194,11 @@ class SeedGenerator
     result_type divisor_;
     result_type remainder_;
 
-    SeedGenerator() : seed_(0), max_(0), divisor_(1), remainder_(0)
+    Seed() : seed_(0), max_(0), divisor_(1), remainder_(0)
     {
         modulo(divisor_, remainder_);
     }
-}; // class SeedGenerator
-
-/// \brief The default Seed type
-/// \ingroup Random
-using Seed = SeedGenerator<NullType>;
-
-template <typename RNGType>
-inline void seed(RNGType &rng)
-{
-    Seed::instance()(rng);
-}
+}; // class Seed
 
 } // namespace mckl
 

@@ -340,9 +340,13 @@ class Particle
     using rng_set_type = RNGSetType<T>;
     using rng_type = typename rng_set_type::rng_type;
 
-    Particle() : size_(0), state_(0), weight_(0), rng_set_(0)
+    Particle()
+        : size_(0)
+        , state_(0)
+        , weight_(0)
+        , rng_set_(0)
+        , rng_(Seed<rng_type>::instance().create())
     {
-        Seed::instance()(rng_);
     }
 
     template <typename... Args>
@@ -351,8 +355,8 @@ class Particle
         , state_(N, std::forward<Args>(args)...)
         , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
+        , rng_(Seed<rng_type>::instance().create())
     {
-        Seed::instance()(rng_);
     }
 
     /// \brief Clone the Particle except the RNG engines
@@ -360,7 +364,7 @@ class Particle
     {
         Particle<T> particle(*this);
         particle.rng_set_.reset();
-        Seed::instance()(particle.rng_);
+        Seed<rng_type>::instance()(particle.rng_);
 
         return particle;
     }

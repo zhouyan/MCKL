@@ -1085,35 +1085,6 @@ inline void rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     rng(n, r);
 }
 
-template <MKL_INT BRNG, int Bits>
-inline void seed(MKLEngine<BRNG, Bits> &rng, std::true_type)
-{
-    using rng_type = MKLEngine<BRNG, Bits>;
-    using result_type = typename rng_type::result_type;
-    using offset_type = SeedGenerator<rng_type, MKL_UINT>;
-
-    static constexpr MKL_UINT max_offset =
-        static_cast<MKL_UINT>(internal::MKLMaxOffset<BRNG>::value);
-
-    MKL_INT b =
-        static_cast<MKL_INT>(offset_type::instance().get() % max_offset);
-    result_type s = static_cast<result_type>(Seed::instance().get());
-    rng.seed(b, s);
-}
-
-template <MKL_INT BRNG, int Bits>
-inline void seed(MKLEngine<BRNG, Bits> &rng, std::false_type)
-{
-    Seed::instance()(rng);
-}
-
-template <MKL_INT BRNG, int Bits>
-inline void seed(MKLEngine<BRNG, Bits> &rng)
-{
-    seed(rng, std::integral_constant<bool,
-                  (internal::MKLMaxOffset<BRNG>::value > 0)>());
-}
-
 /// \brief A 59-bit multiplicative congruential generator
 /// \ingroup MKL
 using MKL_MCG59 = MKLEngine<VSL_BRNG_MCG59, 32>;

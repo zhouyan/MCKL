@@ -29,8 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "seed.cpp"
-
 #include "rng_assign.cpp"
 #include "rng_delete.cpp"
 #include "rng_discard.cpp"

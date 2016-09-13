@@ -111,7 +111,8 @@ class Sampler
     {
         Sampler<T> sampler(*this);
         sampler.particle().rng_set().reset();
-        Seed::instance()(sampler.particle().rng());
+        Seed<typename Particle<T>::rng_type>::instance()(
+            sampler.particle().rng());
 
         return sampler;
     }

@@ -70,7 +70,7 @@ class RNGSetScalar
 
     void resize(std::size_t) {}
 
-    void reset() { Seed::instance()(rng_); }
+    void reset() { Seed<rng_type>::instance()(rng_); }
 
     rng_type &operator[](size_type) { return rng_; }
 
@@ -102,10 +102,10 @@ class RNGSetVector
 
         size_type m = rng_.size();
         rng_.resize(n);
-        Seed::instance()(n - m, rng_.data() + m);
+        Seed<rng_type>::instance()(n - m, rng_.data() + m);
     }
 
-    void reset() { Seed::instance()(rng_.size(), rng_.begin()); }
+    void reset() { Seed<rng_type>::instance()(rng_.begin(), rng_.end()); }
 
     rng_type &operator[](size_type id) { return rng_[id % size()]; }
 
@@ -127,11 +127,7 @@ class RNGSetTBBEnumerable
     using size_type = std::size_t;
 
     explicit RNGSetTBBEnumerable(size_type = 0)
-        : rng_([]() {
-            rng_type rng;
-            seed(rng);
-            return rng;
-        })
+        : rng_([]() { return Seed<rng_type>::instance().create(); })
     {
         reset();
     }
