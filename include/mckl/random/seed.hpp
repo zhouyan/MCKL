@@ -56,7 +56,7 @@ class Seed
 {
     public:
     using rng_type = RNGType;
-    using result_type = typename rng_type::result_type;
+    using result_type = typename internal::SeedType<rng_type>::result_type;
 
     Seed(const Seed<RNGType> &) = delete;
     Seed<RNGType> &operator=(const Seed<RNGType> &) = delete;

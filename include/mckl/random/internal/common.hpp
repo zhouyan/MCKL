@@ -45,8 +45,7 @@
         "Distribution** used with RealType other than floating point types");
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_BLAS_TYPE(Name)                \
-    static_assert(                                                            \
-        ::mckl::internal::is_one_of<RealType, float, double>::value,          \
+    static_assert(internal::is_blas_floating_point<RealType>::value,          \
         "**" #Name                                                            \
         "Distribution** used with RealType other than float or double");
 
@@ -880,6 +879,13 @@ inline IntType ftoi(RealType x)
     return ftoi<IntType>(x, std::integral_constant<bool, W <= M>());
 }
 
+template <typename RNGType>
+class SeedType
+{
+    public:
+    using result_type = typename RNGType::result_type;
+}; // class SeedType
+
 } // namespace mckl::internal
 
 /// \brief Traits of RNG engines
@@ -950,7 +956,8 @@ inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
 template <typename, typename>
 class CounterEngine;
 
-template <typename> class Seed;
+template <typename>
+class Seed;
 
 template <typename = double>
 class ArcsineDistribution;
@@ -1288,6 +1295,13 @@ inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
 
 namespace internal
 {
+
+template <MKL_INT BRNG, int Bits>
+class SeedType<MKLEngine<BRNG, Bits>>
+{
+    public:
+    using result_type = MKL_UINT;
+}; // class SeedType
 
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(

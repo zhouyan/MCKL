@@ -42,7 +42,7 @@ namespace mckl
 template <typename RealType = double>
 class Covariance
 {
-    static_assert(internal::is_one_of<RealType, float, double>::value,
+    static_assert(internal::is_blas_floating_point<RealType>::value,
         "**Covariance** used with RealType other than float or double");
 
     public:

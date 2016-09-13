@@ -102,6 +102,10 @@ class RDRANDEngine
         "**RDRANDEngine** used with ResultType of size other than 16, 32 or "
         "64 bits");
 
+    template <typename T>
+    using is_seed_seq =
+        internal::is_seed_seq<T, RDRANDEngine<ResultType, NTrialMax>>;
+
     public:
     using result_type = ResultType;
 
@@ -109,16 +113,15 @@ class RDRANDEngine
 
     template <typename SeedSeq>
     explicit RDRANDEngine(SeedSeq &,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            RDRANDEngine<ResultType, NTrialMax>>::value>::type * = nullptr)
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
     {
     }
 
     void seed(result_type) {}
 
     template <typename SeedSeq>
-    void seed(SeedSeq &, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                             result_type>::value>::type * = nullptr)
+    void seed(SeedSeq &,
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
     {
     }
 

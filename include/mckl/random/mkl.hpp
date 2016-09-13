@@ -784,6 +784,9 @@ class MKLEngine
     static_assert(Bits == 32 || Bits == 64,
         "**MKLEngine** used with bits other than 32, or 64");
 
+    template <typename T>
+    using is_seed_seq = internal::is_seed_seq<T, MKLEngine<BRNG, Bits>>;
+
     public:
     using result_type = internal::MKLResultType<Bits>;
 
@@ -791,8 +794,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_INT,
-            result_type, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
         : index_(M_)
     {
         seed(seq);
@@ -808,8 +810,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_INT,
-            MKL_UINT, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
         : index_(M_)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
@@ -827,9 +828,8 @@ class MKLEngine
     }
 
     template <typename SeedSeq>
-    void seed(
-        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          MKL_INT, result_type>::value>::type * = nullptr)
+    void seed(SeedSeq &seq,
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
     {
         MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
         Vector<MKL_UINT> params;
@@ -851,8 +851,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
             "**MKLEngine** does not support offseting");

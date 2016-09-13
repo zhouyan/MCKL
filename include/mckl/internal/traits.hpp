@@ -172,30 +172,14 @@ MCKL_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 namespace internal
 {
 
-template <typename T, typename T1, typename... Types>
-class is_one_of : public std::integral_constant<bool,
-                      is_one_of<T, T1>::value || is_one_of<T, Types...>::value>
-{
-}; // class is_one_of
+template <typename T>
+using is_blas_floating_point = std::integral_constant<bool,
+    std::is_same<typename std::remove_cv<T>::type, float>::value ||
+        std::is_same<typename std::remove_cv<T>::type, double>::value>;
 
-template <typename T, typename T1>
-class is_one_of<T, T1>
-    : public std::integral_constant<bool, std::is_same<T, T1>::value>
-{
-}; // class is_one_of
-
-template <typename T, typename T1, typename... Types>
-class is_seed_seq
-    : public std::integral_constant<bool,
-          is_seed_seq<T, T1>::value && is_seed_seq<T, Types...>::value>
-{
-}; // class is_seed_seq
-
-template <typename T, typename T1>
-class is_seed_seq<T, T1>
-    : public std::integral_constant<bool, !std::is_convertible<T, T1>::value>
-{
-}; // class is_seed_seq
+template <typename T, typename RNGType>
+using is_seed_seq = std::integral_constant<bool,
+    std::is_class<T>::value && !std::is_convertible<T, RNGType>::value>;
 
 } // namespace mckl::internal
 
