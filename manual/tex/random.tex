@@ -496,8 +496,16 @@ After this call, all seeds generated will belong to the equivalent class $s
 \equiv r \mod n$. Therefore, no two nodes will ever generate the same seeds.
 Note that, the seeds generated are not random at all. For any deterministic
 \rng{}s, the same seeds always produce identical streams. However, distinctive
-seeds does not always lead to independent streams. This seed generator is only
-suitable for counter-based \rng{}s.
+seeds does not always lead to non-overlapping streams. This seed generator is
+only suitable for counter-based \rng{}s.
+
+Note that, there is one caveat with this seeding procedure. If $n = 1$ and $r =
+0$, which is the default, for any sequence of length $2^N$, where $N$ is the
+number of bits of the integer type, |Seed<RNGType>::result_type>|, there will
+be exactly two seeds being equal to $1$. Moreover, these two seeds will either
+be consecutive or one at the beginning of the sequence and one at the end of
+sequence. For any longer sequence, there are at most $2^N - 1$ distinctive
+seeds. Zero is never used to seed \rng engines by this class.
 
 \section{Non-deterministic \texorpdfstring{\rng}{RNG}}
 \label{sec:Non-deterministic RNG}

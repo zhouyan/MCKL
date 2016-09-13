@@ -66,7 +66,7 @@ sub filter
     foreach (@_) {
         next if (!/Passed|Failed/);
 
-        my ($name, $cpb1, $cpb2) = (split)[0, 5, 6];
+        my ($name, $size, $cpb1, $cpb2) = (split)[0, 1, 5, 6];
         if ($rng eq 'STD') {
             next unless "@std" =~ /$name/;
         } elsif ($rng eq 'MKL') {
@@ -75,8 +75,10 @@ sub filter
             next unless $name =~ /$rng/;
             next if $name =~ /MKL/;
         }
+        $size = (split /\//, $size)[1] if ($size =~ /\//);
 
         $record .= $name . ' ';
+        $record .= $size . ' ';
         $record .= $cpb1 . ' ';
         $record .= $cpb2 . "\n";
     }
@@ -86,6 +88,7 @@ sub filter
 sub table
 {
     my @name;
+    my @size;
     my @cpb1;
     my @cpb2;
     my $wid = 0;
@@ -95,8 +98,10 @@ sub table
         foreach (@lines) {
             my @record = split;
             my $name = $record[0];
+            my $size = $record[1];
             $name =~ s/_/\\_/g;
             $name[$index] = '\texttt{' . $name . '}';
+            $size[$index] = $size;
             $cpb1[$index] .= &format($record[1]);
             $cpb2[$index] .= &format($record[2]);
             if ($wid < length($name[-1])) {
@@ -108,14 +113,14 @@ sub table
 
     my $table;
     $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
+    $table .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= '& \multicolumn{3}{c}{\textsc{loop}} ';
+    $table .= '& & \multicolumn{3}{c}{\textsc{loop}} ';
     $table .= '& \multicolumn{3}{c}{\textsc{batch}}';
     $table .= " \\\\\n";
-    $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
-    $table .= ' ' x 2 . '\rng';
+    $table .= ' ' x 2 . '\cmidrule(lr){3-5}\cmidrule(lr){6-8}' . "\n";
+    $table .= ' ' x 2 . '\rng & Size';
     $table .= ' & \llvm & \gnu & \textsc{intel}';
     $table .= ' & \llvm & \gnu & \textsc{intel}';
     $table .= " \\\\\n";
@@ -124,6 +129,7 @@ sub table
     foreach (@name) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $name[$index];
+        $table .= sprintf " & %-6s", $size[$index];
         $table .= $cpb1[$index];
         $table .= $cpb2[$index];
         $table .= " \\\\\n";
