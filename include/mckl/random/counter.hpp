@@ -526,7 +526,7 @@ class Seed<CounterEngine<ResultType, Generator>>
     private:
     using key_type = typename rng_type::key_type;
     using dispatch_type =
-        std::integral_constant<bool, (std::tuple_size<key_type>::value > 0)>;
+        std::integral_constant<bool, (std::tuple_size<key_type>::value > 1)>;
 
     std::atomic<result_type> seed_;
     result_type max_;

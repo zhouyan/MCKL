@@ -33,7 +33,6 @@
 #define MCKL_RANDOM_MKL_HPP
 
 #include <mckl/random/internal/common.hpp>
-#include <mckl/random/seed.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
 
 namespace mckl
