@@ -34,6 +34,8 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
+#include <mkl_version.h>
+#include <mkl_vsl.h>
 
 namespace mckl
 {
@@ -725,44 +727,48 @@ class MKLOffset<BRNG, 0>
     static MKL_INT eval(MKL_INT) { return BRNG; }
 }; // class MKLOffset
 
-template <int>
-class MKLResultTypeTrait;
-
-template <>
-class MKLResultTypeTrait<32>
-{
-    public:
-    using type = unsigned;
-}; // class MKLResultTypeTrait
-
-template <>
-class MKLResultTypeTrait<64>
-{
-    public:
-    using type = unsigned MKL_INT64;
-}; // class MKLResultTypeTrait
-
-template <int Bits>
-using MKLResultType = typename MKLResultTypeTrait<Bits>::type;
-
-template <int>
+template <MKL_INT, int>
 class MKLUniformBits;
 
-template <>
-class MKLUniformBits<32>
+template <MKL_INT BRNG>
+class MKLUniformBits<BRNG, 32>
 {
     public:
-    static void eval(MKLStream &stream, MKL_INT n, unsigned *r)
+    using result_type = unsigned;
+
+    static constexpr result_type min()
+    {
+        return std::numeric_limits<result_type>::min();
+    }
+
+    static constexpr result_type max()
+    {
+        return std::numeric_limits<result_type>::max();
+    }
+
+    static void eval(MKLStream &stream, MKL_INT n, result_type *r)
     {
         stream.uniform_bits32(n, r);
     }
 }; // class MKLUniformBits
 
-template <>
-class MKLUniformBits<64>
+template <MKL_INT BRNG>
+class MKLUniformBits<BRNG, 64>
 {
     public:
-    static void eval(MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
+    using result_type = unsigned MKL_INT64;
+
+    static constexpr result_type min()
+    {
+        return std::numeric_limits<result_type>::min();
+    }
+
+    static constexpr result_type max()
+    {
+        return std::numeric_limits<result_type>::max();
+    }
+
+    static void eval(MKLStream &stream, MKL_INT n, result_type *r)
     {
         stream.uniform_bits64(n, r);
     }
@@ -788,7 +794,8 @@ class MKLEngine
     using is_seed_seq = internal::is_seed_seq<T, MKLEngine<BRNG, Bits>>;
 
     public:
-    using result_type = internal::MKLResultType<Bits>;
+    using result_type =
+        typename internal::MKLUniformBits<BRNG, Bits>::result_type;
 
     explicit MKLEngine(result_type s = 1) : index_(M_) { seed(s); }
 
@@ -892,7 +899,7 @@ class MKLEngine
 
         const std::size_t m = n / M_ * M_;
         const std::size_t l = n % M_;
-        internal::MKLUniformBits<Bits>::eval(
+        internal::MKLUniformBits<BRNG, Bits>::eval(
             stream_, static_cast<MKL_INT>(m), r);
         r += m;
 
@@ -976,12 +983,12 @@ class MKLEngine
 
     static constexpr result_type min()
     {
-        return std::numeric_limits<result_type>::min();
+        return internal::MKLUniformBits<BRNG, Bits>::min();
     }
 
     static constexpr result_type max()
     {
-        return std::numeric_limits<result_type>::max();
+        return internal::MKLUniformBits<BRNG, Bits>::max();
     }
 
     MKLStream &stream() { return stream_; }
@@ -1059,7 +1066,7 @@ class MKLEngine
     void generate()
     {
         buffer_.resize(M_);
-        internal::MKLUniformBits<Bits>::eval(
+        internal::MKLUniformBits<BRNG, Bits>::eval(
             stream_, static_cast<MKL_INT>(M_), buffer_.data());
     }
 
