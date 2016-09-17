@@ -176,53 +176,35 @@ class StopWatchClockAdapter
     /// \brief Return the accumulated cycles
     std::uint64_t cycles() const { return cycles_; }
 
-    /// \brief Return the accumulated elapsed time in nanoseconds
-    double nanoseconds() const
+    /// \brief Return the accumulated elapsed time in its native format
+    typename clock_type::duration const time() const { return time_; }
+
+    /// \brief Return the accumulated elapsed time in specified format
+    template <typename Rep, typename Period>
+    Rep time() const
     {
-        return std::chrono::duration_cast<
-            std::chrono::duration<double, std::nano>>(time_)
-            .count();
+        using time_type = std::chrono::duration<Rep, Period>;
+
+        return std::chrono::duration_cast<time_type>(time_).count();
     }
 
-    /// \brief Return the accumulated elapsed time in microseconds
-    double microseconds() const
-    {
-        return std::chrono::duration_cast<
-            std::chrono::duration<double, std::micro>>(time_)
-            .count();
-    }
+    /// \brief Equivalent to `time<double, std::nano>()`
+    double nanoseconds() const { return time<double, std::nano>(); }
 
-    /// \brief Return the accumulated elapsed time in milliseconds
-    double milliseconds() const
-    {
-        return std::chrono::duration_cast<
-            std::chrono::duration<double, std::milli>>(time_)
-            .count();
-    }
+    /// \brief Equivalent to `time<double, std::micro>()`
+    double microseconds() const { return time<double, std::micro>(); }
 
-    /// \brief Return the accumulated elapsed time in seconds
-    double seconds() const
-    {
-        return std::chrono::duration_cast<
-            std::chrono::duration<double, std::ratio<1>>>(time_)
-            .count();
-    }
+    /// \brief Equivalent to `time<double, std::milli>()`
+    double milliseconds() const { return time<double, std::milli>(); }
 
-    /// \brief Return the accumulated elapsed time in minutes
-    double minutes() const
-    {
-        return std::chrono::duration_cast<
-            std::chrono::duration<double, std::ratio<60>>>(time_)
-            .count();
-    }
+    /// \brief Equivalent to `time<double, std::ratio<1>>()`
+    double seconds() const { return time<double, std::ratio<1>>(); }
 
-    /// \brief Return the accumulated elapsed time in hours
-    double hours() const
-    {
-        return std::chrono::duration_cast<
-            std::chrono::duration<double, std::ratio<3600>>>(time_)
-            .count();
-    }
+    /// \brief Equivalent to `time<double, std::ratio<60>>()`
+    double minutes() const { return time<double, std::ratio<60>>(); }
+
+    /// \brief Equivalent to `time<double, std::ratio<3600>>()`
+    double hours() const { return time<double, std::ratio<3600>>(); }
 
     private:
     typename clock_type::duration time_;
