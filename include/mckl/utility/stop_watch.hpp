@@ -47,7 +47,6 @@ namespace internal
 inline std::uint64_t rdtsc()
 {
 #if MCKL_HAS_X86
-
 #if defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
     unsigned hi = 0;
     unsigned lo = 0;
@@ -72,7 +71,6 @@ inline std::uint64_t rdtsc()
 #else  // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
     return 0;
 #endif // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
-
 #else  // MCKL_HAS_X86
     return 0;
 #endif // MCKL_HAS_X86
@@ -119,6 +117,26 @@ class StopWatchClockAdapter
         : time_(0), cycles_(0), cycles_start_(0), running_(false)
     {
         reset();
+    }
+
+    /// \brief If cycle counting is supported
+    ///
+    /// \details
+    /// If this function returns `true`, then `cycles()` will return the number
+    /// of accumulated cycles. Otherwise, it will always returns zero.
+    static constexpr bool has_cycles()
+    {
+#if MCKL_HAS_X86
+#if defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
+        return true;
+#elif defined(MCKL_MSVC)
+        return true;
+#else  // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
+        return false;
+#endif // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
+#else  // MCKL_HAS_X86
+        return false;
+#endif // MCKL_HAS_X86
     }
 
     /// \brief If the watch is running
