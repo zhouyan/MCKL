@@ -216,7 +216,7 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
             mckl::rand(rng, ubits, K, r2.data());
             pass = pass && (r1 == r2 || rng != rng);
         }
-        double bytes = static_cast<double>(sizeof(std::uint64_t) * num);
+        std::size_t bytes = sizeof(std::uint64_t) * num;
         g1 = std::max(g1, bytes / watch1.nanoseconds());
         g2 = std::max(g2, bytes / watch2.nanoseconds());
         c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
