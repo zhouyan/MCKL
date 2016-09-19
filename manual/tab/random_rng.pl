@@ -102,8 +102,8 @@ sub table
             $name =~ s/_/\\_/g;
             $name[$index] = '\texttt{' . $name . '}';
             $size[$index] = $size;
-            $cpb1[$index] .= &format($record[1]);
-            $cpb2[$index] .= &format($record[2]);
+            $cpb1[$index] .= &format($record[2]);
+            $cpb2[$index] .= &format($record[3]);
             if ($wid < length($name[-1])) {
                 $wid = length($name[-1]);
             }
