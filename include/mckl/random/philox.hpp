@@ -40,20 +40,6 @@
 #include <intrin.h>
 #endif
 
-#define MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(W, K, val)                    \
-    template <typename T>                                                     \
-    class PhiloxWeylConstant<T, K, W>                                         \
-        : public std::integral_constant<T, UINT##W##_C(val)>                  \
-    {                                                                         \
-    }; // PhiloxMulConstant
-
-#define MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(W, K, I, val)                  \
-    template <typename T>                                                     \
-    class PhiloxMulConstant<T, K, I, W>                                       \
-        : public std::integral_constant<T, UINT##W##_C(val)>                  \
-    {                                                                         \
-    }; // PhiloxMulConstant
-
 /// \brief PhiloxGenerator default rounds
 /// \ingroup Config
 #ifndef MCKL_PHILOX_ROUNDS
@@ -66,45 +52,56 @@ namespace mckl
 namespace internal
 {
 
-template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
-class PhiloxWeylConstant;
+template <typename, std::size_t, int>
+class PhiloxConstantsImpl;
 
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(32, 0, 0x9E3779B9)
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(32, 1, 0xBB67AE85)
+template <typename T>
+class PhiloxConstantsImpl<T, 2, 32>
+{
+    public:
+    static constexpr T weyl[2] = {UINT32_C(0x9E3779B9), UINT32_C(0xBB67AE85)};
 
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(64, 0, 0x9E3779B97F4A7C15)
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(64, 1, 0xBB67AE8584CAA73B)
+    static constexpr T multiplier[1] = {UINT32_C(0xD256D193)};
+}; // class PhiloxConstantsImpl
 
-template <typename T, std::size_t, std::size_t,
-    int = std::numeric_limits<T>::digits>
-class PhiloxMulConstant;
+template <typename T>
+class PhiloxConstantsImpl<T, 4, 32>
+{
+    public:
+    static constexpr T weyl[2] = {UINT32_C(0x9E3779B9), UINT32_C(0xBB67AE85)};
 
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(32, 2, 0, 0xD256D193)
+    static constexpr T multiplier[2] = {
+        UINT32_C(0xCD9E8D57), UINT32_C(0xD2511F53)};
+}; // class PhiloxConstantsImpl
 
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(32, 4, 0, 0xCD9E8D57)
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(32, 4, 1, 0xD2511F53)
+template <typename T>
+class PhiloxConstantsImpl<T, 2, 64>
+{
+    public:
+    static constexpr T weyl[2] = {
+        UINT64_C(0x9E3779B97F4A7C15), UINT64_C(0xBB67AE8584CAA73B)};
 
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(64, 2, 0, 0xD2B74407B1CE6E93)
+    static constexpr T multiplier[1] = {UINT64_C(0xD2B74407B1CE6E93)};
+}; // class PhiloxConstantsImpl
 
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(64, 4, 0, 0xCA5A826395121157)
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(64, 4, 1, 0xD2E7470EE14C6C93)
+template <typename T>
+class PhiloxConstantsImpl<T, 4, 64>
+{
+    public:
+    static constexpr T weyl[2] = {
+        UINT64_C(0x9E3779B97F4A7C15), UINT64_C(0xBB67AE8584CAA73B)};
 
-} // namespace internal
+    static constexpr T multiplier[2] = {
+        UINT64_C(0xCA5A826395121157), UINT64_C(0xD2E7470EE14C6C93)};
+}; // class PhiloxConstantsImpl
+
+} // namespace mckl::internal
 
 /// \brief Default Philox constants
 /// \ingroup Philox
 template <typename T, std::size_t K>
-class PhiloxConstants
-{
-    public:
-    /// \brief Weyl constant of I-th element of the key
-    template <std::size_t I>
-    using weyl = internal::PhiloxWeylConstant<T, I>;
-
-    /// \brief Multiplier of I-th S-box
-    template <std::size_t I>
-    using multiplier = internal::PhiloxMulConstant<T, K, I>;
-}; // class PhiloxConstants
+using PhiloxConstants =
+    internal::PhiloxConstantsImpl<T, K, std::numeric_limits<T>::digits>;
 
 namespace internal
 {
@@ -210,27 +207,26 @@ class PhiloxBumpKey
 template <typename T, std::size_t N, typename Constants>
 class PhiloxBumpKey<T, 2, N, Constants, true>
 {
-    template <std::size_t I>
-    using weyl = typename Constants::template weyl<I>;
-
     public:
     static void eval(std::array<T, 1> &par)
     {
-        std::get<0>(par) += weyl<0>::value;
+        static constexpr T w0 = Constants::weyl[0];
+
+        std::get<0>(par) += w0;
     }
 }; // class PhiloxBumpKey
 
 template <typename T, std::size_t N, typename Constants>
 class PhiloxBumpKey<T, 4, N, Constants, true>
 {
-    template <std::size_t I>
-    using weyl = typename Constants::template weyl<I>;
-
     public:
     static void eval(std::array<T, 2> &par)
     {
-        std::get<0>(par) += weyl<0>::value;
-        std::get<1>(par) += weyl<1>::value;
+        static constexpr T w0 = Constants::weyl[0];
+        static constexpr T w1 = Constants::weyl[1];
+
+        std::get<0>(par) += w0;
+        std::get<1>(par) += w1;
     }
 }; // class PhiloxBumpKey
 
@@ -285,9 +281,6 @@ class PhiloxSBox<T, K, N, Constants, true>
     }
 
     private:
-    template <std::size_t I>
-    using multiplier = typename Constants::template multiplier<I>;
-
     template <std::size_t, std::size_t Rp1>
     static void eval(std::array<T, K> &,
         const std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
@@ -298,9 +291,11 @@ class PhiloxSBox<T, K, N, Constants, true>
     static void eval(std::array<T, K> &state,
         const std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
     {
+        static constexpr T m = Constants::multiplier[I / 2];
+
         T x = std::get<I + 1>(state) ^ std::get<I / 2>(std::get<N>(par));
-        PhiloxHiLo<T>::eval(std::get<I>(state), multiplier<I / 2>::value,
-            std::get<I>(state), std::get<I + 1>(state));
+        PhiloxHiLo<T>::eval(
+            std::get<I>(state), m, std::get<I>(state), std::get<I + 1>(state));
         std::get<I>(state) ^= x;
         eval<I + 2>(state, par, std::integral_constant<bool, I + 3 < K>());
     }
@@ -321,7 +316,7 @@ class PhiloxPBox<T, K, N, true>
     {
         std::array<T, K> tmp;
         eval<0>(state, tmp, std::integral_constant<bool, 0 < K>());
-        std::memcpy(state.data(), tmp.data(), sizeof(T) * K);
+        state = tmp;
     }
 
     private:
@@ -335,8 +330,9 @@ class PhiloxPBox<T, K, N, true>
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        static constexpr std::size_t J =
-            K - ThreefryPermuteConstant<K, K - I - 1>::value - 1;
+        static constexpr std::size_t P =
+            ThreefryConstants<T, K>::permute[K - I - 1];
+        static constexpr std::size_t J = K - P - 1;
 
         std::get<I>(tmp) = std::get<J>(state);
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
@@ -357,21 +353,6 @@ class PhiloxPBox<T, 4, N, true>
     static void eval(std::array<T, 4> &state)
     {
         std::swap(std::get<0>(state), std::get<2>(state));
-    }
-}; // class PhiloxPBox
-
-template <typename T, std::size_t N>
-class PhiloxPBox<T, 8, N, true>
-{
-    public:
-    static void eval(std::array<T, 8> &state)
-    {
-        std::swap(std::get<0>(state), std::get<4>(state));
-        T x = std::get<7>(state);
-        std::get<7>(state) = std::get<5>(state);
-        std::get<5>(state) = std::get<3>(state);
-        std::get<3>(state) = std::get<1>(state);
-        std::get<1>(state) = x;
     }
 }; // class PhiloxPBox
 

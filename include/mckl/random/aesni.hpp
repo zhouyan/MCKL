@@ -542,31 +542,15 @@ MCKL_DEFINE_RANDOM_AES_KEY_GEN_ASSIST(0xFD, 0xE8)
 MCKL_DEFINE_RANDOM_AES_KEY_GEN_ASSIST(0xFE, 0xCB)
 MCKL_DEFINE_RANDOM_AES_KEY_GEN_ASSIST(0xFF, 0x8D)
 
-template <std::size_t>
-class ARSWeylConstant;
-
-template <>
-class ARSWeylConstant<0> : public std::integral_constant<std::uint64_t,
-                               UINT64_C(0x9E3779B97F4A7C15)>
-{
-}; // class ARSWeylConstant
-
-template <>
-class ARSWeylConstant<1> : public std::integral_constant<std::uint64_t,
-                               UINT64_C(0xBB67AE8584CAA73B)>
-{
-}; // class ARSWeylConstant
-
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Default ARS constants
 /// \ingroup AESNI
 class ARSConstants
 {
     public:
-    /// \brief Weyl constant of the I-th 64-bit element of the key
-    template <std::size_t I>
-    using weyl = internal::ARSWeylConstant<I>;
+    static constexpr std::uint64_t weyl[2] = {
+        UINT64_C(0x9E3779B97F4A7C15), UINT64_C(0xBB67AE8584CAA73B)};
 }; // class ARSConstants
 
 namespace internal
@@ -920,9 +904,6 @@ class AES256KeySeqGenerator
 template <std::size_t Rounds, typename Constants>
 class ARSKeySeqImpl
 {
-    template <std::size_t I>
-    using weyl = typename Constants::template weyl<I>;
-
     public:
     static constexpr std::size_t rounds = Rounds;
 
@@ -946,7 +927,10 @@ class ARSKeySeqImpl
     const std::array<__m128i, rounds + 1> &operator()(
         std::array<__m128i, rounds + 1> &rk) const
     {
-        std::array<std::uint64_t, 2> tmp = {{weyl<0>::value, weyl<1>::value}};
+        static constexpr std::uint64_t w0 = Constants::weyl[0];
+        static constexpr std::uint64_t w1 = Constants::weyl[1];
+
+        std::array<std::uint64_t, 2> tmp = {{w0, w1}};
         __m128i w =
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(tmp.data()));
         std::get<0>(rk) = key_;
