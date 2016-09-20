@@ -51,13 +51,13 @@ in section~\ref{sec:Aligned memory allocation}. In short, they library has
 three implementations for aligned memory allocation. The preferred method is to
 use functions from the \tbb library. It is defined through a class called
 |AlignedMemoryTBB|. This class is only defined if and only if |MCKL_HAS_TBB| is
-true, in which case the runtime library |tbbmalloc| will need to be linked as
-well (|-ltbbmalloc| on \unix-alike systems). However, if it is desirable to
-define this class such that the user can use it with \stl containers, but it is
+true, in which case the runtime library |tbbmalloc| needs to be linked as well
+(|-ltbbmalloc| on \unix-alike systems). However, if it is desirable to define
+this class such that the user can use it with \stl containers, but it is
 undesirable for the library itself to use it everywhere, then one can further
 define the macro |MCKL_USE_TBB_MALLOC| to zero. In this case, the class is
-still defined, but it will not be used by the library. Instead the library will
-now prefer operating system dependent memory allocation functions such as
+still defined, but it is not used by the library. Instead the library now
+prefers operating system dependent memory allocation functions such as
 |posix_memalign|. Now, suppose this is still undesirable, and one wants to use
 a memory allocation function not directly supported by the library. In this
 case, one can implement a aligned memory class (see section~\ref{sec:Aligned
@@ -82,14 +82,14 @@ class AlignedMemoryMKL
 };
 
 // Use a fully qualified name in macro
-// This will avoid any possible name conflicts
+// This avoids any possible name conflicts
 #define MCKL_ALIGNED_MEMORY_TYPE ::AlignedMemoryMKL
 
 // Include MCKL headers
 \end{verbatim}
-In summary, the |MCKL_HAS_| macros affect what will be \emph{defined} by the
-library. The |MCKL_USE_| macros affect what will be \emph{used} by the library.
-And other macros give direct control of the library's implementations. In most
+In summary, the |MCKL_HAS_| macros affect what is \emph{defined} by the
+library. The |MCKL_USE_| macros affect what is \emph{used} by the library. And
+other macros give direct control of the library's implementations. In most
 situations, it is sufficient to use the first two to configure the features of
 the library. The third kind is for more advanced users. Below we details all
 configuration macros.
@@ -103,7 +103,7 @@ The library tries its best to determine the correct values. But in the case of
 errors, define these macros to override the default values.
 
 \paragraph{\texttt{MCKL\_HAS\_X86}} Determine if the \cpu is x86 compatible. In
-few rare occasions the library will use features known to exist on x86 \cpu{}s,
+a few rare occasions the library uses features known to exist on x86 \cpu{}s,
 for example the little-endian memory layout, etc.
 
 \paragraph{\texttt{MCKL\_HAS\_X86\_64}} Determine if the \cpu is x86-64
@@ -187,8 +187,8 @@ true. One can include the following header directly to bypass this check,
 \end{verbatim}
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_CBLAS}} Allow the library to use the
-|mkl_cblas.h| header and assuming that corresponding runtime library will be
-linked for \blas support.
+|mkl_cblas.h| header and assuming that corresponding runtime library is linked
+for \blas support.
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_VML}} Allow the library to accelerate the
 vector functions in section~\ref{sec:Vectorized functions} using the \vml
@@ -201,8 +201,8 @@ component of \mkl.
 interface of \blas. The default is true if and only if |MCKL_USE_MKL_CBLAS| is
 true. Manually defining this macro to true if the header file |cblas.h| is
 available and a compatible runtime library is linked. When this macro is tested
-to be false, the library will declare the \blas Fortran routines in C itself
-(see below).
+to be false, the library declares the \blas Fortran routines in C itself (see
+below).
 
 \paragraph{\texttt{MCKL\_BLAS\_NAME} and
 \texttt{MCKL\_BLAS\_NAME\_NO\_UNDERSCORE}} These two macros determine how shall
@@ -234,8 +234,8 @@ section~\ref{sec:Counter-based RNG} and~\ref{sec:Multiple RNG streams}.
 \paragraph{\texttt{MCKL\_ALIGNMENT}} The default alignment for scalar types,
 such as |int|. More specifically, this affects types such that
 |std::is_scalar<T>| true. The default is~32. This is sufficient for modern
-\simd operations. This will affect the memory allocated by |Vector<T>| on the
-heap. The value must be a power of two and positive.
+\simd operations. This affects the memory allocated by |Vector<T>| on the heap.
+The value must be a power of two and positive.
 
 \paragraph{\texttt{MCKL\_ALIGNMENT\_MIN}} The minimum alignment for all types.
 The default is 16. The value must be a power of two and positive.
@@ -254,11 +254,11 @@ always value initialized. For example,
 \begin{verbatim}
 std::vector<int> v(n);
 \end{verbatim}
-will initialize all values to zero. In contrast,
+initializes all values to zero. In contrast,
 \begin{verbatim}
 Vector<int> v(n);
 \end{verbatim}
-will leave the memory uninitialized. To get zero initialized vectors, one can
+leaves the memory uninitialized. To get zero initialized vectors, one can
 either define this macro to 1, or more efficiently,
 \begin{verbatim}
 Vector<int> v(n);
@@ -276,8 +276,8 @@ types etc., and other constructor of |std::vector|, such as
 Vector<ClassType> c(n);
 Vector<int> v(n, 2);
 \end{verbatim}
-the behavior will be as expected. That is, the first will be default
-initialized and the second will be value initialized.
+the behavior is as expected. That is, the first is default initialized and the
+second is value initialized.
 
 \section{Error handling}
 \label{sec:Error handling}
@@ -285,8 +285,8 @@ initialized and the second will be value initialized.
 \paragraph{\texttt{MCKL\_NO\_RUNTIME\_ASSERT}} Determine if all runtime
 assertions shall be disabled. The default is true if and only if |NDEBUG| is
 defined. Otherwise, it is false. Runtime assertions are hard errors. The
-program will be terminated by |std::exit| upon failure of assertions. These are
-usually errors that will cause undefined behaviors.
+program is terminated by |std::exit| upon failure of assertions. These are
+usually errors that cause undefined behaviors.
 
 \paragraph{\texttt{MCKL\_RUNTIME\_ASSERT\_AS\_EXCEPTION}} Determine if runtime
 assertions shall be turned into exceptions. The exception type is

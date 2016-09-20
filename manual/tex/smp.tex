@@ -125,11 +125,11 @@ class PFWeightSMP : public SamplerEvalSMP<PF>
 This new implementation differs from the one earlier in two places. First, it
 is now a derived class of |SamplerEvalSMP<PF>|. Second, the interface operator,
 which makes the class type convertible to |eval_type| of |Sampler| is removed.
-Now, the loop inside that operator in earlier implementations will be
-parallelized. Still, for this simple function, the performance benefits through
+Now, the loop inside that operator in earlier implementations is parallelized.
+Still, for this simple function, the performance benefits through
 parallelization is minimal. However, in less trivial situations, |eval_each|
 may be substantially more complicated. And the extra effort to decompose the
-implementation into these three functions will be minimal and there can be
+implementation into these three functions is minimal and there can be
 considerable performance advantage.
 
 \subsection{Mutations and weighting}
@@ -143,11 +143,10 @@ class SamplerEvalSMP;
 \end{verbatim}
 The first template parameter is the same as that of |Sampler|. The second
 specifies the polymorphism method. The default is to use virtual functions. We
-will introduce another method later in section~\ref{sec:Static polymorphism}.
-The last one selects the parallel programming models, or ``backends''. The
-default is platform dependent and will be detailed in
-section~\ref{sec:Programming models}. In this section, we will discuss the
-default behavior.
+introduce another method later in section~\ref{sec:Static polymorphism}. The
+last one selects the parallel programming models, or ``backends''. The default
+is platform dependent and is detailed in section~\ref{sec:Programming models}.
+In this section, we discuss the default behavior.
 
 The class template has one public method.
 \begin{verbatim}
@@ -294,22 +293,20 @@ class Eval2 : public Eval<Eval2>
 \end{verbatim}
 Here, |Eval| is a direct derived class of |SamplerEvalSMP|, and it implements
 the |eval_first| method. This method is inherited by |Eval1| and |Eval2|, which
-implement the |eval_each| method. The base class |SamlerEvalSMP| will start
-looking for |eval_first| in |Eval1| and |Eval2|. But it will find it in |Eval|.
-It will find |eval_each| in those two classes. And it will find |eval_last| in
-itself.\footnote{This is not actually true. It will find unimplemented methods
-in its base class. However this is an implementation detail.}
+implement the |eval_each| method. The base class |SamlerEvalSMP| starts looking
+for evaluation methods in |Eval1| and |Eval2|. The |eval_first| method is found
+in |Eval|. The |eval_each| method is found in |Eval1| and |Eval2|. The
+|eval_last| method is found in the base class.
 
 The implementations of methods |eval_each| etc., can be either constant,
-non-constant, or static. This type of use is call \emph{Curiously Recurring
-Template Pattern} (\crtp\footnote{
+non-constant, or static. This type of use is called \emph{Curiously Recurring
+  Template Pattern} (\crtp\footnote{
 \url{https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern}}). The
 key point is that, the template parameter |Derived| tells |SamlerEvalSMP| where
-should it start looking for |eval_each|, etc. And it will cast itself to
-|Derived| if it finds non-static member functions. It will call the methods
-directly if it finds static member functions. The class template
-|SamplerEvalSMP| has \emph{non-virtual} default implementations of these
-methods.
+should it start looking for |eval_each|, etc. And it casts itself to |Derived|
+if it finds non-static member functions. It calls the methods directly if it
+finds static member functions. The class template |SamplerEvalSMP| has
+\emph{non-virtual} default implementations of these methods.
 
 \section{Programming models}
 \label{sec:Programming models}
@@ -352,10 +349,10 @@ class Eval : SamplerEvalSMP<T, Eval, BackendTBB>
 };
 \end{verbatim}
 The argument $G$ passed to |run| above controls the threading such that, each
-thread will process at least $G / 2$ particles. See the documents of \tbb for
-more information of grain size. The additional arguments |args| are passed
-directly as the optional arguments of |tbb::parallel_for|, the partitioner and
-the task group context. See documents of \tbb for more details.
+thread processes at least $G / 2$ particles. See the documents of \tbb for more
+information of grain size. The additional arguments |args| are passed directly
+as the optional arguments of |tbb::parallel_for|, the partitioner and the task
+group context. See documents of \tbb for more details.
 
 \section{Vectorization}
 \label{sec:Vectorization}
@@ -378,9 +375,9 @@ class Eval
     }
 };
 \end{verbatim}
-Later in section~\ref{sec:Vectorized random number generating} we will show
-that the library provides vectorized random numbers generating. For example,
-the above can be written as,
+Later in section~\ref{sec:Vectorized random number generating} we show that the
+library provides vectorized random numbers generating. For example, the above
+can be written as,
 \begin{verbatim}
 class Eval
 {
@@ -415,9 +412,9 @@ class Eval : public SamplerEvalSMP<T>
     }
 };
 \end{verbatim}
-If the such a method is defined, the particle system will first be partitioned
-into multiple disjoint ranges. And each thread will process one of more of such
-ranges. The |eval_range| method has to be thread-safe. If both |eval_range| and
+If the such a method is defined, the particle system is first partitioned into
+multiple disjoint ranges. And each thread processes one of more of such ranges.
+The |eval_range| method has to be thread-safe. If both |eval_range| and
 |eval_each| are defined, the later is ignored.
 
 The class |ParticleRange| is an abstraction of a subset of a particle system.
@@ -452,10 +449,10 @@ for (auto idx : range)
 Special care needs to be taken when using the \tbb backend and |eval_range|
 together. The purpose of using it instead of |eval_each| is to process vectors
 as a whole or to only execute some costly operations only once. For optimal
-performance, the vectors cannot be too short. Otherwise, the performance will
-only be worse than using a loop. It is important to control the grain size.
-Therefore, it is recommended that if one does want to use |eval_range|, then
-one should also redefine the interface operator. For example,
+performance, the vectors cannot be too short. Otherwise, the performance is
+worse than using a loop. It is important to control the grain size. Therefore,
+it is recommended that if one does want to use |eval_range|, then one should
+also redefine the interface operator. For example,
 \begin{verbatim}
 class Eval : public SamplerEvalSMP<T>
 {
@@ -493,7 +490,7 @@ void eval_each(size_t iter, ParticleIndex<T> &idx)
     idx(1) = normal(rng);
 }
 \end{verbatim}
-Whenever possible, the library will use thread-local storage (\tls) to reduce
+Whenever possible, the library uses thread-local storage (\tls) to reduce
 memory usage while still provides thread-safe of the above |rng|. It is more
 efficient to obtain a reference to the thread-local object only once instead of
 calling the |idx.rng()| method everything an \rng engine is needed. This is the
@@ -515,7 +512,7 @@ void eval_range(size_t iter, const ParticleRang<T> &range)
         /* use rng for idx */;
 }
 \end{verbatim}
-Note that, all particles within the range will be processed by a single thread,
-and thus it is safe to use one \rng engine for all of them, unless the for loop
+Note that, all particles within the range are processed by a single thread, and
+thus it is safe to use one \rng engine for all of them, unless the for loop
 above is further parallelized, which may cause performance penalty due to over
 submitting, and thus not recommended.

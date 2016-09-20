@@ -43,7 +43,7 @@ constexpr float pi_f = const_pi<float>();
 constexpr double pi_d = const_pi<double>();
 constexpr long double pi_l = const_pi<long double>();
 \end{verbatim}
-The compiler will evaluate these values at compile-time and thus there is no
+The compiler evaluates these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
 table~\ref{tab:Mathematical constants}.
@@ -89,8 +89,8 @@ Vector<double> b(n);
 Vector<double> y(n);
 fma(n, a.data(), b.data(), 2, y.data());
 \end{verbatim}
-will cause compile-time error because the fourth argument is an integer while
-the others are floating points. The correct call shall be,
+causes compile-time error because the fourth argument is an integer while the
+others are floating points. The correct call shall be,
 \begin{verbatim}
 fma(n, a.data(), b.data(), 2.0, y.data());
 \end{verbatim}

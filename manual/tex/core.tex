@@ -38,10 +38,10 @@ It shall contain the state values $X_{1:N_t}^t$. This class may also contain
 other members that is specific for the model, such as its data set. Next are
 the weights $W_{1:N_t}^t$. These two form the particle system $S_{1:N_t}^t$,
 where $S_i^t = (X_i^t,W_i^t)$. A sampler operates on a particle system to
-produce samples iteratively. A sampler might also use some monitors to
-calculate some estimates $\varphi^t(S_{1:N_t}^t)$ as it progresses. These
-concepts are all abstracted in the library. For brevity, in the following we
-will drop the time dependent index $t$.
+produce samples iteratively. A sampler may also use some monitors to calculate
+some estimates $\varphi^t(S_{1:N_t}^t)$ as it progresses. These concepts are
+all abstracted in the library. For brevity, in the following we drop the time
+dependent index $t$.
 
 \section{State}
 \label{sec:State}
@@ -85,11 +85,11 @@ state.resize_dim(d); // Set dimension
 \end{verbatim}
 The enumerator |Dynamic| above has the value zero. Note that, these methods are
 only available when the template parameter |Dim| is zero. Attempting to call
-these methods when it is positive will result in compile-time errors. Let $p$
-be the minimum of the original and new sample sizes, and $q$ be the minimum of
-the original and new dimensions. All the methods that change the size of the
-matrix will preserve the $p$ by $q$ matrix at the upper left corner of the
-original. It is also possible to get pointers to the raw data,
+these methods when it is positive results in compile-time errors. Let $p$ be
+the minimum of the original and new sample sizes, and $q$ be the minimum of the
+original and new dimensions. All the methods that change the size of the matrix
+preserve the $p$ by $q$ matrix at the upper left corner of the original. It is
+also possible to get pointers to the raw data,
 \begin{verbatim}
 state.data();       // &state(0, 0)
 state.row_data(i);  // &state(i, 0)
@@ -139,7 +139,7 @@ std::vector<ValueType> mat(state.size() * state.dim());
 state.read(RowMajor, mat.begin());
 \end{verbatim}
 The first parameter is matrix layout of the output matrix. There are two more
-methods, whose purpose will become clear later. The first is,
+methods, whose purpose become clear later. The first is,
 \begin{verbatim}
 void duplicate(size_type src, size_type dst);
 \end{verbatim}
@@ -235,15 +235,15 @@ down to the constructor of type |T|. For example,
 using T = StateMatrix<RowMajor, Dynamic, double>;
 Particle<T> particle(N, d);
 \end{verbatim}
-will construct the |StateMatrix| object with arguments |N| and |d|. Therefore,
-|T| must has a constructor that accepts an integer value as its first argument.
-The additional acceptable arguments of the constructor of |Particle| is the
-same as those of |T|. Second, |T| has to provide a |select| method similar to
-that of |StateMatrix|. The library does not impose any restriction on the
-internal structure of |T|. And thus it cannot perform the selection by itself.
-However, for more complicated situations, one can always define a class, say
-|ValueType| to represent the space $E$, and use a one dimension |StateMatrix|
-as the type |T|. For example,
+constructs the |StateMatrix| object with arguments |N| and |d|. Therefore, |T|
+must has a constructor that accepts an integer value as its first argument. The
+additional acceptable arguments of the constructor of |Particle| is the same as
+those of |T|. Second, |T| has to provide a |select| method similar to that of
+|StateMatrix|. The library does not impose any restriction on the internal
+structure of |T|. And thus it cannot perform the selection by itself. However,
+for more complicated situations, one can always define a class, say |ValueType|
+to represent the space $E$, and use a one dimension |StateMatrix| as the type
+|T|. For example,
 \begin{verbatim}
 class ValueType; // User defined type
 using T = StateMatrix<RowMajor, 1, ValueType>;
@@ -276,10 +276,10 @@ returns a reference to an \rng engine, specific to the $i$\ith particle. For $i
 auto &rng_i = particle.rng(i);
 auto &rng_j = particle.rng(j);
 \end{verbatim}
-are called from two different threads, then |rng_i| and |rng_j| will be
-instances of two independent \rng engines. The details are in
-section~\ref{sec:Multiple RNG streams}. The |Particle| class also contains an
-\rng engine independent of any particle,
+are called from two different threads, then |rng_i| and |rng_j| are instances
+of two independent \rng engines. The details are in section~\ref{sec:Multiple
+RNG streams}. The |Particle| class also contains an \rng engine independent of
+any particle,
 \begin{verbatim}
 auto &rng = particle.rng();
 \end{verbatim}
@@ -303,10 +303,10 @@ all call the |resize| method on the type |Weight| object with $M$ as the
 argument. How the type |T| handles the call to the |select| method is up to the
 user. But usually it should behave similarly to that of |StateMatrix|. Below is
 descriptions of each method for resizing a particle system. They differ in how
-they generate the index vector $a_{1:M}$. We will let $N$ denote the original
-sample size. Also, for clarity, in the mathematical description of the vectors,
-we are using indices starting with $1$, while in the actual program, the
-indices starts with zero, as usual.
+they generate the index vector $a_{1:M}$. We use $N$ denote the original sample
+size. Also, for clarity, in the mathematical description of the vectors, we are
+using indices starting with $1$, while in the actual program, the indices
+starts with zero, as usual.
 
 \subsubsection{Resize with given index vectors}
 
@@ -360,17 +360,17 @@ auto new_particle = particle;
 \end{verbatim}
 This creates a new particle system as an exact duplicate of the original.
 However, this ``exactness'' is often undesired. The duplicated particle system
-will have exactly the same states of \rng engines as the original. And
-therefore, any random samples generated from this new system will be exactly
-the same as the original. This is hardly the desired effects in algorithms
-where duplicating a particle system into multiple copies is required. In this
-situation, one can use the |clone| method,
+has exactly the same states of \rng engines as the original. And therefore, any
+random samples generated from this new system are exactly the same as the
+original. This is hardly the desired effects in algorithms where duplicating a
+particle system into multiple copies is required. In this situation, one can
+use the |clone| method,
 \begin{verbatim}
 auto new_particle = particle.clone();
 \end{verbatim}
-In contrast to the copy constructor, this will create a new particle system
-exactly the same as the original, except that all \rng engines within the new
-system is re-seeded.
+In contrast to the copy constructor, this creates a new particle system exactly
+the same as the original, except that all \rng engines within the new system is
+re-seeded.
 
 \subsection{Iterate the particle system}
 \label{sub:Iterate the particle system}
@@ -444,7 +444,7 @@ class T : public Base
 The class |ParticleIndex<T>| derives from |T::particle_index_type<T>| if such a
 member type exists. Otherwise, it has methods as described earlier for any type
 |T|. Therefore, it is possible to give it methods that are more convenient for
-a particular problem. We will see examples later in section~\ref{sec:Example
+a particular problem. Examples can be found later in section~\ref{sec:Example
 (PF)}.
 
 The |ParticleIndex| type can also be used like an random access iterator. For
@@ -460,14 +460,14 @@ idx == jdx; // => i == j;
 \end{verbatim}
 Other comparison operators such as |!=|, |<|, etc., are also defined. Note
 that, comparing or subtracting two indices from two different particles systems
-is meaningless. This will result in runtime errors unless debugging is disabled
+is meaningless. This results in runtime errors unless debugging is disabled
 (see section~\ref{sec:Error handling}). The increment and decrement operators
 follow usual prefix and postfix semantics. However, it is important to note
 that, |ParticleIndex| \emph{is not} an iterator even though it shares many
 common methods. Recall that, |Particle| does not have methods to access $X_i$
 directly. And therefore it is not possible to dereference a |ParticleIndex|
 object to get a reference to $X_i$. Instead, dereferencing an |ParticleIndex|
-object will return a reference to itself. This is similar for the member access
+object returns a reference to itself. This is similar for the member access
 operator and the index operator. For example,
 \begin{verbatim}
 *idx;       // => idx
@@ -530,11 +530,11 @@ assumed that $\varphi$ takes the following form,
 \end{equation*}
 And the output parameter |r| is an $N$ by $d$ row major matrix, with the
 $d$-vector value $\varphi_i(X_i)$ written into each row of this matrix. And
-each time |phi| is called, |Monitor| will compute and store the result of the
+each time |phi| is called, |Monitor| computes and store the result of the
 summation above. The last parameter of the constructor of |Monitor| specifies
-when shall the calculation of $\varphi$ be carried out. We will defer its
-discussion until we introduce the sampler in the next section. The evaluation
-object can be replaced later by the following method,
+when shall the calculation of $\varphi$ be carried out. We defer its discussion
+until we introduce the sampler in the next section. The evaluation object can
+be replaced later by the following method,
 \begin{verbatim}
 void eval(
     const eval_type &e, bool record_only = false, MonitorStage stage = MonitorMCMC);
@@ -602,15 +602,15 @@ For example,
 sampler.eval(eval, SamplerInit | SamplerMove, true);
 \end{verbatim}
 The first argument is the evaluation object. The sampler maintains a sequence
-of evaluation steps. The new evaluation object will be appended to the existing
+of evaluation steps. The new evaluation object is appended to the existing
 sequence. Note that, the order at which these objects being evaluated is the
 same as the one they are added to the sampler. One can clear the sequence by,
 \begin{verbatim}
 sampler.eval_clear();
 \end{verbatim}
-The second argument will be explained in the next section. The sampler can also
-have an optional resampling step. This can be added to the sampler by the
-following method,
+The second argument is explained in the next section. The sampler can also have
+an optional resampling step. This can be added to the sampler by the following
+method,
 \begin{verbatim}
 Sampler<T> &resample_method(
     ResampleScheme scheme, double threshold = resample_threshold_always());
@@ -624,7 +624,7 @@ Sampler<T> &resample_method(
     const eval_type &res_eval, double threshold = resample_threshold_always());
 \end{verbatim}
 In either case, the parameter |threshold| specifies the condition under which
-the resampling step will be actually performed. Let its value be $\alpha$,
+the resampling step is actually performed. Let its value be $\alpha$,
 resampling is performed if and only if $\ess < \alpha N$.
 
 \begin{table}
@@ -667,10 +667,10 @@ The sampler can be initialized,
 \begin{verbatim}
 sampler.initialize();
 \end{verbatim}
-This will perform a few things. First, any record of previous operations on the
-sampler will be cleared. The iteration number $t$ will be set to zero. And
-then, there are three evaluation stages and three monitoring stages. They are
-performed in the following order:
+This performs a few things. First, any record of previous operations on the
+sampler is cleared. The iteration number $t$ is set to zero. And then, there
+are three evaluation stages and three monitoring stages. They are performed in
+the following order:
 
 \begin{enumerate}
   \item |SamplerInit|
@@ -685,15 +685,15 @@ Each evaluation object, added to the sampler through,
 \begin{verbatim}
 Sampler<T> &eval(const eval_type &e, SamplerStage stage);
 \end{verbatim}
-will be evaluated at the |SamplerInit|, etc., steps if the corresponding stage
-is set (i.e., the value of |stage & SamplerInit| is non-zero). Similarly, every
+is evaluated at the |SamplerInit|, etc., steps if the corresponding stage is
+set (i.e., the value of |stage & SamplerInit| is non-zero). Similarly, every
 monitor, constructed by,
 \begin{verbatim}
 Monitor(size_t dim, const eval_type &eval, bool record_only = false,
     MonitorStage stage = MonitorMCMC);
 \end{verbatim}
-will be evaluated if the corresponding stage is the same (e.g., |stage|
-\emph{equal} to |MonitorMove|). The sampler can be iterated,
+is evaluated if the corresponding stage is the same (e.g., |stage| \emph{equal}
+to |MonitorMove|). The sampler can be iterated,
 \begin{verbatim}
 sampler.iterate();  // iterate once
 sampler.iterate(n); // iterate n times
@@ -701,14 +701,14 @@ sampler.iterate(n); // iterate n times
 At each iteration, the steps performed is the same as initialization, except
 that |SamplerInit| is replaced by |SamplerMove|. Therefore, one can distinguish
 between operations for initialization or iteration only, and those for every
-step. We will see an example in the next section.
+step. An example is provided in the next section.
 
 \section{Example}
 \label{sec:Example (PF)}
 
 This is an example used in~\cite{Johansen:2009wd}. Through this example, we
-will show how to implement a simple particle filter. It shall walk one through
-the basic features of the library introduced above.
+show how to implement a simple particle filter. It shall walk one through the
+basic features of the library introduced above.
 
 \subsection{Model and algorithm}
 \label{sub:Model and algorithm}
@@ -778,8 +778,8 @@ is shown in Algorithm~\ref{alg:pf}.
 \subsection{Implementation}
 \label{sub:Implementation (PF)}
 
-We will work through a complete implementation using a top-down approach.
-First, we show the contents |main| function.
+We work through a complete implementation using a top-down approach. First, we
+show the contents |main| function.
 \begin{verbatim}
 const size_t N = 1000;
 Sampler<PF> sampler(N);
@@ -798,11 +798,11 @@ out << sampler;
 out.close();
 \end{verbatim}
 Within the |main| function, a |Sampler| object is first constructed with the
-specified number of particles. Then we configure the sampler. First, it will
-use stratified resampling when $\ess < N / 2$. The sampling step within the
-\emph{Initialization} and \emph{Iteration} in Algorithm~\ref{alg:pf} will be
+specified number of particles. Then we configure the sampler. First, it  uses
+stratified resampling when $\ess < N / 2$. The sampling step within the
+\emph{Initialization} and \emph{Iteration} in Algorithm~\ref{alg:pf} is
 implemented by two functions, |PFInit| and |PFMove|, respectively. The
-weighting is done through the function |PFWeight|. And the estimate will be
+weighting is done through the function |PFWeight|. And the estimate is
 monitored through the function |PFEstimate|. These are added to the sampler
 through the |eval| and |monitor| methods as shown above. It then initialized
 and iterated $n - 1$ times, where $n$ is the total number of observations. In
@@ -831,7 +831,7 @@ class PF : public PFBase
     std::vector<double> obs_y_;
 };
 \end{verbatim}
-The constructor will initialize the observations,
+The constructor initializes the observations,
 \begin{verbatim}
 PF(size_t N) : PFBase(N)
 {
@@ -935,9 +935,9 @@ formulation of the algorithm.
 
 \subsubsection{Weighting}
 
-In each iteration, we will weight the particles using its log-likelihood. This
-will be computed with the |log_likelihood| method of |particle_index_type|
-defined earlier,
+In each iteration, we weight the particles using its log-likelihood. This is
+computed with the |log_likelihood| method of |particle_index_type| defined
+earlier,
 \begin{verbatim}
 void PFWeight(size_t iter, Particle<PF> &particle)
 {
@@ -949,7 +949,7 @@ void PFWeight(size_t iter, Particle<PF> &particle)
 \end{verbatim}
 The last step in the function above add the logarithm of the incremental
 weights to the particle system. Note that, each time the |initialize| method of
-|Sampler| is called, the weights will be set to be equal first. And thus the
+|Sampler| is called, the weights are set to be equal first. And thus the
 function above is correct for both initialization and iterations.
 
 \subsubsection{Estimation}
