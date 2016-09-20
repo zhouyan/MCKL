@@ -81,7 +81,7 @@ inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
 }
 
 template <typename ResultType>
-inline bool ranodm_rng_kat(mckl::Threefish256Engine<ResultType> &rng)
+inline bool random_rng_kat(mckl::Threefish256Engine<ResultType> &rng)
 {
     mckl::Vector<std::uint64_t> k =
         random_rng_kat<std::uint64_t>("random_Threefish256.txt");
@@ -92,7 +92,7 @@ inline bool ranodm_rng_kat(mckl::Threefish256Engine<ResultType> &rng)
 }
 
 template <typename ResultType>
-inline bool ranodm_rng_kat(mckl::Threefish512Engine<ResultType> &rng)
+inline bool random_rng_kat(mckl::Threefish512Engine<ResultType> &rng)
 {
     mckl::Vector<std::uint64_t> k =
         random_rng_kat<std::uint64_t>("random_Threefish512.txt");
@@ -103,7 +103,7 @@ inline bool ranodm_rng_kat(mckl::Threefish512Engine<ResultType> &rng)
 }
 
 template <typename ResultType>
-inline bool ranodm_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
+inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
 {
     mckl::Vector<std::uint64_t> k =
         random_rng_kat<std::uint64_t>("random_Threefish1024.txt");
