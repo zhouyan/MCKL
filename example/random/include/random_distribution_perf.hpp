@@ -38,8 +38,8 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
     using result_type = typename MCKLDistType::result_type;
     using std_type = typename RandomDistributionTrait<MCKLDistType>::std_type;
 
-    mckl::RNG rng;
-    RNG01<mckl::RNG> rng01;
+    mckl::RNGFast rng;
+    RNG01<mckl::RNGFast> rng01;
 #if MCKL_HAS_MKL
     mckl::MKL_MT2203 random_mkl;
 #endif
@@ -115,8 +115,8 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
             pass = pass && r1 != r4;
 #endif
 
-            mckl::RNG rng1(rng);
-            mckl::RNG rng2(rng);
+            mckl::RNGFast rng1(rng);
+            mckl::RNGFast rng2(rng);
             std::stringstream ss;
             ss.precision(20);
             ss << dist_mckl;

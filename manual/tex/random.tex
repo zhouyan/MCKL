@@ -82,8 +82,8 @@ for (size_t i = 0; i != n; ++i)
 Depending on the type of |rng| and the distribution (including its parameters),
 the vectorized function may have superior performance. However, the results
 will not be exactly the same as using a loop, except for the standard uniform
-distributions (\ref{sec:Standard uniform distribution}), which will produce
-exactly the same results.
+distributions (see section~\ref{sec:Standard uniform distribution}), which will
+produce exactly the same results.
 
 For consistency, \mckl also defines variants of the function |rand| for
 generating only one random number,
@@ -112,7 +112,7 @@ the same interface,
 RNGSet<RNG> rng_set(N); // A set of N RNGs
 rng_set.resize(n);      // Change the size of the set
 rng_set[i];             // Get a reference to the i-th RNG
-rng_set.seed();         // Re-seed each RNG in the set
+rng_set.reset();        // Re-seed each RNG in the set
 \end{verbatim}
 The first implementation is |RNGSetScalar|. As its name suggests, it is only a
 wrapper of a single \rng. All calls to |rng_set[i]| returns a reference to the
@@ -128,7 +128,7 @@ the advantage that the behavior of an algorithm can be deterministic and
 reproducible (up to rounding errors) even when the scheduling of parallel
 execution is dynamic, since each sample has its own \rng.
 
-Last, if \tbb is available, there is a third implementation, |RNGSetTBB|, which
+If \tbb is available, there is a third implementation, |RNGSetTBB|, which
 uses thread-local storage (\tls). It has much smaller memory footprint than
 |RNGSetVector| while maintains better thread-safety. The performance impact of
 using \tls is minimal unless the computation at the calling site is trivial. To
@@ -141,6 +141,11 @@ void eval_each(size_t, ParticleIndex<T> idx)
     // Use rng
 }
 \end{verbatim}
+
+Last, an implementation |RNGSetTBBKPI| is provided if \tbb is available. It is
+similar to |RNGSetTBB|. It consumes operating system native \tls keys. It has
+potentially higher performance than |RNGSetTBB|. However, native \tls keys is a
+scarce system resources. So this should be used with care.
 
 The type alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is available,
 otherwise it is defined to be |RNGSetVector|. It is used by the |Particle|
@@ -175,26 +180,18 @@ streams.
 
 Table~\ref{tab:Counter-based RNG} lists all counter-based \rng{}s implemented
 in \mckl, along with the bits of the counter and the key. They all output
-32-bit unsigned integers uniform on the set $\{0,\dots,2^{32}-1\}$. For~64-bit
-output, a suffix~|_64| may be appended to the corresponding \rng engine names.
-For example, |Threefry4x64| and |Threefry4x64_64| both generate the same
-256-bit random integers internally. The only difference is that |operator()| of
-the former returns~32 of those~256 bits each time it is called, while the later
-returns~64 bits.
-
-All \rng{}s in table~\ref{tab:Counter-based RNG} are actually type aliases.
-More generally \mckl defines the following class template as the interface,
-\begin{verbatim}
-template <typename ResultType, typename Generator>
-class CounterEngine;
-\end{verbatim}
-where |ResultType| shall be an unsigned integer type and |Generator| is the
-class that actually implements the algorithms. See the reference manual for
-details of the generator type. For most users, those implemented in the library
-are sufficient. They are introduced in the next few sections. A few
-configuration macros of these generators are listed in
-table~\ref{tab:Configuration macros for counter-based RNG} and will be referred
-to later.
+32-bit unsigned integers uniform on the set $\{0, \dots, 2^{32} - 1\}$.
+For~64-bit output, a suffix~|_64| may be appended to the corresponding \rng
+engine names. For example, |Threefry4x64| and |Threefry4x64_64| both generate
+the same 256-bit random integers internally. The only difference is that
+|operator()| of the former returns~32 of those~256 bits each time it is called,
+while the later returns~64 bits. The performance of these engines depends on a
+few factors, such as \cpu types, compilers, operating systems, etc. In any
+case, the performance is good enough even for the most demanding applications.
+\mckl does not attempt to optimize the algorithm for any particular platform.
+In realistic applications, the performance of \rng is unlikely to become a
+bottle neck. Note that, the best performance is obtained with the vectorized
+|rand| function (see section~\ref{sec:Vectorized random number generating}).
 
 \begin{table}
   \tbfigures
@@ -229,6 +226,51 @@ to later.
   \label{tab:Counter-based RNG}
 \end{table}
 
+Table~\ref{tab:Counter-based RNG type alias} lists a few \rng{}s that are
+merely convenient type aliases to those listed in table~\ref{tab:Counter-based
+RNG}. Type aliases to 64-bit versions of these \rng{}s are also defined. For
+example, |ARS| is a type alias to |ARSx8| while |ARS_64| is a type alias to
+|ARSx8_64|.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{llL}
+    \toprule
+    Type alias & \rng engine & Note \\
+    \midrule
+    \texttt{AES128}   & \texttt{AES128x8}     & \\
+    \texttt{AES192}   & \texttt{AES192x8}     & \\
+    \texttt{AES256}   & \texttt{AES256x8}     & \\
+    \texttt{ARS}      & \texttt{ARSx8}        & \\
+    \texttt{Philox}   & \texttt{Philox4x64}   & \\
+    \texttt{Threefry} & \texttt{Threefry8x64} & \\
+    \texttt{RNG}      & \texttt{MCKL\_RNG\_TYPE}
+    & Default \texttt{Threefry8x64} \\
+    \texttt{RNGFast}  & \texttt{MCKL\_RNG\_FAST\_TYPE}
+    & Default \texttt{ARSx8} if \aesni is supported, otherwise
+    \texttt{Philox4x64} \\
+    \texttt{RNGMini}  & \texttt{MCKL\_RNG\_MINI\_TYPE}
+    & Default \texttt{Philox2x32} \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Counter-based \rng type alias}
+  \label{tab:Counter-based RNG type alias}
+\end{table}
+
+All \rng{}s in table~\ref{tab:Counter-based RNG} are actually type aliases
+themselves. More generally \mckl defines the following class template as the
+interface,
+\begin{verbatim}
+template <typename ResultType, typename Generator>
+class CounterEngine;
+\end{verbatim}
+where |ResultType| shall be an unsigned integer type and |Generator| is the
+class that actually implements the algorithms. See the reference manual for
+details of the generator type. For most users, those implemented in the library
+are sufficient. They are introduced in the next few sections. A few
+configuration macros of these generators are listed in
+table~\ref{tab:Configuration macros for counter-based RNG} and will be referred
+to later.
+
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
     \toprule
@@ -240,9 +282,7 @@ to later.
     \texttt{MCKL\_ARS\_ROUNDS}              & 5  \\
     \texttt{MCKL\_AESNI\_BLOCKS}            & 8  \\
     \texttt{MCKL\_PHILOX\_ROUNDS}           & 10 \\
-    \texttt{MCKL\_PHILOX\_VECTOR\_LENGTH}   & 4  \\
     \texttt{MCKL\_THREEFRY\_ROUNDS}         & 20 \\
-    \texttt{MCKL\_THREEFRY\_VECTOR\_LENGTH} & 4  \\
     \bottomrule
   \end{tabularx}
   \caption{Configuration macros for counter-based \rng}
@@ -257,12 +297,13 @@ to later.
 instructions based \rng{}s in~\cite{Salmon:2011um} are implemented in the
 following generator,
 \begin{verbatim}
-template <typename KeySeqType, size_t Rounds, size_t Blocks>
+template <typename KeySeqType, size_t Rounds, size_t Blocks = MCKL_AESNI_BLOCKS>
 class AESNIGenerator;
 \end{verbatim}
 The corresponding \rng engine is,
 \begin{verbatim}
-template <typename ResultType, typename KeySeqType, size_t Rounds, size_t Blocks>
+template <typename ResultType, typename KeySeqType, size_t Rounds,
+    size_t Blocks = MCKL_AESNI_BLOCKS>
 using AESNIEngine =
     CounterEngine<ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
 \end{verbatim}
@@ -277,13 +318,13 @@ to eight, might improve performance. But this is at the cost of larger state
 size. Without going into details, there are four types of sequence of round
 keys implemented by \mckl,
 \begin{verbatim}
-template <size_t Rounds>
+template <size_t Rounds = MCKL_AES128_ROUNDS>
 using AES128KeySeq = internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
 
-template <size_t Rounds>
+template <size_t Rounds = MCKL_AES192_ROUNDS>
 using AES192KeySeq = internal::AESKeySeq<Rounds, internal::AES192KeySeqGenerator>;
 
-template <size_t Rounds>
+template <size_t Rounds = MCKL_AES256_ROUNDS>
 using AES256KeySeq = internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator>;
 
 template <typename Constants = ARSConstants>
@@ -308,12 +349,13 @@ template <typename ResultType, size_t Rounds = MCKL_ARS_ROUNDS,
 using ARSEngine = AESNIEngine<ResultType, ARSKeySeq<Constants>, Rounds, Blocks>;
 \end{verbatim}
 The first three are equivalent to \aes-128, \aes-192 and \aes-256 block ciphers
-used in counter mode. The last is the \ars algorithm introduced
-by~\cite{Salmon:2011um}. The template parameter |Constants| of |ARSKeySeq| and
-|ARSEngine| is a trait class that defines the constants of the Weyl's sequence.
-See~\cite{Salmon:2011um} for details. The defaults are taken from the paper. To
-use an alternative pair of~64-bit integers as the constants, one can define and
-use a trait class as the following,
+used in counter mode when using the default number of rounds. The last is the
+\ars algorithm introduced by~\cite{Salmon:2011um}. The template parameter
+|Constants| of |ARSKeySeq| and |ARSEngine| is a trait class that defines the
+constants of the Weyl's sequence. See~\cite{Salmon:2011um} for details. The
+defaults are taken from the paper. To use an alternative pair of~64-bit
+integers as the constants, one can define and use a trait class as the
+following,
 \begin{verbatim}
 template <size_t>
 struct NewWeylConstant;
@@ -353,16 +395,9 @@ using ARSx8_64 = ARSEngine<uint64_t, MCKL_ARS_ROUNDS, 8>;
 using ARS      = ARSEngine<uint32_t>;
 using ARS_64   = ARSEngine<uint64_t>;
 \end{verbatim}
-The engine |ARS| is the default \rng if \aesni instructions are supported.
-Aliases for block sizes~1, 2, 4 and~8 are defined for all four algorithms, as
-well as both~32- and~64-bit output variants. These aliases are listed in
-table~\ref{tab:Counter-based RNG}. The performance of these engines depends on
-a few factors, such as \cpu types, compilers, operating systems, etc. In any
-case, the performance is good enough even for the most demanding applications.
-\mckl does not attempt to optimize the algorithm for any particular platform.
-In realistic applications, the performance of \rng is unlikely to become a
-bottle neck. Note that, the best performance is obtained with the vectorized
-|rand| function (see section~\ref{sec:Vectorized random number generating}).
+Type aliases for block sizes~1, 2, 4 and~8 are defined for all four algorithms,
+as well as both~32- and~64-bit output variants. These type aliases are listed
+in table~\ref{tab:Counter-based RNG}.
 
 \subsection{Philox}
 \label{sub:Philox}
@@ -370,26 +405,22 @@ bottle neck. Note that, the best performance is obtained with the vectorized
 The Philox algorithm in~\cite{Salmon:2011um} is implemented in the following
 generator,
 \begin{verbatim}
-template <typename T, size_t K = MCKL_PHILOX_VECTOR_LENGTH,
-    size_t Rounds = MCKL_PHILOX_ROUNDS, typename Constants = PhiloxConstants<T, K>>
+template <typename T, size_t K, size_t Rounds = MCKL_PHILOX_ROUNDS,
+    typename Constants = PhiloxConstants<T, K>>
 class PhiloxGenerator;
 \end{verbatim}
 The corresponding \rng engine is,
 \begin{verbatim}
-template <typename ResultType, typename T = ResultType,
-    size_t K = MCKL_PHILOX_VECTOR_LENGTH, size_t Rounds = MCKL_PHILOX_ROUNDS,
+template <typename ResultType, typename T, size_t K,
+    size_t Rounds = MCKL_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>
 using PhiloxEngine =
     CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
 \end{verbatim}
-The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for
-counter-based RNG}. There is no limit on the template parameter |K| or
-|Rounds|, nor any limitation on |T| except that it has to be an unsigned
-integer type. See~\cite{Salmon:2011um} for the most general form of the
-algorithm. However, \mckl only provides default constants for~32- and~64-bit
-unsigned integer types as |T| and |K| taking the values~2 or~4. These four
-engines are defined as type aliases for convenience,
+See~\cite{Salmon:2011um} for the most general form of the algorithm. \mckl
+provides default constants for~32- and~64-bit unsigned integer types as |T| and
+|K| taking the values~2 or~4. These four engines are defined as type aliases
+for convenience,
 \begin{verbatim}
 template <typename ResultType>
 using Philox2x32Engine = PhiloxEngine<ResultType, uint32_t, 2>;
@@ -404,11 +435,7 @@ template <typename ResultType>
 using Philox4x64Engine = PhiloxEngine<ResultType, uint64_t, 4>;
 \end{verbatim}
 Type aliases for~32- and~64-bit |ResultType| are also defined, as listed in
-table~\ref{tab:Counter-based RNG}. To use the engine with |K| taking values
-larger than four, or |T| being unsigned integer type with the number of bits
-other than~32 or~64, one needs to provide a suitable trait class, |Constant|.
-It is similar to that of |ARSEngine|. See the reference manual of
-|PhiloxConstants| for an example of how to define it.
+table~\ref{tab:Counter-based RNG}.
 
 \subsection{Threefry}
 \label{sub:Threefry}
@@ -416,31 +443,26 @@ It is similar to that of |ARSEngine|. See the reference manual of
 The Threefry algorithm in~\cite{Salmon:2011um} is implemented in the following
 generator,
 \begin{verbatim}
-template <typename T, size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
-    size_t Rounds = MCKL_THREEFRY_ROUNDS,
+template <typename T, size_t K, size_t Rounds = MCKL_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
 class ThreefryGenerator;
 \end{verbatim}
 The corresponding \rng engine is,
 \begin{verbatim}
-template <typename ResultType, typename T = ResultType,
-    size_t K = MCKL_THREEFRY_VECTOR_LENGTH, size_t Rounds = MCKL_THREEFRY_ROUNDS,
+template <typename ResultType, typename T, size_t K,
+    size_t Rounds = MCKL_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
 using ThreefryEngine =
     CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
 \end{verbatim}
-The default vector length and the number of rounds can be changed by
-configuration macros listed in table~\ref{tab:Configuration macros for
-counter-based RNG}. Similar to the implementation of the Philox algorithm,
-there is no limit on the template parameter |K| or |Rounds| as long as a
-suitable trait class |Constant| is provided. \mckl provides default constants
-for~64-bit unsigned integer type as |T| and |K| taking the values~4, 8 and~16,
-taken from the skein\footnote{\url{http://www.skein-hash.info}} hash algorithm,
-for which the Threefish algorithm was originally developed for. Defaults for
-32-bit |T| or |K| taking the value~2 are also provided, taken
-from~\cite{Salmon:2011um}. Type aliases for these configurations are defined
-for convenience, Type aliases for~32- and~64-bit |ResultType| are also defined,
-as listed in table~\ref{tab:Counter-based RNG}.
+\mckl provides default constants for~64-bit unsigned integer type as |T| and
+|K| taking the values~4, 8 and~16, taken from the
+skein\footnote{\url{http://www.skein-hash.info}} hash algorithm, for which the
+Threefish algorithm was originally developed for. Defaults for 32-bit |T| or
+|K| taking the value~2 are also provided, taken from~\cite{Salmon:2011um}. Type
+aliases for these configurations are defined for convenience, Type aliases
+for~32- and~64-bit |ResultType| are also defined, as listed in
+table~\ref{tab:Counter-based RNG}.
 \begin{verbatim}
 template <typename ResultType>
 using Threefry2x32Engine = ThreefryEngine<ResultType, uint32_t, 2>;
@@ -469,8 +491,10 @@ using Threefish512Engine = ThreefryEngine<ResultType, std::uint64_t, 8, 72>;
 template <typename ResultType>
 using Threefish1024Engine = ThreefryEngine<ResultType, std::uint64_t, 16, 80>;
 \end{verbatim}
-Note that, the last three are equivalent to Threefish-256, Threefish-512 and
-Threefish-1024 block ciphers without tweaks used in counter mode.
+Type aliases for~32- and~64-bit |ResultType| are also defined, as listed in
+table~\ref{tab:Counter-based RNG}. Note that, the last three are equivalent to
+Threefish-256, Threefish-512 and Threefish-1024 block ciphers without tweaks
+used in counter mode.
 
 \subsection{Seeding counter-based \texorpdfstring{\rng}{RNG}}
 \label{sub:Seeding counter-based RNG}
@@ -658,7 +682,7 @@ template <typename RealType = double>
 class U01Distribution;
 \end{verbatim}
 implements the uniform distribution on $[0, 1)$. If |MCKL_U01_USE_FIXED_POINT|
-  is true, which is the default, then it is an alias to |U01CODistribution|
+  is true, which is the default, then it is a type alias to |U01CODistribution|
   (section~\ref{sub:Closed-open interval}). Otherwise, it is implemented
   through the mapping,
 \begin{equation*}
@@ -1350,8 +1374,8 @@ The template,
 template <size_t D, size_t T, bool Overlap>
 using SerialTest = internal::SerialTestImpl<D, T, Overlap && 1 < T>;
 \end{verbatim}
-is an alias to implementations of the serial tests with independent (|Overlap|
-is false) or overlapping tuples (|Overlap| is true) as described
+is a type alias to implementations of the serial tests with independent
+(|Overlap| is false) or overlapping tuples (|Overlap| is true) as described
 by~\cite[pp.~62]{Knuth:1997us} and~\cite[ex.~24, pp.~78]{Knuth:1997us},
 respectively. The constructor,
 \begin{verbatim}
@@ -1433,9 +1457,9 @@ The templates,
 template <bool Indepenent, bool Up = true>
 using RunTest = internal::RunTestImpl<Independent, Up>;
 \end{verbatim}
-is an alias to implementations of the run tests with dependent or independent
-tuples as described by~\cite[pp.~66]{Knuth:1997us} and~\cite[ex.~14,
-pp.~77]{Knuth:1997us}, respectively. The constructors,
+is a type alias to implementations of the run tests with dependent or
+independent tuples as described by~\cite[pp.~66]{Knuth:1997us}
+and~\cite[ex.~14, pp.~77]{Knuth:1997us}, respectively. The constructors,
 \begin{verbatim}
 RunTest<Independent, Up> test(n);
 \end{verbatim}

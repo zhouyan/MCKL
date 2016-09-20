@@ -60,12 +60,6 @@
 #define MCKL_PHILOX_ROUNDS 10
 #endif
 
-/// \brief PhiloxGenerator default vector length
-/// \ingroup Config
-#ifndef MCKL_PHILOX_VECTOR_LENGTH
-#define MCKL_PHILOX_VECTOR_LENGTH 4
-#endif
-
 namespace mckl
 {
 
@@ -396,8 +390,7 @@ class PhiloxPBox<T, 8, N, true>
 /// This generator implement the Philox algorithm in
 /// [Random123](http://www.deshawresearch.com/resources_random123.html),
 /// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
-template <typename T, std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
-    std::size_t Rounds = MCKL_PHILOX_ROUNDS,
+template <typename T, std::size_t K, std::size_t Rounds = MCKL_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>
 class PhiloxGenerator
 {
@@ -423,7 +416,7 @@ class PhiloxGenerator
     void enc(const ctr_type &ctr, ctr_type &buffer)
     {
         union {
-            std::array<T,K> state;
+            std::array<T, K> state;
             ctr_type result;
         } buf;
 
@@ -539,8 +532,7 @@ class PhiloxGenerator
 
 /// \brief Philox RNG engine
 /// \ingroup Philox
-template <typename ResultType, typename T = ResultType,
-    std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
+template <typename ResultType, typename T, std::size_t K,
     std::size_t Rounds = MCKL_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>
 using PhiloxEngine =
@@ -600,11 +592,11 @@ using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
 /// \brief The default 32-bit Philox engine
 /// \ingroup Philox
-using Philox = Philox4x64Engine<std::uint32_t>;
+using Philox = Philox4x64;
 
 /// \brief The default 64-bit Philox engine
 /// \ingroup Philox
-using Philox_64 = Philox4x64Engine<std::uint64_t>;
+using Philox_64 = Philox4x64_64;
 
 } // namespace mckl
 

@@ -97,7 +97,7 @@ while (my ($basename, $name) = each %distribution) {
     my @dist = split "\n", $distribution{$basename};
     my @cpe = split "\n", $cpe{$basename};
     my $wid = 0;
-    foreach (@dist) {
+    for (@dist) {
         if ($wid < length($_)) {
             $wid = length($_);
         }
@@ -108,11 +108,11 @@ while (my ($basename, $name) = each %distribution) {
     $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= 'Distribution & \std & \mckl & \textsc{batch} & \mkl';
+    $table .= 'Distribution & \std & \mckl & \batch & \mkl';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
-    foreach (@dist) {
+    for (@dist) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $dist[$index];
         $table .= $cpe[$index];

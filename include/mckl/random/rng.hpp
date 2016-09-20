@@ -35,22 +35,32 @@
 #include <mckl/internal/config.h>
 
 /// \brief Default `RNG` type
-/// \ingroup Config
 #ifndef MCKL_RNG_TYPE
-#if MCKL_HAS_AESNI
-#define MCKL_RNG_TYPE ::mckl::ARS
-#else
-#define MCKL_RNG_TYPE ::mckl::Threefry
-#endif
+#define MCKL_RNG_TYPE ::mckl::Threefry8x64
 #endif
 
 /// \brief Default `RNG_64` type
-/// \ingroup Config
 #ifndef MCKL_RNG_64_TYPE
+#define MCKL_RNG_64_TYPE ::mckl::Threefry8x64_64
+#endif
+
+/// \brief Default `RNGFast` type
+/// \ingroup Config
+#ifndef MCKL_RNG_FAST_TYPE
 #if MCKL_HAS_AESNI
-#define MCKL_RNG_64_TYPE ARS_64
+#define MCKL_RNG_FAST_TYPE ::mckl::ARSx8
 #else
-#define MCKL_RNG_64_TYPE Threefry_64
+#define MCKL_RNG_FAST_TYPE ::mckl::Philox4x64
+#endif
+#endif
+
+/// \brief Default `RNGFast_64` type
+/// \ingroup Config
+#ifndef MCKL_RNG_FAST_64_TYPE
+#if MCKL_HAS_AESNI
+#define MCKL_RNG_FAST_64_TYPE ::mckl::ARSx8_64
+#else
+#define MCKL_RNG_FAST_64_TYPE ::mckl::Philox4x64_64
 #endif
 #endif
 
@@ -91,6 +101,12 @@ using RNG = MCKL_RNG_TYPE;
 /// \brief The default 64-bit RNG
 /// \ingroup Random
 using RNG_64 = MCKL_RNG_64_TYPE;
+
+/// \brief The 32-bit RNG with fast generation
+using RNGFast = MCKL_RNG_FAST_TYPE;
+
+/// \brief The 64-bit RNG with fast generation
+using RNGFast_64 = MCKL_RNG_FAST_64_TYPE;
 
 /// \brief The 32-bit RNG with smallest state
 /// \ingroup Random

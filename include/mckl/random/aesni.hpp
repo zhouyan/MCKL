@@ -82,7 +82,8 @@ namespace mckl
 
 /// \brief RNG generator using AES-NI instructions
 /// \ingroup AESNI
-template <typename KeySeqType, std::size_t Rounds, std::size_t Blocks>
+template <typename KeySeqType, std::size_t Rounds,
+    std::size_t Blocks = MCKL_AESNI_BLOCKS>
 class AESNIGenerator
 {
     static_assert(
@@ -290,7 +291,7 @@ class AESNIGenerator
 /// \brief RNG engine using AES-NI instructions
 /// \ingroup AESNI
 template <typename ResultType, typename KeySeqType, std::size_t Rounds,
-    std::size_t Blocks>
+    std::size_t Blocks = MCKL_AESNI_BLOCKS>
 using AESNIEngine =
     CounterEngine<ResultType, AESNIGenerator<KeySeqType, Rounds, Blocks>>;
 
@@ -1038,19 +1039,19 @@ class ARSKeySeqImpl
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AESNI
-template <std::size_t Rounds>
+template <std::size_t Rounds = MCKL_AES128_ROUNDS>
 using AES128KeySeq =
     internal::AESKeySeq<Rounds, internal::AES128KeySeqGenerator>;
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AESNI
-template <std::size_t Rounds>
+template <std::size_t Rounds = MCKL_AES192_ROUNDS>
 using AES192KeySeq =
     internal::AESKeySeq<Rounds, internal::AES192KeySeqGenerator>;
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AESNI
-template <std::size_t Rounds>
+template <std::size_t Rounds = MCKL_AES256_ROUNDS>
 using AES256KeySeq =
     internal::AESKeySeq<Rounds, internal::AES256KeySeqGenerator>;
 
@@ -1128,11 +1129,11 @@ using AES128x4_64 = AES128Engine<std::uint64_t, MCKL_AES128_ROUNDS, 4>;
 using AES128x8_64 = AES128Engine<std::uint64_t, MCKL_AES128_ROUNDS, 8>;
 
 /// \brief AES-128 RNG engine with 32-bit integers output
-using AES128 = AES128Engine<std::uint32_t>;
+using AES128 = AES128x8;
 
 /// \brief AES-128 RNG engine with 64-bit integers output
 /// \ingroup AESNI
-using AES128_64 = AES128Engine<std::uint64_t>;
+using AES128_64 = AES128x8_64;
 
 /// \brief AES-192 RNG engine with 32-bit integers output, 1 block
 /// \ingroup AESNI
@@ -1168,11 +1169,11 @@ using AES192x8_64 = AES192Engine<std::uint64_t, MCKL_AES192_ROUNDS, 8>;
 
 /// \brief AES-192 RNG engine with 32-bit integers output
 /// \ingroup AESNI
-using AES192 = AES192Engine<std::uint32_t>;
+using AES192 = AES192x8;
 
 /// \brief AES-192 RNG engine with 64-bit integers output
 /// \ingroup AESNI
-using AES192_64 = AES192Engine<std::uint64_t>;
+using AES192_64 = AES192x8_64;
 
 /// \brief AES-256 RNG engine with 32-bit integers output, 1 block
 /// \ingroup AESNI
@@ -1208,11 +1209,11 @@ using AES256x8_64 = AES256Engine<std::uint64_t, MCKL_AES256_ROUNDS, 8>;
 
 /// \brief AES-256 RNG engine with 32-bit integers output
 /// \ingroup AESNI
-using AES256 = AES256Engine<std::uint32_t>;
+using AES256 = AES256x8;
 
 /// \brief AES-256 RNG engine with 64-bit integers output
 /// \ingroup AESNI
-using AES256_64 = AES256Engine<std::uint64_t>;
+using AES256_64 = AES256x8_64;
 
 /// \brief ARS RNG engine with 32-bit integers output, 1 block and default
 /// rounds
@@ -1257,12 +1258,12 @@ using ARSx8_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 8>;
 /// \brief ARS RNG engine with 32-bit integers output, default blocks and
 /// default rounds
 /// \ingroup AESNI
-using ARS = ARSEngine<std::uint32_t>;
+using ARS = ARSx8;
 
 /// \brief ARS RNG engine with 64-bit integers output, default blocks and
 /// default rounds
 /// \ingroup AESNI
-using ARS_64 = ARSEngine<std::uint64_t>;
+using ARS_64 = ARSx8_64;
 
 } // namespace mckl
 

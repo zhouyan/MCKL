@@ -62,12 +62,6 @@
 #define MCKL_THREEFRY_ROUNDS 20
 #endif
 
-/// \brief ThreefryGenerator default vector length
-/// \ingroup Config
-#ifndef MCKL_THREEFRY_VECTOR_LENGTH
-#define MCKL_THREEFRY_VECTOR_LENGTH 4
-#endif
-
 namespace mckl
 {
 
@@ -285,20 +279,43 @@ class ThreefryConstants
     /// \brief Rotate constant of I-th S-box of round `(N - 1) % 8`
     template <std::size_t N, std::size_t I>
     using rotate = internal::ThreefryRotateConstant<T, K, N, I>;
+
+    /// \brief Permutation constant of I-th element
+    template <std::size_t I>
+    using permute = internal::ThreefryPermuteConstant<K, I>;
 }; // class ThreefryConstants
 
 namespace internal
 {
 
-template <typename T, std::size_t K, std::size_t N, bool = (N % 4 == 0)>
-class ThreefryInsertKey
+template <std::size_t N, std::size_t I, typename Constants>
+class ThreefryIndex
+{
+    template <std::size_t J>
+    using permute = typename Constants::template permute<J>;
+
+    public:
+    static constexpr std::size_t value =
+        ThreefryIndex<N - 1, permute<I>::value, Constants>::value;
+}; // class ThreefryIndex
+
+template <std::size_t I, typename Constants>
+class ThreefryIndex<0, I, Constants>
+{
+    public:
+    static constexpr std::size_t value = I;
+}; // class ThreefryIndex
+
+template <typename T, std::size_t K, std::size_t N, typename,
+    bool = (N % 4 == 0)>
+class ThreefrySubKey
 {
     public:
     static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
-}; // class ThreefryInsertKey
+}; // class ThreefrySubKey
 
-template <typename T, std::size_t K, std::size_t N>
-class ThreefryInsertKey<T, K, N, true>
+template <typename T, std::size_t K, std::size_t N, typename Constants>
+class ThreefrySubKey<T, K, N, Constants, true>
 {
     public:
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
@@ -308,6 +325,9 @@ class ThreefryInsertKey<T, K, N, true>
     }
 
     private:
+    template <std::size_t I>
+    using index = ThreefryIndex<N, I, Constants>;
+
     static constexpr std::size_t s_ = N / 4;
 
     template <std::size_t>
@@ -320,10 +340,12 @@ class ThreefryInsertKey<T, K, N, true>
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
         std::true_type)
     {
-        std::get<I>(state) += std::get<(s_ + I) % (K + 1)>(par);
+        static constexpr std::size_t J = index<I>::value;
+
+        std::get<J>(state) += std::get<(s_ + J) % (K + 1)>(par);
         eval<I + 1>(state, par, std::integral_constant<bool, I + 1 < K>());
     }
-}; // class ThreefryInsertKey
+}; // class ThreefrySubKey
 
 template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
 class ThreefrySBox
@@ -345,6 +367,9 @@ class ThreefrySBox<T, K, N, Constants, true>
     template <std::size_t I>
     using rotate = typename Constants::template rotate<(N - 1) % 8, I>;
 
+    template <std::size_t I>
+    using index = ThreefryIndex<N - 1, I, Constants>;
+
     template <std::size_t>
     static void eval(std::array<T, K> &, std::false_type)
     {
@@ -355,34 +380,37 @@ class ThreefrySBox<T, K, N, Constants, true>
     {
         static constexpr int L = rotate<I / 2>::value;
         static constexpr int R = std::numeric_limits<T>::digits - L;
+        static constexpr std::size_t I0 = index<I>::value;
+        static constexpr std::size_t I1 = index<I + 1>::value;
 
-        T x = std::get<I + 1>(state);
-        std::get<I>(state) += x;
-        std::get<I + 1>(state) = (x << L) | (x >> R);
-        std::get<I + 1>(state) ^= std::get<I>(state);
+        T x = std::get<I1>(state);
+        std::get<I0>(state) += x;
+        std::get<I1>(state) = (x << L) | (x >> R);
+        std::get<I1>(state) ^= std::get<I0>(state);
         eval<I + 2>(state, std::integral_constant<bool, I + 3 < K>());
     }
 }; // class ThreefrySBox
 
-template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
 class ThreefryPBox
 {
     public:
-    static void eval(std::array<T, K> &) {}
+    static void eval(const std::array<T, K> &, std::array<T, K> &) {}
 }; // class ThreefryPBox
 
-template <typename T, std::size_t K, std::size_t N>
-class ThreefryPBox<T, K, N, true>
+template <typename T, std::size_t K, std::size_t N, typename Constants>
+class ThreefryPBox<T, K, N, Constants, true>
 {
     public:
-    static void eval(std::array<T, K> &state)
+    static void eval(const std::array<T, K> &state, std::array<T, K> &buffer)
     {
-        std::array<T, K> tmp;
-        eval<0>(state, tmp, std::integral_constant<bool, 0 < K>());
-        std::memcpy(state.data(), tmp.data(), sizeof(T) * K);
+        eval<0>(state, buffer, std::integral_constant<bool, 0 < N>());
     }
 
     private:
+    template <std::size_t I>
+    using index = ThreefryIndex<N, I, Constants>;
+
     template <std::size_t>
     static void eval(
         const std::array<T, K> &, std::array<T, K> &, std::false_type)
@@ -390,45 +418,11 @@ class ThreefryPBox<T, K, N, true>
     }
 
     template <std::size_t I>
-    static void eval(
-        const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
+    static void eval(const std::array<T, K> &state, std::array<T, K> &buffer,
+        std::true_type)
     {
-        static constexpr std::size_t J = ThreefryPermuteConstant<K, I>::value;
-
-        std::get<I>(tmp) = std::get<J>(state);
-        eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
-    }
-}; // class ThreefryPBox
-
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 2, N, true>
-{
-    public:
-    static void eval(std::array<T, 2> &) {}
-}; // class ThreefryPBox
-
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 4, N, true>
-{
-    public:
-    static void eval(std::array<T, 4> &state)
-    {
-        std::swap(std::get<1>(state), std::get<3>(state));
-    }
-}; // class ThreefryPBox
-
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 8, N, true>
-{
-    public:
-    static void eval(std::array<T, 8> &state)
-    {
-        std::swap(std::get<3>(state), std::get<7>(state));
-        T x = std::get<0>(state);
-        std::get<0>(state) = std::get<2>(state);
-        std::get<2>(state) = std::get<4>(state);
-        std::get<4>(state) = std::get<6>(state);
-        std::get<6>(state) = x;
+        std::get<I>(buffer) = std::get<index<I>::value>(state);
+        eval<I + 1>(state, buffer, std::integral_constant<bool, I + 1 < K>());
     }
 }; // class ThreefryPBox
 
@@ -448,8 +442,7 @@ class ThreefryPBox<T, 8, N, true>
 /// This generator implement the Threefry algorithm in
 /// [Random123](http://www.deshawresearch.com/resources_random123.html),
 /// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
-template <typename T, std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
-    std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
+template <typename T, std::size_t K, std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
 class ThreefryGenerator
 {
@@ -486,8 +479,14 @@ class ThreefryGenerator
 
     void enc(const ctr_type &ctr, ctr_type &buffer) const
     {
-        buffer = ctr;
-        generate<0>(buffer, par_, std::true_type());
+        union {
+            std::array<T, K> state;
+            ctr_type result;
+        } buf;
+
+        buf.result = ctr;
+        generate<0>(buf.state, par_, std::true_type());
+        permute(buf.state, buffer);
     }
 
     template <typename ResultType>
@@ -503,7 +502,7 @@ class ThreefryGenerator
         increment(ctr);
         buf.ctr = ctr;
         generate<0>(buf.state, par_, std::true_type());
-        buffer = buf.result;
+        permute(buf.state, buffer);
     }
 
     template <typename ResultType>
@@ -520,7 +519,7 @@ class ThreefryGenerator
             increment(ctr);
             buf.ctr = ctr;
             generate<0>(buf.state, par_, std::true_type());
-            buffer[i] = buf.result;
+            permute(buf.state, buffer[i]);
         }
     }
 
@@ -578,10 +577,30 @@ class ThreefryGenerator
         std::true_type) const
     {
         internal::ThreefrySBox<T, K, N, Constants>::eval(state);
-        internal::ThreefryPBox<T, K, N>::eval(state);
-        internal::ThreefryInsertKey<T, K, N>::eval(state, par);
+        internal::ThreefrySubKey<T, K, N, Constants>::eval(state, par);
         generate<N + 1>(
             state, par, std::integral_constant<bool, (N < Rounds)>());
+    }
+
+    template <typename U, std::size_t L>
+    void permute(const std::array<T, K> &state, std::array<U, L> &buffer) const
+    {
+        permute(state, buffer, std::is_same<T, U>());
+    }
+
+    void permute(const std::array<T, K> &state, std::array<T, K> &buffer,
+        std::true_type) const
+    {
+        internal::ThreefryPBox<T, K, Rounds, Constants>::eval(state, buffer);
+    }
+
+    template <typename U, std::size_t L>
+    void permute(const std::array<T, K> &state, std::array<U, L> &buffer,
+        std::false_type) const
+    {
+        std::array<T, K> tmp;
+        permute(state, tmp);
+        std::memcpy(buffer.data(), tmp.data(), sizeof(T) * K);
     }
 
     private:
@@ -590,8 +609,7 @@ class ThreefryGenerator
 
 /// \brief Threefry RNG engine
 /// \ingroup Threefry
-template <typename ResultType, typename T = ResultType,
-    std::size_t K = MCKL_THREEFRY_VECTOR_LENGTH,
+template <typename ResultType, typename T, std::size_t K,
     std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
 using ThreefryEngine =
@@ -713,11 +731,11 @@ using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
 
 /// \brief The default 32-bit Threefry engine
 /// \ingroup Threefry
-using Threefry = Threefry4x64Engine<std::uint32_t>;
+using Threefry = Threefry8x64;
 
 /// \brief The default 64-bit Threefry engine
 /// \ingroup Threefry
-using Threefry_64 = Threefry4x64Engine<std::uint64_t>;
+using Threefry_64 = Threefry8x64_64;
 
 } // namespace mckl
 

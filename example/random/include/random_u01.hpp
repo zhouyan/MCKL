@@ -142,7 +142,7 @@ template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline void random_u01(
     std::size_t N, std::size_t M, int nwid, int swid, int twid)
 {
-    mckl::ThreefryEngine<UIntType> rng;
+    mckl::ThreefryEngine<UIntType, UIntType, 4> rng;
     mckl::Vector<UIntType> u(N);
     mckl::Vector<RealType> r(N);
     mckl::Vector<RealType> r1(N);

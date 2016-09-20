@@ -44,7 +44,7 @@ my @llvm_txt = &read('llvm');
 my @gnu_txt = &read('gnu');
 my @intel_txt = &read('intel');
 
-foreach (@rngs) {
+for (@rngs) {
     open my $texfile, '>', "random_rng_\L$_.tex";
     print $texfile &table(
         &filter($_, @llvm_txt),
@@ -55,7 +55,9 @@ foreach (@rngs) {
 sub read
 {
     open my $txtfile, '<', "random_rng_$_[0].txt";
-    my @txt = <$txtfile>;
+    my @txt = grep { $_ =~ /Passed|Failed/ } <$txtfile>;
+    open $txtfile, '>', "random_rng_$_[0].txt";
+    print $txtfile @txt;
     @txt
 }
 
@@ -63,9 +65,7 @@ sub filter
 {
     my $rng = shift @_;
     my $record;
-    foreach (@_) {
-        next if (!/Passed|Failed/);
-
+    for (@_) {
         my ($name, $size, $cpb1, $cpb2) = (split)[0, 1, 5, 6];
         if ($rng eq 'STD') {
             next unless "@std" =~ /$name/;
@@ -94,10 +94,10 @@ sub table
     my @cpb1;
     my @cpb2;
     my $wid = 0;
-    foreach (@_) {
+    for (@_) {
         my @lines = split "\n", $_;
         my $index = 0;
-        foreach (@lines) {
+        for (@lines) {
             my @record = split;
             my $name = $record[0];
             my $size = $record[1];
@@ -118,17 +118,17 @@ sub table
     $table .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= '& & \multicolumn{3}{c}{\textsc{loop}} ';
-    $table .= '& \multicolumn{3}{c}{\textsc{batch}}';
+    $table .= '& & \multicolumn{3}{c}{\single} ';
+    $table .= '& \multicolumn{3}{c}{\batch}';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\cmidrule(lr){3-5}\cmidrule(lr){6-8}' . "\n";
     $table .= ' ' x 2 . '\rng & Size';
-    $table .= ' & \llvm & \gnu & \textsc{intel}';
-    $table .= ' & \llvm & \gnu & \textsc{intel}';
+    $table .= ' & \llvm & \gnu & \intel';
+    $table .= ' & \llvm & \gnu & \intel';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
     my $index = 0;
-    foreach (@name) {
+    for (@name) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $name[$index];
         $table .= sprintf " & %-6s", $size[$index];
