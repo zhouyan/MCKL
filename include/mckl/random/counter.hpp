@@ -567,6 +567,7 @@ class Seed<CounterEngine<ResultType, Generator>>
     {
         result_type s = seed_.fetch_add(1);
         key_type k;
+        std::fill(k.begin(), k.end(), 0);
         k.front() = s + 1;
         k.back() = remainder_;
 
@@ -577,6 +578,7 @@ class Seed<CounterEngine<ResultType, Generator>>
     {
         result_type s = seed_.fetch_add(1);
         key_type k;
+        std::fill(k.begin(), k.end(), 0);
         k.front() = (s % max_ + 1) * divisor_ + remainder_;
 
         return k;
