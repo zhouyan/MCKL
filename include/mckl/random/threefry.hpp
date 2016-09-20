@@ -621,6 +621,18 @@ using Threefry8x64Engine = ThreefryEngine<ResultType, std::uint64_t, 8>;
 template <typename ResultType>
 using Threefry16x64Engine = ThreefryEngine<ResultType, std::uint64_t, 16>;
 
+/// \brief Threefish-256 RNG engine
+template <typename ResultType>
+using Threefish256Engine = ThreefryEngine<ResultType, std::uint64_t, 4, 72>;
+
+/// \brief Threefish-512 RNG engine
+template <typename ResultType>
+using Threefish512Engine = ThreefryEngine<ResultType, std::uint64_t, 8, 72>;
+
+/// \brief Threefish-1024 RNG engine
+template <typename ResultType>
+using Threefish1024Engine = ThreefryEngine<ResultType, std::uint64_t, 16, 80>;
+
 /// \brief Threefry2x32 RNG engine with 32-bit integer output
 /// \ingroup Threefry
 using Threefry2x32 = Threefry2x32Engine<std::uint32_t>;
@@ -645,6 +657,18 @@ using Threefry8x64 = Threefry8x64Engine<std::uint32_t>;
 /// \ingroup Threefry
 using Threefry16x64 = Threefry16x64Engine<std::uint32_t>;
 
+/// \brief Threefish-256 RNG engine with 32-bit integer output
+/// \ingroup Threefry
+using Threefish256 = Threefish256Engine<std::uint32_t>;
+
+/// \brief Threefish-512 RNG engine with 32-bit integer output
+/// \ingroup Threefry
+using Threefish512 = Threefish512Engine<std::uint32_t>;
+
+/// \brief Threefish-1024 RNG engine with 32-bit integer output
+/// \ingroup Threefry
+using Threefish1024 = Threefish1024Engine<std::uint32_t>;
+
 /// \brief Threefry2x32 RNG engine with 64-bit integer output
 /// \ingroup Threefry
 using Threefry2x32_64 = Threefry2x32Engine<std::uint64_t>;
@@ -668,6 +692,18 @@ using Threefry8x64_64 = Threefry8x64Engine<std::uint64_t>;
 /// \brief Threefry16x64 RNG engine with 64-bit integer output
 /// \ingroup Threefry
 using Threefry16x64_64 = Threefry16x64Engine<std::uint64_t>;
+
+/// \brief Threefish-256 RNG engine with 64-bit integer output
+/// \ingroup Threefry
+using Threefish256_64 = Threefish256Engine<std::uint64_t>;
+
+/// \brief Threefish-512 RNG engine with 64-bit integer output
+/// \ingroup Threefry
+using Threefish512_64 = Threefish512Engine<std::uint64_t>;
+
+/// \brief Threefish-1024 RNG engine with 64-bit integer output
+/// \ingroup Threefry
+using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
 
 /// \brief The default 32-bit Threefry engine
 /// \ingroup Threefry

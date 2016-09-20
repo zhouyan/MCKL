@@ -220,6 +220,9 @@ to later.
     \texttt{Threefry4x64}  & 256  & 256  \\
     \texttt{Threefry8x64}  & 512  & 512  \\
     \texttt{Threefry16x64} & 1024 & 1024 \\
+    \texttt{Threefish256}  & 256  & 256  \\
+    \texttt{Threefish512}  & 512  & 512  \\
+    \texttt{Threefish1024} & 1024 & 1024 \\
     \bottomrule
   \end{tabularx}
   \caption{Counter-based \rng}
@@ -456,7 +459,18 @@ using Threefry8x64Engine = ThreefryEngine<ResultType, uint64_t, 8>;
 
 template <typename ResultType>
 using Threefry16x64Engine = ThreefryEngine<ResultType, uint64_t, 16>;
+
+template <typename ResultType>
+using Threefish256Engine = ThreefryEngine<ResultType, std::uint64_t, 4, 72>;
+
+template <typename ResultType>
+using Threefish512Engine = ThreefryEngine<ResultType, std::uint64_t, 8, 72>;
+
+template <typename ResultType>
+using Threefish1024Engine = ThreefryEngine<ResultType, std::uint64_t, 16, 80>;
 \end{verbatim}
+Note that, the last three are equivalent to Threefish-256, Threefish-512 and
+Threefish-1024 block ciphers without tweaks used in counter mode.
 
 \subsection{Seeding counter-based \texorpdfstring{\rng}{RNG}}
 \label{sub:Seeding counter-based RNG}

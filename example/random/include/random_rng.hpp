@@ -54,8 +54,8 @@ inline bool random_rng_kat(const RNGType &)
     return true;
 }
 
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds>
-inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K, Rounds> &rng)
+template <typename ResultType, typename T, std::size_t K>
+inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
 {
     std::string filename("random_Philox");
     filename += std::to_string(K) + "x";
@@ -67,13 +67,46 @@ inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K, Rounds> &rng)
     return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
 }
 
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds>
-inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K, Rounds> &rng)
+template <typename ResultType, typename T, std::size_t K>
+inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
 {
     std::string filename("random_Threefry");
     filename += std::to_string(K) + "x";
     filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
     mckl::Vector<T> k = random_rng_kat<T>(filename);
+    mckl::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+}
+
+template <typename ResultType>
+inline bool ranodm_rng_kat(mckl::Threefish256Engine<ResultType> &rng)
+{
+    mckl::Vector<std::uint64_t> k =
+        random_rng_kat<std::uint64_t>("random_Threefish256.txt");
+    mckl::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+}
+
+template <typename ResultType>
+inline bool ranodm_rng_kat(mckl::Threefish512Engine<ResultType> &rng)
+{
+    mckl::Vector<std::uint64_t> k =
+        random_rng_kat<std::uint64_t>("random_Threefish512.txt");
+    mckl::Vector<ResultType> r(256);
+    rng(256, r.data());
+
+    return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+}
+
+template <typename ResultType>
+inline bool ranodm_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
+{
+    mckl::Vector<std::uint64_t> k =
+        random_rng_kat<std::uint64_t>("random_Threefish1024.txt");
     mckl::Vector<ResultType> r(256);
     rng(256, r.data());
 

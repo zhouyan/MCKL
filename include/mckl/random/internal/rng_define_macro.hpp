@@ -48,6 +48,9 @@ MCKL_RNG_DEFINE_MACRO(::mckl::Threefry2x64, Threefry2x64, threefry2x64)
 MCKL_RNG_DEFINE_MACRO(::mckl::Threefry4x64, Threefry4x64, threefry4x64)
 MCKL_RNG_DEFINE_MACRO(::mckl::Threefry8x64, Threefry8x64, threefry8x64)
 MCKL_RNG_DEFINE_MACRO(::mckl::Threefry16x64, Threefry16x64, threefry16x64)
+MCKL_RNG_DEFINE_MACRO(::mckl::Threefish256, Threefish256, Threefish256)
+MCKL_RNG_DEFINE_MACRO(::mckl::Threefish512, Threefish512, Threefish512)
+MCKL_RNG_DEFINE_MACRO(::mckl::Threefish1024, Threefish1024, Threefish1024)
 MCKL_RNG_DEFINE_MACRO(
     ::mckl::Threefry2x32_64, Threefry2x32_64, threefry2x32_64)
 MCKL_RNG_DEFINE_MACRO(
@@ -60,6 +63,12 @@ MCKL_RNG_DEFINE_MACRO(
     ::mckl::Threefry8x64_64, Threefry8x64_64, threefry8x64_64)
 MCKL_RNG_DEFINE_MACRO(
     ::mckl::Threefry16x64_64, Threefry16x64_64, threefry16x64_64)
+MCKL_RNG_DEFINE_MACRO(
+    ::mckl::Threefish256_64, Threefish256_64, Threefish256_64)
+MCKL_RNG_DEFINE_MACRO(
+    ::mckl::Threefish512_64, Threefish512_64, Threefish512_64)
+MCKL_RNG_DEFINE_MACRO(
+    ::mckl::Threefish1024_64, Threefish1024_64, Threefish1024_64)
 
 #if MCKL_HAS_AESNI
 #define MCKL_RNG_DEFINE_MACRO_AESNI MCKL_RNG_DEFINE_MACRO

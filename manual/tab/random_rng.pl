@@ -71,6 +71,8 @@ sub filter
             next unless "@std" =~ /$name/;
         } elsif ($rng eq 'MKL') {
             next unless $name =~ /MKL/;
+        } elsif ($rng eq "Threefry") {
+            next unless $name =~ /Threefry|Threefish/;
         } else {
             next unless $name =~ /$rng/;
             next if $name =~ /MKL/;
