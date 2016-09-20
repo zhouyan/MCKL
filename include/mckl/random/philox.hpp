@@ -422,11 +422,17 @@ class PhiloxGenerator
 
     void enc(const ctr_type &ctr, ctr_type &buffer)
     {
+        union {
+            std::array<T,K> state;
+            ctr_type result;
+        } buf;
+
         std::array<key_type, Rounds + 1> par;
         internal::PhiloxInitPar<T, K, Constants>::eval(key_, par);
 
-        buffer = ctr;
-        generate<0>(buffer, par, std::true_type());
+        buf.result = ctr;
+        generate<0>(buf.state, par, std::true_type());
+        buffer = buf.result;
     }
 
     template <typename ResultType>

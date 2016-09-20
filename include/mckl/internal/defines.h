@@ -112,12 +112,18 @@ typedef enum {
     MCKLThreefry4x64,     ///< `mckl::Threefry4x64`
     MCKLThreefry8x64,     ///< `mckl::Threefry8x64`
     MCKLThreefry16x64,    ///< `mckl::Threefry16x64`
+    MCKLThreefish256,     ///< `mckl::Threefish256`
+    MCKLThreefish512,     ///< `mckl::Threefish512`
+    MCKLThreefish1024,    ///< `mckl::Threefish1024`
     MCKLThreefry2x32_64,  ///< `mckl::Threefry2x32_64`
     MCKLThreefry4x32_64,  ///< `mckl::Threefry4x32_64`
     MCKLThreefry2x64_64,  ///< `mckl::Threefry2x64_64`
     MCKLThreefry4x64_64,  ///< `mckl::Threefry4x64_64`
     MCKLThreefry8x64_64,  ///< `mckl::Threefry8x64_64`
     MCKLThreefry16x64_64, ///< `mckl::Threefry16x64_64`
+    MCKLThreefish256_64,  ///< `mckl::Threefish256_64`
+    MCKLThreefish512_64,  ///< `mckl::Threefish512_64`
+    MCKLThreefish1024_64, ///< `mckl::Threefish1024_64`
 
     MCKLAES128x1,    ///< `mckl::AES128x1`
     MCKLAES128x2,    ///< `mckl::AES128x2`
