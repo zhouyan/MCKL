@@ -379,7 +379,7 @@ inline void beta_distribution(RNGType &rng, std::size_t n, RealType *r,
     beta_distribution(rng, n, r, param.alpha(), param.beta());
 }
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Beta distribution
 /// \ingroup Distribution

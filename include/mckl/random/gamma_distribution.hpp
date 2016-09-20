@@ -291,7 +291,7 @@ inline void gamma_distribution(RNGType &rng, std::size_t n, RealType *r,
     gamma_distribution(rng, n, r, param.alpha(), param.beta());
 }
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Gamma distribution
 /// \ingroup Distribution

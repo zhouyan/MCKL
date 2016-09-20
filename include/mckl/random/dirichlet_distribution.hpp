@@ -76,7 +76,7 @@ inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     dirichlet_distribution_avg(n, dim, r);
 }
 
-} // namespace internal
+} // namespace mckl::internal
 
 template <typename RealType, std::size_t Dim>
 class DirichletDistribution

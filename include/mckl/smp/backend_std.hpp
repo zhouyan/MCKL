@@ -65,7 +65,7 @@ inline void backend_std_range(
     }
 }
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Sampler<T>::eval_type subtype using the standard library
 /// \ingroup STD
