@@ -420,6 +420,15 @@ class PhiloxGenerator
 
     void reset(const key_type &key) { key_ = key; }
 
+    void enc(const ctr_type &ctr, ctr_type &buffer)
+    {
+        std::array<key_type, Rounds + 1> par;
+        internal::PhiloxInitPar<T, K, Constants>::eval(key_, par);
+
+        buffer = ctr;
+        generate<0>(buffer, par, std::true_type());
+    }
+
     template <typename ResultType>
     void operator()(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
