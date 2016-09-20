@@ -729,14 +729,6 @@ using Threefish512_64 = Threefish512Engine<std::uint64_t>;
 /// \ingroup Threefry
 using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
 
-/// \brief The default 32-bit Threefry engine
-/// \ingroup Threefry
-using Threefry = Threefry8x64;
-
-/// \brief The default 64-bit Threefry engine
-/// \ingroup Threefry
-using Threefry_64 = Threefry8x64_64;
-
 } // namespace mckl
 
 #endif // MCKL_RANDOM_THREEFRY_HPP

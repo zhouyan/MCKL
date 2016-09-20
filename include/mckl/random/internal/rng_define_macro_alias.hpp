@@ -36,14 +36,11 @@
 MCKL_RNG_DEFINE_MACRO(::mckl::RNG, RNG, rng)
 MCKL_RNG_DEFINE_MACRO(::mckl::RNG_64, RNG_64, rng_64)
 
+MCKL_RNG_DEFINE_MACRO(::mckl::RNGFast, RNGFast, rngfast)
+MCKL_RNG_DEFINE_MACRO(::mckl::RNGFast_64, RNGFast_64, rngfast_64)
+
 MCKL_RNG_DEFINE_MACRO(::mckl::RNGMini, RNGMini, rngmini)
 MCKL_RNG_DEFINE_MACRO(::mckl::RNGMini_64, RNGMini_64, rngmini_64)
-
-MCKL_RNG_DEFINE_MACRO(::mckl::Philox, Philox, philox)
-MCKL_RNG_DEFINE_MACRO(::mckl::Philox_64, Philox_64, philox_64)
-
-MCKL_RNG_DEFINE_MACRO(::mckl::Threefry, Threefry, threefry)
-MCKL_RNG_DEFINE_MACRO(::mckl::Threefry_64, Threefry_64, threefry_64)
 
 #if MCKL_HAS_AESNI
 #define MCKL_RNG_DEFINE_MACRO_AESNI MCKL_RNG_DEFINE_MACRO

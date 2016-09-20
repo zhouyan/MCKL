@@ -590,14 +590,6 @@ using Philox2x64_64 = Philox2x64Engine<std::uint64_t>;
 /// \ingroup Philox
 using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
-/// \brief The default 32-bit Philox engine
-/// \ingroup Philox
-using Philox = Philox4x64;
-
-/// \brief The default 64-bit Philox engine
-/// \ingroup Philox
-using Philox_64 = Philox4x64_64;
-
 } // namespace mckl
 
 #endif // MCKL_RANDOM_PHILOX_HPP

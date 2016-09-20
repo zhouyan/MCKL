@@ -879,13 +879,6 @@ inline IntType ftoi(RealType x)
     return ftoi<IntType>(x, std::integral_constant<bool, W <= M>());
 }
 
-template <typename RNGType>
-class SeedType
-{
-    public:
-    using result_type = typename RNGType::result_type;
-}; // class SeedType
-
 } // namespace mckl::internal
 
 /// \brief Traits of RNG engines
@@ -956,8 +949,19 @@ inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
 template <typename, typename>
 class CounterEngine;
 
-template <typename>
-class Seed;
+template <typename RNGType>
+class SeedType
+{
+    public:
+    using type = typename RNGType::result_type;
+}; // class SeedType
+
+template <typename ResultType, typename Generator>
+class SeedType<CounterEngine<ResultType, Generator>>
+{
+    public:
+    using type = typename Generator::key_type;
+}; // class SeedType
 
 template <typename = double>
 class ArcsineDistribution;
@@ -1288,6 +1292,13 @@ template <MKL_INT, int>
 class MKLEngine;
 
 template <MKL_INT BRNG, int Bits>
+class SeedType<MKLEngine<BRNG, Bits>>
+{
+    public:
+    using type = MKL_UINT;
+}; // class SeedType
+
+template <MKL_INT BRNG, int Bits>
 inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
     typename MKLEngine<BRNG, Bits>::result_type *);
 
@@ -1295,13 +1306,6 @@ inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
 
 namespace internal
 {
-
-template <MKL_INT BRNG, int Bits>
-class SeedType<MKLEngine<BRNG, Bits>>
-{
-    public:
-    using result_type = MKL_UINT;
-}; // class SeedType
 
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(

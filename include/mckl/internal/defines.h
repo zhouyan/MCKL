@@ -76,14 +76,11 @@ typedef enum {
     MCKLRNG,    ///< `mckl::RNG`
     MCKLRNG_64, ///< `mckl::RNG_64`
 
+    MCKLRNGFast,    ///< `mckl::RNGFast`
+    MCKLRNGFast_64, ///< `mckl::RNGFast_64`
+
     MCKLRNGMini,    ///< `mckl::RNGMini`
     MCKLRNGMini_64, ///< `mckl::RNGMini_64`
-
-    MCKLPhilox,    ///< `mckl::Philox`
-    MCKLPhilox_64, ///< `mckl::Philox_64`
-
-    MCKLThreefry,    ///< `mckl::Threefry`
-    MCKLThreefry_64, ///< `mckl::Threefry_64`
 
     MCKLAES128,    ///< `mckl::AES128`
     MCKLAES128_64, ///< `mckl::AES128_64`

@@ -38,8 +38,7 @@
 namespace mckl
 {
 
-/// \brief Seeding RNG engines
-/// \ingroup Random
+/// \brief Seed generator for use with RNG accepting scalar seeds
 ///
 /// \details
 /// The sequence of seeds are belongs to the equivalent class \f$s \mod D
@@ -51,28 +50,38 @@ namespace mckl
 /// equal to `1` in any sequence of length \f$2^N\f$, where \f$N\f$ is the
 /// number of digits in the unsigned integer type. They are either one at the
 /// beginning and one at the end, or consecutive.
-template <typename RNGType>
-class Seed
+template <typename ResultType, typename ID = ResultType>
+class SeedGenerator
 {
     public:
-    using rng_type = RNGType;
-    using result_type = typename internal::SeedType<rng_type>::result_type;
+    using result_type = ResultType;
 
-    Seed(const Seed<RNGType> &) = delete;
-    Seed<RNGType> &operator=(const Seed<RNGType> &) = delete;
+    SeedGenerator(const SeedGenerator<ResultType, ID> &) = delete;
 
-    static Seed<RNGType> &instance()
+    SeedGenerator<ResultType, ID> &operator=(
+        const SeedGenerator<ResultType, ID> &) = delete;
+
+    static SeedGenerator<ResultType, ID> &instance()
     {
-        static Seed<RNGType> seed;
+        static SeedGenerator<ResultType, ID> seed;
 
         return seed;
     }
 
-    /// \brief Create a new RNG using a new seed
-    rng_type operator()() { return rng_type(get()); }
+    /// \brief Get a new seed
+    result_type operator()()
+    {
+        result_type s = seed_.fetch_add(1);
+
+        return (s % max_ + 1) * divisor_ + remainder_;
+    }
 
     /// \brief Seed a single RNG
-    void operator()(rng_type &rng) { rng.seed(get()); }
+    template <typename RNGType>
+    void operator()(RNGType &rng)
+    {
+        rng.seed(operator()());
+    }
 
     /// \brief Seed a sequence of RNGs
     template <typename OutputIter>
@@ -112,13 +121,14 @@ class Seed
     void modulo(result_type divisor, result_type remainder)
     {
         runtime_assert(divisor > remainder,
-            "**Seed::modulo** the remainder is not smaller than the divisor");
+            "**SeedGenerator::modula** the remainder is not smaller than the "
+            "divisor");
 
         result_type maxs =
             (std::numeric_limits<result_type>::max() - remainder) / divisor;
         runtime_assert(maxs > 1,
-            "**Seed::modulo** the maximum of the internal seed will be no "
-            "larger than 1");
+            "**SeedGenerator::modulo** the maximum of the internal seed will "
+            "be no larger than 1");
 
         divisor_ = divisor;
         remainder_ = remainder;
@@ -129,7 +139,8 @@ class Seed
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os, const Seed<RNGType> &sg)
+        std::basic_ostream<CharT, Traits> &os,
+        const SeedGenerator<ResultType, ID> &sg)
     {
         if (!os)
             return os;
@@ -144,7 +155,8 @@ class Seed
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, Seed<RNGType> &sg)
+        std::basic_istream<CharT, Traits> &is,
+        SeedGenerator<ResultType, ID> &sg)
     {
         if (!is)
             return is;
@@ -168,24 +180,205 @@ class Seed
         return is;
     }
 
+    protected:
+    SeedGenerator() : seed_(0), max_(0), divisor_(1), remainder_(0)
+    {
+        modulo(divisor_, remainder_);
+    }
+
     private:
     std::atomic<result_type> seed_;
     result_type max_;
     result_type divisor_;
     result_type remainder_;
+}; // class SeedGenerator
 
-    Seed() : seed_(0), max_(0), divisor_(1), remainder_(0)
+/// \brief Seed generator for use with RNG accepting fixed width keys as seeds
+///
+/// \details
+/// If `K` is less than two, then it operates as the generic `SeedGenerator`.
+/// Otherwise, The sequence of keys are such that, the first element is
+/// \f$1,2,\dots\f$ while the last element is \f$R\f$.
+template <typename ResultType, std::size_t K, typename ID>
+class SeedGenerator<std::array<ResultType, K>, ID>
+{
+    public:
+    using result_type = ResultType;
+    using key_type = std::array<ResultType, K>;
+
+    SeedGenerator(
+        const SeedGenerator<std::array<ResultType, K>, ID> &) = delete;
+
+    SeedGenerator<std::array<ResultType, K>, ID> &operator=(
+        const SeedGenerator<std::array<ResultType, K>, ID> &) = delete;
+
+    static SeedGenerator<std::array<ResultType, K>, ID> &instance()
+    {
+        static SeedGenerator<std::array<ResultType, K>, ID> seed;
+
+        return seed;
+    }
+
+    /// \brief Create a new RNG using a new seed
+    key_type operator()() { return get(dispatch_type()); }
+
+    /// \brief Seed a single RNG
+    template <typename RNGType>
+    void operator()(RNGType &rng)
+    {
+        rng.seed(operator()());
+    }
+
+    /// \brief Seed a sequence of RNGs
+    template <typename OutputIter>
+    OutputIter operator()(std::size_t n, OutputIter first)
+    {
+        for (std::size_t i = 0; i != n; ++i, ++first)
+            operator()(*first);
+
+        return first;
+    }
+
+    /// \brief Seed a sequence of RNGs
+    template <typename OutputIter>
+    OutputIter operator()(OutputIter first, OutputIter last)
+    {
+        while (first != last) {
+            operator()(*first);
+            ++first;
+        }
+
+        return first;
+    }
+
+    /// \brief Set the seed to `s % max() * divisor() + remainder()`
+    void set(result_type s) { seed_ = s % max_; }
+
+    /// \brief The maximum of the seed
+    result_type max() const { return (max_ + 1) * divisor_ + remainder_; }
+
+    /// \brief The divisor of the output seed
+    result_type divisor() const { return divisor_; }
+
+    /// \brief The remainder of the output seed
+    result_type remainder() const { return remainder_; }
+
+    /// \brief Set the divisor and the remainder
+    void modulo(result_type divisor, result_type remainder)
+    {
+        modulo(divisor, remainder, dispatch_type());
+        set(seed_);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const SeedGenerator<std::array<ResultType, K>, ID> &sg)
+    {
+        if (!os)
+            return os;
+
+        os << sg.seed_ << ' ';
+        os << sg.max_ << ' ';
+        os << sg.divisor_ << ' ';
+        os << sg.remainder_ << ' ';
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        SeedGenerator<std::array<ResultType, K>, ID> &sg)
+    {
+        if (!is)
+            return is;
+
+        result_type seed;
+        result_type max;
+        result_type divisor;
+        result_type remainder;
+        is >> std::ws >> seed;
+        is >> std::ws >> max;
+        is >> std::ws >> divisor;
+        is >> std::ws >> remainder;
+
+        if (is) {
+            sg.seed_ = seed;
+            sg.max_ = max;
+            sg.divisor_ = divisor;
+            sg.remainder_ = remainder;
+        }
+
+        return is;
+    }
+
+    protected:
+    SeedGenerator() : seed_(0), max_(0), divisor_(1), remainder_(0)
     {
         modulo(divisor_, remainder_);
     }
 
-    result_type get()
+    private:
+    using dispatch_type =
+        std::integral_constant<bool, (std::tuple_size<key_type>::value > 1)>;
+
+    std::atomic<result_type> seed_;
+    result_type max_;
+    result_type divisor_;
+    result_type remainder_;
+
+    void modulo(result_type, result_type remainder, std::true_type)
+    {
+        max_ = std::numeric_limits<result_type>::max();
+        remainder_ = remainder;
+    }
+
+    void modulo(result_type divisor, result_type remainder, std::false_type)
+    {
+        runtime_assert(divisor > remainder,
+            "**SeedGenerator::modulo** the remainder is not smaller than the "
+            "divisor");
+
+        result_type maxs =
+            (std::numeric_limits<result_type>::max() - remainder) / divisor;
+        runtime_assert(maxs > 1,
+            "**SeedGenerator::modulo** the maximum of the internal seed will "
+            "be no larger than 1");
+
+        divisor_ = divisor;
+        remainder_ = remainder;
+        max_ = maxs;
+
+        set(seed_);
+    }
+
+    key_type get(std::true_type)
     {
         result_type s = seed_.fetch_add(1);
+        key_type k;
+        std::fill(k.begin(), k.end(), 0);
+        k.front() = s + 1;
+        k.back() = remainder_;
 
-        return (s % max_ + 1) * divisor_ + remainder_;
+        return k;
+    }
+
+    key_type get(std::false_type)
+    {
+        result_type s = seed_.fetch_add(1);
+        key_type k;
+        std::fill(k.begin(), k.end(), 0);
+        k.front() = (s % max_ + 1) * divisor_ + remainder_;
+
+        return k;
     }
 }; // class Seed
+
+/// \brief Seeding RNG engines
+/// \ingroup Random
+template <typename RNGType>
+using Seed = SeedGenerator<typename SeedType<RNGType>::type>;
 
 } // namespace mckl
 

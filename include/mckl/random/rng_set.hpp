@@ -127,7 +127,7 @@ class RNGSetTBBEnumerable
     using size_type = std::size_t;
 
     explicit RNGSetTBBEnumerable(size_type = 0)
-        : rng_([]() { return Seed<rng_type>::instance()(); })
+        : rng_([]() { return rng_type(Seed<rng_type>::instance()()); })
     {
         reset();
     }
