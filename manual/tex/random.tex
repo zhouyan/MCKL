@@ -38,14 +38,12 @@ system. The first is a set of \rng engines that generate random integers. The
 other is a set of distribution generators. The former are documented in
 sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL RNG}, and the later in
 sections~\ref{sec:Uniform bits distribution} to~\ref{sec:Multivariate
-  distribution}. There are performance data in appendices~\ref{chap:Performance
-of RNG} and~\ref{chap:Performance of distribution} for them. Apart from these,
-the library also provides facilities for vectorized random number generating
-(section~\ref{sec:Vectorized random number generating}), generating distinctive
-seeds through out a program (section~\ref{sec:Seeding counter-based RNG}), and
-using multiple \rng{}s in parallel programs (section~\ref{sec:Multiple RNG
-streams}). Last, in section~\ref{sec:Randomness tests}, a few randomness tests
-are discussed.
+distribution}. The library also provides facilities for vectorized random
+number generating (section~\ref{sec:Vectorized random number generating}),
+generating distinctive seeds within a program (section~\ref{sec:Seeding
+counter-based RNG}), and using multiple \rng{}s in parallel programs
+(section~\ref{sec:Multiple RNG streams}). Last, in section~\ref{sec:Randomness
+tests}, a few randomness tests are discussed.
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
@@ -62,10 +60,12 @@ The effect of the function call, |rand(rng, n, r)|, is equivalent to the loop,
 for (size_t i = 0; i != n; ++i)
     r[i] = rng();
 \end{verbatim}
-The results are always be the same unless a non-deterministic \rng is used (see
+The results are always the same unless a non-deterministic \rng is used (see
 section~\ref{sec:Non-deterministic RNG}). For some \rng{}s implemented in
-\mckl, the vectorized function may have considerable performance advantage. The
-second variant of |rand| is for generating distribution random variates,
+\mckl, the vectorized function may have considerable performance advantage. See
+appendix~\ref{chap:Performance of RNG}.
+
+The second variant of |rand| is for generating distribution random variates,
 \begin{verbatim}
 template <typename RNGType, typename DistributionType>
 void rand(RNGType &rng, const DistributionType &distribution, size_t n,
@@ -82,21 +82,9 @@ for (size_t i = 0; i != n; ++i)
     r[i] = normal(rng);
 \end{verbatim}
 Depending on the type of |rng| and the distribution (including its parameters),
-the vectorized function may have superior performance. However, the results are
-not be exactly the same as using a loop, except for the standard uniform
-distributions (see section~\ref{sec:Standard uniform distribution}). For
-consistency, \mckl also defines variants of the function |rand| for generating
-only one random number,
-\begin{verbatim}
-rand(rng);               // => rng();
-rand(rng, distribution); // => distribution(rng);
-\end{verbatim}
-And each \rng engine and distribution generator also has methods for vectorized
-generating,
-\begin{verbatim}
-rng(n, r);               // => rand(rng, n, r);
-distribution(rng, n, r); // => rand(rng, distribution, n, r);
-\end{verbatim}
+the vectorized function may have superior performance. See
+appendix~\ref{chap:Performance of distribution}. However, the results are not
+be exactly the same as using a loop.
 
 \section{Counter-based \texorpdfstring{\rng}{RNG}}
 \label{sec:Counter-based RNG}
@@ -149,9 +137,7 @@ going into details, there are four types of sequence of round keys implemented
 by \mckl,
 \begin{verbatim}
 using AES128KeySeq = internal::AESKeySeq<10, internal::AES128KeySeqGenerator>;
-
 using AES192KeySeq = internal::AESKeySeq<12, internal::AES192KeySeqGenerator>;
-
 using AES256KeySeq = internal::AESKeySeq<14, internal::AES256KeySeqGenerator>;
 
 template <std::size_t Rounds, typename Constants = ARSConstants>
@@ -264,10 +250,8 @@ template <typename ResultType, typename T, size_t K,
 using PhiloxEngine =
     CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
 \end{verbatim}
-See~\cite{Salmon:2011um} for the most general form of the algorithm. \mckl
-provides default constants for~32- and~64-bit unsigned integer types as |T| and
-|K| taking the values~2 or~4. These four engines are defined as type aliases
-for convenience,
+The template parameter |Constants| is a trait class that defines the constants
+of the Weyl's sequence. The defaults are taken from~\cite{Salmon:2011um}.
 \begin{verbatim}
 template <typename ResultType>
 using Philox2x32Engine = PhiloxEngine<ResultType, uint32_t, 2>;
