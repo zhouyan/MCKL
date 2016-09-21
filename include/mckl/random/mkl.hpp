@@ -963,14 +963,12 @@ class MKLEngine
             case VSL_BRNG_NIEDERR:
                 stream_.skip_ahead(m);
                 break;
-#if INTEL_MKL_VERSION >= 110300
             case VSL_BRNG_PHILOX4X32X10:
                 stream_.skip_ahead(m);
                 break;
             case VSL_BRNG_ARS5:
                 stream_.skip_ahead(m);
                 break;
-#endif
             default:
                 while (nskip >= M) {
                     generate();
@@ -1132,8 +1130,6 @@ using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, 32>;
 /// \ingroup MKL
 using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 
-#if INTEL_MKL_VERSION >= 110300
-
 /// \brief A counter-based random number generator
 /// \ingroup MKL
 using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
@@ -1149,8 +1145,6 @@ using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
 /// \brief A counter-based random number generator (64-bit)
 /// \ingroup MKL
 using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
-
-#endif // INTEL_MKL_VERSION >= 110300
 
 namespace internal
 {
