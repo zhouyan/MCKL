@@ -496,13 +496,14 @@ class PhiloxGenerator
 
     template <std::size_t>
     void generate(std::array<T, K> &, std::array<key_type, Rounds + 1> &,
-        std::false_type) const
+        std::false_type) const MCKL_ALWAYS_INLINE
     {
     }
 
     template <std::size_t N>
     void generate(std::array<T, K> &state,
-        std::array<key_type, Rounds + 1> &par, std::true_type) const
+        std::array<key_type, Rounds + 1> &par,
+        std::true_type) const MCKL_ALWAYS_INLINE
     {
         internal::PhiloxPBox<T, K, N>::eval(state);
         internal::PhiloxSBox<T, K, N, Constants>::eval(state, par);

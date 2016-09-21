@@ -451,13 +451,13 @@ class ThreefryGenerator
     private:
     template <std::size_t>
     void generate(std::array<T, K> &, const std::array<T, K + 1> &,
-        std::false_type) const
+        std::false_type) const MCKL_ALWAYS_INLINE
     {
     }
 
     template <std::size_t N>
     void generate(std::array<T, K> &state, const std::array<T, K + 1> &par,
-        std::true_type) const
+        std::true_type) const MCKL_ALWAYS_INLINE
     {
         internal::ThreefrySBox<T, K, N, Constants>::eval(state);
         internal::ThreefryPBox<T, K, N, Constants>::eval(state);

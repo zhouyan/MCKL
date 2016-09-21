@@ -36,6 +36,10 @@
 
 #include <mckl/internal/compiler.h>
 
+#ifndef MCKL_ALWAYS_INLINE
+#define MCKL_ALWAYS_INLINE
+#endif
+
 // Assertion macros
 
 #ifndef MCKL_NO_RUNTIME_ASSERT
