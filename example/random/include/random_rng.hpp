@@ -267,6 +267,24 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::endl;
 }
 
+#ifdef MCKL_RNG_DEFINE_MACRO
+#undef MCKL_RNG_DEFINE_MACRO
+#endif
+
+#ifdef MCKL_RNG_DEFINE_MACRO_NA
+#undef MCKL_RNG_DEFINE_MACRO_NA
+#endif
+
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    void random_rng_##name(std::size_t, std::size_t, int, int, int,           \
+        const std::string &, const mckl::Vector<std::string> &);
+
+#include <mckl/random/internal/rng_define_macro_std.hpp>
+
+#include <mckl/random/internal/rng_define_macro.hpp>
+
+#include <mckl/random/internal/rng_define_macro_mkl.hpp>
+
 inline void random_rng(std::size_t N, std::size_t M, int argc, char **argv)
 {
     mckl::Vector<std::string> rngname;
@@ -298,18 +316,34 @@ inline void random_rng(std::size_t N, std::size_t M, int argc, char **argv)
 #endif
 
 #define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    random_rng<RNGType>(N, M, nwid, swid, twid, #Name, rngname);
+    random_rng_##name(N, M, nwid, swid, twid, #Name, rngname);
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
 
-#include <mckl/random/internal/rng_define_macro_std.hpp>
+    #include <mckl/random/internal/rng_define_macro_std.hpp>
 
-#include <mckl/random/internal/rng_define_macro.hpp>
+    #include <mckl/random/internal/rng_define_macro.hpp>
 
-#include <mckl/random/internal/rng_define_macro_mkl.hpp>
+    #include <mckl/random/internal/rng_define_macro_mkl.hpp>
 
     std::cout << std::string(lwid, '-') << std::endl;
 }
+
+#ifdef MCKL_RNG_DEFINE_MACRO
+#undef MCKL_RNG_DEFINE_MACRO
+#endif
+
+#ifdef MCKL_RNG_DEFINE_MACRO_NA
+#undef MCKL_RNG_DEFINE_MACRO_NA
+#endif
+
+#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
+    void random_rng_##name(std::size_t N, std::size_t M, int nwid, int swid,  \
+        int twid, const std::string &name,                                    \
+        const mckl::Vector<std::string> &rngname)                             \
+    {                                                                         \
+        random_rng<RNGType>(N, M, nwid, swid, twid, name, rngname);           \
+    }
 
 #endif // MCKL_EXAMPLE_RANDOM_RNG_HPP
