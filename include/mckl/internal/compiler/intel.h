@@ -55,8 +55,4 @@
 #endif
 #endif
 
-#ifndef MCKL_ALWAYS_INLINE
-#define MCKL_ALWAYS_INLINE __attribute__((always_inline))
-#endif
-
 #endif // MCKL_INTERNAL_COMPILER_INTEL_H

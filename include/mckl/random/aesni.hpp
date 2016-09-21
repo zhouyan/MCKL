@@ -990,13 +990,13 @@ class ARSKeySeqImpl
     private:
     template <std::size_t>
     void generate(std::array<__m128i, rounds + 1> &, const __m128i &,
-        std::false_type) const MCKL_ALWAYS_INLINE
+        std::false_type) const
     {
     }
 
     template <std::size_t N>
     void generate(std::array<__m128i, rounds + 1> &rk, const __m128i &w,
-        std::true_type) const MCKL_ALWAYS_INLINE
+        std::true_type) const
     {
         std::get<N>(rk) = _mm_add_epi64(std::get<N - 1>(rk), w);
         generate<N + 1>(rk, w, std::integral_constant < bool, N<rounds>());
