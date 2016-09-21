@@ -46,6 +46,9 @@
 #define MCKL_PHILOX_ROUNDS 10
 #endif
 
+#define MCKL_PHILOX_GENERATE MCKL_THREEFRY_GENERATE
+#define MCKL_PHILOX_GENERATE_KERNEL MCKL_THREEFRY_GENERATE_KERNEL
+
 namespace mckl
 {
 
@@ -198,14 +201,14 @@ class PhiloxHiLo<T, 64>
 
 template <typename T, std::size_t K, std::size_t N, typename Constants,
     bool = (N > 1)>
-class PhiloxBumpKey
+class PhiloxKBox
 {
     public:
     static void eval(std::array<T, K / 2> &) {}
-}; // class PhiloxBumpKey
+}; // class PhiloxKBox
 
 template <typename T, std::size_t N, typename Constants>
-class PhiloxBumpKey<T, 2, N, Constants, true>
+class PhiloxKBox<T, 2, N, Constants, true>
 {
     public:
     static void eval(std::array<T, 1> &par)
@@ -214,10 +217,10 @@ class PhiloxBumpKey<T, 2, N, Constants, true>
 
         std::get<0>(par) += w0;
     }
-}; // class PhiloxBumpKey
+}; // class PhiloxKBox
 
 template <typename T, std::size_t N, typename Constants>
-class PhiloxBumpKey<T, 4, N, Constants, true>
+class PhiloxKBox<T, 4, N, Constants, true>
 {
     public:
     static void eval(std::array<T, 2> &par)
@@ -228,72 +231,38 @@ class PhiloxBumpKey<T, 4, N, Constants, true>
         std::get<0>(par) += w0;
         std::get<1>(par) += w1;
     }
-}; // class PhiloxBumpKey
-
-template <typename T, std::size_t K, typename Constants>
-class PhiloxInitPar
-{
-    public:
-    template <std::size_t Rp1>
-    static void eval(const std::array<T, K / 2> &key,
-        std::array<std::array<T, K / 2>, Rp1> &par)
-    {
-        std::get<0>(par) = key;
-        eval<1>(par, std::integral_constant<bool, 1 < Rp1>());
-    }
-
-    private:
-    template <std::size_t, std::size_t Rp1>
-    static void eval(std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N, std::size_t Rp1>
-    static void eval(
-        std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
-    {
-        std::get<N>(par) = std::get<N - 1>(par);
-        PhiloxBumpKey<T, K, N, Constants>::eval(std::get<N>(par));
-        eval<N + 1>(par, std::integral_constant<bool, N + 1 < Rp1>());
-    }
-}; // class PhiloxInitPar
+}; // class PhiloxKBox
 
 template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
 class PhiloxSBox
 {
     public:
-    template <std::size_t Rp1>
-    static void eval(
-        std::array<T, K> &, const std::array<std::array<T, K / 2>, Rp1> &)
-    {
-    }
+    static void eval(std::array<T, K> &, const std::array<T, K / 2> &) {}
 }; // class PhiloxSBox
 
 template <typename T, std::size_t K, std::size_t N, typename Constants>
 class PhiloxSBox<T, K, N, Constants, true>
 {
     public:
-    template <std::size_t Rp1>
-    static void eval(std::array<T, K> &state,
-        const std::array<std::array<T, K / 2>, Rp1> &par)
+    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &par)
     {
         eval<0>(state, par, std::integral_constant<bool, 1 < K>());
     }
 
     private:
-    template <std::size_t, std::size_t Rp1>
-    static void eval(std::array<T, K> &,
-        const std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
+    template <std::size_t>
+    static void eval(
+        std::array<T, K> &, const std::array<T, K / 2> &, std::false_type)
     {
     }
 
-    template <std::size_t I, std::size_t Rp1>
-    static void eval(std::array<T, K> &state,
-        const std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
+    template <std::size_t I>
+    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &par,
+        std::true_type)
     {
         static constexpr T m = Constants::multiplier[I / 2];
 
-        T x = std::get<I + 1>(state) ^ std::get<I / 2>(std::get<N>(par));
+        T x = std::get<I + 1>(state) ^ std::get<I / 2>(par);
         PhiloxHiLo<T>::eval(
             std::get<I>(state), m, std::get<I>(state), std::get<I + 1>(state));
         std::get<I>(state) ^= x;
@@ -301,15 +270,15 @@ class PhiloxSBox<T, K, N, Constants, true>
     }
 }; // class PhiloxSBox
 
-template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
+template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
 class PhiloxPBox
 {
     public:
     static void eval(std::array<T, K> &) {}
 }; // class PhiloxPBox
 
-template <typename T, std::size_t K, std::size_t N>
-class PhiloxPBox<T, K, N, true>
+template <typename T, std::size_t K, std::size_t N, typename Constants>
+class PhiloxPBox<T, K, N, Constants, true>
 {
     public:
     static void eval(std::array<T, K> &state)
@@ -340,14 +309,14 @@ class PhiloxPBox<T, K, N, true>
 }; // class PhiloxPBox
 
 template <typename T, std::size_t N>
-class PhiloxPBox<T, 2, N, true>
+class PhiloxPBox<T, 2, N, PhiloxConstants<T, 2>, true>
 {
     public:
     static void eval(std::array<T, 2> &) {}
 }; // class PhiloxPBox
 
 template <typename T, std::size_t N>
-class PhiloxPBox<T, 4, N, true>
+class PhiloxPBox<T, 4, N, PhiloxConstants<T, 4>, true>
 {
     public:
     static void eval(std::array<T, 4> &state)
@@ -355,6 +324,27 @@ class PhiloxPBox<T, 4, N, true>
         std::swap(std::get<0>(state), std::get<2>(state));
     }
 }; // class PhiloxPBox
+
+template <typename T, std::size_t K, std::size_t Rounds, typename,
+    std::size_t N, bool = N <= Rounds>
+class PhiloxRound
+{
+    public:
+    static void eval(std::array<T, K> &, std::array<T, K / 2> &) {}
+}; // class PhiloxRound
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    std::size_t N>
+class PhiloxRound<T, K, Rounds, Constants, N, true>
+{
+    public:
+    static void eval(std::array<T, K> &state, std::array<T, K / 2> &par)
+    {
+        PhiloxKBox<T, K, N, Constants>::eval(par);
+        PhiloxPBox<T, K, N, Constants>::eval(state);
+        PhiloxSBox<T, K, N, Constants>::eval(state, par);
+    }
+}; // class PhiloxRound
 
 } // namespace mckl::internal
 
@@ -401,9 +391,7 @@ class PhiloxGenerator
             ctr_type result;
         } buf;
 
-        std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<T, K, Constants>::eval(key_, par);
-
+        std::array<T, K / 2> par = key_;
         buf.result = ctr;
         generate<0>(buf.state, par, std::true_type());
         buffer = buf.result;
@@ -413,40 +401,15 @@ class PhiloxGenerator
     void operator()(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
-        union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
-        } buf;
-
-        std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<T, K, Constants>::eval(key_, par);
-
-        increment(ctr);
-        buf.ctr = ctr;
-        generate<0>(buf.state, par, std::true_type());
-        buffer = buf.result;
+        generate(ctr, buffer);
     }
 
     template <typename ResultType>
     void operator()(ctr_type &ctr, std::size_t n,
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
-        union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
-        } buf;
-
-        std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<T, K, Constants>::eval(key_, par);
-
-        for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
-            buf.ctr = ctr;
-            generate<0>(buf.state, par, std::true_type());
-            buffer[i] = buf.result;
-        }
+        for (std::size_t i = 0; i != n; ++i)
+            generate(ctr, buffer[i]);
     }
 
     friend bool operator==(const PhiloxGenerator<T, K, Rounds> &gen1,
@@ -492,23 +455,40 @@ class PhiloxGenerator
     }
 
     private:
+    template <std::size_t N>
+    using round = internal::PhiloxRound<T, K, Rounds, Constants, N>;
+
     key_type key_;
 
+    template <typename ResultType>
+    void generate(ctr_type &ctr,
+        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
+    {
+        union {
+            std::array<T, K> state;
+            ctr_type ctr;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
+        } buf;
+
+        std::array<T, K / 2> par = key_;
+        increment(ctr);
+        buf.ctr = ctr;
+        round<0>::eval(buf.state, par);
+        MCKL_PHILOX_GENERATE(0, buf.state, par);
+        buffer = buf.result;
+    }
+
     template <std::size_t>
-    void generate(std::array<T, K> &, std::array<key_type, Rounds + 1> &,
-        std::false_type) const MCKL_ALWAYS_INLINE
+    void generate(
+        std::array<T, K> &, std::array<T, K / 2> &, std::false_type) const
     {
     }
 
     template <std::size_t N>
-    void generate(std::array<T, K> &state,
-        std::array<key_type, Rounds + 1> &par,
-        std::true_type) const MCKL_ALWAYS_INLINE
+    void generate(std::array<T, K> &state, std::array<T, K / 2> &par,
+        std::true_type) const
     {
-        internal::PhiloxPBox<T, K, N>::eval(state);
-        internal::PhiloxSBox<T, K, N, Constants>::eval(state, par);
-        generate<N + 1>(
-            state, par, std::integral_constant<bool, (N < Rounds)>());
+        MCKL_PHILOX_GENERATE(N, state, par);
     }
 }; // class PhiloxGenerator
 

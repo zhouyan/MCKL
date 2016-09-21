@@ -303,15 +303,11 @@ inline void random_rng(std::size_t N, std::size_t M, int argc, char **argv)
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
 
-    MCKL_RNG_DEFINE_MACRO(mckl::Threefry4x64, Threefry4x64, threefry4x64)
-    MCKL_RNG_DEFINE_MACRO(mckl::Threefry4x64_64, Threefry4x64_64, threefry4x64_64)
-    // MCKL_RNG_DEFINE_MACRO(mckl::Threefish256_64, Threefish256_64, threefish256_64)
+#include <mckl/random/internal/rng_define_macro_std.hpp>
 
-// #include <mckl/random/internal/rng_define_macro_std.hpp>
+#include <mckl/random/internal/rng_define_macro.hpp>
 
-// #include <mckl/random/internal/rng_define_macro.hpp>
-
-// #include <mckl/random/internal/rng_define_macro_mkl.hpp>
+#include <mckl/random/internal/rng_define_macro_mkl.hpp>
 
     std::cout << std::string(lwid, '-') << std::endl;
 }

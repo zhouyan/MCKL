@@ -41,6 +41,41 @@
 #define MCKL_THREEFRY_ROUNDS 20
 #endif
 
+#define MCKL_THREEFRY_GENERATE(N, state, par)                                 \
+    round<N + 0x01>::eval(state, par);                                        \
+    generate<N + 0x01>(                                                       \
+        state, par, std::integral_constant<bool, N + 0x01 < Rounds>());
+
+#define MCKL_THREEFRY_GENERATE_KERNEL(R, N, state, par)                       \
+    round<R + N + 0x01>::eval(state, par);                                    \
+    round<R + N + 0x02>::eval(state, par);                                    \
+    round<R + N + 0x03>::eval(state, par);                                    \
+    round<R + N + 0x04>::eval(state, par);                                    \
+    round<R + N + 0x05>::eval(state, par);                                    \
+    round<R + N + 0x06>::eval(state, par);                                    \
+    round<R + N + 0x07>::eval(state, par);                                    \
+    round<R + N + 0x08>::eval(state, par);                                    \
+    round<R + N + 0x09>::eval(state, par);                                    \
+    round<R + N + 0x0A>::eval(state, par);                                    \
+    round<R + N + 0x0B>::eval(state, par);                                    \
+    round<R + N + 0x0C>::eval(state, par);                                    \
+    round<R + N + 0x0D>::eval(state, par);                                    \
+    round<R + N + 0x0E>::eval(state, par);                                    \
+    round<R + N + 0x0F>::eval(state, par);                                    \
+    round<R + N + 0x10>::eval(state, par);
+
+#ifdef MCKL_CLANG
+#undef MCKL_THREEFRY_GENERATE
+#define MCKL_THREEFRY_GENERATE(N, state, par)                                 \
+    MCKL_THREEFRY_GENERATE_KERNEL(0x00, N, state, par)                        \
+    MCKL_THREEFRY_GENERATE_KERNEL(0x10, N, state, par)                        \
+    MCKL_THREEFRY_GENERATE_KERNEL(0x20, N, state, par)                        \
+    MCKL_THREEFRY_GENERATE_KERNEL(0x30, N, state, par)                        \
+    MCKL_THREEFRY_GENERATE_KERNEL(0x40, N, state, par)                        \
+    generate<N + 0x50>(                                                       \
+        state, par, std::integral_constant<bool, N + 0x50 < Rounds>());
+#endif // MCKL_CLANG
+
 namespace mckl
 {
 
@@ -138,14 +173,14 @@ namespace internal
 
 template <typename T, std::size_t K, std::size_t N, typename,
     bool = (N % 4 == 0)>
-class ThreefrySubKey
+class ThreefryKBox
 {
     public:
     static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
-}; // class ThreefrySubKey
+}; // class ThreefryKBox
 
 template <typename T, std::size_t K, std::size_t N, typename Constants>
-class ThreefrySubKey<T, K, N, Constants, true>
+class ThreefryKBox<T, K, N, Constants, true>
 {
     public:
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
@@ -170,7 +205,7 @@ class ThreefrySubKey<T, K, N, Constants, true>
         std::get<I>(state) += std::get<(s_ + I) % (K + 1)>(par);
         eval<I + 1>(state, par, std::integral_constant<bool, I + 1 < K>());
     }
-}; // class ThreefrySubKey
+}; // class ThreefryKBox
 
 template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
 class ThreefrySBox
@@ -307,6 +342,27 @@ class ThreefryPBox<T, 16, N, ThreefryConstants<T, 16>, true>
     }
 }; // class ThreefryPBox
 
+template <typename T, std::size_t K, std::size_t Rounds, typename,
+    std::size_t N, bool = N <= Rounds>
+class ThreefryRound
+{
+    public:
+    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
+}; // class ThreefryRound
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    std::size_t N>
+class ThreefryRound<T, K, Rounds, Constants, N, true>
+{
+    public:
+    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
+    {
+        ThreefrySBox<T, K, N, Constants>::eval(state);
+        ThreefryPBox<T, K, N, Constants>::eval(state);
+        ThreefryKBox<T, K, N, Constants>::eval(state, par);
+    }
+}; // class ThreefryRound
+
 } // namespace mckl::internal
 
 /// \brief Threefry RNG generator
@@ -376,34 +432,15 @@ class ThreefryGenerator
     void operator()(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
-        union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
-        } buf;
-
-        increment(ctr);
-        buf.ctr = ctr;
-        generate<0>(buf.state, par_, std::true_type());
-        buffer = buf.result;
+        generate(ctr, buffer);
     }
 
     template <typename ResultType>
     void operator()(ctr_type &ctr, std::size_t n,
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
-        union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
-        } buf;
-
-        for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
-            buf.ctr = ctr;
-            generate<0>(buf.state, par_, std::true_type());
-            buffer[i] = buf.result;
-        }
+        for (std::size_t i = 0; i != n; ++i)
+            generate(ctr, buffer[i]);
     }
 
     friend bool operator==(const ThreefryGenerator<T, K, Rounds> &gen1,
@@ -449,25 +486,40 @@ class ThreefryGenerator
     }
 
     private:
+    template <std::size_t N>
+    using round = internal::ThreefryRound<T, K, Rounds, Constants, N>;
+
+    std::array<T, K + 1> par_;
+
+    template <typename ResultType>
+    void generate(ctr_type &ctr,
+        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
+    {
+        union {
+            std::array<T, K> state;
+            ctr_type ctr;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
+        } buf;
+
+        increment(ctr);
+        buf.ctr = ctr;
+        round<0>::eval(buf.state, par_);
+        MCKL_THREEFRY_GENERATE(0, buf.state, par_);
+        buffer = buf.result;
+    }
+
     template <std::size_t>
     void generate(std::array<T, K> &, const std::array<T, K + 1> &,
-        std::false_type) const MCKL_ALWAYS_INLINE
+        std::false_type) const
     {
     }
 
     template <std::size_t N>
     void generate(std::array<T, K> &state, const std::array<T, K + 1> &par,
-        std::true_type) const MCKL_ALWAYS_INLINE
+        std::true_type) const
     {
-        internal::ThreefrySBox<T, K, N, Constants>::eval(state);
-        internal::ThreefryPBox<T, K, N, Constants>::eval(state);
-        internal::ThreefrySubKey<T, K, N, Constants>::eval(state, par);
-        generate<N + 1>(
-            state, par, std::integral_constant<bool, (N < Rounds)>());
+        MCKL_THREEFRY_GENERATE(N, state, par);
     }
-
-    private:
-    std::array<T, K + 1> par_;
 }; // class ThreefryGenerator
 
 /// \brief Threefry RNG engine
