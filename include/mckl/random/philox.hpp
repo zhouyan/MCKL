@@ -343,6 +343,32 @@ class PhiloxRound<T, K, Rounds, Constants, N, true>
     }
 }; // class PhiloxRound
 
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl
+{
+    public:
+    static void eval(std::array<T, K> &state, std::array<T, K / 2> &par)
+    {
+        eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
+    }
+
+    private:
+    template <std::size_t>
+    static void eval(
+        std::array<T, K> &, std::array<T, K / 2> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void eval(
+        std::array<T, K> &state, std::array<T, K / 2> &par, std::true_type)
+    {
+        PhiloxRound<T, K, Rounds, Constants, N>::eval(state, par);
+        eval<N + 1>(
+            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
+    }
+}; // class PhiloxGeneratorImpl
+
 } // namespace mckl::internal
 
 /// \brief Philox RNG generator
@@ -390,7 +416,8 @@ class PhiloxGenerator
 
         std::array<T, K / 2> par = key_;
         buf.result = ctr;
-        generate<0>(buf.state, par, std::true_type());
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buf.state, par);
         buffer = buf.result;
     }
 
@@ -454,6 +481,15 @@ class PhiloxGenerator
     private:
     key_type key_;
 
+    void generate(std::array<T, K> &ctr, std::array<T, K> &buffer) const
+    {
+        std::array<T, K / 2> par = key_;
+        increment(ctr);
+        buffer = ctr;
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buffer, par);
+    }
+
     template <typename ResultType>
     void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
@@ -467,23 +503,9 @@ class PhiloxGenerator
         std::array<T, K / 2> par = key_;
         increment(ctr);
         buf.ctr = ctr;
-        generate<0>(buf.state, par, std::true_type());
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buf.state, par);
         buffer = buf.result;
-    }
-
-    template <std::size_t>
-    void generate(
-        std::array<T, K> &, std::array<T, K / 2> &, std::false_type) const
-    {
-    }
-
-    template <std::size_t N>
-    void generate(std::array<T, K> &state, std::array<T, K / 2> &par,
-        std::true_type) const
-    {
-        internal::PhiloxRound<T, K, Rounds, Constants, N>::eval(state, par);
-        generate<N + 1>(
-            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 }; // class PhiloxGenerator
 

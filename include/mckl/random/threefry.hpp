@@ -328,6 +328,32 @@ class ThreefryRound<T, K, Rounds, Constants, N, true>
     }
 }; // class ThreefryRound
 
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl
+{
+    public:
+    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
+    {
+        eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
+    }
+
+    private:
+    template <std::size_t>
+    static void eval(
+        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
+        std::true_type)
+    {
+        ThreefryRound<T, K, Rounds, Constants, N>::eval(state, par);
+        eval<N + 1>(
+            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
+    }
+}; // class ThreefryGeneratorImpl
+
 } // namespace mckl::internal
 
 /// \brief Threefry RNG generator
@@ -389,7 +415,8 @@ class ThreefryGenerator
         } buf;
 
         buf.result = ctr;
-        generate<0>(buf.state, par_, std::true_type());
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buf.state, par_);
         buffer = buf.result;
     }
 
@@ -453,6 +480,14 @@ class ThreefryGenerator
     private:
     std::array<T, K + 1> par_;
 
+    void generate(std::array<T, K> &ctr, std::array<T, K> &buffer) const
+    {
+        increment(ctr);
+        buffer = ctr;
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buffer, par_);
+    }
+
     template <typename ResultType>
     void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
@@ -465,23 +500,9 @@ class ThreefryGenerator
 
         increment(ctr);
         buf.ctr = ctr;
-        generate<0>(buf.state, par_, std::true_type());
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buf.state, par_);
         buffer = buf.result;
-    }
-
-    template <std::size_t>
-    void generate(std::array<T, K> &, const std::array<T, K + 1> &,
-        std::false_type) const
-    {
-    }
-
-    template <std::size_t N>
-    void generate(std::array<T, K> &state, const std::array<T, K + 1> &par,
-        std::true_type) const
-    {
-        internal::ThreefryRound<T, K, Rounds, Constants, N>::eval(state, par);
-        generate<N + 1>(
-            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 }; // class ThreefryGenerator
 
