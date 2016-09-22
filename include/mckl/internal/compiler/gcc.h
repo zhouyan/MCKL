@@ -47,6 +47,18 @@
 #endif
 #endif
 
+#ifdef __SSE2__
+#ifndef MCKL_HAS_SSE2
+#define MCKL_HAS_SSE2 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_AVX2
+#define MCKL_HAS_AVX2 1
+#endif
+#endif
+
 #ifdef __x86_64__
 #ifndef MCKL_HAS_INT128
 #define MCKL_HAS_INT128 1

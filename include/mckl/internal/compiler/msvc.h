@@ -34,4 +34,16 @@
 
 #define MCKL_MSVC_VERSION _MSC_VER
 
+#ifdef __SSE2__
+#ifndef MCKL_HAS_SSE2
+#define MCKL_HAS_SSE2 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_AVX2
+#define MCKL_HAS_AVX2 1
+#endif
+#endif
+
 #endif // MCKL_INTERNAL_COMPILER_MSVC_H

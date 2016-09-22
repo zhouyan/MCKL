@@ -38,7 +38,14 @@
 
 #ifdef MCKL_MSVC
 #include <intrin.h>
+#else
+#if MCKL_HAS_SSE2
+#include <emmintrin.h>
 #endif
+#if MCKL_HAS_AVX2
+#include <immintrin.h>
+#endif
+#endif // MCKL_MSVC
 
 /// \brief PhiloxGenerator default rounds
 /// \ingroup Config
@@ -59,7 +66,7 @@ template <typename T>
 class PhiloxConstantsImpl<T, 2, 32>
 {
     public:
-    static constexpr T weyl[2] = {UINT32_C(0x9E3779B9), UINT32_C(0xBB67AE85)};
+    static constexpr T weyl[1] = {UINT32_C(0x9E3779B9)};
 
     static constexpr T multiplier[1] = {UINT32_C(0xD256D193)};
 }; // class PhiloxConstantsImpl
@@ -78,8 +85,7 @@ template <typename T>
 class PhiloxConstantsImpl<T, 2, 64>
 {
     public:
-    static constexpr T weyl[2] = {
-        UINT64_C(0x9E3779B97F4A7C15), UINT64_C(0xBB67AE8584CAA73B)};
+    static constexpr T weyl[1] = {UINT64_C(0x9E3779B97F4A7C15)};
 
     static constexpr T multiplier[1] = {UINT64_C(0xD2B74407B1CE6E93)};
 }; // class PhiloxConstantsImpl
@@ -204,29 +210,28 @@ class PhiloxKBox
     static void eval(std::array<T, K / 2> &) {}
 }; // class PhiloxKBox
 
-template <typename T, std::size_t N, typename Constants>
-class PhiloxKBox<T, 2, N, Constants, true>
+template <typename T, std::size_t K, std::size_t N, typename Constants>
+class PhiloxKBox<T, K, N, Constants, true>
 {
     public:
-    static void eval(std::array<T, 1> &par)
+    static void eval(std::array<T, K / 2> &par)
     {
-        static constexpr T w0 = Constants::weyl[0];
-
-        std::get<0>(par) += w0;
+        eval<0>(par, std::integral_constant<bool, 0 < K / 2>());
     }
-}; // class PhiloxKBox
 
-template <typename T, std::size_t N, typename Constants>
-class PhiloxKBox<T, 4, N, Constants, true>
-{
-    public:
-    static void eval(std::array<T, 2> &par)
+    private:
+    template <std::size_t>
+    static void eval(std::array<T, K / 2> &, std::false_type)
     {
-        static constexpr T w0 = Constants::weyl[0];
-        static constexpr T w1 = Constants::weyl[1];
+    }
 
-        std::get<0>(par) += w0;
-        std::get<1>(par) += w1;
+    template <std::size_t I>
+    static void eval(std::array<T, K / 2> &par, std::true_type)
+    {
+        static constexpr T w = Constants::weyl[I];
+
+        std::get<I>(par) += w;
+        eval<I + 1>(par, std::integral_constant<bool, I + 1 < K / 2>());
     }
 }; // class PhiloxKBox
 
@@ -322,33 +327,22 @@ class PhiloxPBox<T, 4, N, PhiloxConstants<T, 4>, true>
     }
 }; // class PhiloxPBox
 
-template <typename T, std::size_t K, std::size_t Rounds, typename,
-    std::size_t N, bool = N <= Rounds>
-class PhiloxRound
-{
-    public:
-    static void eval(std::array<T, K> &, std::array<T, K / 2> &) {}
-}; // class PhiloxRound
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
-    std::size_t N>
-class PhiloxRound<T, K, Rounds, Constants, N, true>
-{
-    public:
-    static void eval(std::array<T, K> &state, std::array<T, K / 2> &par)
-    {
-        PhiloxKBox<T, K, N, Constants>::eval(par);
-        PhiloxPBox<T, K, N, Constants>::eval(state);
-        PhiloxSBox<T, K, N, Constants>::eval(state, par);
-    }
-}; // class PhiloxRound
-
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl
+class PhiloxGeneratorGenericImpl
 {
     public:
-    static void eval(std::array<T, K> &state, std::array<T, K / 2> &par)
+    static constexpr std::size_t blocks = 8;
+
+    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
+        std::array<T, K / 2> par = key;
+        eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
+    }
+
+    static void eval(std::array<std::array<T, K>, blocks> &state,
+        const std::array<T, K / 2> &key)
+    {
+        std::array<T, K / 2> par = key;
         eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
     }
 
@@ -363,11 +357,634 @@ class PhiloxGeneratorImpl
     static void eval(
         std::array<T, K> &state, std::array<T, K / 2> &par, std::true_type)
     {
-        PhiloxRound<T, K, Rounds, Constants, N>::eval(state, par);
+        PhiloxKBox<T, K, N, Constants>::eval(par);
+        PhiloxPBox<T, K, N, Constants>::eval(state);
+        PhiloxSBox<T, K, N, Constants>::eval(state, par);
         eval<N + 1>(
             state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
+
+    template <std::size_t>
+    static void eval(std::array<std::array<T, K>, blocks> &,
+        std::array<T, K / 2> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void eval(std::array<std::array<T, K>, blocks> &state,
+        std::array<T, K / 2> &par, std::true_type)
+    {
+        PhiloxKBox<T, K, N, Constants>::eval(par);
+        pbox<N, 0>(state, std::integral_constant<bool, 0 < blocks>());
+        sbox<N, 0>(state, par, std::integral_constant<bool, 0 < blocks>());
+        eval<N + 1>(
+            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
+    }
+
+    template <std::size_t, std::size_t>
+    static void sbox(std::array<std::array<T, K>, blocks> &,
+        std::array<T, K / 2> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t I>
+    static void sbox(std::array<std::array<T, K>, blocks> &state,
+        std::array<T, K / 2> &par, std::true_type)
+    {
+        PhiloxSBox<T, K, N, Constants>::eval(std::get<I>(state), par);
+        sbox<N, I + 1>(
+            state, par, std::integral_constant<bool, I + 1 < blocks>());
+    }
+
+    template <std::size_t, std::size_t>
+    static void pbox(std::array<std::array<T, K>, blocks> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t I>
+    static void pbox(
+        std::array<std::array<T, K>, blocks> &state, std::true_type)
+    {
+        PhiloxPBox<T, K, N, Constants>::eval(std::get<I>(state));
+        pbox<N, I + 1>(state, std::integral_constant<bool, I + 1 < blocks>());
+    }
+}; // class PhiloxGeneratorGenericImpl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl
+    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
+{
 }; // class PhiloxGeneratorImpl
+
+#if MCKL_HAS_SSE2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    typename Derived, int = std::numeric_limits<T>::digits,
+    bool = 128 % (sizeof(T) * K) == 0 && (K % 8 == 0 || K < 8)>
+class PhiloxGeneratorSSE2Impl
+    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorSSE2Impl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    typename Derived>
+class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32, true>
+{
+    public:
+    static constexpr std::size_t blocks = 128 / (sizeof(T) * K);
+
+    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
+    {
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(state, key);
+    }
+
+    static void eval(std::array<std::array<T, K>, blocks> &state,
+        const std::array<T, K / 2> &key)
+    {
+        std::array<__m128i, M_> k;
+        std::array<__m128i, M_> w;
+        std::array<__m128i, M_> m;
+        std::array<__m128i, 8> s;
+        std::array<__m128i, 8> t;
+
+        std::memcpy(s.data(), state.data(), 128);
+        init_k<0>(k, key, std::integral_constant<bool, 0 < M_>());
+        init_w<0>(w, std::integral_constant<bool, 0 < M_>());
+        init_m<0>(m, std::integral_constant<bool, 0 < M_>());
+
+        std::get<0>(t) = _mm_srli_epi64(std::get<0>(s), 32);
+        std::get<1>(t) = _mm_srli_epi64(std::get<1>(s), 32);
+        std::get<2>(t) = _mm_srli_epi64(std::get<2>(s), 32);
+        std::get<3>(t) = _mm_srli_epi64(std::get<3>(s), 32);
+        std::get<4>(t) = _mm_srli_epi64(std::get<4>(s), 32);
+        std::get<5>(t) = _mm_srli_epi64(std::get<5>(s), 32);
+        std::get<6>(t) = _mm_srli_epi64(std::get<6>(s), 32);
+        std::get<7>(t) = _mm_srli_epi64(std::get<7>(s), 32);
+
+        Derived::pbox(s, t); // Round 1
+        sbox(s, t, k, m);    // Round 1
+        kbox(k, w);          // Round 2
+        Derived::pbox(s, t); // Round 2
+        sbox(s, t, k, m);    // Round 2
+        kbox(k, w);          // Round 3
+        Derived::pbox(s, t); // Round 3
+        sbox(s, t, k, m);    // Round 3
+        kbox(k, w);          // Round 4
+        Derived::pbox(s, t); // Round 4
+        sbox(s, t, k, m);    // Round 4
+        kbox(k, w);          // Round 5
+        Derived::pbox(s, t); // Round 5
+        sbox(s, t, k, m);    // Round 5
+        kbox(k, w);          // Round 6
+        Derived::pbox(s, t); // Round 6
+        sbox(s, t, k, m);    // Round 6
+        kbox(k, w);          // Round 7
+        Derived::pbox(s, t); // Round 7
+        sbox(s, t, k, m);    // Round 7
+        kbox(k, w);          // Round 8
+        Derived::pbox(s, t); // Round 8
+        sbox(s, t, k, m);    // Round 8
+        kbox(k, w);          // Round 9
+        Derived::pbox(s, t); // Round 9
+        sbox(s, t, k, m);    // Round 9
+        kbox(k, w);          // Round 10
+        Derived::pbox(s, t); // Round 10
+        sbox(s, t, k, m);    // Round 10
+
+        eval<11>(s, t, k, w, m, std::integral_constant<bool, 11 <= Rounds>());
+
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x87); // 2 0 1 3
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x87); // 2 0 1 3
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0x87); // 2 0 1 3
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0x87); // 2 0 1 3
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0x87); // 2 0 1 3
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0x87); // 2 0 1 3
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0x87); // 2 0 1 3
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0x87); // 2 0 1 3
+
+        std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(t), 0x87); // 2 0 1 3
+        std::get<1>(t) = _mm_shuffle_epi32(std::get<1>(t), 0x87); // 2 0 1 3
+        std::get<2>(t) = _mm_shuffle_epi32(std::get<2>(t), 0x87); // 2 0 1 3
+        std::get<3>(t) = _mm_shuffle_epi32(std::get<3>(t), 0x87); // 2 0 1 3
+        std::get<4>(t) = _mm_shuffle_epi32(std::get<4>(t), 0x87); // 2 0 1 3
+        std::get<5>(t) = _mm_shuffle_epi32(std::get<5>(t), 0x87); // 2 0 1 3
+        std::get<6>(t) = _mm_shuffle_epi32(std::get<6>(t), 0x87); // 2 0 1 3
+        std::get<7>(t) = _mm_shuffle_epi32(std::get<7>(t), 0x87); // 2 0 1 3
+
+        std::get<0>(s) = _mm_unpackhi_epi32(std::get<0>(s), std::get<0>(t));
+        std::get<1>(s) = _mm_unpackhi_epi32(std::get<1>(s), std::get<1>(t));
+        std::get<2>(s) = _mm_unpackhi_epi32(std::get<2>(s), std::get<2>(t));
+        std::get<3>(s) = _mm_unpackhi_epi32(std::get<3>(s), std::get<3>(t));
+        std::get<4>(s) = _mm_unpackhi_epi32(std::get<4>(s), std::get<4>(t));
+        std::get<5>(s) = _mm_unpackhi_epi32(std::get<5>(s), std::get<5>(t));
+        std::get<6>(s) = _mm_unpackhi_epi32(std::get<6>(s), std::get<6>(t));
+        std::get<7>(s) = _mm_unpackhi_epi32(std::get<7>(s), std::get<7>(t));
+
+        std::memcpy(state.data(), s.data(), 128);
+    }
+
+    private:
+    static constexpr std::size_t M_ = K < 8 ? 1 : K / 8;
+
+    template <std::size_t>
+    static void eval(std::array<__m128i, 8> &, std::array<__m128i, 8> &,
+        std::array<__m128i, M_> &, const std::array<__m128i, M_> &,
+        const std::array<__m128i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void eval(std::array<__m128i, 8> &s, std::array<__m128i, 8> &t,
+        std::array<__m128i, M_> &k, const std::array<__m128i, M_> &w,
+        const std::array<__m128i, M_> &m, std::true_type)
+    {
+        kbox(k, w);
+        Derived::pbox(s, t);
+        sbox(s, t, k, m);
+        eval<N + 1>(
+            s, t, k, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
+    }
+
+    template <std::size_t>
+    static void init_k(std::array<__m128i, M_> &, const std::array<T, K / 2> &,
+        std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void init_k(std::array<__m128i, M_> &k,
+        const std::array<T, K / 2> &key, std::true_type)
+    {
+        static constexpr std::size_t i0 = (I * 2 + 0) % (K / 2);
+        static constexpr std::size_t i1 = (I * 2 + 1) % (K / 2);
+
+        const int e0 = static_cast<int>(std::get<i0>(key));
+        const int e1 = static_cast<int>(std::get<i1>(key));
+
+        std::get<I>(k) = _mm_set_epi32(0, e1, 0, e0);
+        init_k<I + 1>(k, key, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    template <std::size_t>
+    static void init_w(std::array<__m128i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void init_w(std::array<__m128i, M_> &w, std::true_type)
+    {
+        static constexpr std::size_t i0 = (I * 2 + 0) % (K / 2);
+        static constexpr std::size_t i1 = (I * 2 + 1) % (K / 2);
+
+        static constexpr int e0 = static_cast<int>(Constants::weyl[i0]);
+        static constexpr int e1 = static_cast<int>(Constants::weyl[i1]);
+
+        std::get<I>(w) = _mm_set_epi32(0, e1, 0, e0);
+        init_w<I + 1>(w, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    template <std::size_t>
+    static void init_m(std::array<__m128i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void init_m(std::array<__m128i, M_> &m, std::true_type)
+    {
+        static constexpr std::size_t i0 = (I * 2 + 0) % (K / 2);
+        static constexpr std::size_t i1 = (I * 2 + 1) % (K / 2);
+
+        static constexpr int e0 = static_cast<int>(Constants::multiplier[i0]);
+        static constexpr int e1 = static_cast<int>(Constants::multiplier[i1]);
+
+        std::get<I>(m) = _mm_set_epi32(0, e1, 0, e0);
+        init_m<I + 1>(m, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    static void kbox(
+        std::array<__m128i, M_> &k, const std::array<__m128i, M_> &w)
+    {
+        kbox<0>(k, w, std::integral_constant<bool, 0 < M_>());
+    }
+
+    template <std::size_t>
+    static void kbox(std::array<__m128i, M_> &,
+        const std::array<__m128i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void kbox(std::array<__m128i, M_> &k,
+        const std::array<__m128i, M_> &w, std::true_type)
+    {
+        std::get<I>(k) = _mm_add_epi32(std::get<I>(k), std::get<I>(w));
+        kbox<I + 1>(k, w, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    static void sbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &t,
+        const std::array<__m128i, M_> &k, const std::array<__m128i, M_> &m)
+    {
+        __m128i x0 = _mm_xor_si128(std::get<0>(t), std::get<0 % M_>(k));
+        __m128i x1 = _mm_xor_si128(std::get<1>(t), std::get<1 % M_>(k));
+        __m128i x2 = _mm_xor_si128(std::get<2>(t), std::get<2 % M_>(k));
+        __m128i x3 = _mm_xor_si128(std::get<3>(t), std::get<3 % M_>(k));
+        __m128i x4 = _mm_xor_si128(std::get<4>(t), std::get<4 % M_>(k));
+        __m128i x5 = _mm_xor_si128(std::get<5>(t), std::get<5 % M_>(k));
+        __m128i x6 = _mm_xor_si128(std::get<6>(t), std::get<6 % M_>(k));
+        __m128i x7 = _mm_xor_si128(std::get<7>(t), std::get<7 % M_>(k));
+
+        std::get<0>(t) = _mm_mul_epu32(std::get<0>(s), std::get<0 % M_>(m));
+        std::get<1>(t) = _mm_mul_epu32(std::get<1>(s), std::get<1 % M_>(m));
+        std::get<2>(t) = _mm_mul_epu32(std::get<2>(s), std::get<2 % M_>(m));
+        std::get<3>(t) = _mm_mul_epu32(std::get<3>(s), std::get<3 % M_>(m));
+        std::get<4>(t) = _mm_mul_epu32(std::get<4>(s), std::get<4 % M_>(m));
+        std::get<5>(t) = _mm_mul_epu32(std::get<5>(s), std::get<5 % M_>(m));
+        std::get<6>(t) = _mm_mul_epu32(std::get<6>(s), std::get<6 % M_>(m));
+        std::get<7>(t) = _mm_mul_epu32(std::get<7>(s), std::get<7 % M_>(m));
+
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(t), 0xB1); // 2 3 0 1
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(t), 0xB1); // 2 3 0 1
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(t), 0xB1); // 2 3 0 1
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(t), 0xB1); // 2 3 0 1
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(t), 0xB1); // 2 3 0 1
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(t), 0xB1); // 2 3 0 1
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(t), 0xB1); // 2 3 0 1
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(t), 0xB1); // 2 3 0 1
+
+        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), x0);
+        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), x1);
+        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), x2);
+        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), x3);
+        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), x4);
+        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), x5);
+        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), x6);
+        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), x7);
+    }
+
+    public:
+    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &) {}
+}; // class PhiloxGeneratorSSE2Impl
+
+#endif // MCKL_HAS_SSE2
+
+#if MCKL_HAS_AVX2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    typename Derived, int = std::numeric_limits<T>::digits,
+    bool = 256 % (sizeof(T) * K) == 0 && (K % 8 == 0 || K < 8)>
+class PhiloxGeneratorAVX2Impl
+    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorAVX2Impl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    typename Derived>
+class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
+{
+    public:
+    static constexpr std::size_t blocks = 256 / (sizeof(T) * K);
+
+    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
+    {
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(state, key);
+    }
+
+    static void eval(std::array<std::array<T, K>, blocks> &state,
+        const std::array<T, K / 2> &key)
+    {
+        std::array<__m256i, M_> k;
+        std::array<__m256i, M_> w;
+        std::array<__m256i, M_> m;
+        std::array<__m256i, 8> s;
+        std::array<__m256i, 8> t;
+
+        std::memcpy(s.data(), state.data(), 256);
+        init_k<0>(k, key, std::integral_constant<bool, 0 < M_>());
+        init_w<0>(w, std::integral_constant<bool, 0 < M_>());
+        init_m<0>(m, std::integral_constant<bool, 0 < M_>());
+
+        std::get<0>(t) = _mm256_srli_epi64(std::get<0>(s), 32);
+        std::get<1>(t) = _mm256_srli_epi64(std::get<1>(s), 32);
+        std::get<2>(t) = _mm256_srli_epi64(std::get<2>(s), 32);
+        std::get<3>(t) = _mm256_srli_epi64(std::get<3>(s), 32);
+        std::get<4>(t) = _mm256_srli_epi64(std::get<4>(s), 32);
+        std::get<5>(t) = _mm256_srli_epi64(std::get<5>(s), 32);
+        std::get<6>(t) = _mm256_srli_epi64(std::get<6>(s), 32);
+        std::get<7>(t) = _mm256_srli_epi64(std::get<7>(s), 32);
+
+        Derived::pbox(s, t); // Round 1
+        sbox(s, t, k, m);    // Round 1
+        kbox(k, w);          // Round 2
+        Derived::pbox(s, t); // Round 2
+        sbox(s, t, k, m);    // Round 2
+        kbox(k, w);          // Round 3
+        Derived::pbox(s, t); // Round 3
+        sbox(s, t, k, m);    // Round 3
+        kbox(k, w);          // Round 4
+        Derived::pbox(s, t); // Round 4
+        sbox(s, t, k, m);    // Round 4
+        kbox(k, w);          // Round 5
+        Derived::pbox(s, t); // Round 5
+        sbox(s, t, k, m);    // Round 5
+        kbox(k, w);          // Round 6
+        Derived::pbox(s, t); // Round 6
+        sbox(s, t, k, m);    // Round 6
+        kbox(k, w);          // Round 7
+        Derived::pbox(s, t); // Round 7
+        sbox(s, t, k, m);    // Round 7
+        kbox(k, w);          // Round 8
+        Derived::pbox(s, t); // Round 8
+        sbox(s, t, k, m);    // Round 8
+        kbox(k, w);          // Round 9
+        Derived::pbox(s, t); // Round 9
+        sbox(s, t, k, m);    // Round 9
+        kbox(k, w);          // Round 10
+        Derived::pbox(s, t); // Round 10
+        sbox(s, t, k, m);    // Round 10
+
+        eval<11>(s, t, k, w, m, std::integral_constant<bool, 11 <= Rounds>());
+
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0x87); // 2 0 1 3
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0x87); // 2 0 1 3
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0x87); // 2 0 1 3
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0x87); // 2 0 1 3
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0x87); // 2 0 1 3
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0x87); // 2 0 1 3
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0x87); // 2 0 1 3
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0x87); // 2 0 1 3
+
+        std::get<0>(t) = _mm256_shuffle_epi32(std::get<0>(t), 0x87); // 2 0 1 3
+        std::get<1>(t) = _mm256_shuffle_epi32(std::get<1>(t), 0x87); // 2 0 1 3
+        std::get<2>(t) = _mm256_shuffle_epi32(std::get<2>(t), 0x87); // 2 0 1 3
+        std::get<3>(t) = _mm256_shuffle_epi32(std::get<3>(t), 0x87); // 2 0 1 3
+        std::get<4>(t) = _mm256_shuffle_epi32(std::get<4>(t), 0x87); // 2 0 1 3
+        std::get<5>(t) = _mm256_shuffle_epi32(std::get<5>(t), 0x87); // 2 0 1 3
+        std::get<6>(t) = _mm256_shuffle_epi32(std::get<6>(t), 0x87); // 2 0 1 3
+        std::get<7>(t) = _mm256_shuffle_epi32(std::get<7>(t), 0x87); // 2 0 1 3
+
+        std::get<0>(s) = _mm256_unpackhi_epi32(std::get<0>(s), std::get<0>(t));
+        std::get<1>(s) = _mm256_unpackhi_epi32(std::get<1>(s), std::get<1>(t));
+        std::get<2>(s) = _mm256_unpackhi_epi32(std::get<2>(s), std::get<2>(t));
+        std::get<3>(s) = _mm256_unpackhi_epi32(std::get<3>(s), std::get<3>(t));
+        std::get<4>(s) = _mm256_unpackhi_epi32(std::get<4>(s), std::get<4>(t));
+        std::get<5>(s) = _mm256_unpackhi_epi32(std::get<5>(s), std::get<5>(t));
+        std::get<6>(s) = _mm256_unpackhi_epi32(std::get<6>(s), std::get<6>(t));
+        std::get<7>(s) = _mm256_unpackhi_epi32(std::get<7>(s), std::get<7>(t));
+
+        std::memcpy(state.data(), s.data(), 256);
+    }
+
+    private:
+    static constexpr std::size_t M_ = K < 8 ? 1 : K / 8;
+
+    template <std::size_t>
+    static void eval(std::array<__m256i, 8> &, std::array<__m256i, 8> &,
+        std::array<__m256i, M_> &, const std::array<__m256i, M_> &,
+        const std::array<__m256i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void eval(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
+        std::array<__m256i, M_> &k, const std::array<__m256i, M_> &w,
+        const std::array<__m256i, M_> &m, std::true_type)
+    {
+        kbox(k, w);
+        Derived::pbox(s, t);
+        sbox(s, t, k, m);
+        eval<N + 1>(
+            s, t, k, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
+    }
+
+    template <std::size_t>
+    static void init_k(std::array<__m256i, M_> &, const std::array<T, K / 2> &,
+        std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void init_k(std::array<__m256i, M_> &k,
+        const std::array<T, K / 2> &key, std::true_type)
+    {
+        static constexpr std::size_t i0 = (I * 4 + 0) % (K / 2);
+        static constexpr std::size_t i1 = (I * 4 + 1) % (K / 2);
+        static constexpr std::size_t i2 = (I * 4 + 2) % (K / 2);
+        static constexpr std::size_t i3 = (I * 4 + 3) % (K / 2);
+
+        const int e0 = static_cast<int>(std::get<i0>(key));
+        const int e1 = static_cast<int>(std::get<i1>(key));
+        const int e2 = static_cast<int>(std::get<i2>(key));
+        const int e3 = static_cast<int>(std::get<i3>(key));
+
+        std::get<I>(k) = _mm256_set_epi32(0, e3, 0, e2, 0, e1, 0, e0);
+        init_k<I + 1>(k, key, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    template <std::size_t>
+    static void init_w(std::array<__m256i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void init_w(std::array<__m256i, M_> &w, std::true_type)
+    {
+        static constexpr std::size_t i0 = (I * 4 + 0) % (K / 2);
+        static constexpr std::size_t i1 = (I * 4 + 1) % (K / 2);
+        static constexpr std::size_t i2 = (I * 4 + 2) % (K / 2);
+        static constexpr std::size_t i3 = (I * 4 + 3) % (K / 2);
+
+        static constexpr int e0 = static_cast<int>(Constants::weyl[i0]);
+        static constexpr int e1 = static_cast<int>(Constants::weyl[i1]);
+        static constexpr int e2 = static_cast<int>(Constants::weyl[i2]);
+        static constexpr int e3 = static_cast<int>(Constants::weyl[i3]);
+
+        std::get<I>(w) = _mm256_set_epi32(0, e3, 0, e2, 0, e1, 0, e0);
+        init_w<I + 1>(w, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    template <std::size_t>
+    static void init_m(std::array<__m256i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void init_m(std::array<__m256i, M_> &m, std::true_type)
+    {
+        static constexpr std::size_t i0 = (I * 4 + 0) % (K / 2);
+        static constexpr std::size_t i1 = (I * 4 + 1) % (K / 2);
+        static constexpr std::size_t i2 = (I * 4 + 2) % (K / 2);
+        static constexpr std::size_t i3 = (I * 4 + 3) % (K / 2);
+
+        static constexpr int e0 = static_cast<int>(Constants::multiplier[i0]);
+        static constexpr int e1 = static_cast<int>(Constants::multiplier[i1]);
+        static constexpr int e2 = static_cast<int>(Constants::multiplier[i2]);
+        static constexpr int e3 = static_cast<int>(Constants::multiplier[i3]);
+
+        std::get<I>(m) = _mm256_set_epi32(0, e3, 0, e2, 0, e1, 0, e0);
+        init_m<I + 1>(m, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    static void kbox(
+        std::array<__m256i, M_> &k, const std::array<__m256i, M_> &w)
+    {
+        kbox<0>(k, w, std::integral_constant<bool, 0 < M_>());
+    }
+
+    template <std::size_t>
+    static void kbox(std::array<__m256i, M_> &,
+        const std::array<__m256i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void kbox(std::array<__m256i, M_> &k,
+        const std::array<__m256i, M_> &w, std::true_type)
+    {
+        std::get<I>(k) = _mm256_add_epi32(std::get<I>(k), std::get<I>(w));
+        kbox<I + 1>(k, w, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    static void sbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
+        const std::array<__m256i, M_> &k, const std::array<__m256i, M_> &m)
+    {
+        __m256i x0 = _mm256_xor_si256(std::get<0>(t), std::get<0 % M_>(k));
+        __m256i x1 = _mm256_xor_si256(std::get<1>(t), std::get<1 % M_>(k));
+        __m256i x2 = _mm256_xor_si256(std::get<2>(t), std::get<2 % M_>(k));
+        __m256i x3 = _mm256_xor_si256(std::get<3>(t), std::get<3 % M_>(k));
+        __m256i x4 = _mm256_xor_si256(std::get<4>(t), std::get<4 % M_>(k));
+        __m256i x5 = _mm256_xor_si256(std::get<5>(t), std::get<5 % M_>(k));
+        __m256i x6 = _mm256_xor_si256(std::get<6>(t), std::get<6 % M_>(k));
+        __m256i x7 = _mm256_xor_si256(std::get<7>(t), std::get<7 % M_>(k));
+
+        std::get<0>(t) = _mm256_mul_epu32(std::get<0>(s), std::get<0 % M_>(m));
+        std::get<1>(t) = _mm256_mul_epu32(std::get<1>(s), std::get<1 % M_>(m));
+        std::get<2>(t) = _mm256_mul_epu32(std::get<2>(s), std::get<2 % M_>(m));
+        std::get<3>(t) = _mm256_mul_epu32(std::get<3>(s), std::get<3 % M_>(m));
+        std::get<4>(t) = _mm256_mul_epu32(std::get<4>(s), std::get<4 % M_>(m));
+        std::get<5>(t) = _mm256_mul_epu32(std::get<5>(s), std::get<5 % M_>(m));
+        std::get<6>(t) = _mm256_mul_epu32(std::get<6>(s), std::get<6 % M_>(m));
+        std::get<7>(t) = _mm256_mul_epu32(std::get<7>(s), std::get<7 % M_>(m));
+
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(t), 0xB1); // 2 3 0 1
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(t), 0xB1); // 2 3 0 1
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(t), 0xB1); // 2 3 0 1
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(t), 0xB1); // 2 3 0 1
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(t), 0xB1); // 2 3 0 1
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(t), 0xB1); // 2 3 0 1
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(t), 0xB1); // 2 3 0 1
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(t), 0xB1); // 2 3 0 1
+
+        std::get<0>(s) = _mm256_xor_si256(std::get<0>(s), x0);
+        std::get<1>(s) = _mm256_xor_si256(std::get<1>(s), x1);
+        std::get<2>(s) = _mm256_xor_si256(std::get<2>(s), x2);
+        std::get<3>(s) = _mm256_xor_si256(std::get<3>(s), x3);
+        std::get<4>(s) = _mm256_xor_si256(std::get<4>(s), x4);
+        std::get<5>(s) = _mm256_xor_si256(std::get<5>(s), x5);
+        std::get<6>(s) = _mm256_xor_si256(std::get<6>(s), x6);
+        std::get<7>(s) = _mm256_xor_si256(std::get<7>(s), x7);
+    }
+
+    public:
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &) {}
+}; // class PhiloxGeneratorAVX2Impl
+
+#endif // MCKL_HAS_AVX2
+
+template <typename T, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, 2, Rounds, Constants>
+#if MCKL_HAS_AVX2
+    : public PhiloxGeneratorAVX2Impl<T, 2, Rounds, Constants,
+          PhiloxGeneratorImpl<T, 2, Rounds, Constants>>
+#elif MCKL_HAS_SSE2
+    : public PhiloxGeneratorSSE2Impl<T, 2, Rounds, Constants,
+          PhiloxGeneratorImpl<T, 2, Rounds, Constants>>
+#else  // MCKL_HAS_AVX2
+    : public PhiloxGeneratorGenericImpl<T, 2, Rounds, Constants>
+#endif // MCKL_HAS_AVX2
+{
+}; // class PhiloxGeneratorImpl
+
+template <typename T, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, 4, Rounds, Constants>
+#if MCKL_HAS_AVX2
+    : public PhiloxGeneratorAVX2Impl<T, 4, Rounds, Constants,
+          PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
+#elif MCKL_HAS_SSE2
+    : public PhiloxGeneratorSSE2Impl<T, 4, Rounds, Constants,
+          PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
+#else  // MCKL_HAS_AVX2
+    : public PhiloxGeneratorGenericImpl<T, 4, Rounds, Constants>
+#endif // MCKL_HAS_AVX2
+{
+    public:
+#if MCKL_HAS_SSE2
+    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &)
+    {
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6); // 3 0 1 2
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6); // 3 0 1 2
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xC6); // 3 0 1 2
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xC6); // 3 0 1 2
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xC6); // 3 0 1 2
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xC6); // 3 0 1 2
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xC6); // 3 0 1 2
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xC6); // 3 0 1 2
+    }
+#endif // MCKL_HAS_SSE2
+
+#if MCKL_HAS_AVX2
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &)
+    {
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xC6); // 3 0 1 2
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xC6); // 3 0 1 2
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xC6); // 3 0 1 2
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xC6); // 3 0 1 2
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xC6); // 3 0 1 2
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xC6); // 3 0 1 2
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xC6); // 3 0 1 2
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xC6); // 3 0 1 2
+    }
+#endif // MCKL_HAS_AVX2
+};     // class PhiloxGeneratorImpl
 
 } // namespace mckl::internal
 
@@ -398,7 +1015,10 @@ class PhiloxGenerator
         Rounds != 0, "**PhiloxGenerator** used with rounds equal to zero");
 
     public:
-    using ctr_type = std::array<T, K>;
+    using ctr_type =
+        typename std::conditional<sizeof(T) * K % sizeof(std::uint64_t) == 0,
+            std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>,
+            std::array<T, K>>::type;
     using key_type = std::array<T, K / 2>;
 
     static constexpr std::size_t size() { return sizeof(T) * K; }
@@ -414,10 +1034,9 @@ class PhiloxGenerator
             ctr_type result;
         } buf;
 
-        std::array<T, K / 2> par = key_;
         buf.result = ctr;
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buf.state, par);
+            buf.state, key_);
         buffer = buf.result;
     }
 
@@ -432,8 +1051,7 @@ class PhiloxGenerator
     void operator()(ctr_type &ctr, std::size_t n,
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
-        for (std::size_t i = 0; i != n; ++i)
-            generate(ctr, buffer[i]);
+        generate(ctr, n, buffer);
     }
 
     friend bool operator==(const PhiloxGenerator<T, K, Rounds> &gen1,
@@ -483,11 +1101,10 @@ class PhiloxGenerator
 
     void generate(std::array<T, K> &ctr, std::array<T, K> &buffer) const
     {
-        std::array<T, K / 2> par = key_;
         increment(ctr);
         buffer = ctr;
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buffer, par);
+            buffer, key_);
     }
 
     template <typename ResultType>
@@ -500,12 +1117,58 @@ class PhiloxGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
-        std::array<T, K / 2> par = key_;
         increment(ctr);
         buf.ctr = ctr;
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buf.state, par);
+            buf.state, key_);
         buffer = buf.result;
+    }
+
+    void generate(
+        std::array<T, K> &ctr, std::size_t n, std::array<T, K> *buffer) const
+    {
+        static constexpr std::size_t blocks =
+            internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::blocks;
+
+        using state_type = std::array<std::array<T, K>, blocks>;
+
+        const std::size_t m = n / blocks;
+        const std::size_t l = n % blocks;
+        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            state_type &state = *reinterpret_cast<state_type *>(buffer);
+            increment(ctr, state);
+            internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+                state, key_);
+        }
+        for (std::size_t i = 0; i != l; ++i)
+            generate(ctr, buffer[i]);
+    }
+
+    template <typename ResultType>
+    void generate(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
+    {
+        static constexpr std::size_t blocks =
+            internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::blocks;
+
+        union {
+            std::array<std::array<T, K>, blocks> state;
+            std::array<ctr_type, blocks> ctr_block;
+            std::array<std::array<ResultType, size() / sizeof(ResultType)>,
+                blocks>
+                result;
+        } buf;
+
+        const std::size_t m = n / blocks;
+        const std::size_t l = n % blocks;
+        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            increment(ctr, buf.ctr_block);
+            internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+                buf.state, key_);
+            std::copy_n(buf.result.data(), blocks, buffer);
+        }
+        for (std::size_t i = 0; i != l; ++i)
+            generate(ctr, buffer[i]);
     }
 }; // class PhiloxGenerator
 

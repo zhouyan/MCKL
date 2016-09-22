@@ -99,6 +99,14 @@
 #define MCKL_HAS_RDRAND 0
 #endif
 
+#ifndef MCKL_HAS_SSE2
+#define MCKL_HAS_SSE2 0
+#endif
+
+#ifndef MCKL_HAS_AVX2
+#define MCKL_HAS_AVX2 0
+#endif
+
 #ifndef MCKL_HAS_INT128
 #define MCKL_HAS_INT128 0
 #endif

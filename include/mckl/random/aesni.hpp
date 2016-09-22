@@ -34,7 +34,12 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/counter.hpp>
+
+#ifdef MCKL_MSVC
+#include <immintrin.h>
+#else
 #include <wmmintrin.h>
+#endif
 
 #ifdef MCKL_GCC
 #if __GNUC__ >= 6
