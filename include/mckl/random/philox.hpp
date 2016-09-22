@@ -46,9 +46,6 @@
 #define MCKL_PHILOX_ROUNDS 10
 #endif
 
-#define MCKL_PHILOX_GENERATE MCKL_THREEFRY_GENERATE
-#define MCKL_PHILOX_GENERATE_KERNEL MCKL_THREEFRY_GENERATE_KERNEL
-
 namespace mckl
 {
 
@@ -455,9 +452,6 @@ class PhiloxGenerator
     }
 
     private:
-    template <std::size_t N>
-    using round = internal::PhiloxRound<T, K, Rounds, Constants, N>;
-
     key_type key_;
 
     template <typename ResultType>
@@ -473,8 +467,7 @@ class PhiloxGenerator
         std::array<T, K / 2> par = key_;
         increment(ctr);
         buf.ctr = ctr;
-        round<0>::eval(buf.state, par);
-        MCKL_PHILOX_GENERATE(0, buf.state, par);
+        generate<0>(buf.state, par, std::true_type());
         buffer = buf.result;
     }
 
@@ -488,7 +481,9 @@ class PhiloxGenerator
     void generate(std::array<T, K> &state, std::array<T, K / 2> &par,
         std::true_type) const
     {
-        MCKL_PHILOX_GENERATE(N, state, par);
+        internal::PhiloxRound<T, K, Rounds, Constants, N>::eval(state, par);
+        generate<N + 1>(
+            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 }; // class PhiloxGenerator
 

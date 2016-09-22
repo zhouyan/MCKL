@@ -41,41 +41,6 @@
 #define MCKL_THREEFRY_ROUNDS 20
 #endif
 
-#define MCKL_THREEFRY_GENERATE(N, state, par)                                 \
-    round<N + 0x01>::eval(state, par);                                        \
-    generate<N + 0x01>(                                                       \
-        state, par, std::integral_constant<bool, N + 0x01 < Rounds>());
-
-#define MCKL_THREEFRY_GENERATE_KERNEL(R, N, state, par)                       \
-    round<R + N + 0x01>::eval(state, par);                                    \
-    round<R + N + 0x02>::eval(state, par);                                    \
-    round<R + N + 0x03>::eval(state, par);                                    \
-    round<R + N + 0x04>::eval(state, par);                                    \
-    round<R + N + 0x05>::eval(state, par);                                    \
-    round<R + N + 0x06>::eval(state, par);                                    \
-    round<R + N + 0x07>::eval(state, par);                                    \
-    round<R + N + 0x08>::eval(state, par);                                    \
-    round<R + N + 0x09>::eval(state, par);                                    \
-    round<R + N + 0x0A>::eval(state, par);                                    \
-    round<R + N + 0x0B>::eval(state, par);                                    \
-    round<R + N + 0x0C>::eval(state, par);                                    \
-    round<R + N + 0x0D>::eval(state, par);                                    \
-    round<R + N + 0x0E>::eval(state, par);                                    \
-    round<R + N + 0x0F>::eval(state, par);                                    \
-    round<R + N + 0x10>::eval(state, par);
-
-#ifdef MCKL_CLANG
-#undef MCKL_THREEFRY_GENERATE
-#define MCKL_THREEFRY_GENERATE(N, state, par)                                 \
-    MCKL_THREEFRY_GENERATE_KERNEL(0x00, N, state, par)                        \
-    MCKL_THREEFRY_GENERATE_KERNEL(0x10, N, state, par)                        \
-    MCKL_THREEFRY_GENERATE_KERNEL(0x20, N, state, par)                        \
-    MCKL_THREEFRY_GENERATE_KERNEL(0x30, N, state, par)                        \
-    MCKL_THREEFRY_GENERATE_KERNEL(0x40, N, state, par)                        \
-    generate<N + 0x50>(                                                       \
-        state, par, std::integral_constant<bool, N + 0x50 < Rounds>());
-#endif // MCKL_CLANG
-
 namespace mckl
 {
 
@@ -486,9 +451,6 @@ class ThreefryGenerator
     }
 
     private:
-    template <std::size_t N>
-    using round = internal::ThreefryRound<T, K, Rounds, Constants, N>;
-
     std::array<T, K + 1> par_;
 
     template <typename ResultType>
@@ -503,8 +465,7 @@ class ThreefryGenerator
 
         increment(ctr);
         buf.ctr = ctr;
-        round<0>::eval(buf.state, par_);
-        MCKL_THREEFRY_GENERATE(0, buf.state, par_);
+        generate<0>(buf.state, par_, std::true_type());
         buffer = buf.result;
     }
 
@@ -518,7 +479,9 @@ class ThreefryGenerator
     void generate(std::array<T, K> &state, const std::array<T, K + 1> &par,
         std::true_type) const
     {
-        MCKL_THREEFRY_GENERATE(N, state, par);
+        internal::ThreefryRound<T, K, Rounds, Constants, N>::eval(state, par);
+        generate<N + 1>(
+            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 }; // class ThreefryGenerator
 
