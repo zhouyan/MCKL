@@ -1,6 +1,7 @@
 *.swp
 .DS_Store
 build
+example/random/src/random_rng_*.cpp
 manual/fig/pf.pdf
 manual/manual.aux
 manual/manual.bbl

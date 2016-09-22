@@ -31,4 +31,49 @@
 
 #include "random_rng.hpp"
 
-MCKL_RNG_DEFINE_MACRO(@RNGType@, @Name@, @name@)
+int main(int argc, char **argv)
+{
+    --argc;
+    ++argv;
+
+    std::size_t N = 10000;
+    if (argc > 0) {
+        std::size_t n = static_cast<std::size_t>(std::atoi(*argv));
+        if (n != 0) {
+            N = n;
+            --argc;
+            ++argv;
+        }
+    }
+
+    std::size_t M = 100;
+    if (argc > 0) {
+        std::size_t m = static_cast<std::size_t>(std::atoi(*argv));
+        if (m != 0) {
+            M = m;
+            --argc;
+            ++argv;
+        }
+    }
+
+    const int nwid = 20;
+    const int swid = 8;
+    const int twid = 15;
+    const std::size_t lwid = nwid + swid * 2 + twid * 4;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+    std::cout << std::setw(nwid) << std::left << "RNGType";
+    std::cout << std::setw(swid) << std::right << "Size";
+    std::cout << std::setw(swid) << std::right << "Align";
+    std::cout << std::setw(twid) << std::right << "CPB";
+    std::cout << std::setw(twid) << std::right << "CPB (Loop)";
+    std::cout << std::setw(twid) << std::right << "CPB (Batch)";
+    std::cout << std::setw(twid) << std::right << "Deterministics";
+    std::cout << std::endl;
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << std::string(lwid, '-') << std::endl;
+    random_rng<@RNGType@>(N, M, nwid, swid, twid, "@Name@");
+    std::cout << std::string(lwid, '-') << std::endl;
+
+    return 0;
+}

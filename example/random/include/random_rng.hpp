@@ -226,18 +226,8 @@ inline std::string random_rng_size(
 
 template <typename RNGType>
 inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
-    int twid, const std::string &name,
-    const mckl::Vector<std::string> &rngname)
+    int twid, const std::string &name)
 {
-    if (!rngname.empty()) {
-        auto iter = std::find_if(
-            rngname.begin(), rngname.end(), [&name](const std::string &rname) {
-                return name.find(rname) != std::string::npos;
-            });
-        if (iter == rngname.end())
-            return;
-    }
-
     RNGType rng;
     bool pass = random_rng_kat(rng);
     double cpb = random_rng_cpb(rng, N, M);
@@ -304,83 +294,5 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::setw(twid) << std::right << random_pass(pass);
     std::cout << std::endl;
 }
-
-#ifdef MCKL_RNG_DEFINE_MACRO
-#undef MCKL_RNG_DEFINE_MACRO
-#endif
-
-#ifdef MCKL_RNG_DEFINE_MACRO_NA
-#undef MCKL_RNG_DEFINE_MACRO_NA
-#endif
-
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    void random_rng_##name(std::size_t, std::size_t, int, int, int,           \
-        const std::string &, const mckl::Vector<std::string> &);
-
-#include <mckl/random/internal/rng_define_macro_std.hpp>
-
-#include <mckl/random/internal/rng_define_macro.hpp>
-
-#include <mckl/random/internal/rng_define_macro_mkl.hpp>
-
-inline void random_rng(std::size_t N, std::size_t M, int argc, char **argv)
-{
-    mckl::Vector<std::string> rngname;
-    for (int i = 0; i != argc; ++i)
-        rngname.push_back(argv[i]);
-
-    const int nwid = 20;
-    const int swid = 8;
-    const int twid = 15;
-    const std::size_t lwid = nwid + swid * 2 + twid * 4;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::setw(nwid) << std::left << "RNGType";
-    std::cout << std::setw(swid) << std::right << "Size";
-    std::cout << std::setw(swid) << std::right << "Align";
-    std::cout << std::setw(twid) << std::right << "CPB";
-    std::cout << std::setw(twid) << std::right << "CPB (Loop)";
-    std::cout << std::setw(twid) << std::right << "CPB (Batch)";
-    std::cout << std::setw(twid) << std::right << "Deterministics";
-    std::cout << std::endl;
-
-#ifdef MCKL_RNG_DEFINE_MACRO
-#undef MCKL_RNG_DEFINE_MACRO
-#endif
-
-#ifdef MCKL_RNG_DEFINE_MACRO_NA
-#undef MCKL_RNG_DEFINE_MACRO_NA
-#endif
-
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    random_rng_##name(N, M, nwid, swid, twid, #Name, rngname);
-
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << std::string(lwid, '-') << std::endl;
-
-#include <mckl/random/internal/rng_define_macro_std.hpp>
-
-#include <mckl/random/internal/rng_define_macro.hpp>
-
-#include <mckl/random/internal/rng_define_macro_mkl.hpp>
-
-    std::cout << std::string(lwid, '-') << std::endl;
-}
-
-#ifdef MCKL_RNG_DEFINE_MACRO
-#undef MCKL_RNG_DEFINE_MACRO
-#endif
-
-#ifdef MCKL_RNG_DEFINE_MACRO_NA
-#undef MCKL_RNG_DEFINE_MACRO_NA
-#endif
-
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    void random_rng_##name(std::size_t N, std::size_t M, int nwid, int swid,  \
-        int twid, const std::string &name,                                    \
-        const mckl::Vector<std::string> &rngname)                             \
-    {                                                                         \
-        random_rng<RNGType>(N, M, nwid, swid, twid, name, rngname);           \
-    }
 
 #endif // MCKL_EXAMPLE_RANDOM_RNG_HPP
