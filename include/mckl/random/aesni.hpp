@@ -143,7 +143,7 @@ class AESNIEncLast
     }
 }; // class AESNIEncLast
 
-template <typename KeySeqType, std::size_t Blocks, std::size_t N,
+template <typename KeySeqType, std::size_t K, std::size_t N,
     bool = N <= KeySeqType::rounds>
 class AESNIRound
 {
@@ -151,16 +151,16 @@ class AESNIRound
 
     public:
     static void eval(
-        std::array<__m128i, Blocks> &, const std::array<__m128i, rounds + 1> &)
+        std::array<__m128i, K> &, const std::array<__m128i, rounds + 1> &)
     {
     }
 }; // class AESNIRound
 
-template <typename KeySeqType, std::size_t Blocks, std::size_t N>
-class AESNIRound<KeySeqType, Blocks, N, true>
+template <typename KeySeqType, std::size_t K, std::size_t N>
+class AESNIRound<KeySeqType, K, N, true>
 {
     public:
-    static void eval(std::array<__m128i, Blocks> &state,
+    static void eval(std::array<__m128i, K> &state,
         const std::array<__m128i, KeySeqType::rounds + 1> &par)
     {
         eval(state, par, std::integral_constant<bool, N == 0>(),
@@ -168,25 +168,25 @@ class AESNIRound<KeySeqType, Blocks, N, true>
     }
 
     private:
-    static void eval(std::array<__m128i, Blocks> &state,
+    static void eval(std::array<__m128i, K> &state,
         const std::array<__m128i, KeySeqType::rounds + 1> &par, std::true_type,
         std::false_type)
     {
-        AESNIEncFirst<Blocks>::eval(state, std::get<N>(par));
+        AESNIEncFirst<K>::eval(state, std::get<N>(par));
     }
 
-    static void eval(std::array<__m128i, Blocks> &state,
+    static void eval(std::array<__m128i, K> &state,
         const std::array<__m128i, KeySeqType::rounds + 1> &par,
         std::false_type, std::false_type)
     {
-        AESNIEncRound<Blocks>::eval(state, std::get<N>(par));
+        AESNIEncRound<K>::eval(state, std::get<N>(par));
     }
 
-    static void eval(std::array<__m128i, Blocks> &state,
+    static void eval(std::array<__m128i, K> &state,
         const std::array<__m128i, KeySeqType::rounds + 1> &par,
         std::false_type, std::true_type)
     {
-        AESNIEncLast<Blocks>::eval(state, std::get<N>(par));
+        AESNIEncLast<K>::eval(state, std::get<N>(par));
     }
 }; // class AESNIRound
 
@@ -306,19 +306,19 @@ class AESNIGenerator
         buffer = buf.result;
     }
 
-    template <std::size_t>
-    void generate(std::array<__m128i, Blocks> &,
+    template <std::size_t, std::size_t K>
+    void generate(std::array<__m128i, K> &,
         const std::array<__m128i, KeySeqType::rounds + 1> &,
         std::false_type) const
     {
     }
 
-    template <std::size_t N>
-    void generate(std::array<__m128i, Blocks> &state,
+    template <std::size_t N, std::size_t K>
+    void generate(std::array<__m128i, K> &state,
         const std::array<__m128i, KeySeqType::rounds + 1> &par,
         std::true_type) const
     {
-        internal::AESNIRound<KeySeqType, Blocks, N>::eval(state, par);
+        internal::AESNIRound<KeySeqType, K, N>::eval(state, par);
         generate<N + 1>(state, par,
             std::integral_constant<bool, N + 1 <= KeySeqType::rounds>());
     }

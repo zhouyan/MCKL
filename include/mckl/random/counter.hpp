@@ -250,6 +250,10 @@ class CounterEngine
         index_ = M_;
     }
 
+    generator_type &generator() { return generator_; }
+
+    const generator_type &generator() const { return generator_; }
+
     result_type operator()()
     {
         if (index_ == M_) {
