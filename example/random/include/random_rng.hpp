@@ -162,6 +162,48 @@ inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds, Blocks> &rng)
 #endif // MCKL_HAS_AESNI
 
 template <typename RNGType>
+inline double random_rng_cpb(RNGType &rng, std::size_t N, std::size_t M)
+{
+    typename RNGType::result_type x = 0;
+    mckl::StopWatch watch;
+    std::size_t bytes = sizeof(typename RNGType::result_type) * N;
+    double cpb = std::numeric_limits<double>::max();
+    for (std::size_t i = 0; i != M; ++i) {
+        watch.reset();
+        watch.start();
+        for (std::size_t j = 0; j != N; ++j)
+            x = rng();
+        watch.stop();
+        cpb = std::min(cpb, 1.0 * watch.cycles() / bytes);
+    }
+    rng.seed(x);
+
+    return cpb;
+}
+
+template <typename ResultType, typename Generator>
+inline double random_rng_cpb(mckl::CounterEngine<ResultType, Generator> &rng,
+    std::size_t N, std::size_t M)
+{
+    using rng_type = mckl::CounterEngine<ResultType, Generator>;
+    typename rng_type::ctr_type x = {{0}};
+    mckl::StopWatch watch;
+    std::size_t bytes = sizeof(typename rng_type::ctr_type) * N;
+    double cpb = std::numeric_limits<double>::max();
+    for (std::size_t i = 0; i != M; ++i) {
+        watch.reset();
+        watch.start();
+        for (std::size_t j = 0; j != N; ++j)
+            rng.generator().enc(x, x);
+        watch.stop();
+        cpb = std::min(cpb, 1.0 * watch.cycles() / bytes);
+    }
+    rng.ctr(x);
+
+    return cpb;
+}
+
+template <typename RNGType>
 inline std::string random_rng_size(const RNGType &)
 {
     return std::to_string(sizeof(RNGType));
@@ -198,6 +240,7 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
 
     RNGType rng;
     bool pass = random_rng_kat(rng);
+    double cpb = random_rng_cpb(rng, N, M);
     mckl::UniformBitsDistribution<std::uint64_t> ubits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
 
@@ -209,8 +252,6 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     r1.reserve(N);
     r2.reserve(N);
 
-    double g1 = 0;
-    double g2 = 0;
     double c1 = std::numeric_limits<double>::max();
     double c2 = std::numeric_limits<double>::max();
     for (std::size_t k = 0; k != 10; ++k) {
@@ -250,8 +291,6 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
             pass = pass && (r1 == r2 || rng != rng);
         }
         std::size_t bytes = sizeof(std::uint64_t) * num;
-        g1 = std::max(g1, bytes / watch1.nanoseconds());
-        g2 = std::max(g2, bytes / watch2.nanoseconds());
         c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
         c2 = std::min(c2, 1.0 * watch2.cycles() / bytes);
     }
@@ -259,8 +298,7 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::setw(nwid) << std::left << name;
     std::cout << std::setw(swid) << std::right << random_rng_size(rng);
     std::cout << std::setw(swid) << std::right << alignof(RNGType);
-    std::cout << std::setw(twid) << std::right << g1;
-    std::cout << std::setw(twid) << std::right << g2;
+    std::cout << std::setw(twid) << std::right << cpb;
     std::cout << std::setw(twid) << std::right << c1;
     std::cout << std::setw(twid) << std::right << c2;
     std::cout << std::setw(twid) << std::right << random_pass(pass);
@@ -294,14 +332,13 @@ inline void random_rng(std::size_t N, std::size_t M, int argc, char **argv)
     const int nwid = 20;
     const int swid = 8;
     const int twid = 15;
-    const std::size_t lwid = nwid + swid * 2 + twid * 5;
+    const std::size_t lwid = nwid + swid * 2 + twid * 4;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(nwid) << std::left << "RNGType";
     std::cout << std::setw(swid) << std::right << "Size";
     std::cout << std::setw(swid) << std::right << "Align";
-    std::cout << std::setw(twid) << std::right << "GB/s (Loop)";
-    std::cout << std::setw(twid) << std::right << "GB/s (Batch)";
+    std::cout << std::setw(twid) << std::right << "CPB";
     std::cout << std::setw(twid) << std::right << "CPB (Loop)";
     std::cout << std::setw(twid) << std::right << "CPB (Batch)";
     std::cout << std::setw(twid) << std::right << "Deterministics";
@@ -321,11 +358,11 @@ inline void random_rng(std::size_t N, std::size_t M, int argc, char **argv)
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
 
-    #include <mckl/random/internal/rng_define_macro_std.hpp>
+#include <mckl/random/internal/rng_define_macro_std.hpp>
 
-    #include <mckl/random/internal/rng_define_macro.hpp>
+#include <mckl/random/internal/rng_define_macro.hpp>
 
-    #include <mckl/random/internal/rng_define_macro_mkl.hpp>
+#include <mckl/random/internal/rng_define_macro_mkl.hpp>
 
     std::cout << std::string(lwid, '-') << std::endl;
 }
