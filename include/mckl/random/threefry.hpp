@@ -136,222 +136,175 @@ using ThreefryConstants =
 namespace internal
 {
 
-template <typename T, std::size_t K, std::size_t N, typename,
-    bool = (N % 4 == 0)>
-class ThreefryKBox
-{
-    public:
-    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
-}; // class ThreefryKBox
+#include <mckl/random/internal/threefry_generic.hpp>
 
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class ThreefryKBox<T, K, N, Constants, true>
-{
-    public:
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
-    {
-        eval<0>(state, par, std::integral_constant<bool, 0 < K>());
-        state.back() += static_cast<T>(s_);
-    }
-
-    private:
-    static constexpr std::size_t s_ = N / 4;
-
-    template <std::size_t>
-    static void eval(
-        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
-        std::true_type)
-    {
-        std::get<I>(state) += std::get<(s_ + I) % (K + 1)>(par);
-        eval<I + 1>(state, par, std::integral_constant<bool, I + 1 < K>());
-    }
-}; // class ThreefryKBox
-
-template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
-class ThreefrySBox
-{
-    public:
-    static void eval(std::array<T, K> &) {}
-}; // class ThreefrySBox
-
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class ThreefrySBox<T, K, N, Constants, true>
-{
-    public:
-    static void eval(std::array<T, K> &state)
-    {
-        eval<0>(state, std::integral_constant<bool, 1 < K>());
-    }
-
-    private:
-    template <std::size_t>
-    static void eval(std::array<T, K> &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(std::array<T, K> &state, std::true_type)
-    {
-        static constexpr int L = Constants::rotate[I / 2][(N - 1) % 8];
-        static constexpr int R = std::numeric_limits<T>::digits - L;
-
-        T x = std::get<I + 1>(state);
-        std::get<I>(state) += x;
-        std::get<I + 1>(state) = (x << L) | (x >> R);
-        std::get<I + 1>(state) ^= std::get<I>(state);
-        eval<I + 2>(state, std::integral_constant<bool, I + 3 < K>());
-    }
-}; // class ThreefrySBox
-
-template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
-class ThreefryPBox
-{
-    public:
-    static void eval(std::array<T, K> &) {}
-}; // class ThreefryPBox
-
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class ThreefryPBox<T, K, N, Constants, true>
-{
-    public:
-    static void eval(std::array<T, K> &state)
-    {
-        std::array<T, K> tmp;
-        eval<0>(state, tmp, std::integral_constant<bool, 0 < N>());
-        state = tmp;
-    }
-
-    private:
-    template <std::size_t>
-    static void eval(
-        const std::array<T, K> &, std::array<T, K> &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(
-        const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
-    {
-        static constexpr std::size_t P = Constants::permute[I];
-
-        std::get<I>(tmp) = std::get<P>(state);
-        eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
-    }
-}; // class ThreefryPBox
-
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 2, N, ThreefryConstants<T, 2>, true>
-{
-    public:
-    static void eval(std::array<T, 2> &) {}
-}; // class ThreefryPBox
-
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 4, N, ThreefryConstants<T, 4>, true>
-{
-    public:
-    static void eval(std::array<T, 4> &state)
-    {
-        std::swap(std::get<1>(state), std::get<3>(state));
-    }
-}; // class ThreefryPBox
-
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 8, N, ThreefryConstants<T, 8>, true>
-{
-    public:
-    static void eval(std::array<T, 8> &state)
-    {
-        T x0 = std::get<0>(state);
-        T x3 = std::get<3>(state);
-        std::get<0>(state) = std::get<2>(state);
-        std::get<2>(state) = std::get<4>(state);
-        std::get<3>(state) = std::get<7>(state);
-        std::get<4>(state) = std::get<6>(state);
-        std::get<6>(state) = x0;
-        std::get<7>(state) = x3;
-    }
-}; // class ThreefryPBox
-
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 16, N, ThreefryConstants<T, 16>, true>
-{
-    public:
-    static void eval(std::array<T, 16> &state)
-    {
-        T x1 = std::get<1>(state);
-        T x3 = std::get<3>(state);
-        T x4 = std::get<4>(state);
-        T x5 = std::get<5>(state);
-        T x7 = std::get<7>(state);
-        T x8 = std::get<8>(state);
-        std::get<1>(state) = std::get<9>(state);
-        std::get<3>(state) = std::get<13>(state);
-        std::get<4>(state) = std::get<6>(state);
-        std::get<5>(state) = std::get<11>(state);
-        std::get<6>(state) = x4;
-        std::get<7>(state) = std::get<15>(state);
-        std::get<8>(state) = std::get<10>(state);
-        std::get<9>(state) = x7;
-        std::get<10>(state) = std::get<12>(state);
-        std::get<11>(state) = x3;
-        std::get<12>(state) = std::get<14>(state);
-        std::get<13>(state) = x5;
-        std::get<14>(state) = x8;
-        std::get<15>(state) = x1;
-    }
-}; // class ThreefryPBox
-
-template <typename T, std::size_t K, std::size_t Rounds, typename,
-    std::size_t N, bool = N <= Rounds>
-class ThreefryRound
-{
-    public:
-    static void eval(std::array<T, K> &, const std::array<T, K + 1> &) {}
-}; // class ThreefryRound
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
-    std::size_t N>
-class ThreefryRound<T, K, Rounds, Constants, N, true>
-{
-    public:
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
-    {
-        ThreefrySBox<T, K, N, Constants>::eval(state);
-        ThreefryPBox<T, K, N, Constants>::eval(state);
-        ThreefryKBox<T, K, N, Constants>::eval(state, par);
-    }
-}; // class ThreefryRound
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/threefry_avx2.hpp>
+#endif
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl
+    : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorImpl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>
+#if MCKL_HAS_AVX2
+    : public ThreefryGeneratorAVX2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
+          ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>
+#else
+    : public ThreefryGeneratorGenericImpl<T, 2, Rounds,
+          ThreefryConstants<T, 2>>
+#endif
 {
     public:
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
+#if MCKL_HAS_AVX2
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &) {}
+#endif
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
+#if MCKL_HAS_AVX2
+    : public ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
+          ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>
+#else
+    : public ThreefryGeneratorGenericImpl<T, 4, Rounds,
+          ThreefryConstants<T, 4>>
+#endif
+{
+#if MCKL_HAS_AVX2
+    public:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
-        eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
+        pbox(s, t,
+            std::integral_constant<int, std::numeric_limits<T>::digits>());
     }
 
     private:
-    template <std::size_t>
-    static void eval(
-        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 64>)
     {
+        // s: 2' 2 0' 0
+        // t: 3' 3 1' 1
+
+        // 1 0 3 2
+        std::get<0>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0x4E);
+        std::get<1>(t) = _mm256_permute4x64_epi64(std::get<1>(t), 0x4E);
+        std::get<2>(t) = _mm256_permute4x64_epi64(std::get<2>(t), 0x4E);
+        std::get<3>(t) = _mm256_permute4x64_epi64(std::get<3>(t), 0x4E);
+        std::get<4>(t) = _mm256_permute4x64_epi64(std::get<4>(t), 0x4E);
+        std::get<5>(t) = _mm256_permute4x64_epi64(std::get<5>(t), 0x4E);
+        std::get<6>(t) = _mm256_permute4x64_epi64(std::get<6>(t), 0x4E);
+        std::get<7>(t) = _mm256_permute4x64_epi64(std::get<7>(t), 0x4E);
+    }
+#endif
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>
+#if MCKL_HAS_AVX2
+    : public ThreefryGeneratorAVX2Impl<T, 8, Rounds, ThreefryConstants<T, 8>,
+          ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>>
+#else
+    : public ThreefryGeneratorGenericImpl<T, 8, Rounds,
+          ThreefryConstants<T, 8>>
+#endif
+{
+#if MCKL_HAS_AVX2
+    public:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    {
+        pbox(s, t,
+            std::integral_constant<int, std::numeric_limits<T>::digits>());
     }
 
-    template <std::size_t N>
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
-        std::true_type)
+    private:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 64>)
     {
-        ThreefryRound<T, K, Rounds, Constants, N>::eval(state, par);
-        eval<N + 1>(
-            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
+        // s: 6 2 4 0
+        // t; 7 3 5 1
+
+        // 0 1 3 2
+        std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x1E);
+        std::get<1>(s) = _mm256_permute4x64_epi64(std::get<1>(s), 0x1E);
+        std::get<2>(s) = _mm256_permute4x64_epi64(std::get<2>(s), 0x1E);
+        std::get<3>(s) = _mm256_permute4x64_epi64(std::get<3>(s), 0x1E);
+        std::get<4>(s) = _mm256_permute4x64_epi64(std::get<4>(s), 0x1E);
+        std::get<5>(s) = _mm256_permute4x64_epi64(std::get<5>(s), 0x1E);
+        std::get<6>(s) = _mm256_permute4x64_epi64(std::get<6>(s), 0x1E);
+        std::get<7>(s) = _mm256_permute4x64_epi64(std::get<7>(s), 0x1E);
+
+        // 2 3 1 0
+        std::get<0>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0xB4);
+        std::get<1>(t) = _mm256_permute4x64_epi64(std::get<1>(t), 0xB4);
+        std::get<2>(t) = _mm256_permute4x64_epi64(std::get<2>(t), 0xB4);
+        std::get<3>(t) = _mm256_permute4x64_epi64(std::get<3>(t), 0xB4);
+        std::get<4>(t) = _mm256_permute4x64_epi64(std::get<4>(t), 0xB4);
+        std::get<5>(t) = _mm256_permute4x64_epi64(std::get<5>(t), 0xB4);
+        std::get<6>(t) = _mm256_permute4x64_epi64(std::get<6>(t), 0xB4);
+        std::get<7>(t) = _mm256_permute4x64_epi64(std::get<7>(t), 0xB4);
     }
+#endif
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>
+#if MCKL_HAS_AVX2
+    : public ThreefryGeneratorAVX2Impl<T, 16, Rounds, ThreefryConstants<T, 16>,
+          ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>>
+#else
+    : public ThreefryGeneratorGenericImpl<T, 16, Rounds,
+          ThreefryConstants<T, 16>>
+#endif
+{
+#if MCKL_HAS_AVX2
+    public:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    {
+        pbox(s, t,
+            std::integral_constant<int, std::numeric_limits<T>::digits>());
+    }
+
+    private:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 64>)
+    {
+        // s: 6 2 4 0 | 8 12 10 14
+        // t; 7 3 5 1 | 9 13 11 15
+
+        // 1 2 3 0
+        std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x6C);
+        std::get<2>(s) = _mm256_permute4x64_epi64(std::get<2>(s), 0x6C);
+        std::get<4>(s) = _mm256_permute4x64_epi64(std::get<4>(s), 0x6C);
+        std::get<6>(s) = _mm256_permute4x64_epi64(std::get<6>(s), 0x6C);
+
+        // 0 1 3 2
+        std::get<1>(s) = _mm256_permute4x64_epi64(std::get<1>(s), 0x1E);
+        std::get<3>(s) = _mm256_permute4x64_epi64(std::get<3>(s), 0x1E);
+        std::get<5>(s) = _mm256_permute4x64_epi64(std::get<5>(s), 0x1E);
+        std::get<7>(s) = _mm256_permute4x64_epi64(std::get<7>(s), 0x1E);
+
+        // 3 1 2 0
+        __m256i t0 = _mm256_permute4x64_epi64(std::get<1>(t), 0xD8);
+        __m256i t2 = _mm256_permute4x64_epi64(std::get<3>(t), 0xD8);
+        __m256i t4 = _mm256_permute4x64_epi64(std::get<5>(t), 0xD8);
+        __m256i t6 = _mm256_permute4x64_epi64(std::get<7>(t), 0xD8);
+
+        // 0 2 1 3
+        std::get<1>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0x27);
+        std::get<3>(t) = _mm256_permute4x64_epi64(std::get<2>(t), 0x27);
+        std::get<5>(t) = _mm256_permute4x64_epi64(std::get<4>(t), 0x27);
+        std::get<7>(t) = _mm256_permute4x64_epi64(std::get<6>(t), 0x27);
+
+        std::get<0>(t) = t0;
+        std::get<2>(t) = t2;
+        std::get<4>(t) = t4;
+        std::get<6>(t) = t6;
+    }
+#endif
 }; // class ThreefryGeneratorImpl
 
 } // namespace mckl::internal
@@ -384,7 +337,10 @@ class ThreefryGenerator
         Rounds != 0, "**ThreefryGenerator** used with rounds equal to zero");
 
     public:
-    using ctr_type = std::array<T, K>;
+    using ctr_type =
+        typename std::conditional<(sizeof(T) * K) % sizeof(std::uint64_t) == 0,
+            std::array<std::uint64_t, (sizeof(T) * K) / sizeof(std::uint64_t)>,
+            std::array<T, K>>::type;
     using key_type = std::array<T, K>;
 
     static constexpr std::size_t size() { return sizeof(T) * K; }
@@ -431,8 +387,7 @@ class ThreefryGenerator
     void operator()(ctr_type &ctr, std::size_t n,
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
-        for (std::size_t i = 0; i != n; ++i)
-            generate(ctr, buffer[i]);
+        generate(ctr, n, buffer);
     }
 
     friend bool operator==(const ThreefryGenerator<T, K, Rounds> &gen1,
@@ -503,6 +458,50 @@ class ThreefryGenerator
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
             buf.state, par_);
         buffer = buf.result;
+    }
+
+    void generate(
+        std::array<T, K> &ctr, std::size_t n, std::array<T, K> *buffer) const
+    {
+        static constexpr std::size_t blocks =
+            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks;
+
+        using state_type = std::array<std::array<T, K>, blocks>;
+
+        const std::size_t m = n / blocks;
+        const std::size_t l = n % blocks;
+        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            state_type &state = *reinterpret_cast<state_type *>(buffer);
+            increment(ctr, state);
+            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+                state, par_);
+        }
+        for (std::size_t i = 0; i != l; ++i)
+            generate(ctr, buffer[i]);
+    }
+
+    template <typename ResultType>
+    void generate(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
+    {
+        static constexpr std::size_t blocks =
+            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks;
+
+        union {
+            std::array<std::array<T, K>, blocks> state;
+            std::array<ctr_type, blocks> ctr_block;
+        } buf;
+
+        const std::size_t m = n / blocks;
+        const std::size_t l = n % blocks;
+        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            increment(ctr, buf.ctr_block);
+            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+                buf.state, par_);
+            std::memcpy(buffer, buf.state.data(), size() * blocks);
+        }
+        for (std::size_t i = 0; i != l; ++i)
+            generate(ctr, buffer[i]);
     }
 }; // class ThreefryGenerator
 
