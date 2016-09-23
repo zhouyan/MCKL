@@ -71,6 +71,22 @@
 #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
 #endif
 
+#if MCKL_HAS_SSE2
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <emmintrin.h>
+#endif
+#endif
+
+#if MCKL_HAS_AVX2
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <immintrin.h>
+#endif
+#endif
+
 #ifndef MCKL_HAS_X86
 #if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
     defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \

@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/cmake/FindAESNI.cpp
+// MCKL/cmake/FindSSE2.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,24 +29,22 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <iostream>
+#include <cassert>
+#include <cstdint>
 
 #ifdef _MSC_VERSION
-#include <immintrin.h>
+#include <intrin.h>
 #else
-#include <wmmintrin.h>
+#include <emmintrin.h>
 #endif
 
 int main()
 {
-    __m128i m = _mm_setzero_si128();
-    char a[32];
-    for (std::size_t i = 0; i != 32; ++i)
-        a[i] = static_cast<char>(i);
-    m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(a));
-    m = _mm_aeskeygenassist_si128(m, 1);
-    _mm_storeu_si128(reinterpret_cast<__m128i *>(a), m);
-    std::cout << a[0] << std::endl;
+    __m128i xmm = _mm_set_epi64x(1, 0);
+    std::int64_t x[2];
+    _mm_storeu_si128(reinterpret_cast<__m128i *>(x), xmm);
+    assert(x[0] == 0);
+    assert(x[1] == 1);
 
     return 0;
 }

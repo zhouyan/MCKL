@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/cmake/FindAESNI.cpp
+// MCKL/cmake/FindAVX2.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,24 +29,25 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <iostream>
+#include <cassert>
+#include <cstdint>
 
 #ifdef _MSC_VERSION
-#include <immintrin.h>
+#include <intrin.h>
 #else
-#include <wmmintrin.h>
+#include <immintrin.h>
 #endif
 
 int main()
 {
-    __m128i m = _mm_setzero_si128();
-    char a[32];
-    for (std::size_t i = 0; i != 32; ++i)
-        a[i] = static_cast<char>(i);
-    m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(a));
-    m = _mm_aeskeygenassist_si128(m, 1);
-    _mm_storeu_si128(reinterpret_cast<__m128i *>(a), m);
-    std::cout << a[0] << std::endl;
+    __m256i ymm = _mm256_set_epi64x(3, 2, 1, 0);
+    ymm = _mm256_add_epi64(ymm, ymm);
+    std::int64_t x[4];
+    _mm256_storeu_si256(reinterpret_cast<__m256i *>(x), ymm);
+    assert(x[0] == 0);
+    assert(x[1] == 2);
+    assert(x[2] == 4);
+    assert(x[3] == 6);
 
     return 0;
 }

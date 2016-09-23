@@ -34,17 +34,6 @@
 
 #include <mckl/internal/common.hpp>
 
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#if MCKL_HAS_SSE2
-#include <emmintrin.h>
-#endif
-#if MCKL_HAS_AVX2
-#include <immintrin.h>
-#endif
-#endif // MCKL_MSVC
-
 #if MCKL_HAS_MKL
 #include <mkl_version.h>
 #include <mkl_vsl.h>
