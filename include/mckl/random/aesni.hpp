@@ -407,7 +407,7 @@ class AES128KeySeqGenerator
         xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
         xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
-}; // class AES128KeySeq
+}; // class AES128KeySeqGenerator
 
 class AES192KeySeqGenerator
 {
@@ -536,7 +536,7 @@ class AES192KeySeqGenerator
         unsigned char *dst = reinterpret_cast<unsigned char *>(rk.data());
         std::memcpy(dst + 24, rk_ptr + 24, Rp1 * 16 - 24);
     }
-}; // class AES192KeySeq
+}; // class AES192KeySeqGenerator
 
 class AES256KeySeqGenerator
 {
@@ -623,15 +623,60 @@ class AES256KeySeqGenerator
         xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
         xmm3_ = _mm_xor_si128(xmm3_, xmm2_);    // pxor   xmm1, xmm2
     }
-}; // class AESKey256
+}; // class AES256KeySeqGenerator
+
+template <typename Constants>
+class ARSKeySeqGenerator
+{
+    public:
+    using key_type = std::array<std::uint64_t, 4>;
+
+    template <std::size_t Rp1>
+    static key_type key(const std::array<__m128i, Rp1> &rk)
+    {
+        key_type key;
+        _mm_storeu_si128(
+            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
+
+        return key;
+    }
+
+    template <std::size_t Rp1>
+    void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
+    {
+        key_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
+        generate<0>(rk, std::integral_constant<bool, 0 < Rp1>());
+    }
+
+    private:
+    __m128i key_;
+
+    template <std::size_t, std::size_t Rp1>
+    void generate(std::array<__m128i, Rp1> &, std::false_type) const
+    {
+    }
+
+    template <std::size_t N, std::size_t Rp1>
+    void generate(std::array<__m128i, Rp1> &rk, std::true_type) const
+    {
+        static constexpr std::int64_t w0 =
+            static_cast<std::int64_t>(Constants::weyl[0] * N);
+        static constexpr std::int64_t w1 =
+            static_cast<std::int64_t>(Constants::weyl[1] * N);
+
+        __m128i w = _mm_set_epi64x(w1, w0);
+        std::get<N>(rk) = _mm_add_epi64(key_, w);
+        generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
+    }
+}; // class ARSKeySeqGenerator
 
 template <std::size_t Rounds, typename KeySeqGenerator>
 class AESKeySeqImpl
 {
     public:
-    static constexpr std::size_t rounds = Rounds;
-
     using key_type = typename KeySeqGenerator::key_type;
+
+    static constexpr std::size_t rounds() { return Rounds; }
 
     key_type key() const { return KeySeqGenerator::key(key_seq_); }
 
@@ -641,25 +686,25 @@ class AESKeySeqImpl
         generator(key, key_seq_);
     }
 
-    const std::array<__m128i, rounds + 1> &operator()(
-        std::array<__m128i, rounds + 1> &) const
+    const std::array<__m128i, rounds() + 1> &operator()(
+        std::array<__m128i, rounds() + 1> &) const
     {
         return key_seq_;
     }
 
-    friend bool operator==(const AESKeySeqImpl<rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq2)
+    friend bool operator==(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
+        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
     {
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks1;
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks2;
-        std::memcpy(ks1.data(), seq1.key_seq_.data(), 16 * (rounds + 1));
-        std::memcpy(ks2.data(), seq2.key_seq_.data(), 16 * (rounds + 1));
+        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks1;
+        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks2;
+        std::memcpy(ks1.data(), seq1.key_seq_.data(), 16 * (rounds() + 1));
+        std::memcpy(ks2.data(), seq2.key_seq_.data(), 16 * (rounds() + 1));
 
         return ks1 == ks2;
     }
 
-    friend bool operator!=(const AESKeySeqImpl<rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq2)
+    friend bool operator!=(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
+        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
     {
         return !(seq1 == seq2);
     }
@@ -667,13 +712,13 @@ class AESKeySeqImpl
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq)
+        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
     {
         if (!os)
             return os;
 
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks;
-        std::memcpy(ks.data(), seq.key_seq_.data(), 16 * (rounds + 1));
+        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
+        std::memcpy(ks.data(), seq.key_seq_.data(), 16 * (rounds() + 1));
         ostream(os, ks);
 
         return os;
@@ -682,57 +727,40 @@ class AESKeySeqImpl
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        AESKeySeqImpl<rounds, KeySeqGenerator> &seq)
+        AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
     {
         if (!is)
             return is;
 
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks;
+        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
         istream(is, ks);
         if (is)
-            std::memcpy(seq.key_seq_.data(), ks.data(), 16 * (rounds + 1));
+            std::memcpy(seq.key_seq_.data(), ks.data(), 16 * (rounds() + 1));
 
         return is;
     }
 
     private:
-    std::array<__m128i, rounds + 1> key_seq_;
+    std::array<__m128i, rounds() + 1> key_seq_;
 }; // class AESKeySeqImpl
 
 template <std::size_t Rounds, typename Constants>
 class ARSKeySeqImpl
 {
     public:
-    static constexpr std::size_t rounds = Rounds;
+    using key_type = typename ARSKeySeqGenerator<Constants>::key_type;
 
-    using key_type = std::array<std::uint64_t, 2>;
+    static constexpr std::size_t rounds() { return Rounds; }
 
-    ARSKeySeqImpl() : key_(_mm_setzero_si128()) {}
+    key_type key() const { return key_; }
 
-    key_type key() const
+    void reset(const key_type &key) { key_ = key; }
+
+    const std::array<__m128i, rounds() + 1> &operator()(
+        std::array<__m128i, rounds() + 1> &rk) const
     {
-        key_type key;
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(key.data()), key_);
-
-        return key;
-    }
-
-    void reset(const key_type &key)
-    {
-        key_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
-    }
-
-    const std::array<__m128i, rounds + 1> &operator()(
-        std::array<__m128i, rounds + 1> &rk) const
-    {
-        static constexpr std::uint64_t w0 = Constants::weyl[0];
-        static constexpr std::uint64_t w1 = Constants::weyl[1];
-
-        std::array<std::uint64_t, 2> tmp = {{w0, w1}};
-        __m128i w =
-            _mm_loadu_si128(reinterpret_cast<const __m128i *>(tmp.data()));
-        std::get<0>(rk) = key_;
-        generate<1>(rk, w, std::integral_constant<bool, 0 < rounds>());
+        ARSKeySeqGenerator<Constants> generator;
+        generator(key_, rk);
 
         return rk;
     }
@@ -740,12 +768,7 @@ class ARSKeySeqImpl
     friend bool operator==(
         const ARSKeySeqImpl &seq1, const ARSKeySeqImpl &seq2)
     {
-        alignas(16) key_type k1;
-        alignas(16) key_type k2;
-        _mm_store_si128(reinterpret_cast<__m128i *>(k1.data()), seq1.key_);
-        _mm_store_si128(reinterpret_cast<__m128i *>(k2.data()), seq2.key_);
-
-        return k1 == k2;
+        return seq1.key_ == seq2.key_;
     }
 
     friend bool operator!=(
@@ -761,9 +784,7 @@ class ARSKeySeqImpl
         if (!os)
             return os;
 
-        alignas(16) key_type k;
-        _mm_store_si128(reinterpret_cast<__m128i *>(k.data()), seq.key_);
-        ostream(os, k);
+        ostream(os, seq.key_);
 
         return os;
     }
@@ -775,33 +796,16 @@ class ARSKeySeqImpl
         if (!is)
             return is;
 
-        alignas(16) key_type k = {{0}};
+        alignas(16) key_type k;
         istream(is, k);
-        if (is) {
-            seq.key_ =
-                _mm_load_si128(reinterpret_cast<const __m128i *>(k.data()));
-        }
+        if (is)
+            seq.key_ = k;
 
         return is;
     }
 
     private:
-    template <std::size_t>
-    void generate(std::array<__m128i, rounds + 1> &, const __m128i &,
-        std::false_type) const
-    {
-    }
-
-    template <std::size_t N>
-    void generate(std::array<__m128i, rounds + 1> &rk, const __m128i &w,
-        std::true_type) const
-    {
-        std::get<N>(rk) = _mm_add_epi64(std::get<N - 1>(rk), w);
-        generate<N + 1>(rk, w, std::integral_constant < bool, N<rounds>());
-    }
-
-    private:
-    __m128i key_;
+    key_type key_;
 }; // class ARSKeySeqImpl
 
 } // namespace mckl::internal
@@ -845,13 +849,11 @@ namespace internal
 template <typename KeySeqType>
 class AESNIGeneratorImpl
 {
-    static constexpr std::size_t rounds = KeySeqType::rounds;
-
     public:
     static constexpr std::size_t blocks = 8;
 
-    static void eval(
-        __m128i &state, const std::array<__m128i, rounds + 1> &par)
+    static void eval(__m128i &state,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &par)
     {
         encfirst<0>(state, par);
         enc<0x01>(state, par);
@@ -869,12 +871,12 @@ class AESNIGeneratorImpl
         enc<0x0D>(state, par);
         enc<0x0E>(state, par);
         enc<0x0F>(state, par);
-        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds>());
-        enclast<rounds>(state, par);
+        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds_>());
+        enclast<rounds_>(state, par);
     }
 
     static void eval(std::array<__m128i, 8> &state,
-        const std::array<__m128i, rounds + 1> &par)
+        const std::array<__m128i, KeySeqType::rounds() + 1> &par)
     {
         encfirst<0>(state, par);
         enc<0x01>(state, par);
@@ -892,113 +894,116 @@ class AESNIGeneratorImpl
         enc<0x0D>(state, par);
         enc<0x0E>(state, par);
         enc<0x0F>(state, par);
-        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds>());
-        enclast<rounds>(state, par);
+        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds_>());
+        enclast<rounds_>(state, par);
     }
 
     private:
+    static constexpr std::size_t rounds_ = KeySeqType::rounds();
+
     template <std::size_t>
     static void eval(
-        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
+        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(
-        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
+    static void eval(__m128i &s, const std::array<__m128i, rounds_ + 1> &par,
+        std::true_type)
     {
         enc<N>(s, par);
-        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds>());
+        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
     template <std::size_t N>
     static void encfirst(
-        __m128i &s, const std::array<__m128i, rounds + 1> &par)
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &par)
     {
         encfirst<N>(s, par, std::integral_constant<bool, N == 0>());
     }
 
     template <std::size_t>
     static void encfirst(
-        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
+        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void encfirst(
-        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
+    static void encfirst(__m128i &s,
+        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
     {
         s = _mm_xor_si128(s, std::get<N>(par));
     }
 
     template <std::size_t N>
-    static void enc(__m128i &s, const std::array<__m128i, rounds + 1> &par)
+    static void enc(__m128i &s, const std::array<__m128i, rounds_ + 1> &par)
     {
-        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds)>());
+        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
 
     template <std::size_t>
     static void enc(
-        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
+        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void enc(
-        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
+    static void enc(__m128i &s, const std::array<__m128i, rounds_ + 1> &par,
+        std::true_type)
     {
         s = _mm_aesenc_si128(s, std::get<N>(par));
     }
 
     template <std::size_t N>
-    static void enclast(__m128i &s, const std::array<__m128i, rounds + 1> &par)
+    static void enclast(
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &par)
     {
-        enclast<N>(s, par, std::integral_constant<bool, N == rounds>());
+        enclast<N>(s, par, std::integral_constant<bool, N == rounds_>());
     }
 
     template <std::size_t>
     static void enclast(
-        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
+        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void enclast(
-        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
+    static void enclast(__m128i &s,
+        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
     {
         s = _mm_aesenclast_si128(s, std::get<N>(par));
     }
 
     template <std::size_t>
     static void eval(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds + 1> &, std::false_type)
+        const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
     static void eval(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
     {
         enc<N>(s, par);
-        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds>());
+        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
     template <std::size_t N>
     static void encfirst(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds + 1> &par)
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &par)
     {
         encfirst<N>(s, par, std::integral_constant<bool, N == 0>());
     }
 
     template <std::size_t>
     static void encfirst(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds + 1> &, std::false_type)
+        const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
     static void encfirst(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
     {
         std::get<0>(s) = _mm_xor_si128(std::get<0>(s), std::get<N>(par));
         std::get<1>(s) = _mm_xor_si128(std::get<1>(s), std::get<N>(par));
@@ -1012,20 +1017,20 @@ class AESNIGeneratorImpl
 
     template <std::size_t N>
     static void enc(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds + 1> &par)
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &par)
     {
-        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds)>());
+        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
 
     template <std::size_t>
     static void enc(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds + 1> &, std::false_type)
+        const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
     static void enc(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
     {
         std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), std::get<N>(par));
         std::get<1>(s) = _mm_aesenc_si128(std::get<1>(s), std::get<N>(par));
@@ -1039,20 +1044,20 @@ class AESNIGeneratorImpl
 
     template <std::size_t N>
     static void enclast(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds + 1> &par)
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &par)
     {
-        enclast<N>(s, par, std::integral_constant<bool, N == rounds>());
+        enclast<N>(s, par, std::integral_constant<bool, N == rounds_>());
     }
 
     template <std::size_t>
     static void enclast(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds + 1> &, std::false_type)
+        const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
     static void enclast(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
     {
         std::get<0>(s) =
             _mm_aesenclast_si128(std::get<0>(s), std::get<N>(par));
@@ -1080,10 +1085,8 @@ class AESNIGeneratorImpl
 template <typename KeySeqType>
 class AESNIGenerator
 {
-    static constexpr std::size_t rounds = KeySeqType::rounds;
-
-    static_assert(rounds != 0,
-        "**AESNIGenerate** used with KeySeqType::rounds equal to rounds");
+    static_assert(KeySeqType::rounds() != 0,
+        "**AESNIGenerate** used with KeySeqType::rounds() equal to zero");
 
     public:
     using ctr_type = std::array<std::uint64_t, 2>;
@@ -1102,8 +1105,8 @@ class AESNIGenerator
             ctr_type result;
         } buf;
 
-        std::array<__m128i, rounds + 1> tmp;
-        const std::array<__m128i, rounds + 1> &par = key_seq_(tmp);
+        std::array<__m128i, rounds_ + 1> tmp;
+        const std::array<__m128i, rounds_ + 1> &par = key_seq_(tmp);
 
         buf.result = ctr;
         internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, par);
@@ -1168,12 +1171,14 @@ class AESNIGenerator
     private:
     KeySeqType key_seq_;
 
+    static constexpr std::size_t rounds_ = KeySeqType::rounds();
+
     template <typename ResultType>
     void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
-        std::array<__m128i, rounds + 1> tmp;
-        const std::array<__m128i, rounds + 1> &par = key_seq_(tmp);
+        std::array<__m128i, rounds_ + 1> tmp;
+        const std::array<__m128i, rounds_ + 1> &par = key_seq_(tmp);
         generate(ctr, buffer, par);
     }
 
@@ -1189,8 +1194,8 @@ class AESNIGenerator
             std::array<ctr_type, blocks> ctr_block;
         } buf;
 
-        std::array<__m128i, rounds + 1> tmp;
-        const std::array<__m128i, rounds + 1> &par = key_seq_(tmp);
+        std::array<__m128i, rounds_ + 1> tmp;
+        const std::array<__m128i, rounds_ + 1> &par = key_seq_(tmp);
 
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
@@ -1206,7 +1211,7 @@ class AESNIGenerator
     template <typename ResultType>
     void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer,
-        const std::array<__m128i, rounds + 1> &par) const
+        const std::array<__m128i, rounds_ + 1> &par) const
     {
         union {
             __m128i state;

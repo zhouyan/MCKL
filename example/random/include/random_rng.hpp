@@ -162,48 +162,6 @@ inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
 #endif // MCKL_HAS_AESNI
 
 template <typename RNGType>
-inline double random_rng_cpb(RNGType &rng, std::size_t N, std::size_t M)
-{
-    typename RNGType::result_type x = 0;
-    mckl::StopWatch watch;
-    std::size_t bytes = sizeof(typename RNGType::result_type) * N;
-    double cpb = std::numeric_limits<double>::max();
-    for (std::size_t i = 0; i != M; ++i) {
-        watch.reset();
-        watch.start();
-        for (std::size_t j = 0; j != N; ++j)
-            x = rng();
-        watch.stop();
-        cpb = std::min(cpb, 1.0 * watch.cycles() / bytes);
-    }
-    rng.seed(x);
-
-    return cpb;
-}
-
-template <typename ResultType, typename Generator>
-inline double random_rng_cpb(mckl::CounterEngine<ResultType, Generator> &rng,
-    std::size_t N, std::size_t M)
-{
-    using rng_type = mckl::CounterEngine<ResultType, Generator>;
-    typename rng_type::ctr_type x = {{0}};
-    mckl::StopWatch watch;
-    std::size_t bytes = sizeof(typename rng_type::ctr_type) * N;
-    double cpb = std::numeric_limits<double>::max();
-    for (std::size_t i = 0; i != M; ++i) {
-        watch.reset();
-        watch.start();
-        for (std::size_t j = 0; j != N; ++j)
-            rng.enc(x, x);
-        watch.stop();
-        cpb = std::min(cpb, 1.0 * watch.cycles() / bytes);
-    }
-    rng.ctr(x);
-
-    return cpb;
-}
-
-template <typename RNGType>
 inline std::string random_rng_size(const RNGType &)
 {
     return std::to_string(sizeof(RNGType));
@@ -230,7 +188,6 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
 {
     RNGType rng;
     bool pass = random_rng_kat(rng);
-    double cpb = random_rng_cpb(rng, N, M);
     mckl::UniformBitsDistribution<std::uint64_t> ubits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
 
@@ -253,15 +210,25 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
             num += K;
             r1.resize(K);
             r2.resize(K);
+            std::uint64_t s1 = 0;
+            std::uint64_t s2 = 0;
 
             watch1.start();
             for (std::size_t j = 0; j != K; ++j)
-                r1[j] = mckl::rand(rng1, ubits);
+                s1 += mckl::rand(rng1, ubits);
             watch1.stop();
+
+            for (std::size_t j = 0; j != K; ++j)
+                r1[j] = mckl::rand(rng1, ubits);
 
             watch2.start();
             mckl::rand(rng2, ubits, K, r2.data());
             watch2.stop();
+            s2 = std::accumulate(r2.begin(), r2.end(), s2);
+
+            mckl::rand(rng2, ubits, K, r2.data());
+
+            pass = pass && (s1 == s2 || rng != rng);
             pass = pass && (r1 == r2 || rng != rng);
 
             rng1.discard(static_cast<unsigned>(K));
@@ -288,7 +255,6 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::setw(nwid) << std::left << name;
     std::cout << std::setw(swid) << std::right << random_rng_size(rng);
     std::cout << std::setw(swid) << std::right << alignof(RNGType);
-    std::cout << std::setw(twid) << std::right << cpb;
     std::cout << std::setw(twid) << std::right << c1;
     std::cout << std::setw(twid) << std::right << c2;
     std::cout << std::setw(twid) << std::right << random_pass(pass);
