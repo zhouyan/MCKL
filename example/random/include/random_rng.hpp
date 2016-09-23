@@ -115,8 +115,8 @@ inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
 
 #if MCKL_HAS_AESNI
 
-template <typename ResultType, std::size_t Blocks>
-inline bool random_rng_kat(mckl::AES128Engine<ResultType, Blocks> &rng)
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::AES128Engine<ResultType, Rounds> &rng)
 {
     mckl::Vector<std::uint64_t> k =
         random_rng_kat<std::uint64_t>("random_AES128.txt");
@@ -126,8 +126,8 @@ inline bool random_rng_kat(mckl::AES128Engine<ResultType, Blocks> &rng)
     return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
 }
 
-template <typename ResultType, std::size_t Blocks>
-inline bool random_rng_kat(mckl::AES192Engine<ResultType, Blocks> &rng)
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::AES192Engine<ResultType, Rounds> &rng)
 {
     mckl::Vector<std::uint64_t> k =
         random_rng_kat<std::uint64_t>("random_AES192.txt");
@@ -137,8 +137,8 @@ inline bool random_rng_kat(mckl::AES192Engine<ResultType, Blocks> &rng)
     return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
 }
 
-template <typename ResultType, std::size_t Blocks>
-inline bool random_rng_kat(mckl::AES256Engine<ResultType, Blocks> &rng)
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::AES256Engine<ResultType, Rounds> &rng)
 {
     mckl::Vector<std::uint64_t> k =
         random_rng_kat<std::uint64_t>("random_AES256.txt");
@@ -148,8 +148,8 @@ inline bool random_rng_kat(mckl::AES256Engine<ResultType, Blocks> &rng)
     return std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
 }
 
-template <typename ResultType, std::size_t Rounds, std::size_t Blocks>
-inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds, Blocks> &rng)
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
 {
     mckl::Vector<std::uint64_t> k =
         random_rng_kat<std::uint64_t>("random_ARS.txt");
@@ -194,7 +194,7 @@ inline double random_rng_cpb(mckl::CounterEngine<ResultType, Generator> &rng,
         watch.reset();
         watch.start();
         for (std::size_t j = 0; j != N; ++j)
-            rng.generator().enc(x, x);
+            rng.enc(x, x);
         watch.stop();
         cpb = std::min(cpb, 1.0 * watch.cycles() / bytes);
     }

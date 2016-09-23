@@ -94,13 +94,13 @@ int main()
     std::memcpy(cipher_192_cbc.data(), test_cipher_192_cbc, 64);
     std::memcpy(cipher_256_cbc.data(), test_cipher_256_cbc, 64);
 
-    mckl::AES128x1_64::generator_type aes128;
-    mckl::AES192x1_64::generator_type aes192;
-    mckl::AES256x1_64::generator_type aes256;
+    mckl::AES128 aes128;
+    mckl::AES192 aes192;
+    mckl::AES256 aes256;
 
-    aes128.reset(key_128);
-    aes192.reset(key_192);
-    aes256.reset(key_256);
+    aes128.key(key_128);
+    aes192.key(key_192);
+    aes256.key(key_256);
 
     auto ctr128 = init_vector;
     auto ctr192 = init_vector;
@@ -117,9 +117,9 @@ int main()
 
     std::cout << std::uppercase << std::hex;
     for (std::size_t i = 0; i != 4; ++i) {
-        aes128.enc(ctr128, buf128[i]);
-        aes192.enc(ctr192, buf192[i]);
-        aes256.enc(ctr256, buf256[i]);
+        aes128.generator().enc(ctr128, buf128[i]);
+        aes192.generator().enc(ctr192, buf192[i]);
+        aes256.generator().enc(ctr256, buf256[i]);
         if (i < 3) {
             for (std::size_t j = 0; j != 2; ++j) {
                 ctr128[j] = buf128[i][j] ^ plain_text[i + 1][j];

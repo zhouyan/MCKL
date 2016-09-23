@@ -254,6 +254,11 @@ class CounterEngine
 
     const generator_type &generator() const { return generator_; }
 
+    void enc(const ctr_type &ctr, ctr_type &buffer) const
+    {
+        generator_.enc(ctr, buffer);
+    }
+
     result_type operator()()
     {
         if (index_ == M_) {

@@ -52,9 +52,9 @@ int main()
             UINT64_C(0xC4A36C28434A5B9A), UINT64_C(0xD54331444B1046CF),
             UINT64_C(0xDF11834830B2A460), UINT64_C(0x1E39E8DFE1F7EE4F)}};
 
-    mckl::Threefish256::generator_type threefish256;
-    mckl::Threefish512::generator_type threefish512;
-    mckl::Threefish1024::generator_type threefish1024;
+    mckl::Threefish256 threefish256;
+    mckl::Threefish512 threefish512;
+    mckl::Threefish1024 threefish1024;
 
     mckl::Threefish256::key_type key256;
     mckl::Threefish512::key_type key512;
@@ -74,9 +74,9 @@ int main()
     mckl::Threefish512::ctr_type buf512;
     mckl::Threefish1024::ctr_type buf1024;
 
-    threefish256.reset(key256);
-    threefish512.reset(key512);
-    threefish1024.reset(key1024);
+    threefish256.key(key256);
+    threefish512.key(key512);
+    threefish1024.key(key1024);
 
     threefish256.enc(ctr256, buf256);
     threefish512.enc(ctr512, buf512);

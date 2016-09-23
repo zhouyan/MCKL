@@ -48,9 +48,9 @@
 /// \ingroup Config
 #ifndef MCKL_RNG_FAST_TYPE
 #if MCKL_HAS_AESNI
-#define MCKL_RNG_FAST_TYPE ::mckl::ARSx8
+#define MCKL_RNG_FAST_TYPE ::mckl::ARS
 #else
-#define MCKL_RNG_FAST_TYPE ::mckl::Philox4x64
+#define MCKL_RNG_FAST_TYPE ::mckl::Philox4x32
 #endif
 #endif
 
@@ -58,9 +58,9 @@
 /// \ingroup Config
 #ifndef MCKL_RNG_FAST_64_TYPE
 #if MCKL_HAS_AESNI
-#define MCKL_RNG_FAST_64_TYPE ::mckl::ARSx8_64
+#define MCKL_RNG_FAST_64_TYPE ::mckl::ARS_64
 #else
-#define MCKL_RNG_FAST_64_TYPE ::mckl::Philox4x64_64
+#define MCKL_RNG_FAST_64_TYPE ::mckl::Philox4x32_64
 #endif
 #endif
 

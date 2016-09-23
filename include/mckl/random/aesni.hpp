@@ -55,16 +55,28 @@
         return _mm_aeskeygenassist_si128(xmm, val);                           \
     }
 
+/// \brief AES128Engine default rounds
+/// \ingroup Config
+#ifndef MCKL_AES128_ROUNDS
+#define MCKL_AES128_ROUNDS 10
+#endif
+
+/// \brief AES192Engine default rounds
+/// \ingroup Config
+#ifndef MCKL_AES192_ROUNDS
+#define MCKL_AES192_ROUNDS 12
+#endif
+
+/// \brief AES256Engine default rounds
+/// \ingroup Config
+#ifndef MCKL_AES256_ROUNDS
+#define MCKL_AES256_ROUNDS 14
+#endif
+
 /// \brief ARSEngine default rounds
 /// \ingroup Config
 #ifndef MCKL_ARS_ROUNDS
 #define MCKL_ARS_ROUNDS 5
-#endif
-
-/// \brief AESEngine default blocks
-/// \ingroup Config
-#ifndef MCKL_AESNI_BLOCKS
-#define MCKL_AESNI_BLOCKS 8
 #endif
 
 namespace mckl
@@ -342,80 +354,6 @@ MCKL_DEFINE_RANDOM_AES_KEY_GEN_ASSIST(0xFD, 0xE8)
 MCKL_DEFINE_RANDOM_AES_KEY_GEN_ASSIST(0xFE, 0xCB)
 MCKL_DEFINE_RANDOM_AES_KEY_GEN_ASSIST(0xFF, 0x8D)
 
-template <std::size_t Rounds, typename KeySeqGenerator>
-class AESKeySeqImpl
-{
-    public:
-    static constexpr std::size_t rounds = Rounds;
-
-    using key_type = typename KeySeqGenerator::key_type;
-
-    key_type key() const { return KeySeqGenerator::key(key_seq_); }
-
-    void reset(const key_type &key)
-    {
-        KeySeqGenerator generator;
-        generator(key, key_seq_);
-    }
-
-    const std::array<__m128i, rounds + 1> &operator()(
-        std::array<__m128i, rounds + 1> &) const
-    {
-        return key_seq_;
-    }
-
-    friend bool operator==(const AESKeySeqImpl<rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq2)
-    {
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks1;
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks2;
-        std::memcpy(ks1.data(), seq1.key_seq_.data(), 16 * (rounds + 1));
-        std::memcpy(ks2.data(), seq2.key_seq_.data(), 16 * (rounds + 1));
-
-        return ks1 == ks2;
-    }
-
-    friend bool operator!=(const AESKeySeqImpl<rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq2)
-    {
-        return !(seq1 == seq2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq)
-    {
-        if (!os)
-            return os;
-
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks;
-        std::memcpy(ks.data(), seq.key_seq_.data(), 16 * (rounds + 1));
-        ostream(os, ks);
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        AESKeySeqImpl<rounds, KeySeqGenerator> &seq)
-    {
-        if (!is)
-            return is;
-
-        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks;
-        istream(is, ks);
-        if (is)
-            std::memcpy(seq.key_seq_.data(), ks.data(), 16 * (rounds + 1));
-
-        return is;
-    }
-
-    private:
-    std::array<__m128i, rounds + 1> key_seq_;
-}; // class AESKeySeqImpl
-
 class AES128KeySeqGenerator
 {
     public:
@@ -687,6 +625,80 @@ class AES256KeySeqGenerator
     }
 }; // class AESKey256
 
+template <std::size_t Rounds, typename KeySeqGenerator>
+class AESKeySeqImpl
+{
+    public:
+    static constexpr std::size_t rounds = Rounds;
+
+    using key_type = typename KeySeqGenerator::key_type;
+
+    key_type key() const { return KeySeqGenerator::key(key_seq_); }
+
+    void reset(const key_type &key)
+    {
+        KeySeqGenerator generator;
+        generator(key, key_seq_);
+    }
+
+    const std::array<__m128i, rounds + 1> &operator()(
+        std::array<__m128i, rounds + 1> &) const
+    {
+        return key_seq_;
+    }
+
+    friend bool operator==(const AESKeySeqImpl<rounds, KeySeqGenerator> &seq1,
+        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq2)
+    {
+        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks1;
+        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks2;
+        std::memcpy(ks1.data(), seq1.key_seq_.data(), 16 * (rounds + 1));
+        std::memcpy(ks2.data(), seq2.key_seq_.data(), 16 * (rounds + 1));
+
+        return ks1 == ks2;
+    }
+
+    friend bool operator!=(const AESKeySeqImpl<rounds, KeySeqGenerator> &seq1,
+        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq2)
+    {
+        return !(seq1 == seq2);
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_ostream<CharT, Traits> &operator<<(
+        std::basic_ostream<CharT, Traits> &os,
+        const AESKeySeqImpl<rounds, KeySeqGenerator> &seq)
+    {
+        if (!os)
+            return os;
+
+        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks;
+        std::memcpy(ks.data(), seq.key_seq_.data(), 16 * (rounds + 1));
+        ostream(os, ks);
+
+        return os;
+    }
+
+    template <typename CharT, typename Traits>
+    friend std::basic_istream<CharT, Traits> &operator>>(
+        std::basic_istream<CharT, Traits> &is,
+        AESKeySeqImpl<rounds, KeySeqGenerator> &seq)
+    {
+        if (!is)
+            return is;
+
+        alignas(16) std::array<std::uint64_t, 2 * (rounds + 1)> ks;
+        istream(is, ks);
+        if (is)
+            std::memcpy(seq.key_seq_.data(), ks.data(), 16 * (rounds + 1));
+
+        return is;
+    }
+
+    private:
+    std::array<__m128i, rounds + 1> key_seq_;
+}; // class AESKeySeqImpl
+
 template <std::size_t Rounds, typename Constants>
 class ARSKeySeqImpl
 {
@@ -796,18 +808,21 @@ class ARSKeySeqImpl
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AESNI
+template <std::size_t Rounds = MCKL_AES128_ROUNDS>
 using AES128KeySeq =
-    internal::AESKeySeqImpl<10, internal::AES128KeySeqGenerator>;
+    internal::AESKeySeqImpl<Rounds, internal::AES128KeySeqGenerator>;
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AESNI
+template <std::size_t Rounds = MCKL_AES192_ROUNDS>
 using AES192KeySeq =
-    internal::AESKeySeqImpl<12, internal::AES192KeySeqGenerator>;
+    internal::AESKeySeqImpl<Rounds, internal::AES192KeySeqGenerator>;
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AESNI
+template <std::size_t Rounds = MCKL_AES256_ROUNDS>
 using AES256KeySeq =
-    internal::AESKeySeqImpl<14, internal::AES256KeySeqGenerator>;
+    internal::AESKeySeqImpl<Rounds, internal::AES256KeySeqGenerator>;
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AESNI
@@ -820,159 +835,241 @@ using AES256KeySeq =
 /// This generator implement the ARS algorithm in
 /// [Random123](http://www.deshawresearch.com/resources_random123.html),
 /// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
-template <std::size_t Rounds, typename Constants = ARSConstants>
+template <std::size_t Rounds = MCKL_ARS_ROUNDS,
+    typename Constants = ARSConstants>
 using ARSKeySeq = internal::ARSKeySeqImpl<Rounds, Constants>;
 
 namespace internal
 {
 
-template <std::size_t Blocks>
-class AESNIEncFirst
-{
-    public:
-    static void eval(std::array<__m128i, Blocks> &state, const __m128i &rk)
-    {
-        eval<0>(state, rk, std::integral_constant<bool, 0 < Blocks>());
-    }
-
-    private:
-    template <std::size_t>
-    static void eval(
-        std::array<__m128i, Blocks> &, const __m128i &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(
-        std::array<__m128i, Blocks> &state, const __m128i &rk, std::true_type)
-    {
-        std::get<I>(state) = _mm_xor_si128(std::get<I>(state), rk);
-        eval<I + 1>(state, rk, std::integral_constant<bool, I + 1 < Blocks>());
-    }
-}; // class AESNIEncFirst
-
-template <std::size_t Blocks>
-class AESNIEncRound
-{
-    public:
-    static void eval(std::array<__m128i, Blocks> &state, const __m128i &rk)
-    {
-        eval<0>(state, rk, std::integral_constant<bool, 0 < Blocks>());
-    }
-
-    private:
-    template <std::size_t>
-    static void eval(
-        std::array<__m128i, Blocks> &, const __m128i &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(
-        std::array<__m128i, Blocks> &state, const __m128i &rk, std::true_type)
-    {
-        std::get<I>(state) = _mm_aesenc_si128(std::get<I>(state), rk);
-        eval<I + 1>(state, rk, std::integral_constant<bool, I + 1 < Blocks>());
-    }
-}; // class AESNIEncRound
-
-template <std::size_t Blocks>
-class AESNIEncLast
-{
-    public:
-    static void eval(std::array<__m128i, Blocks> &state, const __m128i &rk)
-    {
-        eval<0>(state, rk, std::integral_constant<bool, 0 < Blocks>());
-    }
-
-    private:
-    template <std::size_t>
-    static void eval(
-        std::array<__m128i, Blocks> &, const __m128i &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(
-        std::array<__m128i, Blocks> &state, const __m128i &rk, std::true_type)
-    {
-        std::get<I>(state) = _mm_aesenclast_si128(std::get<I>(state), rk);
-        eval<I + 1>(state, rk, std::integral_constant<bool, I + 1 < Blocks>());
-    }
-}; // class AESNIEncLast
-
-template <typename KeySeqType, std::size_t Blocks, std::size_t N,
-    bool = N <= KeySeqType::rounds>
-class AESNIRound
+template <typename KeySeqType>
+class AESNIGeneratorImpl
 {
     static constexpr std::size_t rounds = KeySeqType::rounds;
 
     public:
+    static constexpr std::size_t blocks = 8;
+
     static void eval(
-        std::array<__m128i, Blocks> &, const std::array<__m128i, rounds + 1> &)
+        __m128i &state, const std::array<__m128i, rounds + 1> &par)
     {
-    }
-}; // class AESNIRound
-
-template <typename KeySeqType, std::size_t Blocks, std::size_t N>
-class AESNIRound<KeySeqType, Blocks, N, true>
-{
-    public:
-    static void eval(std::array<__m128i, Blocks> &state,
-        const std::array<__m128i, KeySeqType::rounds + 1> &par)
-    {
-        eval(state, par, std::integral_constant<bool, N == 0>(),
-            std::integral_constant<bool, N == KeySeqType::rounds>());
-    }
-
-    private:
-    static void eval(std::array<__m128i, Blocks> &state,
-        const std::array<__m128i, KeySeqType::rounds + 1> &par, std::true_type,
-        std::false_type)
-    {
-        AESNIEncFirst<Blocks>::eval(state, std::get<N>(par));
+        encfirst<0>(state, par);
+        enc<0x01>(state, par);
+        enc<0x02>(state, par);
+        enc<0x03>(state, par);
+        enc<0x04>(state, par);
+        enc<0x05>(state, par);
+        enc<0x06>(state, par);
+        enc<0x07>(state, par);
+        enc<0x08>(state, par);
+        enc<0x09>(state, par);
+        enc<0x0A>(state, par);
+        enc<0x0B>(state, par);
+        enc<0x0C>(state, par);
+        enc<0x0D>(state, par);
+        enc<0x0E>(state, par);
+        enc<0x0F>(state, par);
+        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds>());
+        enclast<rounds>(state, par);
     }
 
-    static void eval(std::array<__m128i, Blocks> &state,
-        const std::array<__m128i, KeySeqType::rounds + 1> &par,
-        std::false_type, std::false_type)
+    static void eval(std::array<__m128i, 8> &state,
+        const std::array<__m128i, rounds + 1> &par)
     {
-        AESNIEncRound<Blocks>::eval(state, std::get<N>(par));
-    }
-
-    static void eval(std::array<__m128i, Blocks> &state,
-        const std::array<__m128i, KeySeqType::rounds + 1> &par,
-        std::false_type, std::true_type)
-    {
-        AESNIEncLast<Blocks>::eval(state, std::get<N>(par));
-    }
-}; // class AESNIRound
-
-template <typename KeySeqType, std::size_t Blocks>
-class AESNIGeneratorImpl
-{
-    public:
-    static void eval(std::array<__m128i, Blocks> &state,
-        const std::array<__m128i, KeySeqType::rounds + 1> &par)
-    {
-        eval<0>(state, par,
-            std::integral_constant<bool, 0 <= KeySeqType::rounds>());
+        encfirst<0>(state, par);
+        enc<0x01>(state, par);
+        enc<0x02>(state, par);
+        enc<0x03>(state, par);
+        enc<0x04>(state, par);
+        enc<0x05>(state, par);
+        enc<0x06>(state, par);
+        enc<0x07>(state, par);
+        enc<0x08>(state, par);
+        enc<0x09>(state, par);
+        enc<0x0A>(state, par);
+        enc<0x0B>(state, par);
+        enc<0x0C>(state, par);
+        enc<0x0D>(state, par);
+        enc<0x0E>(state, par);
+        enc<0x0F>(state, par);
+        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds>());
+        enclast<rounds>(state, par);
     }
 
     private:
     template <std::size_t>
-    static void eval(std::array<__m128i, Blocks> &,
-        const std::array<__m128i, KeySeqType::rounds + 1> &, std::false_type)
+    static void eval(
+        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m128i, Blocks> &state,
-        const std::array<__m128i, KeySeqType::rounds + 1> &par, std::true_type)
+    static void eval(
+        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
     {
-        AESNIRound<KeySeqType, Blocks, N>::eval(state, par);
-        eval<N + 1>(state, par,
-            std::integral_constant<bool, N + 1 <= KeySeqType::rounds>());
+        enc<N>(s, par);
+        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds>());
+    }
+
+    template <std::size_t N>
+    static void encfirst(
+        __m128i &s, const std::array<__m128i, rounds + 1> &par)
+    {
+        encfirst<N>(s, par, std::integral_constant<bool, N == 0>());
+    }
+
+    template <std::size_t>
+    static void encfirst(
+        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void encfirst(
+        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
+    {
+        s = _mm_xor_si128(s, std::get<N>(par));
+    }
+
+    template <std::size_t N>
+    static void enc(__m128i &s, const std::array<__m128i, rounds + 1> &par)
+    {
+        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds)>());
+    }
+
+    template <std::size_t>
+    static void enc(
+        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void enc(
+        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
+    {
+        s = _mm_aesenc_si128(s, std::get<N>(par));
+    }
+
+    template <std::size_t N>
+    static void enclast(__m128i &s, const std::array<__m128i, rounds + 1> &par)
+    {
+        enclast<N>(s, par, std::integral_constant<bool, N == rounds>());
+    }
+
+    template <std::size_t>
+    static void enclast(
+        __m128i &, const std::array<__m128i, rounds + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void enclast(
+        __m128i &s, const std::array<__m128i, rounds + 1> &par, std::true_type)
+    {
+        s = _mm_aesenclast_si128(s, std::get<N>(par));
+    }
+
+    template <std::size_t>
+    static void eval(std::array<__m128i, 8> &,
+        const std::array<__m128i, rounds + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void eval(std::array<__m128i, 8> &s,
+        const std::array<__m128i, rounds + 1> &par, std::true_type)
+    {
+        enc<N>(s, par);
+        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds>());
+    }
+
+    template <std::size_t N>
+    static void encfirst(
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds + 1> &par)
+    {
+        encfirst<N>(s, par, std::integral_constant<bool, N == 0>());
+    }
+
+    template <std::size_t>
+    static void encfirst(std::array<__m128i, 8> &,
+        const std::array<__m128i, rounds + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void encfirst(std::array<__m128i, 8> &s,
+        const std::array<__m128i, rounds + 1> &par, std::true_type)
+    {
+        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), std::get<N>(par));
+        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), std::get<N>(par));
+        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), std::get<N>(par));
+        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), std::get<N>(par));
+        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), std::get<N>(par));
+        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), std::get<N>(par));
+        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), std::get<N>(par));
+        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), std::get<N>(par));
+    }
+
+    template <std::size_t N>
+    static void enc(
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds + 1> &par)
+    {
+        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds)>());
+    }
+
+    template <std::size_t>
+    static void enc(std::array<__m128i, 8> &,
+        const std::array<__m128i, rounds + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void enc(std::array<__m128i, 8> &s,
+        const std::array<__m128i, rounds + 1> &par, std::true_type)
+    {
+        std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), std::get<N>(par));
+        std::get<1>(s) = _mm_aesenc_si128(std::get<1>(s), std::get<N>(par));
+        std::get<2>(s) = _mm_aesenc_si128(std::get<2>(s), std::get<N>(par));
+        std::get<3>(s) = _mm_aesenc_si128(std::get<3>(s), std::get<N>(par));
+        std::get<4>(s) = _mm_aesenc_si128(std::get<4>(s), std::get<N>(par));
+        std::get<5>(s) = _mm_aesenc_si128(std::get<5>(s), std::get<N>(par));
+        std::get<6>(s) = _mm_aesenc_si128(std::get<6>(s), std::get<N>(par));
+        std::get<7>(s) = _mm_aesenc_si128(std::get<7>(s), std::get<N>(par));
+    }
+
+    template <std::size_t N>
+    static void enclast(
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds + 1> &par)
+    {
+        enclast<N>(s, par, std::integral_constant<bool, N == rounds>());
+    }
+
+    template <std::size_t>
+    static void enclast(std::array<__m128i, 8> &,
+        const std::array<__m128i, rounds + 1> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void enclast(std::array<__m128i, 8> &s,
+        const std::array<__m128i, rounds + 1> &par, std::true_type)
+    {
+        std::get<0>(s) =
+            _mm_aesenclast_si128(std::get<0>(s), std::get<N>(par));
+        std::get<1>(s) =
+            _mm_aesenclast_si128(std::get<1>(s), std::get<N>(par));
+        std::get<2>(s) =
+            _mm_aesenclast_si128(std::get<2>(s), std::get<N>(par));
+        std::get<3>(s) =
+            _mm_aesenclast_si128(std::get<3>(s), std::get<N>(par));
+        std::get<4>(s) =
+            _mm_aesenclast_si128(std::get<4>(s), std::get<N>(par));
+        std::get<5>(s) =
+            _mm_aesenclast_si128(std::get<5>(s), std::get<N>(par));
+        std::get<6>(s) =
+            _mm_aesenclast_si128(std::get<6>(s), std::get<N>(par));
+        std::get<7>(s) =
+            _mm_aesenclast_si128(std::get<7>(s), std::get<N>(par));
     }
 }; // class AESNIGeneratorImpl
 
@@ -980,20 +1077,19 @@ class AESNIGeneratorImpl
 
 /// \brief RNG generator using AES-NI instructions
 /// \ingroup AESNI
-template <typename KeySeqType, std::size_t Blocks = MCKL_AESNI_BLOCKS>
+template <typename KeySeqType>
 class AESNIGenerator
 {
-    static_assert(
-        Blocks != 0, "**AESNIGenerator** used with blocks equal to zero");
+    static constexpr std::size_t rounds = KeySeqType::rounds;
 
-    static_assert(KeySeqType::rounds != 0,
-        "**AESNIGenerate** used with KeySeqType::rounds equal to runds");
+    static_assert(rounds != 0,
+        "**AESNIGenerate** used with KeySeqType::rounds equal to rounds");
 
     public:
     using ctr_type = std::array<std::uint64_t, 2>;
     using key_type = typename KeySeqType::key_type;
 
-    static constexpr std::size_t size() { return Blocks * sizeof(__m128i); }
+    static constexpr std::size_t size() { return sizeof(__m128i); }
 
     key_type key() const { return key_seq_.key(); }
 
@@ -1002,15 +1098,15 @@ class AESNIGenerator
     void enc(const ctr_type &ctr, ctr_type &buffer) const
     {
         union {
-            std::array<__m128i, 1> state;
+            __m128i state;
             ctr_type result;
         } buf;
 
-        std::array<__m128i, KeySeqType::rounds + 1> tmp;
-        const std::array<__m128i, KeySeqType::rounds + 1> &par = key_seq_(tmp);
+        std::array<__m128i, rounds + 1> tmp;
+        const std::array<__m128i, rounds + 1> &par = key_seq_(tmp);
 
         buf.result = ctr;
-        internal::AESNIGeneratorImpl<KeySeqType, 1>::eval(buf.state, par);
+        internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, par);
         buffer = buf.result;
     }
 
@@ -1018,29 +1114,24 @@ class AESNIGenerator
     void operator()(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
-        std::array<__m128i, KeySeqType::rounds + 1> tmp;
-        const std::array<__m128i, KeySeqType::rounds + 1> &par = key_seq_(tmp);
-        generate(ctr, buffer, par);
+        generate(ctr, buffer);
     }
 
     template <typename ResultType>
     void operator()(ctr_type &ctr, std::size_t n,
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
-        std::array<__m128i, KeySeqType::rounds + 1> tmp;
-        const std::array<__m128i, KeySeqType::rounds + 1> &par = key_seq_(tmp);
-        for (std::size_t i = 0; i != n; ++i)
-            generate(ctr, buffer[i], par);
+        generate(ctr, n, buffer);
     }
 
-    friend bool operator==(const AESNIGenerator<KeySeqType, Blocks> &gen1,
-        const AESNIGenerator<KeySeqType, Blocks> &gen2)
+    friend bool operator==(const AESNIGenerator<KeySeqType> &gen1,
+        const AESNIGenerator<KeySeqType> &gen2)
     {
         return gen1.key_seq_ == gen2.key_seq_;
     }
 
-    friend bool operator!=(const AESNIGenerator<KeySeqType, Blocks> &gen1,
-        const AESNIGenerator<KeySeqType, Blocks> &gen2)
+    friend bool operator!=(const AESNIGenerator<KeySeqType> &gen1,
+        const AESNIGenerator<KeySeqType> &gen2)
     {
         return !(gen1 == gen2);
     }
@@ -1048,7 +1139,7 @@ class AESNIGenerator
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const AESNIGenerator<KeySeqType, Blocks> &gen)
+        const AESNIGenerator<KeySeqType> &gen)
     {
         if (!os)
             return os;
@@ -1060,13 +1151,12 @@ class AESNIGenerator
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        AESNIGenerator<KeySeqType, Blocks> &gen)
+        std::basic_istream<CharT, Traits> &is, AESNIGenerator<KeySeqType> &gen)
     {
         if (!is)
             return is;
 
-        AESNIGenerator<KeySeqType, Blocks> gen_tmp;
+        AESNIGenerator<KeySeqType> gen_tmp;
         is >> std::ws >> gen_tmp.key_seq_;
 
         if (is)
@@ -1080,218 +1170,114 @@ class AESNIGenerator
 
     template <typename ResultType>
     void generate(ctr_type &ctr,
+        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
+    {
+        std::array<__m128i, rounds + 1> tmp;
+        const std::array<__m128i, rounds + 1> &par = key_seq_(tmp);
+        generate(ctr, buffer, par);
+    }
+
+    template <typename ResultType>
+    void generate(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
+    {
+        static constexpr std::size_t blocks =
+            internal::AESNIGeneratorImpl<KeySeqType>::blocks;
+
+        union {
+            std::array<__m128i, blocks> state;
+            std::array<ctr_type, blocks> ctr_block;
+        } buf;
+
+        std::array<__m128i, rounds + 1> tmp;
+        const std::array<__m128i, rounds + 1> &par = key_seq_(tmp);
+
+        const std::size_t m = n / blocks;
+        const std::size_t l = n % blocks;
+        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            increment(ctr, buf.ctr_block);
+            internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, par);
+            std::memcpy(buffer, buf.state.data(), size() * blocks);
+        }
+        for (std::size_t i = 0; i != l; ++i)
+            generate(ctr, buffer[i], par);
+    }
+
+    template <typename ResultType>
+    void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer,
-        const std::array<__m128i, KeySeqType::rounds + 1> &par) const
+        const std::array<__m128i, rounds + 1> &par) const
     {
         union {
-            std::array<__m128i, Blocks> state;
-            std::array<ctr_type, Blocks> ctr_block;
+            __m128i state;
+            ctr_type ctr;
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
-        increment(ctr, buf.ctr_block);
-        internal::AESNIGeneratorImpl<KeySeqType, Blocks>::eval(buf.state, par);
+        increment(ctr);
+        buf.ctr = ctr;
+        internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, par);
         buffer = buf.result;
     }
 }; // class AESNIGenerator
 
 /// \brief RNG engine using AES-NI instructions
 /// \ingroup AESNI
-template <typename ResultType, typename KeySeqType,
-    std::size_t Blocks = MCKL_AESNI_BLOCKS>
-using AESNIEngine =
-    CounterEngine<ResultType, AESNIGenerator<KeySeqType, Blocks>>;
+template <typename ResultType, typename KeySeqType>
+using AESNIEngine = CounterEngine<ResultType, AESNIGenerator<KeySeqType>>;
 
 /// \brief AES-128 RNG engine
 /// \ingroup AESNI
-template <typename ResultType, std::size_t Blocks = MCKL_AESNI_BLOCKS>
-using AES128Engine = AESNIEngine<ResultType, AES128KeySeq, Blocks>;
+template <typename ResultType, std::size_t Rounds = MCKL_AES128_ROUNDS>
+using AES128Engine = AESNIEngine<ResultType, AES128KeySeq<Rounds>>;
 
 /// \brief AES-192 RNG engine
 /// \ingroup AESNI
-template <typename ResultType, std::size_t Blocks = MCKL_AESNI_BLOCKS>
-using AES192Engine = AESNIEngine<ResultType, AES192KeySeq, Blocks>;
+template <typename ResultType, std::size_t Rounds = MCKL_AES192_ROUNDS>
+using AES192Engine = AESNIEngine<ResultType, AES192KeySeq<Rounds>>;
 
 /// \brief AES-256 RNG engine
 /// \ingroup AESNI
-template <typename ResultType, std::size_t Blocks = MCKL_AESNI_BLOCKS>
-using AES256Engine = AESNIEngine<ResultType, AES256KeySeq, Blocks>;
+template <typename ResultType, std::size_t Rounds = MCKL_AES256_ROUNDS>
+using AES256Engine = AESNIEngine<ResultType, AES256KeySeq<Rounds>>;
 
 /// \brief ARS RNG engine
 /// \ingroup AESNI
 template <typename ResultType, std::size_t Rounds = MCKL_ARS_ROUNDS,
-    std::size_t Blocks = MCKL_AESNI_BLOCKS, typename Constants = ARSConstants>
-using ARSEngine =
-    AESNIEngine<ResultType, ARSKeySeq<Rounds, Constants>, Blocks>;
-
-/// \brief AES-128 RNG engine with 32-bit integers output, 1 block
-/// \ingroup AESNI
-using AES128x1 = AES128Engine<std::uint32_t, 1>;
-
-/// \brief AES-128 RNG engine with 32-bit integers output, 2 blocks
-/// \ingroup AESNI
-using AES128x2 = AES128Engine<std::uint32_t, 2>;
-
-/// \brief AES-128 RNG engine with 32-bit integers output, 4 blocks
-/// \ingroup AESNI
-using AES128x4 = AES128Engine<std::uint32_t, 4>;
-
-/// \brief AES-128 RNG engine with 32-bit integers output, 8 blocks
-/// \ingroup AESNI
-using AES128x8 = AES128Engine<std::uint32_t, 8>;
-
-/// \brief AES-128 RNG engine with 64-bit integers output, 1 block
-/// \ingroup AESNI
-using AES128x1_64 = AES128Engine<std::uint64_t, 1>;
-
-/// \brief AES-128 RNG engine with 64-bit integers output, 2 blocks
-/// \ingroup AESNI
-using AES128x2_64 = AES128Engine<std::uint64_t, 2>;
-
-/// \brief AES-128 RNG engine with 64-bit integers output, 4 blocks
-/// \ingroup AESNI
-using AES128x4_64 = AES128Engine<std::uint64_t, 4>;
-
-/// \brief AES-128 RNG engine with 64-bit integers output, 8 blocks
-/// \ingroup AESNI
-using AES128x8_64 = AES128Engine<std::uint64_t, 8>;
+    typename Constants = ARSConstants>
+using ARSEngine = AESNIEngine<ResultType, ARSKeySeq<Rounds, Constants>>;
 
 /// \brief AES-128 RNG engine with 32-bit integers output
-using AES128 = AES128x8;
-
-/// \brief AES-128 RNG engine with 64-bit integers output
 /// \ingroup AESNI
-using AES128_64 = AES128x8_64;
-
-/// \brief AES-192 RNG engine with 32-bit integers output, 1 block
-/// \ingroup AESNI
-using AES192x1 = AES192Engine<std::uint32_t, 1>;
-
-/// \brief AES-192 RNG engine with 32-bit integers output, 2 blocks
-/// \ingroup AESNI
-using AES192x2 = AES192Engine<std::uint32_t, 2>;
-
-/// \brief AES-192 RNG engine with 32-bit integers output, 4 blocks
-/// \ingroup AESNI
-using AES192x4 = AES192Engine<std::uint32_t, 4>;
-
-/// \brief AES-192 RNG engine with 32-bit integers output, 8 blocks
-/// \ingroup AESNI
-using AES192x8 = AES192Engine<std::uint32_t, 8>;
-
-/// \brief AES-192 RNG engine with 64-bit integers output, 1 block
-/// \ingroup AESNI
-using AES192x1_64 = AES192Engine<std::uint64_t, 1>;
-
-/// \brief AES-192 RNG engine with 64-bit integers output, 2 blocks
-/// \ingroup AESNI
-using AES192x2_64 = AES192Engine<std::uint64_t, 2>;
-
-/// \brief AES-192 RNG engine with 64-bit integers output, 4 blocks
-/// \ingroup AESNI
-using AES192x4_64 = AES192Engine<std::uint64_t, 4>;
-
-/// \brief AES-192 RNG engine with 64-bit integers output, 8 blocks
-/// \ingroup AESNI
-using AES192x8_64 = AES192Engine<std::uint64_t, 8>;
+using AES128 = AES128Engine<std::uint32_t>;
 
 /// \brief AES-192 RNG engine with 32-bit integers output
 /// \ingroup AESNI
-using AES192 = AES192x8;
-
-/// \brief AES-192 RNG engine with 64-bit integers output
-/// \ingroup AESNI
-using AES192_64 = AES192x8_64;
-
-/// \brief AES-256 RNG engine with 32-bit integers output, 1 block
-/// \ingroup AESNI
-using AES256x1 = AES256Engine<std::uint32_t, 1>;
-
-/// \brief AES-256 RNG engine with 32-bit integers output, 2 blocks
-/// \ingroup AESNI
-using AES256x2 = AES256Engine<std::uint32_t, 2>;
-
-/// \brief AES-256 RNG engine with 32-bit integers output, 4 blocks
-/// \ingroup AESNI
-using AES256x4 = AES256Engine<std::uint32_t, 4>;
-
-/// \brief AES-256 RNG engine with 32-bit integers output, 8 blocks
-/// \ingroup AESNI
-using AES256x8 = AES256Engine<std::uint32_t, 8>;
-
-/// \brief AES-256 RNG engine with 64-bit integers output, 1 block
-/// \ingroup AESNI
-using AES256x1_64 = AES256Engine<std::uint64_t, 1>;
-
-/// \brief AES-256 RNG engine with 64-bit integers output, 2 blocks
-/// \ingroup AESNI
-using AES256x2_64 = AES256Engine<std::uint64_t, 2>;
-
-/// \brief AES-256 RNG engine with 64-bit integers output, 4 blocks
-/// \ingroup AESNI
-using AES256x4_64 = AES256Engine<std::uint64_t, 4>;
-
-/// \brief AES-256 RNG engine with 64-bit integers output, 8 blocks
-/// \ingroup AESNI
-using AES256x8_64 = AES256Engine<std::uint64_t, 8>;
+using AES192 = AES192Engine<std::uint32_t>;
 
 /// \brief AES-256 RNG engine with 32-bit integers output
 /// \ingroup AESNI
-using AES256 = AES256x8;
+using AES256 = AES256Engine<std::uint32_t>;
+
+/// \brief ARS RNG engine with 32-bit integers output
+/// \ingroup AESNI
+using ARS = ARSEngine<std::uint32_t>;
+
+/// \brief AES-128 RNG engine with 64-bit integers output
+/// \ingroup AESNI
+using AES128_64 = AES128Engine<std::uint64_t>;
+
+/// \brief AES-192 RNG engine with 64-bit integers output
+/// \ingroup AESNI
+using AES192_64 = AES192Engine<std::uint64_t>;
 
 /// \brief AES-256 RNG engine with 64-bit integers output
 /// \ingroup AESNI
-using AES256_64 = AES256x8_64;
+using AES256_64 = AES256Engine<std::uint64_t>;
 
-/// \brief ARS RNG engine with 32-bit integers output, 1 block and default
-/// rounds
+/// \brief ARS RNG engine with 64-bit integers output
 /// \ingroup AESNI
-using ARSx1 = ARSEngine<std::uint32_t, MCKL_ARS_ROUNDS, 1>;
-
-/// \brief ARS RNG engine with 32-bit integers output, 2 blocks and default
-/// rounds
-/// \ingroup AESNI
-using ARSx2 = ARSEngine<std::uint32_t, MCKL_ARS_ROUNDS, 2>;
-
-/// \brief ARS RNG engine with 32-bit integers output, 4 blocks and default
-/// rounds
-/// \ingroup AESNI
-using ARSx4 = ARSEngine<std::uint32_t, MCKL_ARS_ROUNDS, 4>;
-
-/// \brief ARS RNG engine with 32-bit integers output, 8 blocks and default
-/// rounds
-/// \ingroup AESNI
-using ARSx8 = ARSEngine<std::uint32_t, MCKL_ARS_ROUNDS, 8>;
-
-/// \brief ARS RNG engine with 64-bit integers output, 1 block and default
-/// rounds
-/// \ingroup AESNI
-using ARSx1_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 1>;
-
-/// \brief ARS RNG engine with 64-bit integers output, 2 blocks and default
-/// rounds
-/// \ingroup AESNI
-using ARSx2_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 2>;
-
-/// \brief ARS RNG engine with 64-bit integers output, 4 blocks and default
-/// rounds
-/// \ingroup AESNI
-using ARSx4_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 4>;
-
-/// \brief ARS RNG engine with 64-bit integers output, 8 blocks and default
-/// rounds
-/// \ingroup AESNI
-using ARSx8_64 = ARSEngine<std::uint64_t, MCKL_ARS_ROUNDS, 8>;
-
-/// \brief ARS RNG engine with 32-bit integers output, default blocks and
-/// default rounds
-/// \ingroup AESNI
-using ARS = ARSx8;
-
-/// \brief ARS RNG engine with 64-bit integers output, default blocks and
-/// default rounds
-/// \ingroup AESNI
-using ARS_64 = ARSx8_64;
+using ARS_64 = ARSEngine<std::uint64_t>;
 
 } // namespace mckl
 
