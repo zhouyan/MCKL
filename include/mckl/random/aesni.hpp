@@ -42,7 +42,7 @@
 #endif
 
 #ifdef MCKL_GCC
-#if __GNUC__ >= 6
+#if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
@@ -1287,7 +1287,7 @@ using ARS_64 = ARSEngine<std::uint64_t>;
 } // namespace mckl
 
 #ifdef MCKL_GCC
-#if __GNUC__ >= 6
+#if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic pop
 #endif
 #endif

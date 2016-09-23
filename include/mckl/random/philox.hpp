@@ -36,6 +36,13 @@
 #include <mckl/random/counter.hpp>
 #include <mckl/random/threefry.hpp>
 
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 /// \brief PhiloxGenerator default rounds
 /// \ingroup Config
 #ifndef MCKL_PHILOX_ROUNDS
@@ -444,5 +451,11 @@ using Philox2x64_64 = Philox2x64Engine<std::uint64_t>;
 using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
 } // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif // MCKL_RANDOM_PHILOX_HPP
