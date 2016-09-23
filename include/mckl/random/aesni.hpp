@@ -850,7 +850,7 @@ template <typename KeySeqType>
 class AESNIGeneratorImpl
 {
     public:
-    static constexpr std::size_t blocks = 8;
+    static constexpr std::size_t blocks() { return 8; }
 
     static void eval(__m128i &state,
         const std::array<__m128i, KeySeqType::rounds() + 1> &par)
@@ -1187,7 +1187,7 @@ class AESNIGenerator
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
         static constexpr std::size_t blocks =
-            internal::AESNIGeneratorImpl<KeySeqType>::blocks;
+            internal::AESNIGeneratorImpl<KeySeqType>::blocks();
 
         union {
             std::array<__m128i, blocks> state;

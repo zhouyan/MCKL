@@ -42,14 +42,14 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
 class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
 {
     public:
-    static constexpr std::size_t blocks = 256 / (sizeof(T) * K);
+    static constexpr std::size_t blocks() { return 256 / (sizeof(T) * K); }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(state, key);
     }
 
-    static void eval(std::array<std::array<T, K>, blocks> &state,
+    static void eval(std::array<std::array<T, K>, blocks()> &state,
         const std::array<T, K / 2> &key)
     {
         std::array<__m256i, M_> k;
@@ -111,7 +111,7 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
             s, t, k, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
-    static void pack(const std::array<std::array<T, K>, blocks> &state,
+    static void pack(const std::array<std::array<T, K>, blocks()> &state,
         std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
         std::memcpy(s.data(), state.data(), 256);
@@ -126,7 +126,7 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
         std::get<7>(t) = _mm256_srli_epi64(std::get<7>(s), 32);
     }
 
-    static void unpack(std::array<std::array<T, K>, blocks> &state,
+    static void unpack(std::array<std::array<T, K>, blocks()> &state,
         const std::array<__m256i, 8> &s, const std::array<__m256i, 8> &t)
     {
         std::array<__m256i, 8> p;

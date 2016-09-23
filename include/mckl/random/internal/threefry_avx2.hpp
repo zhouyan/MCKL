@@ -42,7 +42,7 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
 class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64, true>
 {
     public:
-    static constexpr std::size_t blocks = 512 / (sizeof(T) * K);
+    static constexpr std::size_t blocks() { return 512 / (sizeof(T) * K); }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
     {
@@ -50,7 +50,7 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64, true>
             state, par);
     }
 
-    static void eval(std::array<std::array<T, K>, blocks> &state,
+    static void eval(std::array<std::array<T, K>, blocks()> &state,
         const std::array<T, K + 1> &par)
     {
         std::array<__m256i, 8> s;
@@ -118,7 +118,7 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64, true>
             s, t, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
-    static void pack(const std::array<std::array<T, K>, blocks> &state,
+    static void pack(const std::array<std::array<T, K>, blocks()> &state,
         std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
         std::array<__m256i, 16> p;
@@ -150,7 +150,7 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64, true>
             _mm256_unpackhi_epi64(std::get<14>(p), std::get<15>(p));
     }
 
-    static void unpack(std::array<std::array<T, K>, blocks> &state,
+    static void unpack(std::array<std::array<T, K>, blocks()> &state,
         const std::array<__m256i, 8> &s, const std::array<__m256i, 8> &t)
     {
         std::array<__m256i, 16> p;

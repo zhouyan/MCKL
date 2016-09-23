@@ -56,6 +56,7 @@ sub read
 {
     open my $txtfile, '<', "random_rng_$_[0].txt";
     my @txt = grep { $_ =~ /Passed|Failed/ } <$txtfile>;
+    @txt = sort @txt;
     open $txtfile, '>', "random_rng_$_[0].txt";
     print $txtfile @txt;
     @txt

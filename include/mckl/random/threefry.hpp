@@ -464,7 +464,7 @@ class ThreefryGenerator
         std::array<T, K> &ctr, std::size_t n, std::array<T, K> *buffer) const
     {
         static constexpr std::size_t blocks =
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks;
+            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
         using state_type = std::array<std::array<T, K>, blocks>;
 
@@ -485,7 +485,7 @@ class ThreefryGenerator
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
         static constexpr std::size_t blocks =
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks;
+            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
         union {
             std::array<std::array<T, K>, blocks> state;
