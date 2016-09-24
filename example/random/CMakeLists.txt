@@ -106,6 +106,8 @@ FOREACH(RNG ${STD_RNG})
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng.cpp.in
         ${PROJECT_SOURCE_DIR}/src/random_rng_${name}.cpp)
     MCKL_ADD_TEST(random rng_${name})
+    ADD_DEPENDENCIES(random_rng random_rng_${name})
+    ADD_DEPENDENCIES(random_rng-check random_rng_${name}-check)
 ENDFOREACH(RNG ${STD_RNG})
 
 MCKL_ADD_FILE(random random_Philox2x32.txt)

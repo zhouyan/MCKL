@@ -191,6 +191,23 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
 
     private:
     static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 32>)
+    {
+        // s: 2''' 2' 0''' 0' 2'' 2 0'' 0
+        // t: 3''' 3' 1''' 1' 3'' 3 1'' 1
+
+        // 1 0 3 2
+        std::get<0>(t) = _mm256_shuffle_epi32(std::get<0>(t), 0x4E);
+        std::get<1>(t) = _mm256_shuffle_epi32(std::get<1>(t), 0x4E);
+        std::get<2>(t) = _mm256_shuffle_epi32(std::get<2>(t), 0x4E);
+        std::get<3>(t) = _mm256_shuffle_epi32(std::get<3>(t), 0x4E);
+        std::get<4>(t) = _mm256_shuffle_epi32(std::get<4>(t), 0x4E);
+        std::get<5>(t) = _mm256_shuffle_epi32(std::get<5>(t), 0x4E);
+        std::get<6>(t) = _mm256_shuffle_epi32(std::get<6>(t), 0x4E);
+        std::get<7>(t) = _mm256_shuffle_epi32(std::get<7>(t), 0x4E);
+    }
+
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &t,
         std::integral_constant<int, 64>)
     {
         // s: 2' 2 0' 0
@@ -232,7 +249,7 @@ class ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>
         std::integral_constant<int, 64>)
     {
         // s: 6 2 4 0
-        // t; 7 3 5 1
+        // t: 7 3 5 1
 
         // 0 1 3 2
         std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x1E);
@@ -279,8 +296,8 @@ class ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>
     static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
         std::integral_constant<int, 64>)
     {
-        // s: 6 2 4 0 | 8 12 10 14
-        // t; 7 3 5 1 | 9 13 11 15
+        // s: 6 2 4 0 | E A C 8
+        // t: 7 3 5 1 | F B D 9
 
         // 1 2 3 0
         std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x6C);
