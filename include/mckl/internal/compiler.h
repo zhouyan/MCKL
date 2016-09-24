@@ -71,22 +71,6 @@
 #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
 #endif
 
-#if MCKL_HAS_SSE2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <emmintrin.h>
-#endif
-#endif
-
-#if MCKL_HAS_AVX2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <immintrin.h>
-#endif
-#endif
-
 #ifndef MCKL_HAS_X86
 #if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
     defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \
@@ -115,12 +99,60 @@
 #define MCKL_HAS_RDRAND 0
 #endif
 
-#ifndef MCKL_HAS_SSE2
-#define MCKL_HAS_SSE2 0
-#endif
-
 #ifndef MCKL_HAS_AVX2
 #define MCKL_HAS_AVX2 0
+#endif
+
+#ifndef MCKL_USE_AVX2
+#define MCKL_USE_AVX2 MCKL_HAS_AVX2
+#endif
+
+#ifndef MCKL_HAS_AVX
+#define MCKL_HAS_AVX MCKL_HAS_AVX2
+#endif
+
+#ifndef MCKL_USE_AVX
+#define MCKL_USE_AVX MCKL_HAS_AVX
+#endif
+
+#ifndef MCKL_HAS_SSE4_2
+#define MCKL_HAS_SSE4_2 MCKL_HAS_AVX
+#endif
+
+#ifndef MCKL_USE_SSE4_2
+#define MCKL_USE_SSE4_2 MCKL_HAS_SSE4_2
+#endif
+
+#ifndef MCKL_HAS_SSE4_1
+#define MCKL_HAS_SSE4_1 MCKL_HAS_SSE4_2
+#endif
+
+#ifndef MCKL_USE_SSE4_1
+#define MCKL_USE_SSE4_1 MCKL_HAS_SSE4_1
+#endif
+
+#ifndef MCKL_HAS_SSSE3
+#define MCKL_HAS_SSSE3 MCKL_HAS_SSE4_1
+#endif
+
+#ifndef MCKL_USE_SSSE3
+#define MCKL_USE_SSSE3 MCKL_HAS_SSSE3
+#endif
+
+#ifndef MCKL_HAS_SSE3
+#define MCKL_HAS_SSE3 MCKL_HAS_SSSE3
+#endif
+
+#ifndef MCKL_USE_SSE3
+#define MCKL_USE_SSE3 MCKL_HAS_SSE3
+#endif
+
+#ifndef MCKL_HAS_SSE2
+#define MCKL_HAS_SSE2 MCKL_HAS_SSE3
+#endif
+
+#ifndef MCKL_USE_SSE2
+#define MCKL_USE_SSE2 MCKL_HAS_SSE2
 #endif
 
 #ifndef MCKL_HAS_INT128
@@ -129,6 +161,54 @@
 
 #ifndef MCKL_INT64
 #define MCKL_INT64 long long
+#endif
+
+#if MCKL_USE_SSE2
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <emmintrin.h>
+#endif
+#endif
+
+#if MCKL_USE_SSE3
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <pmmintrin.h>
+#endif
+#endif
+
+#if MCKL_USE_SSSE3
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <tmmintrin.h>
+#endif
+#endif
+
+#if MCKL_USE_SSE4_1
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <smmintrin.h>
+#endif
+#endif
+
+#if MCKL_USE_SSE4_2
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <nmmintrin.h>
+#endif
+#endif
+
+#if MCKL_USE_AVX || MCKL_USE_AVX2
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <immintrin.h>
+#endif
 #endif
 
 #endif // MCKL_INTERNAL_COMPILER_HPP

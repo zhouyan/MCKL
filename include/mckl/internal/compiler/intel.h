@@ -52,6 +52,36 @@
 #endif
 #endif
 
+#ifdef __SSE3__
+#ifndef MCKL_HAS_SSE3
+#define MCKL_HAS_SSE3 1
+#endif
+#endif
+
+#ifdef __SSSE3__
+#ifndef MCKL_HAS_SSSE3
+#define MCKL_HAS_SSSE3 1
+#endif
+#endif
+
+#ifdef __SSE4_1__
+#ifndef MCKL_HAS_SSE4_1
+#define MCKL_HAS_SSE4_1 1
+#endif
+#endif
+
+#ifdef __SSE4_2__
+#ifndef MCKL_HAS_SSE4_2
+#define MCKL_HAS_SSE4_2 1
+#endif
+#endif
+
+#ifdef __AVX__
+#ifndef MCKL_HAS_AVX
+#define MCKL_HAS_AVX 1
+#endif
+#endif
+
 #ifdef __AVX2__
 #ifndef MCKL_HAS_AVX2
 #define MCKL_HAS_AVX2 1
