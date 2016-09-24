@@ -46,4 +46,8 @@
 #endif
 #endif
 
+#ifndef MCKL_INT64
+#define MCKL_INT64 __int64
+#endif
+
 #endif // MCKL_INTERNAL_COMPILER_MSVC_H

@@ -152,29 +152,39 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
 
         std::memcpy(p.data(), state.data(), 512);
 
-        std::get<0>(s) = _mm256_unpacklo_epi64(std::get<0>(p), std::get<1>(p));
-        std::get<1>(s) = _mm256_unpacklo_epi64(std::get<2>(p), std::get<3>(p));
-        std::get<2>(s) = _mm256_unpacklo_epi64(std::get<4>(p), std::get<5>(p));
-        std::get<3>(s) = _mm256_unpacklo_epi64(std::get<6>(p), std::get<7>(p));
-        std::get<4>(s) = _mm256_unpacklo_epi64(std::get<8>(p), std::get<9>(p));
+        std::get<0>(s) =
+            _mm256_unpacklo_epi64(std::get<0x0>(p), std::get<0x1>(p));
+        std::get<1>(s) =
+            _mm256_unpacklo_epi64(std::get<0x2>(p), std::get<0x3>(p));
+        std::get<2>(s) =
+            _mm256_unpacklo_epi64(std::get<0x4>(p), std::get<0x5>(p));
+        std::get<3>(s) =
+            _mm256_unpacklo_epi64(std::get<0x6>(p), std::get<0x7>(p));
+        std::get<4>(s) =
+            _mm256_unpacklo_epi64(std::get<0x8>(p), std::get<0x9>(p));
         std::get<5>(s) =
-            _mm256_unpacklo_epi64(std::get<10>(p), std::get<11>(p));
+            _mm256_unpacklo_epi64(std::get<0xA>(p), std::get<0xB>(p));
         std::get<6>(s) =
-            _mm256_unpacklo_epi64(std::get<12>(p), std::get<13>(p));
+            _mm256_unpacklo_epi64(std::get<0xC>(p), std::get<0xD>(p));
         std::get<7>(s) =
-            _mm256_unpacklo_epi64(std::get<14>(p), std::get<15>(p));
+            _mm256_unpacklo_epi64(std::get<0xE>(p), std::get<0xF>(p));
 
-        std::get<0>(t) = _mm256_unpackhi_epi64(std::get<0>(p), std::get<1>(p));
-        std::get<1>(t) = _mm256_unpackhi_epi64(std::get<2>(p), std::get<3>(p));
-        std::get<2>(t) = _mm256_unpackhi_epi64(std::get<4>(p), std::get<5>(p));
-        std::get<3>(t) = _mm256_unpackhi_epi64(std::get<6>(p), std::get<7>(p));
-        std::get<4>(t) = _mm256_unpackhi_epi64(std::get<8>(p), std::get<9>(p));
+        std::get<0>(t) =
+            _mm256_unpackhi_epi64(std::get<0x0>(p), std::get<0x1>(p));
+        std::get<1>(t) =
+            _mm256_unpackhi_epi64(std::get<0x2>(p), std::get<0x3>(p));
+        std::get<2>(t) =
+            _mm256_unpackhi_epi64(std::get<0x4>(p), std::get<0x5>(p));
+        std::get<3>(t) =
+            _mm256_unpackhi_epi64(std::get<0x6>(p), std::get<0x7>(p));
+        std::get<4>(t) =
+            _mm256_unpackhi_epi64(std::get<0x8>(p), std::get<0x9>(p));
         std::get<5>(t) =
-            _mm256_unpackhi_epi64(std::get<10>(p), std::get<11>(p));
+            _mm256_unpackhi_epi64(std::get<0xA>(p), std::get<0xB>(p));
         std::get<6>(t) =
-            _mm256_unpackhi_epi64(std::get<12>(p), std::get<13>(p));
+            _mm256_unpackhi_epi64(std::get<0xC>(p), std::get<0xD>(p));
         std::get<7>(t) =
-            _mm256_unpackhi_epi64(std::get<14>(p), std::get<15>(p));
+            _mm256_unpackhi_epi64(std::get<0xE>(p), std::get<0xF>(p));
     }
 
     static void unpack(std::array<std::array<T, K>, blocks()> &state,
@@ -182,44 +192,54 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
     {
         std::array<__m256i, 16> p;
 
-        std::get<0>(p) = _mm256_unpacklo_epi64(std::get<0>(s), std::get<0>(t));
-        std::get<2>(p) = _mm256_unpacklo_epi64(std::get<1>(s), std::get<1>(t));
-        std::get<4>(p) = _mm256_unpacklo_epi64(std::get<2>(s), std::get<2>(t));
-        std::get<6>(p) = _mm256_unpacklo_epi64(std::get<3>(s), std::get<3>(t));
-        std::get<8>(p) = _mm256_unpacklo_epi64(std::get<4>(s), std::get<4>(t));
-        std::get<10>(p) =
+        std::get<0x0>(p) =
+            _mm256_unpacklo_epi64(std::get<0>(s), std::get<0>(t));
+        std::get<0x2>(p) =
+            _mm256_unpacklo_epi64(std::get<1>(s), std::get<1>(t));
+        std::get<0x4>(p) =
+            _mm256_unpacklo_epi64(std::get<2>(s), std::get<2>(t));
+        std::get<0x6>(p) =
+            _mm256_unpacklo_epi64(std::get<3>(s), std::get<3>(t));
+        std::get<0x8>(p) =
+            _mm256_unpacklo_epi64(std::get<4>(s), std::get<4>(t));
+        std::get<0xA>(p) =
             _mm256_unpacklo_epi64(std::get<5>(s), std::get<5>(t));
-        std::get<12>(p) =
+        std::get<0xC>(p) =
             _mm256_unpacklo_epi64(std::get<6>(s), std::get<6>(t));
-        std::get<14>(p) =
+        std::get<0xE>(p) =
             _mm256_unpacklo_epi64(std::get<7>(s), std::get<7>(t));
 
-        std::get<1>(p) = _mm256_unpackhi_epi64(std::get<0>(s), std::get<0>(t));
-        std::get<3>(p) = _mm256_unpackhi_epi64(std::get<1>(s), std::get<1>(t));
-        std::get<5>(p) = _mm256_unpackhi_epi64(std::get<2>(s), std::get<2>(t));
-        std::get<7>(p) = _mm256_unpackhi_epi64(std::get<3>(s), std::get<3>(t));
-        std::get<9>(p) = _mm256_unpackhi_epi64(std::get<4>(s), std::get<4>(t));
-        std::get<11>(p) =
+        std::get<0x1>(p) =
+            _mm256_unpackhi_epi64(std::get<0>(s), std::get<0>(t));
+        std::get<0x3>(p) =
+            _mm256_unpackhi_epi64(std::get<1>(s), std::get<1>(t));
+        std::get<0x5>(p) =
+            _mm256_unpackhi_epi64(std::get<2>(s), std::get<2>(t));
+        std::get<0x7>(p) =
+            _mm256_unpackhi_epi64(std::get<3>(s), std::get<3>(t));
+        std::get<0x9>(p) =
+            _mm256_unpackhi_epi64(std::get<4>(s), std::get<4>(t));
+        std::get<0xB>(p) =
             _mm256_unpackhi_epi64(std::get<5>(s), std::get<5>(t));
-        std::get<13>(p) =
+        std::get<0xD>(p) =
             _mm256_unpackhi_epi64(std::get<6>(s), std::get<6>(t));
-        std::get<15>(p) =
+        std::get<0xF>(p) =
             _mm256_unpackhi_epi64(std::get<7>(s), std::get<7>(t));
 
         std::memcpy(state.data(), p.data(), 512);
     }
 
     template <std::size_t, std::size_t>
-    static void init_pq(std::array<__m256i, M_> &, std::array<__m256i, M_> &,
+    static void set_key(std::array<__m256i, M_> &, std::array<__m256i, M_> &,
         const std::array<T, K + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t I>
-    static void init_pq(std::array<__m256i, M_> &p, std::array<__m256i, M_> &q,
+    static void set_key(std::array<__m256i, M_> &u, std::array<__m256i, M_> &v,
         const std::array<T, K + 1> &par, std::true_type)
     {
-        static constexpr T S = N / 4;
+        static constexpr std::size_t S = N / 4;
 
         static constexpr std::size_t I0 = (8 * I + 0) % K;
         static constexpr std::size_t I1 = (8 * I + 4) % K;
@@ -231,36 +251,51 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
         static constexpr std::size_t J2 = (8 * I + 3) % K;
         static constexpr std::size_t J3 = (8 * I + 7) % K;
 
-        const T p0 = std::get<(S + I0) % (K + 1)>(par) + (I0 == K - 1 ? S : 0);
-        const T p1 = std::get<(S + I1) % (K + 1)>(par) + (I1 == K - 1 ? S : 0);
-        const T p2 = std::get<(S + I2) % (K + 1)>(par) + (I2 == K - 1 ? S : 0);
-        const T p3 = std::get<(S + I3) % (K + 1)>(par) + (I3 == K - 1 ? S : 0);
+        static constexpr std::size_t i0 = (S + I0) % (K + 1);
+        static constexpr std::size_t i1 = (S + I1) % (K + 1);
+        static constexpr std::size_t i2 = (S + I2) % (K + 1);
+        static constexpr std::size_t i3 = (S + I3) % (K + 1);
 
-        const T q0 = std::get<(S + J0) % (K + 1)>(par) + (J0 == K - 1 ? S : 0);
-        const T q1 = std::get<(S + J1) % (K + 1)>(par) + (J1 == K - 1 ? S : 0);
-        const T q2 = std::get<(S + J2) % (K + 1)>(par) + (J2 == K - 1 ? S : 0);
-        const T q3 = std::get<(S + J3) % (K + 1)>(par) + (J3 == K - 1 ? S : 0);
+        static constexpr std::size_t j0 = (S + J0) % (K + 1);
+        static constexpr std::size_t j1 = (S + J1) % (K + 1);
+        static constexpr std::size_t j2 = (S + J2) % (K + 1);
+        static constexpr std::size_t j3 = (S + J3) % (K + 1);
 
-        alignas(32) std::array<T, 4> kp = {{p0, p1, p2, p3}};
-        alignas(32) std::array<T, 4> kq = {{q0, q1, q2, q3}};
+        static constexpr T p0 = I0 == K - 1 ? S : 0;
+        static constexpr T p1 = I1 == K - 1 ? S : 0;
+        static constexpr T p2 = I2 == K - 1 ? S : 0;
+        static constexpr T p3 = I3 == K - 1 ? S : 0;
 
-        std::get<I>(p) =
-            _mm256_load_si256(reinterpret_cast<const __m256i *>(kp.data()));
-        std::get<I>(q) =
-            _mm256_load_si256(reinterpret_cast<const __m256i *>(kq.data()));
+        static constexpr T q0 = J0 == K - 1 ? S : 0;
+        static constexpr T q1 = J1 == K - 1 ? S : 0;
+        static constexpr T q2 = J2 == K - 1 ? S : 0;
+        static constexpr T q3 = J3 == K - 1 ? S : 0;
 
-        init_pq<N, I + 1>(
-            p, q, par, std::integral_constant<bool, I + 1 < M_>());
+        const MCKL_INT64 u0 = static_cast<MCKL_INT64>(std::get<i0>(par) + p0);
+        const MCKL_INT64 u1 = static_cast<MCKL_INT64>(std::get<i1>(par) + p1);
+        const MCKL_INT64 u2 = static_cast<MCKL_INT64>(std::get<i2>(par) + p2);
+        const MCKL_INT64 u3 = static_cast<MCKL_INT64>(std::get<i3>(par) + p3);
+
+        const MCKL_INT64 v0 = static_cast<MCKL_INT64>(std::get<j0>(par) + q0);
+        const MCKL_INT64 v1 = static_cast<MCKL_INT64>(std::get<j1>(par) + q1);
+        const MCKL_INT64 v2 = static_cast<MCKL_INT64>(std::get<j2>(par) + q2);
+        const MCKL_INT64 v3 = static_cast<MCKL_INT64>(std::get<j3>(par) + q3);
+
+        std::get<I>(u) = _mm256_set_epi64x(u3, u2, u1, u0);
+        std::get<I>(v) = _mm256_set_epi64x(v3, v2, v1, v0);
+
+        set_key<N, I + 1>(
+            u, v, par, std::integral_constant<bool, I + 1 < M_>());
     }
 
     template <std::size_t, std::size_t>
-    static void init_lr(
+    static void set_rotate(
         std::array<__m256i, M_> &, std::array<__m256i, M_> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t I>
-    static void init_lr(
+    static void set_rotate(
         std::array<__m256i, M_> &l, std::array<__m256i, M_> &r, std::true_type)
     {
         static constexpr std::size_t I0 = (8 * I + 0) % K;
@@ -280,7 +315,7 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
         std::get<I>(l) = _mm256_set_epi64x(L3, L2, L1, L0);
         std::get<I>(r) = _mm256_set_epi64x(R3, R2, R1, R0);
 
-        init_lr<N, I + 1>(l, r, std::integral_constant<bool, I + 1 < M_>());
+        set_rotate<N, I + 1>(l, r, std::integral_constant<bool, I + 1 < M_>());
     }
 
     template <std::size_t N>
@@ -301,27 +336,27 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
     static void kbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
         const std::array<T, K + 1> &par, std::true_type)
     {
-        std::array<__m256i, M_> p;
-        std::array<__m256i, M_> q;
-        init_pq<N, 0>(p, q, par, std::integral_constant<bool, 0 < M_>());
+        std::array<__m256i, M_> u;
+        std::array<__m256i, M_> v;
+        set_key<N, 0>(u, v, par, std::integral_constant<bool, 0 < M_>());
 
-        std::get<0>(s) = _mm256_add_epi64(std::get<0>(s), std::get<0 % M_>(p));
-        std::get<1>(s) = _mm256_add_epi64(std::get<1>(s), std::get<1 % M_>(p));
-        std::get<2>(s) = _mm256_add_epi64(std::get<2>(s), std::get<2 % M_>(p));
-        std::get<3>(s) = _mm256_add_epi64(std::get<3>(s), std::get<3 % M_>(p));
-        std::get<4>(s) = _mm256_add_epi64(std::get<4>(s), std::get<4 % M_>(p));
-        std::get<5>(s) = _mm256_add_epi64(std::get<5>(s), std::get<5 % M_>(p));
-        std::get<6>(s) = _mm256_add_epi64(std::get<6>(s), std::get<6 % M_>(p));
-        std::get<7>(s) = _mm256_add_epi64(std::get<7>(s), std::get<7 % M_>(p));
+        std::get<0>(s) = _mm256_add_epi64(std::get<0>(s), std::get<0 % M_>(u));
+        std::get<1>(s) = _mm256_add_epi64(std::get<1>(s), std::get<1 % M_>(u));
+        std::get<2>(s) = _mm256_add_epi64(std::get<2>(s), std::get<2 % M_>(u));
+        std::get<3>(s) = _mm256_add_epi64(std::get<3>(s), std::get<3 % M_>(u));
+        std::get<4>(s) = _mm256_add_epi64(std::get<4>(s), std::get<4 % M_>(u));
+        std::get<5>(s) = _mm256_add_epi64(std::get<5>(s), std::get<5 % M_>(u));
+        std::get<6>(s) = _mm256_add_epi64(std::get<6>(s), std::get<6 % M_>(u));
+        std::get<7>(s) = _mm256_add_epi64(std::get<7>(s), std::get<7 % M_>(u));
 
-        std::get<0>(t) = _mm256_add_epi64(std::get<0>(t), std::get<0 % M_>(q));
-        std::get<1>(t) = _mm256_add_epi64(std::get<1>(t), std::get<1 % M_>(q));
-        std::get<2>(t) = _mm256_add_epi64(std::get<2>(t), std::get<2 % M_>(q));
-        std::get<3>(t) = _mm256_add_epi64(std::get<3>(t), std::get<3 % M_>(q));
-        std::get<4>(t) = _mm256_add_epi64(std::get<4>(t), std::get<4 % M_>(q));
-        std::get<5>(t) = _mm256_add_epi64(std::get<5>(t), std::get<5 % M_>(q));
-        std::get<6>(t) = _mm256_add_epi64(std::get<6>(t), std::get<6 % M_>(q));
-        std::get<7>(t) = _mm256_add_epi64(std::get<7>(t), std::get<7 % M_>(q));
+        std::get<0>(t) = _mm256_add_epi64(std::get<0>(t), std::get<0 % M_>(v));
+        std::get<1>(t) = _mm256_add_epi64(std::get<1>(t), std::get<1 % M_>(v));
+        std::get<2>(t) = _mm256_add_epi64(std::get<2>(t), std::get<2 % M_>(v));
+        std::get<3>(t) = _mm256_add_epi64(std::get<3>(t), std::get<3 % M_>(v));
+        std::get<4>(t) = _mm256_add_epi64(std::get<4>(t), std::get<4 % M_>(v));
+        std::get<5>(t) = _mm256_add_epi64(std::get<5>(t), std::get<5 % M_>(v));
+        std::get<6>(t) = _mm256_add_epi64(std::get<6>(t), std::get<6 % M_>(v));
+        std::get<7>(t) = _mm256_add_epi64(std::get<7>(t), std::get<7 % M_>(v));
     }
 
     template <std::size_t N>
@@ -342,7 +377,7 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
     {
         std::array<__m256i, M_> l;
         std::array<__m256i, M_> r;
-        init_lr<N, 0>(l, r, std::integral_constant<bool, 0 < M_>());
+        set_rotate<N, 0>(l, r, std::integral_constant<bool, 0 < M_>());
 
         std::get<0>(s) = _mm256_add_epi64(std::get<0>(s), std::get<0>(t));
         std::get<1>(s) = _mm256_add_epi64(std::get<1>(s), std::get<1>(t));

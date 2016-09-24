@@ -127,4 +127,8 @@
 #define MCKL_HAS_INT128 0
 #endif
 
+#ifndef MCKL_INT64
+#define MCKL_INT64 long long
+#endif
+
 #endif // MCKL_INTERNAL_COMPILER_HPP
