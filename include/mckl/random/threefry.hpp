@@ -145,7 +145,7 @@ namespace internal
 
 #include <mckl/random/internal/threefry_generic.hpp>
 
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
 #include <mckl/random/internal/threefry_avx2.hpp>
 #endif
 
@@ -157,7 +157,7 @@ class ThreefryGeneratorImpl
 
 template <typename T, std::size_t Rounds>
 class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
     : public ThreefryGeneratorAVX2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
           ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>
 #else
@@ -165,15 +165,15 @@ class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>
           ThreefryConstants<T, 2>>
 #endif
 {
+#if MCKL_USE_AVX2
     public:
-#if MCKL_HAS_AVX2
     static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &) {}
 #endif
 }; // class ThreefryGeneratorImpl
 
 template <typename T, std::size_t Rounds>
 class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
     : public ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
           ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>
 #else
@@ -181,7 +181,7 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
           ThreefryConstants<T, 4>>
 #endif
 {
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
     public:
     static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
@@ -228,7 +228,7 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
 
 template <typename T, std::size_t Rounds>
 class ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
     : public ThreefryGeneratorAVX2Impl<T, 8, Rounds, ThreefryConstants<T, 8>,
           ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>>
 #else
@@ -236,7 +236,7 @@ class ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>
           ThreefryConstants<T, 8>>
 #endif
 {
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
     public:
     static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
@@ -276,7 +276,7 @@ class ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>
 
 template <typename T, std::size_t Rounds>
 class ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
     : public ThreefryGeneratorAVX2Impl<T, 16, Rounds, ThreefryConstants<T, 16>,
           ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>>
 #else
@@ -284,7 +284,7 @@ class ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>
           ThreefryConstants<T, 16>>
 #endif
 {
-#if MCKL_HAS_AVX2
+#if MCKL_USE_AVX2
     public:
     static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
@@ -459,14 +459,6 @@ class ThreefryGenerator
     private:
     std::array<T, K + 1> par_;
 
-    void generate(std::array<T, K> &ctr, std::array<T, K> &buffer) const
-    {
-        increment(ctr);
-        buffer = ctr;
-        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buffer, par_);
-    }
-
     template <typename ResultType>
     void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
@@ -482,26 +474,6 @@ class ThreefryGenerator
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
             buf.state, par_);
         buffer = buf.result;
-    }
-
-    void generate(
-        std::array<T, K> &ctr, std::size_t n, std::array<T, K> *buffer) const
-    {
-        static constexpr std::size_t blocks =
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
-
-        using state_type = std::array<std::array<T, K>, blocks>;
-
-        const std::size_t m = n / blocks;
-        const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
-            state_type &state = *reinterpret_cast<state_type *>(buffer);
-            increment(ctr, state);
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-                state, par_);
-        }
-        for (std::size_t i = 0; i != l; ++i)
-            generate(ctr, buffer[i]);
     }
 
     template <typename ResultType>

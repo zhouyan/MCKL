@@ -111,7 +111,7 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
             s, t, k, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
-    static void pack(const std::array<std::array<T, K>, blocks()> &state,
+    static void pack(std::array<std::array<T, K>, blocks()> &state,
         std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
         std::memcpy(s.data(), state.data(), 256);
@@ -127,41 +127,38 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
     }
 
     static void unpack(std::array<std::array<T, K>, blocks()> &state,
-        const std::array<__m256i, 8> &s, const std::array<__m256i, 8> &t)
+        std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
-        std::array<__m256i, 8> p;
-        std::array<__m256i, 8> q;
+        // 2 0 1 3
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0x87);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0x87);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0x87);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0x87);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0x87);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0x87);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0x87);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0x87);
 
         // 2 0 1 3
-        std::get<0>(p) = _mm256_shuffle_epi32(std::get<0>(s), 0x87);
-        std::get<1>(p) = _mm256_shuffle_epi32(std::get<1>(s), 0x87);
-        std::get<2>(p) = _mm256_shuffle_epi32(std::get<2>(s), 0x87);
-        std::get<3>(p) = _mm256_shuffle_epi32(std::get<3>(s), 0x87);
-        std::get<4>(p) = _mm256_shuffle_epi32(std::get<4>(s), 0x87);
-        std::get<5>(p) = _mm256_shuffle_epi32(std::get<5>(s), 0x87);
-        std::get<6>(p) = _mm256_shuffle_epi32(std::get<6>(s), 0x87);
-        std::get<7>(p) = _mm256_shuffle_epi32(std::get<7>(s), 0x87);
+        std::get<0>(t) = _mm256_shuffle_epi32(std::get<0>(t), 0x87);
+        std::get<1>(t) = _mm256_shuffle_epi32(std::get<1>(t), 0x87);
+        std::get<2>(t) = _mm256_shuffle_epi32(std::get<2>(t), 0x87);
+        std::get<3>(t) = _mm256_shuffle_epi32(std::get<3>(t), 0x87);
+        std::get<4>(t) = _mm256_shuffle_epi32(std::get<4>(t), 0x87);
+        std::get<5>(t) = _mm256_shuffle_epi32(std::get<5>(t), 0x87);
+        std::get<6>(t) = _mm256_shuffle_epi32(std::get<6>(t), 0x87);
+        std::get<7>(t) = _mm256_shuffle_epi32(std::get<7>(t), 0x87);
 
-        // 2 0 1 3
-        std::get<0>(q) = _mm256_shuffle_epi32(std::get<0>(t), 0x87);
-        std::get<1>(q) = _mm256_shuffle_epi32(std::get<1>(t), 0x87);
-        std::get<2>(q) = _mm256_shuffle_epi32(std::get<2>(t), 0x87);
-        std::get<3>(q) = _mm256_shuffle_epi32(std::get<3>(t), 0x87);
-        std::get<4>(q) = _mm256_shuffle_epi32(std::get<4>(t), 0x87);
-        std::get<5>(q) = _mm256_shuffle_epi32(std::get<5>(t), 0x87);
-        std::get<6>(q) = _mm256_shuffle_epi32(std::get<6>(t), 0x87);
-        std::get<7>(q) = _mm256_shuffle_epi32(std::get<7>(t), 0x87);
+        std::get<0>(s) = _mm256_unpackhi_epi32(std::get<0>(s), std::get<0>(t));
+        std::get<1>(s) = _mm256_unpackhi_epi32(std::get<1>(s), std::get<1>(t));
+        std::get<2>(s) = _mm256_unpackhi_epi32(std::get<2>(s), std::get<2>(t));
+        std::get<3>(s) = _mm256_unpackhi_epi32(std::get<3>(s), std::get<3>(t));
+        std::get<4>(s) = _mm256_unpackhi_epi32(std::get<4>(s), std::get<4>(t));
+        std::get<5>(s) = _mm256_unpackhi_epi32(std::get<5>(s), std::get<5>(t));
+        std::get<6>(s) = _mm256_unpackhi_epi32(std::get<6>(s), std::get<6>(t));
+        std::get<7>(s) = _mm256_unpackhi_epi32(std::get<7>(s), std::get<7>(t));
 
-        std::get<0>(p) = _mm256_unpackhi_epi32(std::get<0>(p), std::get<0>(q));
-        std::get<1>(p) = _mm256_unpackhi_epi32(std::get<1>(p), std::get<1>(q));
-        std::get<2>(p) = _mm256_unpackhi_epi32(std::get<2>(p), std::get<2>(q));
-        std::get<3>(p) = _mm256_unpackhi_epi32(std::get<3>(p), std::get<3>(q));
-        std::get<4>(p) = _mm256_unpackhi_epi32(std::get<4>(p), std::get<4>(q));
-        std::get<5>(p) = _mm256_unpackhi_epi32(std::get<5>(p), std::get<5>(q));
-        std::get<6>(p) = _mm256_unpackhi_epi32(std::get<6>(p), std::get<6>(q));
-        std::get<7>(p) = _mm256_unpackhi_epi32(std::get<7>(p), std::get<7>(q));
-
-        std::memcpy(state.data(), p.data(), 256);
+        std::memcpy(state.data(), s.data(), 256);
     }
 
     template <std::size_t>

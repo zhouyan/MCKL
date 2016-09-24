@@ -261,6 +261,9 @@ class CounterEngine
 
     result_type operator()()
     {
+#ifdef MCKL_INTEL
+#pragma forceinline recursive
+#endif
         if (index_ == M_) {
             generator_(ctr_, buffer_);
             index_ = 0;
@@ -285,6 +288,9 @@ class CounterEngine
         index_ = M_;
 
         const std::size_t m = n / M_;
+#ifdef MCKL_INTEL
+#pragma forceinline recursive
+#endif
         generator_(ctr_, m, reinterpret_cast<buffer_type *>(r));
         r += m * M_;
         n -= m * M_;

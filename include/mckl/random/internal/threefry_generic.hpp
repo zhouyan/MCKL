@@ -187,42 +187,7 @@ class ThreefryGeneratorGenericImpl
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
     {
-        // clang-format off
-        sbox<0x00>(state); pbox<0x00>(state); kbox<0x00>(state, par);
-        sbox<0x01>(state); pbox<0x01>(state); kbox<0x01>(state, par);
-        sbox<0x02>(state); pbox<0x02>(state); kbox<0x02>(state, par);
-        sbox<0x03>(state); pbox<0x03>(state); kbox<0x03>(state, par);
-        sbox<0x04>(state); pbox<0x04>(state); kbox<0x04>(state, par);
-        sbox<0x05>(state); pbox<0x05>(state); kbox<0x05>(state, par);
-        sbox<0x06>(state); pbox<0x06>(state); kbox<0x06>(state, par);
-        sbox<0x07>(state); pbox<0x07>(state); kbox<0x07>(state, par);
-        sbox<0x08>(state); pbox<0x08>(state); kbox<0x08>(state, par);
-        sbox<0x09>(state); pbox<0x09>(state); kbox<0x09>(state, par);
-        sbox<0x0A>(state); pbox<0x0A>(state); kbox<0x0A>(state, par);
-        sbox<0x0B>(state); pbox<0x0B>(state); kbox<0x0B>(state, par);
-        sbox<0x0C>(state); pbox<0x0C>(state); kbox<0x0C>(state, par);
-        sbox<0x0D>(state); pbox<0x0D>(state); kbox<0x0D>(state, par);
-        sbox<0x0E>(state); pbox<0x0E>(state); kbox<0x0E>(state, par);
-        sbox<0x0F>(state); pbox<0x0F>(state); kbox<0x0F>(state, par);
-        sbox<0x10>(state); pbox<0x10>(state); kbox<0x10>(state, par);
-        sbox<0x11>(state); pbox<0x11>(state); kbox<0x11>(state, par);
-        sbox<0x12>(state); pbox<0x12>(state); kbox<0x12>(state, par);
-        sbox<0x13>(state); pbox<0x13>(state); kbox<0x13>(state, par);
-        sbox<0x14>(state); pbox<0x14>(state); kbox<0x14>(state, par);
-        sbox<0x15>(state); pbox<0x15>(state); kbox<0x15>(state, par);
-        sbox<0x16>(state); pbox<0x16>(state); kbox<0x16>(state, par);
-        sbox<0x17>(state); pbox<0x17>(state); kbox<0x17>(state, par);
-        sbox<0x18>(state); pbox<0x18>(state); kbox<0x18>(state, par);
-        sbox<0x19>(state); pbox<0x19>(state); kbox<0x19>(state, par);
-        sbox<0x1A>(state); pbox<0x1A>(state); kbox<0x1A>(state, par);
-        sbox<0x1B>(state); pbox<0x1B>(state); kbox<0x1B>(state, par);
-        sbox<0x1C>(state); pbox<0x1C>(state); kbox<0x1C>(state, par);
-        sbox<0x1D>(state); pbox<0x1D>(state); kbox<0x1D>(state, par);
-        sbox<0x1E>(state); pbox<0x1E>(state); kbox<0x1E>(state, par);
-        sbox<0x1F>(state); pbox<0x1F>(state); kbox<0x1F>(state, par);
-        // clang-format on
-
-        eval<0x20>(state, par, std::integral_constant<bool, 0x20 <= Rounds>());
+        eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
     }
 
     static void eval(std::array<std::array<T, K>, blocks()> &state,
@@ -249,9 +214,9 @@ class ThreefryGeneratorGenericImpl
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
         std::true_type)
     {
-        sbox(state);
-        pbox(state);
-        kbox(state, par);
+        sbox<N>(state);
+        pbox<N>(state);
+        kbox<N>(state, par);
         eval<N + 1>(
             state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
