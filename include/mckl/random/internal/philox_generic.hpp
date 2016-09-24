@@ -88,8 +88,7 @@ class PhiloxHiLo<T, 64>
 
 #elif defined(MCKL_MSVC)
 
-        unsigned __int64 Multiplier =
-            static_cast<unsigned __int64>(multiplier::value);
+        unsigned __int64 Multiplier = static_cast<unsigned __int64>(a);
         unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
         unsigned __int64 hi_tmp = 0;
         lo = static_cast<T>(_umul128(Multiplier, Multiplicand, &hi_tmp));
@@ -97,7 +96,6 @@ class PhiloxHiLo<T, 64>
 
 #else // MCKL_HAS_INT128
 
-        const T a = multiplier::value;
         const T lomask = (const_one<T>() << 32) - 1;
         const T ahi = a >> 32;
         const T alo = a & lomask;
@@ -111,10 +109,6 @@ class PhiloxHiLo<T, 64>
         hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
         hi += ahbl_albh >> 32;
         hi += ((lo >> 32) < (ahbl_albh & lomask));
-        std::array<T, 2> hilo = {{lo, hi}};
-
-        return hilo;
-
 #endif // MCKL_HAS_INT128
     }
 }; // class PhiloxHiLo

@@ -154,9 +154,9 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants>
 #elif MCKL_HAS_SSE2
     : public PhiloxGeneratorSSE2Impl<T, 4, Rounds, Constants,
           PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
-#else  // MCKL_HAS_AVX2
+#else
     : public PhiloxGeneratorGenericImpl<T, 4, Rounds, Constants>
-#endif // MCKL_HAS_AVX2
+#endif
 {
 #if MCKL_HAS_SSE2
     public:
@@ -204,8 +204,8 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants>
         std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xC6);
         std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xC6);
     }
-#endif // MCKL_HAS_AVX2
-};     // class PhiloxGeneratorImpl
+#endif
+}; // class PhiloxGeneratorImpl
 
 } // namespace mckl::internal
 

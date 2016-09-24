@@ -287,23 +287,23 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
     {
         static constexpr std::size_t S = N / 4;
 
-        static constexpr std::size_t I0 = (16 * I + 0x0) % K;
-        static constexpr std::size_t I1 = (16 * I + 0x8) % K;
-        static constexpr std::size_t I2 = (16 * I + 0x2) % K;
-        static constexpr std::size_t I3 = (16 * I + 0xA) % K;
-        static constexpr std::size_t I4 = (16 * I + 0x4) % K;
-        static constexpr std::size_t I5 = (16 * I + 0xC) % K;
-        static constexpr std::size_t I6 = (16 * I + 0x6) % K;
-        static constexpr std::size_t I7 = (16 * I + 0xE) % K;
+        static constexpr std::size_t I0 = (I * 16 + 0x0) % K;
+        static constexpr std::size_t I1 = (I * 16 + 0x8) % K;
+        static constexpr std::size_t I2 = (I * 16 + 0x2) % K;
+        static constexpr std::size_t I3 = (I * 16 + 0xA) % K;
+        static constexpr std::size_t I4 = (I * 16 + 0x4) % K;
+        static constexpr std::size_t I5 = (I * 16 + 0xC) % K;
+        static constexpr std::size_t I6 = (I * 16 + 0x6) % K;
+        static constexpr std::size_t I7 = (I * 16 + 0xE) % K;
 
-        static constexpr std::size_t J0 = (16 * I + 0x1) % K;
-        static constexpr std::size_t J1 = (16 * I + 0x9) % K;
-        static constexpr std::size_t J2 = (16 * I + 0x3) % K;
-        static constexpr std::size_t J3 = (16 * I + 0xB) % K;
-        static constexpr std::size_t J4 = (16 * I + 0x5) % K;
-        static constexpr std::size_t J5 = (16 * I + 0xD) % K;
-        static constexpr std::size_t J6 = (16 * I + 0x7) % K;
-        static constexpr std::size_t J7 = (16 * I + 0xF) % K;
+        static constexpr std::size_t J0 = (I * 16 + 0x1) % K;
+        static constexpr std::size_t J1 = (I * 16 + 0x9) % K;
+        static constexpr std::size_t J2 = (I * 16 + 0x3) % K;
+        static constexpr std::size_t J3 = (I * 16 + 0xB) % K;
+        static constexpr std::size_t J4 = (I * 16 + 0x5) % K;
+        static constexpr std::size_t J5 = (I * 16 + 0xD) % K;
+        static constexpr std::size_t J6 = (I * 16 + 0x7) % K;
+        static constexpr std::size_t J7 = (I * 16 + 0xF) % K;
 
         static constexpr std::size_t i0 = (S + I0) % (K + 1);
         static constexpr std::size_t i1 = (S + I1) % (K + 1);
@@ -376,14 +376,14 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
     static void set_rotate(
         std::array<__m256i, M_> &l, std::array<__m256i, M_> &r, std::true_type)
     {
-        static constexpr std::size_t I0 = (16 * I + 0x0) % K;
-        static constexpr std::size_t I1 = (16 * I + 0x8) % K;
-        static constexpr std::size_t I2 = (16 * I + 0x2) % K;
-        static constexpr std::size_t I3 = (16 * I + 0xA) % K;
-        static constexpr std::size_t I4 = (16 * I + 0x4) % K;
-        static constexpr std::size_t I5 = (16 * I + 0xC) % K;
-        static constexpr std::size_t I6 = (16 * I + 0x6) % K;
-        static constexpr std::size_t I7 = (16 * I + 0xE) % K;
+        static constexpr std::size_t I0 = (I * 16 + 0x0) % K;
+        static constexpr std::size_t I1 = (I * 16 + 0x8) % K;
+        static constexpr std::size_t I2 = (I * 16 + 0x2) % K;
+        static constexpr std::size_t I3 = (I * 16 + 0xA) % K;
+        static constexpr std::size_t I4 = (I * 16 + 0x4) % K;
+        static constexpr std::size_t I5 = (I * 16 + 0xC) % K;
+        static constexpr std::size_t I6 = (I * 16 + 0x6) % K;
+        static constexpr std::size_t I7 = (I * 16 + 0xE) % K;
 
         static constexpr int L0 = Constants::rotate[I0 / 2][(N - 1) % 8];
         static constexpr int L1 = Constants::rotate[I1 / 2][(N - 1) % 8];
@@ -393,6 +393,7 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
         static constexpr int L5 = Constants::rotate[I5 / 2][(N - 1) % 8];
         static constexpr int L6 = Constants::rotate[I6 / 2][(N - 1) % 8];
         static constexpr int L7 = Constants::rotate[I7 / 2][(N - 1) % 8];
+
         static constexpr int R0 = 32 - L0;
         static constexpr int R1 = 32 - L1;
         static constexpr int R2 = 32 - L2;
@@ -746,15 +747,15 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
     {
         static constexpr std::size_t S = N / 4;
 
-        static constexpr std::size_t I0 = (8 * I + 0) % K;
-        static constexpr std::size_t I1 = (8 * I + 4) % K;
-        static constexpr std::size_t I2 = (8 * I + 2) % K;
-        static constexpr std::size_t I3 = (8 * I + 6) % K;
+        static constexpr std::size_t I0 = (I * 8 + 0) % K;
+        static constexpr std::size_t I1 = (I * 8 + 4) % K;
+        static constexpr std::size_t I2 = (I * 8 + 2) % K;
+        static constexpr std::size_t I3 = (I * 8 + 6) % K;
 
-        static constexpr std::size_t J0 = (8 * I + 1) % K;
-        static constexpr std::size_t J1 = (8 * I + 5) % K;
-        static constexpr std::size_t J2 = (8 * I + 3) % K;
-        static constexpr std::size_t J3 = (8 * I + 7) % K;
+        static constexpr std::size_t J0 = (I * 8 + 1) % K;
+        static constexpr std::size_t J1 = (I * 8 + 5) % K;
+        static constexpr std::size_t J2 = (I * 8 + 3) % K;
+        static constexpr std::size_t J3 = (I * 8 + 7) % K;
 
         static constexpr std::size_t i0 = (S + I0) % (K + 1);
         static constexpr std::size_t i1 = (S + I1) % (K + 1);
@@ -803,15 +804,16 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
     static void set_rotate(
         std::array<__m256i, M_> &l, std::array<__m256i, M_> &r, std::true_type)
     {
-        static constexpr std::size_t I0 = (8 * I + 0) % K;
-        static constexpr std::size_t I1 = (8 * I + 4) % K;
-        static constexpr std::size_t I2 = (8 * I + 2) % K;
-        static constexpr std::size_t I3 = (8 * I + 6) % K;
+        static constexpr std::size_t I0 = (I * 8 + 0) % K;
+        static constexpr std::size_t I1 = (I * 8 + 4) % K;
+        static constexpr std::size_t I2 = (I * 8 + 2) % K;
+        static constexpr std::size_t I3 = (I * 8 + 6) % K;
 
         static constexpr int L0 = Constants::rotate[I0 / 2][(N - 1) % 8];
         static constexpr int L1 = Constants::rotate[I1 / 2][(N - 1) % 8];
         static constexpr int L2 = Constants::rotate[I2 / 2][(N - 1) % 8];
         static constexpr int L3 = Constants::rotate[I3 / 2][(N - 1) % 8];
+
         static constexpr int R0 = 64 - L0;
         static constexpr int R1 = 64 - L1;
         static constexpr int R2 = 64 - L2;
