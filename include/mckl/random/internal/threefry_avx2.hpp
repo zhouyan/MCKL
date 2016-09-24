@@ -30,8 +30,7 @@
 //============================================================================
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
-    typename, int = std::numeric_limits<T>::digits,
-    bool = 512 % (sizeof(T) * K) == 0>
+    typename, int = std::numeric_limits<T>::digits>
 class ThreefryGeneratorAVX2Impl
     : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
 {
@@ -39,19 +38,50 @@ class ThreefryGeneratorAVX2Impl
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     typename Derived>
-class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64, true>
+class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
 {
     public:
     static constexpr std::size_t blocks() { return 512 / (sizeof(T) * K); }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
     {
+        eval(state, par, std::integral_constant<bool,
+                             (K != 0 && 512 % (sizeof(T) * K) == 0)>());
+    }
+
+    static void eval(std::array<std::array<T, K>, blocks()> &state,
+        const std::array<T, K + 1> &par)
+    {
+        eval(state, par, std::integral_constant<bool,
+                             (K != 0 && 512 % (sizeof(T) * K) == 0)>());
+    }
+
+    private:
+    static constexpr std::size_t M_ = K / 8 + (K % 8 == 0 ? 0 : 1);
+
+    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
+        std::false_type)
+    {
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            state, par);
+    }
+
+    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
+        std::true_type)
+    {
         ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             state, par);
     }
 
     static void eval(std::array<std::array<T, K>, blocks()> &state,
-        const std::array<T, K + 1> &par)
+        const std::array<T, K + 1> &par, std::false_type)
+    {
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            state, par);
+    }
+
+    static void eval(std::array<std::array<T, K>, blocks()> &state,
+        const std::array<T, K + 1> &par, std::true_type)
     {
         std::array<__m256i, 8> s;
         std::array<__m256i, 8> t;
@@ -97,9 +127,6 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64, true>
 
         unpack(state, s, t);
     }
-
-    private:
-    static constexpr std::size_t M_ = K / 8 + (K % 8 == 0 ? 0 : 1);
 
     template <std::size_t>
     static void eval(std::array<__m256i, 8> &, std::array<__m256i, 8> &,
