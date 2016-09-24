@@ -144,7 +144,15 @@ class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32>
     static void pack(std::array<std::array<T, K>, blocks()> &state,
         std::array<__m128i, 8> &s, std::array<__m128i, 8> &t)
     {
-        std::memcpy(s.data(), state.data(), 128);
+        const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
+        std::get<0>(s) = _mm_load_si128(sptr++);
+        std::get<1>(s) = _mm_load_si128(sptr++);
+        std::get<2>(s) = _mm_load_si128(sptr++);
+        std::get<3>(s) = _mm_load_si128(sptr++);
+        std::get<4>(s) = _mm_load_si128(sptr++);
+        std::get<5>(s) = _mm_load_si128(sptr++);
+        std::get<6>(s) = _mm_load_si128(sptr++);
+        std::get<7>(s) = _mm_load_si128(sptr++);
 
         std::get<0>(t) = _mm_srli_epi64(std::get<0>(s), 32);
         std::get<1>(t) = _mm_srli_epi64(std::get<1>(s), 32);
@@ -188,7 +196,15 @@ class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32>
         std::get<6>(s) = _mm_unpackhi_epi32(std::get<6>(s), std::get<6>(t));
         std::get<7>(s) = _mm_unpackhi_epi32(std::get<7>(s), std::get<7>(t));
 
-        std::memcpy(state.data(), s.data(), 128);
+        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
+        _mm_store_si128(sptr++, std::get<0x0>(s));
+        _mm_store_si128(sptr++, std::get<0x1>(s));
+        _mm_store_si128(sptr++, std::get<0x2>(s));
+        _mm_store_si128(sptr++, std::get<0x3>(s));
+        _mm_store_si128(sptr++, std::get<0x4>(s));
+        _mm_store_si128(sptr++, std::get<0x5>(s));
+        _mm_store_si128(sptr++, std::get<0x6>(s));
+        _mm_store_si128(sptr++, std::get<0x7>(s));
     }
 
     template <std::size_t>

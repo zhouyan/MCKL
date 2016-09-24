@@ -209,7 +209,7 @@ class ThreefryGenerator
 
     void enc(const ctr_type &ctr, ctr_type &buffer) const
     {
-        union {
+        alignas(32) union {
             std::array<T, K> state;
             ctr_type result;
         } buf;
@@ -283,7 +283,7 @@ class ThreefryGenerator
     void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
-        union {
+        alignas(32) union {
             std::array<T, K> state;
             ctr_type ctr;
             std::array<ResultType, size() / sizeof(ResultType)> result;
@@ -303,7 +303,7 @@ class ThreefryGenerator
         static constexpr std::size_t blocks =
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
-        union {
+        alignas(32) union {
             std::array<std::array<T, K>, blocks> state;
             std::array<ctr_type, blocks> ctr_block;
         } buf;

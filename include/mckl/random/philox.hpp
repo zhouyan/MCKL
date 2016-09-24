@@ -159,7 +159,7 @@ class PhiloxGenerator
 
     void enc(const ctr_type &ctr, ctr_type &buffer)
     {
-        union {
+        alignas(32) union {
             std::array<T, K> state;
             ctr_type result;
         } buf;
@@ -233,7 +233,7 @@ class PhiloxGenerator
     void generate(ctr_type &ctr,
         std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
     {
-        union {
+        alignas(32) union {
             std::array<T, K> state;
             ctr_type ctr;
             std::array<ResultType, size() / sizeof(ResultType)> result;
@@ -253,7 +253,7 @@ class PhiloxGenerator
         static constexpr std::size_t blocks =
             internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
-        union {
+        alignas(32) union {
             std::array<std::array<T, K>, blocks> state;
             std::array<ctr_type, blocks> ctr_block;
         } buf;

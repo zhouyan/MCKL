@@ -1100,7 +1100,7 @@ class AESNIGenerator
 
     void enc(const ctr_type &ctr, ctr_type &buffer) const
     {
-        union {
+        alignas(32) union {
             __m128i state;
             ctr_type result;
         } buf;
@@ -1189,7 +1189,7 @@ class AESNIGenerator
         static constexpr std::size_t blocks =
             internal::AESNIGeneratorImpl<KeySeqType>::blocks();
 
-        union {
+        alignas(32) union {
             std::array<__m128i, blocks> state;
             std::array<ctr_type, blocks> ctr_block;
         } buf;
@@ -1213,7 +1213,7 @@ class AESNIGenerator
         std::array<ResultType, size() / sizeof(ResultType)> &buffer,
         const std::array<__m128i, rounds_ + 1> &par) const
     {
-        union {
+        alignas(32) union {
             __m128i state;
             ctr_type ctr;
             std::array<ResultType, size() / sizeof(ResultType)> result;

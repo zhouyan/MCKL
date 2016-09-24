@@ -158,7 +158,23 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
     {
         std::array<__m256i, 16> p;
 
-        std::memcpy(p.data(), state.data(), 512);
+        const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
+        std::get<0x0>(p) = _mm256_load_si256(sptr++);
+        std::get<0x1>(p) = _mm256_load_si256(sptr++);
+        std::get<0x2>(p) = _mm256_load_si256(sptr++);
+        std::get<0x3>(p) = _mm256_load_si256(sptr++);
+        std::get<0x4>(p) = _mm256_load_si256(sptr++);
+        std::get<0x5>(p) = _mm256_load_si256(sptr++);
+        std::get<0x6>(p) = _mm256_load_si256(sptr++);
+        std::get<0x7>(p) = _mm256_load_si256(sptr++);
+        std::get<0x8>(p) = _mm256_load_si256(sptr++);
+        std::get<0x9>(p) = _mm256_load_si256(sptr++);
+        std::get<0xA>(p) = _mm256_load_si256(sptr++);
+        std::get<0xB>(p) = _mm256_load_si256(sptr++);
+        std::get<0xC>(p) = _mm256_load_si256(sptr++);
+        std::get<0xD>(p) = _mm256_load_si256(sptr++);
+        std::get<0xE>(p) = _mm256_load_si256(sptr++);
+        std::get<0xF>(p) = _mm256_load_si256(sptr++);
 
         // 3 1 2 0
         std::get<0x0>(p) = _mm256_shuffle_epi32(std::get<0x0>(p), 0xD8);
@@ -272,7 +288,23 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
         std::get<0xF>(p) =
             _mm256_unpackhi_epi32(std::get<7>(s), std::get<7>(t));
 
-        std::memcpy(state.data(), p.data(), 512);
+        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
+        _mm256_store_si256(sptr++, std::get<0x0>(p));
+        _mm256_store_si256(sptr++, std::get<0x1>(p));
+        _mm256_store_si256(sptr++, std::get<0x2>(p));
+        _mm256_store_si256(sptr++, std::get<0x3>(p));
+        _mm256_store_si256(sptr++, std::get<0x4>(p));
+        _mm256_store_si256(sptr++, std::get<0x5>(p));
+        _mm256_store_si256(sptr++, std::get<0x6>(p));
+        _mm256_store_si256(sptr++, std::get<0x7>(p));
+        _mm256_store_si256(sptr++, std::get<0x8>(p));
+        _mm256_store_si256(sptr++, std::get<0x9>(p));
+        _mm256_store_si256(sptr++, std::get<0xA>(p));
+        _mm256_store_si256(sptr++, std::get<0xB>(p));
+        _mm256_store_si256(sptr++, std::get<0xC>(p));
+        _mm256_store_si256(sptr++, std::get<0xD>(p));
+        _mm256_store_si256(sptr++, std::get<0xE>(p));
+        _mm256_store_si256(sptr++, std::get<0xF>(p));
     }
 
     template <std::size_t, std::size_t>
@@ -656,7 +688,23 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
     {
         std::array<__m256i, 16> p;
 
-        std::memcpy(p.data(), state.data(), 512);
+        const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
+        std::get<0x0>(p) = _mm256_load_si256(sptr++);
+        std::get<0x1>(p) = _mm256_load_si256(sptr++);
+        std::get<0x2>(p) = _mm256_load_si256(sptr++);
+        std::get<0x3>(p) = _mm256_load_si256(sptr++);
+        std::get<0x4>(p) = _mm256_load_si256(sptr++);
+        std::get<0x5>(p) = _mm256_load_si256(sptr++);
+        std::get<0x6>(p) = _mm256_load_si256(sptr++);
+        std::get<0x7>(p) = _mm256_load_si256(sptr++);
+        std::get<0x8>(p) = _mm256_load_si256(sptr++);
+        std::get<0x9>(p) = _mm256_load_si256(sptr++);
+        std::get<0xA>(p) = _mm256_load_si256(sptr++);
+        std::get<0xB>(p) = _mm256_load_si256(sptr++);
+        std::get<0xC>(p) = _mm256_load_si256(sptr++);
+        std::get<0xD>(p) = _mm256_load_si256(sptr++);
+        std::get<0xE>(p) = _mm256_load_si256(sptr++);
+        std::get<0xF>(p) = _mm256_load_si256(sptr++);
 
         std::get<0>(s) =
             _mm256_unpacklo_epi64(std::get<0x0>(p), std::get<0x1>(p));
@@ -732,7 +780,23 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
         std::get<0xF>(p) =
             _mm256_unpackhi_epi64(std::get<7>(s), std::get<7>(t));
 
-        std::memcpy(state.data(), p.data(), 512);
+        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
+        _mm256_store_si256(sptr++, std::get<0x0>(p));
+        _mm256_store_si256(sptr++, std::get<0x1>(p));
+        _mm256_store_si256(sptr++, std::get<0x2>(p));
+        _mm256_store_si256(sptr++, std::get<0x3>(p));
+        _mm256_store_si256(sptr++, std::get<0x4>(p));
+        _mm256_store_si256(sptr++, std::get<0x5>(p));
+        _mm256_store_si256(sptr++, std::get<0x6>(p));
+        _mm256_store_si256(sptr++, std::get<0x7>(p));
+        _mm256_store_si256(sptr++, std::get<0x8>(p));
+        _mm256_store_si256(sptr++, std::get<0x9>(p));
+        _mm256_store_si256(sptr++, std::get<0xA>(p));
+        _mm256_store_si256(sptr++, std::get<0xB>(p));
+        _mm256_store_si256(sptr++, std::get<0xC>(p));
+        _mm256_store_si256(sptr++, std::get<0xD>(p));
+        _mm256_store_si256(sptr++, std::get<0xE>(p));
+        _mm256_store_si256(sptr++, std::get<0xF>(p));
     }
 
     template <std::size_t, std::size_t>

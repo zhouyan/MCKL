@@ -138,7 +138,15 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
     static void pack(std::array<std::array<T, K>, blocks()> &state,
         std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
-        std::memcpy(s.data(), state.data(), 256);
+        const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
+        std::get<0>(s) = _mm256_load_si256(sptr++);
+        std::get<1>(s) = _mm256_load_si256(sptr++);
+        std::get<2>(s) = _mm256_load_si256(sptr++);
+        std::get<3>(s) = _mm256_load_si256(sptr++);
+        std::get<4>(s) = _mm256_load_si256(sptr++);
+        std::get<5>(s) = _mm256_load_si256(sptr++);
+        std::get<6>(s) = _mm256_load_si256(sptr++);
+        std::get<7>(s) = _mm256_load_si256(sptr++);
 
         std::get<0>(t) = _mm256_srli_epi64(std::get<0>(s), 32);
         std::get<1>(t) = _mm256_srli_epi64(std::get<1>(s), 32);
@@ -182,7 +190,15 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
         std::get<6>(s) = _mm256_unpackhi_epi32(std::get<6>(s), std::get<6>(t));
         std::get<7>(s) = _mm256_unpackhi_epi32(std::get<7>(s), std::get<7>(t));
 
-        std::memcpy(state.data(), s.data(), 256);
+        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
+        _mm256_store_si256(sptr++, std::get<0>(s));
+        _mm256_store_si256(sptr++, std::get<1>(s));
+        _mm256_store_si256(sptr++, std::get<2>(s));
+        _mm256_store_si256(sptr++, std::get<3>(s));
+        _mm256_store_si256(sptr++, std::get<4>(s));
+        _mm256_store_si256(sptr++, std::get<5>(s));
+        _mm256_store_si256(sptr++, std::get<6>(s));
+        _mm256_store_si256(sptr++, std::get<7>(s));
     }
 
     template <std::size_t>
