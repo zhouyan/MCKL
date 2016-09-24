@@ -220,7 +220,10 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorGenericImpl
 {
     public:
-    static constexpr std::size_t blocks() { return 8; }
+    static constexpr std::size_t blocks()
+    {
+        return sizeof(T) * K < 128 ? 128 / (sizeof(T) * K) : 1;
+    }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
@@ -254,13 +257,13 @@ class PhiloxGeneratorGenericImpl
     }
 
     template <std::size_t>
-    static void eval(std::array<std::array<T, K>, 8> &, std::array<T, K / 2> &,
-        std::false_type)
+    static void eval(std::array<std::array<T, K>, blocks()> &,
+        std::array<T, K / 2> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<std::array<T, K>, 8> &state,
+    static void eval(std::array<std::array<T, K>, blocks()> &state,
         std::array<T, K / 2> &par, std::true_type)
     {
         kbox<N>(par);
@@ -325,7 +328,7 @@ class PhiloxGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void sbox(std::array<std::array<T, K>, 8> &state,
+    static void sbox(std::array<std::array<T, K>, blocks()> &state,
         const std::array<T, K / 2> &par)
     {
         sbox<N>(state, par,
@@ -333,46 +336,62 @@ class PhiloxGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void sbox(std::array<std::array<T, K>, 8> &,
+    static void sbox(std::array<std::array<T, K>, blocks()> &,
         const std::array<T, K / 2> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void sbox(std::array<std::array<T, K>, 8> &state,
+    static void sbox(std::array<std::array<T, K>, blocks()> &state,
         const std::array<T, K / 2> &par, std::true_type)
     {
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<0>(state), par);
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<1>(state), par);
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<2>(state), par);
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<3>(state), par);
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<4>(state), par);
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<5>(state), par);
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<6>(state), par);
-        PhiloxSBox<T, K, N, Constants>::eval(std::get<7>(state), par);
+        sbox<N, 0>(state, par, std::integral_constant<bool, 0 < blocks()>());
+    }
+
+    template <std::size_t, std::size_t>
+    static void sbox(std::array<std::array<T, K>, blocks()> &,
+        const std::array<T, K / 2> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t I>
+    static void sbox(std::array<std::array<T, K>, blocks()> &state,
+        const std::array<T, K / 2> &par, std::true_type)
+    {
+        PhiloxSBox<T, K, N, Constants>::eval(std::get<I>(state), par);
+        sbox<N, I + 1>(
+            state, par, std::integral_constant<bool, I + 1 < blocks()>());
     }
 
     template <std::size_t N>
-    static void pbox(std::array<std::array<T, K>, 8> &state)
+    static void pbox(std::array<std::array<T, K>, blocks()> &state)
     {
         pbox<N>(state, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t N>
-    static void pbox(std::array<std::array<T, K>, 8> &, std::false_type)
+    static void pbox(std::array<std::array<T, K>, blocks()> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void pbox(std::array<std::array<T, K>, 8> &state, std::true_type)
+    static void pbox(
+        std::array<std::array<T, K>, blocks()> &state, std::true_type)
     {
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<0>(state));
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<1>(state));
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<2>(state));
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<3>(state));
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<4>(state));
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<5>(state));
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<6>(state));
-        PhiloxPBox<T, K, N, Constants>::eval(std::get<7>(state));
+        pbox<N, 0>(state, std::integral_constant<bool, 0 < blocks()>());
+    }
+
+    template <std::size_t, std::size_t>
+    static void pbox(std::array<std::array<T, K>, blocks()> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t I>
+    static void pbox(
+        std::array<std::array<T, K>, blocks()> &state, std::true_type)
+    {
+        PhiloxPBox<T, K, N, Constants>::eval(std::get<I>(state));
+        pbox<N, I + 1>(
+            state, std::integral_constant<bool, I + 1 < blocks()>());
     }
 }; // class PhiloxGeneratorGenericImpl
