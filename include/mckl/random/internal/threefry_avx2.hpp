@@ -506,14 +506,14 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
         std::get<6>(t) = _mm256_or_si256(l6, r6);
         std::get<7>(t) = _mm256_or_si256(l7, r7);
 
-        std::get<0>(t) = _mm256_xor_si256(std::get<0>(s), std::get<0>(t));
-        std::get<1>(t) = _mm256_xor_si256(std::get<1>(s), std::get<1>(t));
-        std::get<2>(t) = _mm256_xor_si256(std::get<2>(s), std::get<2>(t));
-        std::get<3>(t) = _mm256_xor_si256(std::get<3>(s), std::get<3>(t));
-        std::get<4>(t) = _mm256_xor_si256(std::get<4>(s), std::get<4>(t));
-        std::get<5>(t) = _mm256_xor_si256(std::get<5>(s), std::get<5>(t));
-        std::get<6>(t) = _mm256_xor_si256(std::get<6>(s), std::get<6>(t));
-        std::get<7>(t) = _mm256_xor_si256(std::get<7>(s), std::get<7>(t));
+        std::get<0>(t) = _mm256_xor_si256(std::get<0>(t), std::get<0>(s));
+        std::get<1>(t) = _mm256_xor_si256(std::get<1>(t), std::get<1>(s));
+        std::get<2>(t) = _mm256_xor_si256(std::get<2>(t), std::get<2>(s));
+        std::get<3>(t) = _mm256_xor_si256(std::get<3>(t), std::get<3>(s));
+        std::get<4>(t) = _mm256_xor_si256(std::get<4>(t), std::get<4>(s));
+        std::get<5>(t) = _mm256_xor_si256(std::get<5>(t), std::get<5>(s));
+        std::get<6>(t) = _mm256_xor_si256(std::get<6>(t), std::get<6>(s));
+        std::get<7>(t) = _mm256_xor_si256(std::get<7>(t), std::get<7>(s));
     }
 
     template <std::size_t N>
@@ -922,14 +922,14 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
         std::get<6>(t) = _mm256_or_si256(l6, r6);
         std::get<7>(t) = _mm256_or_si256(l7, r7);
 
-        std::get<0>(t) = _mm256_xor_si256(std::get<0>(s), std::get<0>(t));
-        std::get<1>(t) = _mm256_xor_si256(std::get<1>(s), std::get<1>(t));
-        std::get<2>(t) = _mm256_xor_si256(std::get<2>(s), std::get<2>(t));
-        std::get<3>(t) = _mm256_xor_si256(std::get<3>(s), std::get<3>(t));
-        std::get<4>(t) = _mm256_xor_si256(std::get<4>(s), std::get<4>(t));
-        std::get<5>(t) = _mm256_xor_si256(std::get<5>(s), std::get<5>(t));
-        std::get<6>(t) = _mm256_xor_si256(std::get<6>(s), std::get<6>(t));
-        std::get<7>(t) = _mm256_xor_si256(std::get<7>(s), std::get<7>(t));
+        std::get<0>(t) = _mm256_xor_si256(std::get<0>(t), std::get<0>(s));
+        std::get<1>(t) = _mm256_xor_si256(std::get<1>(t), std::get<1>(s));
+        std::get<2>(t) = _mm256_xor_si256(std::get<2>(t), std::get<2>(s));
+        std::get<3>(t) = _mm256_xor_si256(std::get<3>(t), std::get<3>(s));
+        std::get<4>(t) = _mm256_xor_si256(std::get<4>(t), std::get<4>(s));
+        std::get<5>(t) = _mm256_xor_si256(std::get<5>(t), std::get<5>(s));
+        std::get<6>(t) = _mm256_xor_si256(std::get<6>(t), std::get<6>(s));
+        std::get<7>(t) = _mm256_xor_si256(std::get<7>(t), std::get<7>(s));
     }
 
     template <std::size_t N>
@@ -949,3 +949,151 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
         Derived::pbox(s, t);
     }
 }; // class ThreefryGeneratorAVX2Impl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>
+    : public ThreefryGeneratorAVX2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
+          ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>
+{
+    public:
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &) {}
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
+    : public ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
+          ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>
+{
+    public:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    {
+        pbox(s, t,
+            std::integral_constant<int, std::numeric_limits<T>::digits>());
+    }
+
+    private:
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 32>)
+    {
+        // s: 2''' 2' 0''' 0' 2'' 2 0'' 0
+        // t: 3''' 3' 1''' 1' 3'' 3 1'' 1
+
+        // 1 0 3 2
+        std::get<0>(t) = _mm256_shuffle_epi32(std::get<0>(t), 0x4E);
+        std::get<1>(t) = _mm256_shuffle_epi32(std::get<1>(t), 0x4E);
+        std::get<2>(t) = _mm256_shuffle_epi32(std::get<2>(t), 0x4E);
+        std::get<3>(t) = _mm256_shuffle_epi32(std::get<3>(t), 0x4E);
+        std::get<4>(t) = _mm256_shuffle_epi32(std::get<4>(t), 0x4E);
+        std::get<5>(t) = _mm256_shuffle_epi32(std::get<5>(t), 0x4E);
+        std::get<6>(t) = _mm256_shuffle_epi32(std::get<6>(t), 0x4E);
+        std::get<7>(t) = _mm256_shuffle_epi32(std::get<7>(t), 0x4E);
+    }
+
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 64>)
+    {
+        // s: 2' 2 0' 0
+        // t: 3' 3 1' 1
+
+        // 1 0 3 2
+        std::get<0>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0x4E);
+        std::get<1>(t) = _mm256_permute4x64_epi64(std::get<1>(t), 0x4E);
+        std::get<2>(t) = _mm256_permute4x64_epi64(std::get<2>(t), 0x4E);
+        std::get<3>(t) = _mm256_permute4x64_epi64(std::get<3>(t), 0x4E);
+        std::get<4>(t) = _mm256_permute4x64_epi64(std::get<4>(t), 0x4E);
+        std::get<5>(t) = _mm256_permute4x64_epi64(std::get<5>(t), 0x4E);
+        std::get<6>(t) = _mm256_permute4x64_epi64(std::get<6>(t), 0x4E);
+        std::get<7>(t) = _mm256_permute4x64_epi64(std::get<7>(t), 0x4E);
+    }
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>
+    : public ThreefryGeneratorAVX2Impl<T, 8, Rounds, ThreefryConstants<T, 8>,
+          ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>>
+{
+    public:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    {
+        pbox(s, t,
+            std::integral_constant<int, std::numeric_limits<T>::digits>());
+    }
+
+    private:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 64>)
+    {
+        // s: 6 2 4 0
+        // t: 7 3 5 1
+
+        // 0 1 3 2
+        std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x1E);
+        std::get<1>(s) = _mm256_permute4x64_epi64(std::get<1>(s), 0x1E);
+        std::get<2>(s) = _mm256_permute4x64_epi64(std::get<2>(s), 0x1E);
+        std::get<3>(s) = _mm256_permute4x64_epi64(std::get<3>(s), 0x1E);
+        std::get<4>(s) = _mm256_permute4x64_epi64(std::get<4>(s), 0x1E);
+        std::get<5>(s) = _mm256_permute4x64_epi64(std::get<5>(s), 0x1E);
+        std::get<6>(s) = _mm256_permute4x64_epi64(std::get<6>(s), 0x1E);
+        std::get<7>(s) = _mm256_permute4x64_epi64(std::get<7>(s), 0x1E);
+
+        // 2 3 1 0
+        std::get<0>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0xB4);
+        std::get<1>(t) = _mm256_permute4x64_epi64(std::get<1>(t), 0xB4);
+        std::get<2>(t) = _mm256_permute4x64_epi64(std::get<2>(t), 0xB4);
+        std::get<3>(t) = _mm256_permute4x64_epi64(std::get<3>(t), 0xB4);
+        std::get<4>(t) = _mm256_permute4x64_epi64(std::get<4>(t), 0xB4);
+        std::get<5>(t) = _mm256_permute4x64_epi64(std::get<5>(t), 0xB4);
+        std::get<6>(t) = _mm256_permute4x64_epi64(std::get<6>(t), 0xB4);
+        std::get<7>(t) = _mm256_permute4x64_epi64(std::get<7>(t), 0xB4);
+    }
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>
+    : public ThreefryGeneratorAVX2Impl<T, 16, Rounds, ThreefryConstants<T, 16>,
+          ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>>
+{
+    public:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    {
+        pbox(s, t,
+            std::integral_constant<int, std::numeric_limits<T>::digits>());
+    }
+
+    private:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
+        std::integral_constant<int, 64>)
+    {
+        // s: 6 2 4 0 | E A C 8
+        // t: 7 3 5 1 | F B D 9
+
+        // 1 2 3 0
+        std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x6C);
+        std::get<2>(s) = _mm256_permute4x64_epi64(std::get<2>(s), 0x6C);
+        std::get<4>(s) = _mm256_permute4x64_epi64(std::get<4>(s), 0x6C);
+        std::get<6>(s) = _mm256_permute4x64_epi64(std::get<6>(s), 0x6C);
+
+        // 0 1 3 2
+        std::get<1>(s) = _mm256_permute4x64_epi64(std::get<1>(s), 0x1E);
+        std::get<3>(s) = _mm256_permute4x64_epi64(std::get<3>(s), 0x1E);
+        std::get<5>(s) = _mm256_permute4x64_epi64(std::get<5>(s), 0x1E);
+        std::get<7>(s) = _mm256_permute4x64_epi64(std::get<7>(s), 0x1E);
+
+        // 3 1 2 0
+        __m256i t0 = _mm256_permute4x64_epi64(std::get<1>(t), 0xD8);
+        __m256i t2 = _mm256_permute4x64_epi64(std::get<3>(t), 0xD8);
+        __m256i t4 = _mm256_permute4x64_epi64(std::get<5>(t), 0xD8);
+        __m256i t6 = _mm256_permute4x64_epi64(std::get<7>(t), 0xD8);
+
+        // 0 2 1 3
+        std::get<1>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0x27);
+        std::get<3>(t) = _mm256_permute4x64_epi64(std::get<2>(t), 0x27);
+        std::get<5>(t) = _mm256_permute4x64_epi64(std::get<4>(t), 0x27);
+        std::get<7>(t) = _mm256_permute4x64_epi64(std::get<6>(t), 0x27);
+
+        std::get<0>(t) = t0;
+        std::get<2>(t) = t2;
+        std::get<4>(t) = t4;
+        std::get<6>(t) = t6;
+    }
+}; // class ThreefryGeneratorImpl

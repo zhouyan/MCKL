@@ -110,102 +110,11 @@ namespace internal
 
 #include <mckl/random/internal/philox_generic.hpp>
 
-#if MCKL_USE_SSE2
-#include <mckl/random/internal/philox_sse2.hpp>
-#endif
-
 #if MCKL_USE_AVX2
 #include <mckl/random/internal/philox_avx2.hpp>
-#endif
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl
-    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
-{
-}; // class PhiloxGeneratorImpl
-
-template <typename T, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl<T, 2, Rounds, Constants>
-#if MCKL_USE_AVX2
-    : public PhiloxGeneratorAVX2Impl<T, 2, Rounds, Constants,
-          PhiloxGeneratorImpl<T, 2, Rounds, Constants>>
 #elif MCKL_USE_SSE2
-    : public PhiloxGeneratorSSE2Impl<T, 2, Rounds, Constants,
-          PhiloxGeneratorImpl<T, 2, Rounds, Constants>>
-#else
-    : public PhiloxGeneratorGenericImpl<T, 2, Rounds, Constants>
+#include <mckl/random/internal/philox_sse2.hpp>
 #endif
-{
-    public:
-#if MCKL_USE_SSE2
-    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &) {}
-#endif
-
-#if MCKL_USE_AVX2
-    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &) {}
-#endif
-}; // class PhiloxGeneratorImpl
-
-template <typename T, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl<T, 4, Rounds, Constants>
-#if MCKL_USE_AVX2
-    : public PhiloxGeneratorAVX2Impl<T, 4, Rounds, Constants,
-          PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
-#elif MCKL_USE_SSE2
-    : public PhiloxGeneratorSSE2Impl<T, 4, Rounds, Constants,
-          PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
-#else
-    : public PhiloxGeneratorGenericImpl<T, 4, Rounds, Constants>
-#endif
-{
-#if MCKL_USE_SSE2
-    public:
-    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &t)
-    {
-        pbox(s, t,
-            std::integral_constant<int, std::numeric_limits<T>::digits>());
-    }
-
-    private:
-    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &,
-        std::integral_constant<int, 32>)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xC6);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xC6);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xC6);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xC6);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xC6);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xC6);
-    }
-#endif // MCKL_USE_SSE2
-
-#if MCKL_USE_AVX2
-    public:
-    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
-    {
-        pbox(s, t,
-            std::integral_constant<int, std::numeric_limits<T>::digits>());
-    }
-
-    private:
-    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &,
-        std::integral_constant<int, 32>)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xC6);
-        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xC6);
-        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xC6);
-        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xC6);
-        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xC6);
-        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xC6);
-        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xC6);
-    }
-#endif
-}; // class PhiloxGeneratorImpl
 
 } // namespace mckl::internal
 

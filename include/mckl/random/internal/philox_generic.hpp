@@ -395,3 +395,9 @@ class PhiloxGeneratorGenericImpl
             state, std::integral_constant<bool, I + 1 < blocks()>());
     }
 }; // class PhiloxGeneratorGenericImpl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl
+    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorImpl

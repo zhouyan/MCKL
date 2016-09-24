@@ -388,3 +388,9 @@ class ThreefryGeneratorGenericImpl
             state, std::integral_constant<bool, I + 1 < blocks()>());
     }
 }; // class ThreefryGeneratorGenericImpl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl
+    : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorImpl

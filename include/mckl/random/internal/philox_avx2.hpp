@@ -30,8 +30,7 @@
 //============================================================================
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
-    typename, int = std::numeric_limits<T>::digits,
-    bool = 256 % (sizeof(T) * K) == 0>
+    typename, int = std::numeric_limits<T>::digits>
 class PhiloxGeneratorAVX2Impl
     : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
 {
@@ -39,18 +38,46 @@ class PhiloxGeneratorAVX2Impl
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     typename Derived>
-class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
+class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
 {
     public:
-    static constexpr std::size_t blocks() { return 256 / (sizeof(T) * K); }
+    static constexpr std::size_t blocks()
+    {
+        return K != 0 && 64 % K == 0 ?
+            64 / K :
+            PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::blocks();
+    }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
+    {
+        eval(state, key,
+            std::integral_constant<bool, (K != 0 && K % 8 == 0)>());
+    }
+
+    static void eval(std::array<std::array<T, K>, blocks()> &state,
+        const std::array<T, K / 2> &key)
+    {
+        eval(state, key,
+            std::integral_constant<bool, (K != 0 && 64 % K == 0)>());
+    }
+
+    private:
+    static constexpr std::size_t M_ = K / 8 + (K % 8 == 0 ? 0 : 1);
+
+    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key,
+        std::false_type)
+    {
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(state, key);
+    }
+
+    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key,
+        std::true_type)
     {
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(state, key);
     }
 
     static void eval(std::array<std::array<T, K>, blocks()> &state,
-        const std::array<T, K / 2> &key)
+        const std::array<T, K / 2> &key, std::true_type)
     {
         std::array<__m256i, M_> k;
         std::array<__m256i, M_> w;
@@ -88,9 +115,6 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
 
         unpack(state, s, t);
     }
-
-    private:
-    static constexpr std::size_t M_ = K / 8 + (K % 8 == 0 ? 0 : 1);
 
     template <std::size_t>
     static void eval(std::array<__m256i, 8> &, std::array<__m256i, 8> &,
@@ -334,3 +358,40 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32, true>
         Derived::pbox(s, t);
     }
 }; // class PhiloxGeneratorAVX2Impl
+
+template <typename T, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, 2, Rounds, Constants>
+    : public PhiloxGeneratorAVX2Impl<T, 2, Rounds, Constants,
+          PhiloxGeneratorImpl<T, 2, Rounds, Constants>>
+{
+    public:
+    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &) {}
+}; // class PhiloxGeneratorImpl
+
+template <typename T, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, 4, Rounds, Constants>
+    : public PhiloxGeneratorAVX2Impl<T, 4, Rounds, Constants,
+          PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
+{
+    public:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    {
+        pbox(s, t,
+            std::integral_constant<int, std::numeric_limits<T>::digits>());
+    }
+
+    private:
+    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &,
+        std::integral_constant<int, 32>)
+    {
+        // 3 0 1 2
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xC6);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xC6);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xC6);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xC6);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xC6);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xC6);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xC6);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xC6);
+    }
+}; // class PhiloxGeneratorImpl
