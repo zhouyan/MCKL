@@ -820,26 +820,23 @@ class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 32>
         static constexpr int L = constants::rotate[0][(N - 1) % 8];
         static constexpr int R = 32 - L;
 
-        __m128i l = _mm_set_epi64x(0, L);
-        __m128i r = _mm_set_epi64x(0, R);
+        __m128i l0 = _mm_slli_epi32(std::get<0>(t), L);
+        __m128i l1 = _mm_slli_epi32(std::get<1>(t), L);
+        __m128i l2 = _mm_slli_epi32(std::get<2>(t), L);
+        __m128i l3 = _mm_slli_epi32(std::get<3>(t), L);
+        __m128i l4 = _mm_slli_epi32(std::get<4>(t), L);
+        __m128i l5 = _mm_slli_epi32(std::get<5>(t), L);
+        __m128i l6 = _mm_slli_epi32(std::get<6>(t), L);
+        __m128i l7 = _mm_slli_epi32(std::get<7>(t), L);
 
-        __m128i l0 = _mm_sll_epi32(std::get<0>(t), l);
-        __m128i l1 = _mm_sll_epi32(std::get<1>(t), l);
-        __m128i l2 = _mm_sll_epi32(std::get<2>(t), l);
-        __m128i l3 = _mm_sll_epi32(std::get<3>(t), l);
-        __m128i l4 = _mm_sll_epi32(std::get<4>(t), l);
-        __m128i l5 = _mm_sll_epi32(std::get<5>(t), l);
-        __m128i l6 = _mm_sll_epi32(std::get<6>(t), l);
-        __m128i l7 = _mm_sll_epi32(std::get<7>(t), l);
-
-        __m128i r0 = _mm_srl_epi32(std::get<0>(t), r);
-        __m128i r1 = _mm_srl_epi32(std::get<1>(t), r);
-        __m128i r2 = _mm_srl_epi32(std::get<2>(t), r);
-        __m128i r3 = _mm_srl_epi32(std::get<3>(t), r);
-        __m128i r4 = _mm_srl_epi32(std::get<4>(t), r);
-        __m128i r5 = _mm_srl_epi32(std::get<5>(t), r);
-        __m128i r6 = _mm_srl_epi32(std::get<6>(t), r);
-        __m128i r7 = _mm_srl_epi32(std::get<7>(t), r);
+        __m128i r0 = _mm_srli_epi32(std::get<0>(t), R);
+        __m128i r1 = _mm_srli_epi32(std::get<1>(t), R);
+        __m128i r2 = _mm_srli_epi32(std::get<2>(t), R);
+        __m128i r3 = _mm_srli_epi32(std::get<3>(t), R);
+        __m128i r4 = _mm_srli_epi32(std::get<4>(t), R);
+        __m128i r5 = _mm_srli_epi32(std::get<5>(t), R);
+        __m128i r6 = _mm_srli_epi32(std::get<6>(t), R);
+        __m128i r7 = _mm_srli_epi32(std::get<7>(t), R);
 
         std::get<0>(t) = _mm_or_si128(l0, r0);
         std::get<1>(t) = _mm_or_si128(l1, r1);
@@ -886,11 +883,6 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 32>
         static constexpr int R0 = 32 - L0;
         static constexpr int R1 = 32 - L1;
 
-        __m128i lx0 = _mm_set_epi64x(0, L0);
-        __m128i lx1 = _mm_set_epi64x(0, L1);
-        __m128i rx0 = _mm_set_epi64x(0, R0);
-        __m128i rx1 = _mm_set_epi64x(0, R1);
-
         __m128i x0 = _mm_unpacklo_epi64(std::get<0>(t), std::get<1>(t));
         __m128i x1 = _mm_unpacklo_epi64(std::get<2>(t), std::get<3>(t));
         __m128i x2 = _mm_unpacklo_epi64(std::get<4>(t), std::get<5>(t));
@@ -901,23 +893,23 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 32>
         __m128i x6 = _mm_unpackhi_epi64(std::get<4>(t), std::get<5>(t));
         __m128i x7 = _mm_unpackhi_epi64(std::get<6>(t), std::get<7>(t));
 
-        __m128i l0 = _mm_sll_epi32(x0, lx0);
-        __m128i l1 = _mm_sll_epi32(x1, lx0);
-        __m128i l2 = _mm_sll_epi32(x2, lx0);
-        __m128i l3 = _mm_sll_epi32(x3, lx0);
-        __m128i l4 = _mm_sll_epi32(x4, lx1);
-        __m128i l5 = _mm_sll_epi32(x5, lx1);
-        __m128i l6 = _mm_sll_epi32(x6, lx1);
-        __m128i l7 = _mm_sll_epi32(x7, lx1);
+        __m128i l0 = _mm_slli_epi32(x0, L0);
+        __m128i l1 = _mm_slli_epi32(x1, L0);
+        __m128i l2 = _mm_slli_epi32(x2, L0);
+        __m128i l3 = _mm_slli_epi32(x3, L0);
+        __m128i l4 = _mm_slli_epi32(x4, L1);
+        __m128i l5 = _mm_slli_epi32(x5, L1);
+        __m128i l6 = _mm_slli_epi32(x6, L1);
+        __m128i l7 = _mm_slli_epi32(x7, L1);
 
-        __m128i r0 = _mm_srl_epi32(x0, rx0);
-        __m128i r1 = _mm_srl_epi32(x1, rx0);
-        __m128i r2 = _mm_srl_epi32(x2, rx0);
-        __m128i r3 = _mm_srl_epi32(x3, rx0);
-        __m128i r4 = _mm_srl_epi32(x4, rx1);
-        __m128i r5 = _mm_srl_epi32(x5, rx1);
-        __m128i r6 = _mm_srl_epi32(x6, rx1);
-        __m128i r7 = _mm_srl_epi32(x7, rx1);
+        __m128i r0 = _mm_srli_epi32(x0, L0);
+        __m128i r1 = _mm_srli_epi32(x1, L0);
+        __m128i r2 = _mm_srli_epi32(x2, L0);
+        __m128i r3 = _mm_srli_epi32(x3, L0);
+        __m128i r4 = _mm_srli_epi32(x4, L1);
+        __m128i r5 = _mm_srli_epi32(x5, L1);
+        __m128i r6 = _mm_srli_epi32(x6, L1);
+        __m128i r7 = _mm_srli_epi32(x7, L1);
 
         x0 = _mm_or_si128(l0, r0);
         x1 = _mm_or_si128(l1, r1);
