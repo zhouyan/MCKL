@@ -36,8 +36,17 @@ use Getopt::Long;
 
 do 'format.pl';
 
+my $simd;
 my $run = 0;
-GetOptions("run" => \$run);
+GetOptions("run" => \$run, "simd=s" => \$run);
+
+if ($simd) {
+    $run = 0;
+} else {
+    my $cpuid = `cpuid_info`;
+    $simd = "sse2" if $cpuid =~ "SSE2";
+    $simd = "avx2" if $cpuid =~ "AVX2";
+}
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
@@ -63,11 +72,6 @@ my %rngs = (
     threefry => [@threefry],
     mkl      => [@mkl],
 );
-
-my $cpuid = `cpuid_info`;
-my $simd;
-$simd = "sse2" if $cpuid =~ "SSE2";
-$simd = "avx2" if $cpuid =~ "AVX2";
 
 if ($run) {
     &run("llvm");
