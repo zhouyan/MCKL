@@ -206,38 +206,6 @@ class BufferSize
 {
 }; // class BufferSize;
 
-template <std::size_t, typename CharT, typename Traits, typename T,
-    std::size_t N>
-inline void ostream_ary_space(std::basic_ostream<CharT, Traits> &,
-    const std::array<T, N> &, std::false_type)
-{
-}
-
-template <std::size_t, typename CharT, typename Traits, typename T,
-    std::size_t N>
-inline void ostream_ary_space(std::basic_ostream<CharT, Traits> &os,
-    const std::array<T, N> &, std::true_type)
-{
-    os << ' ';
-}
-
-template <std::size_t, typename CharT, typename Traits, typename T,
-    std::size_t N>
-inline void ostream_ary(std::basic_ostream<CharT, Traits> &,
-    const std::array<T, N> &, std::false_type)
-{
-}
-
-template <std::size_t K, typename CharT, typename Traits, typename T,
-    std::size_t N>
-inline void ostream_ary(std::basic_ostream<CharT, Traits> &os,
-    const std::array<T, N> &ary, std::true_type)
-{
-    os << std::get<K>(ary);
-    ostream_ary_space<K>(os, ary, std::integral_constant<bool, K + 1 != N>());
-    ostream_ary<K + 1>(os, ary, std::integral_constant<bool, K + 1 < N>());
-}
-
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &ostream(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
@@ -245,25 +213,14 @@ inline std::basic_ostream<CharT, Traits> &ostream(
     if (!os)
         return os;
 
-    ostream_ary<0>(os, ary, std::integral_constant<bool, 0 < N>());
+    os << N;
+    if (!os)
+        return os;
+
+    for (const auto &v : ary)
+        os << ' ' << v;
 
     return os;
-}
-
-template <std::size_t, typename CharT, typename Traits, typename T,
-    std::size_t N>
-inline void istream_ary(
-    std::basic_istream<CharT, Traits> &, std::array<T, N> &, std::false_type)
-{
-}
-
-template <std::size_t K, typename CharT, typename Traits, typename T,
-    std::size_t N>
-inline void istream_ary(std::basic_istream<CharT, Traits> &is,
-    std::array<T, N> &ary, std::true_type)
-{
-    is >> std::ws >> std::get<K>(ary);
-    istream_ary<K + 1>(is, ary, std::integral_constant<bool, K + 1 < N>());
 }
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
@@ -273,8 +230,16 @@ inline std::basic_istream<CharT, Traits> &istream(
     if (!is)
         return is;
 
+    std::size_t n = 0;
+    is >> n;
+    if (!is)
+        return is;
+
     std::array<T, N> tmp;
-    istream_ary<0>(is, tmp, std::integral_constant<bool, 0 < N>());
+
+    n = std::min(n, N);
+    for (std::size_t i = 0; i != n; ++i)
+        is >> std::ws >> tmp[i];
     if (is)
         ary = std::move(tmp);
 
