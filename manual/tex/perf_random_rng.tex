@@ -59,55 +59,61 @@ experiment is repeated ten times, and the best results are shown. The two cases
 are labeled ``\single'' and ``\batch'', respectively, in the tables below.
 
 \begin{table}
-  \input{tab/random_rng_std}%
-  \caption{Performance of \rng in the standard library}
-  \label{tab:Performance of RNG in the standard library RNG}
+  \input{tab/random_rng_std_sse2}%
+  \caption{Performance of \rng in the standard library (Nehalem)}
+  \label{tab:Performance of RNG in the standard library RNG (Nehalem)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_rng_aes128}%
-  \caption{Performance of \protect\texttt{AES128Engine}}
-  \label{tab:Performance of AES128Engine}
+  \input{tab/random_rng_std_avx2}%
+  \caption{Performance of \rng in the standard library (Haswell)}
+  \label{tab:Performance of RNG in the standard library RNG (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_rng_aes192}%
-  \caption{Performance of \protect\texttt{AES192Engine}}
-  \label{tab:Performance of AES192Engine}
+  \input{tab/random_rng_aesni_avx2}%
+  \caption{Performance of \protect\texttt{AESNIEngine} (Haswell)}
+  \label{tab:Performance of AESNIEngine (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_rng_aes256}%
-  \caption{Performance of \protect\texttt{AES256Engine}}
-  \label{tab:Performance of AES256Engine}
+  \input{tab/random_rng_philox_sse2}%
+  \caption{Performance of \protect\texttt{PhiloxEngine} (Nehalem)}
+  \label{tab:Performance of PhiloxEngine (Nehalem)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_rng_ars}%
-  \caption{Performance of \protect\texttt{ARSEngine}}
-  \label{tab:Performance of ARSEngine}
+  \input{tab/random_rng_philox_avx2}%
+  \caption{Performance of \protect\texttt{PhiloxEngine} (Haswell)}
+  \label{tab:Performance of PhiloxEngine (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_rng_philox}%
-  \caption{Performance of \protect\texttt{PhiloxEngine}}
-  \label{tab:Performance of PhiloxEngine}
+  \input{tab/random_rng_threefry_sse2}%
+  \caption{Performance of \protect\texttt{ThreefryEngine} (Nehalem)}
+  \label{tab:Performance of ThreefryEngine (Nehalem)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_rng_threefry}%
-  \caption{Performance of \protect\texttt{ThreefryEngine}}
-  \label{tab:Performance of ThreefryEngine}
+  \input{tab/random_rng_threefry_avx2}%
+\caption{Performance of \protect\texttt{ThreefryEngine} (Haswell)}
+  \label{tab:Performance of ThreefryEngine (Haswell)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_rng_sse2}%
+  \caption{Performance of \mkl \rng (Nehalem)}
+  \label{tab:Performance of MKL RNG (Nehalem)}
 \end{table}
 
 \begin{table}
   \input{tab/random_rng_mkl}%
-  \caption{Performance of \mkl \rng}
-  \label{tab:Performance of MKL RNG}
+  \caption{Performance of \mkl \rng (Haswell)}
+  \label{tab:Performance of MKL RNG (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_rng_rdrand}%
-  \caption{Performance of non-deterministic \rng}
-  \label{tab:Performance of non-deterministic RNG}
+  \input{tab/random_rng_rdrand_avx2}%
+  \caption{Performance of non-deterministic \rng (Haswell)}
+  \label{tab:Performance of non-deterministic RNG (Haswell)}
 \end{table}

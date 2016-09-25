@@ -32,60 +32,94 @@
 # ============================================================================
 
 use v5.16;
+use Getopt::Long;
 
 do 'format.pl';
+
+my $run = 0;
+GetOptions("run" => \$run);
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
 
-my @rngs = qw(STD Philox Threefry AES128 AES192 AES256 ARS RDRAND MKL);
+my @aesni = qw(AES128 AES192 AES256 ARS AES128_64 AES192_64 AES256_64 ARS_64);
 
-my @llvm_txt = &read('llvm');
-my @gnu_txt = &read('gnu');
-my @intel_txt = &read('intel');
+my @philox = qw(Philox2x32 Philox4x32 Philox2x64 Philox4x64 Philox2x32_64
+Philox4x32_64 Philox2x64_64 Philox4x64_64);
 
-for (@rngs) {
-    open my $texfile, '>', "random_rng_\L$_.tex";
+my @threefry = qw(Threefry2x32 Threefry4x32 Threefry2x64 Threefry4x64
+Threefry8x64 Threefry16x64 Threefish256 Threefish512 Threefish1024
+Threefry2x32_64 Threefry4x32_64 Threefry2x64_64 Threefry4x64_64 Threefry8x64_64
+Threefry16x64_64 Threefish256_64 Threefish512_64 Threefish1024_64);
+
+my @mkl = qw(MKL_ARS5 MKL_PHILOX4X32X10 MKL_MCG59 MKL_MT19937 MKL_MT2203
+MKL_SFMT19937 MKL_NONDETERM MKL_ARS5_64 MKL_PHILOX4X32X10_64 MKL_MCG59_64
+MKL_MT19937_64 MKL_MT2203_64 MKL_SFMT19937_64 MKL_NONDETERM_64);
+
+my %rngs = (
+    std      => [@std],
+    aesni    => [@aesni],
+    philox   => [@philox],
+    threefry => [@threefry],
+    mkl      => [@mkl],
+);
+
+my $cpuid = `cpuid_info`;
+my $simd;
+$simd = "sse2" if $cpuid =~ "SSE2";
+$simd = "avx2" if $cpuid =~ "AVX2";
+
+if ($run) {
+    &run("llvm");
+    &run("gnu");
+    &run("intel");
+    exit;
+}
+
+for (keys %rngs) {
+    my $tex = "random_rng";
+    $tex .= "_\L$_";
+    $tex .= "_$simd";
+    $tex .= ".tex";
+    open my $texfile, '>', $tex;
     print $texfile &table(
-        &filter($_, @llvm_txt),
-        &filter($_, @gnu_txt),
-        &filter($_, @intel_txt));
+        &read($_, "llvm"),
+        &read($_, "gnu"),
+        &read($_, "intel"));
+}
+
+sub run
+{
+    my $dir = "../../build/$_[0]-release-sys";
+    open my $txtfile, '>', "random_rng_$_[0]_$simd.txt";
+    for (sort(keys %rngs)) {
+        my @val = @{$rngs{$_}};
+        for my $rng (@val) {
+            my $cmd = "ninja -C $dir random_rng_\L$rng-check";
+            my @lines = split "\n", `$cmd`;
+            my @result = grep { $_ =~ /Passed|Failed/ } @lines;
+            say @result;
+            say $txtfile @result;
+        }
+    }
+    close $txtfile;
 }
 
 sub read
 {
-    open my $txtfile, '<', "random_rng_$_[0].txt";
+    my @val = @{$rngs{$_[0]}};
+    shift @_;
+    open my $txtfile, '<', "random_rng_$_[0]_$simd.txt";
     my @txt = grep { $_ =~ /Passed|Failed/ } <$txtfile>;
-    @txt = sort @txt;
-    open $txtfile, '>', "random_rng_$_[0].txt";
-    print $txtfile @txt;
-    @txt
-}
-
-sub filter
-{
-    my $rng = shift @_;
     my $record;
-    for (@_) {
-        my ($name, $size, $cpb1, $cpb2) = (split)[0, 1, 5, 6];
-        if ($rng eq 'STD') {
-            next unless "@std" =~ /$name/;
-        } elsif ($rng eq 'MKL') {
-            next unless $name =~ /MKL/;
-        } elsif ($rng eq "Threefry") {
-            next unless $name =~ /Threefry|Threefish/;
-        } else {
-            next unless $name =~ /$rng/;
-            next if $name =~ /MKL/;
+    for (@txt) {
+        my ($name, $size, $cpb1, $cpb2) = (split)[0, 1, 3, 4];
+        if (grep /^$name$/, @val) {
+            $size = (split /\//, $size)[1] if ($size =~ /\//);
+            $record .= "$name $size $cpb1 $cpb2\n";
         }
-        $size = (split /\//, $size)[1] if ($size =~ /\//);
-
-        $record .= $name . ' ';
-        $record .= $size . ' ';
-        $record .= $cpb1 . ' ';
-        $record .= $cpb2 . "\n";
     }
-    $record
+    $record;
 }
 
 sub table
