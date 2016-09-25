@@ -95,11 +95,11 @@ sub run
     for (sort(keys %rngs)) {
         my @val = @{$rngs{$_}};
         for my $rng (@val) {
-            my $cmd = "ninja -C $dir random_rng_\L$rng-check";
+            my $cmd = "ninja -C $dir random_rng_\L$rng-check 2>&1";
             my @lines = split "\n", `$cmd`;
             my @result = grep { $_ =~ /Passed|Failed/ } @lines;
-            say @result;
-            say $txtfile @result;
+            say @result if @result;
+            say $txtfile @result if @result;
         }
     }
     close $txtfile;
