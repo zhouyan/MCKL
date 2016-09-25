@@ -370,29 +370,25 @@ class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32>
 }; // class PhiloxGeneratorSSE2Impl
 
 template <typename T, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl<T, 2, Rounds, Constants>
+class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
     : public PhiloxGeneratorSSE2Impl<T, 2, Rounds, Constants,
           PhiloxGeneratorImpl<T, 2, Rounds, Constants>>
 {
-    public:
+    friend PhiloxGeneratorSSE2Impl<T, 2, Rounds, Constants,
+        PhiloxGeneratorImpl<T, 2, Rounds, Constants>>;
+
     static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &) {}
 }; // class PhiloxGeneratorImpl
 
 template <typename T, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl<T, 4, Rounds, Constants>
+class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
     : public PhiloxGeneratorSSE2Impl<T, 4, Rounds, Constants,
           PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
 {
-    public:
-    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &t)
-    {
-        pbox(s, t,
-            std::integral_constant<int, std::numeric_limits<T>::digits>());
-    }
+    friend PhiloxGeneratorSSE2Impl<T, 4, Rounds, Constants,
+        PhiloxGeneratorImpl<T, 4, Rounds, Constants>>;
 
-    private:
-    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &,
-        std::integral_constant<int, 32>)
+    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &)
     {
         // 3 0 1 2
         std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);

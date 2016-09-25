@@ -389,7 +389,8 @@ class ThreefryGeneratorGenericImpl
     }
 }; // class ThreefryGeneratorGenericImpl
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    int = std::numeric_limits<T>::digits>
 class ThreefryGeneratorImpl
     : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
 {

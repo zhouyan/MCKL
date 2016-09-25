@@ -802,25 +802,21 @@ class ThreefryGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, -64>
     }
 }; // class ThreefryGeneratorSSE2Impl
 
+// Packing scheme
+// s: 0''' 0' 0'' 0
+// t: 1''' 1' 1'' 1
 template <typename T, std::size_t Rounds>
-class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>
+class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 32>
     : public ThreefryGeneratorSSE2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
           ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>
 {
-    public:
+    friend ThreefryGeneratorSSE2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
+        ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>;
+
     static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &) {}
 
     template <std::size_t N>
     static void rotate(std::array<__m128i, 8> &t)
-    {
-        rotate<N>(
-            t, std::integral_constant<int, std::numeric_limits<T>::digits>());
-    }
-
-    private:
-    template <std::size_t N>
-    static void rotate(
-        std::array<__m128i, 8> &t, std::integral_constant<int, 32>)
     {
         using constants = ThreefryConstants<T, 2>;
 
@@ -857,109 +853,35 @@ class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>
         std::get<6>(t) = _mm_or_si128(l6, r6);
         std::get<7>(t) = _mm_or_si128(l7, r7);
     }
-
-    template <std::size_t N>
-    static void rotate(
-        std::array<__m128i, 8> &t, std::integral_constant<int, 64>)
-    {
-        using constants = ThreefryConstants<T, 2>;
-
-        static constexpr int L = constants::rotate[0][(N - 1) % 8];
-        static constexpr int R = 64 - L;
-
-        __m128i l = _mm_set_epi64x(0, L);
-        __m128i r = _mm_set_epi64x(0, R);
-
-        __m128i l0 = _mm_sll_epi64(std::get<0>(t), l);
-        __m128i l1 = _mm_sll_epi64(std::get<1>(t), l);
-        __m128i l2 = _mm_sll_epi64(std::get<2>(t), l);
-        __m128i l3 = _mm_sll_epi64(std::get<3>(t), l);
-        __m128i l4 = _mm_sll_epi64(std::get<4>(t), l);
-        __m128i l5 = _mm_sll_epi64(std::get<5>(t), l);
-        __m128i l6 = _mm_sll_epi64(std::get<6>(t), l);
-        __m128i l7 = _mm_sll_epi64(std::get<7>(t), l);
-
-        __m128i r0 = _mm_srl_epi64(std::get<0>(t), r);
-        __m128i r1 = _mm_srl_epi64(std::get<1>(t), r);
-        __m128i r2 = _mm_srl_epi64(std::get<2>(t), r);
-        __m128i r3 = _mm_srl_epi64(std::get<3>(t), r);
-        __m128i r4 = _mm_srl_epi64(std::get<4>(t), r);
-        __m128i r5 = _mm_srl_epi64(std::get<5>(t), r);
-        __m128i r6 = _mm_srl_epi64(std::get<6>(t), r);
-        __m128i r7 = _mm_srl_epi64(std::get<7>(t), r);
-
-        std::get<0>(t) = _mm_or_si128(l0, r0);
-        std::get<1>(t) = _mm_or_si128(l1, r1);
-        std::get<2>(t) = _mm_or_si128(l2, r2);
-        std::get<3>(t) = _mm_or_si128(l3, r3);
-        std::get<4>(t) = _mm_or_si128(l4, r4);
-        std::get<5>(t) = _mm_or_si128(l5, r5);
-        std::get<6>(t) = _mm_or_si128(l6, r6);
-        std::get<7>(t) = _mm_or_si128(l7, r7);
-    }
 }; // class ThreefryGeneratorImpl
 
+// Packing scheme
+// s: 2' 2 0' 0
+// t: 3' 3 1' 1
 template <typename T, std::size_t Rounds>
-class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
+class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 32>
     : public ThreefryGeneratorSSE2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
           ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>
 {
-    public:
-    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &t)
+    friend ThreefryGeneratorSSE2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
+        ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>;
+
+    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &t)
     {
-        pbox(s, t,
-            std::integral_constant<int, std::numeric_limits<T>::digits>());
+        // 1 0 3 2
+        std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(t), 0x4E);
+        std::get<1>(t) = _mm_shuffle_epi32(std::get<1>(t), 0x4E);
+        std::get<2>(t) = _mm_shuffle_epi32(std::get<2>(t), 0x4E);
+        std::get<3>(t) = _mm_shuffle_epi32(std::get<3>(t), 0x4E);
+        std::get<4>(t) = _mm_shuffle_epi32(std::get<4>(t), 0x4E);
+        std::get<5>(t) = _mm_shuffle_epi32(std::get<5>(t), 0x4E);
+        std::get<6>(t) = _mm_shuffle_epi32(std::get<6>(t), 0x4E);
+        std::get<7>(t) = _mm_shuffle_epi32(std::get<7>(t), 0x4E);
     }
 
     template <std::size_t N>
     static void rotate(std::array<__m128i, 8> &t)
     {
-        rotate<N>(
-            t, std::integral_constant<int, std::numeric_limits<T>::digits>());
-    }
-
-    private:
-    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &t,
-        std::integral_constant<int, 32>)
-    {
-        // s: 2' 2 0' 0
-        // t: 3' 3 1' 1
-
-        // 1 0 3 2
-        std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(t), 0x4E);
-        std::get<1>(t) = _mm_shuffle_epi32(std::get<1>(t), 0x4E);
-        std::get<2>(t) = _mm_shuffle_epi32(std::get<2>(t), 0x4E);
-        std::get<3>(t) = _mm_shuffle_epi32(std::get<3>(t), 0x4E);
-        std::get<4>(t) = _mm_shuffle_epi32(std::get<4>(t), 0x4E);
-        std::get<5>(t) = _mm_shuffle_epi32(std::get<5>(t), 0x4E);
-        std::get<6>(t) = _mm_shuffle_epi32(std::get<6>(t), 0x4E);
-        std::get<7>(t) = _mm_shuffle_epi32(std::get<7>(t), 0x4E);
-    }
-
-    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &t,
-        std::integral_constant<int, 64>)
-    {
-        // s: 2 0
-        // t: 3 1
-
-        // 1 0 3 2
-        std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(t), 0x4E);
-        std::get<1>(t) = _mm_shuffle_epi32(std::get<1>(t), 0x4E);
-        std::get<2>(t) = _mm_shuffle_epi32(std::get<2>(t), 0x4E);
-        std::get<3>(t) = _mm_shuffle_epi32(std::get<3>(t), 0x4E);
-        std::get<4>(t) = _mm_shuffle_epi32(std::get<4>(t), 0x4E);
-        std::get<5>(t) = _mm_shuffle_epi32(std::get<5>(t), 0x4E);
-        std::get<6>(t) = _mm_shuffle_epi32(std::get<6>(t), 0x4E);
-        std::get<7>(t) = _mm_shuffle_epi32(std::get<7>(t), 0x4E);
-    }
-
-    template <std::size_t N>
-    static void rotate(
-        std::array<__m128i, 8> &t, std::integral_constant<int, 32>)
-    {
-        // s: 2' 2 0' 0
-        // t: 3' 3 1' 1
-
         using constants = ThreefryConstants<T, 4>;
 
         static constexpr int L0 = constants::rotate[0][(N - 1) % 8];
@@ -999,73 +921,6 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>
         __m128i r5 = _mm_srl_epi32(x5, rx1);
         __m128i r6 = _mm_srl_epi32(x6, rx1);
         __m128i r7 = _mm_srl_epi32(x7, rx1);
-
-        x0 = _mm_or_si128(l0, r0);
-        x1 = _mm_or_si128(l1, r1);
-        x2 = _mm_or_si128(l2, r2);
-        x3 = _mm_or_si128(l3, r3);
-        x4 = _mm_or_si128(l4, r4);
-        x5 = _mm_or_si128(l5, r5);
-        x6 = _mm_or_si128(l6, r6);
-        x7 = _mm_or_si128(l7, r7);
-
-        std::get<0>(t) = _mm_unpacklo_epi64(x0, x4);
-        std::get<2>(t) = _mm_unpacklo_epi64(x1, x5);
-        std::get<4>(t) = _mm_unpacklo_epi64(x2, x6);
-        std::get<6>(t) = _mm_unpacklo_epi64(x3, x7);
-
-        std::get<1>(t) = _mm_unpackhi_epi64(x0, x4);
-        std::get<3>(t) = _mm_unpackhi_epi64(x1, x5);
-        std::get<5>(t) = _mm_unpackhi_epi64(x2, x6);
-        std::get<7>(t) = _mm_unpackhi_epi64(x3, x7);
-    }
-
-    template <std::size_t N>
-    static void rotate(
-        std::array<__m128i, 8> &t, std::integral_constant<int, 64>)
-    {
-        // s: 2 0
-        // t: 3 1
-
-        using constants = ThreefryConstants<T, 4>;
-
-        static constexpr int L0 = constants::rotate[0][(N - 1) % 8];
-        static constexpr int L1 = constants::rotate[1][(N - 1) % 8];
-        static constexpr int R0 = 64 - L0;
-        static constexpr int R1 = 64 - L1;
-
-        __m128i lx0 = _mm_set_epi64x(0, L0);
-        __m128i lx1 = _mm_set_epi64x(0, L1);
-        __m128i rx0 = _mm_set_epi64x(0, R0);
-        __m128i rx1 = _mm_set_epi64x(0, R1);
-
-        __m128i x0 = _mm_unpacklo_epi64(std::get<0>(t), std::get<1>(t));
-        __m128i x1 = _mm_unpacklo_epi64(std::get<2>(t), std::get<3>(t));
-        __m128i x2 = _mm_unpacklo_epi64(std::get<4>(t), std::get<5>(t));
-        __m128i x3 = _mm_unpacklo_epi64(std::get<6>(t), std::get<7>(t));
-
-        __m128i x4 = _mm_unpackhi_epi64(std::get<0>(t), std::get<1>(t));
-        __m128i x5 = _mm_unpackhi_epi64(std::get<2>(t), std::get<3>(t));
-        __m128i x6 = _mm_unpackhi_epi64(std::get<4>(t), std::get<5>(t));
-        __m128i x7 = _mm_unpackhi_epi64(std::get<6>(t), std::get<7>(t));
-
-        __m128i l0 = _mm_sll_epi64(x0, lx0);
-        __m128i l1 = _mm_sll_epi64(x1, lx0);
-        __m128i l2 = _mm_sll_epi64(x2, lx0);
-        __m128i l3 = _mm_sll_epi64(x3, lx0);
-        __m128i l4 = _mm_sll_epi64(x4, lx1);
-        __m128i l5 = _mm_sll_epi64(x5, lx1);
-        __m128i l6 = _mm_sll_epi64(x6, lx1);
-        __m128i l7 = _mm_sll_epi64(x7, lx1);
-
-        __m128i r0 = _mm_srl_epi64(x0, rx0);
-        __m128i r1 = _mm_srl_epi64(x1, rx0);
-        __m128i r2 = _mm_srl_epi64(x2, rx0);
-        __m128i r3 = _mm_srl_epi64(x3, rx0);
-        __m128i r4 = _mm_srl_epi64(x4, rx1);
-        __m128i r5 = _mm_srl_epi64(x5, rx1);
-        __m128i r6 = _mm_srl_epi64(x6, rx1);
-        __m128i r7 = _mm_srl_epi64(x7, rx1);
 
         x0 = _mm_or_si128(l0, r0);
         x1 = _mm_or_si128(l1, r1);
