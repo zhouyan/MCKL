@@ -261,13 +261,8 @@ class CounterEngine
 
     result_type operator()()
     {
-#ifdef MCKL_INTEL
-#pragma forceinline recursive
-#endif
-        if (index_ == M_) {
-            generator_(ctr_, buffer_);
-            index_ = 0;
-        }
+        MCKL_FLATTEN_CALL_SITE
+        generate();
 
         return buffer_[static_cast<std::size_t>(index_++)];
     }
@@ -288,10 +283,8 @@ class CounterEngine
         index_ = M_;
 
         const std::size_t m = n / M_;
-#ifdef MCKL_INTEL
-#pragma forceinline recursive
-#endif
-        generator_(ctr_, m, reinterpret_cast<buffer_type *>(r));
+        MCKL_FLATTEN_CALL_SITE
+        generate(m, r);
         r += m * M_;
         n -= m * M_;
 
@@ -418,6 +411,21 @@ class CounterEngine
         ctr_.fill(0);
         generator_.reset(key);
         index_ = M_;
+    }
+
+    MCKL_FLATTEN_DEFINITION
+    void generate()
+    {
+        if (index_ == M_) {
+            generator_(ctr_, buffer_);
+            index_ = 0;
+        }
+    }
+
+    MCKL_FLATTEN_DEFINITION
+    void generate(std::size_t m, result_type *r)
+    {
+        generator_(ctr_, m, reinterpret_cast<buffer_type *>(r));
     }
 }; // class CounterEngine
 

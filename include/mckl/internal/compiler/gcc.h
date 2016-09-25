@@ -102,4 +102,8 @@
 #define MCKL_INT64 long long
 #endif
 
+#ifndef MCKL_FLATTEN_DEFINITION
+#define MCKL_FLATTEN_DEFINITION __attribute__((flatten, always_inline))
+#endif
+
 #endif // MCKL_INTERNAL_COMPILER_GCC_H

@@ -163,6 +163,14 @@
 #define MCKL_INT64 long long
 #endif
 
+#ifndef MCKL_FLATTEN_CALL_SITE
+#define MCKL_FLATTEN_CALL_SITE
+#endif
+
+#ifndef MCKL_FLATTEN_DEFINITION
+#define MCKL_FLATTEN_DEFINITION
+#endif
+
 #if MCKL_USE_SSE2
 #ifdef MCKL_MSVC
 #include <intrin.h>
