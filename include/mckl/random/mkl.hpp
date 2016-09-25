@@ -872,12 +872,9 @@ class MKLEngine
 
     result_type operator()()
     {
-        if (index_ == M_) {
-            generate();
-            index_ = 0;
-        }
+        generate();
 
-        return buffer_[index_++];
+        return buffer_[static_cast<std::size_t>(index_++)];
     }
 
     void operator()(std::size_t n, result_type *r)
@@ -898,14 +895,13 @@ class MKLEngine
         index_ = M_;
 
         const std::size_t m = n / M_ * M_;
-        const std::size_t l = n % M_;
-        internal::MKLUniformBits<BRNG, Bits>::eval(
-            stream_, static_cast<MKL_INT>(m), r);
+        generate(m, r);
         r += m;
+        n -= m;
 
         generate();
-        std::copy_n(buffer_.data(), l, r);
-        index_ = l;
+        std::copy_n(buffer_.data(), n, r);
+        index_ = static_cast<unsigned>(n);
     }
 
     /// \brief Discard the buffer
@@ -976,7 +972,7 @@ class MKLEngine
                 }
         };
         generate();
-        index_ = static_cast<std::size_t>(nskip % M);
+        index_ = static_cast<unsigned>(nskip % M);
     }
 
     static constexpr result_type min()
@@ -1039,15 +1035,15 @@ class MKLEngine
             return is;
 
         MKLStream stream;
-        Vector<result_type> buffer;
-        std::size_t index;
+        buffer_type buffer;
+        unsigned index;
         is >> std::ws >> stream;
         is >> std::ws >> buffer;
         is >> std::ws >> index;
 
         if (is) {
             eng.stream_ = std::move(stream);
-            eng.buffer_ = std::move(buffer);
+            eng.buffer_ = buffer;
             eng.index_ = index;
         }
 
@@ -1055,17 +1051,27 @@ class MKLEngine
     }
 
     private:
-    static constexpr std::size_t M_ = internal::BufferSize<result_type>::value;
+    static constexpr std::size_t M_ = 128;
 
-    Vector<result_type> buffer_;
-    std::size_t index_;
+    using buffer_type = std::array<result_type, M_>;
+
+    buffer_type buffer_;
     MKLStream stream_;
+    unsigned index_;
 
     void generate()
     {
-        buffer_.resize(M_);
+        if (index_ == M_) {
+            internal::MKLUniformBits<BRNG, Bits>::eval(
+                stream_, static_cast<MKL_INT>(M_), buffer_.data());
+            index_ = 0;
+        }
+    }
+
+    void generate(std::size_t n, result_type *r)
+    {
         internal::MKLUniformBits<BRNG, Bits>::eval(
-            stream_, static_cast<MKL_INT>(M_), buffer_.data());
+            stream_, static_cast<MKL_INT>(n), r);
     }
 
     template <typename SeedSeq>

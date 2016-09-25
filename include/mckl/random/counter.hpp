@@ -420,9 +420,9 @@ class CounterEngine
         }
     }
 
-    void generate(std::size_t m, result_type *r)
+    void generate(std::size_t n, result_type *r)
     {
-        generator_(ctr_, m, reinterpret_cast<buffer_type *>(r));
+        generator_(ctr_, n, reinterpret_cast<buffer_type *>(r));
     }
 }; // class CounterEngine
 
