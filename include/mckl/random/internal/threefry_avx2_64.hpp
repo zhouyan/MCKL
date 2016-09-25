@@ -468,18 +468,20 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 64>
     template <std::size_t N>
     static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
-        pbox(s, t, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
+        pbox<N>(s, t, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
+    template <std::size_t>
     static void pbox(
         std::array<__m256i, 8> &, std::array<__m256i, 8> &, std::false_type)
     {
     }
 
+    template <std::size_t N>
     static void pbox(
         std::array<__m256i, 8> &s, std::array<__m256i, 8> &t, std::true_type)
     {
-        Derived::pbox(s, t);
+        Derived::template permute<N>(s, t);
     }
 }; // class ThreefryGeneratorAVX2Impl
 
@@ -490,8 +492,6 @@ class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 64>
 {
     friend ThreefryGeneratorAVX2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
         ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>;
-
-    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &) {}
 
     template <std::size_t N>
     static void rotate(std::array<__m256i, 8> &t)
@@ -528,6 +528,11 @@ class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 64>
         std::get<6>(t) = _mm256_or_si256(l6, r6);
         std::get<7>(t) = _mm256_or_si256(l7, r7);
     }
+
+    template <std::size_t>
+    static void permute(std::array<__m256i, 8> &, std::array<__m256i, 8> &)
+    {
+    }
 }; // class ThreefryGeneratorImpl
 
 // Packing scheme
@@ -541,7 +546,8 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 64>
     friend ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
         ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>;
 
-    static void pbox(std::array<__m256i, 8> &, std::array<__m256i, 8> &t)
+    template <std::size_t>
+    static void permute(std::array<__m256i, 8> &, std::array<__m256i, 8> &t)
     {
         // 1 0 3 2
         std::get<0>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0x4E);
@@ -566,7 +572,8 @@ class ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>, 64>
     friend ThreefryGeneratorAVX2Impl<T, 8, Rounds, ThreefryConstants<T, 8>,
         ThreefryGeneratorImpl<T, 8, Rounds, ThreefryConstants<T, 8>>>;
 
-    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    template <std::size_t>
+    static void permute(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
         // 0 1 3 2
         std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x1E);
@@ -601,7 +608,8 @@ class ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>, 64>
     friend ThreefryGeneratorAVX2Impl<T, 16, Rounds, ThreefryConstants<T, 16>,
         ThreefryGeneratorImpl<T, 16, Rounds, ThreefryConstants<T, 16>>>;
 
-    static void pbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
+    template <std::size_t>
+    static void permute(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t)
     {
         // 1 2 3 0
         std::get<0>(s) = _mm256_permute4x64_epi64(std::get<0>(s), 0x6C);

@@ -128,7 +128,7 @@ class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32>
         const std::array<__m128i, M_> &m, std::true_type)
     {
         kbox(k, w);
-        Derived::pbox(s, t);
+        pbox<N>(s, t);
         sbox(s, t, k, m);
         eval<N + 1>(
             s, t, k, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
@@ -347,18 +347,20 @@ class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32>
     template <std::size_t N>
     static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &t)
     {
-        pbox(s, t, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
+        pbox<N>(s, t, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
+    template <std::size_t N>
     static void pbox(
         std::array<__m128i, 8> &, std::array<__m128i, 8> &, std::false_type)
     {
     }
 
+    template <std::size_t N>
     static void pbox(
         std::array<__m128i, 8> &s, std::array<__m128i, 8> &t, std::true_type)
     {
-        Derived::pbox(s, t);
+        Derived::template permute<N>(s, t);
     }
 }; // class PhiloxGeneratorSSE2Impl
 
@@ -370,7 +372,10 @@ class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
     friend PhiloxGeneratorSSE2Impl<T, 2, Rounds, Constants,
         PhiloxGeneratorImpl<T, 2, Rounds, Constants>>;
 
-    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &) {}
+    template <std::size_t>
+    static void permute(std::array<__m128i, 8> &, std::array<__m128i, 8> &)
+    {
+    }
 }; // class PhiloxGeneratorImpl
 
 template <typename T, std::size_t Rounds, typename Constants>
@@ -381,7 +386,8 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
     friend PhiloxGeneratorSSE2Impl<T, 4, Rounds, Constants,
         PhiloxGeneratorImpl<T, 4, Rounds, Constants>>;
 
-    static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &)
+    template <std::size_t>
+    static void permute(std::array<__m128i, 8> &s, std::array<__m128i, 8> &)
     {
         // 3 0 1 2
         std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);

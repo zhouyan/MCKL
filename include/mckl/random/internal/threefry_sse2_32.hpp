@@ -424,18 +424,20 @@ class ThreefryGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32>
     template <std::size_t N>
     static void pbox(std::array<__m128i, 8> &s, std::array<__m128i, 8> &t)
     {
-        pbox(s, t, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
+        pbox<N>(s, t, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
+    template <std::size_t>
     static void pbox(
         std::array<__m128i, 8> &, std::array<__m128i, 8> &, std::false_type)
     {
     }
 
+    template <std::size_t N>
     static void pbox(
         std::array<__m128i, 8> &s, std::array<__m128i, 8> &t, std::true_type)
     {
-        Derived::pbox(s, t);
+        Derived::template permute<N>(s, t);
     }
 }; // class ThreefryGeneratorSSE2Impl
 
@@ -446,8 +448,6 @@ class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 32>
 {
     friend ThreefryGeneratorSSE2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
         ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>;
-
-    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &) {}
 
     template <std::size_t N>
     static void rotate(std::array<__m128i, 8> &t)
@@ -484,6 +484,11 @@ class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 32>
         std::get<6>(t) = _mm_or_si128(l6, r6);
         std::get<7>(t) = _mm_or_si128(l7, r7);
     }
+
+    template <std::size_t>
+    static void permute(std::array<__m128i, 8> &, std::array<__m128i, 8> &)
+    {
+    }
 }; // class ThreefryGeneratorImpl
 
 // Packing scheme
@@ -496,19 +501,6 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 32>
 {
     friend ThreefryGeneratorSSE2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
         ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>;
-
-    static void pbox(std::array<__m128i, 8> &, std::array<__m128i, 8> &t)
-    {
-        // 1 0 3 2
-        std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(t), 0x4E);
-        std::get<1>(t) = _mm_shuffle_epi32(std::get<1>(t), 0x4E);
-        std::get<2>(t) = _mm_shuffle_epi32(std::get<2>(t), 0x4E);
-        std::get<3>(t) = _mm_shuffle_epi32(std::get<3>(t), 0x4E);
-        std::get<4>(t) = _mm_shuffle_epi32(std::get<4>(t), 0x4E);
-        std::get<5>(t) = _mm_shuffle_epi32(std::get<5>(t), 0x4E);
-        std::get<6>(t) = _mm_shuffle_epi32(std::get<6>(t), 0x4E);
-        std::get<7>(t) = _mm_shuffle_epi32(std::get<7>(t), 0x4E);
-    }
 
     template <std::size_t N>
     static void rotate(std::array<__m128i, 8> &t)
@@ -539,14 +531,14 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 32>
         __m128i l6 = _mm_slli_epi32(x6, L1);
         __m128i l7 = _mm_slli_epi32(x7, L1);
 
-        __m128i r0 = _mm_srli_epi32(x0, L0);
-        __m128i r1 = _mm_srli_epi32(x1, L0);
-        __m128i r2 = _mm_srli_epi32(x2, L0);
-        __m128i r3 = _mm_srli_epi32(x3, L0);
-        __m128i r4 = _mm_srli_epi32(x4, L1);
-        __m128i r5 = _mm_srli_epi32(x5, L1);
-        __m128i r6 = _mm_srli_epi32(x6, L1);
-        __m128i r7 = _mm_srli_epi32(x7, L1);
+        __m128i r0 = _mm_srli_epi32(x0, R0);
+        __m128i r1 = _mm_srli_epi32(x1, R0);
+        __m128i r2 = _mm_srli_epi32(x2, R0);
+        __m128i r3 = _mm_srli_epi32(x3, R0);
+        __m128i r4 = _mm_srli_epi32(x4, R1);
+        __m128i r5 = _mm_srli_epi32(x5, R1);
+        __m128i r6 = _mm_srli_epi32(x6, R1);
+        __m128i r7 = _mm_srli_epi32(x7, R1);
 
         x0 = _mm_or_si128(l0, r0);
         x1 = _mm_or_si128(l1, r1);
@@ -566,5 +558,19 @@ class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 32>
         std::get<3>(t) = _mm_unpackhi_epi64(x1, x5);
         std::get<5>(t) = _mm_unpackhi_epi64(x2, x6);
         std::get<7>(t) = _mm_unpackhi_epi64(x3, x7);
+    }
+
+    template <std::size_t>
+    static void permute(std::array<__m128i, 8> &, std::array<__m128i, 8> &t)
+    {
+        // 1 0 3 2
+        std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(t), 0x4E);
+        std::get<1>(t) = _mm_shuffle_epi32(std::get<1>(t), 0x4E);
+        std::get<2>(t) = _mm_shuffle_epi32(std::get<2>(t), 0x4E);
+        std::get<3>(t) = _mm_shuffle_epi32(std::get<3>(t), 0x4E);
+        std::get<4>(t) = _mm_shuffle_epi32(std::get<4>(t), 0x4E);
+        std::get<5>(t) = _mm_shuffle_epi32(std::get<5>(t), 0x4E);
+        std::get<6>(t) = _mm_shuffle_epi32(std::get<6>(t), 0x4E);
+        std::get<7>(t) = _mm_shuffle_epi32(std::get<7>(t), 0x4E);
     }
 }; // class ThreefryGeneratorImpl
