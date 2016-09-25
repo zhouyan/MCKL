@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/threefry_avx2.hpp
+// MCKL/include/mckl/random/threefry4x64_avx2.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,12 +29,28 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
-    typename, int = std::numeric_limits<T>::digits>
-class ThreefryGeneratorAVX2Impl
-    : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
+// Packing scheme
+// s: 2' 2 0' 0
+// t: 3' 3 1' 1
+template <typename T, std::size_t Rounds>
+class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 64>
+    : public ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
+          ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>
 {
-}; // class ThreefryGeneratorAVX2Impl
+    friend ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
+        ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>;
 
-#include <mckl/random/internal/threefry32_avx2.hpp>
-#include <mckl/random/internal/threefry64_avx2.hpp>
+    template <std::size_t>
+    static void permute(std::array<__m256i, 8> &, std::array<__m256i, 8> &t)
+    {
+        // 1 0 3 2
+        std::get<0>(t) = _mm256_permute4x64_epi64(std::get<0>(t), 0x4E);
+        std::get<1>(t) = _mm256_permute4x64_epi64(std::get<1>(t), 0x4E);
+        std::get<2>(t) = _mm256_permute4x64_epi64(std::get<2>(t), 0x4E);
+        std::get<3>(t) = _mm256_permute4x64_epi64(std::get<3>(t), 0x4E);
+        std::get<4>(t) = _mm256_permute4x64_epi64(std::get<4>(t), 0x4E);
+        std::get<5>(t) = _mm256_permute4x64_epi64(std::get<5>(t), 0x4E);
+        std::get<6>(t) = _mm256_permute4x64_epi64(std::get<6>(t), 0x4E);
+        std::get<7>(t) = _mm256_permute4x64_epi64(std::get<7>(t), 0x4E);
+    }
+}; // class ThreefryGeneratorImpl

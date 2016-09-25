@@ -36,5 +36,5 @@ class ThreefryGeneratorSSE2Impl
 {
 }; // class ThreefryGeneratorSSE2Impl
 
-#include <mckl/random/internal/threefry_sse2_32.hpp>
-#include <mckl/random/internal/threefry_sse2_64.hpp>
+#include <mckl/random/internal/threefry32_sse2.hpp>
+#include <mckl/random/internal/threefry64_sse2.hpp>

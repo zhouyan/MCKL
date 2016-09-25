@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/threefry_avx2_32.hpp
+// MCKL/include/mckl/random/threefry32_avx2.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -398,6 +398,84 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
             u, v, par, std::integral_constant<bool, I + 1 < M_>());
     }
 
+    template <std::size_t, std::size_t>
+    static void set_rotate(
+        std::array<__m256i, M_> &, std::array<__m256i, M_> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, std::size_t I>
+    static void set_rotate(
+        std::array<__m256i, M_> &l, std::array<__m256i, M_> &r, std::true_type)
+    {
+        static constexpr std::size_t I0 = (I * 16 + 0x0) % K;
+        static constexpr std::size_t I1 = (I * 16 + 0x8) % K;
+        static constexpr std::size_t I2 = (I * 16 + 0x2) % K;
+        static constexpr std::size_t I3 = (I * 16 + 0xA) % K;
+        static constexpr std::size_t I4 = (I * 16 + 0x4) % K;
+        static constexpr std::size_t I5 = (I * 16 + 0xC) % K;
+        static constexpr std::size_t I6 = (I * 16 + 0x6) % K;
+        static constexpr std::size_t I7 = (I * 16 + 0xE) % K;
+
+        static constexpr int L0 = Constants::rotate[I0 / 2][(N - 1) % 8];
+        static constexpr int L1 = Constants::rotate[I1 / 2][(N - 1) % 8];
+        static constexpr int L2 = Constants::rotate[I2 / 2][(N - 1) % 8];
+        static constexpr int L3 = Constants::rotate[I3 / 2][(N - 1) % 8];
+        static constexpr int L4 = Constants::rotate[I4 / 2][(N - 1) % 8];
+        static constexpr int L5 = Constants::rotate[I5 / 2][(N - 1) % 8];
+        static constexpr int L6 = Constants::rotate[I6 / 2][(N - 1) % 8];
+        static constexpr int L7 = Constants::rotate[I7 / 2][(N - 1) % 8];
+
+        static constexpr int R0 = 64 - L0;
+        static constexpr int R1 = 64 - L1;
+        static constexpr int R2 = 64 - L2;
+        static constexpr int R3 = 64 - L3;
+        static constexpr int R4 = 64 - L4;
+        static constexpr int R5 = 64 - L5;
+        static constexpr int R6 = 64 - L6;
+        static constexpr int R7 = 64 - L7;
+
+        std::get<I>(l) = _mm256_set_epi32(L7, L6, L5, L4, L3, L2, L1, L0);
+        std::get<I>(r) = _mm256_set_epi32(R7, R6, R5, R4, R3, R2, R1, R0);
+
+        set_rotate<N, I + 1>(l, r, std::integral_constant<bool, I + 1 < M_>());
+    }
+
+    template <std::size_t N>
+    static void rotate(std::array<__m256i, 8> &t)
+    {
+        std::array<__m256i, M_> l;
+        std::array<__m256i, M_> r;
+        set_rotate<N, 0>(l, r, std::integral_constant<bool, 0 < M_>());
+
+        __m256i l0 = _mm256_sllv_epi32(std::get<0>(t), std::get<0 % M_>(l));
+        __m256i l1 = _mm256_sllv_epi32(std::get<1>(t), std::get<1 % M_>(l));
+        __m256i l2 = _mm256_sllv_epi32(std::get<2>(t), std::get<2 % M_>(l));
+        __m256i l3 = _mm256_sllv_epi32(std::get<3>(t), std::get<3 % M_>(l));
+        __m256i l4 = _mm256_sllv_epi32(std::get<4>(t), std::get<4 % M_>(l));
+        __m256i l5 = _mm256_sllv_epi32(std::get<5>(t), std::get<5 % M_>(l));
+        __m256i l6 = _mm256_sllv_epi32(std::get<6>(t), std::get<6 % M_>(l));
+        __m256i l7 = _mm256_sllv_epi32(std::get<7>(t), std::get<7 % M_>(l));
+
+        __m256i r0 = _mm256_srlv_epi32(std::get<0>(t), std::get<0 % M_>(r));
+        __m256i r1 = _mm256_srlv_epi32(std::get<1>(t), std::get<1 % M_>(r));
+        __m256i r2 = _mm256_srlv_epi32(std::get<2>(t), std::get<2 % M_>(r));
+        __m256i r3 = _mm256_srlv_epi32(std::get<3>(t), std::get<3 % M_>(r));
+        __m256i r4 = _mm256_srlv_epi32(std::get<4>(t), std::get<4 % M_>(r));
+        __m256i r5 = _mm256_srlv_epi32(std::get<5>(t), std::get<5 % M_>(r));
+        __m256i r6 = _mm256_srlv_epi32(std::get<6>(t), std::get<6 % M_>(r));
+        __m256i r7 = _mm256_srlv_epi32(std::get<7>(t), std::get<7 % M_>(r));
+
+        std::get<0>(t) = _mm256_or_si256(l0, r0);
+        std::get<1>(t) = _mm256_or_si256(l1, r1);
+        std::get<2>(t) = _mm256_or_si256(l2, r2);
+        std::get<3>(t) = _mm256_or_si256(l3, r3);
+        std::get<4>(t) = _mm256_or_si256(l4, r4);
+        std::get<5>(t) = _mm256_or_si256(l5, r5);
+        std::get<6>(t) = _mm256_or_si256(l6, r6);
+        std::get<7>(t) = _mm256_or_si256(l7, r7);
+    }
+
     template <std::size_t N>
     static void kbox(std::array<__m256i, 8> &s, std::array<__m256i, 8> &t,
         const std::array<T, K + 1> &par)
@@ -496,136 +574,5 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
     }
 }; // class ThreefryGeneratorAVX2Impl
 
-template <typename T, std::size_t Rounds>
-class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 32>
-    : public ThreefryGeneratorAVX2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
-          ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>
-{
-    friend ThreefryGeneratorAVX2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
-        ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>>>;
-
-    template <std::size_t N>
-    static void rotate(std::array<__m256i, 8> &t)
-    {
-        using constants = ThreefryConstants<T, 2>;
-
-        static constexpr int L = constants::rotate[0][(N - 1) % 8];
-        static constexpr int R = 32 - L;
-
-        __m256i l0 = _mm256_slli_epi32(std::get<0>(t), L);
-        __m256i l1 = _mm256_slli_epi32(std::get<1>(t), L);
-        __m256i l2 = _mm256_slli_epi32(std::get<2>(t), L);
-        __m256i l3 = _mm256_slli_epi32(std::get<3>(t), L);
-        __m256i l4 = _mm256_slli_epi32(std::get<4>(t), L);
-        __m256i l5 = _mm256_slli_epi32(std::get<5>(t), L);
-        __m256i l6 = _mm256_slli_epi32(std::get<6>(t), L);
-        __m256i l7 = _mm256_slli_epi32(std::get<7>(t), L);
-
-        __m256i r0 = _mm256_srli_epi32(std::get<0>(t), R);
-        __m256i r1 = _mm256_srli_epi32(std::get<1>(t), R);
-        __m256i r2 = _mm256_srli_epi32(std::get<2>(t), R);
-        __m256i r3 = _mm256_srli_epi32(std::get<3>(t), R);
-        __m256i r4 = _mm256_srli_epi32(std::get<4>(t), R);
-        __m256i r5 = _mm256_srli_epi32(std::get<5>(t), R);
-        __m256i r6 = _mm256_srli_epi32(std::get<6>(t), R);
-        __m256i r7 = _mm256_srli_epi32(std::get<7>(t), R);
-
-        std::get<0>(t) = _mm256_or_si256(l0, r0);
-        std::get<1>(t) = _mm256_or_si256(l1, r1);
-        std::get<2>(t) = _mm256_or_si256(l2, r2);
-        std::get<3>(t) = _mm256_or_si256(l3, r3);
-        std::get<4>(t) = _mm256_or_si256(l4, r4);
-        std::get<5>(t) = _mm256_or_si256(l5, r5);
-        std::get<6>(t) = _mm256_or_si256(l6, r6);
-        std::get<7>(t) = _mm256_or_si256(l7, r7);
-    }
-
-    template <std::size_t>
-    static void permute(std::array<__m256i, 8> &, std::array<__m256i, 8> &)
-    {
-    }
-}; // class ThreefryGeneratorImpl
-
-// Packing scheme
-// s: 2''' 2' 0''' 0' 2'' 2 0'' 0
-// t: 3''' 3' 1''' 1' 3'' 3 1'' 1
-template <typename T, std::size_t Rounds>
-class ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>, 32>
-    : public ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
-          ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>
-{
-    friend ThreefryGeneratorAVX2Impl<T, 4, Rounds, ThreefryConstants<T, 4>,
-        ThreefryGeneratorImpl<T, 4, Rounds, ThreefryConstants<T, 4>>>;
-
-    template <std::size_t N>
-    static void rotate(std::array<__m256i, 8> &t)
-    {
-        using constants = ThreefryConstants<T, 4>;
-
-        static constexpr int L0 = constants::rotate[0][(N - 1) % 8];
-        static constexpr int L1 = constants::rotate[1][(N - 1) % 8];
-        static constexpr int R0 = 32 - L0;
-        static constexpr int R1 = 32 - L1;
-
-        __m256i x0 = _mm256_unpacklo_epi64(std::get<0>(t), std::get<1>(t));
-        __m256i x1 = _mm256_unpacklo_epi64(std::get<2>(t), std::get<3>(t));
-        __m256i x2 = _mm256_unpacklo_epi64(std::get<4>(t), std::get<5>(t));
-        __m256i x3 = _mm256_unpacklo_epi64(std::get<6>(t), std::get<7>(t));
-
-        __m256i x4 = _mm256_unpackhi_epi64(std::get<0>(t), std::get<1>(t));
-        __m256i x5 = _mm256_unpackhi_epi64(std::get<2>(t), std::get<3>(t));
-        __m256i x6 = _mm256_unpackhi_epi64(std::get<4>(t), std::get<5>(t));
-        __m256i x7 = _mm256_unpackhi_epi64(std::get<6>(t), std::get<7>(t));
-
-        __m256i l0 = _mm256_slli_epi32(x0, L0);
-        __m256i l1 = _mm256_slli_epi32(x1, L0);
-        __m256i l2 = _mm256_slli_epi32(x2, L0);
-        __m256i l3 = _mm256_slli_epi32(x3, L0);
-        __m256i l4 = _mm256_slli_epi32(x4, L1);
-        __m256i l5 = _mm256_slli_epi32(x5, L1);
-        __m256i l6 = _mm256_slli_epi32(x6, L1);
-        __m256i l7 = _mm256_slli_epi32(x7, L1);
-
-        __m256i r0 = _mm256_srli_epi32(x0, R0);
-        __m256i r1 = _mm256_srli_epi32(x1, R0);
-        __m256i r2 = _mm256_srli_epi32(x2, R0);
-        __m256i r3 = _mm256_srli_epi32(x3, R0);
-        __m256i r4 = _mm256_srli_epi32(x4, R1);
-        __m256i r5 = _mm256_srli_epi32(x5, R1);
-        __m256i r6 = _mm256_srli_epi32(x6, R1);
-        __m256i r7 = _mm256_srli_epi32(x7, R1);
-
-        x0 = _mm256_or_si256(l0, r0);
-        x1 = _mm256_or_si256(l1, r1);
-        x2 = _mm256_or_si256(l2, r2);
-        x3 = _mm256_or_si256(l3, r3);
-        x4 = _mm256_or_si256(l4, r4);
-        x5 = _mm256_or_si256(l5, r5);
-        x6 = _mm256_or_si256(l6, r6);
-        x7 = _mm256_or_si256(l7, r7);
-
-        std::get<0>(t) = _mm256_unpacklo_epi64(x0, x4);
-        std::get<2>(t) = _mm256_unpacklo_epi64(x1, x5);
-        std::get<4>(t) = _mm256_unpacklo_epi64(x2, x6);
-        std::get<6>(t) = _mm256_unpacklo_epi64(x3, x7);
-
-        std::get<1>(t) = _mm256_unpackhi_epi64(x0, x4);
-        std::get<3>(t) = _mm256_unpackhi_epi64(x1, x5);
-        std::get<5>(t) = _mm256_unpackhi_epi64(x2, x6);
-        std::get<7>(t) = _mm256_unpackhi_epi64(x3, x7);
-    }
-
-    template <std::size_t>
-    static void permute(std::array<__m256i, 8> &, std::array<__m256i, 8> &t)
-    {
-        // 1 0 3 2
-        std::get<0>(t) = _mm256_shuffle_epi32(std::get<0>(t), 0x4E);
-        std::get<1>(t) = _mm256_shuffle_epi32(std::get<1>(t), 0x4E);
-        std::get<2>(t) = _mm256_shuffle_epi32(std::get<2>(t), 0x4E);
-        std::get<3>(t) = _mm256_shuffle_epi32(std::get<3>(t), 0x4E);
-        std::get<4>(t) = _mm256_shuffle_epi32(std::get<4>(t), 0x4E);
-        std::get<5>(t) = _mm256_shuffle_epi32(std::get<5>(t), 0x4E);
-        std::get<6>(t) = _mm256_shuffle_epi32(std::get<6>(t), 0x4E);
-        std::get<7>(t) = _mm256_shuffle_epi32(std::get<7>(t), 0x4E);
-    }
-}; // class ThreefryGeneratorImpl
+#include <mckl/random/internal/threefry2x32_avx2.hpp>
+#include <mckl/random/internal/threefry4x32_avx2.hpp>

@@ -179,6 +179,7 @@
 #endif
 #endif
 
+/*
 #if MCKL_USE_SSE3
 #ifdef MCKL_MSVC
 #include <intrin.h>
@@ -211,7 +212,16 @@
 #endif
 #endif
 
-#if MCKL_USE_AVX || MCKL_USE_AVX2
+#if MCKL_USE_AVX
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <immintrin.h>
+#endif
+#endif
+*/
+
+#if MCKL_USE_AVX2
 #ifdef MCKL_MSVC
 #include <intrin.h>
 #else
