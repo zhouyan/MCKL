@@ -1200,6 +1200,7 @@ class AESNIGenerator
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
         for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            MCKL_FLATTEN_CALL_SITE
             increment(ctr, buf.ctr_block);
             internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, par);
             std::memcpy(buffer, buf.state.data(), size() * blocks);
@@ -1219,6 +1220,7 @@ class AESNIGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
+        MCKL_FLATTEN_CALL_SITE
         increment(ctr);
         buf.ctr = ctr;
         internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, par);

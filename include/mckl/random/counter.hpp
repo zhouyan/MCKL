@@ -59,7 +59,7 @@ inline void increment_single(std::array<T, K> &ctr, std::true_type)
 /// \brief Increment a counter by one
 /// \ingroup Random
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr)
+MCKL_FLATTEN_DEFINITION inline void increment(std::array<T, K> &ctr)
 {
     internal::increment_single<0>(ctr, std::true_type());
 }
@@ -67,7 +67,8 @@ inline void increment(std::array<T, K> &ctr)
 /// \brief Increment a counter by given steps
 /// \ingroup Random
 template <typename T, std::size_t K, T NSkip>
-inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
+MCKL_FLATTEN_DEFINITION inline void increment(
+    std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - NSkip) {
         ctr.front() += NSkip;
@@ -81,7 +82,7 @@ inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 /// \brief Increment a counter by given steps
 /// \ingroup Random
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr, T nskip)
+MCKL_FLATTEN_DEFINITION inline void increment(std::array<T, K> &ctr, T nskip)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - nskip) {
         ctr.front() += nskip;
@@ -146,7 +147,7 @@ inline void increment_block_safe(std::array<T, K> &ctr,
 /// array of counters
 /// \ingroup Random
 template <typename T, std::size_t K, std::size_t Blocks>
-inline void increment(
+MCKL_FLATTEN_DEFINITION inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     internal::increment_block_set<0>(
@@ -261,7 +262,6 @@ class CounterEngine
 
     result_type operator()()
     {
-        MCKL_FLATTEN_CALL_SITE
         generate();
 
         return buffer_[static_cast<std::size_t>(index_++)];
@@ -283,7 +283,6 @@ class CounterEngine
         index_ = M_;
 
         const std::size_t m = n / M_;
-        MCKL_FLATTEN_CALL_SITE
         generate(m, r);
         r += m * M_;
         n -= m * M_;
@@ -413,7 +412,6 @@ class CounterEngine
         index_ = M_;
     }
 
-    MCKL_FLATTEN_DEFINITION
     void generate()
     {
         if (index_ == M_) {
@@ -422,7 +420,6 @@ class CounterEngine
         }
     }
 
-    MCKL_FLATTEN_DEFINITION
     void generate(std::size_t m, result_type *r)
     {
         generator_(ctr_, m, reinterpret_cast<buffer_type *>(r));

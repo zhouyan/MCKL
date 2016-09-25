@@ -239,6 +239,7 @@ class PhiloxGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
+        MCKL_FLATTEN_CALL_SITE
         increment(ctr);
         buf.ctr = ctr;
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
@@ -261,6 +262,7 @@ class PhiloxGenerator
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
         for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            MCKL_FLATTEN_CALL_SITE
             increment(ctr, buf.ctr_block);
             internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
                 buf.state, key_);
