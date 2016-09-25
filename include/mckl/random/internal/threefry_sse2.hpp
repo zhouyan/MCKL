@@ -802,9 +802,6 @@ class ThreefryGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, -64>
     }
 }; // class ThreefryGeneratorSSE2Impl
 
-// Packing scheme
-// s: 0''' 0' 0'' 0
-// t: 1''' 1' 1'' 1
 template <typename T, std::size_t Rounds>
 class ThreefryGeneratorImpl<T, 2, Rounds, ThreefryConstants<T, 2>, 32>
     : public ThreefryGeneratorSSE2Impl<T, 2, Rounds, ThreefryConstants<T, 2>,
