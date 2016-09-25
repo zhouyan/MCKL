@@ -220,6 +220,8 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorGenericImpl
 {
     public:
+    static constexpr bool batch() { return true; }
+
     static constexpr std::size_t blocks()
     {
         return sizeof(T) * K < 128 ? 128 / (sizeof(T) * K) : 1;

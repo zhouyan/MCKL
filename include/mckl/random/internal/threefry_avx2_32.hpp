@@ -37,6 +37,13 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
 class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, Derived, 32>
 {
     public:
+    static constexpr bool batch()
+    {
+        return K != 0 && 128 % K == 0 ?
+            true :
+            ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::batch();
+    }
+
     static constexpr std::size_t blocks()
     {
         return K != 0 && 128 % K == 0 ?

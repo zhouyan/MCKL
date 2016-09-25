@@ -34,6 +34,13 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
 class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, Derived, 32>
 {
     public:
+    static constexpr bool batch()
+    {
+        return K != 0 && 32 % K == 0 ?
+            true :
+            PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::blocks();
+    }
+
     static constexpr std::size_t blocks()
     {
         return K != 0 && 32 % K == 0 ?

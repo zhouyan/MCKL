@@ -301,6 +301,25 @@ class ThreefryGenerator
     void generate(ctr_type &ctr, std::size_t n,
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
+        generate(ctr, n, buffer,
+            std::integral_constant<bool, internal::ThreefryGeneratorImpl<T, K,
+                                             Rounds, Constants>::batch()>());
+    }
+
+    template <typename ResultType>
+    void generate(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer,
+        std::false_type) const
+    {
+        for (std::size_t i = 0; i != n; ++i)
+            generate(ctr, buffer[i]);
+    }
+
+    template <typename ResultType>
+    void generate(ctr_type &ctr, std::size_t n,
+        std::array<ResultType, size() / sizeof(ResultType)> *buffer,
+        std::true_type) const
+    {
         static constexpr std::size_t blocks =
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
 

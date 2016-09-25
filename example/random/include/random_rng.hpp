@@ -264,6 +264,8 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     std::cout << std::setw(twid) << std::right << c1;
     std::cout << std::setw(twid) << std::right << c2;
     std::cout << std::setw(twid) << std::right << random_pass(pass);
+    if (c1 < c2)
+        std::cout << '*';
     std::cout << std::endl;
 }
 
