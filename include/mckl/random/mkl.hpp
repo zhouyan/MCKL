@@ -872,7 +872,10 @@ class MKLEngine
 
     result_type operator()()
     {
-        generate();
+        if (index_ == M_) {
+            generate();
+            index_ = 0;
+        }
 
         return buffer_[static_cast<std::size_t>(index_++)];
     }
@@ -935,6 +938,12 @@ class MKLEngine
         if (Bits >= bits)
             m *= Bits / bits + (Bits % bits == 0 ? 0 : 1);
         switch (stream_.get_brng()) {
+            case VSL_BRNG_ARS5:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_PHILOX4X32X10:
+                stream_.skip_ahead(m);
+                break;
             case VSL_BRNG_MCG31:
                 stream_.skip_ahead(m);
                 break;
@@ -957,12 +966,6 @@ class MKLEngine
                 stream_.skip_ahead(m);
                 break;
             case VSL_BRNG_NIEDERR:
-                stream_.skip_ahead(m);
-                break;
-            case VSL_BRNG_PHILOX4X32X10:
-                stream_.skip_ahead(m);
-                break;
-            case VSL_BRNG_ARS5:
                 stream_.skip_ahead(m);
                 break;
             default:
@@ -1051,7 +1054,7 @@ class MKLEngine
     }
 
     private:
-    static constexpr std::size_t M_ = 128;
+    static constexpr std::size_t M_ = 256;
 
     using buffer_type = std::array<result_type, M_>;
 
@@ -1061,11 +1064,8 @@ class MKLEngine
 
     void generate()
     {
-        if (index_ == M_) {
             internal::MKLUniformBits<BRNG, Bits>::eval(
                 stream_, static_cast<MKL_INT>(M_), buffer_.data());
-            index_ = 0;
-        }
     }
 
     void generate(std::size_t n, result_type *r)
@@ -1093,6 +1093,22 @@ inline void rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
 {
     rng(n, r);
 }
+
+/// \brief A counter-based random number generator
+/// \ingroup MKL
+using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
+
+/// \brief A counter-based random number generator (64-bit)
+/// \ingroup MKL
+using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
+
+/// \brief A counter-based random number generator
+/// \ingroup MKL
+using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
+
+/// \brief A counter-based random number generator (64-bit)
+/// \ingroup MKL
+using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 /// \brief A 59-bit multiplicative congruential generator
 /// \ingroup MKL
@@ -1135,22 +1151,6 @@ using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, 32>;
 /// \brief A non-determinstic random number generator (64-bit)
 /// \ingroup MKL
 using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
-
-/// \brief A counter-based random number generator
-/// \ingroup MKL
-using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
-
-/// \brief A counter-based random number generator (64-bit)
-/// \ingroup MKL
-using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
-
-/// \brief A counter-based random number generator
-/// \ingroup MKL
-using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
-
-/// \brief A counter-based random number generator (64-bit)
-/// \ingroup MKL
-using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 namespace internal
 {

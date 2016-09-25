@@ -183,7 +183,7 @@ inline std::string random_rng_size(
     using RNGType = mckl::CounterEngine<ResultType, Generator>;
 
     std::size_t size = sizeof(typename Generator::ctr_type) * 2 +
-        sizeof(typename Generator::key_type) + sizeof(ResultType);
+        sizeof(typename Generator::key_type) + sizeof(unsigned);
 
     return std::to_string(size) + "/" + std::to_string(sizeof(RNGType));
 }
