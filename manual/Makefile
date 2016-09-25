@@ -35,7 +35,8 @@ all :
 	latexmk -silent -f manual.tex >/dev/null
 
 tab :
-	cd tab; ./random_rng.pl
+	cd tab; ./random_rng.pl --simd sse2
+	cd tab; ./random_rng.pl --simd avx2
 	cd tab; ./random_distribution.pl
 
 fig :

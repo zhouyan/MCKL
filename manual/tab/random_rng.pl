@@ -36,9 +36,9 @@ use Getopt::Long;
 
 do 'format.pl';
 
-my $simd;
 my $run = 0;
-GetOptions("run" => \$run, "simd=s" => \$run);
+my $simd;
+GetOptions("run" => \$run, "simd=s" => \$simd);
 
 if ($simd) {
     $run = 0;
@@ -65,12 +65,15 @@ my @mkl = qw(MKL_ARS5 MKL_PHILOX4X32X10 MKL_MCG59 MKL_MT19937 MKL_MT2203
 MKL_SFMT19937 MKL_NONDETERM MKL_ARS5_64 MKL_PHILOX4X32X10_64 MKL_MCG59_64
 MKL_MT19937_64 MKL_MT2203_64 MKL_SFMT19937_64 MKL_NONDETERM_64);
 
+my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64);
+
 my %rngs = (
     std      => [@std],
     aesni    => [@aesni],
     philox   => [@philox],
     threefry => [@threefry],
     mkl      => [@mkl],
+    rdrand   => [@rdrand],
 );
 
 if ($run) {
@@ -117,11 +120,8 @@ sub read
     my @txt = grep { $_ =~ /Passed|Failed/ } <$txtfile>;
     my $record;
     for (@txt) {
-        my ($name, $size, $cpb1, $cpb2) = (split)[0, 1, 3, 4];
-        if (grep /^$name$/, @val) {
-            $size = (split /\//, $size)[1] if ($size =~ /\//);
-            $record .= "$name $size $cpb1 $cpb2\n";
-        }
+        my ($name, $cpb1, $cpb2) = (split)[0, 3, 4];
+        $record .= "$name $cpb1 $cpb2\n" if (grep /^$name$/, @val);
     }
     $record;
 }
@@ -129,7 +129,6 @@ sub read
 sub table
 {
     my @name;
-    my @size;
     my @cpb1;
     my @cpb2;
     my $wid = 0;
@@ -139,12 +138,10 @@ sub table
         for (@lines) {
             my @record = split;
             my $name = $record[0];
-            my $size = $record[1];
             $name =~ s/_/\\_/g;
             $name[$index] = '\texttt{' . $name . '}';
-            $size[$index] = $size;
-            $cpb1[$index] .= &format($record[2]);
-            $cpb2[$index] .= &format($record[3]);
+            $cpb1[$index] .= &format($record[1]);
+            $cpb2[$index] .= &format($record[2]);
             if ($wid < length($name[-1])) {
                 $wid = length($name[-1]);
             }
@@ -154,14 +151,14 @@ sub table
 
     my $table;
     $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRRR}' . "\n";
+    $table .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
     $table .= ' ' x 2;
-    $table .= '& & \multicolumn{3}{c}{\single} ';
+    $table .= '& \multicolumn{3}{c}{\single} ';
     $table .= '& \multicolumn{3}{c}{\batch}';
     $table .= " \\\\\n";
-    $table .= ' ' x 2 . '\cmidrule(lr){3-5}\cmidrule(lr){6-8}' . "\n";
-    $table .= ' ' x 2 . '\rng & Size';
+    $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
+    $table .= ' ' x 2 . '\rng';
     $table .= ' & \llvm & \gnu & \intel';
     $table .= ' & \llvm & \gnu & \intel';
     $table .= " \\\\\n";
@@ -170,7 +167,6 @@ sub table
     for (@name) {
         $table .= ' ' x 2;
         $table .= sprintf "%-${wid}s", $name[$index];
-        $table .= sprintf " & %-6s", $size[$index];
         $table .= $cpb1[$index];
         $table .= $cpb2[$index];
         $table .= " \\\\\n";
