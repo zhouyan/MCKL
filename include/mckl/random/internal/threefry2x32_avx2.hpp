@@ -33,7 +33,7 @@ template <typename T, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl<T, 2, Rounds, Constants, 32>
 {
     static constexpr std::size_t K_ = 2;
-    static constexpr std::size_t M_ = 8;
+    static constexpr std::size_t M_ = 16 / K_;
 
     public:
     static constexpr bool batch() { return true; }
