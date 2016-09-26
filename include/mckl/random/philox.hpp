@@ -111,9 +111,9 @@ namespace internal
 #include <mckl/random/internal/philox_generic.hpp>
 
 #if MCKL_USE_AVX2
-#include <mckl/random/internal/philox_avx2.hpp>
+#include <mckl/random/internal/philox_avx2_32.hpp>
 #elif MCKL_USE_SSE2
-#include <mckl/random/internal/philox_sse2.hpp>
+#include <mckl/random/internal/philox_sse2_32.hpp>
 #endif
 
 } // namespace mckl::internal
