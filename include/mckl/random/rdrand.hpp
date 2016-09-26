@@ -102,13 +102,15 @@ class RDRANDEngine
         "**RDRANDEngine** used with ResultType of size other than 16, 32 or "
         "64 bits");
 
+    public:
+    using result_type = ResultType;
+
+    private:
     template <typename T>
     using is_seed_seq =
         internal::is_seed_seq<T, RDRANDEngine<ResultType, NTrialMax>>;
 
     public:
-    using result_type = ResultType;
-
     explicit RDRANDEngine(result_type = 0) {}
 
     template <typename SeedSeq>

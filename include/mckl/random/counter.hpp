@@ -195,10 +195,6 @@ class CounterEngine
         "**CounterEngine** used with Generator::size() not divisible by "
         "sizeof(ResultType)");
 
-    template <typename T>
-    using is_seed_seq =
-        internal::is_seed_seq<T, CounterEngine<ResultType, Generator>>;
-
     public:
     using result_type = ResultType;
     using generator_type = Generator;
@@ -206,6 +202,12 @@ class CounterEngine
     using key_type = typename generator_type::key_type;
     using skip_type = typename ctr_type::value_type;
 
+    private:
+    template <typename T>
+    using is_seed_seq = internal::is_seed_seq<T,
+        CounterEngine<ResultType, Generator>, key_type>;
+
+    public:
     explicit CounterEngine(result_type s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>

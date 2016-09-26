@@ -790,13 +790,15 @@ class MKLEngine
     static_assert(Bits == 32 || Bits == 64,
         "**MKLEngine** used with bits other than 32, or 64");
 
-    template <typename T>
-    using is_seed_seq = internal::is_seed_seq<T, MKLEngine<BRNG, Bits>>;
-
     public:
     using result_type =
         typename internal::MKLUniformBits<BRNG, Bits>::result_type;
 
+    private:
+    template <typename T>
+    using is_seed_seq = internal::is_seed_seq<T, MKLEngine<BRNG, Bits>>;
+
+    public:
     explicit MKLEngine(result_type s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
@@ -1064,8 +1066,8 @@ class MKLEngine
 
     void generate()
     {
-            internal::MKLUniformBits<BRNG, Bits>::eval(
-                stream_, static_cast<MKL_INT>(M_), buffer_.data());
+        internal::MKLUniformBits<BRNG, Bits>::eval(
+            stream_, static_cast<MKL_INT>(M_), buffer_.data());
     }
 
     void generate(std::size_t n, result_type *r)
@@ -1236,7 +1238,7 @@ template <typename RNGType>
 inline int mkl_init(
     int method, ::VSLStreamStatePtr stream, int n, const unsigned *param)
 {
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*static_cast<MKLStreamState<RNGType> *>(stream)).rng;
 
     if (method == VSL_INIT_METHOD_STANDARD) {
         return mkl_init(rng, n, param,
@@ -1258,7 +1260,7 @@ template <typename RNGType, typename RealType>
 inline int mkl_uniform_real(
     ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
 {
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*static_cast<MKLStreamState<RNGType> *>(stream)).rng;
     uniform_real_distribution(rng, static_cast<std::size_t>(n), r, a, b);
 
     return 0;
@@ -1267,7 +1269,7 @@ inline int mkl_uniform_real(
 template <typename RNGType>
 inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 {
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*static_cast<MKLStreamState<RNGType> *>(stream)).rng;
     uniform_bits_distribution(rng, static_cast<std::size_t>(n), r);
 
     return 0;

@@ -362,17 +362,21 @@ class AES128KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        key_type key;
-        _mm_storeu_si128(
-            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
+        alignas(32) union {
+            key_type key;
+            __m128i xmm;
+        } buf;
 
-        return key;
+        buf.xmm = std::get<0>(rk);
+
+        return buf.key;
     }
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
+        xmm1_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
+            static_cast<MCKL_INT64>(std::get<0>(key)));
         std::get<0>(rk) = xmm1_;
         generate_seq<1>(rk, std::integral_constant<bool, 1 < Rp1>());
     }
@@ -417,13 +421,17 @@ class AES192KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
+        alignas(32) union {
+            std::array<std::uint64_t, 4> key;
+            std::array<__m128i, 2> xmm;
+        } buf;
+
         key_type key;
-        std::array<std::uint64_t, 2> tmp;
-        _mm_storeu_si128(
-            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
-        _mm_storeu_si128(
-            reinterpret_cast<__m128i *>(tmp.data()), std::get<1>(rk));
-        key.back() = tmp.front();
+        std::get<0>(buf.xmm) = std::get<0>(rk);
+        std::get<1>(buf.xmm) = std::get<1>(rk);
+        std::get<0>(key) = std::get<0>(buf.key);
+        std::get<1>(key) = std::get<1>(buf.key);
+        std::get<2>(key) = std::get<2>(buf.key);
 
         return key;
     }
@@ -431,9 +439,9 @@ class AES192KeySeqGenerator
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        std::array<std::uint64_t, 2> tmp = {{std::get<2>(key), 0}};
-        xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
-        xmm7_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(tmp.data()));
+        xmm1_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
+            static_cast<MCKL_INT64>(std::get<0>(key)));
+        xmm7_ = _mm_set_epi64x(0, static_cast<MCKL_INT64>(std::get<2>(key)));
         std::get<0>(rk) = xmm1_;
         std::get<1>(rk) = xmm7_;
 
@@ -546,21 +554,24 @@ class AES256KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        key_type key;
-        _mm_storeu_si128(
-            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
-        _mm_storeu_si128(
-            reinterpret_cast<__m128i *>(key.data() + 2), std::get<1>(rk));
+        alignas(32) union {
+            key_type key;
+            std::array<__m128i, 2> xmm;
+        } buf;
 
-        return key;
+        std::get<0>(buf.xmm) = std::get<0>(rk);
+        std::get<1>(buf.xmm) = std::get<2>(rk);
+
+        return buf.key;
     }
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
-        xmm3_ =
-            _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data() + 2));
+        xmm1_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
+            static_cast<MCKL_INT64>(std::get<0>(key)));
+        xmm3_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(key)),
+            static_cast<MCKL_INT64>(std::get<2>(key)));
         std::get<0>(rk) = xmm1_;
         std::get<1>(rk) = xmm3_;
         generate_seq<2>(rk, std::integral_constant<bool, 2 < Rp1>());
@@ -634,17 +645,21 @@ class ARSKeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        key_type key;
-        _mm_storeu_si128(
-            reinterpret_cast<__m128i *>(key.data()), std::get<0>(rk));
+        alignas(32) union {
+            key_type key;
+            __m128i xmm;
+        } buf;
 
-        return key;
+        buf.xmm = std::get<0>(rk);
+
+        return buf.key;
     }
 
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        key_ = _mm_loadu_si128(reinterpret_cast<const __m128i *>(key.data()));
+        key_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
+            static_cast<MCKL_INT64>(std::get<0>(key)));
         generate<0>(rk, std::integral_constant<bool, 0 < Rp1>());
     }
 

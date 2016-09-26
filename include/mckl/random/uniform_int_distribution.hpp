@@ -125,11 +125,6 @@ inline void uniform_int_distribution_impl(
         return;
     }
 
-    if (a == imin && b == imax) {
-        uniform_bits_distribution(rng, n, reinterpret_cast<UIntType *>(r));
-        return;
-    }
-
     uniform_int_distribution_use_double(a, b) ?
         uniform_int_distribution_impl<K>(rng, n, r, a, b, std::true_type()) :
         uniform_int_distribution_impl<K>(rng, n, r, a, b, std::false_type());

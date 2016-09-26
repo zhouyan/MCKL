@@ -177,9 +177,12 @@ using is_blas_floating_point = std::integral_constant<bool,
     std::is_same<typename std::remove_cv<T>::type, float>::value ||
         std::is_same<typename std::remove_cv<T>::type, double>::value>;
 
-template <typename T, typename RNGType>
-using is_seed_seq = std::integral_constant<bool,
-    std::is_class<T>::value && !std::is_convertible<T, RNGType>::value>;
+template <typename T, typename RNGType,
+    typename KeyType = typename RNGType::result_type>
+using is_seed_seq = std::integral_constant<bool, std::is_class<T>::value &&
+        !std::is_convertible<T, RNGType>::value &&
+        !std::is_convertible<T, typename RNGType::result_type>::value &&
+        !std::is_convertible<T, KeyType>::value>;
 
 } // namespace mckl::internal
 
