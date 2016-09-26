@@ -31,44 +31,70 @@
 
 PROJECT(MCKLExample-random CXX)
 
-SET(MCKL_RNG ${MCKL_RNG} Philox2x32 Philox4x32 Philox2x64 Philox4x64)
-SET(MCKL_RNG ${MCKL_RNG} Threefry2x32 Threefry4x32 Threefry2x64 Threefry4x64)
-SET(MCKL_RNG ${MCKL_RNG} Threefry8x64 Threefry16x64)
-SET(MCKL_RNG ${MCKL_RNG} Threefish256 Threefish512 Threefish1024)
+SET(MCKL_RNG_STD
+    mt19937
+    mt19937_64
+    minstd_rand0
+    minstd_rand
+    ranlux24_base
+    ranlux48_base
+    ranlux24
+    ranlux48
+    knuth_b)
+
+SET(MCKL_RNG_PHILOX
+    Philox2x32 Philox2x32_64
+    Philox4x32 Philox4x32_64
+    Philox2x64 Philox2x64_64
+    Philox4x64 Philox4x64_64)
+
+SET(MCKL_RNG_THREEFRY
+    Threefry2x32  Threefry2x32_64
+    Threefry4x32  Threefry4x32_64
+    Threefry2x64  Threefry2x64_64
+    Threefry4x64  Threefry4x64_64
+    Threefry8x64  Threefry8x64_64
+    Threefry16x64 Threefry16x64_64
+    Threefish256  Threefish256_64
+    Threefish512  Threefish512_64
+    Threefish1024 Threefish1024_64)
 
 IF(AESNI_FOUND)
-    SET(MCKL_RNG ${MCKL_RNG} AES128 AES192 AES256 ARS)
+    SET(MCKL_RNG_AESNI
+        AES128 AES128_64
+        AES192 AES192_64
+        AES256 AES256_64
+        ARS    ARS_64)
 ENDIF(AESNI_FOUND)
 
 IF(MKL_FOUND)
-    SET(MCKL_RNG ${MCKL_RNG} MKL_MCG59)
-    SET(MCKL_RNG ${MCKL_RNG} MKL_MT19937 MKL_MT2203 MKL_SFMT19937)
-    SET(MCKL_RNG ${MCKL_RNG} MKL_PHILOX4X32X10)
+    SET(MCKL_MKL_RNG
+        MKL_MCG59          MKL_MCG59_64
+        MKL_MT19937        MKL_MT19937_64
+        MKL_MT2203         MKL_MT2203_64
+        MKL_SFMT19937      MKL_SFMT19937_64
+        MKL_PHILOX4X32X10  MKL_PHILOX4X32X10_64)
 ENDIF(MKL_FOUND)
 
 IF(AESNI_FOUND AND MKL_FOUND)
-    SET(MCKL_RNG ${MCKL_RNG} MKL_ARS5)
+    SET(MCKL_RNG_MKL ${MCKL_RNG_MKL} MKL_ARS5 MKL_ARS5_64)
 ENDIF(AESNI_FOUND AND MKL_FOUND)
 
 IF(RDRAND_FOUND AND MKL_FOUND)
-    SET(MCKL_RNG ${MCKL_RNG} MKL_NONDETERM)
+    SET(MCKL_RNG_MKL ${MCKL_RNG_MKL} MKL_NONDETERM MKL_NONDETERM_64)
 ENDIF(RDRAND_FOUND AND MKL_FOUND)
 
-FOREACH(RNG ${MCKL_RNG})
-    SET(MCKL_RNG_64 ${MCKL_RNG_64} ${RNG}_64)
-ENDFOREACH(RNG ${MCKL_RNG})
-
-SET(MCKL_RNG ${MCKL_RNG} ${MCKL_RNG_64})
-
 IF(RDRAND_FOUND)
-    SET(MCKL_RNG ${MCKL_RNG} RDRAND16 RDRAND32 RDRAND64)
+    SET(MCKL_RNG_RDRAND RDRAND16 RDRAND32 RDRAND64)
 ENDIF(RDRAND_FOUND)
 
-SET(STD_RNG ${STD_RNG} mt19937 mt19937_64)
-SET(STD_RNG ${STD_RNG} minstd_rand0 minstd_rand)
-SET(STD_RNG ${STD_RNG} ranlux24_base ranlux48_base)
-SET(STD_RNG ${STD_RNG} ranlux24 ranlux48)
-SET(STD_RNG ${STD_RNG} knuth_b)
+SET(MCKL_RNG
+    ${MCKL_RNG_STD}
+    ${MCKL_RNG_PHILOX}
+    ${MCKL_RNG_THREEFRY}
+    ${MCKL_RNG_AESNI}
+    ${MCKL_RNG_MKL}
+    ${MCKL_RNG_RDRAND})
 
 MCKL_ADD_EXAMPLE(random)
 
@@ -99,16 +125,51 @@ FOREACH(RNG ${MCKL_RNG})
     ADD_DEPENDENCIES(random_rng-check random_rng_${name}-check)
 ENDFOREACH(RNG ${MCKL_RNG})
 
-FOREACH(RNG ${STD_RNG})
-    SET(RNGType ::std::${RNG})
-    SET(Name ${RNG})
+ADD_CUSTOM_TARGET(random_rng_philox)
+ADD_CUSTOM_TARGET(random_rng_philox-check)
+FOREACH(RNG ${MCKL_RNG_PHILOX})
     STRING(TOLOWER ${RNG} name)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng.cpp.in
-        ${PROJECT_SOURCE_DIR}/src/random_rng_${name}.cpp)
-    MCKL_ADD_TEST(random rng_${name})
-    ADD_DEPENDENCIES(random_rng random_rng_${name})
-    ADD_DEPENDENCIES(random_rng-check random_rng_${name}-check)
-ENDFOREACH(RNG ${STD_RNG})
+    ADD_DEPENDENCIES(random_rng_philox random_rng_${name})
+    ADD_DEPENDENCIES(random_rng_philox-check random_rng_${name}-check)
+ENDFOREACH(RNG ${MCKL_RNG_PHILOX})
+
+ADD_CUSTOM_TARGET(random_rng_threefry)
+ADD_CUSTOM_TARGET(random_rng_threefry-check)
+FOREACH(RNG ${MCKL_RNG_THREEFRY})
+    STRING(TOLOWER ${RNG} name)
+    ADD_DEPENDENCIES(random_rng_threefry random_rng_${name})
+    ADD_DEPENDENCIES(random_rng_threefry-check random_rng_${name}-check)
+ENDFOREACH(RNG ${MCKL_RNG_THREEFRY})
+
+IF(AESNI_FOUND)
+    ADD_CUSTOM_TARGET(random_rng_aesni)
+    ADD_CUSTOM_TARGET(random_rng_aesni-check)
+    FOREACH(RNG ${MCKL_RNG_AESNI})
+        STRING(TOLOWER ${RNG} name)
+        ADD_DEPENDENCIES(random_rng_aesni random_rng_${name})
+        ADD_DEPENDENCIES(random_rng_aesni-check random_rng_${name}-check)
+    ENDFOREACH(RNG ${MCKL_RNG_AESNI})
+ENDIF(AESNI_FOUND)
+
+IF(MKL_FOUND)
+    ADD_CUSTOM_TARGET(random_rng_mkl)
+    ADD_CUSTOM_TARGET(random_rng_mkl-check)
+    FOREACH(RNG ${MCKL_RNG_MKL})
+        STRING(TOLOWER ${RNG} name)
+        ADD_DEPENDENCIES(random_rng_mkl random_rng_${name})
+        ADD_DEPENDENCIES(random_rng_mkl-check random_rng_${name}-check)
+    ENDFOREACH(RNG ${MCKL_RNG_MKL})
+ENDIF(MKL_FOUND)
+
+IF(RDRAND_FOUND)
+    ADD_CUSTOM_TARGET(random_rng_rdrand)
+    ADD_CUSTOM_TARGET(random_rng_rdrand-check)
+    FOREACH(RNG ${MCKL_RNG_RDRAND})
+        STRING(TOLOWER ${RNG} name)
+        ADD_DEPENDENCIES(random_rng_rdrand random_rng_${name})
+        ADD_DEPENDENCIES(random_rng_rdrand-check random_rng_${name}-check)
+    ENDFOREACH(RNG ${MCKL_RNG_RDRAND})
+ENDIF(RDRAND_FOUND)
 
 MCKL_ADD_FILE(random random_Philox2x32.txt)
 MCKL_ADD_FILE(random random_Philox2x64.txt)
