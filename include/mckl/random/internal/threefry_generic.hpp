@@ -98,6 +98,13 @@ class ThreefryPBox
         state = tmp;
     }
 
+    static void eval(T *state)
+    {
+        std::array<T, K> tmp;
+        eval<0>(state, tmp, std::integral_constant<bool, 0 < N>());
+        std::copy(tmp.begin(), tmp.end(), state);
+    }
+
     private:
     template <std::size_t>
     static void eval(
@@ -114,6 +121,20 @@ class ThreefryPBox
         std::get<I>(tmp) = std::get<P>(state);
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
     }
+
+    template <std::size_t>
+    static void eval(const T *, std::array<T, K> &, std::false_type)
+    {
+    }
+
+    template <std::size_t I>
+    static void eval(const T *state, std::array<T, K> &tmp, std::true_type)
+    {
+        static constexpr std::size_t P = Constants::permute[I];
+
+        std::get<I>(tmp) = state[P];
+        eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
+    }
 }; // class ThreefryPBox
 
 template <typename T, typename U, std::size_t N>
@@ -121,6 +142,8 @@ class ThreefryPBox<T, 2, N, ThreefryConstants<U, 2>>
 {
     public:
     static void eval(std::array<T, 2> &) {}
+
+    static void eval(T *) {}
 }; // class ThreefryPBox
 
 template <typename T, typename U, std::size_t N>
@@ -131,6 +154,8 @@ class ThreefryPBox<T, 4, N, ThreefryConstants<U, 4>>
     {
         std::swap(std::get<1>(state), std::get<3>(state));
     }
+
+    static void eval(T *state) { std::swap(state[1], state[3]); }
 }; // class ThreefryPBox
 
 template <typename T, typename U, std::size_t N>
@@ -147,6 +172,18 @@ class ThreefryPBox<T, 8, N, ThreefryConstants<U, 8>>
         std::get<4>(state) = std::get<6>(state);
         std::get<6>(state) = x0;
         std::get<7>(state) = x3;
+    }
+
+    static void eval(T *state)
+    {
+        T x0 = state[0];
+        T x3 = state[3];
+        state[0] = state[2];
+        state[2] = state[4];
+        state[3] = state[7];
+        state[4] = state[6];
+        state[6] = x0;
+        state[7] = x3;
     }
 }; // class ThreefryPBox
 
@@ -176,6 +213,30 @@ class ThreefryPBox<T, 16, N, ThreefryConstants<U, 16>>
         std::get<13>(state) = x5;
         std::get<14>(state) = x8;
         std::get<15>(state) = x1;
+    }
+
+    static void eval(T *state)
+    {
+        T x1 = state[1];
+        T x3 = state[3];
+        T x4 = state[4];
+        T x5 = state[5];
+        T x7 = state[7];
+        T x8 = state[8];
+        state[1] = state[9];
+        state[3] = state[13];
+        state[4] = state[6];
+        state[5] = state[11];
+        state[6] = x4;
+        state[7] = state[15];
+        state[8] = state[10];
+        state[9] = x7;
+        state[10] = state[12];
+        state[11] = x3;
+        state[12] = state[14];
+        state[13] = x5;
+        state[14] = x8;
+        state[15] = x1;
     }
 }; // class ThreefryPBox
 

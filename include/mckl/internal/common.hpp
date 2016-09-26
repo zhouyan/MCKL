@@ -284,6 +284,25 @@ inline std::basic_istream<CharT, Traits> &istream(
     return is;
 }
 
+#if MCKL_HAS_AVX2
+
+template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
+    std::size_t N>
+static void transpose4x64_si256(std::array<__m256i, N> &s)
+{
+    __m256i s0 = _mm256_unpacklo_epi64(std::get<i0>(s), std::get<i1>(s));
+    __m256i s1 = _mm256_unpacklo_epi64(std::get<i2>(s), std::get<i3>(s));
+    __m256i t0 = _mm256_unpackhi_epi64(std::get<i0>(s), std::get<i1>(s));
+    __m256i t1 = _mm256_unpackhi_epi64(std::get<i2>(s), std::get<i3>(s));
+
+    std::get<i0>(s) = _mm256_permute2x128_si256(s0, s1, 0x20);
+    std::get<i1>(s) = _mm256_permute2x128_si256(t0, t1, 0x20);
+    std::get<i2>(s) = _mm256_permute2x128_si256(s0, s1, 0x31);
+    std::get<i3>(s) = _mm256_permute2x128_si256(t0, t1, 0x31);
+}
+
+#endif // MCKL_HAS_AVX2
+
 } // namespace mckl::internal
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
