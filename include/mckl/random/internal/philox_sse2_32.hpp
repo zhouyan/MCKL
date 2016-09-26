@@ -36,7 +36,7 @@ class PhiloxGeneratorImplSSE2_32
     public:
     static constexpr bool batch() { return true; }
 
-    static constexpr std::size_t blocks() { return 32 / K; }
+    static constexpr std::size_t blocks() { return 64 / K; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
@@ -62,7 +62,7 @@ class PhiloxGeneratorImplSSE2_32
         __m128i m = _mm_set_epi32(0, m1, 0, m0);
         __m128i p = _mm_set_epi32(p1, 0, p0, 0);
 
-        std::array<__m128i, 8> s;
+        std::array<__m128i, 16> s;
         pack(state, s);
         Derived::permute_first(s);
 
@@ -92,13 +92,13 @@ class PhiloxGeneratorImplSSE2_32
 
     private:
     template <std::size_t>
-    static void eval(std::array<__m128i, 8> &, __m128i &, const __m128i &,
+    static void eval(std::array<__m128i, 16> &, __m128i &, const __m128i &,
         const __m128i &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m128i, 8> &s, __m128i &p, const __m128i &w,
+    static void eval(std::array<__m128i, 16> &s, __m128i &p, const __m128i &w,
         const __m128i &m, std::true_type)
     {
         kbox<N>(p, w);
@@ -108,7 +108,7 @@ class PhiloxGeneratorImplSSE2_32
     }
 
     static void pack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m128i, 8> &s)
+        std::array<__m128i, 16> &s)
     {
         const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
         std::get<0x0>(s) = _mm_load_si128(sptr++);
@@ -119,10 +119,18 @@ class PhiloxGeneratorImplSSE2_32
         std::get<0x5>(s) = _mm_load_si128(sptr++);
         std::get<0x6>(s) = _mm_load_si128(sptr++);
         std::get<0x7>(s) = _mm_load_si128(sptr++);
+        std::get<0x8>(s) = _mm_load_si128(sptr++);
+        std::get<0x9>(s) = _mm_load_si128(sptr++);
+        std::get<0xA>(s) = _mm_load_si128(sptr++);
+        std::get<0xB>(s) = _mm_load_si128(sptr++);
+        std::get<0xC>(s) = _mm_load_si128(sptr++);
+        std::get<0xD>(s) = _mm_load_si128(sptr++);
+        std::get<0xE>(s) = _mm_load_si128(sptr++);
+        std::get<0xF>(s) = _mm_load_si128(sptr++);
     }
 
     static void unpack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m128i, 8> &s)
+        std::array<__m128i, 16> &s)
     {
         __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         _mm_store_si128(sptr++, std::get<0x0>(s));
@@ -133,6 +141,14 @@ class PhiloxGeneratorImplSSE2_32
         _mm_store_si128(sptr++, std::get<0x5>(s));
         _mm_store_si128(sptr++, std::get<0x6>(s));
         _mm_store_si128(sptr++, std::get<0x7>(s));
+        _mm_store_si128(sptr++, std::get<0x8>(s));
+        _mm_store_si128(sptr++, std::get<0x9>(s));
+        _mm_store_si128(sptr++, std::get<0xA>(s));
+        _mm_store_si128(sptr++, std::get<0xB>(s));
+        _mm_store_si128(sptr++, std::get<0xC>(s));
+        _mm_store_si128(sptr++, std::get<0xD>(s));
+        _mm_store_si128(sptr++, std::get<0xE>(s));
+        _mm_store_si128(sptr++, std::get<0xF>(s));
     }
 
     template <std::size_t N>
@@ -150,20 +166,20 @@ class PhiloxGeneratorImplSSE2_32
 
     template <std::size_t N>
     static void spbox(
-        std::array<__m128i, 8> &s, const __m128i &p, const __m128i &m)
+        std::array<__m128i, 16> &s, const __m128i &p, const __m128i &m)
     {
         spbox<N>(
             s, p, m, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void spbox(std::array<__m128i, 8> &, const __m128i &,
+    static void spbox(std::array<__m128i, 16> &, const __m128i &,
         const __m128i &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void spbox(std::array<__m128i, 8> &s, const __m128i &p,
+    static void spbox(std::array<__m128i, 16> &s, const __m128i &p,
         const __m128i &m, std::true_type)
     {
         static constexpr int msk = static_cast<int>(0xFFFFFFFF);
@@ -178,6 +194,14 @@ class PhiloxGeneratorImplSSE2_32
         __m128i m5 = _mm_mul_epu32(std::get<0x5>(s), m);
         __m128i m6 = _mm_mul_epu32(std::get<0x6>(s), m);
         __m128i m7 = _mm_mul_epu32(std::get<0x7>(s), m);
+        __m128i m8 = _mm_mul_epu32(std::get<0x8>(s), m);
+        __m128i m9 = _mm_mul_epu32(std::get<0x9>(s), m);
+        __m128i mA = _mm_mul_epu32(std::get<0xA>(s), m);
+        __m128i mB = _mm_mul_epu32(std::get<0xB>(s), m);
+        __m128i mC = _mm_mul_epu32(std::get<0xC>(s), m);
+        __m128i mD = _mm_mul_epu32(std::get<0xD>(s), m);
+        __m128i mE = _mm_mul_epu32(std::get<0xE>(s), m);
+        __m128i mF = _mm_mul_epu32(std::get<0xF>(s), m);
 
         m0 = _mm_xor_si128(m0, p);
         m1 = _mm_xor_si128(m1, p);
@@ -187,6 +211,14 @@ class PhiloxGeneratorImplSSE2_32
         m5 = _mm_xor_si128(m5, p);
         m6 = _mm_xor_si128(m6, p);
         m7 = _mm_xor_si128(m7, p);
+        m8 = _mm_xor_si128(m8, p);
+        m9 = _mm_xor_si128(m9, p);
+        mA = _mm_xor_si128(mA, p);
+        mB = _mm_xor_si128(mB, p);
+        mC = _mm_xor_si128(mC, p);
+        mD = _mm_xor_si128(mD, p);
+        mE = _mm_xor_si128(mE, p);
+        mF = _mm_xor_si128(mF, p);
 
         std::get<0x0>(s) = _mm_and_si128(std::get<0x0>(s), mask);
         std::get<0x1>(s) = _mm_and_si128(std::get<0x1>(s), mask);
@@ -196,6 +228,14 @@ class PhiloxGeneratorImplSSE2_32
         std::get<0x5>(s) = _mm_and_si128(std::get<0x5>(s), mask);
         std::get<0x6>(s) = _mm_and_si128(std::get<0x6>(s), mask);
         std::get<0x7>(s) = _mm_and_si128(std::get<0x7>(s), mask);
+        std::get<0x8>(s) = _mm_and_si128(std::get<0x8>(s), mask);
+        std::get<0x9>(s) = _mm_and_si128(std::get<0x9>(s), mask);
+        std::get<0xA>(s) = _mm_and_si128(std::get<0xA>(s), mask);
+        std::get<0xB>(s) = _mm_and_si128(std::get<0xB>(s), mask);
+        std::get<0xC>(s) = _mm_and_si128(std::get<0xC>(s), mask);
+        std::get<0xD>(s) = _mm_and_si128(std::get<0xD>(s), mask);
+        std::get<0xE>(s) = _mm_and_si128(std::get<0xE>(s), mask);
+        std::get<0xF>(s) = _mm_and_si128(std::get<0xF>(s), mask);
 
         std::get<0x0>(s) = _mm_xor_si128(std::get<0x0>(s), m0);
         std::get<0x1>(s) = _mm_xor_si128(std::get<0x1>(s), m1);
@@ -205,19 +245,27 @@ class PhiloxGeneratorImplSSE2_32
         std::get<0x5>(s) = _mm_xor_si128(std::get<0x5>(s), m5);
         std::get<0x6>(s) = _mm_xor_si128(std::get<0x6>(s), m6);
         std::get<0x7>(s) = _mm_xor_si128(std::get<0x7>(s), m7);
+        std::get<0x8>(s) = _mm_xor_si128(std::get<0x8>(s), m8);
+        std::get<0x9>(s) = _mm_xor_si128(std::get<0x9>(s), m9);
+        std::get<0xA>(s) = _mm_xor_si128(std::get<0xA>(s), mA);
+        std::get<0xB>(s) = _mm_xor_si128(std::get<0xB>(s), mB);
+        std::get<0xC>(s) = _mm_xor_si128(std::get<0xC>(s), mC);
+        std::get<0xD>(s) = _mm_xor_si128(std::get<0xD>(s), mD);
+        std::get<0xE>(s) = _mm_xor_si128(std::get<0xE>(s), mE);
+        std::get<0xF>(s) = _mm_xor_si128(std::get<0xF>(s), mF);
 
         permute<N>(s);
     }
 
     template <std::size_t N>
-    static void permute(std::array<__m128i, 8> &s)
+    static void permute(std::array<__m128i, 16> &s)
     {
         permute(s, std::integral_constant<bool, (N > 0 && N < Rounds)>());
     }
 
-    static void permute(std::array<__m128i, 8> &, std::false_type) {}
+    static void permute(std::array<__m128i, 16> &, std::false_type) {}
 
-    static void permute(std::array<__m128i, 8> &s, std::true_type)
+    static void permute(std::array<__m128i, 16> &s, std::true_type)
     {
         Derived::permute(s);
     }
@@ -231,9 +279,9 @@ class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
     friend PhiloxGeneratorImplSSE2_32<T, 2, Rounds, Constants,
         PhiloxGeneratorImpl<T, 2, Rounds, Constants>>;
 
-    static void permute_first(std::array<__m128i, 8> &) {}
+    static void permute_first(std::array<__m128i, 16> &) {}
 
-    static void permute(std::array<__m128i, 8> &s)
+    static void permute(std::array<__m128i, 16> &s)
     {
         // 2 3 0 1
         std::get<0x0>(s) = _mm_shuffle_epi32(std::get<0x0>(s), 0xB1);
@@ -244,9 +292,17 @@ class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
         std::get<0x5>(s) = _mm_shuffle_epi32(std::get<0x5>(s), 0xB1);
         std::get<0x6>(s) = _mm_shuffle_epi32(std::get<0x6>(s), 0xB1);
         std::get<0x7>(s) = _mm_shuffle_epi32(std::get<0x7>(s), 0xB1);
+        std::get<0x8>(s) = _mm_shuffle_epi32(std::get<0x8>(s), 0xB1);
+        std::get<0x9>(s) = _mm_shuffle_epi32(std::get<0x9>(s), 0xB1);
+        std::get<0xA>(s) = _mm_shuffle_epi32(std::get<0xA>(s), 0xB1);
+        std::get<0xB>(s) = _mm_shuffle_epi32(std::get<0xB>(s), 0xB1);
+        std::get<0xC>(s) = _mm_shuffle_epi32(std::get<0xC>(s), 0xB1);
+        std::get<0xD>(s) = _mm_shuffle_epi32(std::get<0xD>(s), 0xB1);
+        std::get<0xE>(s) = _mm_shuffle_epi32(std::get<0xE>(s), 0xB1);
+        std::get<0xF>(s) = _mm_shuffle_epi32(std::get<0xF>(s), 0xB1);
     }
 
-    static void permute_last(std::array<__m128i, 8> &s)
+    static void permute_last(std::array<__m128i, 16> &s)
     {
         // 2 3 0 1
         std::get<0x0>(s) = _mm_shuffle_epi32(std::get<0x0>(s), 0xB1);
@@ -257,6 +313,14 @@ class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
         std::get<0x5>(s) = _mm_shuffle_epi32(std::get<0x5>(s), 0xB1);
         std::get<0x6>(s) = _mm_shuffle_epi32(std::get<0x6>(s), 0xB1);
         std::get<0x7>(s) = _mm_shuffle_epi32(std::get<0x7>(s), 0xB1);
+        std::get<0x8>(s) = _mm_shuffle_epi32(std::get<0x8>(s), 0xB1);
+        std::get<0x9>(s) = _mm_shuffle_epi32(std::get<0x9>(s), 0xB1);
+        std::get<0xA>(s) = _mm_shuffle_epi32(std::get<0xA>(s), 0xB1);
+        std::get<0xB>(s) = _mm_shuffle_epi32(std::get<0xB>(s), 0xB1);
+        std::get<0xC>(s) = _mm_shuffle_epi32(std::get<0xC>(s), 0xB1);
+        std::get<0xD>(s) = _mm_shuffle_epi32(std::get<0xD>(s), 0xB1);
+        std::get<0xE>(s) = _mm_shuffle_epi32(std::get<0xE>(s), 0xB1);
+        std::get<0xF>(s) = _mm_shuffle_epi32(std::get<0xF>(s), 0xB1);
     }
 }; // class PhiloxGeneratorImpl
 
@@ -268,7 +332,7 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
     friend PhiloxGeneratorImplSSE2_32<T, 4, Rounds, Constants,
         PhiloxGeneratorImpl<T, 4, Rounds, Constants>>;
 
-    static void permute_first(std::array<__m128i, 8> &s)
+    static void permute_first(std::array<__m128i, 16> &s)
     {
         // 3 0 1 2
         std::get<0x0>(s) = _mm_shuffle_epi32(std::get<0x0>(s), 0xC6);
@@ -279,9 +343,17 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
         std::get<0x5>(s) = _mm_shuffle_epi32(std::get<0x5>(s), 0xC6);
         std::get<0x6>(s) = _mm_shuffle_epi32(std::get<0x6>(s), 0xC6);
         std::get<0x7>(s) = _mm_shuffle_epi32(std::get<0x7>(s), 0xC6);
+        std::get<0x8>(s) = _mm_shuffle_epi32(std::get<0x8>(s), 0xC6);
+        std::get<0x9>(s) = _mm_shuffle_epi32(std::get<0x9>(s), 0xC6);
+        std::get<0xA>(s) = _mm_shuffle_epi32(std::get<0xA>(s), 0xC6);
+        std::get<0xB>(s) = _mm_shuffle_epi32(std::get<0xB>(s), 0xC6);
+        std::get<0xC>(s) = _mm_shuffle_epi32(std::get<0xC>(s), 0xC6);
+        std::get<0xD>(s) = _mm_shuffle_epi32(std::get<0xD>(s), 0xC6);
+        std::get<0xE>(s) = _mm_shuffle_epi32(std::get<0xE>(s), 0xC6);
+        std::get<0xF>(s) = _mm_shuffle_epi32(std::get<0xF>(s), 0xC6);
     }
 
-    static void permute(std::array<__m128i, 8> &s)
+    static void permute(std::array<__m128i, 16> &s)
     {
         // 2 1 0 3
         std::get<0x0>(s) = _mm_shuffle_epi32(std::get<0x0>(s), 0x93);
@@ -292,9 +364,17 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
         std::get<0x5>(s) = _mm_shuffle_epi32(std::get<0x5>(s), 0x93);
         std::get<0x6>(s) = _mm_shuffle_epi32(std::get<0x6>(s), 0x93);
         std::get<0x7>(s) = _mm_shuffle_epi32(std::get<0x7>(s), 0x93);
+        std::get<0x8>(s) = _mm_shuffle_epi32(std::get<0x8>(s), 0x93);
+        std::get<0x9>(s) = _mm_shuffle_epi32(std::get<0x9>(s), 0x93);
+        std::get<0xA>(s) = _mm_shuffle_epi32(std::get<0xA>(s), 0x93);
+        std::get<0xB>(s) = _mm_shuffle_epi32(std::get<0xB>(s), 0x93);
+        std::get<0xC>(s) = _mm_shuffle_epi32(std::get<0xC>(s), 0x93);
+        std::get<0xD>(s) = _mm_shuffle_epi32(std::get<0xD>(s), 0x93);
+        std::get<0xE>(s) = _mm_shuffle_epi32(std::get<0xE>(s), 0x93);
+        std::get<0xF>(s) = _mm_shuffle_epi32(std::get<0xF>(s), 0x93);
     }
 
-    static void permute_last(std::array<__m128i, 8> &s)
+    static void permute_last(std::array<__m128i, 16> &s)
     {
         // 2 3 0 1
         std::get<0x0>(s) = _mm_shuffle_epi32(std::get<0x0>(s), 0xB1);
@@ -305,5 +385,13 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
         std::get<0x5>(s) = _mm_shuffle_epi32(std::get<0x5>(s), 0xB1);
         std::get<0x6>(s) = _mm_shuffle_epi32(std::get<0x6>(s), 0xB1);
         std::get<0x7>(s) = _mm_shuffle_epi32(std::get<0x7>(s), 0xB1);
+        std::get<0x8>(s) = _mm_shuffle_epi32(std::get<0x8>(s), 0xB1);
+        std::get<0x9>(s) = _mm_shuffle_epi32(std::get<0x9>(s), 0xB1);
+        std::get<0xA>(s) = _mm_shuffle_epi32(std::get<0xA>(s), 0xB1);
+        std::get<0xB>(s) = _mm_shuffle_epi32(std::get<0xB>(s), 0xB1);
+        std::get<0xC>(s) = _mm_shuffle_epi32(std::get<0xC>(s), 0xB1);
+        std::get<0xD>(s) = _mm_shuffle_epi32(std::get<0xD>(s), 0xB1);
+        std::get<0xE>(s) = _mm_shuffle_epi32(std::get<0xE>(s), 0xB1);
+        std::get<0xF>(s) = _mm_shuffle_epi32(std::get<0xF>(s), 0xB1);
     }
 }; // class PhiloxGeneratorImpl
