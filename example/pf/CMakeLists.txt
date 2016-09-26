@@ -34,8 +34,8 @@ PROJECT(MCKLExample-pf CXX)
 MCKL_ADD_EXAMPLE(pf)
 
 MCKL_ADD_TEST(pf core)
-MCKL_ADD_TEST(pf cv)
-MCKL_ADD_TEST(pf smp)
+MCKL_ADD_TEST(pf cv "OpenMP")
+MCKL_ADD_TEST(pf smp "OpenMP")
 MCKL_ADD_TEST(pf truth)
 
 MCKL_ADD_FILE(pf pf_cv.R)

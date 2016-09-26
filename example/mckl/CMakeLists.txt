@@ -37,7 +37,7 @@ FUNCTION(MCKL_ADD_HEADER_TEST basepath cond)
         CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/mckl.cpp
             ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
         MCKL_ADD_EXECUTABLE(${basename}_hpp
-            ${PROJECT_BINARY_DIR}/src/${basename}.cpp)
+            ${PROJECT_BINARY_DIR}/src/${basename}.cpp "OpenMP")
         ADD_DEPENDENCIES(mckl ${basename}_hpp)
 
         ADD_CUSTOM_TARGET(${basename}_hpp-check

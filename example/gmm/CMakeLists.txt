@@ -33,6 +33,6 @@ PROJECT(MCKLExample-gmm CXX)
 
 MCKL_ADD_EXAMPLE(gmm)
 
-MCKL_ADD_TEST(gmm ps)
+MCKL_ADD_TEST(gmm ps "OpenMP")
 
 MCKL_ADD_FILE(gmm gmm.data)

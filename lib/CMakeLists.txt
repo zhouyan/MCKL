@@ -60,7 +60,7 @@ FOREACH(name ${MCKL_LIB_NAME})
         ADD_LIBRARY(lib${name}_${type} ${TYPE} ${MCKL_LIB_SOURCE_${NAME}})
         SET_TARGET_PROPERTIES(lib${name}_${type}
             PROPERTIES OUTPUT_NAME ${name})
-        MCKL_LINK_TARGET(lib${name}_${type})
+        MCKL_LINK_TARGET(lib${name}_${type} "OpenMP")
         ADD_DEPENDENCIES(lib${name} lib${name}_${type})
         INSTALL(TARGETS lib${name}_${type} DESTINATION ${MCKL_INSTALL_LIB_DIR})
     ENDFOREACH(type ${MCKL_LIB_TYPE})

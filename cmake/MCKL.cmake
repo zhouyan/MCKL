@@ -44,12 +44,12 @@ FUNCTION(MCKL_LINK_TARGET target)
         UNSET(link_flags)
     ENDIF(NOT link_flags)
 
-    IF(OPENMP_FOUND)
+    IF("${ARGN}" MATCHES "OpenMP" AND OPENMP_FOUND)
         SET(compile_flags "${compile_flags} ${OpenMP_CXX_FLAGS}")
         IF(NOT MSVC)
             SET(link_flags "${link_flags} ${OpenMP_CXX_FLAGS}")
         ENDIF(NOT MSVC)
-    ENDIF(OPENMP_FOUND)
+    ENDIF("${ARGN}" MATCHES "OpenMP" AND OPENMP_FOUND)
 
     IF(NOT MKL_FOUND)
         SET(link_flags "${link_flags} ${BLAS_LINKER_FLAGS}")
@@ -68,7 +68,7 @@ ENDFUNCTION(MCKL_LINK_TARGET)
 
 FUNCTION(MCKL_ADD_EXECUTABLE exe src)
     ADD_EXECUTABLE(${exe} ${src})
-    MCKL_LINK_TARGET(${exe})
+    MCKL_LINK_TARGET(${exe} ${ARGN})
 ENDFUNCTION(MCKL_ADD_EXECUTABLE)
 
 FUNCTION(MCKL_ADD_EXAMPLE basename)
@@ -86,7 +86,7 @@ ENDFUNCTION(MCKL_ADD_EXAMPLE)
 
 FUNCTION(MCKL_ADD_TEST basename testname)
     MCKL_ADD_EXECUTABLE(${basename}_${testname}
-        ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp)
+        ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp ${ARGN})
     ADD_DEPENDENCIES(${basename} ${basename}_${testname})
     ADD_CUSTOM_TARGET(${basename}_${testname}-check
         DEPENDS ${basename}_${testname} ${basename}-files
@@ -166,9 +166,11 @@ IF(NOT DEFINED OPENMP_FOUND)
 ENDIF(NOT DEFINED OPENMP_FOUND)
 IF(OPENMP_FOUND)
     SET(BACKENDS ${BACKENDS} "OpenMP")
+    SET(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_OMP=1)
     SET(OPENMP_FOUND TRUE CACHE BOOL "Found OpenMP")
 ELSE(OPENMP_FOUND)
     UNSET(OPENMP_FOUND CACHE)
+    SET(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_OMP=0)
     SET(OPENMP_FOUND FALSE CACHE BOOL "NOT Found OpenMP")
 ENDIF(OPENMP_FOUND)
 
