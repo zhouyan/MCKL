@@ -115,11 +115,6 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void uniform_int_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, IntType a, IntType b)
 {
-    using UIntType = typename std::make_unsigned<IntType>::type;
-
-    static constexpr IntType imin = std::numeric_limits<IntType>::min();
-    static constexpr IntType imax = std::numeric_limits<IntType>::max();
-
     if (a == b) {
         std::fill_n(r, n, a);
         return;

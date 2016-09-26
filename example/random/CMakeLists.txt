@@ -31,7 +31,7 @@
 
 PROJECT(MCKLExample-random CXX)
 
-SET(MCKL_RNG_STD
+SET(STD_RNG
     mt19937
     mt19937_64
     minstd_rand0
@@ -89,7 +89,6 @@ IF(RDRAND_FOUND)
 ENDIF(RDRAND_FOUND)
 
 SET(MCKL_RNG
-    ${MCKL_RNG_STD}
     ${MCKL_RNG_PHILOX}
     ${MCKL_RNG_THREEFRY}
     ${MCKL_RNG_AESNI}
@@ -123,6 +122,21 @@ FOREACH(RNG ${MCKL_RNG})
     MCKL_ADD_TEST(random rng_${name})
     ADD_DEPENDENCIES(random_rng random_rng_${name})
     ADD_DEPENDENCIES(random_rng-check random_rng_${name}-check)
+ENDFOREACH(RNG ${MCKL_RNG})
+
+ADD_CUSTOM_TARGET(random_rng_std)
+ADD_CUSTOM_TARGET(random_rng_std-check)
+FOREACH(RNG ${STD_RNG})
+    SET(RNGType std::${RNG})
+    SET(Name ${RNG})
+    STRING(TOLOWER ${RNG} name)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng.cpp.in
+        ${PROJECT_SOURCE_DIR}/src/random_rng_${name}.cpp)
+    MCKL_ADD_TEST(random rng_${name})
+    ADD_DEPENDENCIES(random_rng random_rng_${name})
+    ADD_DEPENDENCIES(random_rng-check random_rng_${name}-check)
+    ADD_DEPENDENCIES(random_rng_std random_rng_${name})
+    ADD_DEPENDENCIES(random_rng_std-check random_rng_${name}-check)
 ENDFOREACH(RNG ${MCKL_RNG})
 
 ADD_CUSTOM_TARGET(random_rng_philox)
