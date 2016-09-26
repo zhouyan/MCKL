@@ -284,6 +284,35 @@ inline std::basic_istream<CharT, Traits> &istream(
     return is;
 }
 
+#if MCKL_HAS_SSE2
+
+template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
+    std::size_t N>
+static void transpose4x32_si128(std::array<__m128i, N> &s)
+{
+    __m128i s0 = _mm_unpacklo_epi32(std::get<i0>(s), std::get<i1>(s));
+    __m128i s1 = _mm_unpacklo_epi32(std::get<i2>(s), std::get<i3>(s));
+    __m128i t0 = _mm_unpackhi_epi32(std::get<i0>(s), std::get<i1>(s));
+    __m128i t1 = _mm_unpackhi_epi32(std::get<i2>(s), std::get<i3>(s));
+
+    std::get<i0>(s) = _mm_unpacklo_epi64(s0, s1);
+    std::get<i1>(s) = _mm_unpackhi_epi64(s0, s1);
+    std::get<i2>(s) = _mm_unpacklo_epi64(t0, t1);
+    std::get<i3>(s) = _mm_unpackhi_epi64(t0, t1);
+}
+
+template <std::size_t i0, std::size_t i1, std::size_t N>
+static void transpose2x64_si128(std::array<__m128i, N> &s)
+{
+    __m128i s0 = _mm_unpacklo_epi64(std::get<i0>(s), std::get<i1>(s));
+    __m128i t0 = _mm_unpackhi_epi64(std::get<i0>(s), std::get<i1>(s));
+
+    std::get<i0>(s) = s0;
+    std::get<i1>(s) = t0;
+}
+
+#endif // MCKL_HAS_SSE2
+
 #if MCKL_HAS_AVX2
 
 template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,

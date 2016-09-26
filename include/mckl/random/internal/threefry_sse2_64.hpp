@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/threefry32_avx2.hpp
+// MCKL/include/mckl/random/threefry_sse2_64.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -30,7 +30,7 @@
 //============================================================================
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 {
     public:
     static constexpr bool batch()
@@ -43,7 +43,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
     static constexpr std::size_t blocks()
     {
         return K != 0 && 16 % K == 0 ?
-            128 / K :
+            32 / K :
             ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::blocks();
     }
 
@@ -73,7 +73,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
     static void eval(std::array<std::array<T, K>, blocks()> &state,
         const std::array<T, K + 1> &par, std::true_type)
     {
-        std::array<__m256i, 16> s;
+        std::array<__m128i, 16> s;
         pack(state, s);
 
         // clang-format off
@@ -116,13 +116,13 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
     }
 
     template <std::size_t>
-    static void eval(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
+    static void eval(std::array<__m128i, 16> &, const std::array<T, K + 1> &,
         std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m256i, 16> &s,
+    static void eval(std::array<__m128i, 16> &s,
         const std::array<T, K + 1> &par, std::true_type)
     {
         sbox<N>(s);
@@ -132,123 +132,135 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
     }
 
     static void pack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m256i, 16> &s)
+        std::array<__m128i, 16> &s)
     {
-        const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
-        std::get<0x0>(s) = _mm256_load_si256(sptr++);
-        std::get<0x8>(s) = _mm256_load_si256(sptr++);
-        std::get<0x1>(s) = _mm256_load_si256(sptr++);
-        std::get<0x9>(s) = _mm256_load_si256(sptr++);
-        std::get<0x2>(s) = _mm256_load_si256(sptr++);
-        std::get<0xA>(s) = _mm256_load_si256(sptr++);
-        std::get<0x3>(s) = _mm256_load_si256(sptr++);
-        std::get<0xB>(s) = _mm256_load_si256(sptr++);
-        std::get<0x4>(s) = _mm256_load_si256(sptr++);
-        std::get<0xC>(s) = _mm256_load_si256(sptr++);
-        std::get<0x5>(s) = _mm256_load_si256(sptr++);
-        std::get<0xD>(s) = _mm256_load_si256(sptr++);
-        std::get<0x6>(s) = _mm256_load_si256(sptr++);
-        std::get<0xE>(s) = _mm256_load_si256(sptr++);
-        std::get<0x7>(s) = _mm256_load_si256(sptr++);
-        std::get<0xF>(s) = _mm256_load_si256(sptr++);
+        const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
+        std::get<0x0>(s) = _mm_load_si128(sptr++);
+        std::get<0x2>(s) = _mm_load_si128(sptr++);
+        std::get<0x4>(s) = _mm_load_si128(sptr++);
+        std::get<0x6>(s) = _mm_load_si128(sptr++);
+        std::get<0x8>(s) = _mm_load_si128(sptr++);
+        std::get<0xA>(s) = _mm_load_si128(sptr++);
+        std::get<0xC>(s) = _mm_load_si128(sptr++);
+        std::get<0xE>(s) = _mm_load_si128(sptr++);
+        std::get<0x1>(s) = _mm_load_si128(sptr++);
+        std::get<0x3>(s) = _mm_load_si128(sptr++);
+        std::get<0x5>(s) = _mm_load_si128(sptr++);
+        std::get<0x7>(s) = _mm_load_si128(sptr++);
+        std::get<0x9>(s) = _mm_load_si128(sptr++);
+        std::get<0xB>(s) = _mm_load_si128(sptr++);
+        std::get<0xD>(s) = _mm_load_si128(sptr++);
+        std::get<0xF>(s) = _mm_load_si128(sptr++);
 
-        transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
-        transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
+        transpose2x64_si128<0x0, 0x1>(s);
+        transpose2x64_si128<0x2, 0x3>(s);
+        transpose2x64_si128<0x4, 0x5>(s);
+        transpose2x64_si128<0x6, 0x7>(s);
+        transpose2x64_si128<0x8, 0x9>(s);
+        transpose2x64_si128<0xA, 0xB>(s);
+        transpose2x64_si128<0xC, 0xD>(s);
+        transpose2x64_si128<0xE, 0xF>(s);
     }
 
     static void unpack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m256i, 16> &s)
+        std::array<__m128i, 16> &s)
     {
-        transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
-        transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
+        transpose2x64_si128<0x0, 0x1>(s);
+        transpose2x64_si128<0x2, 0x3>(s);
+        transpose2x64_si128<0x4, 0x5>(s);
+        transpose2x64_si128<0x6, 0x7>(s);
+        transpose2x64_si128<0x8, 0x9>(s);
+        transpose2x64_si128<0xA, 0xB>(s);
+        transpose2x64_si128<0xC, 0xD>(s);
+        transpose2x64_si128<0xE, 0xF>(s);
 
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        _mm256_store_si256(sptr++, std::get<0x0>(s));
-        _mm256_store_si256(sptr++, std::get<0x8>(s));
-        _mm256_store_si256(sptr++, std::get<0x1>(s));
-        _mm256_store_si256(sptr++, std::get<0x9>(s));
-        _mm256_store_si256(sptr++, std::get<0x2>(s));
-        _mm256_store_si256(sptr++, std::get<0xA>(s));
-        _mm256_store_si256(sptr++, std::get<0x3>(s));
-        _mm256_store_si256(sptr++, std::get<0xB>(s));
-        _mm256_store_si256(sptr++, std::get<0x4>(s));
-        _mm256_store_si256(sptr++, std::get<0xC>(s));
-        _mm256_store_si256(sptr++, std::get<0x5>(s));
-        _mm256_store_si256(sptr++, std::get<0xD>(s));
-        _mm256_store_si256(sptr++, std::get<0x6>(s));
-        _mm256_store_si256(sptr++, std::get<0xE>(s));
-        _mm256_store_si256(sptr++, std::get<0x7>(s));
-        _mm256_store_si256(sptr++, std::get<0xF>(s));
+        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
+        _mm_store_si128(sptr++, std::get<0x0>(s));
+        _mm_store_si128(sptr++, std::get<0x2>(s));
+        _mm_store_si128(sptr++, std::get<0x4>(s));
+        _mm_store_si128(sptr++, std::get<0x6>(s));
+        _mm_store_si128(sptr++, std::get<0x8>(s));
+        _mm_store_si128(sptr++, std::get<0xA>(s));
+        _mm_store_si128(sptr++, std::get<0xC>(s));
+        _mm_store_si128(sptr++, std::get<0xE>(s));
+        _mm_store_si128(sptr++, std::get<0x1>(s));
+        _mm_store_si128(sptr++, std::get<0x3>(s));
+        _mm_store_si128(sptr++, std::get<0x5>(s));
+        _mm_store_si128(sptr++, std::get<0x7>(s));
+        _mm_store_si128(sptr++, std::get<0x9>(s));
+        _mm_store_si128(sptr++, std::get<0xB>(s));
+        _mm_store_si128(sptr++, std::get<0xD>(s));
+        _mm_store_si128(sptr++, std::get<0xF>(s));
     }
 
     template <std::size_t N>
     static void kbox(
-        std::array<__m256i, 16> &s, const std::array<T, K + 1> &par)
+        std::array<__m128i, 16> &s, const std::array<T, K + 1> &par)
     {
         kbox<N>(s, par,
             std::integral_constant<bool, (N % 4 == 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void kbox(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
+    static void kbox(std::array<__m128i, 16> &, const std::array<T, K + 1> &,
         std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void kbox(std::array<__m256i, 16> &s,
+    static void kbox(std::array<__m128i, 16> &s,
         const std::array<T, K + 1> &par, std::true_type)
     {
-        std::array<__m256i, K> k;
+        std::array<__m128i, K> k;
         set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
 
         std::get<0x0>(s) =
-            _mm256_add_epi32(std::get<0x0>(s), std::get<0x0 % K>(k));
+            _mm_add_epi64(std::get<0x0>(s), std::get<0x0 % K>(k));
         std::get<0x1>(s) =
-            _mm256_add_epi32(std::get<0x1>(s), std::get<0x1 % K>(k));
+            _mm_add_epi64(std::get<0x1>(s), std::get<0x1 % K>(k));
         std::get<0x2>(s) =
-            _mm256_add_epi32(std::get<0x2>(s), std::get<0x2 % K>(k));
+            _mm_add_epi64(std::get<0x2>(s), std::get<0x2 % K>(k));
         std::get<0x3>(s) =
-            _mm256_add_epi32(std::get<0x3>(s), std::get<0x3 % K>(k));
+            _mm_add_epi64(std::get<0x3>(s), std::get<0x3 % K>(k));
         std::get<0x4>(s) =
-            _mm256_add_epi32(std::get<0x4>(s), std::get<0x4 % K>(k));
+            _mm_add_epi64(std::get<0x4>(s), std::get<0x4 % K>(k));
         std::get<0x5>(s) =
-            _mm256_add_epi32(std::get<0x5>(s), std::get<0x5 % K>(k));
+            _mm_add_epi64(std::get<0x5>(s), std::get<0x5 % K>(k));
         std::get<0x6>(s) =
-            _mm256_add_epi32(std::get<0x6>(s), std::get<0x6 % K>(k));
+            _mm_add_epi64(std::get<0x6>(s), std::get<0x6 % K>(k));
         std::get<0x7>(s) =
-            _mm256_add_epi32(std::get<0x7>(s), std::get<0x7 % K>(k));
+            _mm_add_epi64(std::get<0x7>(s), std::get<0x7 % K>(k));
         std::get<0x8>(s) =
-            _mm256_add_epi32(std::get<0x8>(s), std::get<0x8 % K>(k));
+            _mm_add_epi64(std::get<0x8>(s), std::get<0x8 % K>(k));
         std::get<0x9>(s) =
-            _mm256_add_epi32(std::get<0x9>(s), std::get<0x9 % K>(k));
+            _mm_add_epi64(std::get<0x9>(s), std::get<0x9 % K>(k));
         std::get<0xA>(s) =
-            _mm256_add_epi32(std::get<0xA>(s), std::get<0xA % K>(k));
+            _mm_add_epi64(std::get<0xA>(s), std::get<0xA % K>(k));
         std::get<0xB>(s) =
-            _mm256_add_epi32(std::get<0xB>(s), std::get<0xB % K>(k));
+            _mm_add_epi64(std::get<0xB>(s), std::get<0xB % K>(k));
         std::get<0xC>(s) =
-            _mm256_add_epi32(std::get<0xC>(s), std::get<0xC % K>(k));
+            _mm_add_epi64(std::get<0xC>(s), std::get<0xC % K>(k));
         std::get<0xD>(s) =
-            _mm256_add_epi32(std::get<0xD>(s), std::get<0xD % K>(k));
+            _mm_add_epi64(std::get<0xD>(s), std::get<0xD % K>(k));
         std::get<0xE>(s) =
-            _mm256_add_epi32(std::get<0xE>(s), std::get<0xE % K>(k));
+            _mm_add_epi64(std::get<0xE>(s), std::get<0xE % K>(k));
         std::get<0xF>(s) =
-            _mm256_add_epi32(std::get<0xF>(s), std::get<0xF % K>(k));
+            _mm_add_epi64(std::get<0xF>(s), std::get<0xF % K>(k));
     }
 
     template <std::size_t N>
-    static void sbox(std::array<__m256i, 16> &s)
+    static void sbox(std::array<__m128i, 16> &s)
     {
         sbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void sbox(std::array<__m256i, 16> &, std::false_type)
+    static void sbox(std::array<__m128i, 16> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void sbox(std::array<__m256i, 16> &s, std::true_type)
+    static void sbox(std::array<__m128i, 16> &s, std::true_type)
     {
         static constexpr int L0 = Constants::rotate[0 % (K / 2)][(N - 1) % 8];
         static constexpr int L1 = Constants::rotate[1 % (K / 2)][(N - 1) % 8];
@@ -258,102 +270,86 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         static constexpr int L5 = Constants::rotate[5 % (K / 2)][(N - 1) % 8];
         static constexpr int L6 = Constants::rotate[6 % (K / 2)][(N - 1) % 8];
         static constexpr int L7 = Constants::rotate[7 % (K / 2)][(N - 1) % 8];
-        static constexpr int R0 = 32 - L0;
-        static constexpr int R1 = 32 - L1;
-        static constexpr int R2 = 32 - L2;
-        static constexpr int R3 = 32 - L3;
-        static constexpr int R4 = 32 - L4;
-        static constexpr int R5 = 32 - L5;
-        static constexpr int R6 = 32 - L6;
-        static constexpr int R7 = 32 - L7;
+        static constexpr int R0 = 64 - L0;
+        static constexpr int R1 = 64 - L1;
+        static constexpr int R2 = 64 - L2;
+        static constexpr int R3 = 64 - L3;
+        static constexpr int R4 = 64 - L4;
+        static constexpr int R5 = 64 - L5;
+        static constexpr int R6 = 64 - L6;
+        static constexpr int R7 = 64 - L7;
 
-        std::get<0x0>(s) =
-            _mm256_add_epi32(std::get<0x0>(s), std::get<0x1>(s));
-        std::get<0x2>(s) =
-            _mm256_add_epi32(std::get<0x2>(s), std::get<0x3>(s));
-        std::get<0x4>(s) =
-            _mm256_add_epi32(std::get<0x4>(s), std::get<0x5>(s));
-        std::get<0x6>(s) =
-            _mm256_add_epi32(std::get<0x6>(s), std::get<0x7>(s));
-        std::get<0x8>(s) =
-            _mm256_add_epi32(std::get<0x8>(s), std::get<0x9>(s));
-        std::get<0xA>(s) =
-            _mm256_add_epi32(std::get<0xA>(s), std::get<0xB>(s));
-        std::get<0xC>(s) =
-            _mm256_add_epi32(std::get<0xC>(s), std::get<0xD>(s));
-        std::get<0xE>(s) =
-            _mm256_add_epi32(std::get<0xE>(s), std::get<0xF>(s));
+        std::get<0x0>(s) = _mm_add_epi64(std::get<0x0>(s), std::get<0x1>(s));
+        std::get<0x2>(s) = _mm_add_epi64(std::get<0x2>(s), std::get<0x3>(s));
+        std::get<0x4>(s) = _mm_add_epi64(std::get<0x4>(s), std::get<0x5>(s));
+        std::get<0x6>(s) = _mm_add_epi64(std::get<0x6>(s), std::get<0x7>(s));
+        std::get<0x8>(s) = _mm_add_epi64(std::get<0x8>(s), std::get<0x9>(s));
+        std::get<0xA>(s) = _mm_add_epi64(std::get<0xA>(s), std::get<0xB>(s));
+        std::get<0xC>(s) = _mm_add_epi64(std::get<0xC>(s), std::get<0xD>(s));
+        std::get<0xE>(s) = _mm_add_epi64(std::get<0xE>(s), std::get<0xF>(s));
 
-        __m256i l0 = _mm256_slli_epi32(std::get<0x1>(s), L0);
-        __m256i l1 = _mm256_slli_epi32(std::get<0x3>(s), L1);
-        __m256i l2 = _mm256_slli_epi32(std::get<0x5>(s), L2);
-        __m256i l3 = _mm256_slli_epi32(std::get<0x7>(s), L3);
-        __m256i l4 = _mm256_slli_epi32(std::get<0x9>(s), L4);
-        __m256i l5 = _mm256_slli_epi32(std::get<0xB>(s), L5);
-        __m256i l6 = _mm256_slli_epi32(std::get<0xD>(s), L6);
-        __m256i l7 = _mm256_slli_epi32(std::get<0xF>(s), L7);
+        __m128i l0 = _mm_slli_epi64(std::get<0x1>(s), L0);
+        __m128i l1 = _mm_slli_epi64(std::get<0x3>(s), L1);
+        __m128i l2 = _mm_slli_epi64(std::get<0x5>(s), L2);
+        __m128i l3 = _mm_slli_epi64(std::get<0x7>(s), L3);
+        __m128i l4 = _mm_slli_epi64(std::get<0x9>(s), L4);
+        __m128i l5 = _mm_slli_epi64(std::get<0xB>(s), L5);
+        __m128i l6 = _mm_slli_epi64(std::get<0xD>(s), L6);
+        __m128i l7 = _mm_slli_epi64(std::get<0xF>(s), L7);
 
-        __m256i r0 = _mm256_srli_epi32(std::get<0x1>(s), R0);
-        __m256i r1 = _mm256_srli_epi32(std::get<0x3>(s), R1);
-        __m256i r2 = _mm256_srli_epi32(std::get<0x5>(s), R2);
-        __m256i r3 = _mm256_srli_epi32(std::get<0x7>(s), R3);
-        __m256i r4 = _mm256_srli_epi32(std::get<0x9>(s), R4);
-        __m256i r5 = _mm256_srli_epi32(std::get<0xB>(s), R5);
-        __m256i r6 = _mm256_srli_epi32(std::get<0xD>(s), R6);
-        __m256i r7 = _mm256_srli_epi32(std::get<0xF>(s), R7);
+        __m128i r0 = _mm_srli_epi64(std::get<0x1>(s), R0);
+        __m128i r1 = _mm_srli_epi64(std::get<0x3>(s), R1);
+        __m128i r2 = _mm_srli_epi64(std::get<0x5>(s), R2);
+        __m128i r3 = _mm_srli_epi64(std::get<0x7>(s), R3);
+        __m128i r4 = _mm_srli_epi64(std::get<0x9>(s), R4);
+        __m128i r5 = _mm_srli_epi64(std::get<0xB>(s), R5);
+        __m128i r6 = _mm_srli_epi64(std::get<0xD>(s), R6);
+        __m128i r7 = _mm_srli_epi64(std::get<0xF>(s), R7);
 
-        std::get<0x1>(s) = _mm256_or_si256(l0, r0);
-        std::get<0x3>(s) = _mm256_or_si256(l1, r1);
-        std::get<0x5>(s) = _mm256_or_si256(l2, r2);
-        std::get<0x7>(s) = _mm256_or_si256(l3, r3);
-        std::get<0x9>(s) = _mm256_or_si256(l4, r4);
-        std::get<0xB>(s) = _mm256_or_si256(l5, r5);
-        std::get<0xD>(s) = _mm256_or_si256(l6, r6);
-        std::get<0xF>(s) = _mm256_or_si256(l7, r7);
+        std::get<0x1>(s) = _mm_or_si128(l0, r0);
+        std::get<0x3>(s) = _mm_or_si128(l1, r1);
+        std::get<0x5>(s) = _mm_or_si128(l2, r2);
+        std::get<0x7>(s) = _mm_or_si128(l3, r3);
+        std::get<0x9>(s) = _mm_or_si128(l4, r4);
+        std::get<0xB>(s) = _mm_or_si128(l5, r5);
+        std::get<0xD>(s) = _mm_or_si128(l6, r6);
+        std::get<0xF>(s) = _mm_or_si128(l7, r7);
 
-        std::get<0x1>(s) =
-            _mm256_xor_si256(std::get<0x0>(s), std::get<0x1>(s));
-        std::get<0x3>(s) =
-            _mm256_xor_si256(std::get<0x2>(s), std::get<0x3>(s));
-        std::get<0x5>(s) =
-            _mm256_xor_si256(std::get<0x4>(s), std::get<0x5>(s));
-        std::get<0x7>(s) =
-            _mm256_xor_si256(std::get<0x6>(s), std::get<0x7>(s));
-        std::get<0x9>(s) =
-            _mm256_xor_si256(std::get<0x8>(s), std::get<0x9>(s));
-        std::get<0xB>(s) =
-            _mm256_xor_si256(std::get<0xA>(s), std::get<0xB>(s));
-        std::get<0xD>(s) =
-            _mm256_xor_si256(std::get<0xC>(s), std::get<0xD>(s));
-        std::get<0xF>(s) =
-            _mm256_xor_si256(std::get<0xE>(s), std::get<0xF>(s));
+        std::get<0x1>(s) = _mm_xor_si128(std::get<0x0>(s), std::get<0x1>(s));
+        std::get<0x3>(s) = _mm_xor_si128(std::get<0x2>(s), std::get<0x3>(s));
+        std::get<0x5>(s) = _mm_xor_si128(std::get<0x4>(s), std::get<0x5>(s));
+        std::get<0x7>(s) = _mm_xor_si128(std::get<0x6>(s), std::get<0x7>(s));
+        std::get<0x9>(s) = _mm_xor_si128(std::get<0x8>(s), std::get<0x9>(s));
+        std::get<0xB>(s) = _mm_xor_si128(std::get<0xA>(s), std::get<0xB>(s));
+        std::get<0xD>(s) = _mm_xor_si128(std::get<0xC>(s), std::get<0xD>(s));
+        std::get<0xF>(s) = _mm_xor_si128(std::get<0xE>(s), std::get<0xF>(s));
     }
 
     template <std::size_t N>
-    static void pbox(std::array<__m256i, 16> &s)
+    static void pbox(std::array<__m128i, 16> &s)
     {
         pbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void pbox(std::array<__m256i, 16> &, std::false_type)
+    static void pbox(std::array<__m128i, 16> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void pbox(std::array<__m256i, 16> &s, std::true_type)
+    static void pbox(std::array<__m128i, 16> &s, std::true_type)
     {
         permute<N, 0>(s, std::integral_constant<bool, 0 < M_>());
     }
 
     template <std::size_t, std::size_t>
-    static void set_key(std::array<__m256i, K> &, const std::array<T, K + 1> &,
+    static void set_key(std::array<__m128i, K> &, const std::array<T, K + 1> &,
         std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t I>
-    static void set_key(std::array<__m256i, K> &k,
+    static void set_key(std::array<__m128i, K> &k,
         const std::array<T, K + 1> &par, std::true_type)
     {
         static constexpr std::size_t S = N / 4;
@@ -361,19 +357,19 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         static constexpr T p = I == K - 1 ? S : 0;
 
         std::get<I>(k) =
-            _mm256_set1_epi32(static_cast<int>(std::get<J>(par) + p));
+            _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<J>(par) + p));
         set_key<N, I + 1>(k, par, std::integral_constant<bool, I + 1 < K>());
     }
 
     template <std::size_t, std::size_t>
-    static void permute(std::array<__m256i, 16> &, std::false_type)
+    static void permute(std::array<__m128i, 16> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t I>
-    static void permute(std::array<__m256i, 16> &s, std::true_type)
+    static void permute(std::array<__m128i, 16> &s, std::true_type)
     {
-        ThreefryPBox<__m256i, K, N, Constants>::eval(s.data() + I * K);
+        ThreefryPBox<__m128i, K, N, Constants>::eval(s.data() + I * K);
         permute<N, I + 1>(s, std::integral_constant<bool, I + 1 < M_>());
     }
-}; // class ThreefryGeneratorAVX2Impl
+}; // class ThreefryGeneratorImpl

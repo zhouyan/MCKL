@@ -144,11 +144,12 @@ namespace internal
 {
 
 #include <mckl/random/internal/threefry_generic.hpp>
-
 #if MCKL_USE_AVX2
-#include <mckl/random/internal/threefry_avx2.hpp>
+#include <mckl/random/internal/threefry_avx2_32.hpp>
+#include <mckl/random/internal/threefry_avx2_64.hpp>
 #elif MCKL_USE_SSE2
-#include <mckl/random/internal/threefry_sse2.hpp>
+#include <mckl/random/internal/threefry_sse2_32.hpp>
+#include <mckl/random/internal/threefry_sse2_64.hpp>
 #endif
 
 } // namespace mckl::internal
