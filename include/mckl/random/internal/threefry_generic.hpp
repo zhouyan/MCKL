@@ -116,15 +116,15 @@ class ThreefryPBox
     }
 }; // class ThreefryPBox
 
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 2, N, ThreefryConstants<T, 2>>
+template <typename T, typename U, std::size_t N>
+class ThreefryPBox<T, 2, N, ThreefryConstants<U, 2>>
 {
     public:
     static void eval(std::array<T, 2> &) {}
 }; // class ThreefryPBox
 
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 4, N, ThreefryConstants<T, 4>>
+template <typename T, typename U, std::size_t N>
+class ThreefryPBox<T, 4, N, ThreefryConstants<U, 4>>
 {
     public:
     static void eval(std::array<T, 4> &state)
@@ -133,8 +133,8 @@ class ThreefryPBox<T, 4, N, ThreefryConstants<T, 4>>
     }
 }; // class ThreefryPBox
 
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 8, N, ThreefryConstants<T, 8>>
+template <typename T, typename U, std::size_t N>
+class ThreefryPBox<T, 8, N, ThreefryConstants<U, 8>>
 {
     public:
     static void eval(std::array<T, 8> &state)
@@ -150,8 +150,8 @@ class ThreefryPBox<T, 8, N, ThreefryConstants<T, 8>>
     }
 }; // class ThreefryPBox
 
-template <typename T, std::size_t N>
-class ThreefryPBox<T, 16, N, ThreefryConstants<T, 16>>
+template <typename T, typename U, std::size_t N>
+class ThreefryPBox<T, 16, N, ThreefryConstants<U, 16>>
 {
     public:
     static void eval(std::array<T, 16> &state)
