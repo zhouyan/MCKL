@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/counter.hpp>
+#include <mckl/random/threefry.hpp>
 
 namespace mckl
 {
@@ -191,6 +192,13 @@ class SeedGenerator
     result_type max_;
     result_type divisor_;
     result_type remainder_;
+
+    result_type get()
+    {
+        result_type s = seed_.fetch_add(1);
+
+        return (s % max_ + 1) * divisor_ + remainder_;
+    }
 }; // class SeedGenerator
 
 /// \brief Seed generator for use with RNG accepting fixed width keys as seeds
@@ -203,7 +211,9 @@ template <typename ResultType, std::size_t K, typename ID>
 class SeedGenerator<std::array<ResultType, K>, ID>
 {
     public:
-    using result_type = ResultType;
+    using result_type = typename std::conditional<K != 0 &&
+            sizeof(ResultType) * K % sizeof(std::uint64_t) == 0,
+        std::uint64_t, ResultType>::type;
     using key_type = std::array<ResultType, K>;
 
     SeedGenerator(
@@ -320,8 +330,12 @@ class SeedGenerator<std::array<ResultType, K>, ID>
     }
 
     private:
-    using dispatch_type =
-        std::integral_constant<bool, (std::tuple_size<key_type>::value > 1)>;
+    static constexpr std::size_t M_ =
+        K != 0 && sizeof(ResultType) * K % sizeof(std::uint64_t) == 0 ?
+        sizeof(ResultType) * K / sizeof(std::uint64_t) :
+        K;
+
+    using dispatch_type = std::integral_constant<bool, (M_ > 1)>;
 
     std::atomic<result_type> seed_;
     result_type max_;
@@ -356,22 +370,83 @@ class SeedGenerator<std::array<ResultType, K>, ID>
     key_type get(std::true_type)
     {
         result_type s = seed_.fetch_add(1);
-        key_type k;
-        std::fill(k.begin(), k.end(), 0);
+        std::array<result_type, M_> k = {{0}};
         k.front() = s + 1;
         k.back() = remainder_;
 
-        return k;
+        return enc(k, std::integral_constant<int,
+                          std::numeric_limits<result_type>::digits * M_>());
     }
 
     key_type get(std::false_type)
     {
         result_type s = seed_.fetch_add(1);
-        key_type k;
+        std::array<result_type, M_> k = {{0}};
         std::fill(k.begin(), k.end(), 0);
         k.front() = (s % max_ + 1) * divisor_ + remainder_;
 
-        return k;
+        return enc(k, std::integral_constant<int,
+                          std::numeric_limits<result_type>::digits * M_>());
+    }
+
+    template <int D>
+    key_type enc(
+        const std::array<result_type, M_> &k, std::integral_constant<int, D>)
+    {
+        union {
+            key_type key;
+            std::array<result_type, M_> k;
+        } buf;
+
+        buf.k = k;
+
+        return buf.key;
+    }
+
+    key_type enc(
+        const std::array<result_type, M_> &k, std::integral_constant<int, 64>)
+    {
+        return enc<Threefry2x32_64>(k);
+    }
+
+    key_type enc(
+        const std::array<result_type, M_> &k, std::integral_constant<int, 128>)
+    {
+        return enc<Threefry2x64_64>(k);
+    }
+
+    key_type enc(
+        const std::array<result_type, M_> &k, std::integral_constant<int, 256>)
+    {
+        return enc<Threefry4x64_64>(k);
+    }
+
+    key_type enc(
+        const std::array<result_type, M_> &k, std::integral_constant<int, 512>)
+    {
+        return enc<Threefry8x64_64>(k);
+    }
+
+    key_type enc(const std::array<result_type, M_> &k,
+        std::integral_constant<int, 1024>)
+    {
+        return enc<Threefry16x64_64>(k);
+    }
+
+    template <typename RNGType>
+    key_type enc(const std::array<result_type, M_> &k)
+    {
+        union {
+            std::array<result_type, M_> k;
+            typename RNGType::ctr_type ctr;
+            key_type key;
+        } buf;
+
+        buf.k = k;
+        RNGType rng;
+        rng.enc(buf.ctr, buf.ctr);
+
+        return buf.key;
     }
 }; // class Seed
 
