@@ -208,7 +208,7 @@ class IncrementBlock<T, 2, 32, 64>
         __m256i c5 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x0A, 0, 0x0A));
         __m256i c6 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x0C, 0, 0x0C));
         __m256i c7 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x0E, 0, 0x0E));
-        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x12, 0, 0x10));
+        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x10, 0, 0x10));
         __m256i c9 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x12, 0, 0x12));
         __m256i cA = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x14, 0, 0x14));
         __m256i cB = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x16, 0, 0x16));
