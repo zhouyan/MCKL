@@ -108,12 +108,24 @@ using PhiloxConstants =
 namespace internal
 {
 
-#include <mckl/random/internal/philox_generic.hpp>
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
 
+#include <mckl/random/internal/philox_generic.hpp>
 #if MCKL_USE_AVX2
 #include <mckl/random/internal/philox_avx2_32.hpp>
 #elif MCKL_USE_SSE2
 #include <mckl/random/internal/philox_sse2_32.hpp>
+#endif
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 } // namespace mckl::internal

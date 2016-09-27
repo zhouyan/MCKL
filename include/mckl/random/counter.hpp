@@ -166,8 +166,21 @@ class IncrementBlock
     }
 }; // class IncrementBlock
 
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 #if MCKL_USE_AVX2
 #include <mckl/random/internal/increment_avx2_64.hpp>
+#endif
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
 #endif
 
 } // namespace mckl::internal

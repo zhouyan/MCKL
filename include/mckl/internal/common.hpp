@@ -284,6 +284,13 @@ inline std::basic_istream<CharT, Traits> &istream(
     return is;
 }
 
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 #if MCKL_HAS_SSE2
 
 template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
@@ -364,6 +371,12 @@ static void transpose4x64_si256(std::array<__m256i, N> &s)
 }
 
 #endif // MCKL_HAS_AVX2
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 } // namespace mckl::internal
 
