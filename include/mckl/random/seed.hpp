@@ -443,7 +443,7 @@ class SeedGenerator<std::array<ResultType, K>, ID>
         } buf;
 
         buf.k = k;
-        RNGType rng;
+        RNGType rng(0);
         rng.enc(buf.ctr, buf.ctr);
 
         return buf.key;

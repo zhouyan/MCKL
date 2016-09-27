@@ -362,7 +362,7 @@ class AES128KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        alignas(32) union {
+        union {
             key_type key;
             __m128i xmm;
         } buf;
@@ -421,7 +421,7 @@ class AES192KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        alignas(32) union {
+        union {
             std::array<std::uint64_t, 4> key;
             std::array<__m128i, 2> xmm;
         } buf;
@@ -554,7 +554,7 @@ class AES256KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        alignas(32) union {
+        union {
             key_type key;
             std::array<__m128i, 2> xmm;
         } buf;
@@ -645,7 +645,7 @@ class ARSKeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        alignas(32) union {
+        union {
             key_type key;
             __m128i xmm;
         } buf;
@@ -706,8 +706,8 @@ class AESKeySeqImpl
     friend bool operator==(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
         const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
     {
-        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks1;
-        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks2;
+        std::array<std::uint64_t, 2 * (rounds() + 1)> ks1;
+        std::array<std::uint64_t, 2 * (rounds() + 1)> ks2;
         std::memcpy(ks1.data(), seq1.rk_.data(), 16 * (rounds() + 1));
         std::memcpy(ks2.data(), seq2.rk_.data(), 16 * (rounds() + 1));
 
@@ -728,7 +728,7 @@ class AESKeySeqImpl
         if (!os)
             return os;
 
-        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
+        std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
         std::memcpy(ks.data(), seq.rk_.data(), 16 * (rounds() + 1));
         ostream(os, ks);
 
@@ -743,7 +743,7 @@ class AESKeySeqImpl
         if (!is)
             return is;
 
-        alignas(16) std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
+        std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
         istream(is, ks);
         if (is)
             std::memcpy(seq.rk_.data(), ks.data(), 16 * (rounds() + 1));
@@ -807,7 +807,7 @@ class ARSKeySeqImpl
         if (!is)
             return is;
 
-        alignas(16) key_type k;
+        key_type k = {{0}};
         istream(is, k);
         if (is)
             seq.key_ = k;
