@@ -864,49 +864,49 @@ class AESNIGeneratorImpl
     static constexpr std::size_t blocks() { return 8; }
 
     static void eval(__m128i &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &par)
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
-        encfirst<0>(state, par);
-        enc<0x01>(state, par);
-        enc<0x02>(state, par);
-        enc<0x03>(state, par);
-        enc<0x04>(state, par);
-        enc<0x05>(state, par);
-        enc<0x06>(state, par);
-        enc<0x07>(state, par);
-        enc<0x08>(state, par);
-        enc<0x09>(state, par);
-        enc<0x0A>(state, par);
-        enc<0x0B>(state, par);
-        enc<0x0C>(state, par);
-        enc<0x0D>(state, par);
-        enc<0x0E>(state, par);
-        enc<0x0F>(state, par);
-        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(state, par);
+        encfirst<0>(state, rk);
+        enc<0x01>(state, rk);
+        enc<0x02>(state, rk);
+        enc<0x03>(state, rk);
+        enc<0x04>(state, rk);
+        enc<0x05>(state, rk);
+        enc<0x06>(state, rk);
+        enc<0x07>(state, rk);
+        enc<0x08>(state, rk);
+        enc<0x09>(state, rk);
+        enc<0x0A>(state, rk);
+        enc<0x0B>(state, rk);
+        enc<0x0C>(state, rk);
+        enc<0x0D>(state, rk);
+        enc<0x0E>(state, rk);
+        enc<0x0F>(state, rk);
+        eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
+        enclast<rounds_>(state, rk);
     }
 
     static void eval(std::array<__m128i, 8> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &par)
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
-        encfirst<0>(state, par);
-        enc<0x01>(state, par);
-        enc<0x02>(state, par);
-        enc<0x03>(state, par);
-        enc<0x04>(state, par);
-        enc<0x05>(state, par);
-        enc<0x06>(state, par);
-        enc<0x07>(state, par);
-        enc<0x08>(state, par);
-        enc<0x09>(state, par);
-        enc<0x0A>(state, par);
-        enc<0x0B>(state, par);
-        enc<0x0C>(state, par);
-        enc<0x0D>(state, par);
-        enc<0x0E>(state, par);
-        enc<0x0F>(state, par);
-        eval<0x10>(state, par, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(state, par);
+        encfirst<0>(state, rk);
+        enc<0x01>(state, rk);
+        enc<0x02>(state, rk);
+        enc<0x03>(state, rk);
+        enc<0x04>(state, rk);
+        enc<0x05>(state, rk);
+        enc<0x06>(state, rk);
+        enc<0x07>(state, rk);
+        enc<0x08>(state, rk);
+        enc<0x09>(state, rk);
+        enc<0x0A>(state, rk);
+        enc<0x0B>(state, rk);
+        enc<0x0C>(state, rk);
+        enc<0x0D>(state, rk);
+        enc<0x0E>(state, rk);
+        enc<0x0F>(state, rk);
+        eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
+        enclast<rounds_>(state, rk);
     }
 
     private:
@@ -919,18 +919,18 @@ class AESNIGeneratorImpl
     }
 
     template <std::size_t N>
-    static void eval(__m128i &s, const std::array<__m128i, rounds_ + 1> &par,
-        std::true_type)
+    static void eval(
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        enc<N>(s, par);
-        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds_>());
+        enc<N>(s, rk);
+        eval<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
     template <std::size_t N>
     static void encfirst(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &par)
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        encfirst<N>(s, par, std::integral_constant<bool, N == 0>());
+        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
     }
 
     template <std::size_t>
@@ -940,16 +940,16 @@ class AESNIGeneratorImpl
     }
 
     template <std::size_t N>
-    static void encfirst(__m128i &s,
-        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
+    static void encfirst(
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        s = _mm_xor_si128(s, std::get<N>(par));
+        s = _mm_xor_si128(s, std::get<N>(rk));
     }
 
     template <std::size_t N>
-    static void enc(__m128i &s, const std::array<__m128i, rounds_ + 1> &par)
+    static void enc(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds_)>());
+        enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
 
     template <std::size_t>
@@ -959,17 +959,16 @@ class AESNIGeneratorImpl
     }
 
     template <std::size_t N>
-    static void enc(__m128i &s, const std::array<__m128i, rounds_ + 1> &par,
-        std::true_type)
+    static void enc(
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        s = _mm_aesenc_si128(s, std::get<N>(par));
+        s = _mm_aesenc_si128(s, std::get<N>(rk));
     }
 
     template <std::size_t N>
-    static void enclast(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &par)
+    static void enclast(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enclast<N>(s, par, std::integral_constant<bool, N == rounds_>());
+        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
     }
 
     template <std::size_t>
@@ -979,10 +978,10 @@ class AESNIGeneratorImpl
     }
 
     template <std::size_t N>
-    static void enclast(__m128i &s,
-        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
+    static void enclast(
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        s = _mm_aesenclast_si128(s, std::get<N>(par));
+        s = _mm_aesenclast_si128(s, std::get<N>(rk));
     }
 
     template <std::size_t>
@@ -993,17 +992,17 @@ class AESNIGeneratorImpl
 
     template <std::size_t N>
     static void eval(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        enc<N>(s, par);
-        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 < rounds_>());
+        enc<N>(s, rk);
+        eval<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
     template <std::size_t N>
     static void encfirst(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &par)
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        encfirst<N>(s, par, std::integral_constant<bool, N == 0>());
+        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
     }
 
     template <std::size_t>
@@ -1014,23 +1013,23 @@ class AESNIGeneratorImpl
 
     template <std::size_t N>
     static void encfirst(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), std::get<N>(par));
-        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), std::get<N>(par));
-        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), std::get<N>(par));
-        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), std::get<N>(par));
-        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), std::get<N>(par));
-        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), std::get<N>(par));
-        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), std::get<N>(par));
-        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), std::get<N>(par));
+        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), std::get<N>(rk));
+        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), std::get<N>(rk));
+        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), std::get<N>(rk));
+        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), std::get<N>(rk));
+        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), std::get<N>(rk));
+        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), std::get<N>(rk));
+        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), std::get<N>(rk));
+        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), std::get<N>(rk));
     }
 
     template <std::size_t N>
     static void enc(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &par)
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enc<N>(s, par, std::integral_constant<bool, (N > 0 && N < rounds_)>());
+        enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
 
     template <std::size_t>
@@ -1041,23 +1040,23 @@ class AESNIGeneratorImpl
 
     template <std::size_t N>
     static void enc(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), std::get<N>(par));
-        std::get<1>(s) = _mm_aesenc_si128(std::get<1>(s), std::get<N>(par));
-        std::get<2>(s) = _mm_aesenc_si128(std::get<2>(s), std::get<N>(par));
-        std::get<3>(s) = _mm_aesenc_si128(std::get<3>(s), std::get<N>(par));
-        std::get<4>(s) = _mm_aesenc_si128(std::get<4>(s), std::get<N>(par));
-        std::get<5>(s) = _mm_aesenc_si128(std::get<5>(s), std::get<N>(par));
-        std::get<6>(s) = _mm_aesenc_si128(std::get<6>(s), std::get<N>(par));
-        std::get<7>(s) = _mm_aesenc_si128(std::get<7>(s), std::get<N>(par));
+        std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), std::get<N>(rk));
+        std::get<1>(s) = _mm_aesenc_si128(std::get<1>(s), std::get<N>(rk));
+        std::get<2>(s) = _mm_aesenc_si128(std::get<2>(s), std::get<N>(rk));
+        std::get<3>(s) = _mm_aesenc_si128(std::get<3>(s), std::get<N>(rk));
+        std::get<4>(s) = _mm_aesenc_si128(std::get<4>(s), std::get<N>(rk));
+        std::get<5>(s) = _mm_aesenc_si128(std::get<5>(s), std::get<N>(rk));
+        std::get<6>(s) = _mm_aesenc_si128(std::get<6>(s), std::get<N>(rk));
+        std::get<7>(s) = _mm_aesenc_si128(std::get<7>(s), std::get<N>(rk));
     }
 
     template <std::size_t N>
     static void enclast(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &par)
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enclast<N>(s, par, std::integral_constant<bool, N == rounds_>());
+        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
     }
 
     template <std::size_t>
@@ -1068,24 +1067,16 @@ class AESNIGeneratorImpl
 
     template <std::size_t N>
     static void enclast(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &par, std::true_type)
+        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        std::get<0>(s) =
-            _mm_aesenclast_si128(std::get<0>(s), std::get<N>(par));
-        std::get<1>(s) =
-            _mm_aesenclast_si128(std::get<1>(s), std::get<N>(par));
-        std::get<2>(s) =
-            _mm_aesenclast_si128(std::get<2>(s), std::get<N>(par));
-        std::get<3>(s) =
-            _mm_aesenclast_si128(std::get<3>(s), std::get<N>(par));
-        std::get<4>(s) =
-            _mm_aesenclast_si128(std::get<4>(s), std::get<N>(par));
-        std::get<5>(s) =
-            _mm_aesenclast_si128(std::get<5>(s), std::get<N>(par));
-        std::get<6>(s) =
-            _mm_aesenclast_si128(std::get<6>(s), std::get<N>(par));
-        std::get<7>(s) =
-            _mm_aesenclast_si128(std::get<7>(s), std::get<N>(par));
+        std::get<0>(s) = _mm_aesenclast_si128(std::get<0>(s), std::get<N>(rk));
+        std::get<1>(s) = _mm_aesenclast_si128(std::get<1>(s), std::get<N>(rk));
+        std::get<2>(s) = _mm_aesenclast_si128(std::get<2>(s), std::get<N>(rk));
+        std::get<3>(s) = _mm_aesenclast_si128(std::get<3>(s), std::get<N>(rk));
+        std::get<4>(s) = _mm_aesenclast_si128(std::get<4>(s), std::get<N>(rk));
+        std::get<5>(s) = _mm_aesenclast_si128(std::get<5>(s), std::get<N>(rk));
+        std::get<6>(s) = _mm_aesenclast_si128(std::get<6>(s), std::get<N>(rk));
+        std::get<7>(s) = _mm_aesenclast_si128(std::get<7>(s), std::get<N>(rk));
     }
 }; // class AESNIGeneratorImpl
 
@@ -1193,6 +1184,24 @@ class AESNIGenerator
     }
 
     template <typename ResultType>
+    void generate(ctr_type &ctr,
+        std::array<ResultType, size() / sizeof(ResultType)> &buffer,
+        const std::array<__m128i, rounds_ + 1> &rk) const
+    {
+        alignas(32) union {
+            __m128i state;
+            ctr_type ctr;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
+        } buf;
+
+        MCKL_FLATTEN_CALL_SITE
+        increment(ctr);
+        buf.ctr = ctr;
+        internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
+        buffer = buf.result;
+    }
+
+    template <typename ResultType>
     void generate(ctr_type &ctr, std::size_t n,
         std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
     {
@@ -1216,24 +1225,6 @@ class AESNIGenerator
         }
         for (std::size_t i = 0; i != l; ++i)
             generate(ctr, buffer[i], rk);
-    }
-
-    template <typename ResultType>
-    void generate(ctr_type &ctr,
-        std::array<ResultType, size() / sizeof(ResultType)> &buffer,
-        const std::array<__m128i, rounds_ + 1> &par) const
-    {
-        alignas(32) union {
-            __m128i state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
-        } buf;
-
-        MCKL_FLATTEN_CALL_SITE
-        increment(ctr);
-        buf.ctr = ctr;
-        internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, par);
-        buffer = buf.result;
     }
 }; // class AESNIGenerator
 
