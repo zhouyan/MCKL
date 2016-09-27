@@ -29,9 +29,9 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-.PHONY : rng distribution
+.PHONY : pdf rng distribution
 
-rng.pdf : rng
+pdf :
 	latexmk -silent -f random_rng.tex >/dev/null
 
 rng :

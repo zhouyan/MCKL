@@ -38,7 +38,16 @@ do 'format.pl';
 
 my $run = 0;
 my $simd;
-GetOptions("run" => \$run, "simd=s" => \$simd);
+my $llvm = "../../build/llvm-release-sys";
+my $gnu = "../../build/llvm-release-sys";
+my $intel = "../../build/llvm-release-sys";
+GetOptions(
+    "run"     => \$run,
+    "simd=s"  => \$simd,
+    "llvm=s"  => \$llvm,
+    "gnu=s"   => \$gnu,
+    "intel=s" => \$intel,
+);
 
 if ($simd) {
     $run = 0;
@@ -47,6 +56,8 @@ if ($simd) {
     $simd = "sse2" if $cpuid =~ "SSE2";
     $simd = "avx2" if $cpuid =~ "AVX2";
 }
+
+my %build_dir = (llvm => $llvm, gnu => $gnu, intel => $intel);
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
@@ -97,7 +108,7 @@ for (keys %rngs) {
 
 sub run
 {
-    my $dir = "../../build/$_[0]-release-sys";
+    my $dir = $build_dir{$_[0]};
     open my $txtfile, '>', "random_rng_$_[0]_$simd.txt";
     for (sort(keys %rngs)) {
         my @val = @{$rngs{$_}};
