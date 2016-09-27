@@ -112,43 +112,43 @@ inline void increment_block_set(const std::array<T, K> &ctr,
 }
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block(std::array<T, K> &,
+inline void increment_block_add(
     std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block(std::array<T, K> &ctr,
+inline void increment_block_add(
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
-    increment_block<B + 1>(
-        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
+    increment_block_add<B + 1>(
+        ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
 }
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_safe(std::array<T, K> &,
+inline void increment_block_add_safe(
     std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_safe(std::array<T, K> &ctr,
+inline void increment_block_add_safe(
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block).front() += B + 1;
-    increment_block_safe<B + 1>(
-        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
+    increment_block_add_safe<B + 1>(
+        ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
 }
 
 template <typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block(
-    std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
+inline void increment_block(const std::array<T, K> &ctr,
+    std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     increment_block_set<0>(
         ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    increment_block<0>(
-        ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
+    increment_block_add<0>(
+        ctr_block, std::integral_constant<bool, 0 < Blocks>());
 }
 
 template <typename T, std::size_t K, std::size_t Blocks,
@@ -156,13 +156,13 @@ template <typename T, std::size_t K, std::size_t Blocks,
 class IncrementBlock
 {
     public:
-    static void eval(
-        std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
+    static void eval(const std::array<T, K> &ctr,
+        std::array<std::array<T, K>, Blocks> &ctr_block)
     {
         increment_block_set<0>(
             ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-        increment_block_safe<0>(
-            ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
+        increment_block_add_safe<0>(
+            ctr_block, std::integral_constant<bool, 0 < Blocks>());
     }
 }; // class IncrementBlock
 
