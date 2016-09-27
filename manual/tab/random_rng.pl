@@ -105,7 +105,7 @@ sub run
             my $cmd = "ninja -C $dir random_rng_\L$rng-check 2>&1";
             my @result;
             my $cpb = 0xFFFF;
-            for (1..3) {
+            for (1..5) {
                 my @lines = split "\n", `$cmd`;
                 my @this_result = grep { $_ =~ /Passed|Failed/ } @lines;
                 if (@this_result) {
