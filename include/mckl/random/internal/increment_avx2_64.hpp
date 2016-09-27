@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/increment_avx2_64.hpp
+// MCKL/include/mckl/random/internal/increment_avx2_64.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -47,9 +47,9 @@ class IncrementBlock<T, 2, 8, 64>
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
         c0 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 2, 0, 1));
 
-        __m256i c1 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x02, 0, 0x02));
-        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x04, 0, 0x04));
-        __m256i c3 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x06, 0, 0x06));
+        __m256i c1 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 2, 0, 2));
+        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 4, 0, 4));
+        __m256i c3 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 6, 0, 6));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
         _mm256_store_si256(cptr++, c0);
@@ -112,13 +112,13 @@ class IncrementBlock<T, 2, 16, 64>
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
         c0 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 2, 0, 1));
 
-        __m256i c1 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x02, 0, 0x02));
-        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x04, 0, 0x04));
-        __m256i c3 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x06, 0, 0x06));
-        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x08, 0, 0x08));
-        __m256i c5 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x0A, 0, 0x0A));
-        __m256i c6 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x0C, 0, 0x0C));
-        __m256i c7 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x0E, 0, 0x0E));
+        __m256i c1 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x2, 0, 0x2));
+        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x4, 0, 0x4));
+        __m256i c3 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x6, 0, 0x6));
+        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0x8, 0, 0x8));
+        __m256i c5 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0xA, 0, 0xA));
+        __m256i c6 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0xC, 0, 0xC));
+        __m256i c7 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0xE, 0, 0xE));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
         _mm256_store_si256(cptr++, c0);
@@ -255,21 +255,21 @@ class IncrementBlock<T, 4, 16, 64>
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
         c0 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 1));
 
-        __m256i c1 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x01));
-        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x02));
-        __m256i c3 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x03));
-        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x04));
-        __m256i c5 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x05));
-        __m256i c6 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x06));
-        __m256i c7 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x07));
-        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x08));
-        __m256i c9 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x09));
-        __m256i cA = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x0A));
-        __m256i cB = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x0B));
-        __m256i cC = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x0C));
-        __m256i cD = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x0D));
-        __m256i cE = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x0E));
-        __m256i cF = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x0F));
+        __m256i c1 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x1));
+        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x2));
+        __m256i c3 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x3));
+        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x4));
+        __m256i c5 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x5));
+        __m256i c6 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x6));
+        __m256i c7 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x7));
+        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x8));
+        __m256i c9 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x9));
+        __m256i cA = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0xA));
+        __m256i cB = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0xB));
+        __m256i cC = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0xC));
+        __m256i cD = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0xD));
+        __m256i cE = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0xE));
+        __m256i cF = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0xF));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
         _mm256_store_si256(cptr++, c0);
@@ -314,13 +314,13 @@ class IncrementBlock<T, 8, 8, 64>
                 static_cast<MCKL_INT64>(std::get<4>(ctr)));
         c0 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 1));
 
-        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x01));
-        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x02));
-        __m256i c6 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x03));
-        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x04));
-        __m256i cA = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x05));
-        __m256i cC = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x06));
-        __m256i cE = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x07));
+        __m256i c2 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 1));
+        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 2));
+        __m256i c6 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 3));
+        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 4));
+        __m256i cA = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 5));
+        __m256i cC = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 6));
+        __m256i cE = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 7));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
         _mm256_store_si256(cptr++, c0);
@@ -375,9 +375,9 @@ class IncrementBlock<T, 16, 4, 64>
                 static_cast<MCKL_INT64>(std::get<0xC>(ctr)));
         c0 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 1));
 
-        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x01));
-        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x02));
-        __m256i cC = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 0x03));
+        __m256i c4 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 1));
+        __m256i c8 = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 2));
+        __m256i cC = _mm256_add_epi64(c0, _mm256_set_epi64x(0, 0, 0, 3));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
         _mm256_store_si256(cptr++, c0);
