@@ -1,5 +1,14 @@
 *.swp
 .DS_Store
+/manual/tab/random_rng.aux
+/manual/tab/random_rng.bbl
+/manual/tab/random_rng.bcf
+/manual/tab/random_rng.blg
+/manual/tab/random_rng.fdb_latexmk
+/manual/tab/random_rng.fls
+/manual/tab/random_rng.log
+/manual/tab/random_rng.pdf
+/manual/tab/random_rng.run.xml
 build
 example/random/src/random_rng_*.cpp
 manual/fig/pf.pdf
