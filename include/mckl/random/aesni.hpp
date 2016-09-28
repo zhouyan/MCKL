@@ -867,21 +867,21 @@ class AESNIGeneratorImpl
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
         encfirst<0>(state, rk);
-        enc<0x01>(state, rk);
-        enc<0x02>(state, rk);
-        enc<0x03>(state, rk);
-        enc<0x04>(state, rk);
-        enc<0x05>(state, rk);
-        enc<0x06>(state, rk);
-        enc<0x07>(state, rk);
-        enc<0x08>(state, rk);
-        enc<0x09>(state, rk);
-        enc<0x0A>(state, rk);
-        enc<0x0B>(state, rk);
-        enc<0x0C>(state, rk);
-        enc<0x0D>(state, rk);
-        enc<0x0E>(state, rk);
-        enc<0x0F>(state, rk);
+        enc<0x1>(state, rk);
+        enc<0x2>(state, rk);
+        enc<0x3>(state, rk);
+        enc<0x4>(state, rk);
+        enc<0x5>(state, rk);
+        enc<0x6>(state, rk);
+        enc<0x7>(state, rk);
+        enc<0x8>(state, rk);
+        enc<0x9>(state, rk);
+        enc<0xA>(state, rk);
+        enc<0xB>(state, rk);
+        enc<0xC>(state, rk);
+        enc<0xD>(state, rk);
+        enc<0xE>(state, rk);
+        enc<0xF>(state, rk);
         eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
         enclast<rounds_>(state, rk);
     }
@@ -1194,7 +1194,6 @@ class AESNIGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
-        MCKL_FLATTEN_CALL_SITE
         increment(ctr);
         buf.ctr = ctr;
         internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
@@ -1218,7 +1217,6 @@ class AESNIGenerator
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
         for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
-            MCKL_FLATTEN_CALL_SITE
             increment(ctr, buf.ctr_block);
             internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
             std::memcpy(buffer, buf.state.data(), size() * blocks);

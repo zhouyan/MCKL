@@ -74,7 +74,28 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         const std::array<T, K + 1> &par, std::true_type)
     {
         std::array<__m256i, 16> s;
-        pack(state, s);
+        __m256i *sptr = nullptr;
+
+        __m256i sptr = reinterpret_cast<__m256i *>(state.data());
+        std::get<0x0>(s) = _mm256_load_si256(sptr++);
+        std::get<0x8>(s) = _mm256_load_si256(sptr++);
+        std::get<0x1>(s) = _mm256_load_si256(sptr++);
+        std::get<0x9>(s) = _mm256_load_si256(sptr++);
+        std::get<0x2>(s) = _mm256_load_si256(sptr++);
+        std::get<0xA>(s) = _mm256_load_si256(sptr++);
+        std::get<0x3>(s) = _mm256_load_si256(sptr++);
+        std::get<0xB>(s) = _mm256_load_si256(sptr++);
+        std::get<0x4>(s) = _mm256_load_si256(sptr++);
+        std::get<0xC>(s) = _mm256_load_si256(sptr++);
+        std::get<0x5>(s) = _mm256_load_si256(sptr++);
+        std::get<0xD>(s) = _mm256_load_si256(sptr++);
+        std::get<0x6>(s) = _mm256_load_si256(sptr++);
+        std::get<0xE>(s) = _mm256_load_si256(sptr++);
+        std::get<0x7>(s) = _mm256_load_si256(sptr++);
+        std::get<0xF>(s) = _mm256_load_si256(sptr++);
+
+        transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
+        transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 
         // clang-format off
         sbox<0x00>(s); pbox<0x00>(s); kbox<0x00>(s, par);
@@ -112,57 +133,11 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         // clang-format on
 
         eval<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
-        unpack(state, s);
-    }
-
-    template <std::size_t>
-    static void eval(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
-        std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void eval(std::array<__m256i, 16> &s,
-        const std::array<T, K + 1> &par, std::true_type)
-    {
-        sbox<N>(s);
-        pbox<N>(s);
-        kbox<N>(s, par);
-        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
-    }
-
-    static void pack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m256i, 16> &s)
-    {
-        const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
-        std::get<0x0>(s) = _mm256_load_si256(sptr++);
-        std::get<0x8>(s) = _mm256_load_si256(sptr++);
-        std::get<0x1>(s) = _mm256_load_si256(sptr++);
-        std::get<0x9>(s) = _mm256_load_si256(sptr++);
-        std::get<0x2>(s) = _mm256_load_si256(sptr++);
-        std::get<0xA>(s) = _mm256_load_si256(sptr++);
-        std::get<0x3>(s) = _mm256_load_si256(sptr++);
-        std::get<0xB>(s) = _mm256_load_si256(sptr++);
-        std::get<0x4>(s) = _mm256_load_si256(sptr++);
-        std::get<0xC>(s) = _mm256_load_si256(sptr++);
-        std::get<0x5>(s) = _mm256_load_si256(sptr++);
-        std::get<0xD>(s) = _mm256_load_si256(sptr++);
-        std::get<0x6>(s) = _mm256_load_si256(sptr++);
-        std::get<0xE>(s) = _mm256_load_si256(sptr++);
-        std::get<0x7>(s) = _mm256_load_si256(sptr++);
-        std::get<0xF>(s) = _mm256_load_si256(sptr++);
 
         transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
         transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
-    }
 
-    static void unpack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m256i, 16> &s)
-    {
-        transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
-        transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
-
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
+        sptr = reinterpret_cast<__m256i *>(state.data());
         _mm256_store_si256(sptr++, std::get<0x0>(s));
         _mm256_store_si256(sptr++, std::get<0x8>(s));
         _mm256_store_si256(sptr++, std::get<0x1>(s));
@@ -179,6 +154,22 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         _mm256_store_si256(sptr++, std::get<0xE>(s));
         _mm256_store_si256(sptr++, std::get<0x7>(s));
         _mm256_store_si256(sptr++, std::get<0xF>(s));
+    }
+
+    template <std::size_t>
+    static void eval(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
+        std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void eval(std::array<__m256i, 16> &s,
+        const std::array<T, K + 1> &par, std::true_type)
+    {
+        sbox<N>(s);
+        pbox<N>(s);
+        kbox<N>(s, par);
+        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N>

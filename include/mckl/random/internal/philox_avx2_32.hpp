@@ -74,31 +74,51 @@ class PhiloxGeneratorImplAVX2_32
         __m256i p = _mm256_set_epi32(p3, 0, p2, 0, p1, 0, p0, 0);
 
         std::array<__m256i, 8> s;
-        pack(state, s);
+        __m256i *sptr = nullptr;
+
+        sptr = reinterpret_cast<__m256i *>(state.data());
+        std::get<0>(s) = _mm256_load_si256(sptr++);
+        std::get<1>(s) = _mm256_load_si256(sptr++);
+        std::get<2>(s) = _mm256_load_si256(sptr++);
+        std::get<3>(s) = _mm256_load_si256(sptr++);
+        std::get<4>(s) = _mm256_load_si256(sptr++);
+        std::get<5>(s) = _mm256_load_si256(sptr++);
+        std::get<6>(s) = _mm256_load_si256(sptr++);
+        std::get<7>(s) = _mm256_load_si256(sptr++);
+
         Derived::permute_first(s);
 
         // clang-format off
-        kbox<0x00>(p, w); spbox<0x00>(s, p, m);
-        kbox<0x01>(p, w); spbox<0x01>(s, p, m);
-        kbox<0x02>(p, w); spbox<0x02>(s, p, m);
-        kbox<0x03>(p, w); spbox<0x03>(s, p, m);
-        kbox<0x04>(p, w); spbox<0x04>(s, p, m);
-        kbox<0x05>(p, w); spbox<0x05>(s, p, m);
-        kbox<0x06>(p, w); spbox<0x06>(s, p, m);
-        kbox<0x07>(p, w); spbox<0x07>(s, p, m);
-        kbox<0x08>(p, w); spbox<0x08>(s, p, m);
-        kbox<0x09>(p, w); spbox<0x09>(s, p, m);
-        kbox<0x0A>(p, w); spbox<0x0A>(s, p, m);
-        kbox<0x0B>(p, w); spbox<0x0B>(s, p, m);
-        kbox<0x0C>(p, w); spbox<0x0C>(s, p, m);
-        kbox<0x0D>(p, w); spbox<0x0D>(s, p, m);
-        kbox<0x0E>(p, w); spbox<0x0E>(s, p, m);
-        kbox<0x0F>(p, w); spbox<0x0F>(s, p, m);
+        kbox<0x0>(p, w); spbox<0x0>(s, p, m);
+        kbox<0x1>(p, w); spbox<0x1>(s, p, m);
+        kbox<0x2>(p, w); spbox<0x2>(s, p, m);
+        kbox<0x3>(p, w); spbox<0x3>(s, p, m);
+        kbox<0x4>(p, w); spbox<0x4>(s, p, m);
+        kbox<0x5>(p, w); spbox<0x5>(s, p, m);
+        kbox<0x6>(p, w); spbox<0x6>(s, p, m);
+        kbox<0x7>(p, w); spbox<0x7>(s, p, m);
+        kbox<0x8>(p, w); spbox<0x8>(s, p, m);
+        kbox<0x9>(p, w); spbox<0x9>(s, p, m);
+        kbox<0xA>(p, w); spbox<0xA>(s, p, m);
+        kbox<0xB>(p, w); spbox<0xB>(s, p, m);
+        kbox<0xC>(p, w); spbox<0xC>(s, p, m);
+        kbox<0xD>(p, w); spbox<0xD>(s, p, m);
+        kbox<0xE>(p, w); spbox<0xE>(s, p, m);
+        kbox<0xF>(p, w); spbox<0xF>(s, p, m);
         // clang-format on
 
         eval<0x10>(s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
         Derived::permute_last(s);
-        unpack(state, s);
+
+        sptr = reinterpret_cast<__m256i *>(state.data());
+        _mm256_store_si256(sptr++, std::get<0>(s));
+        _mm256_store_si256(sptr++, std::get<1>(s));
+        _mm256_store_si256(sptr++, std::get<2>(s));
+        _mm256_store_si256(sptr++, std::get<3>(s));
+        _mm256_store_si256(sptr++, std::get<4>(s));
+        _mm256_store_si256(sptr++, std::get<5>(s));
+        _mm256_store_si256(sptr++, std::get<6>(s));
+        _mm256_store_si256(sptr++, std::get<7>(s));
     }
 
     private:
@@ -116,34 +136,6 @@ class PhiloxGeneratorImplAVX2_32
         spbox<N>(s, p, m);
         eval<N + 1>(
             s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
-    }
-
-    static void pack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m256i, 8> &s)
-    {
-        const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
-        std::get<0>(s) = _mm256_load_si256(sptr++);
-        std::get<1>(s) = _mm256_load_si256(sptr++);
-        std::get<2>(s) = _mm256_load_si256(sptr++);
-        std::get<3>(s) = _mm256_load_si256(sptr++);
-        std::get<4>(s) = _mm256_load_si256(sptr++);
-        std::get<5>(s) = _mm256_load_si256(sptr++);
-        std::get<6>(s) = _mm256_load_si256(sptr++);
-        std::get<7>(s) = _mm256_load_si256(sptr++);
-    }
-
-    static void unpack(std::array<std::array<T, K>, blocks()> &state,
-        std::array<__m256i, 8> &s)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        _mm256_store_si256(sptr++, std::get<0>(s));
-        _mm256_store_si256(sptr++, std::get<1>(s));
-        _mm256_store_si256(sptr++, std::get<2>(s));
-        _mm256_store_si256(sptr++, std::get<3>(s));
-        _mm256_store_si256(sptr++, std::get<4>(s));
-        _mm256_store_si256(sptr++, std::get<5>(s));
-        _mm256_store_si256(sptr++, std::get<6>(s));
-        _mm256_store_si256(sptr++, std::get<7>(s));
     }
 
     template <std::size_t N>

@@ -29,7 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-// AESNI
 template <typename T>
 class IncrementBlock<T, 2, 8, 64>
 {
@@ -59,7 +58,6 @@ class IncrementBlock<T, 2, 8, 64>
     }
 }; // class IncrementBlock
 
-// Philox2x32
 template <typename T>
 class IncrementBlock<T, 1, 32, 64>
 {
@@ -102,7 +100,6 @@ class IncrementBlock<T, 1, 32, 64>
     }
 }; // class IncrementBlock
 
-// Philox4x32
 template <typename T>
 class IncrementBlock<T, 2, 16, 64>
 {
@@ -140,7 +137,6 @@ class IncrementBlock<T, 2, 16, 64>
     }
 }; // class IncrementBlock
 
-// Threefry2x32
 template <typename T>
 class IncrementBlock<T, 1, 64, 64>
 {
@@ -207,7 +203,6 @@ class IncrementBlock<T, 1, 64, 64>
     }
 }; // class IncrementBlock
 
-// Threefry4x32, Threefry2x64
 template <typename T>
 class IncrementBlock<T, 2, 32, 64>
 {
@@ -261,7 +256,6 @@ class IncrementBlock<T, 2, 32, 64>
     }
 }; // class IncrementBlock
 
-// Threefry4x64
 template <typename T>
 class IncrementBlock<T, 4, 16, 64>
 {
@@ -315,7 +309,6 @@ class IncrementBlock<T, 4, 16, 64>
     }
 }; // class IncrementBlock
 
-// Threefry8x64
 template <typename T>
 class IncrementBlock<T, 8, 8, 64>
 {
@@ -366,7 +359,6 @@ class IncrementBlock<T, 8, 8, 64>
     }
 }; // class IncrementBlock
 
-// Threefry16x64
 template <typename T>
 class IncrementBlock<T, 16, 4, 64>
 {

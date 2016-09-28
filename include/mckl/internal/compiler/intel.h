@@ -101,8 +101,4 @@
 #define MCKL_INT64 __int64
 #endif
 
-#ifndef MCKL_FLATTEN_CALL_SITE
-#define MCKL_FLATTEN_CALL_SITE _Pragma("forceinline recursive")
-#endif
-
 #endif // MCKL_INTERNAL_COMPILER_INTEL_H

@@ -59,7 +59,7 @@ inline void increment_single(std::array<T, K> &ctr, std::true_type)
 /// \brief Increment a counter by one
 /// \ingroup Random
 template <typename T, std::size_t K>
-MCKL_FLATTEN_DEFINITION inline void increment(std::array<T, K> &ctr)
+inline void increment(std::array<T, K> &ctr)
 {
     internal::increment_single<0>(ctr, std::true_type());
 }
@@ -67,8 +67,7 @@ MCKL_FLATTEN_DEFINITION inline void increment(std::array<T, K> &ctr)
 /// \brief Increment a counter by given steps
 /// \ingroup Random
 template <typename T, std::size_t K, T NSkip>
-MCKL_FLATTEN_DEFINITION inline void increment(
-    std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
+inline void increment(std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - NSkip) {
         ctr.front() += NSkip;
@@ -82,7 +81,7 @@ MCKL_FLATTEN_DEFINITION inline void increment(
 /// \brief Increment a counter by given steps
 /// \ingroup Random
 template <typename T, std::size_t K>
-MCKL_FLATTEN_DEFINITION inline void increment(std::array<T, K> &ctr, T nskip)
+inline void increment(std::array<T, K> &ctr, T nskip)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - nskip) {
         ctr.front() += nskip;
@@ -191,7 +190,7 @@ class IncrementBlock
 /// array of counters
 /// \ingroup Random
 template <typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN_DEFINITION inline void increment(
+inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     if (ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks))
