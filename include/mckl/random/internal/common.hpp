@@ -953,7 +953,8 @@ template <typename RNGType>
 class SeedType
 {
     public:
-    using type = unsigned;
+    using type = typename std::conditional<(RNGTraits<RNGType>::bits < 32),
+        typename RNGType::result_type, unsigned>::type;
 }; // class SeedType
 
 template <typename ResultType, typename Generator>
