@@ -953,7 +953,7 @@ template <typename RNGType>
 class SeedType
 {
     public:
-    using type = typename RNGType::result_type;
+    using type = unsigned;
 }; // class SeedType
 
 template <typename ResultType, typename Generator>
@@ -1290,13 +1290,6 @@ class MKLStream;
 
 template <MKL_INT, int>
 class MKLEngine;
-
-template <MKL_INT BRNG, int Bits>
-class SeedType<MKLEngine<BRNG, Bits>>
-{
-    public:
-    using type = MKL_UINT;
-}; // class SeedType
 
 template <MKL_INT BRNG, int Bits>
 inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
