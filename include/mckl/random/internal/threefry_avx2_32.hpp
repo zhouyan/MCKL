@@ -76,7 +76,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         std::array<__m256i, 16> s;
         __m256i *sptr = nullptr;
 
-        __m256i sptr = reinterpret_cast<__m256i *>(state.data());
+        sptr = reinterpret_cast<__m256i *>(state.data());
         std::get<0x0>(s) = _mm256_load_si256(sptr++);
         std::get<0x8>(s) = _mm256_load_si256(sptr++);
         std::get<0x1>(s) = _mm256_load_si256(sptr++);

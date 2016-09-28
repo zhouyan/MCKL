@@ -59,6 +59,35 @@ class IncrementBlock<T, 2, 8, 64>
 }; // class IncrementBlock
 
 template <typename T>
+class IncrementBlock<T, 4, 4, 64>
+{
+    static constexpr std::size_t K_ = 4;
+    static constexpr std::size_t blocks_ = 4;
+
+    public:
+    static void eval(std::array<T, K_> &ctr,
+        std::array<std::array<T, K_>, blocks_> &ctr_block)
+    {
+        __m256i a0 =
+            _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
+                static_cast<MCKL_INT64>(std::get<2>(ctr)),
+                static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        __m256i c0 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 1));
+        __m256i c1 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 2));
+        __m256i c2 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 3));
+        __m256i c3 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 4));
+
+        __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
+    }
+}; // class IncrementBlock
+
+template <typename T>
 class IncrementBlock<T, 1, 32, 64>
 {
     static constexpr std::size_t K_ = 1;

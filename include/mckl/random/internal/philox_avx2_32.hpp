@@ -69,8 +69,8 @@ class PhiloxGeneratorImplAVX2_32
         const int p2 = static_cast<int>(std::get<i2>(key));
         const int p3 = static_cast<int>(std::get<i3>(key));
 
-        __m256i w = _mm256_set_epi32(w3, 0, w2, 0, w1, 0, w0, 0);
-        __m256i m = _mm256_set_epi32(0, m3, 0, m2, 0, m1, 0, m0);
+        const __m256i w = _mm256_set_epi32(w3, 0, w2, 0, w1, 0, w0, 0);
+        const __m256i m = _mm256_set_epi32(0, m3, 0, m2, 0, m1, 0, m0);
         __m256i p = _mm256_set_epi32(p3, 0, p2, 0, p1, 0, p0, 0);
 
         std::array<__m256i, 8> s;

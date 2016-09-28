@@ -61,8 +61,8 @@ class PhiloxGeneratorImplSSE2_32
         const int p0 = static_cast<int>(std::get<i0>(key));
         const int p1 = static_cast<int>(std::get<i1>(key));
 
-        __m128i w = _mm_set_epi32(w1, 0, w0, 0);
-        __m128i m = _mm_set_epi32(0, m1, 0, m0);
+        const __m128i w = _mm_set_epi32(w1, 0, w0, 0);
+        const __m128i m = _mm_set_epi32(0, m1, 0, m0);
         __m128i p = _mm_set_epi32(p1, 0, p0, 0);
 
         std::array<__m128i, 8> s;
