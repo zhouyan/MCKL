@@ -303,6 +303,7 @@ class ThreefryGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
+        MCKL_FLATTEN_CALL
         increment(ctr);
         buf.ctr = ctr;
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
@@ -344,6 +345,7 @@ class ThreefryGenerator
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
         for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            MCKL_FLATTEN_CALL
             increment(ctr, buf.ctr_block);
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
                 buf.state, par_);

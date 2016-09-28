@@ -36,7 +36,7 @@ class IncrementBlock<T, 2, 8, 64>
     static constexpr std::size_t blocks_ = 8;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -65,7 +65,7 @@ class IncrementBlock<T, 4, 4, 64>
     static constexpr std::size_t blocks_ = 4;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -94,7 +94,7 @@ class IncrementBlock<T, 1, 32, 64>
     static constexpr std::size_t blocks_ = 32;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -136,7 +136,7 @@ class IncrementBlock<T, 2, 16, 64>
     static constexpr std::size_t blocks_ = 16;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -173,7 +173,7 @@ class IncrementBlock<T, 1, 64, 64>
     static constexpr std::size_t blocks_ = 64;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -239,7 +239,7 @@ class IncrementBlock<T, 2, 32, 64>
     static constexpr std::size_t blocks_ = 32;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -292,7 +292,7 @@ class IncrementBlock<T, 4, 16, 64>
     static constexpr std::size_t blocks_ = 16;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -345,7 +345,7 @@ class IncrementBlock<T, 8, 8, 64>
     static constexpr std::size_t blocks_ = 8;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -395,7 +395,7 @@ class IncrementBlock<T, 16, 4, 64>
     static constexpr std::size_t blocks_ = 4;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =

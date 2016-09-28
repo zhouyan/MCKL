@@ -857,231 +857,10 @@ using ARSKeySeq = internal::ARSKeySeqImpl<Rounds, Constants>;
 namespace internal
 {
 
-template <typename KeySeqType>
-class AESNIGeneratorImpl
-{
-    public:
-    static constexpr std::size_t blocks() { return 8; }
-
-    static void eval(__m128i &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        encfirst<0>(state, rk);
-        enc<0x1>(state, rk);
-        enc<0x2>(state, rk);
-        enc<0x3>(state, rk);
-        enc<0x4>(state, rk);
-        enc<0x5>(state, rk);
-        enc<0x6>(state, rk);
-        enc<0x7>(state, rk);
-        enc<0x8>(state, rk);
-        enc<0x9>(state, rk);
-        enc<0xA>(state, rk);
-        enc<0xB>(state, rk);
-        enc<0xC>(state, rk);
-        enc<0xD>(state, rk);
-        enc<0xE>(state, rk);
-        enc<0xF>(state, rk);
-        eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(state, rk);
-    }
-
-    static void eval(std::array<__m128i, 8> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        encfirst<0>(state, rk);
-        enc<0x01>(state, rk);
-        enc<0x02>(state, rk);
-        enc<0x03>(state, rk);
-        enc<0x04>(state, rk);
-        enc<0x05>(state, rk);
-        enc<0x06>(state, rk);
-        enc<0x07>(state, rk);
-        enc<0x08>(state, rk);
-        enc<0x09>(state, rk);
-        enc<0x0A>(state, rk);
-        enc<0x0B>(state, rk);
-        enc<0x0C>(state, rk);
-        enc<0x0D>(state, rk);
-        enc<0x0E>(state, rk);
-        enc<0x0F>(state, rk);
-        eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(state, rk);
-    }
-
-    private:
-    static constexpr std::size_t rounds_ = KeySeqType::rounds();
-
-    template <std::size_t>
-    static void eval(
-        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void eval(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        enc<N>(s, rk);
-        eval<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
-    }
-
-    template <std::size_t>
-    static void eval(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void eval(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        enc<N>(s, rk);
-        eval<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
-    }
-
-    template <std::size_t N>
-    static void encfirst(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
-    }
-
-    template <std::size_t>
-    static void encfirst(
-        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void encfirst(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        s = _mm_xor_si128(s, std::get<N>(rk));
-    }
-
-    template <std::size_t N>
-    static void enc(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
-    }
-
-    template <std::size_t>
-    static void enc(
-        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enc(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        s = _mm_aesenc_si128(s, std::get<N>(rk));
-    }
-
-    template <std::size_t N>
-    static void enclast(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
-    }
-
-    template <std::size_t>
-    static void enclast(
-        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enclast(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        s = _mm_aesenclast_si128(s, std::get<N>(rk));
-    }
-
-    template <std::size_t N>
-    static void encfirst(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
-    }
-
-    template <std::size_t>
-    static void encfirst(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void encfirst(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), k);
-        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), k);
-        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), k);
-        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), k);
-        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), k);
-        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), k);
-        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), k);
-    }
-
-    template <std::size_t N>
-    static void enc(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
-    }
-
-    template <std::size_t>
-    static void enc(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enc(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
-        std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_aesenc_si128(std::get<1>(s), k);
-        std::get<2>(s) = _mm_aesenc_si128(std::get<2>(s), k);
-        std::get<3>(s) = _mm_aesenc_si128(std::get<3>(s), k);
-        std::get<4>(s) = _mm_aesenc_si128(std::get<4>(s), k);
-        std::get<5>(s) = _mm_aesenc_si128(std::get<5>(s), k);
-        std::get<6>(s) = _mm_aesenc_si128(std::get<6>(s), k);
-        std::get<7>(s) = _mm_aesenc_si128(std::get<7>(s), k);
-    }
-
-    template <std::size_t N>
-    static void enclast(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
-    }
-
-    template <std::size_t>
-    static void enclast(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enclast(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
-        std::get<0>(s) = _mm_aesenclast_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_aesenclast_si128(std::get<1>(s), k);
-        std::get<2>(s) = _mm_aesenclast_si128(std::get<2>(s), k);
-        std::get<3>(s) = _mm_aesenclast_si128(std::get<3>(s), k);
-        std::get<4>(s) = _mm_aesenclast_si128(std::get<4>(s), k);
-        std::get<5>(s) = _mm_aesenclast_si128(std::get<5>(s), k);
-        std::get<6>(s) = _mm_aesenclast_si128(std::get<6>(s), k);
-        std::get<7>(s) = _mm_aesenclast_si128(std::get<7>(s), k);
-    }
-}; // class AESNIGeneratorImpl
+#include <mckl/random/internal/aesni_generic.hpp>
+#if MCKL_USE_AVX2
+#include <mckl/random/internal/aesni_avx2.hpp>
+#endif
 
 } // namespace mckl::internal
 
@@ -1197,6 +976,7 @@ class AESNIGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
+        MCKL_FLATTEN_CALL
         increment(ctr);
         buf.ctr = ctr;
         internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
@@ -1220,6 +1000,7 @@ class AESNIGenerator
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
         for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
+            MCKL_FLATTEN_CALL
             increment(ctr, buf.ctr_block);
             internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
             std::memcpy(buffer, buf.state.data(), size() * blocks);
