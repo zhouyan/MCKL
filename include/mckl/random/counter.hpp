@@ -175,6 +175,8 @@ class IncrementBlock
 
 #if MCKL_USE_AVX2
 #include <mckl/random/internal/increment_avx2_64.hpp>
+#elif MCKL_USE_SSE2
+#include <mckl/random/internal/increment_sse2_64.hpp>
 #endif
 
 #ifdef MCKL_GCC

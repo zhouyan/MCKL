@@ -33,6 +33,9 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     typename Derived>
 class PhiloxGeneratorImplAVX2_32
 {
+    static_assert(K == 2 || K == 4 || K == 8,
+        "PhiloxGeneratorImplSSE2_32 only support K equal to 2, 4 or 8");
+
     public:
     static constexpr bool batch() { return true; }
 
@@ -119,28 +122,28 @@ class PhiloxGeneratorImplAVX2_32
         std::array<__m256i, 8> &s)
     {
         const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
-        std::get<0x0>(s) = _mm256_load_si256(sptr++);
-        std::get<0x1>(s) = _mm256_load_si256(sptr++);
-        std::get<0x2>(s) = _mm256_load_si256(sptr++);
-        std::get<0x3>(s) = _mm256_load_si256(sptr++);
-        std::get<0x4>(s) = _mm256_load_si256(sptr++);
-        std::get<0x5>(s) = _mm256_load_si256(sptr++);
-        std::get<0x6>(s) = _mm256_load_si256(sptr++);
-        std::get<0x7>(s) = _mm256_load_si256(sptr++);
+        std::get<0>(s) = _mm256_load_si256(sptr++);
+        std::get<1>(s) = _mm256_load_si256(sptr++);
+        std::get<2>(s) = _mm256_load_si256(sptr++);
+        std::get<3>(s) = _mm256_load_si256(sptr++);
+        std::get<4>(s) = _mm256_load_si256(sptr++);
+        std::get<5>(s) = _mm256_load_si256(sptr++);
+        std::get<6>(s) = _mm256_load_si256(sptr++);
+        std::get<7>(s) = _mm256_load_si256(sptr++);
     }
 
     static void unpack(std::array<std::array<T, K>, blocks()> &state,
         std::array<__m256i, 8> &s)
     {
         __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        _mm256_store_si256(sptr++, std::get<0x0>(s));
-        _mm256_store_si256(sptr++, std::get<0x1>(s));
-        _mm256_store_si256(sptr++, std::get<0x2>(s));
-        _mm256_store_si256(sptr++, std::get<0x3>(s));
-        _mm256_store_si256(sptr++, std::get<0x4>(s));
-        _mm256_store_si256(sptr++, std::get<0x5>(s));
-        _mm256_store_si256(sptr++, std::get<0x6>(s));
-        _mm256_store_si256(sptr++, std::get<0x7>(s));
+        _mm256_store_si256(sptr++, std::get<0>(s));
+        _mm256_store_si256(sptr++, std::get<1>(s));
+        _mm256_store_si256(sptr++, std::get<2>(s));
+        _mm256_store_si256(sptr++, std::get<3>(s));
+        _mm256_store_si256(sptr++, std::get<4>(s));
+        _mm256_store_si256(sptr++, std::get<5>(s));
+        _mm256_store_si256(sptr++, std::get<6>(s));
+        _mm256_store_si256(sptr++, std::get<7>(s));
     }
 
     template <std::size_t N>
@@ -178,14 +181,14 @@ class PhiloxGeneratorImplAVX2_32
 
         const __m256i mask = _mm256_set_epi32(msk, 0, msk, 0, msk, 0, msk, 0);
 
-        __m256i m0 = _mm256_mul_epu32(std::get<0x0>(s), m);
-        __m256i m1 = _mm256_mul_epu32(std::get<0x1>(s), m);
-        __m256i m2 = _mm256_mul_epu32(std::get<0x2>(s), m);
-        __m256i m3 = _mm256_mul_epu32(std::get<0x3>(s), m);
-        __m256i m4 = _mm256_mul_epu32(std::get<0x4>(s), m);
-        __m256i m5 = _mm256_mul_epu32(std::get<0x5>(s), m);
-        __m256i m6 = _mm256_mul_epu32(std::get<0x6>(s), m);
-        __m256i m7 = _mm256_mul_epu32(std::get<0x7>(s), m);
+        __m256i m0 = _mm256_mul_epu32(std::get<0>(s), m);
+        __m256i m1 = _mm256_mul_epu32(std::get<1>(s), m);
+        __m256i m2 = _mm256_mul_epu32(std::get<2>(s), m);
+        __m256i m3 = _mm256_mul_epu32(std::get<3>(s), m);
+        __m256i m4 = _mm256_mul_epu32(std::get<4>(s), m);
+        __m256i m5 = _mm256_mul_epu32(std::get<5>(s), m);
+        __m256i m6 = _mm256_mul_epu32(std::get<6>(s), m);
+        __m256i m7 = _mm256_mul_epu32(std::get<7>(s), m);
 
         m0 = _mm256_xor_si256(m0, p);
         m1 = _mm256_xor_si256(m1, p);
@@ -196,23 +199,23 @@ class PhiloxGeneratorImplAVX2_32
         m6 = _mm256_xor_si256(m6, p);
         m7 = _mm256_xor_si256(m7, p);
 
-        std::get<0x0>(s) = _mm256_and_si256(std::get<0x0>(s), mask);
-        std::get<0x1>(s) = _mm256_and_si256(std::get<0x1>(s), mask);
-        std::get<0x2>(s) = _mm256_and_si256(std::get<0x2>(s), mask);
-        std::get<0x3>(s) = _mm256_and_si256(std::get<0x3>(s), mask);
-        std::get<0x4>(s) = _mm256_and_si256(std::get<0x4>(s), mask);
-        std::get<0x5>(s) = _mm256_and_si256(std::get<0x5>(s), mask);
-        std::get<0x6>(s) = _mm256_and_si256(std::get<0x6>(s), mask);
-        std::get<0x7>(s) = _mm256_and_si256(std::get<0x7>(s), mask);
+        std::get<0>(s) = _mm256_and_si256(std::get<0>(s), mask);
+        std::get<1>(s) = _mm256_and_si256(std::get<1>(s), mask);
+        std::get<2>(s) = _mm256_and_si256(std::get<2>(s), mask);
+        std::get<3>(s) = _mm256_and_si256(std::get<3>(s), mask);
+        std::get<4>(s) = _mm256_and_si256(std::get<4>(s), mask);
+        std::get<5>(s) = _mm256_and_si256(std::get<5>(s), mask);
+        std::get<6>(s) = _mm256_and_si256(std::get<6>(s), mask);
+        std::get<7>(s) = _mm256_and_si256(std::get<7>(s), mask);
 
-        std::get<0x0>(s) = _mm256_xor_si256(std::get<0x0>(s), m0);
-        std::get<0x1>(s) = _mm256_xor_si256(std::get<0x1>(s), m1);
-        std::get<0x2>(s) = _mm256_xor_si256(std::get<0x2>(s), m2);
-        std::get<0x3>(s) = _mm256_xor_si256(std::get<0x3>(s), m3);
-        std::get<0x4>(s) = _mm256_xor_si256(std::get<0x4>(s), m4);
-        std::get<0x5>(s) = _mm256_xor_si256(std::get<0x5>(s), m5);
-        std::get<0x6>(s) = _mm256_xor_si256(std::get<0x6>(s), m6);
-        std::get<0x7>(s) = _mm256_xor_si256(std::get<0x7>(s), m7);
+        std::get<0>(s) = _mm256_xor_si256(std::get<0>(s), m0);
+        std::get<1>(s) = _mm256_xor_si256(std::get<1>(s), m1);
+        std::get<2>(s) = _mm256_xor_si256(std::get<2>(s), m2);
+        std::get<3>(s) = _mm256_xor_si256(std::get<3>(s), m3);
+        std::get<4>(s) = _mm256_xor_si256(std::get<4>(s), m4);
+        std::get<5>(s) = _mm256_xor_si256(std::get<5>(s), m5);
+        std::get<6>(s) = _mm256_xor_si256(std::get<6>(s), m6);
+        std::get<7>(s) = _mm256_xor_si256(std::get<7>(s), m7);
 
         permute<N>(s);
     }
@@ -244,27 +247,27 @@ class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
     static void permute(std::array<__m256i, 8> &s)
     {
         // 2 3 0 1
-        std::get<0x0>(s) = _mm256_shuffle_epi32(std::get<0x0>(s), 0xB1);
-        std::get<0x1>(s) = _mm256_shuffle_epi32(std::get<0x1>(s), 0xB1);
-        std::get<0x2>(s) = _mm256_shuffle_epi32(std::get<0x2>(s), 0xB1);
-        std::get<0x3>(s) = _mm256_shuffle_epi32(std::get<0x3>(s), 0xB1);
-        std::get<0x4>(s) = _mm256_shuffle_epi32(std::get<0x4>(s), 0xB1);
-        std::get<0x5>(s) = _mm256_shuffle_epi32(std::get<0x5>(s), 0xB1);
-        std::get<0x6>(s) = _mm256_shuffle_epi32(std::get<0x6>(s), 0xB1);
-        std::get<0x7>(s) = _mm256_shuffle_epi32(std::get<0x7>(s), 0xB1);
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xB1);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xB1);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xB1);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xB1);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xB1);
     }
 
     static void permute_last(std::array<__m256i, 8> &s)
     {
         // 2 3 0 1
-        std::get<0x0>(s) = _mm256_shuffle_epi32(std::get<0x0>(s), 0xB1);
-        std::get<0x1>(s) = _mm256_shuffle_epi32(std::get<0x1>(s), 0xB1);
-        std::get<0x2>(s) = _mm256_shuffle_epi32(std::get<0x2>(s), 0xB1);
-        std::get<0x3>(s) = _mm256_shuffle_epi32(std::get<0x3>(s), 0xB1);
-        std::get<0x4>(s) = _mm256_shuffle_epi32(std::get<0x4>(s), 0xB1);
-        std::get<0x5>(s) = _mm256_shuffle_epi32(std::get<0x5>(s), 0xB1);
-        std::get<0x6>(s) = _mm256_shuffle_epi32(std::get<0x6>(s), 0xB1);
-        std::get<0x7>(s) = _mm256_shuffle_epi32(std::get<0x7>(s), 0xB1);
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xB1);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xB1);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xB1);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xB1);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xB1);
     }
 }; // class PhiloxGeneratorImpl
 
@@ -279,39 +282,39 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
     static void permute_first(std::array<__m256i, 8> &s)
     {
         // 3 0 1 2
-        std::get<0x0>(s) = _mm256_shuffle_epi32(std::get<0x0>(s), 0xC6);
-        std::get<0x1>(s) = _mm256_shuffle_epi32(std::get<0x1>(s), 0xC6);
-        std::get<0x2>(s) = _mm256_shuffle_epi32(std::get<0x2>(s), 0xC6);
-        std::get<0x3>(s) = _mm256_shuffle_epi32(std::get<0x3>(s), 0xC6);
-        std::get<0x4>(s) = _mm256_shuffle_epi32(std::get<0x4>(s), 0xC6);
-        std::get<0x5>(s) = _mm256_shuffle_epi32(std::get<0x5>(s), 0xC6);
-        std::get<0x6>(s) = _mm256_shuffle_epi32(std::get<0x6>(s), 0xC6);
-        std::get<0x7>(s) = _mm256_shuffle_epi32(std::get<0x7>(s), 0xC6);
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xC6);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xC6);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xC6);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xC6);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xC6);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xC6);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xC6);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xC6);
     }
 
     static void permute(std::array<__m256i, 8> &s)
     {
         // 2 1 0 3
-        std::get<0x0>(s) = _mm256_shuffle_epi32(std::get<0x0>(s), 0x93);
-        std::get<0x1>(s) = _mm256_shuffle_epi32(std::get<0x1>(s), 0x93);
-        std::get<0x2>(s) = _mm256_shuffle_epi32(std::get<0x2>(s), 0x93);
-        std::get<0x3>(s) = _mm256_shuffle_epi32(std::get<0x3>(s), 0x93);
-        std::get<0x4>(s) = _mm256_shuffle_epi32(std::get<0x4>(s), 0x93);
-        std::get<0x5>(s) = _mm256_shuffle_epi32(std::get<0x5>(s), 0x93);
-        std::get<0x6>(s) = _mm256_shuffle_epi32(std::get<0x6>(s), 0x93);
-        std::get<0x7>(s) = _mm256_shuffle_epi32(std::get<0x7>(s), 0x93);
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0x93);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0x93);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0x93);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0x93);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0x93);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0x93);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0x93);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0x93);
     }
 
     static void permute_last(std::array<__m256i, 8> &s)
     {
         // 2 3 0 1
-        std::get<0x0>(s) = _mm256_shuffle_epi32(std::get<0x0>(s), 0xB1);
-        std::get<0x1>(s) = _mm256_shuffle_epi32(std::get<0x1>(s), 0xB1);
-        std::get<0x2>(s) = _mm256_shuffle_epi32(std::get<0x2>(s), 0xB1);
-        std::get<0x3>(s) = _mm256_shuffle_epi32(std::get<0x3>(s), 0xB1);
-        std::get<0x4>(s) = _mm256_shuffle_epi32(std::get<0x4>(s), 0xB1);
-        std::get<0x5>(s) = _mm256_shuffle_epi32(std::get<0x5>(s), 0xB1);
-        std::get<0x6>(s) = _mm256_shuffle_epi32(std::get<0x6>(s), 0xB1);
-        std::get<0x7>(s) = _mm256_shuffle_epi32(std::get<0x7>(s), 0xB1);
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xB1);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xB1);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xB1);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xB1);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xB1);
     }
 }; // class PhiloxGeneratorImpl
