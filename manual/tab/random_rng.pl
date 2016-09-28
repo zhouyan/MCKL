@@ -39,14 +39,16 @@ do 'format.pl';
 my $run = 0;
 my $simd;
 my $llvm = "../../build/llvm-release-sys";
-my $gnu = "../../build/llvm-release-sys";
-my $intel = "../../build/llvm-release-sys";
+my $gnu = "../../build/gnu-release-sys";
+my $intel = "../../build/intel-release-sys";
+my $make = "ninja";
 GetOptions(
     "run"     => \$run,
     "simd=s"  => \$simd,
     "llvm=s"  => \$llvm,
     "gnu=s"   => \$gnu,
     "intel=s" => \$intel,
+    "make=s"  => \$make,
 );
 
 if ($simd) {
@@ -113,7 +115,7 @@ sub run
     for (sort(keys %rngs)) {
         my @val = @{$rngs{$_}};
         for my $rng (@val) {
-            my $cmd = "ninja -C $dir random_rng_\L$rng-check 2>&1";
+            my $cmd = "$make -C $dir random_rng_\L$rng-check 2>&1";
             my @result;
             my $cpb = 0xFFFF;
             for (1..5) {
