@@ -100,7 +100,7 @@ my @rngs;
 for my $k (sort(keys %rngs)) {
     my @val = @{$rngs{$k}};
     for (@val) {
-        push @rngs, $_, if $_ =~ /$rng/ or $rng =~ /$k/ or $all;
+        push @rngs, $_, if $_ =~ /$rng/i or $rng =~ /$k/i or $all;
     }
 }
 
