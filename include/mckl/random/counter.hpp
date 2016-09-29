@@ -41,12 +41,13 @@ namespace internal
 {
 
 template <std::size_t, typename T, std::size_t K>
-inline void increment_single(std::array<T, K> &, std::false_type)
+MCKL_FLATTEN inline void increment_single(std::array<T, K> &, std::false_type)
 {
 }
 
 template <std::size_t N, typename T, std::size_t K>
-inline void increment_single(std::array<T, K> &ctr, std::true_type)
+MCKL_FLATTEN inline void increment_single(
+    std::array<T, K> &ctr, std::true_type)
 {
     if (++std::get<N>(ctr) != 0)
         return;
@@ -97,13 +98,13 @@ namespace internal
 {
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_set(const std::array<T, K> &,
+MCKL_FLATTEN inline void increment_block_set(const std::array<T, K> &,
     std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_set(const std::array<T, K> &ctr,
+MCKL_FLATTEN inline void increment_block_set(const std::array<T, K> &ctr,
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block) = ctr;
@@ -112,13 +113,13 @@ inline void increment_block_set(const std::array<T, K> &ctr,
 }
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_add(
+MCKL_FLATTEN inline void increment_block_add(
     std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_add(
+MCKL_FLATTEN inline void increment_block_add(
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
@@ -127,13 +128,13 @@ inline void increment_block_add(
 }
 
 template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_add_safe(
+MCKL_FLATTEN inline void increment_block_add_safe(
     std::array<std::array<T, K>, Blocks> &, std::false_type)
 {
 }
 
 template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block_add_safe(
+MCKL_FLATTEN inline void increment_block_add_safe(
     std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
 {
     std::get<B>(ctr_block).front() += B + 1;
@@ -142,7 +143,7 @@ inline void increment_block_add_safe(
 }
 
 template <typename T, std::size_t K, std::size_t Blocks>
-inline void increment_block(const std::array<T, K> &ctr,
+MCKL_FLATTEN inline void increment_block(const std::array<T, K> &ctr,
     std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     increment_block_set<0>(
@@ -156,7 +157,9 @@ template <typename T, std::size_t K, std::size_t Blocks,
 class IncrementBlock
 {
     public:
-    static void eval(const std::array<T, K> &ctr,
+    static constexpr bool aligned(void *) { return true; }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K> &ctr,
         std::array<std::array<T, K>, Blocks> &ctr_block)
     {
         increment_block_set<0>(
@@ -194,9 +197,11 @@ template <typename T, std::size_t K, std::size_t Blocks>
 MCKL_FLATTEN inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
-    ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks) ?
-        internal::IncrementBlock<T, K, Blocks>::eval(ctr, ctr_block) :
-        internal::increment_block(ctr, ctr_block);
+    const bool safe =
+        internal::IncrementBlock<T, K, Blocks>::aligned(ctr_block.data()) &&
+        ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks);
+    safe ? internal::IncrementBlock<T, K, Blocks>::eval(ctr, ctr_block) :
+           internal::increment_block(ctr, ctr_block);
     ctr = ctr_block.back();
 }
 

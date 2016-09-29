@@ -58,7 +58,7 @@ class AESNIGeneratorGenericImpl
         enclast<rounds_>(state, rk);
     }
 
-    static void eval(std::array<__m128i, blocks()> &state,
+    static void eval(std::array<__m128i, 8> &state,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
         encfirst<0>(state, rk);
@@ -99,13 +99,13 @@ class AESNIGeneratorGenericImpl
     }
 
     template <std::size_t>
-    static void eval(std::array<__m128i, blocks()> &,
+    static void eval(std::array<__m128i, 8> &,
         const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m128i, blocks()> &s,
+    static void eval(std::array<__m128i, 8> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         enc<N>(s, rk);
@@ -171,20 +171,20 @@ class AESNIGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void encfirst(std::array<__m128i, blocks()> &s,
-        const std::array<__m128i, rounds_ + 1> &rk)
+    static void encfirst(
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
         encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
     }
 
     template <std::size_t>
-    static void encfirst(std::array<__m128i, blocks()> &,
+    static void encfirst(std::array<__m128i, 8> &,
         const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void encfirst(std::array<__m128i, blocks()> &s,
+    static void encfirst(std::array<__m128i, 8> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         const __m128i k = std::get<N>(rk);
@@ -199,20 +199,20 @@ class AESNIGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void enc(std::array<__m128i, blocks()> &s,
-        const std::array<__m128i, rounds_ + 1> &rk)
+    static void enc(
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
         enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
 
     template <std::size_t>
-    static void enc(std::array<__m128i, blocks()> &,
+    static void enc(std::array<__m128i, 8> &,
         const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void enc(std::array<__m128i, blocks()> &s,
+    static void enc(std::array<__m128i, 8> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         const __m128i k = std::get<N>(rk);
@@ -227,20 +227,20 @@ class AESNIGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void enclast(std::array<__m128i, blocks()> &s,
-        const std::array<__m128i, rounds_ + 1> &rk)
+    static void enclast(
+        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
         enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
     }
 
     template <std::size_t>
-    static void enclast(std::array<__m128i, blocks()> &,
+    static void enclast(std::array<__m128i, 8> &,
         const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void enclast(std::array<__m128i, blocks()> &s,
+    static void enclast(std::array<__m128i, 8> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         const __m128i k = std::get<N>(rk);

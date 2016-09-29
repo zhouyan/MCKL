@@ -42,13 +42,17 @@ my $llvm = "../../build/llvm-release-sys";
 my $gnu = "../../build/gnu-release-sys";
 my $intel = "../../build/intel-release-sys";
 my $make = "ninja";
+my $rng;
+my $write = 0;
 GetOptions(
-    "run"     => \$run,
-    "simd=s"  => \$simd,
-    "llvm=s"  => \$llvm,
-    "gnu=s"   => \$gnu,
-    "intel=s" => \$intel,
-    "make=s"  => \$make,
+    "run"      => \$run,
+    "simd=s"   => \$simd,
+    "llvm=s"   => \$llvm,
+    "gnu=s"    => \$gnu,
+    "intel=s"  => \$intel,
+    "make=s"   => \$make,
+    "rng=s"    => \$rng,
+    "write"    => \$write,
 );
 
 if ($simd) {
@@ -58,6 +62,9 @@ if ($simd) {
     $simd = "sse2" if $cpuid =~ "SSE2";
     $simd = "avx2" if $cpuid =~ "AVX2";
 }
+
+my $all = 0;
+$all = 1 if $rng =~ /all/;
 
 my %build_dir = (llvm => $llvm, gnu => $gnu, intel => $intel);
 
@@ -89,6 +96,14 @@ my %rngs = (
     rdrand   => [@rdrand],
 );
 
+my @rngs;
+for my $k (sort(keys %rngs)) {
+    my @val = @{$rngs{$k}};
+    for (@val) {
+        push @rngs, $_, if $_ =~ /$rng/ or $rng =~ /$k/ or $all;
+    }
+}
+
 if ($run) {
     &run("llvm");
     &run("gnu");
@@ -111,32 +126,31 @@ for (keys %rngs) {
 sub run
 {
     my $dir = $build_dir{$_[0]};
-    open my $txtfile, '>', "random_rng_$_[0]_$simd.txt";
-    for (sort(keys %rngs)) {
-        my @val = @{$rngs{$_}};
-        for my $rng (@val) {
-            my $cmd = "$make -C $dir random_rng_\L$rng-check 2>&1";
-            my @result;
-            my $cpb = 0xFFFF;
-            for (1..5) {
-                my @lines = split "\n", `$cmd`;
-                my @this_result = grep { $_ =~ /Passed|Failed/ } @lines;
-                if (@this_result) {
-                    for (@this_result) {
-                        my $this_cpb = (split)[4];
-                        if ($this_cpb < $cpb) {
-                            $cpb = $this_cpb;
-                            @result = @this_result;
-                        }
+    say $dir;
+    my $txtfile;
+    open $txtfile, '>', "random_rng_$_[0]_$simd.txt" if $all and $write;
+    for my $rng (@rngs) {
+        my $cmd = "$make -C $dir random_rng_\L$rng-check 2>&1";
+        my @result;
+        my $cpb = 0xFFFF;
+        for (1..5) {
+            my @lines = split "\n", `$cmd`;
+            my @this_result = grep { $_ =~ /Passed|Failed/ } @lines;
+            if (@this_result) {
+                for (@this_result) {
+                    my $this_cpb = (split)[4];
+                    if ($this_cpb < $cpb) {
+                        $cpb = $this_cpb;
+                        @result = @this_result;
                     }
-                    last if $cpb > 10;
                 }
+                last if $cpb > 10;
             }
-            say @result if @result;
-            say $txtfile @result if @result;
         }
+        say @result if @result;
+        say $txtfile @result if @result and $all and $write;
     }
-    close $txtfile;
+    close $txtfile if $all and $write;
 }
 
 sub read

@@ -36,7 +36,12 @@ class IncrementBlock<T, 1, 64, 64>
     static constexpr std::size_t blocks_ = 64;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -60,14 +65,14 @@ class IncrementBlock<T, 1, 64, 64>
             _mm256_add_epi64(a0, _mm256_set_epi64x(0x20, 0x1F, 0x1E, 0x1D));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, c5);
-        _mm256_storeu_si256(cptr++, c6);
-        _mm256_storeu_si256(cptr++, c7);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, c5);
+        _mm256_store_si256(cptr++, c6);
+        _mm256_store_si256(cptr++, c7);
 
         __m256i d = _mm256_set1_epi64x(0x20);
 
@@ -80,14 +85,14 @@ class IncrementBlock<T, 1, 64, 64>
         c6 = _mm256_add_epi64(c6, d);
         c7 = _mm256_add_epi64(c7, d);
 
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, c5);
-        _mm256_storeu_si256(cptr++, c6);
-        _mm256_storeu_si256(cptr++, c7);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, c5);
+        _mm256_store_si256(cptr++, c6);
+        _mm256_store_si256(cptr++, c7);
     }
 }; // class IncrementBlock
 
@@ -98,7 +103,12 @@ class IncrementBlock<T, 2, 32, 64>
     static constexpr std::size_t blocks_ = 32;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -117,14 +127,14 @@ class IncrementBlock<T, 2, 32, 64>
         __m256i c7 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0x10, 0, 0x0F));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, c5);
-        _mm256_storeu_si256(cptr++, c6);
-        _mm256_storeu_si256(cptr++, c7);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, c5);
+        _mm256_store_si256(cptr++, c6);
+        _mm256_store_si256(cptr++, c7);
 
         __m256i d = _mm256_set_epi64x(0, 0x10, 0, 0x10);
 
@@ -137,14 +147,14 @@ class IncrementBlock<T, 2, 32, 64>
         c6 = _mm256_add_epi64(c6, d);
         c7 = _mm256_add_epi64(c7, d);
 
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, c5);
-        _mm256_storeu_si256(cptr++, c6);
-        _mm256_storeu_si256(cptr++, c7);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, c5);
+        _mm256_store_si256(cptr++, c6);
+        _mm256_store_si256(cptr++, c7);
     }
 }; // class IncrementBlock
 
@@ -155,7 +165,12 @@ class IncrementBlock<T, 4, 16, 64>
     static constexpr std::size_t blocks_ = 16;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -174,14 +189,14 @@ class IncrementBlock<T, 4, 16, 64>
         __m256i c7 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 8));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, c5);
-        _mm256_storeu_si256(cptr++, c6);
-        _mm256_storeu_si256(cptr++, c7);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, c5);
+        _mm256_store_si256(cptr++, c6);
+        _mm256_store_si256(cptr++, c7);
 
         __m256i d = _mm256_set_epi64x(0, 0, 0, 8);
 
@@ -194,14 +209,14 @@ class IncrementBlock<T, 4, 16, 64>
         c6 = _mm256_add_epi64(c6, d);
         c7 = _mm256_add_epi64(c7, d);
 
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, c5);
-        _mm256_storeu_si256(cptr++, c6);
-        _mm256_storeu_si256(cptr++, c7);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, c5);
+        _mm256_store_si256(cptr++, c6);
+        _mm256_store_si256(cptr++, c7);
     }
 }; // class IncrementBlock
 
@@ -212,7 +227,12 @@ class IncrementBlock<T, 8, 8, 64>
     static constexpr std::size_t blocks_ = 8;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -236,22 +256,22 @@ class IncrementBlock<T, 8, 8, 64>
         __m256i cE = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 8));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, c6);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, c8);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, cA);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, cC);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, cE);
-        _mm256_storeu_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, c6);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, c8);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, cA);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, cC);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, cE);
+        _mm256_store_si256(cptr++, a1);
     }
 }; // class IncrementBlock
 
@@ -262,7 +282,12 @@ class IncrementBlock<T, 16, 4, 64>
     static constexpr std::size_t blocks_ = 4;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -292,22 +317,22 @@ class IncrementBlock<T, 16, 4, 64>
         __m256i cC = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 4));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, a2);
-        _mm256_storeu_si256(cptr++, a3);
-        _mm256_storeu_si256(cptr++, c4);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, a2);
-        _mm256_storeu_si256(cptr++, a3);
-        _mm256_storeu_si256(cptr++, c8);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, a2);
-        _mm256_storeu_si256(cptr++, a3);
-        _mm256_storeu_si256(cptr++, cC);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, a2);
-        _mm256_storeu_si256(cptr++, a3);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, a2);
+        _mm256_store_si256(cptr++, a3);
+        _mm256_store_si256(cptr++, c4);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, a2);
+        _mm256_store_si256(cptr++, a3);
+        _mm256_store_si256(cptr++, c8);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, a2);
+        _mm256_store_si256(cptr++, a3);
+        _mm256_store_si256(cptr++, cC);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, a2);
+        _mm256_store_si256(cptr++, a3);
     }
 }; // class IncrementBlock
 
@@ -318,7 +343,12 @@ class IncrementBlock<T, 32, 2, 64>
     static constexpr std::size_t blocks_ = 2;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -366,21 +396,21 @@ class IncrementBlock<T, 32, 2, 64>
         __m256i c8 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 2));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, a2);
-        _mm256_storeu_si256(cptr++, a3);
-        _mm256_storeu_si256(cptr++, a4);
-        _mm256_storeu_si256(cptr++, a5);
-        _mm256_storeu_si256(cptr++, a6);
-        _mm256_storeu_si256(cptr++, a7);
-        _mm256_storeu_si256(cptr++, c8);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, a2);
-        _mm256_storeu_si256(cptr++, a3);
-        _mm256_storeu_si256(cptr++, a4);
-        _mm256_storeu_si256(cptr++, a5);
-        _mm256_storeu_si256(cptr++, a6);
-        _mm256_storeu_si256(cptr++, a7);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, a2);
+        _mm256_store_si256(cptr++, a3);
+        _mm256_store_si256(cptr++, a4);
+        _mm256_store_si256(cptr++, a5);
+        _mm256_store_si256(cptr++, a6);
+        _mm256_store_si256(cptr++, a7);
+        _mm256_store_si256(cptr++, c8);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, a2);
+        _mm256_store_si256(cptr++, a3);
+        _mm256_store_si256(cptr++, a4);
+        _mm256_store_si256(cptr++, a5);
+        _mm256_store_si256(cptr++, a6);
+        _mm256_store_si256(cptr++, a7);
     }
 }; // class IncrementBlock

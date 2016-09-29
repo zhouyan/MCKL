@@ -36,7 +36,12 @@ class IncrementBlock<T, 1, 16, 64>
     static constexpr std::size_t blocks_ = 16;
 
     public:
-    static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -52,10 +57,10 @@ class IncrementBlock<T, 1, 16, 64>
             _mm256_add_epi64(a0, _mm256_set_epi64x(0x10, 0x0F, 0x0E, 0x0D));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
     }
 }; // class IncrementBlock
 
@@ -66,7 +71,12 @@ class IncrementBlock<T, 2, 8, 64>
     static constexpr std::size_t blocks_ = 8;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -81,10 +91,10 @@ class IncrementBlock<T, 2, 8, 64>
         __m256i c3 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 8, 0, 7));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
     }
 }; // class IncrementBlock
 
@@ -95,7 +105,12 @@ class IncrementBlock<T, 4, 4, 64>
     static constexpr std::size_t blocks_ = 4;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -110,10 +125,10 @@ class IncrementBlock<T, 4, 4, 64>
         __m256i c3 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 4));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, c1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, c3);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, c1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, c3);
     }
 }; // class IncrementBlock
 
@@ -124,7 +139,12 @@ class IncrementBlock<T, 8, 2, 64>
     static constexpr std::size_t blocks_ = 2;
 
     public:
-    static void eval(const std::array<T, K_> &ctr,
+    MCKL_FLATTEN static bool aligned(void *ptr)
+    {
+        return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
+    }
+
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -142,9 +162,9 @@ class IncrementBlock<T, 8, 2, 64>
         __m256i c2 = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 2));
 
         __m256i *cptr = reinterpret_cast<__m256i *>(ctr_block.data());
-        _mm256_storeu_si256(cptr++, c0);
-        _mm256_storeu_si256(cptr++, a1);
-        _mm256_storeu_si256(cptr++, c2);
-        _mm256_storeu_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, c0);
+        _mm256_store_si256(cptr++, a1);
+        _mm256_store_si256(cptr++, c2);
+        _mm256_store_si256(cptr++, a1);
     }
 }; // class IncrementBlock
