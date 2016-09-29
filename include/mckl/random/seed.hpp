@@ -39,6 +39,32 @@
 namespace mckl
 {
 
+namespace internal
+{
+template <typename RNGType, typename OutputType, typename InputType>
+OutputType seed_enc(const InputType &input)
+{
+    static_assert(sizeof(InputType) == sizeof(OutputType),
+        "**seed_enc** input and output have different sizes");
+
+    static_assert(sizeof(InputType) == sizeof(typename RNGType::ctr_type),
+        "**seed_enc** input and RNGType::ctr_type have different sizes");
+
+    union {
+        InputType k;
+        OutputType key;
+        typename RNGType::ctr_type ctr;
+    } buf;
+
+    buf.k = input;
+    RNGType rng(0);
+    rng.enc(buf.ctr, buf.ctr);
+
+    return buf.key;
+}
+
+} // namespace mckl::internal
+
 /// \brief Seed generator for use with RNG accepting scalar seeds
 ///
 /// \details
@@ -197,7 +223,25 @@ class SeedGenerator
     {
         result_type s = seed_.fetch_add(1);
 
-        return (s % max_ + 1) * divisor_ + remainder_;
+        return enc((s % max_ + 1) * divisor_ + remainder_,
+            std::integral_constant<int,
+                std::numeric_limits<result_type>::digits>());
+    }
+
+    template <std::size_t D>
+    result_type enc(result_type s, std::integral_constant<int, D>)
+    {
+        return s;
+    }
+
+    result_type enc(result_type s, std::integral_constant<int, 32>)
+    {
+        return s;
+    }
+
+    result_type enc(result_type s, std::integral_constant<int, 64>)
+    {
+        return internal::seed_enc<Threefry2x32, result_type>(s);
     }
 }; // class SeedGenerator
 
@@ -406,47 +450,31 @@ class SeedGenerator<std::array<ResultType, K>, ID>
     key_type enc(
         const std::array<result_type, M_> &k, std::integral_constant<int, 64>)
     {
-        return enc<Threefry2x32_64>(k);
+        return internal::seed_enc<Threefry2x32, key_type>(k);
     }
 
     key_type enc(
         const std::array<result_type, M_> &k, std::integral_constant<int, 128>)
     {
-        return enc<Threefry2x64_64>(k);
+        return internal::seed_enc<Threefry2x64, key_type>(k);
     }
 
     key_type enc(
         const std::array<result_type, M_> &k, std::integral_constant<int, 256>)
     {
-        return enc<Threefry4x64_64>(k);
+        return internal::seed_enc<Threefry4x64, key_type>(k);
     }
 
     key_type enc(
         const std::array<result_type, M_> &k, std::integral_constant<int, 512>)
     {
-        return enc<Threefry8x64_64>(k);
+        return internal::seed_enc<Threefry8x64, key_type>(k);
     }
 
     key_type enc(const std::array<result_type, M_> &k,
         std::integral_constant<int, 1024>)
     {
-        return enc<Threefry16x64_64>(k);
-    }
-
-    template <typename RNGType>
-    key_type enc(const std::array<result_type, M_> &k)
-    {
-        union {
-            std::array<result_type, M_> k;
-            typename RNGType::ctr_type ctr;
-            key_type key;
-        } buf;
-
-        buf.k = k;
-        RNGType rng(0);
-        rng.enc(buf.ctr, buf.ctr);
-
-        return buf.key;
+        return internal::seed_enc<Threefry16x64, key_type>(k);
     }
 }; // class Seed
 
