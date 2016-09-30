@@ -35,6 +35,7 @@ pdf :
 	latexmk -silent -f random_rng.tex >/dev/null
 
 rng :
+	./random_rng.pl --build
 	./random_rng.pl --run --write --rng all
 	./random_rng.pl --simd sse2
 	./random_rng.pl --simd avx2
