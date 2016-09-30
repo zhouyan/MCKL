@@ -37,6 +37,7 @@ use Getopt::Long;
 do 'format.pl';
 
 my $run = 0;
+my $build = 0;
 my $simd;
 my $llvm = "../../build/llvm-release-sys";
 my $gnu = "../../build/gnu-release-sys";
@@ -46,6 +47,7 @@ my $rng;
 my $write = 0;
 GetOptions(
     "run"      => \$run,
+    "build"    => \$build,
     "simd=s"   => \$simd,
     "llvm=s"   => \$llvm,
     "gnu=s"    => \$gnu,
@@ -57,6 +59,7 @@ GetOptions(
 
 if ($simd) {
     $run = 0;
+    $build = 0;
 } else {
     my $cpuid = `cpuid_info`;
     $simd = "sse2" if $cpuid =~ "SSE2";
@@ -100,7 +103,7 @@ my @rngs;
 for my $k (sort(keys %rngs)) {
     my @val = @{$rngs{$k}};
     for (@val) {
-        push @rngs, $_, if $_ =~ /$rng/i or $rng =~ /$k/i or $all;
+        push @rngs, $_, if $_ =~ /$rng/i or $k =~ /$rng/i or $all;
     }
 }
 
@@ -108,6 +111,13 @@ if ($run) {
     &run("llvm");
     &run("gnu");
     &run("intel");
+    exit;
+}
+
+if ($build) {
+    &build("llvm");
+    &build("gnu");
+    &build("intel");
     exit;
 }
 
@@ -151,6 +161,13 @@ sub run
         say $txtfile @result if @result and $all and $write;
     }
     close $txtfile if $all and $write;
+}
+
+sub build
+{
+    my $dir = $build_dir{$_[0]};
+    say $dir;
+    `$make -C $dir random_rng 2>&1`;
 }
 
 sub read
