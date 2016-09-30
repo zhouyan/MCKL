@@ -232,7 +232,7 @@ class PhiloxGenerator
             return is;
 
         PhiloxGenerator<T, K, Rounds, Constants> gen_tmp;
-        is >> std::ws >> gen.key_;
+        is >> std::ws >> gen_tmp.key_;
 
         if (is)
             gen = std::move(gen_tmp);
