@@ -261,12 +261,8 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
     static void set_key(std::array<__m128i, K> &k,
         const std::array<T, K + 1> &par, std::true_type)
     {
-        static constexpr std::size_t S = N / 4;
-        static constexpr std::size_t J = (S + I) % (K + 1);
-        static constexpr T p = I == K - 1 ? S : 0;
-
-        std::get<I>(k) =
-            _mm_set1_epi32(static_cast<int>(std::get<J>(par) + p));
+        std::get<I>(k) = _mm_set1_epi32(static_cast<int>(
+            ThreefryKBox<T, K, N, Constants>::template key<I>(par)));
         set_key<N, I + 1>(k, par, std::integral_constant<bool, I + 1 < K>());
     }
 

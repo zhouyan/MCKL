@@ -63,6 +63,8 @@ class ThreefryConstantsImpl<T, 2, 32>
     public:
     static constexpr T parity = UINT32_C(0x1BD11BDA);
 
+    static constexpr T tweaks[2] = {0, 0};
+
     static constexpr int rotate[1][8] = {{13, 15, 26, 6, 17, 29, 16, 24}};
 
     static constexpr std::size_t permute[2] = {0, 1};
@@ -73,6 +75,8 @@ class ThreefryConstantsImpl<T, 4, 32>
 {
     public:
     static constexpr T parity = UINT32_C(0x1BD11BDA);
+
+    static constexpr T tweaks[2] = {0, 0};
 
     static constexpr int rotate[2][8] = {
         {10, 11, 13, 23, 6, 17, 25, 18}, {26, 21, 27, 5, 20, 11, 10, 20}};
@@ -86,6 +90,8 @@ class ThreefryConstantsImpl<T, 2, 64>
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
 
+    static constexpr T tweaks[2] = {0, 0};
+
     static constexpr int rotate[1][8] = {{16, 42, 12, 31, 16, 32, 24, 21}};
 
     static constexpr std::size_t permute[2] = {0, 1};
@@ -96,6 +102,8 @@ class ThreefryConstantsImpl<T, 4, 64>
 {
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
+
+    static constexpr T tweaks[2] = {0, 0};
 
     static constexpr int rotate[2][8] = {
         {14, 52, 23, 5, 25, 46, 58, 32}, {16, 57, 40, 37, 33, 12, 22, 32}};
@@ -109,6 +117,8 @@ class ThreefryConstantsImpl<T, 8, 64>
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
 
+    static constexpr T tweaks[2] = {0, 0};
+
     static constexpr int rotate[4][8] = {{46, 33, 17, 44, 39, 13, 25, 8},
         {36, 27, 49, 9, 30, 50, 29, 35}, {19, 14, 36, 54, 34, 10, 39, 56},
         {37, 42, 39, 56, 24, 17, 43, 22}};
@@ -121,6 +131,8 @@ class ThreefryConstantsImpl<T, 16, 64>
 {
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
+
+    static constexpr T tweaks[2] = {0, 0};
 
     static constexpr int rotate[8][8] = {{24, 38, 33, 5, 41, 16, 31, 9},
         {13, 19, 4, 20, 9, 34, 44, 48}, {8, 10, 51, 48, 37, 56, 47, 35},
@@ -248,14 +260,16 @@ class ThreefryGenerator
         generate(ctr, n, buffer);
     }
 
-    friend bool operator==(const ThreefryGenerator<T, K, Rounds> &gen1,
-        const ThreefryGenerator<T, K, Rounds> &gen2)
+    friend bool operator==(
+        const ThreefryGenerator<T, K, Rounds, Constants> &gen1,
+        const ThreefryGenerator<T, K, Rounds, Constants> &gen2)
     {
         return gen1.par_ == gen2.par_;
     }
 
-    friend bool operator!=(const ThreefryGenerator<T, K, Rounds> &gen1,
-        const ThreefryGenerator<T, K, Rounds> &gen2)
+    friend bool operator!=(
+        const ThreefryGenerator<T, K, Rounds, Constants> &gen1,
+        const ThreefryGenerator<T, K, Rounds, Constants> &gen2)
     {
         return !(gen1 == gen2);
     }
@@ -263,7 +277,7 @@ class ThreefryGenerator
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const ThreefryGenerator<T, K, Rounds> &gen)
+        const ThreefryGenerator<T, K, Rounds, Constants> &gen)
     {
         if (!os)
             return os;
@@ -276,12 +290,12 @@ class ThreefryGenerator
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        ThreefryGenerator<T, K, Rounds> &gen)
+        ThreefryGenerator<T, K, Rounds, Constants> &gen)
     {
         if (!is)
             return is;
 
-        ThreefryGenerator<T, K, Rounds> gen_tmp;
+        ThreefryGenerator<T, K, Rounds, Constants> gen_tmp;
         is >> std::ws >> gen_tmp.par_;
 
         if (is)

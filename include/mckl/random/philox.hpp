@@ -196,14 +196,16 @@ class PhiloxGenerator
         generate(ctr, n, buffer);
     }
 
-    friend bool operator==(const PhiloxGenerator<T, K, Rounds> &gen1,
-        const PhiloxGenerator<T, K, Rounds> &gen2)
+    friend bool operator==(
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen1,
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen2)
     {
         return gen1.key_ == gen2.key_;
     }
 
-    friend bool operator!=(const PhiloxGenerator<T, K, Rounds> &gen1,
-        const PhiloxGenerator<T, K, Rounds> &gen2)
+    friend bool operator!=(
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen1,
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen2)
     {
         return !(gen1 == gen2);
     }
@@ -211,7 +213,7 @@ class PhiloxGenerator
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const PhiloxGenerator<T, K, Rounds> &gen)
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen)
     {
         if (!os)
             return os;
@@ -224,16 +226,16 @@ class PhiloxGenerator
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        PhiloxGenerator<T, K, Rounds> &gen)
+        PhiloxGenerator<T, K, Rounds, Constants> &gen)
     {
         if (!is)
             return is;
 
-        key_type key = {{0}};
-        is >> std::ws >> key;
+        PhiloxGenerator<T, K, Rounds, Constants> gen_tmp;
+        is >> std::ws >> gen.key_;
 
         if (is)
-            gen.key_ = std::move(key);
+            gen = std::move(gen_tmp);
 
         return is;
     }

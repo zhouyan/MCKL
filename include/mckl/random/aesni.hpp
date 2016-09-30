@@ -776,21 +776,22 @@ class ARSKeySeqImpl
         return rk;
     }
 
-    friend bool operator==(
-        const ARSKeySeqImpl &seq1, const ARSKeySeqImpl &seq2)
+    friend bool operator==(const ARSKeySeqImpl<Rounds, Constants> &seq1,
+        const ARSKeySeqImpl<Rounds, Constants> &seq2)
     {
         return seq1.key_ == seq2.key_;
     }
 
-    friend bool operator!=(
-        const ARSKeySeqImpl &seq1, const ARSKeySeqImpl &seq2)
+    friend bool operator!=(const ARSKeySeqImpl<Rounds, Constants> &seq1,
+        const ARSKeySeqImpl<Rounds, Constants> &seq2)
     {
         return !(seq1 == seq2);
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os, const ARSKeySeqImpl &seq)
+        std::basic_ostream<CharT, Traits> &os,
+        const ARSKeySeqImpl<Rounds, Constants> &seq)
     {
         if (!os)
             return os;
@@ -802,7 +803,8 @@ class ARSKeySeqImpl
 
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is, ARSKeySeqImpl &seq)
+        std::basic_istream<CharT, Traits> &is,
+        ARSKeySeqImpl<Rounds, Constants> &seq)
     {
         if (!is)
             return is;
