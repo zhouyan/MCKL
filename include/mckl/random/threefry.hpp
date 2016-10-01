@@ -35,13 +35,6 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/counter.hpp>
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
-
 /// \brief ThreefryGenerator default rounds
 /// \ingroup Config
 #ifndef MCKL_THREEFRY_ROUNDS
@@ -296,6 +289,7 @@ class ThreefryGenerator
             return is;
 
         ThreefryGenerator<T, K, Rounds, Constants> gen_tmp;
+        gen_tmp.par_.fill(0);
         is >> std::ws >> gen_tmp.par_;
 
         if (is)
@@ -493,11 +487,5 @@ using Threefish512_64 = Threefish512Engine<std::uint64_t>;
 using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
 
 } // namespace mckl
-
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
 
 #endif // MCKL_RANDOM_THREEFRY_HPP

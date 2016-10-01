@@ -49,9 +49,21 @@ inline mckl::Vector<T> random_rng_kat(const std::string &filename)
 }
 
 template <typename RNGType>
-inline bool random_rng_kat(const RNGType &)
+inline bool random_rng_kat(RNGType &)
 {
     return true;
+}
+
+template <typename T, typename RNGType>
+inline bool random_rng_kat(RNGType &rng, const std::string &filename)
+{
+    mckl::Vector<T> k = random_rng_kat<T>(filename);
+    mckl::Vector<typename RNGType::result_type> r(256);
+    mckl::rand(rng, 256, r.data());
+
+    return k.size() >= r.size() &&
+        std::memcmp(k.data(), r.data(),
+            sizeof(typename RNGType::result_type) * 256) == 0;
 }
 
 template <typename ResultType, typename T, std::size_t K>
@@ -60,12 +72,8 @@ inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
     std::string filename("random_Philox");
     filename += std::to_string(K) + "x";
     filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
-    mckl::Vector<T> k = random_rng_kat<T>(filename);
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
 
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<T>(rng, filename);
 }
 
 template <typename ResultType, typename T, std::size_t K>
@@ -74,48 +82,26 @@ inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
     std::string filename("random_Threefry");
     filename += std::to_string(K) + "x";
     filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
-    mckl::Vector<T> k = random_rng_kat<T>(filename);
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
 
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<T>(rng, filename);
 }
 
 template <typename ResultType>
 inline bool random_rng_kat(mckl::Threefish256Engine<ResultType> &rng)
 {
-    mckl::Vector<std::uint64_t> k =
-        random_rng_kat<std::uint64_t>("random_Threefish256.txt");
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
-
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<std::uint64_t>(rng, "random_Threefish256.txt");
 }
 
 template <typename ResultType>
 inline bool random_rng_kat(mckl::Threefish512Engine<ResultType> &rng)
 {
-    mckl::Vector<std::uint64_t> k =
-        random_rng_kat<std::uint64_t>("random_Threefish512.txt");
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
-
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<std::uint64_t>(rng, "random_Threefish512.txt");
 }
 
 template <typename ResultType>
 inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
 {
-    mckl::Vector<std::uint64_t> k =
-        random_rng_kat<std::uint64_t>("random_Threefish1024.txt");
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
-
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<std::uint64_t>(rng, "random_Threefish1024.txt");
 }
 
 #if MCKL_HAS_AESNI
@@ -123,49 +109,25 @@ inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::AES128Engine<ResultType, Rounds> &rng)
 {
-    mckl::Vector<std::uint64_t> k =
-        random_rng_kat<std::uint64_t>("random_AES128.txt");
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
-
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<std::uint64_t>(rng, "random_AES128.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::AES192Engine<ResultType, Rounds> &rng)
 {
-    mckl::Vector<std::uint64_t> k =
-        random_rng_kat<std::uint64_t>("random_AES192.txt");
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
-
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<std::uint64_t>(rng, "random_AES192.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::AES256Engine<ResultType, Rounds> &rng)
 {
-    mckl::Vector<std::uint64_t> k =
-        random_rng_kat<std::uint64_t>("random_AES256.txt");
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
-
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<std::uint64_t>(rng, "random_AES256.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
 {
-    mckl::Vector<std::uint64_t> k =
-        random_rng_kat<std::uint64_t>("random_ARS.txt");
-    mckl::Vector<ResultType> r(256);
-    rng(256, r.data());
-
-    return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(), sizeof(ResultType) * 256) == 0;
+    return random_rng_kat<std::uint64_t>(rng, "random_ARS.txt");
 }
 
 #endif // MCKL_HAS_AESNI
