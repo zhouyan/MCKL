@@ -99,7 +99,7 @@ class MKLStream
     }
 
     /// \brief `vslCopyStream`
-    MKLStream(const MKLStream &other)
+    MKLStream(const MKLStream &other) : ptr_(nullptr)
     {
         ::VSLStreamStatePtr ptr = nullptr;
         if (internal::mkl_error_check(::vslCopyStream(&ptr, other.ptr_),
