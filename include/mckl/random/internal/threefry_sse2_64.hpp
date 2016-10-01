@@ -40,12 +40,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
             ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::batch();
     }
 
-    static constexpr std::size_t blocks()
-    {
-        return K != 0 && 8 % K == 0 ?
-            16 / K :
-            ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::blocks();
-    }
+    static constexpr std::size_t blocks() { return 16 / K; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
     {

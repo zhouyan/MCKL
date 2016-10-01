@@ -257,17 +257,9 @@ class ThreefryGeneratorGenericImpl
     public:
     static constexpr bool batch() { return false; }
 
-    static constexpr std::size_t blocks() { return 1; }
-
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
     {
         eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
-    }
-
-    static void eval(std::array<std::array<T, K>, 1> &state,
-        const std::array<T, K + 1> &par)
-    {
-        eval(std::get<0>(state), par);
     }
 
     private:
