@@ -192,16 +192,21 @@ template <typename RNGType>
 inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
     int twid, const std::string &name)
 {
+    using result_type = typename std::conditional<
+        std::numeric_limits<typename RNGType::result_type>::digits == 32 ||
+            std::numeric_limits<typename RNGType::result_type>::digits == 64,
+        typename RNGType::result_type, std::uint64_t>::type;
+
     RNGType rng;
     bool pass = random_rng_kat(rng);
-    mckl::UniformBitsDistribution<std::uint64_t> ubits;
+    mckl::UniformBitsDistribution<result_type> ubits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
 
     RNGType rng1;
     RNGType rng2;
 
-    mckl::Vector<std::uint64_t> r1;
-    mckl::Vector<std::uint64_t> r2;
+    mckl::Vector<result_type> r1;
+    mckl::Vector<result_type> r2;
     r1.reserve(N);
     r2.reserve(N);
 
@@ -216,8 +221,8 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
             num += K;
             r1.resize(K);
             r2.resize(K);
-            std::uint64_t s1 = 0;
-            std::uint64_t s2 = 0;
+            result_type s1 = 0;
+            result_type s2 = 0;
 
             watch1.start();
             for (std::size_t j = 0; j != K; ++j)
@@ -253,7 +258,7 @@ inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
             mckl::rand(rng, ubits, K, r2.data());
             pass = pass && (r1 == r2 || rng != rng);
         }
-        std::size_t bytes = sizeof(std::uint64_t) * num;
+        std::size_t bytes = sizeof(result_type) * num;
         c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
         c2 = std::min(c2, 1.0 * watch2.cycles() / bytes);
     }

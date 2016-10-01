@@ -46,11 +46,11 @@ class PhiloxHiLo<T, 32>
         buf.prod =
             static_cast<std::uint64_t>(a) * static_cast<std::uint64_t>(b);
 #if MCKL_HAS_X86 // little endian
-        hi = std::get<1>(buf.result);
         lo = std::get<0>(buf.result);
+        hi = std::get<1>(buf.result);
 #else  // MCKL_HAS_X86
-        hi = static_cast<T>(buf.prod >> 32);
         lo = static_cast<T>(buf.prod);
+        hi = static_cast<T>(buf.prod >> 32);
 #endif // MCKL_HAS_X86
     }
 }; // class PhiloxHiLo
@@ -79,11 +79,11 @@ class PhiloxHiLo<T, 64>
 #endif // MCKL_GCC
 
 #if MCKL_HAS_X86 // littel endia
-        hi = std::get<1>(buf.result);
         lo = std::get<0>(buf.result);
+        hi = std::get<1>(buf.result);
 #else  // MCKL_HAS_X86
-        hi = static_cast<T>(buf.prod >> 64);
         lo = static_cast<T>(buf.prod);
+        hi = static_cast<T>(buf.prod >> 64);
 #endif // MCKL_HAS_X86
 
 #elif defined(MCKL_MSVC)
