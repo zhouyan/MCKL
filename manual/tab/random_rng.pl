@@ -139,12 +139,21 @@ sub run
     say $dir;
     my $txtfile;
     open $txtfile, '>', "random_rng_$_[0]_$simd.txt" if $all and $write;
+    my $header = 1;
+    my @header;
     for my $rng (@rngs) {
         my $cmd = "$make -C $dir random_rng_\L$rng-check 2>&1";
         my @result;
         my $cpb = 0xFFFF;
         for (1..5) {
             my @lines = split "\n", `$cmd`;
+            if ($header) {
+                @header = grep { $_ =~ /Determinstics/ } @lines;
+                say '=' x length($header[0]);
+                say $header[0];
+                say '-' x length($header[0]);
+                $header = 0;
+            }
             my @this_result = grep { $_ =~ /Passed|Failed/ } @lines;
             if (@this_result) {
                 for (@this_result) {
@@ -160,6 +169,7 @@ sub run
         say @result if @result;
         say $txtfile @result if @result and $all and $write;
     }
+    say '-' x length($header[0]);
     close $txtfile if $all and $write;
 }
 

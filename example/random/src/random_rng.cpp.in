@@ -55,26 +55,9 @@ int main(int argc, char **argv)
             ++argv;
         }
     }
-
-    const int nwid = 20;
-    const int swid = 8;
-    const int twid = 15;
-    const std::size_t lwid = nwid + swid * 2 + twid * 3;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::setw(nwid) << std::left << "RNGType";
-    std::cout << std::setw(swid) << std::right << "Size";
-    std::cout << std::setw(swid) << std::right << "Align";
-    std::cout << std::setw(twid) << std::right << "CPB (Single)";
-    std::cout << std::setw(twid) << std::right << "CPB (Batch)";
-    std::cout << std::setw(twid) << std::right << "Deterministics";
-    std::cout << std::endl;
-    std::cout << std::fixed << std::setprecision(2);
-    std::cout << std::string(lwid, '-') << std::endl;
     // clang-format off
-    random_rng<@RNGType@>(N, M, nwid, swid, twid, "@Name@");
+    random_rng<@RNGType@>(N, M, "@Name@");
     // clang-format on
-    std::cout << std::string(lwid, '-') << std::endl;
 
     return 0;
 }

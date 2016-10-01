@@ -32,6 +32,8 @@
 #ifndef MCKL_EXAMPLE_RANDOM_RNG_HPP
 #define MCKL_EXAMPLE_RANDOM_RNG_HPP
 
+#include <mckl/random/rng_set.hpp>
+#include <mckl/random/seed.hpp>
 #include <mckl/random/uniform_bits_distribution.hpp>
 #include "random_common.hpp"
 
@@ -151,89 +153,271 @@ inline std::string random_rng_size(
 }
 
 template <typename RNGType>
-inline void random_rng(std::size_t N, std::size_t M, int nwid, int swid,
-    int twid, const std::string &name)
-{
-    using result_type = typename std::conditional<
-        std::numeric_limits<typename RNGType::result_type>::digits == 32 ||
-            std::numeric_limits<typename RNGType::result_type>::digits == 64,
-        typename RNGType::result_type, std::uint64_t>::type;
+using ResultType = typename std::conditional<
+    std::numeric_limits<typename RNGType::result_type>::digits == 32 ||
+        std::numeric_limits<typename RNGType::result_type>::digits == 64,
+    typename RNGType::result_type, std::uint64_t>::type;
 
+struct RandomRNGPerf {
+    bool pass;
+    double c1;
+    double c2;
+};
+
+template <typename RNGType>
+inline bool random_rng_d(std::size_t N, std::size_t M)
+{
+    using result_type = ResultType<RNGType>;
+
+    mckl::UniformBitsDistribution<result_type> ubits;
+    std::uniform_int_distribution<std::size_t> rsize(0, N);
     RNGType rng;
     bool pass = random_rng_kat(rng);
+
+    mckl::Seed<RNGType>::instance().set(0);
+    RNGType rng1(mckl::Seed<RNGType>::instance()());
+
+    mckl::Seed<RNGType>::instance().set(0);
+    RNGType rng2(mckl::Seed<RNGType>::instance()());
+
+    mckl::Vector<result_type> r1(N);
+    mckl::Vector<result_type> r2(N);
+
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = rsize(rng);
+
+        for (std::size_t j = 0; j != K; ++j)
+            r1[j] = mckl::rand(rng1, ubits);
+        mckl::rand(rng2, ubits, K, r2.data());
+        bool equal =
+            std::memcmp(r1.data(), r2.data(), sizeof(result_type) * K) == 0;
+        pass = pass && (equal || rng != rng);
+
+        rng1.discard(static_cast<unsigned>(K));
+        typename RNGType::result_type next = rng1();
+        for (std::size_t j = 0; j != K; ++j)
+            rng2();
+        bool find = false;
+        for (std::size_t j = 0; j != 2; ++j)
+            find = find || rng2() == next;
+        pass = pass && (find || rng != rng);
+
+        std::stringstream ss;
+        ss << rng;
+        mckl::rand(rng, ubits, K, r1.data());
+        ss >> rng;
+        mckl::rand(rng, ubits, K, r2.data());
+        pass = pass && (r1 == r2 || rng != rng);
+
+        RNGType tmp(rng);
+        mckl::rand(rng, ubits, K, r1.data());
+        mckl::rand(tmp, ubits, K, r2.data());
+        pass = pass && (r1 == r2 || rng != rng);
+
+        tmp = rng;
+        mckl::rand(rng, ubits, K, r1.data());
+        mckl::rand(tmp, ubits, K, r2.data());
+        pass = pass && (r1 == r2 || rng != rng);
+    }
+
+    return pass;
+}
+
+template <typename RNGType>
+inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
+{
+    using result_type = ResultType<RNGType>;
+
     mckl::UniformBitsDistribution<result_type> ubits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    RNGType rng;
+    bool pass = true;
 
-    RNGType rng1;
-    RNGType rng2;
+    mckl::Seed<RNGType>::instance().set(0);
+    RNGType rng1(mckl::Seed<RNGType>::instance()());
 
-    mckl::Vector<result_type> r1;
-    mckl::Vector<result_type> r2;
-    r1.reserve(N);
-    r2.reserve(N);
+    mckl::Seed<RNGType>::instance().set(0);
+    RNGType rng2(mckl::Seed<RNGType>::instance()());
+
+    mckl::Vector<result_type> r1(N);
+    mckl::Vector<result_type> r2(N);
 
     double c1 = std::numeric_limits<double>::max();
     double c2 = std::numeric_limits<double>::max();
     for (std::size_t k = 0; k != 10; ++k) {
-        std::size_t num = 0;
+        std::size_t n = 0;
         mckl::StopWatch watch1;
         mckl::StopWatch watch2;
         for (std::size_t i = 0; i != M; ++i) {
             std::size_t K = rsize(rng);
-            num += K;
-            r1.resize(K);
-            r2.resize(K);
-            result_type s1 = 0;
-            result_type s2 = 0;
+            n += K;
 
             watch1.start();
             for (std::size_t j = 0; j != K; ++j)
-                s1 += mckl::rand(rng1, ubits);
-            watch1.stop();
-
-            for (std::size_t j = 0; j != K; ++j)
                 r1[j] = mckl::rand(rng1, ubits);
+            watch1.stop();
 
             watch2.start();
             mckl::rand(rng2, ubits, K, r2.data());
             watch2.stop();
-            s2 = std::accumulate(r2.begin(), r2.end(), s2);
 
-            mckl::rand(rng2, ubits, K, r2.data());
-
-            pass = pass && (s1 == s2 || rng != rng);
-            pass = pass && (r1 == r2 || rng != rng);
-
-            rng1.discard(static_cast<unsigned>(K));
-            typename RNGType::result_type next = rng1();
-            for (std::size_t j = 0; j != K; ++j)
-                rng2();
-            bool find = false;
-            for (std::size_t j = 0; j != 2; ++j)
-                find = find || rng2() == next;
-            pass = pass && (find || rng != rng);
-
-            std::stringstream ss;
-            ss << rng;
-            mckl::rand(rng, ubits, K, r1.data());
-            ss >> rng;
-            mckl::rand(rng, ubits, K, r2.data());
-            pass = pass && (r1 == r2 || rng != rng);
+            std::uniform_int_distribution<std::size_t> ridx(0, K - 1);
+            std::size_t idx = ridx(rng);
+            pass = pass && (r1[idx] == r2[idx] || rng != rng);
         }
-        std::size_t bytes = sizeof(result_type) * num;
+        std::size_t bytes = sizeof(result_type) * n;
         c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
         c2 = std::min(c2, 1.0 * watch2.cycles() / bytes);
     }
 
-    std::cout << std::setw(nwid) << std::left << name;
-    std::cout << std::setw(swid) << std::right << random_rng_size(rng);
-    std::cout << std::setw(swid) << std::right << alignof(RNGType);
-    std::cout << std::setw(twid) << std::right << c1;
-    std::cout << std::setw(twid) << std::right << c2;
-    std::cout << std::setw(twid) << std::right << random_pass(pass);
-    if (c1 < c2)
-        std::cout << '*';
+    return {pass, c1, c2};
+}
+
+template <typename RNGType>
+inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
+{
+    using result_type = ResultType<RNGType>;
+
+    bool pass = true;
+
+    std::size_t P = std::thread::hardware_concurrency();
+
+    mckl::Seed<RNGType>::instance().set(0);
+    mckl::RNGSetVector<RNGType> rs1(P);
+
+    mckl::Seed<RNGType>::instance().set(0);
+    mckl::RNGSetVector<RNGType> rs2(P);
+
+    mckl::Vector<result_type> r1(N * P);
+    mckl::Vector<result_type> r2(N * P);
+    mckl::Vector<result_type> s1(M * P);
+    mckl::Vector<result_type> s2(M * P);
+    mckl::Vector<std::size_t> n1(M * P);
+    mckl::Vector<std::size_t> n2(M * P);
+
+    auto worker1 = [N, M, &rs1, &r1, &s1, &n1](std::size_t p) {
+        mckl::UniformBitsDistribution<result_type> ubits;
+        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+        RNGType rng = std::move(rs1[p]);
+        result_type *const r = r1.data() + N * p;
+        for (std::size_t i = 0; i != M; ++i) {
+            std::size_t K = rsize(rng);
+            for (std::size_t j = 0; j != K; ++j)
+                r[j] = mckl::rand(rng, ubits);
+            std::uniform_int_distribution<std::size_t> ridx(0, K - 1);
+            std::size_t idx = ridx(rng);
+            s1[M * p + i] = r[idx];
+            n1[M * p + i] = K;
+        }
+        rs1[p] = std::move(rng);
+    };
+
+    auto worker2 = [N, M, &rs2, &r2, &s2, &n2](std::size_t p) {
+        mckl::UniformBitsDistribution<result_type> ubits;
+        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+        RNGType rng = std::move(rs2[p]);
+        result_type *const r = r2.data() + N * p;
+        for (std::size_t i = 0; i != M; ++i) {
+            std::size_t K = rsize(rng);
+            mckl::rand(rng, ubits, K, r);
+            std::uniform_int_distribution<std::size_t> ridx(0, K - 1);
+            std::size_t idx = ridx(rng);
+            s2[M * p + i] = r[idx];
+            n2[M * p + i] = K;
+        }
+        rs2[p] = std::move(rng);
+    };
+
+    double c1 = std::numeric_limits<double>::max();
+    double c2 = std::numeric_limits<double>::max();
+    for (std::size_t k = 0; k != 10; ++k) {
+        mckl::StopWatch watch1;
+        mckl::StopWatch watch2;
+
+        mckl::Vector<std::future<void>> task1;
+        task1.reserve(P);
+        watch1.start();
+        for (std::size_t p = 0; p != P; ++p)
+            task1.push_back(std::async(std::launch::async, worker1, p));
+        for (std::size_t p = 0; p != P; ++p)
+            task1[p].wait();
+        watch1.stop();
+
+        mckl::Vector<std::future<void>> task2;
+        task2.reserve(P);
+        watch2.start();
+        for (std::size_t p = 0; p != P; ++p)
+            task2.push_back(std::async(std::launch::async, worker2, p));
+        for (std::size_t p = 0; p != P; ++p)
+            task2[p].wait();
+        watch2.stop();
+
+        pass = pass && (s1 == s2 || rs1[0] != rs1[0]);
+        pass = pass && (n1 == n2 || rs1[0] != rs1[0]);
+
+        std::size_t bytes1 = sizeof(result_type) *
+            std::accumulate(n1.begin(), n1.end(), static_cast<std::size_t>(0));
+        std::size_t bytes2 = sizeof(result_type) *
+            std::accumulate(n2.begin(), n2.end(), static_cast<std::size_t>(0));
+        c1 = std::min(c1, 1.0 * watch1.cycles() / bytes1);
+        c2 = std::min(c2, 1.0 * watch2.cycles() / bytes2);
+    }
+
+    return {pass, c1, c2};
+}
+
+template <typename RNGType>
+inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
+{
+    const int nwid = 20;
+    const int swid = 8;
+    const int twid = 7;
+    const std::size_t lwid = nwid + swid * 2 + twid * 8 + 15;
+
+    bool pass_d = random_rng_d<RNGType>(N, M);
+    RandomRNGPerf perf_s = random_rng_s<RNGType>(N, M);
+    RandomRNGPerf perf_p = random_rng_p<RNGType>(N, M);
+
+    std::cout << std::fixed << std::setprecision(2);
+
+    std::cout << std::string(lwid, '=') << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "RNG";
+    std::cout << std::setw(swid) << std::right << "Size";
+    std::cout << std::setw(swid) << std::right << "Align";
+    std::cout << std::setw(twid) << std::right << "S";
+    std::cout << std::setw(twid) << std::right << "B";
+    std::cout << std::setw(twid) << std::right << "SP";
+    std::cout << std::setw(twid) << std::right << "BP";
+    std::cout << std::setw(twid) << std::right << "S/B";
+    std::cout << std::setw(twid) << std::right << "SP/BP";
+    std::cout << std::setw(twid) << std::right << "S/SP";
+    std::cout << std::setw(twid) << std::right << "B/BP";
+    std::cout << std::setw(15) << std::right << "Determinstics";
     std::cout << std::endl;
+
+    std::cout << std::string(lwid, '-') << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << name;
+    std::cout << std::setw(swid) << std::right << random_rng_size(RNGType());
+    std::cout << std::setw(swid) << std::right << alignof(RNGType);
+    std::cout << std::setw(twid) << std::right << perf_s.c1;
+    std::cout << std::setw(twid) << std::right << perf_s.c2;
+    std::cout << std::setw(twid) << std::right << perf_p.c1;
+    std::cout << std::setw(twid) << std::right << perf_p.c2;
+    std::cout << std::setw(twid) << std::right << perf_s.c1 / perf_s.c2;
+    std::cout << std::setw(twid) << std::right << perf_p.c1 / perf_p.c2;
+    std::cout << std::setw(twid) << std::right << perf_s.c1 / perf_p.c1;
+    std::cout << std::setw(twid) << std::right << perf_s.c2 / perf_p.c2;
+
+    std::string pass;
+    pass += perf_s.c1 > perf_s.c2 ? "-" : "*";
+    pass += perf_p.c1 > perf_p.c2 ? "-" : "*";
+    pass += pass_d && perf_s.pass && perf_p.pass ? "Passed" : "Failed";
+    std::cout << std::setw(15) << std::right << pass;
+    std::cout << std::endl;
+
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_RNG_HPP
