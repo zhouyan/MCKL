@@ -88,26 +88,41 @@ class PhiloxGeneratorImplAVX2_32
 
         Derived::permute_first(s);
 
-        // clang-format off
-        kbox<0x0>(p, w); spbox<0x0>(s, p, m);
-        kbox<0x1>(p, w); spbox<0x1>(s, p, m);
-        kbox<0x2>(p, w); spbox<0x2>(s, p, m);
-        kbox<0x3>(p, w); spbox<0x3>(s, p, m);
-        kbox<0x4>(p, w); spbox<0x4>(s, p, m);
-        kbox<0x5>(p, w); spbox<0x5>(s, p, m);
-        kbox<0x6>(p, w); spbox<0x6>(s, p, m);
-        kbox<0x7>(p, w); spbox<0x7>(s, p, m);
-        kbox<0x8>(p, w); spbox<0x8>(s, p, m);
-        kbox<0x9>(p, w); spbox<0x9>(s, p, m);
-        kbox<0xA>(p, w); spbox<0xA>(s, p, m);
-        kbox<0xB>(p, w); spbox<0xB>(s, p, m);
-        kbox<0xC>(p, w); spbox<0xC>(s, p, m);
-        kbox<0xD>(p, w); spbox<0xD>(s, p, m);
-        kbox<0xE>(p, w); spbox<0xE>(s, p, m);
-        kbox<0xF>(p, w); spbox<0xF>(s, p, m);
-        // clang-format on
+        kbox<0x0>(p, w);
+        spbox<0x0>(s, p, m);
+        kbox<0x1>(p, w);
+        spbox<0x1>(s, p, m);
+        kbox<0x2>(p, w);
+        spbox<0x2>(s, p, m);
+        kbox<0x3>(p, w);
+        spbox<0x3>(s, p, m);
+        kbox<0x4>(p, w);
+        spbox<0x4>(s, p, m);
+        kbox<0x5>(p, w);
+        spbox<0x5>(s, p, m);
+        kbox<0x6>(p, w);
+        spbox<0x6>(s, p, m);
+        kbox<0x7>(p, w);
+        spbox<0x7>(s, p, m);
+        kbox<0x8>(p, w);
+        spbox<0x8>(s, p, m);
+        kbox<0x9>(p, w);
+        spbox<0x9>(s, p, m);
+        kbox<0xA>(p, w);
+        spbox<0xA>(s, p, m);
+        kbox<0xB>(p, w);
+        spbox<0xB>(s, p, m);
+        kbox<0xC>(p, w);
+        spbox<0xC>(s, p, m);
+        kbox<0xD>(p, w);
+        spbox<0xD>(s, p, m);
+        kbox<0xE>(p, w);
+        spbox<0xE>(s, p, m);
+        kbox<0xF>(p, w);
+        spbox<0xF>(s, p, m);
 
         eval<0x10>(s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
+
         Derived::permute_last(s);
 
         sptr = reinterpret_cast<__m256i *>(state.data());
