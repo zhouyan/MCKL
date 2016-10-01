@@ -899,17 +899,35 @@ class AESNIGenerator
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr,
-        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
+    void operator()(ctr_type &ctr, ResultType *buffer) const
     {
-        generate(ctr, buffer);
+        std::array<__m128i, rounds_ + 1> rk(key_seq_.get());
+        generate(ctr, buffer, rk);
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, std::size_t n,
-        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
+    void operator()(ctr_type &ctr, std::size_t n, ResultType *buffer) const
     {
-        generate(ctr, n, buffer);
+        static constexpr std::size_t stride = size() / sizeof(ResultType);
+        static constexpr std::size_t blocks =
+            internal::AESNIGeneratorImpl<KeySeqType>::blocks();
+
+        alignas(32) union {
+            std::array<__m128i, blocks> state;
+            std::array<ctr_type, blocks> ctr_block;
+        } buf;
+
+        std::array<__m128i, rounds_ + 1> rk(key_seq_.get());
+
+        const std::size_t m = n / blocks;
+        const std::size_t l = n % blocks;
+        for (std::size_t i = 0; i != m; ++i, buffer += stride * blocks) {
+            MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
+            internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
+            std::memcpy(buffer, buf.state.data(), size() * blocks);
+        }
+        for (std::size_t i = 0; i != l; ++i, buffer += stride)
+            generate(ctr, buffer, rk);
     }
 
     friend bool operator==(const AESNIGenerator<KeySeqType> &gen1,
@@ -959,17 +977,7 @@ class AESNIGenerator
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
 
     template <typename ResultType>
-    void generate(ctr_type &ctr,
-        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
-    {
-        std::array<__m128i, rounds_ + 1> rk(key_seq_.get());
-
-        generate(ctr, buffer, rk);
-    }
-
-    template <typename ResultType>
-    void generate(ctr_type &ctr,
-        std::array<ResultType, size() / sizeof(ResultType)> &buffer,
+    void generate(ctr_type &ctr, ResultType *buffer,
         const std::array<__m128i, rounds_ + 1> &rk) const
     {
         alignas(32) union {
@@ -978,37 +986,10 @@ class AESNIGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
-        MCKL_FLATTEN_CALL
-        increment(ctr);
+        MCKL_FLATTEN_CALL increment(ctr);
         buf.ctr = ctr;
         internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
-        buffer = buf.result;
-    }
-
-    template <typename ResultType>
-    void generate(ctr_type &ctr, std::size_t n,
-        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
-    {
-        static constexpr std::size_t blocks =
-            internal::AESNIGeneratorImpl<KeySeqType>::blocks();
-
-        alignas(32) union {
-            std::array<__m128i, blocks> state;
-            std::array<ctr_type, blocks> ctr_block;
-        } buf;
-
-        std::array<__m128i, rounds_ + 1> rk(key_seq_.get());
-
-        const std::size_t m = n / blocks;
-        const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
-            MCKL_FLATTEN_CALL
-            increment(ctr, buf.ctr_block);
-            internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
-            std::memcpy(buffer, buf.state.data(), size() * blocks);
-        }
-        for (std::size_t i = 0; i != l; ++i)
-            generate(ctr, buffer[i], rk);
+        std::copy(buf.result.begin(), buf.result.end(), buffer);
     }
 }; // class AESNIGenerator
 

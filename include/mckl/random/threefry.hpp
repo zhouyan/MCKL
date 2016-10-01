@@ -240,17 +240,27 @@ class ThreefryGenerator
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr,
-        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
+    void operator()(ctr_type &ctr, ResultType *buffer) const
     {
-        generate(ctr, buffer);
+        alignas(32) union {
+            std::array<T, K> state;
+            ctr_type ctr;
+            std::array<ResultType, size() / sizeof(ResultType)> result;
+        } buf;
+
+        MCKL_FLATTEN_CALL increment(ctr);
+        buf.ctr = ctr;
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buf.state, par_);
+        std::copy(buf.result.begin(), buf.result.end(), buffer);
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, std::size_t n,
-        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
+    void operator()(ctr_type &ctr, std::size_t n, ResultType *buffer) const
     {
-        generate(ctr, n, buffer);
+        generate(ctr, n, buffer,
+            std::integral_constant<bool, internal::ThreefryGeneratorImpl<T, K,
+                                             Rounds, Constants>::batch()>());
     }
 
     friend bool operator==(
@@ -302,46 +312,20 @@ class ThreefryGenerator
     std::array<T, K + 1> par_;
 
     template <typename ResultType>
-    void generate(ctr_type &ctr,
-        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
-    {
-        alignas(32) union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
-        } buf;
-
-        MCKL_FLATTEN_CALL
-        increment(ctr);
-        buf.ctr = ctr;
-        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buf.state, par_);
-        buffer = buf.result;
-    }
-
-    template <typename ResultType>
-    void generate(ctr_type &ctr, std::size_t n,
-        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
-    {
-        generate(ctr, n, buffer,
-            std::integral_constant<bool, internal::ThreefryGeneratorImpl<T, K,
-                                             Rounds, Constants>::batch()>());
-    }
-
-    template <typename ResultType>
-    void generate(ctr_type &ctr, std::size_t n,
-        std::array<ResultType, size() / sizeof(ResultType)> *buffer,
+    void generate(ctr_type &ctr, std::size_t n, ResultType *buffer,
         std::false_type) const
     {
-        for (std::size_t i = 0; i != n; ++i)
-            generate(ctr, buffer[i]);
+        static constexpr std::size_t stride = size() / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, buffer += stride)
+            operator()(ctr, buffer);
     }
 
     template <typename ResultType>
-    void generate(ctr_type &ctr, std::size_t n,
-        std::array<ResultType, size() / sizeof(ResultType)> *buffer,
-        std::true_type) const
+    void generate(
+        ctr_type &ctr, std::size_t n, ResultType *buffer, std::true_type) const
     {
+        static constexpr std::size_t stride = size() / sizeof(ResultType);
         static constexpr std::size_t blocks =
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
@@ -352,15 +336,14 @@ class ThreefryGenerator
 
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, buffer += blocks) {
-            MCKL_FLATTEN_CALL
-            increment(ctr, buf.ctr_block);
+        for (std::size_t i = 0; i != m; ++i, buffer += stride * blocks) {
+            MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
                 buf.state, par_);
             std::memcpy(buffer, buf.state.data(), size() * blocks);
         }
-        for (std::size_t i = 0; i != l; ++i)
-            generate(ctr, buffer[i]);
+        for (std::size_t i = 0; i != l; ++i, buffer += stride)
+            operator()(ctr, buffer);
     }
 }; // class ThreefryGenerator
 

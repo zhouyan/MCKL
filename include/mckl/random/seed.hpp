@@ -41,8 +41,9 @@ namespace mckl
 
 namespace internal
 {
+
 template <typename RNGType, typename OutputType, typename InputType>
-OutputType seed_enc(const InputType &input)
+inline OutputType seed_enc(const InputType &input)
 {
     static_assert(sizeof(InputType) == sizeof(OutputType),
         "**seed_enc** input and output have different sizes");

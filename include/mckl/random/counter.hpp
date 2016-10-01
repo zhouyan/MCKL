@@ -307,7 +307,10 @@ class CounterEngine
 
     result_type operator()()
     {
-        generate();
+        if (index_ == M_) {
+            generator_(ctr_, buffer_.data());
+            index_ = 0;
+        }
 
         return buffer_[static_cast<std::size_t>(index_++)];
     }
@@ -328,11 +331,11 @@ class CounterEngine
         index_ = M_;
 
         const std::size_t m = n / M_;
-        generate(m, r);
+        generator_(ctr_, m, r);
         r += m * M_;
         n -= m * M_;
 
-        generator_(ctr_, buffer_);
+        generator_(ctr_, buffer_.data());
         std::copy_n(buffer_.data(), n, r);
         index_ = static_cast<unsigned>(n);
     }
@@ -364,7 +367,7 @@ class CounterEngine
         std::size_t ctr_size = sizeof(ctr_type);
         skip_type rate = static_cast<skip_type>(buf_size / ctr_size);
         increment(ctr_, nskip / M * rate);
-        generator_(ctr_, buffer_);
+        generator_(ctr_, buffer_.data());
         index_ = static_cast<unsigned>(nskip % M);
     }
 
@@ -455,19 +458,6 @@ class CounterEngine
         ctr_.fill(0);
         generator_.reset(key);
         index_ = M_;
-    }
-
-    void generate()
-    {
-        if (index_ == M_) {
-            generator_(ctr_, buffer_);
-            index_ = 0;
-        }
-    }
-
-    void generate(std::size_t n, result_type *r)
-    {
-        generator_(ctr_, n, reinterpret_cast<buffer_type *>(r));
     }
 }; // class CounterEngine
 
