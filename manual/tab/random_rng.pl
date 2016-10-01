@@ -103,7 +103,7 @@ my @rngs;
 for my $k (sort(keys %rngs)) {
     my @val = @{$rngs{$k}};
     for (@val) {
-        push @rngs, $_, if $_ =~ /$rng/i or $k =~ /$rng/i or $all;
+        push @rngs, $_, if $_ =~ /$rng/ or $k =~ /$rng/i or $all;
     }
 }
 
@@ -141,6 +141,7 @@ sub run
     open $txtfile, '>', "random_rng_$_[0]_$simd.txt" if $all and $write;
     my $header = 1;
     my @header;
+    my @target;
     for my $rng (@rngs) {
         my $cmd = "$make -C $dir random_rng_\L$rng-check 2>&1";
         my @result;
