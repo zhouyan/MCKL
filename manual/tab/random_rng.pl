@@ -149,10 +149,12 @@ sub run
             my @lines = split "\n", `$cmd`;
             if ($header) {
                 @header = grep { $_ =~ /Determinstics/ } @lines;
-                say '=' x length($header[0]);
-                say $header[0];
-                say '-' x length($header[0]);
-                $header = 0;
+                if (@header) {
+                    say '=' x length($header[0]);
+                    say $header[0];
+                    say '-' x length($header[0]);
+                    $header = 0;
+                }
             }
             my @this_result = grep { $_ =~ /Passed|Failed/ } @lines;
             if (@this_result) {
