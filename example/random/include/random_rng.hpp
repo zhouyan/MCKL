@@ -413,6 +413,8 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::string pass;
     pass += perf_s.c1 > perf_s.c2 ? "-" : "*";
     pass += perf_p.c1 > perf_p.c2 ? "-" : "*";
+    pass += perf_s.c1 > perf_p.c1 ? "-" : "*";
+    pass += perf_s.c2 > perf_p.c2 ? "-" : "*";
     pass += pass_d && perf_s.pass && perf_p.pass ? "Passed" : "Failed";
     std::cout << std::setw(15) << std::right << pass;
     std::cout << std::endl;
