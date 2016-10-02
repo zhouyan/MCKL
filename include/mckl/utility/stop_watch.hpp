@@ -107,14 +107,6 @@ class StopWatchGuard
 
 /// \brief StopWatch as an adapter of C++11 clock
 /// \ingroup StopWatch
-///
-/// \details
-/// The `start` and `stop` methods are not fully thread-safe in the sense that
-/// if one thread calls `start` while another calls `stop` at the same time,
-/// then the behavior is undefined. However, if two threads tries to call
-/// `start` at the same time, then the behavior is well defined and the first
-/// one calls it get to start the clock. The same principle applies to the
-/// `stop` method.
 template <typename ClockType = std::chrono::high_resolution_clock>
 class StopWatchClockAdapter
 {
@@ -152,7 +144,7 @@ class StopWatchClockAdapter
     /// \details
     /// If `start()` has been called and no `stop()` call since, then it is
     /// running, otherwise it is stoped.
-    bool running() const { return static_cast<bool>(running_); }
+    bool running() const { return running_; }
 
     /// \brief Start the watch, no effect if already started
     ///
@@ -162,9 +154,10 @@ class StopWatchClockAdapter
     /// started earlier.
     bool start()
     {
-        if (running_.exchange(true))
+        if (running_)
             return false;
 
+        running_ = true;
         time_start_ = clock_type::now();
         cycles_start_ = internal::rdtsc();
 
@@ -178,9 +171,10 @@ class StopWatchClockAdapter
     /// before.
     bool stop()
     {
-        if (!running_.exchange(false))
+        if (!running_)
             return false;
 
+        running_ = false;
         cycles_ += internal::rdtsc() - cycles_start_;
         typename clock_type::time_point time_stop = clock_type::now();
         time_ += time_stop - time_start_;
@@ -235,7 +229,7 @@ class StopWatchClockAdapter
     typename clock_type::time_point time_start_;
     std::uint64_t cycles_;
     std::uint64_t cycles_start_;
-    std::atomic<bool> running_;
+    bool running_;
 }; // class StopWatchClockAdapter
 
 /// \brief Stop watch using `<chrono>`
