@@ -31,9 +31,6 @@
 
 .PHONY : pdf rng distribution
 
-pdf :
-	latexmk -silent -f random_rng.tex >/dev/null
-
 rng :
 	./random_rng.pl --build
 	./random_rng.pl --run --write --rng all
@@ -44,3 +41,4 @@ distribution :
 	ninja -C ../../build/llvm-release-sys \
 	    random_distribution_perf-check \
 	    > random_distribution.txt
+	./random_distribuiton.pl
