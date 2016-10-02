@@ -39,16 +39,6 @@ pdf("pf_cv.pdf", width = 14.4, height = 9)
 
 ##############################################################################
 
-dat <- read.table("pf_cv.txt", header = TRUE)
-plt <- ggplot(dat)
-plt <- plt + aes(x = MatrixLayout, y = Error)
-plt <- plt + aes(group = RNGSetType, fill = RNGSetType)
-plt <- plt + geom_bar(stat = "identity", position = "dodge")
-plt <- plt + facet_grid(ResampleScheme ~ Backend, scale = "free_y")
-print(plt)
-
-##############################################################################
-
 smp <- paste0("Backend", c("SEQ", "STD", "OMP", "TBB"))
 exe <- paste("pf_cv", smp, sep = ".")
 res <- c("Multinomial", "Stratified", "Systematic", "Residual",
@@ -57,6 +47,22 @@ rc <- c("RowMajor", "ColMajor")
 rs <- c("RNGSetVector", "RNGSetTBB", "RNGSetTBBKPI")
 runs <- expand.grid(exe, res, rc, rs)
 runs <- paste(runs$Var1, runs$Var2, runs$Var3, runs$Var4, sep = ".")
+
+##############################################################################
+
+dat <- data.frame()
+for (run in runs) {
+    pf_cv.err.txt <- paste0(run, ".err.txt")
+    if (file.exists(pf_cv.err.txt)) {
+        dat <- rbind(dat, read.table(pf_cv.err.txt, header = TRUE))
+    }
+}
+plt <- ggplot(dat)
+plt <- plt + aes(x = MatrixLayout, y = Error)
+plt <- plt + aes(group = RNGSetType, fill = RNGSetType)
+plt <- plt + geom_bar(stat = "identity", position = "dodge")
+plt <- plt + facet_grid(ResampleScheme ~ Backend, scale = "free_y")
+print(plt)
 
 truth <- read.table("pf_cv.truth", header = FALSE)
 n <- dim(truth)[1]
@@ -97,11 +103,13 @@ pf_cv <- function(filename, sampler)
 for (run in runs) {
     pf_cv.txt <- paste0(run, ".txt")
     if (file.exists(pf_cv.txt)) {
+        cat(pf_cv.txt, "\n")
         pf_cv(pf_cv.txt, read.table(pf_cv.txt, header = TRUE))
     }
 
     pf_cv.h5 <- paste0(run, ".h5")
     if (file.exists(pf_cv.h5)) {
+        cat(pf_cv.h5, "\n")
         pf_cv.s <- paste(pf_cv.h5, "(Sampler)")
         pf_cv(pf_cv.s, as.data.frame(h5read(pf_cv.h5, "Sampler")))
 

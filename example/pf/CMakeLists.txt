@@ -31,12 +31,52 @@
 
 PROJECT(MCKLExample-pf CXX)
 
+SET(PF_BACKEND BackendSEQ BackendSTD)
+IF(OPENMP_FOUND)
+    SET(PF_BACKEND ${PF_BACKEND} BackendOMP)
+ENDIF(OPENMP_FOUND)
+IF(TBB_FOUND)
+    SET(PF_BACKEND ${PF_BACKEND} BackendTBB)
+ENDIF(TBB_FOUND)
+
+SET(PF_SCHEME Multinomial Stratified Systematic Residual ResidualStratified
+    ResidualSystematic)
+
+SET(PF_LAYOUT RowMajor ColMajor)
+
+SET(PF_RNGSET RNGSetVector)
+IF(TBB_FOUND)
+    SET(PF_RNGSET ${PF_RNGSET} RNGSetTBB RNGSetTBBKPI)
+ENDIF(TBB_FOUND)
+
 MCKL_ADD_EXAMPLE(pf)
 
 MCKL_ADD_TEST(pf core  "OpenMP")
-MCKL_ADD_TEST(pf cv    "OpenMP")
 MCKL_ADD_TEST(pf smp   "OpenMP")
 MCKL_ADD_TEST(pf truth "OpenMP")
+
+ADD_CUSTOM_TARGET(pf_cv)
+ADD_CUSTOM_TARGET(pf_cv-check)
+ADD_DEPENDENCIES(pf pf_cv)
+ADD_DEPENDENCIES(pf-check pf_cv-check)
+FOREACH(Backend ${PF_BACKEND})
+    FOREACH(Scheme ${PF_SCHEME})
+        FOREACH(Layout ${PF_LAYOUT})
+            FOREACH(RNGSet ${PF_RNGSET})
+                STRING(TOLOWER ${Backend} smp)
+                STRING(TOLOWER ${Scheme} res)
+                STRING(TOLOWER ${Layout} rc)
+                STRING(TOLOWER ${RNGSet} rs)
+                SET(config ${smp}_${res}_${rc}_${rs})
+                CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/pf_cv.cpp.in
+                    ${PROJECT_SOURCE_DIR}/src/pf_cv_${config}.cpp)
+                MCKL_ADD_TEST(pf cv_${config} "OpenMP")
+                ADD_DEPENDENCIES(pf_cv pf_cv_${config})
+                ADD_DEPENDENCIES(pf_cv-check pf_cv_${config}-check)
+            ENDFOREACH(RNGSet ${PF_RNGSET})
+        ENDFOREACH(Layout ${PF_LAYOUT})
+    ENDFOREACH(Scheme ${PF_SCHEME})
+ENDFOREACH(Backend ${PF_BACKEND})
 
 MCKL_ADD_FILE(pf pf_core.R)
 MCKL_ADD_FILE(pf pf_cv.R)

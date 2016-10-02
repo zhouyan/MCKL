@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/pf/src/pf_cv.cpp
+// MCKL/example/pf/src/pf_cv.cpp.in
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -37,7 +37,13 @@ int main(int argc, char **argv)
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
 
-    pf_cv(N);
+    // clang-format off
+    pf_cv<
+        mckl::@Backend@,
+        mckl::@Scheme@,
+        mckl::@Layout@,
+        mckl::@RNGSet@<>>(N);
+    // clang-format on
 
     return 0;
 }

@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_PFCV_HPP
-#define MCKL_EXAMPLE_PFCV_HPP
+#ifndef MCKL_EXAMPLE_PF_CV_HPP
+#define MCKL_EXAMPLE_PF_CV_HPP
 
 #include "pf.hpp"
 
@@ -274,7 +274,7 @@ inline double pf_cv_error(const mckl::Sampler<T> &sampler)
 
 template <typename Backend, mckl::ResampleScheme Scheme,
     mckl::MatrixLayout Layout, typename RNGSetType>
-inline void pf_cv_run(std::size_t N)
+inline void pf_cv(std::size_t N)
 {
     using T = PFCV<Layout, RNGSetType>;
     using init = PFCVInit<Backend, Layout, RNGSetType>;
@@ -322,66 +322,22 @@ inline void pf_cv_run(std::size_t N)
     txt << sampler << std::endl;
     txt.close();
 
-    std::ofstream os;
-    os.open("pf_cv.txt", std::ios_base::app);
-    os.precision(16);
-    os << N << '\t';
-    os << smp << '\t';
-    os << res << '\t';
-    os << rc << '\t';
-    os << rs << '\t';
-    os << pf_cv_error(sampler) << '\n';
-    os.close();
+    std::ofstream err;
+    err.open(base + ".err.txt");
+    err.precision(16);
+    err << "N\t";
+    err << "Backend\t";
+    err << "ResampleScheme\t";
+    err << "MatrixLayout\t";
+    err << "RNGSetType\t";
+    err << "Error\n";
+    err << N << '\t';
+    err << smp << '\t';
+    err << res << '\t';
+    err << rc << '\t';
+    err << rs << '\t';
+    err << pf_cv_error(sampler) << '\n';
+    err.close();
 }
 
-template <typename Backend, mckl::ResampleScheme Scheme,
-    mckl::MatrixLayout Layout>
-inline void pf_cv_run(std::size_t N)
-{
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetVector<>>(N);
-#if MCKL_HAS_TBB
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBB<>>(N);
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBBKPI<>>(N);
-#endif
-}
-
-template <typename Backend, mckl::ResampleScheme Scheme>
-inline void pf_cv_run(std::size_t N)
-{
-    pf_cv_run<Backend, Scheme, mckl::RowMajor>(N);
-    pf_cv_run<Backend, Scheme, mckl::ColMajor>(N);
-}
-
-template <typename Backend>
-inline void pf_cv_run(std::size_t N)
-{
-    pf_cv_run<Backend, mckl::Multinomial>(N);
-    pf_cv_run<Backend, mckl::Residual>(N);
-    pf_cv_run<Backend, mckl::ResidualStratified>(N);
-    pf_cv_run<Backend, mckl::ResidualSystematic>(N);
-    pf_cv_run<Backend, mckl::Stratified>(N);
-    pf_cv_run<Backend, mckl::Systematic>(N);
-}
-
-inline void pf_cv(std::size_t N)
-{
-    std::ofstream os("pf_cv.txt");
-    os << "N\t";
-    os << "Backend\t";
-    os << "ResampleScheme\t";
-    os << "MatrixLayout\t";
-    os << "RNGSetType\t";
-    os << "Error\n";
-    os.close();
-
-    pf_cv_run<mckl::BackendSEQ>(N);
-    pf_cv_run<mckl::BackendSTD>(N);
-#if MCKL_HAS_OMP
-    pf_cv_run<mckl::BackendOMP>(N);
-#endif
-#if MCKL_HAS_TBB
-    pf_cv_run<mckl::BackendTBB>(N);
-#endif
-}
-
-#endif // MCKL_EXAMPLE_PFCV_HPP
+#endif // MCKL_EXAMPLE_PF_CV_HPP
