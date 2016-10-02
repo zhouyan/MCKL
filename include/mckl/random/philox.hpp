@@ -162,7 +162,7 @@ class PhiloxGenerator
 
     void reset(const key_type &key) { key_ = key; }
 
-    void enc(const ctr_type &ctr, ctr_type &buffer)
+    void enc(const ctr_type &ctr, ctr_type &buffer) const
     {
         alignas(32) union {
             std::array<T, K> state;

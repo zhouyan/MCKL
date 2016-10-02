@@ -367,16 +367,55 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 }
 
 template <typename RNGType>
+double random_rng_c(const RNGType &, std::size_t, std::size_t)
+{
+    return 0;
+}
+
+template <typename ResultType, typename Generator>
+double random_rng_c(const mckl::CounterEngine<ResultType, Generator> &rng,
+    std::size_t N, std::size_t M)
+{
+    using ctr_type =
+        typename mckl::CounterEngine<ResultType, Generator>::ctr_type;
+
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    auto rngs = rng;
+    ctr_type ctr;
+    mckl::Vector<ctr_type> r(N);
+    mckl::StopWatch watch;
+
+    double c = std::numeric_limits<double>::max();
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = rsize(rngs);
+        watch.start();
+        for (std::size_t j = 0; j != K; ++j) {
+            rng.enc(ctr, r[j]);
+            ++ctr.front();
+        }
+        watch.stop();
+        std::uniform_int_distribution<std::size_t> ridx(0, K - 1);
+        std::size_t idx = ridx(rngs);
+        if (r[idx].front() == 0)
+            continue;
+        c = std::min(c, 1.0 * watch.cycles() / (K * sizeof(ctr_type)));
+    }
+
+    return c;
+}
+
+template <typename RNGType>
 inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
 {
     const int nwid = 20;
     const int swid = 8;
     const int twid = 7;
-    const std::size_t lwid = nwid + swid * 2 + twid * 8 + 15;
+    const std::size_t lwid = nwid + swid * 2 + twid * 9 + 15;
 
     bool pass_d = random_rng_d<RNGType>(N, M);
     RandomRNGPerf perf_s = random_rng_s<RNGType>(N, M);
     RandomRNGPerf perf_p = random_rng_p<RNGType>(N, M);
+    double cpb = random_rng_c(RNGType(), N, M);
 
     std::cout << std::fixed << std::setprecision(2);
 
@@ -393,6 +432,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(twid) << std::right << "SP/BP";
     std::cout << std::setw(twid) << std::right << "S/SP";
     std::cout << std::setw(twid) << std::right << "B/BP";
+    std::cout << std::setw(twid) << std::right << "C";
     std::cout << std::setw(15) << std::right << "Determinstics";
     std::cout << std::endl;
 
@@ -409,6 +449,10 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(twid) << std::right << perf_p.c1 / perf_p.c2;
     std::cout << std::setw(twid) << std::right << perf_s.c1 / perf_p.c1;
     std::cout << std::setw(twid) << std::right << perf_s.c2 / perf_p.c2;
+    if (cpb > 0)
+        std::cout << std::setw(twid) << std::right << cpb;
+    else
+        std::cout << std::setw(twid) << std::right << "---";
 
     std::string pass;
     pass += pass_d ? "-" : "*";
