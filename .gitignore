@@ -9,6 +9,7 @@
 /manual/tab/random_rng.log
 /manual/tab/random_rng.pdf
 /manual/tab/random_rng.run.xml
+/manual/tab/random_rng.tex
 build
 example/random/src/random_rng_*.cpp
 manual/fig/pf.pdf
