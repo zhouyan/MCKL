@@ -117,7 +117,7 @@ class RNGSetVector
 
 /// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// \ingroup Random
-template <typename RNGType = RNG,
+template <typename RNGType = RNGFast,
     typename Alloc = ::tbb::cache_aligned_allocator<RNGType>,
     ::tbb::ets_key_usage_type ETSKeyType = ::tbb::ets_no_key>
 class RNGSetTBBEnumerable
@@ -148,14 +148,14 @@ class RNGSetTBBEnumerable
 /// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// without native TLS keys
 /// \ingroup Random
-template <typename RNGType = RNG>
+template <typename RNGType = RNGFast>
 using RNGSetTBB = RNGSetTBBEnumerable<RNGType,
     ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_no_key>;
 
 /// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// with native TLS keys
 /// \ingroup Random
-template <typename RNGType = RNG>
+template <typename RNGType = RNGFast>
 using RNGSetTBBKPI = RNGSetTBBEnumerable<RNGType,
     ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_key_per_instance>;
 

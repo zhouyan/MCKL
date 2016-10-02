@@ -103,13 +103,11 @@ pf_cv <- function(filename, sampler)
 for (run in runs) {
     pf_cv.txt <- paste0(run, ".txt")
     if (file.exists(pf_cv.txt)) {
-        cat(pf_cv.txt, "\n")
         pf_cv(pf_cv.txt, read.table(pf_cv.txt, header = TRUE))
     }
 
     pf_cv.h5 <- paste0(run, ".h5")
     if (file.exists(pf_cv.h5)) {
-        cat(pf_cv.h5, "\n")
         pf_cv.s <- paste(pf_cv.h5, "(Sampler)")
         pf_cv(pf_cv.s, as.data.frame(h5read(pf_cv.h5, "Sampler")))
 
