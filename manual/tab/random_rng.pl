@@ -37,6 +37,7 @@ use Getopt::Long;
 do 'format.pl';
 
 my $run = 0;
+my $pdf = 0;
 my $build = 0;
 my $simd;
 my $llvm = "../../build/llvm-release-sys";
@@ -47,6 +48,7 @@ my $rng;
 my $write = 0;
 GetOptions(
     "run"      => \$run,
+    "pdf"      => \$pdf,
     "build"    => \$build,
     "simd=s"   => \$simd,
     "llvm=s"   => \$llvm,
@@ -99,8 +101,10 @@ my %rngs = (
     rdrand   => [@rdrand],
 );
 
+my @keys = qw(std aesni philox threefry mkl rdrand);
+
 my @rngs;
-for my $k (sort(keys %rngs)) {
+for my $k (@keys) {
     my @val = @{$rngs{$k}};
     for (@val) {
         push @rngs, $_, if $_ =~ /$rng/ or $k =~ /$rng/i or $all;
@@ -121,16 +125,45 @@ if ($build) {
     exit;
 }
 
-for (keys %rngs) {
-    my $tex = "random_rng";
-    $tex .= "_\L$_";
-    $tex .= "_$simd";
-    $tex .= ".tex";
-    open my $texfile, '>', $tex;
-    print $texfile &table(
-        &read($_, "llvm"),
-        &read($_, "gnu"),
-        &read($_, "intel"));
+my $texfile;
+if ($pdf) {
+    open $texfile, '>', 'random_rng.tex';
+    say $texfile '\documentclass[';
+    say $texfile '  a4paper,';
+    say $texfile '  lines=45,';
+    say $texfile '  linespread=1.2,';
+    say $texfile '  fontsize=11pt,';
+    say $texfile '  fontset=Minion,';
+    say $texfile '  monofont=TheSansMonoCd,';
+    say $texfile '  monoscale=MatchLowercase,';
+    say $texfile ']{mbook}';
+    say $texfile '\input{../tex/macro}';
+    say $texfile '\pagestyle{empty}';
+    say $texfile '\begin{document}';
+}
+for (@keys) {
+    my $this_tex = "random_rng";
+    $this_tex .= "_\L$_";
+    $this_tex .= "_$simd";
+    if (&table($this_tex,
+            &read($_, "llvm"),
+            &read($_, "gnu"),
+            &read($_, "intel"))) {
+        if ($pdf) {
+            say $texfile '\begin{table}';
+            say $texfile "\\input{$this_tex}%";
+            say $texfile '\end{table}';
+            say $texfile '\begin{table}';
+            say $texfile "\\input{${this_tex}_p}%";
+            say $texfile '\end{table}';
+            say $texfile '\clearpage';
+        }
+    }
+}
+if ($pdf) {
+    say $texfile '\end{document}';
+    close $texfile;
+    `lualatex -interaction=batchmode random_rng.tex`;
 }
 
 sub run
@@ -191,17 +224,21 @@ sub read
     my @txt = grep { $_ =~ /Passed|Failed/ } <$txtfile>;
     my $record;
     for (@txt) {
-        my ($name, $cpb1, $cpb2) = (split)[0, 3, 4];
-        $record .= "$name $cpb1 $cpb2\n" if (grep /^$name$/, @val);
+        my @this_record = (split)[0, 3..6];
+        my $name = $this_record[0];
+        $record .= "@this_record\n" if (grep /^$name$/, @val);
     }
     $record;
 }
 
 sub table
 {
+    my $tex = shift @_;
     my @name;
     my @cpb1;
     my @cpb2;
+    my @cpb1p;
+    my @cpb2p;
     my $wid = 0;
     for (@_) {
         my @lines = split "\n", $_;
@@ -213,6 +250,8 @@ sub table
             $name[$index] = '\texttt{' . $name . '}';
             $cpb1[$index] .= &format($record[1]);
             $cpb2[$index] .= &format($record[2]);
+            $cpb1p[$index] .= &format($record[3]);
+            $cpb2p[$index] .= &format($record[4]);
             if ($wid < length($name[-1])) {
                 $wid = length($name[-1]);
             }
@@ -220,30 +259,55 @@ sub table
         }
     }
 
+    my $header;
+    $header .= '\tbfigures' . "\n";
+    $header .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
+    $header .= ' ' x 2 . '\toprule' . "\n";
+    $header .= ' ' x 2;
+    $header .= '& \multicolumn{3}{c}{\single} ';
+    $header .= '& \multicolumn{3}{c}{\batch}';
+    $header .= " \\\\\n";
+    $header .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
+    $header .= ' ' x 2 . '\rng';
+    $header .= ' & \llvm & \gnu & \intel';
+    $header .= ' & \llvm & \gnu & \intel';
+    $header .= " \\\\\n";
+    $header .= ' ' x 2 . '\midrule' . "\n";
+
+    my $footer;
+    $footer .= ' ' x 2 . '\bottomrule' . "\n";
+    $footer .= '\end{tabularx}' . "\n";
+    $footer;
+
     my $table;
-    $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
-    $table .= ' ' x 2 . '\toprule' . "\n";
-    $table .= ' ' x 2;
-    $table .= '& \multicolumn{3}{c}{\single} ';
-    $table .= '& \multicolumn{3}{c}{\batch}';
-    $table .= " \\\\\n";
-    $table .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
-    $table .= ' ' x 2 . '\rng';
-    $table .= ' & \llvm & \gnu & \intel';
-    $table .= ' & \llvm & \gnu & \intel';
-    $table .= " \\\\\n";
-    $table .= ' ' x 2 . '\midrule' . "\n";
-    my $index = 0;
-    for (@name) {
-        $table .= ' ' x 2;
-        $table .= sprintf "%-${wid}s", $name[$index];
-        $table .= $cpb1[$index];
-        $table .= $cpb2[$index];
-        $table .= " \\\\\n";
-        $index++;
+    my $table_p;
+    if (@name) {
+        my $index = 0;
+        for (@name) {
+            $table .= ' ' x 2;
+            $table .= sprintf "%-${wid}s", $name[$index];
+            $table .= $cpb1[$index];
+            $table .= $cpb2[$index];
+            $table .= " \\\\\n";
+
+            $table_p .= ' ' x 2;
+            $table_p .= sprintf "%-${wid}s", $name[$index];
+            $table_p .= $cpb1p[$index];
+            $table_p .= $cpb2p[$index];
+            $table_p .= " \\\\\n";
+
+            $index++;
+        }
+        $table = $header . $table . $footer;
+        $table_p = $header . $table_p . $footer;
+
+        open my $texfile, '>', "$tex.tex";
+        print $texfile $table;
+        close $texfile;
+
+        open my $texfile_p, '>', "${tex}_p.tex";
+        print $texfile_p $table_p;
+        close $texfile_p;
     }
-    $table .= ' ' x 2 . '\bottomrule' . "\n";
-    $table .= '\end{tabularx}' . "\n";
     $table;
 }
