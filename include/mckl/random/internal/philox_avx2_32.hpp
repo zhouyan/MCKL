@@ -121,7 +121,8 @@ class PhiloxGeneratorImplAVX2_32
         kbox<0xF>(p, w);
         spbox<0xF>(s, p, m);
 
-        eval<0x10>(s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
+        round<0x10>(
+            s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
 
         Derived::permute_last(s);
 
@@ -138,18 +139,18 @@ class PhiloxGeneratorImplAVX2_32
 
     private:
     template <std::size_t>
-    static void eval(std::array<__m256i, 8> &, __m256i &, const __m256i &,
+    static void round(std::array<__m256i, 8> &, __m256i &, const __m256i &,
         const __m256i &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m256i, 8> &s, __m256i &p, const __m256i &w,
+    static void round(std::array<__m256i, 8> &s, __m256i &p, const __m256i &w,
         const __m256i &m, std::true_type)
     {
         kbox<N>(p, w);
         spbox<N>(s, p, m);
-        eval<N + 1>(
+        round<N + 1>(
             s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 

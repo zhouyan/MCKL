@@ -259,24 +259,24 @@ class ThreefryGeneratorGenericImpl
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
     {
-        eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
+        round<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
     }
 
     private:
     template <std::size_t>
-    static void eval(
+    static void round(
         std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
+    static void round(std::array<T, K> &state, const std::array<T, K + 1> &par,
         std::true_type)
     {
         sbox<N>(state);
         pbox<N>(state);
         kbox<N>(state, par);
-        eval<N + 1>(
+        round<N + 1>(
             state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 

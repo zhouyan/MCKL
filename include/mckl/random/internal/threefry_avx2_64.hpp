@@ -169,7 +169,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
         pbox<0x1F>(s);
         kbox<0x1F>(s, par);
 
-        eval<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
+        round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
 
         transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
         transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);
@@ -199,19 +199,19 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     static constexpr std::size_t M_ = 16 / K;
 
     template <std::size_t>
-    static void eval(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
+    static void round(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
         std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m256i, 16> &s,
+    static void round(std::array<__m256i, 16> &s,
         const std::array<T, K + 1> &par, std::true_type)
     {
         sbox<N>(s);
         pbox<N>(s);
         kbox<N>(s, par);
-        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
+        round<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N>

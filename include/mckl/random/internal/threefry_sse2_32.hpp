@@ -159,7 +159,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         MCKL_FLATTEN_CALL pbox<0x1F>(s);
         MCKL_FLATTEN_CALL kbox<0x1F>(s, par);
 
-        eval<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
+        round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
 
         MCKL_FLATTEN_CALL transpose4x32_si128<0, 1, 2, 3>(s);
         MCKL_FLATTEN_CALL transpose4x32_si128<4, 5, 6, 7>(s);
@@ -179,19 +179,19 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
     static constexpr std::size_t M_ = 8 / K;
 
     template <std::size_t>
-    static void eval(std::array<__m128i, 8> &, const std::array<T, K + 1> &,
+    static void round(std::array<__m128i, 8> &, const std::array<T, K + 1> &,
         std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m128i, 8> &s,
+    static void round(std::array<__m128i, 8> &s,
         const std::array<T, K + 1> &par, std::true_type)
     {
         MCKL_FLATTEN_CALL sbox<N>(s);
         MCKL_FLATTEN_CALL pbox<N>(s);
         MCKL_FLATTEN_CALL kbox<N>(s, par);
-        eval<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
+        round<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N>

@@ -283,24 +283,24 @@ class PhiloxGeneratorGenericImpl
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
         std::array<T, K / 2> par = key;
-        eval<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
+        round<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
     }
 
     private:
     template <std::size_t>
-    static void eval(
+    static void round(
         std::array<T, K> &, std::array<T, K / 2> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(
+    static void round(
         std::array<T, K> &state, std::array<T, K / 2> &par, std::true_type)
     {
         kbox<N>(par);
         pbox<N>(state);
         sbox<N>(state, par);
-        eval<N + 1>(
+        round<N + 1>(
             state, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
