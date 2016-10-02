@@ -367,21 +367,22 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 }
 
 template <typename RNGType>
-double random_rng_c(const RNGType &, std::size_t, std::size_t)
+inline double random_rng_c(const RNGType &, std::size_t, std::size_t)
 {
     return 0;
 }
 
 template <typename ResultType, typename Generator>
-double random_rng_c(const mckl::CounterEngine<ResultType, Generator> &rng,
-    std::size_t N, std::size_t M)
+inline double random_rng_c(
+    const mckl::CounterEngine<ResultType, Generator> &rng, std::size_t N,
+    std::size_t M)
 {
     using ctr_type =
         typename mckl::CounterEngine<ResultType, Generator>::ctr_type;
 
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
     auto rngs = rng;
-    ctr_type ctr;
+    ctr_type ctr = {{0}};
     mckl::Vector<ctr_type> r(N);
     mckl::StopWatch watch;
 
