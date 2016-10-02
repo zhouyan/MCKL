@@ -793,7 +793,7 @@ sampler.resample_method(Stratified, 0.5)
 sampler.initialize();
 sampler.iterate(sampler.particle().state().n() - 1);
 
-std::ofstream out("pf.est");
+std::ofstream out("pf.out");
 out << sampler;
 out.close();
 \end{verbatim}
@@ -806,7 +806,7 @@ weighting is done through the function |PFWeight|. And the estimate is
 monitored through the function |PFEstimate|. These are added to the sampler
 through the |eval| and |monitor| methods as shown above. It then initialized
 and iterated $n - 1$ times, where $n$ is the total number of observations. In
-the end, we write a summary of the sampler into the file |pf.est|.
+the end, we write a summary of the sampler into the file |pf.out|.
 
 \subsubsection{State}
 
@@ -977,7 +977,7 @@ methods and data that is specific to the model.
 
 The first few lines of the output of the program, written by
 \begin{verbatim}
-std::ofstream out("pf.est");
+std::ofstream out("pf.out");
 out << sampler;
 out.close();
 \end{verbatim}

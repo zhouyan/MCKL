@@ -38,9 +38,16 @@ MCKL_ADD_TEST(pf cv    "OpenMP")
 MCKL_ADD_TEST(pf smp   "OpenMP")
 MCKL_ADD_TEST(pf truth "OpenMP")
 
+MCKL_ADD_FILE(pf pf_core.R)
 MCKL_ADD_FILE(pf pf_cv.R)
 MCKL_ADD_FILE(pf pf_cv.data)
 MCKL_ADD_FILE(pf pf_cv.truth)
+
+ADD_CUSTOM_TARGET(pf_core-pdf
+    DEPENDS pf-files pf_core-check
+    COMMAND Rscript "${PROJECT_BINARY_DIR}/pf_core.R"
+    COMMENT "Plotting pf_core-check results"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 ADD_CUSTOM_TARGET(pf_cv-pdf
     DEPENDS pf-files pf_cv-check

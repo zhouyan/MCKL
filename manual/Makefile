@@ -31,6 +31,9 @@
 
 .PHONY : all tab fig clean
 
+BUILD_CMD ?= ninja
+BUILD_DIR ?= ../build/llvm-release-sys
+
 all :
 	latexmk -silent -f manual.tex >/dev/null
 
@@ -40,10 +43,9 @@ tab :
 	cd tab; ./random_distribution.pl
 
 fig :
-	make -C prg pf.pdf
+	$(BUILD_CMD) -C $(BUILD_DIR) pf_core-pdf
 	mkdir -p fig
-	cp prg/pf.pdf fig/pf.pdf
+	cp $(BUILD_DIR)/example/pf/pf_core.pdf fig/pf.pdf
 
 clean:
-	make -C prg clean
 	latexmk -c manual.tex

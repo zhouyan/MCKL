@@ -57,7 +57,6 @@ ENDIF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
 # Options
 ##############################################################################
 
-OPTION(MCKL_ENABLE_LIBRARY "Enable building of library" ON)
 OPTION(MCKL_ENABLE_EXAMPLE "Enable building of example" ON)
 
 ##############################################################################
@@ -99,11 +98,11 @@ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include/mckl
 # Check features
 ##############################################################################
 
-IF(MCKL_ENABLE_LIBRARY OR MCKL_ENABLE_EXAMPLE)
+IF(MCKL_ENABLE_EXAMPLE)
     INCLUDE(MCKL)
-ELSE(MCKL_ENABLE_LIBRARY OR MCKL_ENABLE_EXAMPLE)
+ELSE(MCKL_ENABLE_EXAMPLE)
     RETURN()
-ENDIF(MCKL_ENABLE_LIBRARY OR MCKL_ENABLE_EXAMPLE)
+ENDIF(MCKL_ENABLE_EXAMPLE)
 
 IF (NOT (MKL_FOUND OR BLAS_FOUND))
     RETURN()
@@ -126,17 +125,6 @@ MESSAGE(STATUS "=================== Enable features ===================")
 FOREACH(feature ${FEATURES})
     MESSAGE(STATUS ${feature})
 ENDFOREACH(feature ${FEATURES})
-
-##############################################################################
-# Library
-##############################################################################
-
-IF(MCKL_ENABLE_LIBRARY)
-    ADD_CUSTOM_TARGET(lib ALL)
-    IF(MCKL_GOOD_COMPILER)
-        ADD_SUBDIRECTORY(lib)
-    ENDIF(MCKL_GOOD_COMPILER)
-ENDIF(MCKL_ENABLE_LIBRARY)
 
 ##############################################################################
 # Example
