@@ -113,7 +113,7 @@ inline void random_test(std::size_t N, std::size_t M, int, char **)
     const int swid = 10;
     const int twid = 15;
 
-    mckl::RNG rng;
+    mckl::RNGFast rng;
 
     random_test(M, nwid, swid, twid, rng, mckl::BirthdaySpacingsTest<2, 40>(N),
         "BirthdaySpacings (n = 10^5, d = 2, t = 40)");

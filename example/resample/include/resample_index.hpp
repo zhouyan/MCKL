@@ -175,7 +175,7 @@ inline void resample_index_test(std::size_t N, std::size_t dim, bool fixed)
               << std::endl;
     std::cout << std::string(80, '-') << std::endl;
 
-    mckl::RNG rng;
+    mckl::RNGFast rng;
     auto size = resample_size(rng, N, dim, fixed);
     auto value = resample_value(rng, size);
     auto weight = resample_weight(rng, size);

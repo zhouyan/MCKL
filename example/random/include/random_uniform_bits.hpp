@@ -71,31 +71,24 @@ inline void random_uniform_bits(std::size_t N, std::size_t M, int nwid,
     int rbits = mckl::RNGTraits<RNGType>::bits;
     int tbits = std::numeric_limits<typename RNGType::result_type>::digits;
     int ubits = std::numeric_limits<UIntType>::digits;
-    std::size_t bytes = sizeof(UIntType) * num;
-    double g1 = bytes / watch1.nanoseconds();
-    double g2 = bytes / watch2.nanoseconds();
-    double c1 = 1.0 * watch1.cycles() / bytes;
-    double c2 = 1.0 * watch2.cycles() / bytes;
 
     std::cout << std::setw(nwid) << std::left << name;
     std::cout << std::setw(swid) << std::right << (full ? "Yes" : "No");
     std::cout << std::setw(swid) << std::right << rbits;
     std::cout << std::setw(swid) << std::right << tbits;
     std::cout << std::setw(swid) << std::right << ubits;
-    std::cout << std::setw(twid) << std::right << g1;
-    std::cout << std::setw(twid) << std::right << g2;
-    std::cout << std::setw(twid) << std::right << c1;
-    std::cout << std::setw(twid) << std::right << c2;
     std::cout << std::setw(twid) << std::right << random_pass(pass);
     std::cout << std::endl;
 }
 
-inline void random_uniform_bits(std::size_t N, std::size_t M, int, char **)
+template <typename RNGType>
+inline void random_uniform_bits(
+    std::size_t N, std::size_t M, const std::string &name)
 {
     const int nwid = 20;
     const int swid = 5;
     const int twid = 15;
-    const std::size_t lwid = nwid + swid * 4 + twid * 5;
+    const std::size_t lwid = nwid + swid * 4 + twid;
 
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(nwid) << std::left << "RNGType";
@@ -103,36 +96,13 @@ inline void random_uniform_bits(std::size_t N, std::size_t M, int, char **)
     std::cout << std::setw(swid) << std::right << "R";
     std::cout << std::setw(swid) << std::right << "T";
     std::cout << std::setw(swid) << std::right << "U";
-    std::cout << std::setw(twid) << std::right << "GB/s (Loop)";
-    std::cout << std::setw(twid) << std::right << "GB/s (Batch)";
-    std::cout << std::setw(twid) << std::right << "CPB (Loop)";
-    std::cout << std::setw(twid) << std::right << "CPB (Batch)";
     std::cout << std::setw(twid) << std::right << "Deterministics";
     std::cout << std::endl;
 
-#ifdef MCKL_RNG_DEFINE_MACRO
-#undef MCKL_RNG_DEFINE_MACRO
-#endif
-
-#ifdef MCKL_RNG_DEFINE_MACRO_NA
-#undef MCKL_RNG_DEFINE_MACRO_NA
-#endif
-
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    random_uniform_bits<RNGType, std::uint16_t>(                              \
-        N, M, nwid, swid, twid, #Name);                                       \
-    random_uniform_bits<RNGType, std::uint32_t>(                              \
-        N, M, nwid, swid, twid, #Name);                                       \
-    random_uniform_bits<RNGType, std::uint64_t>(N, M, nwid, swid, twid, #Name);
-
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
-
-#include <mckl/random/internal/rng_define_macro_std.hpp>
-
-#include <mckl/random/internal/rng_define_macro.hpp>
-
-#include <mckl/random/internal/rng_define_macro_mkl.hpp>
-
+    random_uniform_bits<RNGType, std::uint16_t>(N, M, nwid, swid, twid, name);
+    random_uniform_bits<RNGType, std::uint32_t>(N, M, nwid, swid, twid, name);
+    random_uniform_bits<RNGType, std::uint64_t>(N, M, nwid, swid, twid, name);
     std::cout << std::string(lwid, '-') << std::endl;
 }

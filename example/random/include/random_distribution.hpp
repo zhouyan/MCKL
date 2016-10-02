@@ -1270,7 +1270,7 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     RandomDistributionTrait<MCKLDistType> trait;
     names.push_back(trait.name(param));
 
-    mckl::RNG rng;
+    mckl::RNGFast rng;
     MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));
     std_type dist_std(random_distribution_init<std_type>(param));
 
