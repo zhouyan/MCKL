@@ -95,149 +95,115 @@ SET(MCKL_RNG
     ${MCKL_RNG_MKL}
     ${MCKL_RNG_RDRAND})
 
+FUNCTION(MCKL_ADD_TEST_RNG testname)
+    ADD_CUSTOM_TARGET(random_${testname})
+    ADD_CUSTOM_TARGET(random_${testname}-check)
+    ADD_DEPENDENCIES(random random_${testname})
+    ADD_DEPENDENCIES(random-check random_${testname}-check)
+
+    FOREACH(RNG ${MCKL_RNG})
+        SET(RNGType ::mckl::${RNG})
+        SET(RNGName ${RNG})
+        STRING(TOLOWER ${RNG} rng)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
+            ${PROJECT_SOURCE_DIR}/src/random_${testname}_${rng}.cpp)
+        MCKL_ADD_TEST(random ${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}
+            random_${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}-check
+            random_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG})
+
+    ADD_CUSTOM_TARGET(random_${testname}_std)
+    ADD_CUSTOM_TARGET(random_${testname}_std-check)
+    FOREACH(RNG ${STD_RNG})
+        SET(RNGType std::${RNG})
+        SET(RNGName ${RNG})
+        STRING(TOLOWER ${RNG} rng)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
+            ${PROJECT_SOURCE_DIR}/src/random_${testname}_${rng}.cpp)
+        MCKL_ADD_TEST(random ${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}
+            random_${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}-check
+            random_${testname}_${rng}-check)
+        ADD_DEPENDENCIES(random_${testname}_std
+            random_${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}_std-check
+            random_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG})
+
+    ADD_CUSTOM_TARGET(random_${testname}_philox)
+    ADD_CUSTOM_TARGET(random_${testname}_philox-check)
+    FOREACH(RNG ${MCKL_RNG_PHILOX})
+        STRING(TOLOWER ${RNG} rng)
+        ADD_DEPENDENCIES(random_${testname}_philox
+            random_${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}_philox-check
+            random_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG_PHILOX})
+
+    ADD_CUSTOM_TARGET(random_${testname}_threefry)
+    ADD_CUSTOM_TARGET(random_${testname}_threefry-check)
+    FOREACH(RNG ${MCKL_RNG_THREEFRY})
+        STRING(TOLOWER ${RNG} rng)
+        ADD_DEPENDENCIES(random_${testname}_threefry
+            random_${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}_threefry-check
+            random_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG_THREEFRY})
+
+    IF(AESNI_FOUND)
+        ADD_CUSTOM_TARGET(random_${testname}_aesni)
+        ADD_CUSTOM_TARGET(random_${testname}_aesni-check)
+        FOREACH(RNG ${MCKL_RNG_AESNI})
+            STRING(TOLOWER ${RNG} rng)
+            ADD_DEPENDENCIES(random_${testname}_aesni
+                random_${testname}_${rng})
+            ADD_DEPENDENCIES(random_${testname}_aesni-check
+                random_${testname}_${rng}-check)
+        ENDFOREACH(RNG ${MCKL_RNG_AESNI})
+    ENDIF(AESNI_FOUND)
+
+    IF(MKL_FOUND)
+        ADD_CUSTOM_TARGET(random_${testname}_mkl)
+        ADD_CUSTOM_TARGET(random_${testname}_mkl-check)
+        FOREACH(RNG ${MCKL_RNG_MKL})
+            STRING(TOLOWER ${RNG} rng)
+            ADD_DEPENDENCIES(random_${testname}_mkl
+                random_${testname}_${rng})
+            ADD_DEPENDENCIES(random_${testname}_mkl-check
+                random_${testname}_${rng}-check)
+        ENDFOREACH(RNG ${MCKL_RNG_MKL})
+    ENDIF(MKL_FOUND)
+
+    IF(RDRAND_FOUND)
+        ADD_CUSTOM_TARGET(random_${testname}_rdrand)
+        ADD_CUSTOM_TARGET(random_${testname}_rdrand-check)
+        FOREACH(RNG ${MCKL_RNG_RDRAND})
+            STRING(TOLOWER ${RNG} rng)
+            ADD_DEPENDENCIES(random_${testname}_rdrand
+                random_${testname}_${rng})
+            ADD_DEPENDENCIES(random_${testname}_rdrand-check
+                random_${testname}_${rng}-check)
+        ENDFOREACH(RNG ${MCKL_RNG_RDRAND})
+    ENDIF(RDRAND_FOUND)
+ENDFUNCTION(MCKL_ADD_TEST_RNG testname)
+
 MCKL_ADD_EXAMPLE(random)
-
-ADD_CUSTOM_TARGET(random_rng)
-ADD_CUSTOM_TARGET(random_rng-check)
-ADD_DEPENDENCIES(random random_rng)
-ADD_DEPENDENCIES(random-check random_rng-check)
-
-ADD_CUSTOM_TARGET(random_uniform_bits)
-ADD_CUSTOM_TARGET(random_uniform_bits-check)
-ADD_DEPENDENCIES(random random_uniform_bits)
-ADD_DEPENDENCIES(random-check random_uniform_bits-check)
 
 MCKL_ADD_TEST(random distribution)
 MCKL_ADD_TEST(random distribution_perf)
 MCKL_ADD_TEST(random test)
 MCKL_ADD_TEST(random threefish)
 MCKL_ADD_TEST(random u01)
-
 IF(MKL_FOUND)
     MCKL_ADD_TEST(random mkl_brng)
 ENDIF(MKL_FOUND)
 
-FOREACH(RNG ${MCKL_RNG})
-    SET(RNGType ::mckl::${RNG})
-    SET(Name ${RNG})
-    STRING(TOLOWER ${RNG} name)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng.cpp.in
-        ${PROJECT_SOURCE_DIR}/src/random_rng_${name}.cpp)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_uniform_bits.cpp.in
-        ${PROJECT_SOURCE_DIR}/src/random_uniform_bits_${name}.cpp)
-    MCKL_ADD_TEST(random rng_${name})
-    MCKL_ADD_TEST(random uniform_bits_${name})
-    ADD_DEPENDENCIES(random_rng random_rng_${name})
-    ADD_DEPENDENCIES(random_rng-check random_rng_${name}-check)
-    ADD_DEPENDENCIES(random_uniform_bits
-        random_uniform_bits_${name})
-    ADD_DEPENDENCIES(random_uniform_bits-check
-        random_uniform_bits_${name}-check)
-ENDFOREACH(RNG ${MCKL_RNG})
-
-ADD_CUSTOM_TARGET(random_rng_std)
-ADD_CUSTOM_TARGET(random_rng_std-check)
-ADD_CUSTOM_TARGET(random_uniform_bits_std)
-ADD_CUSTOM_TARGET(random_uniform_bits_std-check)
-FOREACH(RNG ${STD_RNG})
-    SET(RNGType std::${RNG})
-    SET(Name ${RNG})
-    STRING(TOLOWER ${RNG} name)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng.cpp.in
-        ${PROJECT_SOURCE_DIR}/src/random_rng_${name}.cpp)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_uniform_bits.cpp.in
-        ${PROJECT_SOURCE_DIR}/src/random_uniform_bits_${name}.cpp)
-    MCKL_ADD_TEST(random rng_${name})
-    MCKL_ADD_TEST(random uniform_bits_${name})
-    ADD_DEPENDENCIES(random_rng random_rng_${name})
-    ADD_DEPENDENCIES(random_rng-check random_rng_${name}-check)
-    ADD_DEPENDENCIES(random_rng_std random_rng_${name})
-    ADD_DEPENDENCIES(random_rng_std-check random_rng_${name}-check)
-    ADD_DEPENDENCIES(random_uniform_bits
-        random_uniform_bits_${name})
-    ADD_DEPENDENCIES(random_uniform_bits-check
-        random_uniform_bits_${name}-check)
-    ADD_DEPENDENCIES(random_uniform_bits_std
-        random_uniform_bits_${name})
-    ADD_DEPENDENCIES(random_uniform_bits_std-check
-        random_uniform_bits_${name}-check)
-ENDFOREACH(RNG ${MCKL_RNG})
-
-ADD_CUSTOM_TARGET(random_rng_philox)
-ADD_CUSTOM_TARGET(random_rng_philox-check)
-ADD_CUSTOM_TARGET(random_uniform_bits_philox)
-ADD_CUSTOM_TARGET(random_uniform_bits_philox-check)
-FOREACH(RNG ${MCKL_RNG_PHILOX})
-    STRING(TOLOWER ${RNG} name)
-    ADD_DEPENDENCIES(random_rng_philox random_rng_${name})
-    ADD_DEPENDENCIES(random_rng_philox-check random_rng_${name}-check)
-    ADD_DEPENDENCIES(random_uniform_bits_philox
-        random_uniform_bits_${name})
-    ADD_DEPENDENCIES(random_uniform_bits_philox-check
-        random_uniform_bits_${name}-check)
-ENDFOREACH(RNG ${MCKL_RNG_PHILOX})
-
-ADD_CUSTOM_TARGET(random_rng_threefry)
-ADD_CUSTOM_TARGET(random_rng_threefry-check)
-ADD_CUSTOM_TARGET(random_uniform_bits_threefry)
-ADD_CUSTOM_TARGET(random_uniform_bits_threefry-check)
-FOREACH(RNG ${MCKL_RNG_THREEFRY})
-    STRING(TOLOWER ${RNG} name)
-    ADD_DEPENDENCIES(random_rng_threefry random_rng_${name})
-    ADD_DEPENDENCIES(random_rng_threefry-check random_rng_${name}-check)
-    ADD_DEPENDENCIES(random_uniform_bits_threefry
-        random_uniform_bits_${name})
-    ADD_DEPENDENCIES(random_uniform_bits_threefry-check
-        random_uniform_bits_${name}-check)
-ENDFOREACH(RNG ${MCKL_RNG_THREEFRY})
-
-IF(AESNI_FOUND)
-    ADD_CUSTOM_TARGET(random_rng_aesni)
-    ADD_CUSTOM_TARGET(random_rng_aesni-check)
-    ADD_CUSTOM_TARGET(random_uniform_bits_aesni)
-    ADD_CUSTOM_TARGET(random_uniform_bits_aesni-check)
-    FOREACH(RNG ${MCKL_RNG_AESNI})
-        STRING(TOLOWER ${RNG} name)
-        ADD_DEPENDENCIES(random_rng_aesni random_rng_${name})
-        ADD_DEPENDENCIES(random_rng_aesni-check random_rng_${name}-check)
-        ADD_DEPENDENCIES(random_uniform_bits_aesni
-            random_uniform_bits_${name})
-        ADD_DEPENDENCIES(random_uniform_bits_aesni-check
-            random_uniform_bits_${name}-check)
-    ENDFOREACH(RNG ${MCKL_RNG_AESNI})
-ENDIF(AESNI_FOUND)
-
-IF(MKL_FOUND)
-    ADD_CUSTOM_TARGET(random_rng_mkl)
-    ADD_CUSTOM_TARGET(random_rng_mkl-check)
-    ADD_CUSTOM_TARGET(random_uniform_bits_mkl)
-    ADD_CUSTOM_TARGET(random_uniform_bits_mkl-check)
-    FOREACH(RNG ${MCKL_RNG_MKL})
-        STRING(TOLOWER ${RNG} name)
-        ADD_DEPENDENCIES(random_rng_mkl random_rng_${name})
-        ADD_DEPENDENCIES(random_rng_mkl-check random_rng_${name}-check)
-        ADD_DEPENDENCIES(random_uniform_bits_mkl
-            random_uniform_bits_${name})
-        ADD_DEPENDENCIES(random_uniform_bits_mkl-check
-            random_uniform_bits_${name}-check)
-    ENDFOREACH(RNG ${MCKL_RNG_MKL})
-ENDIF(MKL_FOUND)
-
-IF(RDRAND_FOUND)
-    ADD_CUSTOM_TARGET(random_rng_rdrand)
-    ADD_CUSTOM_TARGET(random_rng_rdrand-check)
-    ADD_CUSTOM_TARGET(random_uniform_bits_rdrand)
-    ADD_CUSTOM_TARGET(random_uniform_bits_rdrand-check)
-    FOREACH(RNG ${MCKL_RNG_RDRAND})
-        STRING(TOLOWER ${RNG} name)
-        ADD_DEPENDENCIES(random_rng_rdrand random_rng_${name})
-        ADD_DEPENDENCIES(random_rng_rdrand-check random_rng_${name}-check)
-        ADD_DEPENDENCIES(random_uniform_bits_rdrand
-            random_uniform_bits_${name})
-        ADD_DEPENDENCIES(random_uniform_bits_rdrand-check
-            random_uniform_bits_${name}-check)
-    ENDFOREACH(RNG ${MCKL_RNG_RDRAND})
-ENDIF(RDRAND_FOUND)
+MCKL_ADD_TEST_RNG(rng)
+MCKL_ADD_TEST_RNG(seed)
+MCKL_ADD_TEST_RNG(uniform_bits)
 
 MCKL_ADD_FILE(random random_Philox2x32.txt)
 MCKL_ADD_FILE(random random_Philox2x64.txt)

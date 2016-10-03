@@ -3,6 +3,7 @@
 /build
 /example/pf/src/pf_cv_*.cpp
 /example/random/src/random_rng_*.cpp
+/example/random/src/random_seed_*.cpp
 /example/random/src/random_uniform_bits_*.cpp
 /manual/fig/pf.pdf
 /manual/manual.aux

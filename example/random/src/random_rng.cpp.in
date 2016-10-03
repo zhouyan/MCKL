@@ -56,7 +56,7 @@ int main(int argc, char **argv)
         }
     }
     // clang-format off
-    random_rng<@RNGType@>(N, M, "@Name@");
+    random_rng<@RNGType@>(N, M, "@RNGName@");
     // clang-format on
 
     return 0;

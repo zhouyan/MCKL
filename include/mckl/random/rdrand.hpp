@@ -111,7 +111,7 @@ class RDRANDEngine
         internal::is_seed_seq<T, RDRANDEngine<ResultType, NTrialMax>>;
 
     public:
-    explicit RDRANDEngine(result_type = 0) {}
+    explicit RDRANDEngine(unsigned long long = 0) {}
 
     template <typename SeedSeq>
     explicit RDRANDEngine(SeedSeq &,
@@ -119,7 +119,7 @@ class RDRANDEngine
     {
     }
 
-    void seed(result_type) {}
+    void seed(unsigned long long) {}
 
     template <typename SeedSeq>
     void seed(SeedSeq &,

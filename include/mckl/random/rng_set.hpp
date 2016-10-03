@@ -55,7 +55,7 @@ namespace mckl
 
 /// \brief Scalar RNG set
 /// \ingroup Random
-template <typename RNGType = RNG>
+template <typename RNGType = RNGFast>
 class RNGSetScalar
 {
     MCKL_DEFINE_NEW_DELETE(RNGSetScalar<RNGType>)
@@ -70,7 +70,7 @@ class RNGSetScalar
 
     void resize(std::size_t) {}
 
-    void reset() { Seed<rng_type>::instance()(rng_); }
+    void reset() { rng_.seed(Seed<rng_type>::instance().get()); }
 
     rng_type &operator[](size_type) { return rng_; }
 
@@ -102,10 +102,15 @@ class RNGSetVector
 
         size_type m = rng_.size();
         rng_.resize(n);
-        Seed<rng_type>::instance()(n - m, rng_.data() + m);
+        for (std::size_t i = m; i != n; ++i)
+            rng_[i].seed(Seed<rng_type>::instance().get());
     }
 
-    void reset() { Seed<rng_type>::instance()(rng_.begin(), rng_.end()); }
+    void reset()
+    {
+        for (auto &rng : rng_)
+            rng.seed(Seed<rng_type>::instance().get());
+    }
 
     rng_type &operator[](size_type id) { return rng_[id % size()]; }
 
@@ -127,7 +132,7 @@ class RNGSetTBBEnumerable
     using size_type = std::size_t;
 
     explicit RNGSetTBBEnumerable(size_type = 0)
-        : rng_([]() { return rng_type(Seed<rng_type>::instance()()); })
+        : rng_([]() { return rng_type(Seed<rng_type>::instance().get()); })
     {
         reset();
     }
@@ -163,9 +168,7 @@ using RNGSetTBBKPI = RNGSetTBBEnumerable<RNGType,
 
 /// \brief Default RNG set
 /// \ingroup Random
-template <typename RNGType = typename std::conditional<
-              std::is_same<MCKL_RNG_SET_TYPE<RNG>, RNGSetVector<RNG>>::value,
-              RNGMini, RNG>::type>
+template <typename RNGType = typename MCKL_RNG_SET_TYPE<>::rng_type>
 using RNGSet = MCKL_RNG_SET_TYPE<RNGType>;
 
 /// \brief Particle::rng_set_type trait

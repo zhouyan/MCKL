@@ -174,11 +174,11 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
     RNGType rng;
     bool pass = random_rng_kat(rng);
 
-    mckl::Seed<RNGType>::instance().set(0);
-    RNGType rng1(mckl::Seed<RNGType>::instance()());
+    mckl::Seed<RNGType>::instance().set(1);
+    RNGType rng1(mckl::Seed<RNGType>::instance().get());
 
-    mckl::Seed<RNGType>::instance().set(0);
-    RNGType rng2(mckl::Seed<RNGType>::instance()());
+    mckl::Seed<RNGType>::instance().set(1);
+    RNGType rng2(mckl::Seed<RNGType>::instance().get());
 
     mckl::Vector<result_type> r1(N);
     mckl::Vector<result_type> r2(N);
@@ -233,11 +233,11 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
     RNGType rng;
     bool pass = true;
 
-    mckl::Seed<RNGType>::instance().set(0);
-    RNGType rng1(mckl::Seed<RNGType>::instance()());
+    mckl::Seed<RNGType>::instance().set(1);
+    RNGType rng1(mckl::Seed<RNGType>::instance().get());
 
-    mckl::Seed<RNGType>::instance().set(0);
-    RNGType rng2(mckl::Seed<RNGType>::instance()());
+    mckl::Seed<RNGType>::instance().set(1);
+    RNGType rng2(mckl::Seed<RNGType>::instance().get());
 
     mckl::Vector<result_type> r1(N);
     mckl::Vector<result_type> r2(N);
@@ -282,10 +282,10 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 
     std::size_t P = std::thread::hardware_concurrency();
 
-    mckl::Seed<RNGType>::instance().set(0);
+    mckl::Seed<RNGType>::instance().set(1);
     mckl::RNGSetVector<RNGType> rs1(P);
 
-    mckl::Seed<RNGType>::instance().set(0);
+    mckl::Seed<RNGType>::instance().set(1);
     mckl::RNGSetVector<RNGType> rs2(P);
 
     mckl::Vector<result_type> r1(N * P);

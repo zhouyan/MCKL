@@ -42,141 +42,108 @@ namespace mckl
 namespace internal
 {
 
-template <typename RNGType, typename OutputType, typename InputType>
-inline OutputType seed_enc(const InputType &input)
+template <typename RNGType, typename ResultType, typename StateType>
+inline ResultType seed_enc(const StateType &state)
 {
-    static_assert(sizeof(InputType) == sizeof(OutputType),
-        "**seed_enc** input and output have different sizes");
+    static_assert(sizeof(StateType) == sizeof(ResultType),
+        "**seed_enc** state and result have different sizes");
 
-    static_assert(sizeof(InputType) == sizeof(typename RNGType::ctr_type),
-        "**seed_enc** input and RNGType::ctr_type have different sizes");
+    static_assert(sizeof(StateType) == sizeof(typename RNGType::ctr_type),
+        "**seed_enc** state and RNGType::ctr_type have different sizes");
 
     union {
-        InputType k;
-        OutputType key;
+        StateType state;
+        ResultType result;
         typename RNGType::ctr_type ctr;
     } buf;
 
-    buf.k = input;
+    buf.state = state;
     RNGType rng(0);
     rng.enc(buf.ctr, buf.ctr);
 
-    return buf.key;
+    return buf.result;
 }
 
 } // namespace mckl::internal
 
 /// \brief Seed generator for use with RNG accepting scalar seeds
-///
-/// \details
-/// The sequence of seeds are belongs to the equivalent class \f$s \mod D
-/// \equiv R\f$ where \f$D > 0\f$, \f$R \ge 0\f$. The defaults are \f$D = 1\f$
-/// and \f$R = 0\f$. Each time `operator()` is called, a new seed is used.
-///
-/// \note
-/// If \f$D = 1\f$ (and \f$R = 0\f$), then there will be exactly two seeds
-/// equal to `1` in any sequence of length \f$2^N\f$, where \f$N\f$ is the
-/// number of digits in the unsigned integer type. They are either one at the
-/// beginning and one at the end, or consecutive.
-template <typename ResultType, typename ID = ResultType>
+template <typename ResultType, typename ID = ResultType, bool Randomize = true>
 class SeedGenerator
 {
+    static_assert(std::is_unsigned<ResultType>::value,
+        "**SeedGenerator** ResultType is not an unsigned integer type");
+
     public:
     using result_type = ResultType;
 
-    SeedGenerator(const SeedGenerator<ResultType, ID> &) = delete;
+    SeedGenerator(const SeedGenerator<ResultType, ID, Randomize> &) = delete;
 
-    SeedGenerator<ResultType, ID> &operator=(
-        const SeedGenerator<ResultType, ID> &) = delete;
+    SeedGenerator<ResultType, ID, Randomize> &operator=(
+        const SeedGenerator<ResultType, ID, Randomize> &) = delete;
 
-    static SeedGenerator<ResultType, ID> &instance()
+    static SeedGenerator<ResultType, ID, Randomize> &instance()
     {
-        static SeedGenerator<ResultType, ID> seed;
+        static SeedGenerator<ResultType, ID, Randomize> seed;
 
         return seed;
     }
 
-    /// \brief Get a new seed
-    result_type operator()()
+    /// \brief Set the internal seed
+    void set(result_type s) { seed_ = s; }
+
+    /// \brief Get the next seed
+    result_type get()
     {
         result_type s = seed_.fetch_add(1);
+        s %= maxs_;
+        s *= np_;
+        s += rank_;
 
-        return (s % max_ + 1) * divisor_ + remainder_;
+        return enc(s, std::integral_constant<bool, Randomize>());
     }
 
-    /// \brief Seed a single RNG
-    template <typename RNGType>
-    void operator()(RNGType &rng)
+    /// \brief The number of partitions
+    result_type np() const { return np_; }
+
+    /// \brief The rank of this partition
+    result_type rank() const { return rank_; }
+
+    /// \brief Set the number of partitions and the rank of this partition
+    void partition(result_type np, result_type rank)
     {
-        rng.seed(operator()());
-    }
+        runtime_assert(np > 0,
+            "**SeedGenerator::partition** the number of the partitions is "
+            "zero");
+        if (np < 1)
+            np = 1;
 
-    /// \brief Seed a sequence of RNGs
-    template <typename OutputIter>
-    OutputIter operator()(std::size_t n, OutputIter first)
-    {
-        for (std::size_t i = 0; i != n; ++i, ++first)
-            operator()(*first);
+        runtime_assert(np > rank,
+            "**SeedGenerator::partition** the rank is not smaller than the "
+            "number of partitions");
+        if (rank >= np)
+            rank = 0;
 
-        return first;
-    }
+        result_type maxs = std::numeric_limits<result_type>::max();
+        if (np > 1)
+            maxs = (maxs - rank) / np + 1;
 
-    /// \brief Seed a sequence of RNGs
-    template <typename OutputIter>
-    OutputIter operator()(OutputIter first, OutputIter last)
-    {
-        while (first != last) {
-            operator()(*first);
-            ++first;
-        }
-
-        return first;
-    }
-
-    /// \brief Set the seed to `s % max() * divisor() + remainder()`
-    void set(result_type s) { seed_ = s % max_; }
-
-    /// \brief The maximum of the seed
-    result_type max() const { return (max_ + 1) * divisor_ + remainder_; }
-
-    /// \brief The divisor of the output seed
-    result_type divisor() const { return divisor_; }
-
-    /// \brief The remainder of the output seed
-    result_type remainder() const { return remainder_; }
-
-    /// \brief Set the divisor and the remainder
-    void modulo(result_type divisor, result_type remainder)
-    {
-        runtime_assert(divisor > remainder,
-            "**SeedGenerator::modula** the remainder is not smaller than the "
-            "divisor");
-
-        result_type maxs =
-            (std::numeric_limits<result_type>::max() - remainder) / divisor;
-        runtime_assert(maxs > 1,
-            "**SeedGenerator::modulo** the maximum of the internal seed will "
-            "be no larger than 1");
-
-        divisor_ = divisor;
-        remainder_ = remainder;
-        max_ = maxs;
-
-        set(seed_);
+        np_ = np;
+        rank_ = rank;
+        maxs_ = maxs;
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ResultType, ID> &sg)
+        const SeedGenerator<ResultType, ID, Randomize> &sg)
     {
         if (!os)
             return os;
 
+        os << sg.np_ << ' ';
+        os << sg.rank_ << ' ';
+        os << sg.maxs_ << ' ';
         os << sg.seed_ << ' ';
-        os << sg.max_ << ' ';
-        os << sg.divisor_ << ' ';
-        os << sg.remainder_ << ' ';
 
         return os;
     }
@@ -184,55 +151,51 @@ class SeedGenerator
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ResultType, ID> &sg)
+        SeedGenerator<ResultType, ID, Randomize> &sg)
     {
         if (!is)
             return is;
 
+        result_type np;
+        result_type rank;
+        result_type maxs;
         result_type seed;
-        result_type max;
-        result_type divisor;
-        result_type remainder;
+        is >> std::ws >> np;
+        is >> std::ws >> rank;
+        is >> std::ws >> maxs;
         is >> std::ws >> seed;
-        is >> std::ws >> max;
-        is >> std::ws >> divisor;
-        is >> std::ws >> remainder;
 
         if (is) {
+            sg.np_ = np;
+            sg.rank_ = rank;
+            sg.maxs_ = maxs;
             sg.seed_ = seed;
-            sg.max_ = max;
-            sg.divisor_ = divisor;
-            sg.remainder_ = remainder;
         }
 
         return is;
     }
 
     protected:
-    SeedGenerator() : seed_(0), max_(0), divisor_(1), remainder_(0)
-    {
-        modulo(divisor_, remainder_);
-    }
+    SeedGenerator() : seed_(1) { partition(1, 0); }
 
     private:
+    result_type np_;
+    result_type rank_;
+    result_type maxs_;
     std::atomic<result_type> seed_;
-    result_type max_;
-    result_type divisor_;
-    result_type remainder_;
 
-    result_type get()
+    result_type enc(result_type s, std::false_type) { return s; }
+
+    result_type enc(result_type s, std::true_type)
     {
-        result_type s = seed_.fetch_add(1);
-
-        return enc((s % max_ + 1) * divisor_ + remainder_,
-            std::integral_constant<int,
-                std::numeric_limits<result_type>::digits>());
+        return enc(s, std::integral_constant<int,
+                          std::numeric_limits<result_type>::digits>());
     }
 
     template <std::size_t D>
     result_type enc(result_type s, std::integral_constant<int, D>)
     {
-        return s;
+        return enc(s, std::false_type());
     }
 
     result_type enc(result_type s, std::integral_constant<int, 32>)
@@ -246,97 +209,60 @@ class SeedGenerator
     }
 }; // class SeedGenerator
 
-/// \brief Seed generator for use with RNG accepting fixed width keys as seeds
-///
-/// \details
-/// If `K` is less than two, then it operates as the generic `SeedGenerator`.
-/// Otherwise, The sequence of keys are such that, the first element is
-/// \f$1,2,\dots\f$ while the last element is \f$R\f$.
-template <typename ResultType, std::size_t K, typename ID>
-class SeedGenerator<std::array<ResultType, K>, ID>
+/// \brief Seed generator for RNG with fixed width keys as seeds
+template <typename T, std::size_t K, typename ID, bool Randomize>
+class SeedGenerator<std::array<T, K>, ID, Randomize>
 {
     public:
-    using result_type = typename std::conditional<K != 0 &&
-            sizeof(ResultType) * K % sizeof(std::uint64_t) == 0,
-        std::uint64_t, ResultType>::type;
-    using key_type = std::array<ResultType, K>;
+    using seed_type = typename std::conditional<K != 0 &&
+            sizeof(T) * K % sizeof(std::uint64_t) == 0,
+        std::uint64_t, T>::type;
+
+    using result_type = std::array<T, K>;
 
     SeedGenerator(
-        const SeedGenerator<std::array<ResultType, K>, ID> &) = delete;
+        const SeedGenerator<std::array<T, K>, ID, Randomize> &) = delete;
 
-    SeedGenerator<std::array<ResultType, K>, ID> &operator=(
-        const SeedGenerator<std::array<ResultType, K>, ID> &) = delete;
+    SeedGenerator<std::array<T, K>, ID, Randomize> &operator=(
+        const SeedGenerator<std::array<T, K>, ID, Randomize> &) = delete;
 
-    static SeedGenerator<std::array<ResultType, K>, ID> &instance()
+    static SeedGenerator<std::array<T, K>, ID, Randomize> &instance()
     {
-        static SeedGenerator<std::array<ResultType, K>, ID> seed;
+        static SeedGenerator<std::array<T, K>, ID, Randomize> seed;
 
         return seed;
     }
 
-    /// \brief Create a new RNG using a new seed
-    key_type operator()() { return get(dispatch_type()); }
+    /// \brief Set the internal seed
+    void set(seed_type s) { seed_ = s; }
 
-    /// \brief Seed a single RNG
-    template <typename RNGType>
-    void operator()(RNGType &rng)
+    /// \brief Get the next key
+    result_type get() { return get(std::integral_constant<bool, (M_ > 1)>()); }
+
+    /// \brief The number of partitions
+    seed_type np() const { return np_; }
+
+    /// \brief The rank of this partition
+    seed_type rank() const { return rank_; }
+
+    /// \brief Set the number of partitions and the rank of this partition
+    void partition(seed_type np, seed_type rank)
     {
-        rng.seed(operator()());
-    }
-
-    /// \brief Seed a sequence of RNGs
-    template <typename OutputIter>
-    OutputIter operator()(std::size_t n, OutputIter first)
-    {
-        for (std::size_t i = 0; i != n; ++i, ++first)
-            operator()(*first);
-
-        return first;
-    }
-
-    /// \brief Seed a sequence of RNGs
-    template <typename OutputIter>
-    OutputIter operator()(OutputIter first, OutputIter last)
-    {
-        while (first != last) {
-            operator()(*first);
-            ++first;
-        }
-
-        return first;
-    }
-
-    /// \brief Set the seed to `s % max() * divisor() + remainder()`
-    void set(result_type s) { seed_ = s % max_; }
-
-    /// \brief The maximum of the seed
-    result_type max() const { return (max_ + 1) * divisor_ + remainder_; }
-
-    /// \brief The divisor of the output seed
-    result_type divisor() const { return divisor_; }
-
-    /// \brief The remainder of the output seed
-    result_type remainder() const { return remainder_; }
-
-    /// \brief Set the divisor and the remainder
-    void modulo(result_type divisor, result_type remainder)
-    {
-        modulo(divisor, remainder, dispatch_type());
-        set(seed_);
+        partition(np, rank, std::integral_constant<bool, (M_ > 1)>());
     }
 
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<std::array<ResultType, K>, ID> &sg)
+        const SeedGenerator<std::array<T, K>, ID, Randomize> &sg)
     {
         if (!os)
             return os;
 
+        os << sg.np_ << ' ';
+        os << sg.rank_ << ' ';
+        os << sg.maxs_ << ' ';
         os << sg.seed_ << ' ';
-        os << sg.max_ << ' ';
-        os << sg.divisor_ << ' ';
-        os << sg.remainder_ << ' ';
 
         return os;
     }
@@ -344,145 +270,156 @@ class SeedGenerator<std::array<ResultType, K>, ID>
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<std::array<ResultType, K>, ID> &sg)
+        SeedGenerator<std::array<T, K>, ID, Randomize> &sg)
     {
         if (!is)
             return is;
 
-        result_type seed;
-        result_type max;
-        result_type divisor;
-        result_type remainder;
+        seed_type np;
+        seed_type rank;
+        seed_type maxs;
+        seed_type seed;
+        is >> std::ws >> np;
+        is >> std::ws >> rank;
+        is >> std::ws >> maxs;
         is >> std::ws >> seed;
-        is >> std::ws >> max;
-        is >> std::ws >> divisor;
-        is >> std::ws >> remainder;
 
         if (is) {
+            sg.np_ = np;
+            sg.rank_ = rank;
+            sg.maxs_ = maxs;
             sg.seed_ = seed;
-            sg.max_ = max;
-            sg.divisor_ = divisor;
-            sg.remainder_ = remainder;
         }
 
         return is;
     }
 
     protected:
-    SeedGenerator() : seed_(0), max_(0), divisor_(1), remainder_(0)
-    {
-        modulo(divisor_, remainder_);
-    }
+    SeedGenerator() : seed_(1) { partition(1, 0); }
 
     private:
     static constexpr std::size_t M_ =
-        K != 0 && sizeof(ResultType) * K % sizeof(std::uint64_t) == 0 ?
-        sizeof(ResultType) * K / sizeof(std::uint64_t) :
+        K != 0 && sizeof(T) * K % sizeof(std::uint64_t) == 0 ?
+        sizeof(T) * K / sizeof(std::uint64_t) :
         K;
 
-    using dispatch_type = std::integral_constant<bool, (M_ > 1)>;
+    seed_type np_;
+    seed_type rank_;
+    seed_type maxs_;
+    std::atomic<seed_type> seed_;
 
-    std::atomic<result_type> seed_;
-    result_type max_;
-    result_type divisor_;
-    result_type remainder_;
-
-    void modulo(result_type, result_type remainder, std::true_type)
+    void partition(seed_type np, seed_type rank, std::true_type)
     {
-        max_ = std::numeric_limits<result_type>::max();
-        remainder_ = remainder;
+        np_ = np;
+        rank_ = rank;
+        maxs_ = std::numeric_limits<seed_type>::max();
     }
 
-    void modulo(result_type divisor, result_type remainder, std::false_type)
+    void partition(seed_type np, seed_type rank, std::false_type)
     {
-        runtime_assert(divisor > remainder,
-            "**SeedGenerator::modulo** the remainder is not smaller than the "
-            "divisor");
+        runtime_assert(np > 0,
+            "**SeedGenerator::partition** the number of the partitions is "
+            "zero");
+        if (np < 1)
+            np = 1;
 
-        result_type maxs =
-            (std::numeric_limits<result_type>::max() - remainder) / divisor;
-        runtime_assert(maxs > 1,
-            "**SeedGenerator::modulo** the maximum of the internal seed will "
-            "be no larger than 1");
+        runtime_assert(np > rank,
+            "**SeedGenerator::partition** the rank is not smaller than the "
+            "number of partitions");
+        if (rank >= np)
+            rank = 0;
 
-        divisor_ = divisor;
-        remainder_ = remainder;
-        max_ = maxs;
+        seed_type maxs = std::numeric_limits<seed_type>::max();
+        if (np > 1)
+            maxs = (maxs - rank) / np + 1;
 
-        set(seed_);
+        np_ = np;
+        rank_ = rank;
+        maxs_ = maxs;
     }
 
-    key_type get(std::true_type)
+    result_type get(std::true_type)
     {
-        result_type s = seed_.fetch_add(1);
-        std::array<result_type, M_> k = {{0}};
-        k.front() = s + 1;
-        k.back() = remainder_;
+        seed_type s = seed_.fetch_add(1);
+        std::array<seed_type, M_> k = {{0}};
+        k.front() = s;
+        k.back() = rank_;
 
-        return enc(k, std::integral_constant<int,
-                          std::numeric_limits<result_type>::digits * M_>());
+        return enc(k, std::integral_constant<bool, Randomize>());
     }
 
-    key_type get(std::false_type)
+    result_type get(std::false_type)
     {
-        result_type s = seed_.fetch_add(1);
-        std::array<result_type, M_> k = {{0}};
-        std::fill(k.begin(), k.end(), 0);
-        k.front() = (s % max_ + 1) * divisor_ + remainder_;
+        seed_type s = seed_.fetch_add(1);
+        s %= maxs_;
+        s *= np_;
+        s += rank_;
+        std::array<seed_type, M_> k = {{s}};
 
-        return enc(k, std::integral_constant<int,
-                          std::numeric_limits<result_type>::digits * M_>());
+        return enc(k, std::integral_constant<bool, Randomize>());
     }
 
-    template <int D>
-    key_type enc(
-        const std::array<result_type, M_> &k, std::integral_constant<int, D>)
+    result_type enc(const std::array<seed_type, M_> &k, std::false_type)
     {
         union {
-            key_type key;
-            std::array<result_type, M_> k;
+            result_type result;
+            std::array<seed_type, M_> k;
         } buf;
 
         buf.k = k;
 
-        return buf.key;
+        return buf.result;
     }
 
-    key_type enc(
-        const std::array<result_type, M_> &k, std::integral_constant<int, 64>)
+    result_type enc(const std::array<seed_type, M_> &k, std::true_type)
     {
-        return internal::seed_enc<Threefry2x32, key_type>(k);
+        return enc(k,
+            std::integral_constant<int, std::numeric_limits<T>::digits * K>());
     }
 
-    key_type enc(
-        const std::array<result_type, M_> &k, std::integral_constant<int, 128>)
+    template <int D>
+    result_type enc(
+        const std::array<seed_type, M_> &k, std::integral_constant<int, D>)
     {
-        return internal::seed_enc<Threefry2x64, key_type>(k);
+        return enc(k, std::false_type());
     }
 
-    key_type enc(
-        const std::array<result_type, M_> &k, std::integral_constant<int, 256>)
+    result_type enc(
+        const std::array<seed_type, M_> &k, std::integral_constant<int, 64>)
     {
-        return internal::seed_enc<Threefry4x64, key_type>(k);
+        return internal::seed_enc<Threefry2x32, result_type>(k);
     }
 
-    key_type enc(
-        const std::array<result_type, M_> &k, std::integral_constant<int, 512>)
+    result_type enc(
+        const std::array<seed_type, M_> &k, std::integral_constant<int, 128>)
     {
-        return internal::seed_enc<Threefry8x64, key_type>(k);
+        return internal::seed_enc<Threefry2x64, result_type>(k);
     }
 
-    key_type enc(const std::array<result_type, M_> &k,
-        std::integral_constant<int, 1024>)
+    result_type enc(
+        const std::array<seed_type, M_> &k, std::integral_constant<int, 256>)
     {
-        return internal::seed_enc<Threefry16x64, key_type>(k);
+        return internal::seed_enc<Threefry4x64, result_type>(k);
+    }
+
+    result_type enc(
+        const std::array<seed_type, M_> &k, std::integral_constant<int, 512>)
+    {
+        return internal::seed_enc<Threefry8x64, result_type>(k);
+    }
+
+    result_type enc(
+        const std::array<seed_type, M_> &k, std::integral_constant<int, 1024>)
+    {
+        return internal::seed_enc<Threefry16x64, result_type>(k);
     }
 }; // class Seed
 
 /// \brief Seeding RNG engines
 /// \ingroup Random
-template <typename RNGType>
-using Seed = SeedGenerator<typename SeedType<RNGType>::type>;
+template <typename RNGType, typename ID = typename SeedType<RNGType>::type,
+    bool Randomize = true>
+using Seed = SeedGenerator<typename SeedType<RNGType>::type, ID, Randomize>;
 
 } // namespace mckl
 
