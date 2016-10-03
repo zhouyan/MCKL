@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_test.cpp
+// MCKL/example/random/src/random_test.cpp.in
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -31,4 +31,34 @@
 
 #include "random_test.hpp"
 
-MCKL_EXAMPLE_RANDOM_MAIN(test, 100000, 10)
+int main(int argc, char **argv)
+{
+    --argc;
+    ++argv;
+
+    std::size_t N = 100000;
+    if (argc > 0) {
+        std::size_t n = static_cast<std::size_t>(std::atoi(*argv));
+        if (n != 0) {
+            N = n;
+            --argc;
+            ++argv;
+        }
+    }
+
+    std::size_t M = 10;
+    if (argc > 0) {
+        std::size_t m = static_cast<std::size_t>(std::atoi(*argv));
+        if (m != 0) {
+            M = m;
+            --argc;
+            ++argv;
+        }
+    }
+
+    // clang-format off
+    random_test<@RNGType@>(N, M, "@RNGName@");
+    // clang-format on
+
+    return 0;
+}

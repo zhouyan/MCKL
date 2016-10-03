@@ -192,6 +192,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     std::size_t lwid =
         static_cast<std::size_t>(nwid + twid * (4 + MCKL_HAS_MKL) + 3);
 
+    std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(nwid) << std::left << "Distribution";
     std::cout << std::setw(twid) << std::right << "STD";

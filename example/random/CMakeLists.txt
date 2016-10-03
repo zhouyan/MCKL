@@ -215,15 +215,18 @@ ENDFUNCTION(MCKL_ADD_TEST_DISTRIBUTION testname)
 
 MCKL_ADD_EXAMPLE(random)
 
-MCKL_ADD_TEST(random test)
 MCKL_ADD_TEST(random threefish)
 MCKL_ADD_TEST(random u01)
+IF(AESNI_FOUND)
+    MCKL_ADD_TEST(random aes)
+ENDIF(AESNI_FOUND)
 IF(MKL_FOUND)
     MCKL_ADD_TEST(random mkl_brng)
 ENDIF(MKL_FOUND)
 
 MCKL_ADD_TEST_RNG(rng)
 MCKL_ADD_TEST_RNG(seed)
+MCKL_ADD_TEST_RNG(test)
 MCKL_ADD_TEST_RNG(uniform_bits)
 
 MCKL_ADD_TEST_DISTRIBUTION(distribution)
@@ -245,7 +248,6 @@ MCKL_ADD_FILE(random random_Threefish512.txt)
 MCKL_ADD_FILE(random random_Threefish1024.txt)
 
 IF(AESNI_FOUND)
-    MCKL_ADD_TEST(random aes)
     MCKL_ADD_FILE(random random_AES128.txt)
     MCKL_ADD_FILE(random random_AES192.txt)
     MCKL_ADD_FILE(random random_AES256.txt)

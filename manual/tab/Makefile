@@ -39,6 +39,6 @@ rng :
 
 distribution :
 	ninja -C ../../build/llvm-release-sys \
-	    random_distribution_perf-check \
+	    -j1 random_distribution_perf-check \
 	    > random_distribution.txt
 	./random_distribuiton.pl
