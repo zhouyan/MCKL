@@ -155,8 +155,8 @@ for my $k (@keys) {
         say $texfile "\\input{${this_tex}_p}%";
         say $texfile "\\caption{\\textsc{$k ($_, parallel)}}";
         say $texfile '\end{table}';
-        say $texfile '\clearpage';
     }
+    say $texfile '\clearpage';
 }
 say $texfile '\end{document}';
 close $texfile;
@@ -274,7 +274,7 @@ sub table
             }
             $table .= " \\\\\n";
         }
-        if ($mode eq 'S') {
+        if ($mode eq 'P') {
             $table_p .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
             if ($nostd{$distname}) {
                 $table_p .= ' & ' . sprintf('%-6s', '--');

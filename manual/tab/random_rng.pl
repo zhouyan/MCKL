@@ -152,8 +152,8 @@ for (@keys) {
         say $texfile "\\input{${this_tex}_p}%";
         say $texfile "\\caption{\\textsc{$_ (parallel)}}";
         say $texfile '\end{table}';
-        say $texfile '\clearpage';
     }
+    say $texfile '\clearpage';
 }
 say $texfile '\end{document}';
 close $texfile;
