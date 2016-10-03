@@ -271,7 +271,7 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
 
 #if MCKL_HAS_MKL
 #if MCKL_HAS_AESNI
-    mckl::RNGSetVector<mckl::ARS5> rs(P);
+    mckl::RNGSetVector<mckl::MKL_ARS5> rs_mkl(P);
 #else
     mckl::RNGSetVector<mckl::MKL_PHILOX4X32X10> rs_mkl(P);
 #endif
