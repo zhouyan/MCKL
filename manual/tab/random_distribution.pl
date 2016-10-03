@@ -226,25 +226,94 @@ sub table
 {
     my $tex = shift @_;
     my @lines = split "\n", $_[0];
+    my @scpp = grep { /SCPP/ } @lines;
+    my @pcpp = grep { /PCPP/ } @lines;
+    my @svml = grep { /SVML/ } @lines;
+    my @pvml = grep { /PVML/ } @lines;
 
     my $wid = 0;
+    my @dist;
     my @name;
+    my @std_s;
+    my @std_p;
+    my @mckl_s;
+    my @mckl_p;
+    my @batch_scpp;
+    my @batch_svml;
+    my @batch_pcpp;
+    my @batch_pvml;
+    my @mkl_s;
+    my @mkl_p;
     my $index = 0;
-    for (@lines) {
-        my $name = (split)[1];
+    for (@scpp) {
+        my $dist;
+        my $name;
+        my $std;
+        my $mckl;
+        my $batch;
+        my $mkl;
+        my $std_s = 0xFFF;
+        my $std_p = 0xFFF;
+        my $mckl_s = 0xFFF;
+        my $mckl_p = 0xFFF;
+        my $batch_scpp = 0xFFF;
+        my $batch_svml = 0xFFF;
+        my $batch_pcpp = 0xFFF;
+        my $batch_pvml = 0xFFF;
+        my $mkl_s = 0xFFF;
+        my $mkl_p = 0xFFF;
+
+        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $scpp[$index];
+        $std_s      = $std  if $std  < $std_s;
+        $mckl_s     = $mckl if $mckl < $mckl_s;
+        $batch_scpp = $batch;
+        $mkl_s      = $mkl  if $mkl  < $mkl_s;
+
+        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $pcpp[$index];
+        $std_p      = $std  if $std  < $std_p;
+        $mckl_p     = $mckl if $mckl < $mckl_p;
+        $batch_pcpp = $batch;
+        $mkl_p      = $mkl  if $mkl  < $mkl_p;
+
+        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $svml[$index];
+        $std_s      = $std  if $std  < $std_s;
+        $mckl_s     = $mckl if $mckl < $mckl_s;
+        $batch_svml = $batch;
+        $mkl_s      = $mkl  if $mkl  < $mkl_s;
+
+        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $pvml[$index];
+        $std_p      = $std  if $std  < $std_p;
+        $mckl_p     = $mckl if $mckl < $mckl_p;
+        $batch_pvml = $batch;
+        $mkl_p      = $mkl  if $mkl  < $mkl_p;
+
         $name =~ s/_/\\_/g;
-        $name[$index] = '\texttt{' . $name . '}';
+        $name = '\texttt{' . $name . '}';
         if ($wid < length($name[-1])) {
             $wid = length($name[-1])
         }
+
+        push @dist,       $dist;
+        push @name,       $name;
+        push @std_s,      $std_s;
+        push @std_p,      $std_p;
+        push @mckl_s,     $mckl_s;
+        push @mckl_p,     $mckl_p;
+        push @batch_scpp, $batch_scpp;
+        push @batch_svml, $batch_svml;
+        push @batch_pcpp, $batch_pcpp;
+        push @batch_pvml, $batch_pvml;
+        push @mkl_s,      $mkl_s;
+        push @mkl_p,      $mkl_p;
+
         $index++;
     }
 
     my $header;
     $header .= '\tbfigures' . "\n";
-    $header .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
+    $header .= '\begin{tabularx}{\textwidth}{p{2in}RRRRR}' . "\n";
     $header .= ' ' x 2 . '\toprule' . "\n";
-    $header .= ' ' x 2 . 'Distribution & \std & \mckl & \batch & \mkl';
+    $header .= ' ' x 2 . 'Distribution & \std & \mckl & \batch & \vml & \mkl';
     $header .= " \\\\\n";
     $header .= ' ' x 2 . '\midrule' . "\n";
 
@@ -256,40 +325,31 @@ sub table
     my $table;
     my $table_p;
     $index = 0;
-    for (@lines) {
-        my ($distname, $name, $std, $mckl, $batch, $mkl, $mode) = split;
-        if ($mode eq 'S') {
-            $table .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
-            if ($nostd{$distname}) {
-                $table .= ' & ' . sprintf('%-6s', '--');
-            } else {
-                $table .= &format($std);
-            }
-            $table .= &format($mckl);
-            $table .= &format($batch);
-            if ($nomkl{$distname}) {
-                $table .= ' & ' . sprintf('%-6s', '--');
-            } else {
-                $table .= &format($mkl);
-            }
-            $table .= " \\\\\n";
+    for (@name) {
+        $table .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
+        $table_p .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
+        if ($nostd{$dist[$index]}) {
+            $table .= ' & ' . sprintf('%-6s', '--');
+            $table_p .= ' & ' . sprintf('%-6s', '--');
+        } else {
+            $table .= &format($std_s[$index]);
+            $table_p .= &format($std_p[$index]);
         }
-        if ($mode eq 'P') {
-            $table_p .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
-            if ($nostd{$distname}) {
-                $table_p .= ' & ' . sprintf('%-6s', '--');
-            } else {
-                $table_p .= &format($std);
-            }
-            $table_p .= &format($mckl);
-            $table_p .= &format($batch);
-            if ($nomkl{$distname}) {
-                $table_p .= ' & ' . sprintf('%-6s', '--');
-            } else {
-                $table_p .= &format($mkl);
-            }
-            $table_p .= " \\\\\n";
+        $table .= &format($mckl_s[$index]);
+        $table .= &format($batch_scpp[$index]);
+        $table .= &format($batch_svml[$index]);
+        $table_p .= &format($mckl_p[$index]);
+        $table_p .= &format($batch_pcpp[$index]);
+        $table_p .= &format($batch_pvml[$index]);
+        if ($nomkl{$dist[$index]}) {
+            $table .= ' & ' . sprintf('%-6s', '--');
+            $table_p .= ' & ' . sprintf('%-6s', '--');
+        } else {
+            $table .= &format($mkl_s[$index]);
+            $table_p .= &format($mkl_p[$index]);
         }
+        $table .= " \\\\\n";
+        $table_p .= " \\\\\n";
         $index++;
     }
     $table = $header . $table . $footer;

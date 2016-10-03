@@ -1277,7 +1277,7 @@ inline void random_distribution_test_pval(
 }
 
 template <template <typename> class DistributionType>
-inline void random_distribution_pval(
+inline void random_distribution(
     std::size_t N, std::size_t M, int nwid, int twid, std::true_type)
 {
     random_distribution_test_pval<DistributionType<float>>(N, M, nwid, twid);
@@ -1285,7 +1285,7 @@ inline void random_distribution_pval(
 }
 
 template <template <typename> class DistributionType>
-inline void random_distribution_pval(
+inline void random_distribution(
     std::size_t N, std::size_t M, int nwid, int twid, std::false_type)
 {
     random_distribution_test_pval<DistributionType<std::int32_t>>(
@@ -1307,7 +1307,7 @@ inline void random_distribution(std::size_t N, std::size_t M)
     int nwid = 30;
     int twid = 12;
 
-    random_distribution_pval<DistributionType>(
+    random_distribution<DistributionType>(
         N, M, nwid, twid, std::is_floating_point<ResultType>());
 }
 

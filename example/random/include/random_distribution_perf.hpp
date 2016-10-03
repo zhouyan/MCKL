@@ -514,6 +514,12 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 
     std::cout << std::string(lwid, '-') << std::endl;
 
+#if MCKL_USE_MKL_VML
+    std::string mode = "VML";
+#else
+    std::string mode = "CPP";
+#endif
+
     for (std::size_t i = 0; i != perf_s.size(); ++i) {
         std::cout << std::setw(nwid) << std::left << perf_s[i].name;
         std::cout << std::setw(twid) << std::right << perf_s[i].c1;
@@ -522,7 +528,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
         std::cout << std::setw(twid) << std::right << perf_s[i].c4;
 #endif
-        std::cout << std::setw(5) << std::right << "S";
+        std::cout << std::setw(5) << std::right << ("S" + mode);
 
         std::string pass;
         pass += perf_d[i] ? "-" : "*";
@@ -542,7 +548,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
         std::cout << std::setw(twid) << std::right << perf_p[i].c4;
 #endif
-        std::cout << std::setw(5) << std::right << "P";
+        std::cout << std::setw(5) << std::right << ("P" + mode);
 
         std::string pass;
         pass += perf_d[i] ? "-" : "*";

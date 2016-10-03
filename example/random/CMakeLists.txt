@@ -202,14 +202,27 @@ FUNCTION(MCKL_ADD_TEST_DISTRIBUTION testname)
 
     FOREACH(Distribution ${MCKL_DISTRIBUTION})
         SET(DistributionType mckl::${Distribution}Distribution)
-        STRING(TOLOWER ${Distribution} distribution)
+        STRING(TOLOWER ${Distribution} dist)
         CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
-            ${PROJECT_SOURCE_DIR}/src/random_${testname}_${distribution}.cpp)
-        MCKL_ADD_TEST(random ${testname}_${distribution})
+            ${PROJECT_SOURCE_DIR}/src/random_${testname}_${dist}.cpp)
+        MCKL_ADD_TEST(random ${testname}_${dist})
         ADD_DEPENDENCIES(random_${testname}
-            random_${testname}_${distribution})
+            random_${testname}_${dist})
         ADD_DEPENDENCIES(random_${testname}-check
-            random_${testname}_${distribution}-check)
+            random_${testname}_${dist}-check)
+        IF(MKL_FOUND)
+            CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
+                ${PROJECT_SOURCE_DIR}/src/random_${testname}_${dist}_novml.cpp)
+            MCKL_ADD_TEST(random ${testname}_${dist}_novml)
+            SET_TARGET_PROPERTIES(random_${testname}_${dist}_novml
+                PROPERTIES COMPILE_FLAGS "-DMCKL_USE_MKL_VML=0")
+            ADD_DEPENDENCIES(random_${testname}
+                random_${testname}_${dist}_novml)
+            ADD_DEPENDENCIES(random_${testname}_${dist}-check
+                random_${testname}_${dist}_novml-check)
+            ADD_DEPENDENCIES(random_${testname}-check
+                random_${testname}_${dist}_novml-check)
+        ENDIF(MKL_FOUND)
     ENDFOREACH(Distribution ${MCKL_DISTRIBUTION})
 ENDFUNCTION(MCKL_ADD_TEST_DISTRIBUTION testname)
 
