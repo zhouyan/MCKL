@@ -58,62 +58,43 @@ number of bytes generated. This gives the performance measurement in \cpb. This
 experiment is repeated ten times, and the best results are shown. The two cases
 are labeled ``\single'' and ``\batch'', respectively, in the tables below.
 
-\begin{table}
-  \input{tab/random_rng_std_sse2}%
-  \caption{Performance of \rng in the standard library (Nehalem)}
-  \label{tab:Performance of RNG in the standard library RNG (Nehalem)}
-\end{table}
+\ExplSyntaxOn
+\def\rngtable#1#2#3{
+  \file_if_exist:nT{tab/random_rng_#1_sse2.tex}{
+    \begin{table}
+      \input{tab/random_rng_#1_sse2}
+      \caption{Performance~of~#2~(Nehalem,~sequential)}
+      \label{tab:Performance~of~#3~(Nehalem,~sequential)}
+    \end{table}
+  }
+  \file_if_exist:nT{tab/random_rng_#1_sse2_p.tex}{
+    \begin{table}
+      \input{tab/random_rng_#1_sse2_p}
+      \caption{Performance~of~#2~(Nehalem,~parallel)}
+      \label{tab:Performance~of~#3~(Nehalem,~parallel)}
+    \end{table}
+  }
+  \file_if_exist:nT{tab/random_rng_#1_avx2.tex}{
+    \begin{table}
+      \input{tab/random_rng_#1_avx2}
+      \caption{Performance~of~#2~(Haswell,~sequential)}
+      \label{tab:Performance~of~#3~(Haswell,~sequential)}
+    \end{table}
+  }
+  \file_if_exist:nT{tab/random_rng_#1_avx2_p.tex}{
+    \begin{table}
+      \input{tab/random_rng_#1_avx2_p}
+      \caption{Performance~of~#2~(Haswell,~parallel)}
+      \label{tab:Performance~of~#3~(Haswell,~parallel)}
+    \end{table}
+  }
+  \clearpage
+}
+\ExplSyntaxOff
 
-\begin{table}
-  \input{tab/random_rng_std_avx2}%
-  \caption{Performance of \rng in the standard library (Haswell)}
-  \label{tab:Performance of RNG in the standard library RNG (Haswell)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_aesni_avx2}%
-  \caption{Performance of \protect\texttt{AESNIEngine} (Haswell)}
-  \label{tab:Performance of AESNIEngine (Haswell)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_philox_sse2}%
-  \caption{Performance of \protect\texttt{PhiloxEngine} (Nehalem)}
-  \label{tab:Performance of PhiloxEngine (Nehalem)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_philox_avx2}%
-  \caption{Performance of \protect\texttt{PhiloxEngine} (Haswell)}
-  \label{tab:Performance of PhiloxEngine (Haswell)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_threefry_sse2}%
-  \caption{Performance of \protect\texttt{ThreefryEngine} (Nehalem)}
-  \label{tab:Performance of ThreefryEngine (Nehalem)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_threefry_avx2}%
-\caption{Performance of \protect\texttt{ThreefryEngine} (Haswell)}
-  \label{tab:Performance of ThreefryEngine (Haswell)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_mkl_sse2}%
-  \caption{Performance of \mkl \rng (Nehalem)}
-  \label{tab:Performance of MKL RNG (Nehalem)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_mkl_avx2}%
-  \caption{Performance of \mkl \rng (Haswell)}
-  \label{tab:Performance of MKL RNG (Haswell)}
-\end{table}
-
-\begin{table}
-  \input{tab/random_rng_rdrand_avx2}%
-  \caption{Performance of non-deterministic \rng (Haswell)}
-  \label{tab:Performance of non-deterministic RNG (Haswell)}
-\end{table}
+\rngtable{std}{\rng in the standard library}{RNG in the standard library}
+\rngtable{aesni}{\protect\texttt{AESNIEngine}}{AESNIEngine}
+\rngtable{philox}{\protect\texttt{PhiloxEngine}}{PhiloxEngine}
+\rngtable{threefry}{\protect\texttt{ThreefryEngine}}{ThreefryEngine}
+\rngtable{mkl}{\mkl \rng}{MKL RNG}
+\rngtable{rdrand}{non-deterministic \rng}{non-deterministic RNG}

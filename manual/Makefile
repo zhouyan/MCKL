@@ -38,9 +38,7 @@ all :
 	latexmk -silent -f manual.tex >/dev/null
 
 tab :
-	cd tab; ./random_rng.pl --simd sse2
-	cd tab; ./random_rng.pl --simd avx2
-	cd tab; ./random_distribution.pl
+	make -C tab
 
 fig :
 	$(BUILD_CMD) -C $(BUILD_DIR) pf_core-pdf

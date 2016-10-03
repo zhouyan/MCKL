@@ -127,22 +127,19 @@ if ($build) {
     exit;
 }
 
-my $texfile;
-if ($pdf) {
-    open $texfile, '>', "random_distribution_$simd.tex";
-    say $texfile '\documentclass[';
-    say $texfile '  a4paper,';
-    say $texfile '  lines=42,';
-    say $texfile '  linespread=1.2,';
-    say $texfile '  fontsize=11pt,';
-    say $texfile '  fontset=Minion,';
-    say $texfile '  monofont=TheSansMonoCd,';
-    say $texfile '  monoscale=MatchLowercase,';
-    say $texfile ']{mbook}';
-    say $texfile '\input{../tex/macro}';
-    say $texfile '\pagestyle{empty}';
-    say $texfile '\begin{document}';
-}
+open my $texfile, '>', "random_distribution_$simd.tex";
+say $texfile '\documentclass[';
+say $texfile '  a4paper,';
+say $texfile '  lines=42,';
+say $texfile '  linespread=1.2,';
+say $texfile '  fontsize=11pt,';
+say $texfile '  fontset=Minion,';
+say $texfile '  monofont=TheSansMonoCd,';
+say $texfile '  monoscale=MatchLowercase,';
+say $texfile ']{mbook}';
+say $texfile '\input{../tex/macro}';
+say $texfile '\pagestyle{empty}';
+say $texfile '\begin{document}';
 for my $k (@keys) {
     for (qw(llvm gnu intel)) {
         my $this_tex = "random_distribution";
@@ -150,19 +147,20 @@ for my $k (@keys) {
         $this_tex .= "_$_";
         $this_tex .= "_$simd";
         &table($this_tex, &read($k, $_));
-        if ($pdf) {
-            say $texfile '\begin{table}';
-            say $texfile "\\input{$this_tex}%";
-            say $texfile "\\caption{\\textsc{$k ($_)}}";
-            say $texfile '\end{table}';
-        }
+        say $texfile '\begin{table}';
+        say $texfile "\\input{$this_tex}%";
+        say $texfile "\\caption{\\textsc{$k ($_, sequential)}}";
+        say $texfile '\end{table}';
+        say $texfile '\begin{table}';
+        say $texfile "\\input{${this_tex}_p}%";
+        say $texfile "\\caption{\\textsc{$k ($_, parallel)}}";
+        say $texfile '\end{table}';
+        say $texfile '\clearpage';
     }
 }
-if ($pdf) {
-    say $texfile '\end{document}';
-    close $texfile;
-    `lualatex -interaction=batchmode random_distribution_$simd.tex`;
-}
+say $texfile '\end{document}';
+close $texfile;
+`lualatex -interaction=batchmode random_distribution_$simd.tex` if $pdf;
 
 sub run
 {
@@ -211,7 +209,7 @@ sub read
     $_ =~ /(.*)<(double|u?int.._t)>.*(Passed|Failed).*/ } <$txtfile>;
     my $record;
     for (@txt) {
-        my @this_record = (split)[0..4];
+        my @this_record = split;
         my $name = shift @this_record;
         my $distname = $name;
         $distname =~ s/(.*)\(.*/$1/;
@@ -242,39 +240,68 @@ sub table
         $index++;
     }
 
+    my $header;
+    $header .= '\tbfigures' . "\n";
+    $header .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
+    $header .= ' ' x 2 . '\toprule' . "\n";
+    $header .= ' ' x 2 . 'Distribution & \std & \mckl & \batch & \mkl';
+    $header .= " \\\\\n";
+    $header .= ' ' x 2 . '\midrule' . "\n";
+
+    my $footer;
+    $footer .= ' ' x 2 . '\bottomrule' . "\n";
+    $footer .= '\end{tabularx}' . "\n";
+    $footer;
+
     my $table;
+    my $table_p;
     $index = 0;
-    $table .= '\tbfigures' . "\n";
-    $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
-    $table .= ' ' x 2 . '\toprule' . "\n";
-    $table .= ' ' x 2 . 'Distribution & \std & \mckl & \batch & \mkl';
-    $table .= " \\\\\n";
-    $table .= ' ' x 2 . '\midrule' . "\n";
     for (@lines) {
-        my ($distname, $name, $std, $mckl, $batch, $mkl) = split;
-        $table .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
-        if ($nostd{$distname}) {
-            $table .= ' & ' . sprintf('%-6s', '--');
-        } else {
-            $table .= &format($std);
+        my ($distname, $name, $std, $mckl, $batch, $mkl, $mode) = split;
+        if ($mode eq 'S') {
+            $table .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
+            if ($nostd{$distname}) {
+                $table .= ' & ' . sprintf('%-6s', '--');
+            } else {
+                $table .= &format($std);
+            }
+            $table .= &format($mckl);
+            $table .= &format($batch);
+            if ($nomkl{$distname}) {
+                $table .= ' & ' . sprintf('%-6s', '--');
+            } else {
+                $table .= &format($mkl);
+            }
+            $table .= " \\\\\n";
         }
-        $table .= &format($mckl);
-        $table .= &format($batch);
-        if ($nomkl{$distname}) {
-            $table .= ' & ' . sprintf('%-6s', '--');
-        } else {
-            $table .= &format($mkl);
+        if ($mode eq 'S') {
+            $table_p .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
+            if ($nostd{$distname}) {
+                $table_p .= ' & ' . sprintf('%-6s', '--');
+            } else {
+                $table_p .= &format($std);
+            }
+            $table_p .= &format($mckl);
+            $table_p .= &format($batch);
+            if ($nomkl{$distname}) {
+                $table_p .= ' & ' . sprintf('%-6s', '--');
+            } else {
+                $table_p .= &format($mkl);
+            }
+            $table_p .= " \\\\\n";
         }
-        $table .= " \\\\\n";
         $index++;
     }
-    $table .= ' ' x 2 . '\bottomrule' . "\n";
-    $table .= '\end{tabularx}' . "\n";
-    $table;
+    $table = $header . $table . $footer;
+    $table_p = $header . $table_p . $footer;
 
     open my $texfile, '>', "$tex.tex";
     print $texfile $table;
     close $texfile;
+
+    open my $texfile_p, '>', "${tex}_p.tex";
+    print $texfile_p $table_p;
+    close $texfile_p;
 
     $table;
 }

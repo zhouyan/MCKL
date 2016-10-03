@@ -32,6 +32,10 @@
 .PHONY : all pdf rng distribution
 
 all :
+	./random_rng.pl --simd sse2
+	./random_rng.pl --simd avx2
+	./random_distribution.pl --simd sse2
+	./random_distribution.pl --simd avx2
 
 pdf :
 	./random_rng.pl --pdf --simd sse2

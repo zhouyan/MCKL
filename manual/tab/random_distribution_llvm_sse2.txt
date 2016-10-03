@@ -1,154 +1,308 @@
-Arcsine<float>(0,1)                  85.69       87.17       20.67       18.49         Passed
-Arcsine<double>(0,1)                116.79      117.46       34.10       32.32         Passed
-Cauchy<float>(0,1)                  196.18      134.58       23.91       15.74         Passed
-Cauchy<double>(0,1)                 221.23      186.06       50.64       24.28         Passed
-Exponential<float>(1)                90.52       89.38       14.65       11.96         Passed
-Exponential<double>(1)              191.89      160.70       26.00       17.77         Passed
-ExtremeValue<float>(0,1)            175.36      174.17       20.34       17.18         Passed
-ExtremeValue<double>(0,1)           332.04      293.25       41.21       29.07         Passed
-Laplace<float>(0,1)                 106.18      105.33       17.63       20.75         Passed
-Laplace<double>(0,1)                186.29      185.95       32.26       28.29         Passed
-Logistic<float>(0,1)                101.37      101.14       18.08       16.29         Passed
-Logistic<double>(0,1)               193.06      191.85       36.31       34.54         Passed
-Pareto<float>(1,1)                  168.51      171.40       20.48       18.09         Passed
-Pareto<double>(1,1)                 248.36      247.78       38.75       30.96         Passed
-Rayleigh<float>(1)                  105.05      105.04       18.71       15.01         Passed
-Rayleigh<double>(1)                 168.13      168.30       39.36       28.03         Passed
-UniformReal<float>(-0.5,0.5)         26.24       26.06        9.43        7.02         Passed
-UniformReal<double>(-0.5,0.5)        55.97       28.08       10.86        7.35         Passed
-Weibull<float>(1,1)                 148.06      104.19       16.90       14.59         Passed
-Weibull<double>(1,1)                219.78      162.76       25.98       19.19         Passed
-Beta<float>(0.5,0.5)                 95.20       94.21       18.86       59.60         Passed
-Beta<float>(1,1)                     32.70       32.79        8.94       16.43         Passed
-Beta<float>(1,0.5)                  173.59      173.25       20.70       16.62         Passed
-Beta<float>(1,1.5)                  176.88      176.06       21.20       17.28         Passed
-Beta<float>(0.5,1)                  171.25      170.20       20.65       16.48         Passed
-Beta<float>(1.5,1)                  174.27      174.10       20.97       16.87         Passed
-Beta<float>(1.5,1.5)                357.69      356.90       59.07       57.44         Passed
-Beta<float>(0.3,0.3)                710.94      709.47       81.61       51.48         Passed
-Beta<float>(0.9,0.9)                546.97      547.04      547.43       67.91         Passed
-Beta<float>(1.5,0.5)                443.89      443.65      441.84       82.31         Passed
-Beta<float>(0.5,1.5)                440.38      441.67      439.20       81.68         Passed
-Beta<double>(0.5,0.5)               131.55      131.39       33.09       86.65         Passed
-Beta<double>(1,1)                    32.95       32.93        9.85       26.16         Passed
-Beta<double>(1,0.5)                 253.78      253.23       38.68       26.18         Passed
-Beta<double>(1,1.5)                 253.72      252.97       38.67       26.17         Passed
-Beta<double>(0.5,1)                 249.33      249.95       37.81       25.45         Passed
-Beta<double>(1.5,1)                 249.52      249.85       37.85       25.44         Passed
-Beta<double>(1.5,1.5)               590.94      588.03      117.17       91.26         Passed
-Beta<double>(0.3,0.3)               574.35      572.47      121.39       78.36         Passed
-Beta<double>(0.9,0.9)               598.84      597.31      597.01       88.43         Passed
-Beta<double>(1.5,0.5)               563.99      564.02      561.27      106.64         Passed
-Beta<double>(0.5,1.5)               563.39      563.05      562.90      105.98         Passed
-ChiSquared<float>(2)                101.72      107.71       14.87       12.83         Passed
-ChiSquared<float>(0.2)              457.34      291.95       55.80       52.81         Passed
-ChiSquared<float>(1)                230.00      366.66       98.16       72.06         Passed
-ChiSquared<float>(1.4)              548.74      413.66       74.82       56.06         Passed
-ChiSquared<float>(1.8)              529.91      352.65       53.96       43.82         Passed
-ChiSquared<float>(3)                328.95      412.40       60.57       49.10         Passed
-ChiSquared<float>(30)               297.52      406.88       56.34       46.07         Passed
-ChiSquared<double>(2)               196.29      174.01       26.02       19.12         Passed
-ChiSquared<double>(0.2)             548.85      469.94       96.97       67.32         Passed
-ChiSquared<double>(1)               409.89      585.02      176.59       90.08         Passed
-ChiSquared<double>(1.4)             665.19      701.66      126.21       80.30         Passed
-ChiSquared<double>(1.8)             652.47      603.60       97.15       64.58         Passed
-ChiSquared<double>(3)               546.33      663.30       99.36       62.34         Passed
-ChiSquared<double>(30)              517.00      658.77       95.23       59.00         Passed
-Gamma<float>(1,1)                   103.76      105.76       15.73       13.14         Passed
-Gamma<float>(0.1,1)                 455.93      287.44       56.42       52.78         Passed
-Gamma<float>(0.5,1)                 228.97      362.22       99.28       72.31         Passed
-Gamma<float>(0.7,1)                 547.76      407.02       74.50       56.03         Passed
-Gamma<float>(0.9,1)                 529.21      346.43       54.20       43.77         Passed
-Gamma<float>(1.5,1)                 327.54      404.49       60.95       48.97         Passed
-Gamma<float>(15,1)                  293.95      398.86       56.34       45.99         Passed
-Gamma<double>(1,1)                  199.32      170.08       26.18       19.19         Passed
-Gamma<double>(0.1,1)                569.34      472.48       99.01       68.05         Passed
-Gamma<double>(0.5,1)                405.92      580.87      180.71       89.82         Passed
-Gamma<double>(0.7,1)                664.60      706.50      128.89       80.34         Passed
-Gamma<double>(0.9,1)                652.19      608.64      101.16       64.72         Passed
-Gamma<double>(1.5,1)                544.32      652.08       99.49       62.96         Passed
-Gamma<double>(15,1)                 515.00      647.24       95.81       59.05         Passed
-FisherF<float>(1,1)                 465.70      732.77      257.96      154.36         Passed
-FisherF<float>(1,0.5)               740.48      694.77      227.45      145.44         Passed
-FisherF<float>(1,1.5)               796.32      781.14      251.80      136.90         Passed
-FisherF<float>(1,3)                 558.48      797.41      199.20      129.66         Passed
-FisherF<float>(1,30)                525.68      792.29      188.20      126.90         Passed
-FisherF<float>(0.5,1)               738.31      693.87      226.55      145.43         Passed
-FisherF<float>(0.5,0.5)             995.09      654.56      196.15      135.98         Passed
-FisherF<float>(0.5,1.5)            1050.08      732.55      218.39      125.30         Passed
-FisherF<float>(0.5,3)               821.55      750.36      169.53      121.26         Passed
-FisherF<float>(0.5,30)              788.73      753.91      158.29      117.40         Passed
-FisherF<float>(1.5,1)               780.58      766.60      248.66      134.76         Passed
-FisherF<float>(1.5,0.5)            1046.30      728.13      218.46      125.87         Passed
-FisherF<float>(1.5,1.5)            1096.29      801.45      240.78      113.81         Passed
-FisherF<float>(1.5,3)               869.28      827.74      191.89      110.46         Passed
-FisherF<float>(1.5,30)              835.76      829.35      179.51      107.18         Passed
-FisherF<float>(3,1)                 558.49      794.10      200.36      130.37         Passed
-FisherF<float>(3,0.5)               829.11      753.37      169.35      121.05         Passed
-FisherF<float>(3,1.5)               877.08      833.18      191.58      109.99         Passed
-FisherF<float>(3,3)                 660.55      842.54      140.57      104.43         Passed
-FisherF<float>(3,30)                633.24      837.11      129.28      100.97         Passed
-FisherF<float>(30,1)                525.26      790.94      187.77      126.79         Passed
-FisherF<float>(30,0.5)              798.86      750.84      158.06      117.65         Passed
-FisherF<float>(30,1.5)              842.39      832.45      180.66      106.64         Passed
-FisherF<float>(30,3)                636.91      837.70      129.23      100.98         Passed
-FisherF<float>(30,30)               596.43      830.89      117.70       97.05         Passed
-FisherF<double>(1,1)                824.24     1157.55      453.85      202.91         Passed
-FisherF<double>(1,0.5)             1041.52     1100.82      400.33      191.26         Passed
-FisherF<double>(1,1.5)             1112.40     1273.65      443.22      188.55         Passed
-FisherF<double>(1,3)                973.59     1270.79      350.23      174.31         Passed
-FisherF<double>(1,30)               930.08     1275.63      331.14      169.79         Passed
-FisherF<double>(0.5,1)             1050.23     1100.16      399.27      191.07         Passed
-FisherF<double>(0.5,0.5)           1203.57     1037.48      343.85      179.50         Passed
-FisherF<double>(0.5,1.5)           1289.89     1209.91      389.31      177.55         Passed
-FisherF<double>(0.5,3)             1155.58     1209.24      294.80      162.80         Passed
-FisherF<double>(0.5,30)            1124.28     1205.03      275.13      158.66         Passed
-FisherF<double>(1.5,1)             1117.97     1260.90      444.99      189.03         Passed
-FisherF<double>(1.5,0.5)           1299.32     1199.90      388.83      177.33         Passed
-FisherF<double>(1.5,1.5)           1331.13     1368.39      433.24      173.66         Passed
-FisherF<double>(1.5,3)             1237.60     1367.25      341.89      160.43         Passed
-FisherF<double>(1.5,30)            1209.06     1366.60      321.99      155.62         Passed
-FisherF<double>(3,1)                962.52     1261.88      350.63      173.92         Passed
-FisherF<double>(3,0.5)             1149.34     1205.93      294.24      163.10         Passed
-FisherF<double>(3,1.5)             1221.63     1377.84      339.64      159.60         Passed
-FisherF<double>(3,3)               1084.38     1350.49      239.10      142.34         Passed
-FisherF<double>(3,30)              1082.87     1347.54      221.57      138.13         Passed
-FisherF<double>(30,1)               934.23     1258.05      330.94      169.60         Passed
-FisherF<double>(30,0.5)            1117.39     1201.72      276.87      158.12         Passed
-FisherF<double>(30,1.5)            1188.57     1377.01      322.31      155.60         Passed
-FisherF<double>(30,3)              1073.37     1346.54      222.95      138.29         Passed
-FisherF<double>(30,30)             1029.35     1345.05      203.50      133.06         Passed
-Normal<float>(0,1)                  116.76      123.46       24.61       19.76         Passed
-Normal<double>(0,1)                 186.31      228.84       44.92       31.02         Passed
-Lognormal<float>(0,1)               165.04      161.04       27.52       22.77         Passed
-Lognormal<double>(0,1)              269.71      309.42       55.78       37.76         Passed
-Levy<float>(0,1)                    125.91      125.28       41.15       35.46         Passed
-Levy<double>(0,1)                   240.48      239.87       68.20       54.73         Passed
-Stable<float>(2,0,0,1)              586.06      577.81       64.24       60.07         Passed
-Stable<float>(1,0,0,1)              256.60      256.80       52.49       48.75         Passed
-Stable<float>(0.5,1,0,1)            318.34      317.35       60.29       56.26         Passed
-Stable<double>(2,0,0,1)             974.86      968.15      218.61      211.75         Passed
-Stable<double>(1,0,0,1)             450.16      450.19      177.54      170.43         Passed
-Stable<double>(0.5,1,0,1)           502.94      503.19      127.86      124.21         Passed
-StudentT<float>(2)                  229.01      264.70       55.09       51.52         Passed
-StudentT<float>(0.2)                586.86      451.97      106.28       93.35         Passed
-StudentT<float>(1)                  353.76      527.03      164.57      113.59         Passed
-StudentT<float>(1.4)                679.76      581.47      175.24       97.69         Passed
-StudentT<float>(1.8)                657.25      518.81      113.52       83.59         Passed
-StudentT<float>(3)                  449.51      576.08      108.16       93.28         Passed
-StudentT<float>(30)                 419.84      571.46       96.57       89.40         Passed
-StudentT<double>(2)                 405.68      443.46      106.76       92.80         Passed
-StudentT<double>(0.2)               761.75      746.88      196.06      144.48         Passed
-StudentT<double>(1)                 635.20      863.89      302.59      168.64         Passed
-StudentT<double>(1.4)               877.38      985.88      319.65      159.40         Passed
-StudentT<double>(1.8)               862.96      886.44      217.64      142.51         Passed
-StudentT<double>(3)                 774.20      940.46      195.57      139.66         Passed
-StudentT<double>(30)                737.69      936.22      176.81      135.38         Passed
-Geometric<int32_t>(0.5)             158.23      163.37       29.24       12.50         Passed
-Geometric<uint32_t>(0.5)            157.56      161.65       32.07       30.50         Passed
-Geometric<int64_t>(0.5)             157.98      161.89       28.82       27.26         Passed
-Geometric<uint64_t>(0.5)            165.65      171.09       33.32       31.73         Passed
-UniformInt<int32_t>(-10,10)         139.15       57.96       18.87       11.90         Passed
-UniformInt<uint32_t>(0,20)          107.43       44.84       14.47       12.86         Passed
-UniformInt<int64_t>(-10,10)         168.96       39.60       13.04       11.47         Passed
-UniformInt<uint64_t>(0,20)          169.07       43.14       15.89       14.25         Passed
+Arcsine<float>(0,1)                  88.39       88.82       21.14       19.63    S       --Passed
+Arcsine<double>(0,1)                113.74      114.57       33.00       32.19    S       --Passed
+Arcsine<float>(0,1)                  13.30       13.46        5.53        4.86    P       --Passed
+Arcsine<double>(0,1)                 19.74       19.62        8.60        8.49    P       --Passed
+Cauchy<float>(0,1)                  189.25      127.80       23.09       15.71    S       --Passed
+Cauchy<double>(0,1)                 228.55      186.66       50.33       25.96    S       --Passed
+Cauchy<float>(0,1)                   31.96       22.75        5.29        3.90    P       --Passed
+Cauchy<double>(0,1)                  37.78       31.12       12.22        6.28    P       --Passed
+Exponential<float>(1)                90.36       89.95       14.59       12.54    S       --Passed
+Exponential<double>(1)              202.73      168.36       26.79       20.10    S       --Passed
+Exponential<float>(1)                16.42       16.49        3.73        3.44    P       --Passed
+Exponential<double>(1)               33.19       28.00        6.68        5.17    P       --Passed
+ExtremeValue<float>(0,1)            175.46      174.40       20.21       17.73    S       --Passed
+ExtremeValue<double>(0,1)           330.89      293.43       41.16       30.61    S       --Passed
+ExtremeValue<float>(0,1)             29.54       29.25        5.06        4.48    P       --Passed
+ExtremeValue<double>(0,1)            57.83       51.61       10.91        8.10    P       --Passed
+Laplace<float>(0,1)                 106.09      105.06       17.41       21.94    S       --Passed
+Laplace<double>(0,1)                187.04      186.47       31.57       32.04    S       --Passed
+Laplace<float>(0,1)                  19.03       19.38        4.28        5.64    P       --Passed
+Laplace<double>(0,1)                 32.03       31.97        8.02        8.29    P       --Passed
+Logistic<float>(0,1)                101.51      100.88       17.87       18.99    S       --Passed
+Logistic<double>(0,1)               191.47      191.26       36.01       37.83    S       --Passed
+Logistic<float>(0,1)                 18.15       18.50        4.10        4.58    P       --Passed
+Logistic<double>(0,1)                32.57       31.82        8.37        9.11    P       --Passed
+Pareto<float>(1,1)                  169.32      170.49       20.43       18.69    S       --Passed
+Pareto<double>(1,1)                 246.05      247.95       39.36       33.11    S       --Passed
+Pareto<float>(1,1)                   30.18       30.60        5.03        4.85    P       --Passed
+Pareto<double>(1,1)                  48.93       47.71       10.15        8.94    P       --Passed
+Rayleigh<float>(1)                  118.45      116.13       20.72       17.26    S       --Passed
+Rayleigh<double>(1)                 168.80      168.37       39.31       29.42    S       --Passed
+Rayleigh<float>(1)                   17.85       18.13        4.47        4.00    P       --Passed
+Rayleigh<double>(1)                  30.85       30.27        9.69        7.43    P       --Passed
+UniformReal<float>(-0.5,0.5)         26.39       26.28        9.14        7.47    S       --Passed
+UniformReal<double>(-0.5,0.5)        55.40       26.55       10.31        8.52    S       --Passed
+UniformReal<float>(-0.5,0.5)          4.53        4.63        2.43        2.24    P       --Passed
+UniformReal<double>(-0.5,0.5)         9.21        4.61        2.75        2.63    P       --Passed
+Weibull<float>(1,1)                 127.71       91.81       14.66       13.03    S       --Passed
+Weibull<double>(1,1)                220.27      165.99       25.85       20.76    S       --Passed
+Weibull<float>(1,1)                  21.81       16.41        3.67        3.44    P       --Passed
+Weibull<double>(1,1)                 40.02       28.14        6.70        5.46    P       --Passed
+Beta<float>(0.5,0.5)                 93.92       94.11       18.61       62.45    S       --Passed
+Beta<float>(1,1)                     33.70       33.74        9.20       17.67    S       --Passed
+Beta<float>(1,0.5)                  172.65      174.72       20.71       17.35    S       --Passed
+Beta<float>(1,1.5)                  172.73      172.50       20.44       17.19    S       --Passed
+Beta<float>(0.5,1)                  167.41      167.38       19.96       16.89    S       --Passed
+Beta<float>(1.5,1)                  167.43      167.48       19.96       16.88    S       --Passed
+Beta<float>(1.5,1.5)                357.63      357.28       58.48       59.35    S       --Passed
+Beta<float>(0.3,0.3)                711.34      710.15       82.52       53.60    S       --Passed
+Beta<float>(0.9,0.9)                546.53      545.99      545.18       69.49    S       --Passed
+Beta<float>(1.5,0.5)                441.03      441.58      439.06       84.01    S       --Passed
+Beta<float>(0.5,1.5)                441.20      441.16      439.55       83.55    S       --Passed
+Beta<double>(0.5,0.5)               131.74      131.74       32.97       91.86    S       --Passed
+Beta<double>(1,1)                    33.21       33.14        9.78       27.57    S       --Passed
+Beta<double>(1,0.5)                 252.97      251.64       38.76       27.82    S       --Passed
+Beta<double>(1,1.5)                 253.11      251.23       38.75       27.87    S       --Passed
+Beta<double>(0.5,1)                 249.17      248.19       37.83       27.05    S       --Passed
+Beta<double>(1.5,1)                 249.13      247.98       37.84       27.05    S       --Passed
+Beta<double>(1.5,1.5)               587.74      586.12      117.25       95.75    S       --Passed
+Beta<double>(0.3,0.3)               575.01      572.13      121.62       82.88    S       --Passed
+Beta<double>(0.9,0.9)               595.14      594.84      593.50       92.94    S       --Passed
+Beta<double>(1.5,0.5)               560.74      558.81      557.03      112.18    S       --Passed
+Beta<double>(0.5,1.5)               559.39      558.63      555.37      111.40    S       --Passed
+Beta<float>(0.5,0.5)                 15.88       16.06        4.83       14.11    P       --Passed
+Beta<float>(1,1)                      6.22        6.17        2.42        4.53    P       --Passed
+Beta<float>(1,0.5)                   32.28       32.23        5.03        4.40    P       --Passed
+Beta<float>(1,1.5)                   32.00       31.51        5.09        4.43    P       --Passed
+Beta<float>(0.5,1)                   30.44       30.74        5.04        4.42    P       --Passed
+Beta<float>(1.5,1)                   30.60       30.72        4.98        4.33    P       --Passed
+Beta<float>(1.5,1.5)                 65.24       64.84       13.13       12.93    P       --Passed
+Beta<float>(0.3,0.3)                116.51      116.00       17.71       12.11    P       --Passed
+Beta<float>(0.9,0.9)                 90.44       90.32       90.14       15.70    P       --Passed
+Beta<float>(1.5,0.5)                 76.54       74.67       73.96       18.22    P       --Passed
+Beta<float>(0.5,1.5)                 76.20       74.88       75.73       18.53    P       --Passed
+Beta<double>(0.5,0.5)                22.51       22.66        8.52       21.74    P       --Passed
+Beta<double>(1,1)                     6.64        6.57        2.60        7.21    P       --Passed
+Beta<double>(1,0.5)                  49.83       49.85       10.04        7.19    P       --Passed
+Beta<double>(1,1.5)                  49.40       49.50       10.05        7.15    P       --Passed
+Beta<double>(0.5,1)                  49.22       49.77        9.80        7.03    P       --Passed
+Beta<double>(1.5,1)                  49.44       48.55        9.88        7.16    P       --Passed
+Beta<double>(1.5,1.5)               108.68      107.83       27.31       22.01    P       --Passed
+Beta<double>(0.3,0.3)               101.53      100.49       26.88       19.04    P       --Passed
+Beta<double>(0.9,0.9)               108.08      108.95      106.82       22.01    P       --Passed
+Beta<double>(1.5,0.5)               101.15       98.87       99.05       25.79    P       --Passed
+Beta<double>(0.5,1.5)               101.55       99.12       98.82       25.65    P       --Passed
+ChiSquared<float>(2)                101.31      107.67       14.67       13.24    S       --Passed
+ChiSquared<float>(0.2)              458.30      290.40       55.47       54.87    S       --Passed
+ChiSquared<float>(1)                229.77      365.08       97.42       74.07    S       --Passed
+ChiSquared<float>(1.4)              549.21      413.83       74.85       58.08    S       --Passed
+ChiSquared<float>(1.8)              530.38      353.15       54.01       45.50    S       --Passed
+ChiSquared<float>(3)                327.15      416.46       60.46       51.13    S       --Passed
+ChiSquared<float>(30)               294.07      410.01       55.70       47.87    S       --Passed
+ChiSquared<double>(2)               198.40      175.02       25.88       20.73    S       --Passed
+ChiSquared<double>(0.2)             555.09      468.74       95.95       71.82    S       --Passed
+ChiSquared<double>(1)               420.02      586.40      178.28       95.46    S       --Passed
+ChiSquared<double>(1.4)             676.32      706.37      125.48       85.51    S       --Passed
+ChiSquared<double>(1.8)             660.94      608.99       97.73       68.97    S       --Passed
+ChiSquared<double>(3)               587.69      663.40       99.83       67.01    S       --Passed
+ChiSquared<double>(30)              544.17      660.31       95.92       64.33    S       --Passed
+ChiSquared<float>(2)                 18.64       20.42        3.96        4.04    P       --Passed
+ChiSquared<float>(0.2)               79.00       57.73       12.80       13.12    P       --Passed
+ChiSquared<float>(1)                 42.11       68.86       20.90       16.28    P       --Passed
+ChiSquared<float>(1.4)               90.77       79.73       16.64       13.44    P       --Passed
+ChiSquared<float>(1.8)               87.86       68.91       12.51       11.24    P       --Passed
+ChiSquared<float>(3)                 56.88       85.71       13.72       12.43    P       --Passed
+ChiSquared<float>(30)                52.83       85.64       13.38       11.88    P       --Passed
+ChiSquared<double>(2)                34.18       32.18        6.84        5.95    P       --Passed
+ChiSquared<double>(0.2)             101.40       91.35       22.84       18.05    P       --Passed
+ChiSquared<double>(1)                75.55      109.59       37.79       22.19    P       --Passed
+ChiSquared<double>(1.4)             118.57      133.05       31.31       21.32    P       --Passed
+ChiSquared<double>(1.8)             117.73      114.65       24.59       17.68    P       --Passed
+ChiSquared<double>(3)                95.86      133.52       22.63       16.46    P       --Passed
+ChiSquared<double>(30)               92.75      129.35       21.98       16.08    P       --Passed
+Gamma<float>(1,1)                   100.62      102.22       14.66       13.20    S       --Passed
+Gamma<float>(0.1,1)                 457.23      285.73       55.82       54.69    S       --Passed
+Gamma<float>(0.5,1)                 229.53      359.93       99.35       74.10    S       --Passed
+Gamma<float>(0.7,1)                 548.48      409.20       74.39       57.90    S       --Passed
+Gamma<float>(0.9,1)                 531.06      347.25       53.84       45.48    S       --Passed
+Gamma<float>(1.5,1)                 328.57      410.09       60.50       55.09    S       --Passed
+Gamma<float>(15,1)                  296.27      402.71       55.87       51.83    S       --Passed
+Gamma<double>(1,1)                  197.50      168.23       25.85       20.75    S       --Passed
+Gamma<double>(0.1,1)                552.76      464.36       96.04       71.62    S       --Passed
+Gamma<double>(0.5,1)                407.22      576.72      176.22       95.14    S       --Passed
+Gamma<double>(0.7,1)                668.88      704.45      125.26       85.74    S       --Passed
+Gamma<double>(0.9,1)                656.85      602.82       96.91       69.01    S       --Passed
+Gamma<double>(1.5,1)                544.43      654.71       99.23       67.10    S       --Passed
+Gamma<double>(15,1)                 520.43      654.48       96.02       64.17    S       --Passed
+Gamma<float>(1,1)                    18.83       19.10        6.29        5.92    P       --Passed
+Gamma<float>(0.1,1)                  77.14       55.91       16.49       14.44    P       --Passed
+Gamma<float>(0.5,1)                  41.53       67.89       23.53       16.97    P       --Passed
+Gamma<float>(0.7,1)                  90.66       79.16       19.61       14.50    P       --Passed
+Gamma<float>(0.9,1)                  86.80       67.30       14.40       12.40    P       --Passed
+Gamma<float>(1.5,1)                  57.84       85.25       17.43       13.45    P       --Passed
+Gamma<float>(15,1)                   52.48       85.36       16.48       12.95    P       --Passed
+Gamma<double>(1,1)                   34.03       30.49        6.71        6.22    P       --Passed
+Gamma<double>(0.1,1)                 99.54       89.12       23.24       17.59    P       --Passed
+Gamma<double>(0.5,1)                 74.60      108.15       38.49       21.92    P       --Passed
+Gamma<double>(0.7,1)                114.89      132.20       30.66       21.55    P       --Passed
+Gamma<double>(0.9,1)                115.58      112.34       25.32       17.53    P       --Passed
+Gamma<double>(1.5,1)                 95.12      139.29       22.58       16.27    P       --Passed
+Gamma<double>(15,1)                  89.20      137.80       22.10       15.73    P       --Passed
+FisherF<float>(1,1)                 462.05      734.75      252.31      159.21    S       --Passed
+FisherF<float>(1,0.5)               742.30      695.80      223.78      150.36    S       --Passed
+FisherF<float>(1,1.5)               781.64      772.66      246.52      139.50    S       --Passed
+FisherF<float>(1,3)                 563.42      785.26      196.63      134.61    S       --Passed
+FisherF<float>(1,30)                533.07      782.43      185.17      130.99    S       --Passed
+FisherF<float>(0.5,1)               739.86      696.62      223.59      150.36    S       --Passed
+FisherF<float>(0.5,0.5)             998.09      655.64      194.19      140.82    S       --Passed
+FisherF<float>(0.5,1.5)            1053.43      733.27      217.49      130.47    S       --Passed
+FisherF<float>(0.5,3)               824.28      745.56      168.06      125.23    S       --Passed
+FisherF<float>(0.5,30)              792.79      741.63      156.34      122.07    S       --Passed
+FisherF<float>(1.5,1)               783.08      766.60      246.62      139.50    S       --Passed
+FisherF<float>(1.5,0.5)            1048.28      726.45      217.13      130.83    S       --Passed
+FisherF<float>(1.5,1.5)            1095.34      796.28      239.76      119.21    S       --Passed
+FisherF<float>(1.5,3)               867.75      817.86      190.74      114.79    S       --Passed
+FisherF<float>(1.5,30)              838.07      814.01      178.45      110.85    S       --Passed
+FisherF<float>(3,1)                 561.46      791.23      197.81      134.92    S       --Passed
+FisherF<float>(3,0.5)               833.78      752.66      167.73      125.53    S       --Passed
+FisherF<float>(3,1.5)               876.73      830.33      191.40      114.81    S       --Passed
+FisherF<float>(3,3)                 657.70      838.58      140.77      108.92    S       --Passed
+FisherF<float>(3,30)                629.96      833.62      128.42      105.30    S       --Passed
+FisherF<float>(30,1)                528.84      788.11      185.29      131.10    S       --Passed
+FisherF<float>(30,0.5)              800.24      748.56      156.16      121.92    S       --Passed
+FisherF<float>(30,1.5)              846.93      827.68      179.56      110.92    S       --Passed
+FisherF<float>(30,3)                628.72      833.65      128.58      105.28    S       --Passed
+FisherF<float>(30,30)               591.48      829.11      116.85      101.20    S       --Passed
+FisherF<double>(1,1)                843.67     1172.57      457.39      213.25    S       --Passed
+FisherF<double>(1,0.5)             1054.56     1115.11      401.01      201.97    S       --Passed
+FisherF<double>(1,1.5)             1123.01     1332.36      451.95      199.24    S       --Passed
+FisherF<double>(1,3)                980.69     1270.71      352.43      184.00    S       --Passed
+FisherF<double>(1,30)               948.29     1268.70      333.97      179.42    S       --Passed
+FisherF<double>(0.5,1)             1062.67     1116.35      401.82      202.18    S       --Passed
+FisherF<double>(0.5,0.5)           1214.78     1054.84      346.61      189.75    S       --Passed
+FisherF<double>(0.5,1.5)           1305.58     1273.99      399.86      188.44    S       --Passed
+FisherF<double>(0.5,3)             1173.57     1213.56      298.57      171.95    S       --Passed
+FisherF<double>(0.5,30)            1138.33     1206.33      277.71      167.36    S       --Passed
+FisherF<double>(1.5,1)             1133.04     1325.41      454.76      199.74    S       --Passed
+FisherF<double>(1.5,0.5)           1308.59     1264.14      397.09      187.97    S       --Passed
+FisherF<double>(1.5,1.5)           1345.46     1440.56      448.48      184.70    S       --Passed
+FisherF<double>(1.5,3)             1247.35     1401.17      352.42      169.94    S       --Passed
+FisherF<double>(1.5,30)            1208.56     1398.57      330.73      165.36    S       --Passed
+FisherF<double>(3,1)                979.08     1267.99      353.75      184.13    S       --Passed
+FisherF<double>(3,0.5)             1161.74     1208.51      297.80      171.91    S       --Passed
+FisherF<double>(3,1.5)             1224.79     1411.74      348.85      169.95    S       --Passed
+FisherF<double>(3,3)               1098.87     1336.02      241.70      152.68    S       --Passed
+FisherF<double>(3,30)              1093.76     1332.78      224.19      147.73    S       --Passed
+FisherF<double>(30,1)               944.31     1267.40      334.12      178.44    S       --Passed
+FisherF<double>(30,0.5)            1128.19     1204.99      279.44      167.08    S       --Passed
+FisherF<double>(30,1.5)            1193.22     1406.32      332.29      165.39    S       --Passed
+FisherF<double>(30,3)              1079.83     1331.34      223.09      147.94    S       --Passed
+FisherF<double>(30,30)             1027.07     1326.70      205.54      143.06    S       --Passed
+FisherF<float>(1,1)                  83.93      135.37       50.83       33.99    P       --Passed
+FisherF<float>(1,0.5)               128.52      129.74       44.90       32.66    P       --Passed
+FisherF<float>(1,1.5)               134.20      143.25       48.88       30.71    P       --Passed
+FisherF<float>(1,3)                  99.27      157.42       40.98       29.88    P       --Passed
+FisherF<float>(1,30)                 93.99      157.17       38.58       29.68    P       --Passed
+FisherF<float>(0.5,1)               128.30      129.34       45.68       32.46    P       --Passed
+FisherF<float>(0.5,0.5)             168.43      123.89       39.60       30.87    P       --Passed
+FisherF<float>(0.5,1.5)             172.77      139.86       44.34       29.11    P       --Passed
+FisherF<float>(0.5,3)               140.68      152.00       35.90       28.39    P       --Passed
+FisherF<float>(0.5,30)              136.88      152.03       33.48       27.67    P       --Passed
+FisherF<float>(1.5,1)               134.16      144.87       49.93       30.93    P       --Passed
+FisherF<float>(1.5,0.5)             171.44      136.73       44.19       29.12    P       --Passed
+FisherF<float>(1.5,1.5)             176.85      153.93       48.88       26.71    P       --Passed
+FisherF<float>(1.5,3)               146.58      165.76       40.13       26.54    P       --Passed
+FisherF<float>(1.5,30)              145.85      163.41       37.26       25.66    P       --Passed
+FisherF<float>(3,1)                  99.25      159.03       41.18       29.99    P       --Passed
+FisherF<float>(3,0.5)               138.86      152.41       35.82       28.98    P       --Passed
+FisherF<float>(3,1.5)               144.80      164.81       39.21       26.64    P       --Passed
+FisherF<float>(3,3)                 112.87      178.79       30.88       25.38    P       --Passed
+FisherF<float>(3,30)                110.36      181.30       28.85       25.01    P       --Passed
+FisherF<float>(30,1)                 92.61      158.93       39.08       29.12    P       --Passed
+FisherF<float>(30,0.5)              135.72      153.47       33.51       27.95    P       --Passed
+FisherF<float>(30,1.5)              145.04      164.61       37.60       25.61    P       --Passed
+FisherF<float>(30,3)                109.61      178.32       28.80       25.35    P       --Passed
+FisherF<float>(30,30)               105.24      178.39       26.35       24.33    P       --Passed
+FisherF<double>(1,1)                155.01      221.37       91.23       47.45    P       --Passed
+FisherF<double>(1,0.5)              186.93      210.13       81.43       45.41    P       --Passed
+FisherF<double>(1,1.5)              199.85      244.87       92.52       45.04    P       --Passed
+FisherF<double>(1,3)                172.25      258.89       74.19       41.28    P       --Passed
+FisherF<double>(1,30)               167.22      259.17       69.31       41.58    P       --Passed
+FisherF<double>(0.5,1)              187.99      211.03       80.73       45.06    P       --Passed
+FisherF<double>(0.5,0.5)            217.51      199.53       72.78       43.80    P       --Passed
+FisherF<double>(0.5,1.5)            227.73      236.15       81.67       43.99    P       --Passed
+FisherF<double>(0.5,3)              197.87      247.43       62.40       39.08    P       --Passed
+FisherF<double>(0.5,30)             202.40      246.92       59.47       39.38    P       --Passed
+FisherF<double>(1.5,1)              195.03      250.05       94.70       46.51    P       --Passed
+FisherF<double>(1.5,0.5)            237.95      248.39       81.41       43.31    P       --Passed
+FisherF<double>(1.5,1.5)            255.14      273.40       92.87       44.81    P       --Passed
+FisherF<double>(1.5,3)              220.41      284.82       75.80       40.31    P       --Passed
+FisherF<double>(1.5,30)             216.73      287.68       69.56       39.39    P       --Passed
+FisherF<double>(3,1)                174.33      263.11       73.56       41.91    P       --Passed
+FisherF<double>(3,0.5)              206.82      260.61       64.52       39.17    P       --Passed
+FisherF<double>(3,1.5)              216.76      289.49       74.05       39.34    P       --Passed
+FisherF<double>(3,3)                196.69      299.56       52.00       34.91    P       --Passed
+FisherF<double>(3,30)               190.93      292.94       50.11       34.16    P       --Passed
+FisherF<double>(30,1)               168.57      264.45       69.02       40.55    P       --Passed
+FisherF<double>(30,0.5)             202.96      246.44       60.55       39.24    P       --Passed
+FisherF<double>(30,1.5)             222.75      295.59       70.03       39.20    P       --Passed
+FisherF<double>(30,3)               194.79      294.60       49.34       34.30    P       --Passed
+FisherF<double>(30,30)              188.26      285.82       45.58       33.32    P       --Passed
+Normal<float>(0,1)                  107.59      112.05       22.24       19.01    S       --Passed
+Normal<double>(0,1)                 192.65      238.68       45.51       33.67    S       --Passed
+Normal<float>(0,1)                   18.38       21.43        5.71        5.04    P       --Passed
+Normal<double>(0,1)                  29.69       42.44       10.41        8.49    P       --Passed
+Lognormal<float>(0,1)               165.54      160.30       27.33       23.23    S       --Passed
+Lognormal<double>(0,1)              278.44      319.28       58.20       41.90    S       --Passed
+Lognormal<float>(0,1)                30.96       33.44        7.19        6.19    P       --Passed
+Lognormal<double>(0,1)               47.97       60.30       13.67       10.75    P       --Passed
+Levy<float>(0,1)                    121.03      120.67       36.95       34.35    S       --Passed
+Levy<double>(0,1)                   234.17      236.30       67.80       55.81    S       --Passed
+Levy<float>(0,1)                     22.90       22.59        7.91        7.61    P       --Passed
+Levy<double>(0,1)                    45.50       44.21       14.26       12.69    P       --Passed
+Stable<float>(2,0,0,1)              580.32      581.36       64.09       65.39    S       --Passed
+Stable<float>(1,0,0,1)              259.80      259.72       52.90       54.67    S       --Passed
+Stable<float>(0.5,1,0,1)            308.55      307.40       58.21       59.86    S       --Passed
+Stable<double>(2,0,0,1)             983.27      977.66      217.04      221.42    S       --Passed
+Stable<double>(1,0,0,1)             453.41      452.38      175.11      180.53    S       --Passed
+Stable<double>(0.5,1,0,1)           506.47      508.70      128.63      131.57    S       --Passed
+Stable<float>(2,0,0,1)               99.47       99.90       20.55       17.58    P       --Passed
+Stable<float>(1,0,0,1)               50.70       50.72       15.73       16.50    P       --Passed
+Stable<float>(0.5,1,0,1)             60.87       60.05       17.05       18.11    P       --Passed
+Stable<double>(2,0,0,1)             177.61      184.18       48.72       49.55    P       --Passed
+Stable<double>(1,0,0,1)              84.94       84.00       40.46       41.52    P       --Passed
+Stable<double>(0.5,1,0,1)            97.67       95.86       29.46       30.11    P       --Passed
+StudentT<float>(2)                  229.07      265.35       56.06       52.50    S       --Passed
+StudentT<float>(0.2)                591.10      456.73      107.67       98.48    S       --Passed
+StudentT<float>(1)                  353.98      526.61      166.54      117.66    S       --Passed
+StudentT<float>(1.4)                689.16      586.08      177.79      103.04    S       --Passed
+StudentT<float>(1.8)                658.34      511.27      114.75       87.20    S       --Passed
+StudentT<float>(3)                  450.42      565.64      109.38       92.12    S       --Passed
+StudentT<float>(30)                 416.52      560.86       97.42       88.54    S       --Passed
+StudentT<double>(2)                 406.28      436.72      107.15       91.95    S       --Passed
+StudentT<double>(0.2)               787.21      773.66      220.94      168.64    S       --Passed
+StudentT<double>(1)                 641.97      857.00      303.75      173.14    S       --Passed
+StudentT<double>(1.4)               883.14     1004.91      333.01      166.31    S       --Passed
+StudentT<double>(1.8)               870.53      883.30      220.61      145.78    S       --Passed
+StudentT<double>(3)                 787.43      942.01      198.80      142.16    S       --Passed
+StudentT<double>(30)                741.35      935.59      178.56      137.00    S       --Passed
+StudentT<float>(2)                   39.71       48.86       12.07       12.02    P       --Passed
+StudentT<float>(0.2)                100.68       85.65       23.36       21.91    P       --Passed
+StudentT<float>(1)                   65.63       98.42       33.90       25.40    P       --Passed
+StudentT<float>(1.4)                112.22      107.57       36.10       22.78    P       --Passed
+StudentT<float>(1.8)                108.21       99.93       24.73       20.17    P       --Passed
+StudentT<float>(3)                   80.43      113.99       23.85       21.08    P       --Passed
+StudentT<float>(30)                  75.58      118.88       22.51       20.45    P       --Passed
+StudentT<double>(2)                  69.25       82.15       24.45       21.19    P       --Passed
+StudentT<double>(0.2)               137.36      142.48       43.84       33.73    P       --Passed
+StudentT<double>(1)                 113.18      161.49       63.68       38.66    P       --Passed
+StudentT<double>(1.4)               159.84      215.18       67.01       38.14    P       --Passed
+StudentT<double>(1.8)               151.00      165.07       49.24       33.40    P       --Passed
+StudentT<double>(3)                 135.74      198.26       44.46       32.78    P       --Passed
+StudentT<double>(30)                130.58      195.47       39.98       30.96    P       --Passed
+Geometric<int32_t>(0.5)             159.20      162.04       28.70       13.33    S       --Passed
+Geometric<uint32_t>(0.5)            159.24      162.61       32.39       33.84    S       --Passed
+Geometric<int64_t>(0.5)             164.53      168.95       29.80       31.86    S       --Passed
+Geometric<uint64_t>(0.5)            159.99      165.87       32.06       33.82    S       --Passed
+Geometric<int32_t>(0.5)              26.11       28.66        7.60        3.47    P       --Passed
+Geometric<uint32_t>(0.5)             25.85       28.39        8.47        8.63    P       --Passed
+Geometric<int64_t>(0.5)              26.15       28.86        7.40        7.96    P       --Passed
+Geometric<uint64_t>(0.5)             26.97       29.47        8.34        8.81    P       --Passed
+UniformInt<int32_t>(-10,10)          95.18       40.00       13.06       10.51    S       --Passed
+UniformInt<uint32_t>(0,20)           98.42       41.00       13.20       12.44    S       --Passed
+UniformInt<int64_t>(-10,10)         174.35       40.42       13.16       12.82    S       --Passed
+UniformInt<uint64_t>(0,20)          168.99       44.03       16.02       15.77    S       --Passed
+UniformInt<int32_t>(-10,10)          17.23        6.34        3.64        2.97    P       --Passed
+UniformInt<uint32_t>(0,20)           17.49        6.71        3.64        3.58    P       --Passed
+UniformInt<int64_t>(-10,10)          32.58        6.68        4.38        3.87    P       --Passed
+UniformInt<uint64_t>(0,20)           32.06        9.17        4.26        4.30    P       --Passed

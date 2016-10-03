@@ -123,22 +123,19 @@ if ($build) {
     exit;
 }
 
-my $texfile;
-if ($pdf) {
-    open $texfile, '>', "random_rng_$simd.tex";
-    say $texfile '\documentclass[';
-    say $texfile '  a4paper,';
-    say $texfile '  lines=42,';
-    say $texfile '  linespread=1.2,';
-    say $texfile '  fontsize=11pt,';
-    say $texfile '  fontset=Minion,';
-    say $texfile '  monofont=TheSansMonoCd,';
-    say $texfile '  monoscale=MatchLowercase,';
-    say $texfile ']{mbook}';
-    say $texfile '\input{../tex/macro}';
-    say $texfile '\pagestyle{empty}';
-    say $texfile '\begin{document}';
-}
+open my $texfile, '>', "random_rng_$simd.tex";
+say $texfile '\documentclass[';
+say $texfile '  a4paper,';
+say $texfile '  lines=42,';
+say $texfile '  linespread=1.2,';
+say $texfile '  fontsize=11pt,';
+say $texfile '  fontset=Minion,';
+say $texfile '  monofont=TheSansMonoCd,';
+say $texfile '  monoscale=MatchLowercase,';
+say $texfile ']{mbook}';
+say $texfile '\input{../tex/macro}';
+say $texfile '\pagestyle{empty}';
+say $texfile '\begin{document}';
 for (@keys) {
     my $this_tex = "random_rng";
     $this_tex .= "_\L$_";
@@ -147,23 +144,20 @@ for (@keys) {
             &read($_, "llvm"),
             &read($_, "gnu"),
             &read($_, "intel"))) {
-        if ($pdf) {
-            say $texfile '\begin{table}';
-            say $texfile "\\input{$this_tex}%";
-            say $texfile "\\caption{\\textsc{$_ (sequential)}}";
-            say $texfile '\end{table}';
-            say $texfile '\begin{table}';
-            say $texfile "\\input{${this_tex}_p}%";
-            say $texfile "\\caption{\\textsc{$_ (parallel)}}";
-            say $texfile '\end{table}';
-        }
+        say $texfile '\begin{table}';
+        say $texfile "\\input{$this_tex}%";
+        say $texfile "\\caption{\\textsc{$_ (sequential)}}";
+        say $texfile '\end{table}';
+        say $texfile '\begin{table}';
+        say $texfile "\\input{${this_tex}_p}%";
+        say $texfile "\\caption{\\textsc{$_ (parallel)}}";
+        say $texfile '\end{table}';
+        say $texfile '\clearpage';
     }
 }
-if ($pdf) {
-    say $texfile '\end{document}';
-    close $texfile;
-    `lualatex -interaction=batchmode random_rng_$simd.tex`;
-}
+say $texfile '\end{document}';
+close $texfile;
+`lualatex -interaction=batchmode random_rng_$simd.tex` if $pdf;
 
 sub run
 {
@@ -307,6 +301,7 @@ sub table
         print $texfile_p $table_p;
         close $texfile_p;
     }
+
     $table;
 }
 
