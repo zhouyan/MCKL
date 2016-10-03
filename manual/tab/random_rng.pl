@@ -125,7 +125,7 @@ if ($build) {
 
 my $texfile;
 if ($pdf) {
-    open $texfile, '>', 'random_rng.tex';
+    open $texfile, '>', "random_rng_$simd.tex";
     say $texfile '\documentclass[';
     say $texfile '  a4paper,';
     say $texfile '  lines=42,';
@@ -162,7 +162,7 @@ for (@keys) {
 if ($pdf) {
     say $texfile '\end{document}';
     close $texfile;
-    `lualatex -interaction=batchmode random_rng.tex`;
+    `lualatex -interaction=batchmode random_rng_$simd.tex`;
 }
 
 sub run

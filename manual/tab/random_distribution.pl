@@ -129,7 +129,7 @@ if ($build) {
 
 my $texfile;
 if ($pdf) {
-    open $texfile, '>', 'random_distribution.tex';
+    open $texfile, '>', "random_distribution_$simd.tex";
     say $texfile '\documentclass[';
     say $texfile '  a4paper,';
     say $texfile '  lines=42,';
@@ -161,7 +161,7 @@ for my $k (@keys) {
 if ($pdf) {
     say $texfile '\end{document}';
     close $texfile;
-    `lualatex -interaction=batchmode random_distribution.tex`;
+    `lualatex -interaction=batchmode random_distribution_$simd.tex`;
 }
 
 sub run
