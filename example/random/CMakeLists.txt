@@ -218,8 +218,6 @@ FUNCTION(MCKL_ADD_TEST_DISTRIBUTION testname)
                 PROPERTIES COMPILE_FLAGS "-DMCKL_USE_MKL_VML=0")
             ADD_DEPENDENCIES(random_${testname}
                 random_${testname}_${dist}_novml)
-            ADD_DEPENDENCIES(random_${testname}_${dist}-check
-                random_${testname}_${dist}_novml-check)
             ADD_DEPENDENCIES(random_${testname}-check
                 random_${testname}_${dist}_novml-check)
         ENDIF(MKL_FOUND)

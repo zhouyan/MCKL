@@ -172,8 +172,14 @@ sub run
     my $header = 1;
     my @header;
     for my $dist (@dists) {
-        my $cmd = "$make -C $dir random_distribution_perf_\L$dist-check 2>&1";
-        my @lines = split "\n", `$cmd`;
+        my $cmd1 =
+        "$make -C $dir random_distribution_perf_\L$dist-check 2>&1";
+        my $cmd2 =
+        "$make -C $dir random_distribution_perf_\L${dist}_novml-check 2>&1";
+        my $out;
+        $out .= `$cmd1`;
+        $out .= `$cmd2`;
+        my @lines = split "\n", $out;
         if ($header) {
             @header = grep { $_ =~ /Deterministics/ } @lines;
             if (@header) {
