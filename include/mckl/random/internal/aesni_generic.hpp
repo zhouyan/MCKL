@@ -54,7 +54,7 @@ class AESNIGeneratorGenericImpl
         enc<0xD>(state, rk);
         enc<0xE>(state, rk);
         enc<0xF>(state, rk);
-        eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
+        round<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
         enclast<rounds_>(state, rk);
     }
 
@@ -77,7 +77,7 @@ class AESNIGeneratorGenericImpl
         enc<0x0D>(state, rk);
         enc<0x0E>(state, rk);
         enc<0x0F>(state, rk);
-        eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
+        round<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
         enclast<rounds_>(state, rk);
     }
 
@@ -85,31 +85,31 @@ class AESNIGeneratorGenericImpl
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
 
     template <std::size_t>
-    static void eval(
+    static void round(
         __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(
+    static void round(
         __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         enc<N>(s, rk);
-        eval<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
+        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
     template <std::size_t>
-    static void eval(std::array<__m128i, 8> &,
+    static void round(std::array<__m128i, 8> &,
         const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m128i, 8> &s,
+    static void round(std::array<__m128i, 8> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         enc<N>(s, rk);
-        eval<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
+        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
     template <std::size_t N>

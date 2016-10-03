@@ -79,22 +79,22 @@ class AESNIGeneratorImpl<ARSKeySeq<Rounds, Constants>>
         enc<0x0D>(state, rk);
         enc<0x0E>(state, rk);
         enc<0x0F>(state, rk);
-        eval<0x10>(state, rk, std::integral_constant<bool, 0x10 < Rounds>());
+        round<0x10>(state, rk, std::integral_constant<bool, 0x10 < Rounds>());
         enclast<Rounds>(state, rk);
     }
 
     template <std::size_t>
-    static void eval(std::array<__m128i, 16> &,
+    static void round(std::array<__m128i, 16> &,
         const std::array<__m128i, Rounds + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void eval(std::array<__m128i, 16> &s,
+    static void round(std::array<__m128i, 16> &s,
         const std::array<__m128i, Rounds + 1> &rk, std::true_type)
     {
         enc<N>(s, rk);
-        eval<N + 1>(s, rk, std::integral_constant<bool, N + 1 < Rounds>());
+        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < Rounds>());
     }
 
     template <std::size_t N>
