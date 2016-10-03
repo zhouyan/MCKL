@@ -32,95 +32,261 @@
 # ============================================================================
 
 use v5.16;
+use Getopt::Long;
 
-do 'format.pl';
+my $run = 0;
+my $pdf = 0;
+my $build = 0;
+my $simd;
+my $llvm = "../../build/llvm-release-sys";
+my $gnu = "../../build/gnu-release-sys";
+my $intel = "../../build/intel-release-sys";
+my $make = "ninja";
+my $name;
+my $write = 0;
+GetOptions(
+    "run"      => \$run,
+    "pdf"      => \$pdf,
+    "build"    => \$build,
+    "simd=s"   => \$simd,
+    "llvm=s"   => \$llvm,
+    "gnu=s"    => \$gnu,
+    "intel=s"  => \$intel,
+    "make=s"   => \$make,
+    "name=s"   => \$name,
+    "write"    => \$write,
+);
+
+if ($simd) {
+    $run = 0;
+    $build = 0;
+} else {
+    my $cpuid = `cpuid_info`;
+    $simd = "sse2" if $cpuid =~ "SSE2";
+    $simd = "avx2" if $cpuid =~ "AVX2";
+}
+
+my $all = 0;
+$all = 1 if not $name or $name =~ /all/;
+
+my %build_dir = (llvm => $llvm, gnu => $gnu, intel => $intel);
 
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
-
+my @beta = qw(Beta);
+my @chisquared = qw(ChiSquared);
+my @gamma = qw(Gamma);
+my @fisherf = qw(FisherF);
+my @normal = qw(Normal Lognormal Levy);
+my @stable = qw(Stable);
+my @studentt = qw(StudentT);
 my @int = qw(Geometric UniformInt);
 
-my @normal = qw(Normal Lognormal Levy);
-
 my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh Stable);
-
 my @nomkl = qw(Arcsine Pareto Stable);
 
-my %distribution;
-my %cpe;
-my $txt;
-open my $txtfile, '<', 'random_distribution.txt';
-while (<$txtfile>) {
-    if (/<(double|int)>\(.*(Passed|Failed)/) {
-        $txt .= $_;
-        my @record = split;
-        my $name = shift @record;
-        $name =~ s/(.*)<double>(.*)/$1$2/;
-        $name =~ s/_/\\_/g;
-        $name = '\texttt{' . $name . "}\n";
-        my $basename = $1;
-        my $cpe;
-        if ("@nostd" =~ /$basename/) {
-            shift @record;
-            $cpe .= sprintf ' & %-4s', '--';
-        } else {
-            $cpe .= &format(shift @record);
-        }
-        $cpe .= &format(shift @record);
-        $cpe .= &format(shift @record);
-        if ("@nomkl" =~ /$basename/) {
-            shift @record;
-            $cpe .= sprintf ' & %-4s', '--';
-        } else {
-            $cpe .= &format(shift @record);
-        }
-        $cpe .= "\n";
-        if ("@inverse" =~ /$basename/) {
-            $distribution{'inverse'} .= $name;
-            $cpe{'inverse'} .= $cpe;
-        } elsif ("@int" =~ /$basename/) {
-            $distribution{'int'} .= $name;
-            $cpe{'int'} .= $cpe;
-        } elsif ("@normal" =~ /$basename/) {
-            $distribution{'normal'} .= $name;
-            $cpe{'normal'} .= $cpe;
-        } else {
-            $distribution{$basename} .= $name;
-            $cpe{$basename} .= $cpe;
+my %nostd;
+my %nomkl;
+$nostd{$_} = 1 for @nostd;
+$nomkl{$_} = 1 for @nomkl;
+
+my %dists = (
+    inverse    => [@inverse],
+    beta       => [@beta],
+    chisquared => [@chisquared],
+    gamma      => [@gamma],
+    fisherf    => [@fisherf],
+    normal     => [@normal],
+    stable     => [@stable],
+    studentt   => [@studentt],
+    int        => [@int],
+);
+
+my @keys = qw(inverse beta chisquared gamma fisherf normal stable studentt
+int);
+
+my @dists;
+for my $k (@keys) {
+    my @val = @{$dists{$k}};
+    for (@val) {
+        push @dists, $_, if $_ =~ /$name/ or $k =~ /$name/ or $all;
+    }
+}
+
+if ($run) {
+    &run("llvm");
+    &run("gnu");
+    &run("intel");
+    exit;
+}
+
+if ($build) {
+    &build("llvm");
+    &build("gnu");
+    &build("intel");
+    exit;
+}
+
+my $texfile;
+if ($pdf) {
+    open $texfile, '>', 'random_distribution.tex';
+    say $texfile '\documentclass[';
+    say $texfile '  a4paper,';
+    say $texfile '  lines=42,';
+    say $texfile '  linespread=1.2,';
+    say $texfile '  fontsize=11pt,';
+    say $texfile '  fontset=Minion,';
+    say $texfile '  monofont=TheSansMonoCd,';
+    say $texfile '  monoscale=MatchLowercase,';
+    say $texfile ']{mbook}';
+    say $texfile '\input{../tex/macro}';
+    say $texfile '\pagestyle{empty}';
+    say $texfile '\begin{document}';
+}
+for my $k (@keys) {
+    for (qw(llvm gnu intel)) {
+        my $this_tex = "random_distribution";
+        $this_tex .= "_\L$k";
+        $this_tex .= "_$_";
+        $this_tex .= "_$simd";
+        &table($this_tex, &read($k, $_));
+        if ($pdf) {
+            say $texfile '\begin{table}';
+            say $texfile "\\input{$this_tex}%";
+            say $texfile "\\caption{\\textsc{$k ($_)}}";
+            say $texfile '\end{table}';
         }
     }
 }
-open $txtfile, '>', 'random_distribution.txt';
-print $txtfile $txt;
+if ($pdf) {
+    say $texfile '\end{document}';
+    close $texfile;
+    `lualatex -interaction=batchmode random_distribution.tex`;
+}
 
-while (my ($basename, $name) = each %distribution) {
-    my @dist = split "\n", $distribution{$basename};
-    my @cpe = split "\n", $cpe{$basename};
-    my $wid = 0;
-    for (@dist) {
-        if ($wid < length($_)) {
-            $wid = length($_);
+sub run
+{
+    my $dir = $build_dir{$_[0]};
+    say $dir;
+    my $txtfile;
+    open $txtfile, '>',
+    "random_distribution_$_[0]_$simd.txt" if $all and $write;
+    my $header = 1;
+    my @header;
+    for my $dist (@dists) {
+        my $cmd = "$make -C $dir random_distribution_perf_\L$dist-check 2>&1";
+        my @lines = split "\n", `$cmd`;
+        if ($header) {
+            @header = grep { $_ =~ /Deterministics/ } @lines;
+            if (@header) {
+                say '=' x length($header[0]);
+                say $header[0];
+                say '-' x length($header[0]);
+                $header = 0;
+            }
         }
+        my @result = grep { $_ =~ /Passed|Failed/ } @lines;
+        say $_ for @result;
+        say '-' x length($header[0]);
+        if ($all and $write) {
+            say $txtfile $_ for @result;
+        }
+    }
+    close $txtfile if $all and $write;
+}
+
+sub build
+{
+    my $dir = $build_dir{$_[0]};
+    say $dir;
+    `$make -C $dir random_distribution_perf 2>&1`;
+}
+
+sub read
+{
+    my @val = @{$dists{$_[0]}};
+    shift @_;
+    open my $txtfile, '<', "random_distribution_$_[0]_$simd.txt";
+    my @txt = grep {
+    $_ =~ /(.*)<(double|u?int.._t)>.*(Passed|Failed).*/ } <$txtfile>;
+    my $record;
+    for (@txt) {
+        my @this_record = (split)[0..4];
+        my $name = shift @this_record;
+        my $distname = $name;
+        $distname =~ s/(.*)\(.*/$1/;
+        $distname =~ s/(.*)<.*/$1/;
+        $name =~ s/(.*)<double>(.*)/$1$2/;
+        if (grep /^$distname$/, @val) {
+            $record .= "$distname $name @this_record\n";
+        }
+    }
+    $record;
+}
+
+sub table
+{
+    my $tex = shift @_;
+    my @lines = split "\n", $_[0];
+
+    my $wid = 0;
+    my @name;
+    my $index = 0;
+    for (@lines) {
+        my $name = (split)[1];
+        $name =~ s/_/\\_/g;
+        $name[$index] = '\texttt{' . $name . '}';
+        if ($wid < length($name[-1])) {
+            $wid = length($name[-1])
+        }
+        $index++;
     }
 
     my $table;
+    $index = 0;
     $table .= '\tbfigures' . "\n";
     $table .= '\begin{tabularx}{\textwidth}{p{2in}RRRR}' . "\n";
     $table .= ' ' x 2 . '\toprule' . "\n";
-    $table .= ' ' x 2;
-    $table .= 'Distribution & \std & \mckl & \batch & \mkl';
+    $table .= ' ' x 2 . 'Distribution & \std & \mckl & \batch & \mkl';
     $table .= " \\\\\n";
     $table .= ' ' x 2 . '\midrule' . "\n";
-    my $index = 0;
-    for (@dist) {
-        $table .= ' ' x 2;
-        $table .= sprintf "%-${wid}s", $dist[$index];
-        $table .= $cpe[$index];
+    for (@lines) {
+        my ($distname, $name, $std, $mckl, $batch, $mkl) = split;
+        $table .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
+        if ($nostd{$distname}) {
+            $table .= ' & ' . sprintf('%-6s', '--');
+        } else {
+            $table .= &format($std);
+        }
+        $table .= &format($mckl);
+        $table .= &format($batch);
+        if ($nomkl{$distname}) {
+            $table .= ' & ' . sprintf('%-6s', '--');
+        } else {
+            $table .= &format($mkl);
+        }
         $table .= " \\\\\n";
         $index++;
     }
     $table .= ' ' x 2 . '\bottomrule' . "\n";
     $table .= '\end{tabularx}' . "\n";
-    open my $texfile, '>', "random_distribution_\L$basename.tex";
+    $table;
+
+    open my $texfile, '>', "$tex.tex";
     print $texfile $table;
+    close $texfile;
+
+    $table;
+}
+
+sub format
+{
+    my $num = shift @_;
+    if ($num > 100) {
+        ' & ' . sprintf('%-6.0f', $num);
+    } elsif ($num > 10) {
+        ' & ' . sprintf('%-6.1f', $num);
+    } else {
+        ' & ' . sprintf('%-6.2f', $num);
+    }
 }

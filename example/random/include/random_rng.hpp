@@ -434,7 +434,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(twid) << std::right << "S/SP";
     std::cout << std::setw(twid) << std::right << "B/BP";
     std::cout << std::setw(twid) << std::right << "C";
-    std::cout << std::setw(15) << std::right << "Determinstics";
+    std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;

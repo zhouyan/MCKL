@@ -34,8 +34,6 @@
 use v5.16;
 use Getopt::Long;
 
-do 'format.pl';
-
 my $run = 0;
 my $pdf = 0;
 my $build = 0;
@@ -44,7 +42,7 @@ my $llvm = "../../build/llvm-release-sys";
 my $gnu = "../../build/gnu-release-sys";
 my $intel = "../../build/intel-release-sys";
 my $make = "ninja";
-my $rng;
+my $name;
 my $write = 0;
 GetOptions(
     "run"      => \$run,
@@ -55,7 +53,7 @@ GetOptions(
     "gnu=s"    => \$gnu,
     "intel=s"  => \$intel,
     "make=s"   => \$make,
-    "rng=s"    => \$rng,
+    "name=s"   => \$name,
     "write"    => \$write,
 );
 
@@ -69,7 +67,7 @@ if ($simd) {
 }
 
 my $all = 0;
-$all = 1 if $rng =~ /all/;
+$all = 1 if not $name or $name =~ /all/;
 
 my %build_dir = (llvm => $llvm, gnu => $gnu, intel => $intel);
 
@@ -107,7 +105,7 @@ my @rngs;
 for my $k (@keys) {
     my @val = @{$rngs{$k}};
     for (@val) {
-        push @rngs, $_, if $_ =~ /$rng/ or $k =~ /$rng/i or $all;
+        push @rngs, $_, if $_ =~ /$name/ or $k =~ /$name/ or $all;
     }
 }
 
@@ -130,7 +128,7 @@ if ($pdf) {
     open $texfile, '>', 'random_rng.tex';
     say $texfile '\documentclass[';
     say $texfile '  a4paper,';
-    say $texfile '  lines=45,';
+    say $texfile '  lines=42,';
     say $texfile '  linespread=1.2,';
     say $texfile '  fontsize=11pt,';
     say $texfile '  fontset=Minion,';
@@ -152,11 +150,12 @@ for (@keys) {
         if ($pdf) {
             say $texfile '\begin{table}';
             say $texfile "\\input{$this_tex}%";
+            say $texfile "\\caption{\\textsc{$_ (sequential)}}";
             say $texfile '\end{table}';
             say $texfile '\begin{table}';
             say $texfile "\\input{${this_tex}_p}%";
+            say $texfile "\\caption{\\textsc{$_ (parallel)}}";
             say $texfile '\end{table}';
-            say $texfile '\clearpage';
         }
     }
 }
@@ -174,7 +173,6 @@ sub run
     open $txtfile, '>', "random_rng_$_[0]_$simd.txt" if $all and $write;
     my $header = 1;
     my @header;
-    my @target;
     for my $rng (@rngs) {
         my $cmd = "$make -C $dir random_rng_\L$rng-check 2>&1";
         my @result;
@@ -182,7 +180,7 @@ sub run
         for (1..5) {
             my @lines = split "\n", `$cmd`;
             if ($header) {
-                @header = grep { $_ =~ /Determinstics/ } @lines;
+                @header = grep { $_ =~ /Deterministics/ } @lines;
                 if (@header) {
                     say '=' x length($header[0]);
                     say $header[0];
@@ -310,4 +308,16 @@ sub table
         close $texfile_p;
     }
     $table;
+}
+
+sub format
+{
+    my $num = shift @_;
+    if ($num > 100) {
+        ' & ' . sprintf('%-6.0f', $num);
+    } elsif ($num > 10) {
+        ' & ' . sprintf('%-6.1f', $num);
+    } else {
+        ' & ' . sprintf('%-6.2f', $num);
+    }
 }

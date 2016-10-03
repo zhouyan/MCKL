@@ -97,7 +97,7 @@ SET(MCKL_RNG
 
 SET(MCKL_DISTRIBUTION Arcsine Beta Cauchy ChiSquared Exponential ExtremeValue
     FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto Rayleigh Stable
-    U01 UniformReal Weibull Geometric UniformInt)
+    StudentT U01 UniformReal Weibull Geometric UniformInt)
 
 FUNCTION(MCKL_ADD_TEST_RNG testname)
     ADD_CUSTOM_TARGET(random_${testname})
