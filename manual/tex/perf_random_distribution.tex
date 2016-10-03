@@ -74,55 +74,109 @@ cases are labeled ``\std'', ``\mckl'', ``\batch'' and ``\mkl'', respectively,
 in tables below.
 
 \begin{table}
-  \input{tab/random_distribution_inverse}%
-  \caption{Performance of distributions using the inverse method}
-  \label{tab:Performance of distributions using the inverse method}
+  \input{tab/random_distribution_inverse_llvm_sse2}%
+  \caption{Performance of distributions using the inverse method (Nehalem)}
+  \label{tab:Performance of distributions using the inverse method (Nehalem)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_beta}%
-  \caption{Performance of Beta distribution}
-  \label{tab:Performance of Beta distribution}
+  \input{tab/random_distribution_inverse_llvm_avx2}%
+  \caption{Performance of distributions using the inverse method (Haswell)}
+  \label{tab:Performance of distributions using the inverse method (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_chisquared}%
-  \caption{Performance of $\chi^2$ distribution}
-  \label{tab:Performance of chi-squared distribution}
+  \input{tab/random_distribution_beta_llvm_sse2}%
+  \caption{Performance of Beta distribution (Nehalem)}
+  \label{tab:Performance of Beta distribution (Nehalem)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_gamma}%
-  \caption{Performance of Gamma distribution}
-  \label{tab:Performance of Gamma distribution}
+  \input{tab/random_distribution_beta_llvm_avx2}%
+  \caption{Performance of Beta distribution (Haswell)}
+  \label{tab:Performance of Beta distribution (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_fisherf}%
-  \caption{Performance of Fisher's $F$-distribution}
-  \label{tab:Performance of Fisher's F-distribution}
+  \input{tab/random_distribution_chisquared_llvm_sse2}%
+  \caption{Performance of $\chi^2$ distribution (Nehalem)}
+  \label{tab:Performance of chi-squared distribution (Nehalem)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_normal}%
-  \caption{Performance of Normal and related distributions}
-  \label{tab:Performance of Normal and related distributions}
+  \input{tab/random_distribution_chisquared_llvm_avx2}%
+  \caption{Performance of $\chi^2$ distribution (Haswell)}
+  \label{tab:Performance of chi-squared distribution (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_stable}%
-  \caption{Performance of Stable distribution}
-  \label{tab:Performance of Stable stribution}
+  \input{tab/random_distribution_gamma_llvm_sse2}%
+  \caption{Performance of Gamma distribution (Nehalem)}
+  \label{tab:Performance of Gamma distribution (Nehalem)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_studentt}%
-  \caption{Performance of Student's $t$-distribution}
-  \label{tab:Performance of Student's t-distribution}
+  \input{tab/random_distribution_gamma_llvm_avx2}%
+  \caption{Performance of Gamma distribution (Haswell)}
+  \label{tab:Performance of Gamma distribution (Haswell)}
 \end{table}
 
 \begin{table}
-  \input{tab/random_distribution_int}%
-  \caption{Performance of discrete distributions}
-  \label{tab:Performance of discrete distributions}
+  \input{tab/random_distribution_fisherf_llvm_sse2}%
+  \caption{Performance of Fisher's $F$-distribution (Nehalem)}
+  \label{tab:Performance of Fisher's F-distribution (Nehalem)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_fisherf_llvm_avx2}%
+  \caption{Performance of Fisher's $F$-distribution (Haswell)}
+  \label{tab:Performance of Fisher's F-distribution (Haswell)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_normal_llvm_sse2}%
+  \caption{Performance of Normal and related distributions (Nehalem)}
+  \label{tab:Performance of Normal and related distributions (Nehalem)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_normal_llvm_avx2}%
+  \caption{Performance of Normal and related distributions (Haswell)}
+  \label{tab:Performance of Normal and related distributions (Haswell)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_stable_llvm_sse2}%
+  \caption{Performance of Stable distribution (Nehalem)}
+  \label{tab:Performance of Stable distribution (Nehalem)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_stable_llvm_avx2}%
+  \caption{Performance of Stable distribution (Haswell)}
+  \label{tab:Performance of Stable distribution (Haswell)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_studentt_llvm_sse2}%
+  \caption{Performance of Student's $t$-distribution (Nehalem)}
+  \label{tab:Performance of Student's t-distribution (Nehalem)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_studentt_llvm_avx2}%
+  \caption{Performance of Student's $t$-distribution (Haswell)}
+  \label{tab:Performance of Student's t-distribution (Haswell)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_int_llvm_sse2}%
+  \caption{Performance of discrete distributions (Nehalem)}
+  \label{tab:Performance of discrete distributions (Nehalem)}
+\end{table}
+
+\begin{table}
+  \input{tab/random_distribution_int_llvm_avx2}%
+  \caption{Performance of discrete distributions (Haswell)}
+  \label{tab:Performance of discrete distributions (Haswell)}
 \end{table}

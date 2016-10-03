@@ -29,16 +29,24 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-.PHONY : pdf rng distribution
+.PHONY : all pdf rng distribution
+
+all :
+
+pdf :
+	./random_rng.pl --pdf --simd sse2
+	./random_rng.pl --pdf --simd avx2
+	./random_distribution.pl --pdf --simd sse2
+	./random_distribution.pl --pdf --simd avx2
 
 rng :
 	./random_rng.pl --build
-	./random_rng.pl --run --write --rng all
+	./random_rng.pl --run --write
 	./random_rng.pl --simd sse2
 	./random_rng.pl --simd avx2
 
 distribution :
-	ninja -C ../../build/llvm-release-sys \
-	    -j1 random_distribution_perf-check \
-	    > random_distribution.txt
-	./random_distribuiton.pl
+	./random_distribution.pl --build
+	./random_distribution.pl --run --write
+	./random_distribution.pl --simd sse2
+	./random_distribution.pl --simd avx2
