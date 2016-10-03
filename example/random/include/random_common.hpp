@@ -88,15 +88,27 @@ inline std::string random_typename<long double>()
 }
 
 template <>
-inline std::string random_typename<int>()
+inline std::string random_typename<std::int32_t>()
 {
-    return "int";
+    return "int32_t";
 }
 
 template <>
-inline std::string random_typename<unsigned>()
+inline std::string random_typename<std::uint32_t>()
 {
-    return "unsigned";
+    return "uint32_t";
+}
+
+template <>
+inline std::string random_typename<std::int64_t>()
+{
+    return "int64_t";
+}
+
+template <>
+inline std::string random_typename<std::uint64_t>()
+{
+    return "uint64_t";
 }
 
 template <>

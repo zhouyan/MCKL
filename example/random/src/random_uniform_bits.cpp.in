@@ -55,6 +55,7 @@ int main(int argc, char **argv)
             ++argv;
         }
     }
+
     // clang-format off
     random_uniform_bits<@RNGType@>(N, M, "@RNGName@");
     // clang-format on

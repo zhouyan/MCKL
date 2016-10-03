@@ -95,6 +95,10 @@ SET(MCKL_RNG
     ${MCKL_RNG_MKL}
     ${MCKL_RNG_RDRAND})
 
+SET(MCKL_DISTRIBUTION Arcsine Beta Cauchy ChiSquared Exponential ExtremeValue
+    FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto Rayleigh Stable
+    U01 UniformReal Weibull Geometric UniformInt)
+
 FUNCTION(MCKL_ADD_TEST_RNG testname)
     ADD_CUSTOM_TARGET(random_${testname})
     ADD_CUSTOM_TARGET(random_${testname}-check)
@@ -190,10 +194,27 @@ FUNCTION(MCKL_ADD_TEST_RNG testname)
     ENDIF(RDRAND_FOUND)
 ENDFUNCTION(MCKL_ADD_TEST_RNG testname)
 
+FUNCTION(MCKL_ADD_TEST_DISTRIBUTION testname)
+    ADD_CUSTOM_TARGET(random_${testname})
+    ADD_CUSTOM_TARGET(random_${testname}-check)
+    ADD_DEPENDENCIES(random random_${testname})
+    ADD_DEPENDENCIES(random-check random_${testname}-check)
+
+    FOREACH(Distribution ${MCKL_DISTRIBUTION})
+        SET(DistributionType mckl::${Distribution}Distribution)
+        STRING(TOLOWER ${Distribution} distribution)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
+            ${PROJECT_SOURCE_DIR}/src/random_${testname}_${distribution}.cpp)
+        MCKL_ADD_TEST(random ${testname}_${distribution})
+        ADD_DEPENDENCIES(random_${testname}
+            random_${testname}_${distribution})
+        ADD_DEPENDENCIES(random_${testname}-check
+            random_${testname}_${distribution}-check)
+    ENDFOREACH(Distribution ${MCKL_DISTRIBUTION})
+ENDFUNCTION(MCKL_ADD_TEST_DISTRIBUTION testname)
+
 MCKL_ADD_EXAMPLE(random)
 
-MCKL_ADD_TEST(random distribution)
-MCKL_ADD_TEST(random distribution_perf)
 MCKL_ADD_TEST(random test)
 MCKL_ADD_TEST(random threefish)
 MCKL_ADD_TEST(random u01)
@@ -204,6 +225,9 @@ ENDIF(MKL_FOUND)
 MCKL_ADD_TEST_RNG(rng)
 MCKL_ADD_TEST_RNG(seed)
 MCKL_ADD_TEST_RNG(uniform_bits)
+
+MCKL_ADD_TEST_DISTRIBUTION(distribution)
+MCKL_ADD_TEST_DISTRIBUTION(distribution_perf)
 
 MCKL_ADD_FILE(random random_Philox2x32.txt)
 MCKL_ADD_FILE(random random_Philox2x64.txt)

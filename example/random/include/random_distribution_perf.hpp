@@ -148,43 +148,43 @@ inline void random_distribution_test_perf(std::size_t N, std::size_t M,
 }
 
 template <typename MCKLDistType>
-inline void random_distribution_test_perf(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
+inline void random_distribution_test_perf(
+    std::size_t N, std::size_t M, int nwid, int twid)
 {
     RandomDistributionTrait<MCKLDistType> trait;
-    if (!distname.empty()) {
-        auto iter =
-            std::find(distname.begin(), distname.end(), trait.distname());
-        if (iter == distname.end())
-            return;
-    }
-
     mckl::Vector<std::string> names;
     auto params = trait.params();
     for (const auto &param : params)
         random_distribution_test_perf<MCKLDistType>(N, M, param, nwid, twid);
 }
 
-template <typename RealType>
-inline void random_distribution_perf_real(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
-{
-    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(perf);
-}
-
-template <typename IntType>
-inline void random_distribution_perf_int(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
-{
-    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(perf);
-}
-
+template <template <typename> class DistributionType>
 inline void random_distribution_perf(
-    std::size_t N, std::size_t M, int argc, char **argv)
+    std::size_t N, std::size_t M, int nwid, int twid, std::true_type)
 {
-    mckl::Vector<std::string> distname;
-    for (int i = 0; i != argc; ++i)
-        distname.push_back(argv[i]);
+    random_distribution_test_perf<DistributionType<float>>(N, M, nwid, twid);
+    random_distribution_test_perf<DistributionType<double>>(N, M, nwid, twid);
+}
+
+template <template <typename> class DistributionType>
+inline void random_distribution_perf(
+    std::size_t N, std::size_t M, int nwid, int twid, std::false_type)
+{
+    random_distribution_test_perf<DistributionType<std::int32_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_perf<DistributionType<std::uint32_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_perf<DistributionType<std::int64_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_perf<DistributionType<std::uint64_t>>(
+        N, M, nwid, twid);
+}
+
+template <template <typename> class DistributionType, typename ResultType>
+inline void random_distribution_perf(std::size_t N, std::size_t M)
+{
+    N = std::max(N, static_cast<std::size_t>(10000));
+    M = std::max(M, static_cast<std::size_t>(10));
 
     int nwid = 30;
     int twid = 12;
@@ -203,9 +203,7 @@ inline void random_distribution_perf(
     std::cout << std::setw(twid + 3) << std::right << "Deterministics";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
-    random_distribution_perf_real<float>(N, M, nwid, twid, distname);
-    random_distribution_perf_real<double>(N, M, nwid, twid, distname);
-    random_distribution_perf_int<int>(N, M, nwid, twid, distname);
-    random_distribution_perf_int<unsigned>(N, M, nwid, twid, distname);
+    random_distribution_perf<DistributionType>(
+        N, M, nwid, twid, std::is_floating_point<ResultType>());
     std::cout << std::string(lwid, '-') << std::endl;
 }

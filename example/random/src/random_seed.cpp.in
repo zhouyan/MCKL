@@ -45,6 +45,7 @@ int main(int argc, char **argv)
             ++argv;
         }
     }
+
     // clang-format off
     random_seed<@RNGType@>(N, "@RNGName@");
     // clang-format on

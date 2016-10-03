@@ -98,8 +98,8 @@ inline void random_seed(std::size_t N, const std::string &name)
     std::cout << std::endl;
     std::cout << std::string(40, '-') << std::endl;
     std::cout << std::setw(20) << std::left << name;
-    std::cout << std::setw(10) << std::right << (pass1 ? "Passed" : "Failed");
-    std::cout << std::setw(10) << std::right << (pass4 ? "Passed" : "Failed");
+    std::cout << std::setw(10) << std::right << random_pass(pass1);
+    std::cout << std::setw(10) << std::right << random_pass(pass4);
     std::cout << std::endl;
     std::cout << std::string(40, '-') << std::endl;
 }

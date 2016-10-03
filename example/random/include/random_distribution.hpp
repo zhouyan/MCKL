@@ -38,55 +38,6 @@
 #include <mckl/random/distribution.hpp>
 #include "random_common.hpp"
 
-#define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(test)               \
-    random_distribution_test_##test<mckl::ArcsineDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::BetaDistribution<RealType>>(        \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::CauchyDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::ChiSquaredDistribution<RealType>>(  \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::ExponentialDistribution<RealType>>( \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<                                          \
-        mckl::ExtremeValueDistribution<RealType>>(                            \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::FisherFDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::GammaDistribution<RealType>>(       \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LaplaceDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LevyDistribution<RealType>>(        \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LogisticDistribution<RealType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LognormalDistribution<RealType>>(   \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::NormalDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::ParetoDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::RayleighDistribution<RealType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::StableDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::StudentTDistribution<RealType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::U01Distribution<RealType>>(         \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::UniformRealDistribution<RealType>>( \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::WeibullDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);
-
-#define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(test)                \
-    random_distribution_test_##test<mckl::GeometricDistribution<IntType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::UniformIntDistribution<IntType>>(   \
-        N, M, nwid, twid, distname);
-
 template <typename RNGType>
 class RNG01 : public RNGType
 {
@@ -1313,17 +1264,10 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
 }
 
 template <typename MCKLDistType>
-inline void random_distribution_test_pval(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
+inline void random_distribution_test_pval(
+    std::size_t N, std::size_t M, int nwid, int twid)
 {
     RandomDistributionTrait<MCKLDistType> trait;
-    if (!distname.empty()) {
-        auto iter =
-            std::find(distname.begin(), distname.end(), trait.distname());
-        if (iter == distname.end())
-            return;
-    }
-
     mckl::Vector<std::string> names;
     std::array<mckl::Vector<double>, 6> pval;
     auto params = trait.params();
@@ -1332,37 +1276,39 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     random_distribution_summary_pval(names, pval, nwid, twid);
 }
 
-template <typename RealType>
-inline void random_distribution_pval_real(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
+template <template <typename> class DistributionType>
+inline void random_distribution_pval(
+    std::size_t N, std::size_t M, int nwid, int twid, std::true_type)
 {
-    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(pval);
+    random_distribution_test_pval<DistributionType<float>>(N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<double>>(N, M, nwid, twid);
 }
 
-template <typename IntType>
-inline void random_distribution_pval_int(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
+template <template <typename> class DistributionType>
+inline void random_distribution_pval(
+    std::size_t N, std::size_t M, int nwid, int twid, std::false_type)
 {
-    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(pval);
+    random_distribution_test_pval<DistributionType<std::int32_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<std::uint32_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<std::int64_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<std::uint64_t>>(
+        N, M, nwid, twid);
 }
 
-inline void random_distribution(
-    std::size_t N, std::size_t M, int argc, char **argv)
+template <template <typename> class DistributionType, typename ResultType>
+inline void random_distribution(std::size_t N, std::size_t M)
 {
-    mckl::Vector<std::string> distname;
-    for (int i = 0; i != argc; ++i)
-        distname.push_back(argv[i]);
-
     N = std::max(N, static_cast<std::size_t>(10000));
     M = std::max(M, static_cast<std::size_t>(10));
 
     int nwid = 30;
     int twid = 12;
 
-    random_distribution_pval_real<float>(N, M, nwid, twid, distname);
-    random_distribution_pval_real<double>(N, M, nwid, twid, distname);
-    random_distribution_pval_int<int>(N, M, nwid, twid, distname);
-    random_distribution_pval_int<unsigned>(N, M, nwid, twid, distname);
+    random_distribution_pval<DistributionType>(
+        N, M, nwid, twid, std::is_floating_point<ResultType>());
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
