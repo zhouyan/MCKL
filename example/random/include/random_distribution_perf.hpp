@@ -277,10 +277,10 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
 #endif
 #endif
 
-    mckl::Vector<MCKLDistType> dist_mckl(P,
-        random_distribution_init<MCKLDistType>(param));
-    mckl::Vector<std_type> dist_std(P,
-        random_distribution_init<std_type>(param));
+    mckl::Vector<MCKLDistType> dist_mckl(
+        P, random_distribution_init<MCKLDistType>(param));
+    mckl::Vector<std_type> dist_std(
+        P, random_distribution_init<std_type>(param));
     bool pass = true;
 
     mckl::Vector<result_type> r1(N * P);
