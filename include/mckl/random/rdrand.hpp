@@ -105,25 +105,13 @@ class RDRANDEngine
     public:
     using result_type = ResultType;
 
-    private:
-    template <typename T>
-    using is_seed_seq =
-        internal::is_seed_seq<T, RDRANDEngine<ResultType, NTrialMax>>;
-
-    public:
-    explicit RDRANDEngine(unsigned long long = 0) {}
-
-    template <typename SeedSeq>
-    explicit RDRANDEngine(SeedSeq &,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+    template <typename Seed>
+    explicit RDRANDEngine(const Seed &)
     {
     }
 
-    void seed(unsigned long long) {}
-
-    template <typename SeedSeq>
-    void seed(SeedSeq &,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+    template <typename Seed>
+    void seed(const Seed &)
     {
     }
 

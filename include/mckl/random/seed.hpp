@@ -39,41 +39,23 @@
 namespace mckl
 {
 
-namespace internal
-{
-
-template <typename RNGType, typename ResultType, typename StateType>
-inline ResultType seed_enc(const StateType &state)
-{
-    static_assert(sizeof(StateType) == sizeof(ResultType),
-        "**seed_enc** state and result have different sizes");
-
-    static_assert(sizeof(StateType) == sizeof(typename RNGType::ctr_type),
-        "**seed_enc** state and RNGType::ctr_type have different sizes");
-
-    union {
-        StateType state;
-        ResultType result;
-        typename RNGType::ctr_type ctr;
-    } buf;
-
-    buf.state = state;
-    RNGType rng(0);
-    rng.enc(buf.ctr, buf.ctr);
-
-    return buf.result;
-}
-
-} // namespace mckl::internal
-
-/// \brief Seed generator for use with RNG accepting scalar seeds
-template <typename ResultType, typename ID = ResultType, bool Randomize = true>
+/// \brief Seed generator
+/// \ingroup Random
+template <typename ResultType,
+    typename ID = std::integral_constant<std::size_t, sizeof(ResultType)>,
+    bool Randomize = true>
 class SeedGenerator
 {
-    static_assert(std::is_unsigned<ResultType>::value,
-        "**SeedGenerator** ResultType is not an unsigned integer type");
+    static_assert(sizeof(ResultType) % sizeof(std::uint32_t) == 0,
+        "**SeedGenerator** size of ResultType is not a multiple of uint32_t");
 
     public:
+    /// \brief The type of the internal seed
+    using seed_type =
+        typename std::conditional<sizeof(ResultType) % sizeof(std::uint64_t) ==
+                0,
+            std::uint64_t, std::uint32_t>::type;
+
     using result_type = ResultType;
 
     SeedGenerator(const SeedGenerator<ResultType, ID, Randomize> &) = delete;
@@ -84,151 +66,6 @@ class SeedGenerator
     static SeedGenerator<ResultType, ID, Randomize> &instance()
     {
         static SeedGenerator<ResultType, ID, Randomize> seed;
-
-        return seed;
-    }
-
-    /// \brief Set the internal seed
-    void set(result_type s) { seed_ = s; }
-
-    /// \brief Get the next seed
-    result_type get()
-    {
-        result_type s = seed_.fetch_add(1);
-        s %= maxs_;
-        s *= np_;
-        s += rank_;
-
-        return enc(s, std::integral_constant<bool, Randomize>());
-    }
-
-    /// \brief The number of partitions
-    result_type np() const { return np_; }
-
-    /// \brief The rank of this partition
-    result_type rank() const { return rank_; }
-
-    /// \brief Set the number of partitions and the rank of this partition
-    void partition(result_type np, result_type rank)
-    {
-        runtime_assert(np > 0,
-            "**SeedGenerator::partition** the number of the partitions is "
-            "zero");
-        if (np < 1)
-            np = 1;
-
-        runtime_assert(np > rank,
-            "**SeedGenerator::partition** the rank is not smaller than the "
-            "number of partitions");
-        if (rank >= np)
-            rank = 0;
-
-        result_type maxs = std::numeric_limits<result_type>::max();
-        if (np > 1)
-            maxs = (maxs - rank) / np + 1;
-
-        np_ = np;
-        rank_ = rank;
-        maxs_ = maxs;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ResultType, ID, Randomize> &sg)
-    {
-        if (!os)
-            return os;
-
-        os << sg.np_ << ' ';
-        os << sg.rank_ << ' ';
-        os << sg.maxs_ << ' ';
-        os << sg.seed_ << ' ';
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ResultType, ID, Randomize> &sg)
-    {
-        if (!is)
-            return is;
-
-        result_type np;
-        result_type rank;
-        result_type maxs;
-        result_type seed;
-        is >> std::ws >> np;
-        is >> std::ws >> rank;
-        is >> std::ws >> maxs;
-        is >> std::ws >> seed;
-
-        if (is) {
-            sg.np_ = np;
-            sg.rank_ = rank;
-            sg.maxs_ = maxs;
-            sg.seed_ = seed;
-        }
-
-        return is;
-    }
-
-    protected:
-    SeedGenerator() : seed_(1) { partition(1, 0); }
-
-    private:
-    result_type np_;
-    result_type rank_;
-    result_type maxs_;
-    std::atomic<result_type> seed_;
-
-    result_type enc(result_type s, std::false_type) { return s; }
-
-    result_type enc(result_type s, std::true_type)
-    {
-        return enc(s, std::integral_constant<int,
-                          std::numeric_limits<result_type>::digits>());
-    }
-
-    template <std::size_t D>
-    result_type enc(result_type s, std::integral_constant<int, D>)
-    {
-        return enc(s, std::false_type());
-    }
-
-    result_type enc(result_type s, std::integral_constant<int, 32>)
-    {
-        return s;
-    }
-
-    result_type enc(result_type s, std::integral_constant<int, 64>)
-    {
-        return internal::seed_enc<Threefry2x32, result_type>(s);
-    }
-}; // class SeedGenerator
-
-/// \brief Seed generator for RNG with fixed width keys as seeds
-template <typename T, std::size_t K, typename ID, bool Randomize>
-class SeedGenerator<std::array<T, K>, ID, Randomize>
-{
-    public:
-    using seed_type = typename std::conditional<K != 0 &&
-            sizeof(T) * K % sizeof(std::uint64_t) == 0,
-        std::uint64_t, T>::type;
-
-    using result_type = std::array<T, K>;
-
-    SeedGenerator(
-        const SeedGenerator<std::array<T, K>, ID, Randomize> &) = delete;
-
-    SeedGenerator<std::array<T, K>, ID, Randomize> &operator=(
-        const SeedGenerator<std::array<T, K>, ID, Randomize> &) = delete;
-
-    static SeedGenerator<std::array<T, K>, ID, Randomize> &instance()
-    {
-        static SeedGenerator<std::array<T, K>, ID, Randomize> seed;
 
         return seed;
     }
@@ -254,7 +91,7 @@ class SeedGenerator<std::array<T, K>, ID, Randomize>
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<std::array<T, K>, ID, Randomize> &sg)
+        const SeedGenerator<ResultType, ID, Randomize> &sg)
     {
         if (!os)
             return os;
@@ -270,7 +107,7 @@ class SeedGenerator<std::array<T, K>, ID, Randomize>
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<std::array<T, K>, ID, Randomize> &sg)
+        SeedGenerator<ResultType, ID, Randomize> &sg)
     {
         if (!is)
             return is;
@@ -298,10 +135,7 @@ class SeedGenerator<std::array<T, K>, ID, Randomize>
     SeedGenerator() : seed_(1) { partition(1, 0); }
 
     private:
-    static constexpr std::size_t M_ =
-        K != 0 && sizeof(T) * K % sizeof(std::uint64_t) == 0 ?
-        sizeof(T) * K / sizeof(std::uint64_t) :
-        K;
+    static constexpr std::size_t M_ = sizeof(result_type) % sizeof(seed_type);
 
     seed_type np_;
     seed_type rank_;
@@ -345,7 +179,7 @@ class SeedGenerator<std::array<T, K>, ID, Randomize>
         k.front() = s;
         k.back() = rank_;
 
-        return enc(k, std::integral_constant<bool, Randomize>());
+        return randomize(k, std::integral_constant<bool, Randomize>());
     }
 
     result_type get(std::false_type)
@@ -356,10 +190,10 @@ class SeedGenerator<std::array<T, K>, ID, Randomize>
         s += rank_;
         std::array<seed_type, M_> k = {{s}};
 
-        return enc(k, std::integral_constant<bool, Randomize>());
+        return randomize(k, std::integral_constant<bool, Randomize>());
     }
 
-    result_type enc(const std::array<seed_type, M_> &k, std::false_type)
+    result_type randomize(const std::array<seed_type, M_> &k, std::false_type)
     {
         union {
             result_type result;
@@ -371,55 +205,71 @@ class SeedGenerator<std::array<T, K>, ID, Randomize>
         return buf.result;
     }
 
-    result_type enc(const std::array<seed_type, M_> &k, std::true_type)
+    result_type randomize(const std::array<seed_type, M_> &k, std::true_type)
     {
-        return enc(k,
-            std::integral_constant<int, std::numeric_limits<T>::digits * K>());
+        return randomize(
+            k, std::integral_constant<int,
+                   std::numeric_limits<seed_type>::digits * M_>());
     }
 
     template <int D>
-    result_type enc(
+    result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, D>)
     {
-        return enc(k, std::false_type());
+        return randomize(k, std::false_type());
     }
 
-    result_type enc(
+    result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, 64>)
     {
-        return internal::seed_enc<Threefry2x32, result_type>(k);
+        return randomize<Threefry2x32>(k);
     }
 
-    result_type enc(
+    result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, 128>)
     {
-        return internal::seed_enc<Threefry2x64, result_type>(k);
+        return randomize<Threefry2x64>(k);
     }
 
-    result_type enc(
+    result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, 256>)
     {
-        return internal::seed_enc<Threefry4x64, result_type>(k);
+        return randomize<Threefry4x64>(k);
     }
 
-    result_type enc(
+    result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, 512>)
     {
-        return internal::seed_enc<Threefry8x64, result_type>(k);
+        return randomize<Threefry8x64>(k);
     }
 
-    result_type enc(
+    result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, 1024>)
     {
-        return internal::seed_enc<Threefry16x64, result_type>(k);
+        return randomize<Threefry16x64>(k);
+    }
+
+    template <typename RNGType>
+    result_type randomize(const std::array<seed_type, M_> &k)
+    {
+        union {
+            typename RNGType::ctr_type ctr;
+            std::array<seed_type, M_> k;
+            result_type result;
+        } buf;
+
+        buf.k = k;
+        RNGType rng(0);
+        rng.enc(buf.ctr, buf.ctr);
+
+        return buf.result;
     }
 }; // class Seed
 
-/// \brief Seeding RNG engines
+/// \brief RNG default seed generator
 /// \ingroup Random
-template <typename RNGType, typename ID = typename SeedType<RNGType>::type,
-    bool Randomize = true>
-using Seed = SeedGenerator<typename SeedType<RNGType>::type, ID, Randomize>;
+template <typename RNGType>
+using Seed = SeedGenerator<typename SeedType<RNGType>::type>;
 
 } // namespace mckl
 
