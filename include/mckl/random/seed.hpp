@@ -74,6 +74,7 @@ class SeedGenerator
         "**SeedGenerator** ResultType is not an unsigned integer type");
 
     public:
+    using seed_type = ResultType;
     using result_type = ResultType;
 
     SeedGenerator(const SeedGenerator<ResultType, ID, Randomize> &) = delete;
@@ -89,12 +90,12 @@ class SeedGenerator
     }
 
     /// \brief Set the internal seed
-    void set(result_type s) { seed_ = s; }
+    void set(seed_type s) { seed_ = s; }
 
     /// \brief Get the next seed
     result_type get()
     {
-        result_type s = seed_.fetch_add(1);
+        seed_type s = seed_.fetch_add(1);
         s %= maxs_;
         s *= np_;
         s += rank_;
@@ -103,13 +104,13 @@ class SeedGenerator
     }
 
     /// \brief The number of partitions
-    result_type np() const { return np_; }
+    seed_type np() const { return np_; }
 
     /// \brief The rank of this partition
-    result_type rank() const { return rank_; }
+    seed_type rank() const { return rank_; }
 
     /// \brief Set the number of partitions and the rank of this partition
-    void partition(result_type np, result_type rank)
+    void partition(seed_type np, seed_type rank)
     {
         runtime_assert(np > 0,
             "**SeedGenerator::partition** the number of the partitions is "
@@ -123,7 +124,7 @@ class SeedGenerator
         if (rank >= np)
             rank = 0;
 
-        result_type maxs = std::numeric_limits<result_type>::max();
+        seed_type maxs = std::numeric_limits<seed_type>::max();
         if (np > 1)
             maxs = (maxs - rank) / np + 1;
 
@@ -156,10 +157,10 @@ class SeedGenerator
         if (!is)
             return is;
 
-        result_type np;
-        result_type rank;
-        result_type maxs;
-        result_type seed;
+        seed_type np;
+        seed_type rank;
+        seed_type maxs;
+        seed_type seed;
         is >> std::ws >> np;
         is >> std::ws >> rank;
         is >> std::ws >> maxs;
@@ -179,31 +180,28 @@ class SeedGenerator
     SeedGenerator() : seed_(1) { partition(1, 0); }
 
     private:
-    result_type np_;
-    result_type rank_;
-    result_type maxs_;
-    std::atomic<result_type> seed_;
+    seed_type np_;
+    seed_type rank_;
+    seed_type maxs_;
+    std::atomic<seed_type> seed_;
 
-    result_type enc(result_type s, std::false_type) { return s; }
+    result_type enc(seed_type s, std::false_type) { return s; }
 
-    result_type enc(result_type s, std::true_type)
+    result_type enc(seed_type s, std::true_type)
     {
         return enc(s, std::integral_constant<int,
-                          std::numeric_limits<result_type>::digits>());
+                          std::numeric_limits<seed_type>::digits>());
     }
 
     template <std::size_t D>
-    result_type enc(result_type s, std::integral_constant<int, D>)
+    result_type enc(seed_type s, std::integral_constant<int, D>)
     {
         return enc(s, std::false_type());
     }
 
-    result_type enc(result_type s, std::integral_constant<int, 32>)
-    {
-        return s;
-    }
+    result_type enc(seed_type s, std::integral_constant<int, 32>) { return s; }
 
-    result_type enc(result_type s, std::integral_constant<int, 64>)
+    result_type enc(seed_type s, std::integral_constant<int, 64>)
     {
         return internal::seed_enc<Threefry2x32, result_type>(s);
     }
