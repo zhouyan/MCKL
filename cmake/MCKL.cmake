@@ -392,7 +392,7 @@ FUNCTION(MCKL_ADD_TEST_RNG basename testname)
         STRING(TOLOWER ${RNG} rng)
         CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
             ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${rng}.cpp)
-        MCKL_ADD_TEST(${basename} ${testname}_${rng})
+        MCKL_ADD_TEST(${basename} ${testname}_${rng} ${ARGN})
         ADD_DEPENDENCIES(${basename}_${testname}
             ${basename}_${testname}_${rng})
         ADD_DEPENDENCIES(${basename}_${testname}-check
@@ -407,7 +407,7 @@ FUNCTION(MCKL_ADD_TEST_RNG basename testname)
         STRING(TOLOWER ${RNG} rng)
         CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
             ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${rng}.cpp)
-        MCKL_ADD_TEST(${basename} ${testname}_${rng})
+        MCKL_ADD_TEST(${basename} ${testname}_${rng} ${ARGN})
         ADD_DEPENDENCIES(${basename}_${testname}
             ${basename}_${testname}_${rng})
         ADD_DEPENDENCIES(${basename}_${testname}-check
@@ -486,7 +486,7 @@ FUNCTION(MCKL_ADD_TEST_DISTRIBUTION basename testname)
         STRING(TOLOWER ${Distribution} dist)
         CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
             ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${dist}.cpp)
-        MCKL_ADD_TEST(${basename} ${testname}_${dist})
+        MCKL_ADD_TEST(${basename} ${testname}_${dist} ${ARGN})
         ADD_DEPENDENCIES(${basename}_${testname}
             ${basename}_${testname}_${dist})
         ADD_DEPENDENCIES(${basename}_${testname}-check
@@ -494,7 +494,7 @@ FUNCTION(MCKL_ADD_TEST_DISTRIBUTION basename testname)
         IF(MKL_FOUND)
             CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
                 ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${dist}_novml.cpp)
-            MCKL_ADD_TEST(${basename} ${testname}_${dist}_novml)
+            MCKL_ADD_TEST(${basename} ${testname}_${dist}_novml ${ARGN})
             SET_TARGET_PROPERTIES(${basename}_${testname}_${dist}_novml
                 PROPERTIES COMPILE_FLAGS "-DMCKL_USE_MKL_VML=0")
             ADD_DEPENDENCIES(${basename}_${testname}
