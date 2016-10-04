@@ -307,3 +307,200 @@ MESSAGE(STATUS "=================== Libraries ========================")
 FOREACH(lib ${MCKL_LINK_LIBRARIES})
     MESSAGE(STATUS "${lib}")
 ENDFOREACH(lib ${MCKL_LINK_LIBRARIES})
+
+##############################################################################
+# RNGs and Distributions
+##############################################################################
+
+SET(STD_RNG
+    mt19937
+    mt19937_64
+    minstd_rand0
+    minstd_rand
+    ranlux24_base
+    ranlux48_base
+    ranlux24
+    ranlux48
+    knuth_b)
+
+SET(MCKL_RNG_PHILOX
+    Philox2x32 Philox2x32_64
+    Philox4x32 Philox4x32_64
+    Philox2x64 Philox2x64_64
+    Philox4x64 Philox4x64_64)
+
+SET(MCKL_RNG_THREEFRY
+    Threefry2x32  Threefry2x32_64
+    Threefry4x32  Threefry4x32_64
+    Threefry2x64  Threefry2x64_64
+    Threefry4x64  Threefry4x64_64
+    Threefry8x64  Threefry8x64_64
+    Threefry16x64 Threefry16x64_64
+    Threefish256  Threefish256_64
+    Threefish512  Threefish512_64
+    Threefish1024 Threefish1024_64)
+
+IF(AESNI_FOUND)
+    SET(MCKL_RNG_AESNI
+        AES128 AES128_64
+        AES192 AES192_64
+        AES256 AES256_64
+        ARS    ARS_64)
+ENDIF(AESNI_FOUND)
+
+IF(MKL_FOUND)
+    SET(MCKL_RNG_MKL
+        MKL_MCG59          MKL_MCG59_64
+        MKL_MT19937        MKL_MT19937_64
+        MKL_MT2203         MKL_MT2203_64
+        MKL_SFMT19937      MKL_SFMT19937_64
+        MKL_PHILOX4X32X10  MKL_PHILOX4X32X10_64)
+ENDIF(MKL_FOUND)
+
+IF(AESNI_FOUND AND MKL_FOUND)
+    SET(MCKL_RNG_MKL ${MCKL_RNG_MKL} MKL_ARS5 MKL_ARS5_64)
+ENDIF(AESNI_FOUND AND MKL_FOUND)
+
+IF(RDRAND_FOUND AND MKL_FOUND)
+    SET(MCKL_RNG_MKL ${MCKL_RNG_MKL} MKL_NONDETERM MKL_NONDETERM_64)
+ENDIF(RDRAND_FOUND AND MKL_FOUND)
+
+IF(RDRAND_FOUND)
+    SET(MCKL_RNG_RDRAND RDRAND16 RDRAND32 RDRAND64)
+ENDIF(RDRAND_FOUND)
+
+SET(MCKL_RNG
+    ${MCKL_RNG_PHILOX}
+    ${MCKL_RNG_THREEFRY}
+    ${MCKL_RNG_AESNI}
+    ${MCKL_RNG_MKL}
+    ${MCKL_RNG_RDRAND})
+
+SET(MCKL_DISTRIBUTION Arcsine Beta Cauchy ChiSquared Exponential ExtremeValue
+    FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto Rayleigh Stable
+    StudentT U01 UniformReal Weibull Geometric UniformInt)
+
+FUNCTION(MCKL_ADD_TEST_RNG basename testname)
+    ADD_CUSTOM_TARGET(${basename}_${testname})
+    ADD_CUSTOM_TARGET(${basename}_${testname}-check)
+    ADD_DEPENDENCIES(${basename} ${basename}_${testname})
+    ADD_DEPENDENCIES(${basename}-check ${basename}_${testname}-check)
+
+    FOREACH(RNG ${MCKL_RNG})
+        SET(RNGType ::mckl::${RNG})
+        SET(RNGName ${RNG})
+        STRING(TOLOWER ${RNG} rng)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
+            ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${rng}.cpp)
+        MCKL_ADD_TEST(${basename} ${testname}_${rng} ${ARGN})
+        ADD_DEPENDENCIES(${basename}_${testname}
+            ${basename}_${testname}_${rng})
+        ADD_DEPENDENCIES(${basename}_${testname}-check
+            ${basename}_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG})
+
+    ADD_CUSTOM_TARGET(${basename}_${testname}_std)
+    ADD_CUSTOM_TARGET(${basename}_${testname}_std-check)
+    FOREACH(RNG ${STD_RNG})
+        SET(RNGType std::${RNG})
+        SET(RNGName ${RNG})
+        STRING(TOLOWER ${RNG} rng)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
+            ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${rng}.cpp)
+        MCKL_ADD_TEST(${basename} ${testname}_${rng} ${ARGN})
+        ADD_DEPENDENCIES(${basename}_${testname}
+            ${basename}_${testname}_${rng})
+        ADD_DEPENDENCIES(${basename}_${testname}-check
+            ${basename}_${testname}_${rng}-check)
+        ADD_DEPENDENCIES(${basename}_${testname}_std
+            ${basename}_${testname}_${rng})
+        ADD_DEPENDENCIES(${basename}_${testname}_std-check
+            ${basename}_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG})
+
+    ADD_CUSTOM_TARGET(${basename}_${testname}_philox)
+    ADD_CUSTOM_TARGET(${basename}_${testname}_philox-check)
+    FOREACH(RNG ${MCKL_RNG_PHILOX})
+        STRING(TOLOWER ${RNG} rng)
+        ADD_DEPENDENCIES(${basename}_${testname}_philox
+            ${basename}_${testname}_${rng})
+        ADD_DEPENDENCIES(${basename}_${testname}_philox-check
+            ${basename}_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG_PHILOX})
+
+    ADD_CUSTOM_TARGET(${basename}_${testname}_threefry)
+    ADD_CUSTOM_TARGET(${basename}_${testname}_threefry-check)
+    FOREACH(RNG ${MCKL_RNG_THREEFRY})
+        STRING(TOLOWER ${RNG} rng)
+        ADD_DEPENDENCIES(${basename}_${testname}_threefry
+            ${basename}_${testname}_${rng})
+        ADD_DEPENDENCIES(${basename}_${testname}_threefry-check
+            ${basename}_${testname}_${rng}-check)
+    ENDFOREACH(RNG ${MCKL_RNG_THREEFRY})
+
+    IF(AESNI_FOUND)
+        ADD_CUSTOM_TARGET(${basename}_${testname}_aesni)
+        ADD_CUSTOM_TARGET(${basename}_${testname}_aesni-check)
+        FOREACH(RNG ${MCKL_RNG_AESNI})
+            STRING(TOLOWER ${RNG} rng)
+            ADD_DEPENDENCIES(${basename}_${testname}_aesni
+                ${basename}_${testname}_${rng})
+            ADD_DEPENDENCIES(${basename}_${testname}_aesni-check
+                ${basename}_${testname}_${rng}-check)
+        ENDFOREACH(RNG ${MCKL_RNG_AESNI})
+    ENDIF(AESNI_FOUND)
+
+    IF(MKL_FOUND)
+        ADD_CUSTOM_TARGET(${basename}_${testname}_mkl)
+        ADD_CUSTOM_TARGET(${basename}_${testname}_mkl-check)
+        FOREACH(RNG ${MCKL_RNG_MKL})
+            STRING(TOLOWER ${RNG} rng)
+            ADD_DEPENDENCIES(${basename}_${testname}_mkl
+                ${basename}_${testname}_${rng})
+            ADD_DEPENDENCIES(${basename}_${testname}_mkl-check
+                ${basename}_${testname}_${rng}-check)
+        ENDFOREACH(RNG ${MCKL_RNG_MKL})
+    ENDIF(MKL_FOUND)
+
+    IF(RDRAND_FOUND)
+        ADD_CUSTOM_TARGET(${basename}_${testname}_rdrand)
+        ADD_CUSTOM_TARGET(${basename}_${testname}_rdrand-check)
+        FOREACH(RNG ${MCKL_RNG_RDRAND})
+            STRING(TOLOWER ${RNG} rng)
+            ADD_DEPENDENCIES(${basename}_${testname}_rdrand
+                ${basename}_${testname}_${rng})
+            ADD_DEPENDENCIES(${basename}_${testname}_rdrand-check
+                ${basename}_${testname}_${rng}-check)
+        ENDFOREACH(RNG ${MCKL_RNG_RDRAND})
+    ENDIF(RDRAND_FOUND)
+ENDFUNCTION(MCKL_ADD_TEST_RNG basename testname)
+
+FUNCTION(MCKL_ADD_TEST_DISTRIBUTION basename testname)
+    ADD_CUSTOM_TARGET(${basename}_${testname})
+    ADD_CUSTOM_TARGET(${basename}_${testname}-check)
+    ADD_DEPENDENCIES(${basename} ${basename}_${testname})
+    ADD_DEPENDENCIES(${basename}-check ${basename}_${testname}-check)
+
+    FOREACH(Distribution ${MCKL_DISTRIBUTION})
+        SET(DistributionType mckl::${Distribution}Distribution)
+        STRING(TOLOWER ${Distribution} dist)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
+            ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${dist}.cpp)
+        MCKL_ADD_TEST(${basename} ${testname}_${dist} ${ARGN})
+        ADD_DEPENDENCIES(${basename}_${testname}
+            ${basename}_${testname}_${dist})
+        ADD_DEPENDENCIES(${basename}_${testname}-check
+            ${basename}_${testname}_${dist}-check)
+        IF(MKL_FOUND)
+            CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/${basename}_${testname}.cpp.in
+                ${PROJECT_SOURCE_DIR}/src/${basename}_${testname}_${dist}_novml.cpp)
+            MCKL_ADD_TEST(${basename} ${testname}_${dist}_novml ${ARGN})
+            SET_TARGET_PROPERTIES(${basename}_${testname}_${dist}_novml
+                PROPERTIES COMPILE_FLAGS "-DMCKL_USE_MKL_VML=0")
+            ADD_DEPENDENCIES(${basename}_${testname}
+                ${basename}_${testname}_${dist}_novml)
+            ADD_DEPENDENCIES(${basename}_${testname}-check
+                ${basename}_${testname}_${dist}_novml-check)
+        ENDIF(MKL_FOUND)
+    ENDFOREACH(Distribution ${MCKL_DISTRIBUTION})
+ENDFUNCTION(MCKL_ADD_TEST_DISTRIBUTION basename testname)

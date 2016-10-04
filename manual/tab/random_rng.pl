@@ -109,17 +109,17 @@ for my $k (@keys) {
     }
 }
 
+if ($run or $build) {
+    &build("llvm");
+    &build("gnu");
+    &build("intel");
+    exit if (not $run);
+}
+
 if ($run) {
     &run("llvm");
     &run("gnu");
     &run("intel");
-    exit;
-}
-
-if ($build) {
-    &build("llvm");
-    &build("gnu");
-    &build("intel");
     exit;
 }
 
@@ -158,6 +158,19 @@ for (@keys) {
 say $texfile '\end{document}';
 close $texfile;
 `lualatex -interaction=batchmode random_rng_$simd.tex` if $pdf;
+
+sub build
+{
+    my $dir = $build_dir{$_[0]};
+    say $dir;
+    if ($all) {
+        `$make -C $dir random_rng 2>&1`;
+    } else {
+        my @target;
+        push @target, "random_rng_\L$_" for (@rngs);
+        `$make -C $dir @target`;
+    }
+}
 
 sub run
 {
@@ -199,13 +212,6 @@ sub run
     }
     say '-' x length($header[0]);
     close $txtfile if $all and $write;
-}
-
-sub build
-{
-    my $dir = $build_dir{$_[0]};
-    say $dir;
-    `$make -C $dir random_rng 2>&1`;
 }
 
 sub read

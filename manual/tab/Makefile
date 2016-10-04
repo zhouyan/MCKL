@@ -44,13 +44,7 @@ pdf :
 	./random_distribution.pl --pdf --simd avx2
 
 rng :
-	./random_rng.pl --build
 	./random_rng.pl --run --write
-	./random_rng.pl --simd sse2
-	./random_rng.pl --simd avx2
 
 distribution :
-	./random_distribution.pl --build
 	./random_distribution.pl --run --write
-	./random_distribution.pl --simd sse2
-	./random_distribution.pl --simd avx2
