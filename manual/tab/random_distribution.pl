@@ -113,17 +113,17 @@ for my $k (@keys) {
     }
 }
 
+if ($run or $build) {
+    &build("llvm");
+    &build("gnu");
+    &build("intel");
+    exit if (not $run);
+}
+
 if ($run) {
     &run("llvm");
     &run("gnu");
     &run("intel");
-    exit;
-}
-
-if ($build) {
-    &build("llvm");
-    &build("gnu");
-    &build("intel");
     exit;
 }
 
@@ -162,6 +162,20 @@ say $texfile '\end{document}';
 close $texfile;
 `lualatex -interaction=batchmode random_distribution_$simd.tex` if $pdf;
 
+sub build
+{
+    my $dir = $build_dir{$_[0]};
+    say $dir;
+    if ($all) {
+        `$make -C $dir random_distribution_perf 2>&1`;
+    } else {
+        my @target;
+        push @target, "random_distribution_perf_\L$_" for (@dists);
+        push @target, "random_distribution_perf_\L${_}_novml" for (@dists);
+        `$make -C $dir @target`;
+    }
+}
+
 sub run
 {
     my $dir = $build_dir{$_[0]};
@@ -197,13 +211,6 @@ sub run
         }
     }
     close $txtfile if $all and $write;
-}
-
-sub build
-{
-    my $dir = $build_dir{$_[0]};
-    say $dir;
-    `$make -C $dir random_distribution_perf 2>&1`;
 }
 
 sub read
