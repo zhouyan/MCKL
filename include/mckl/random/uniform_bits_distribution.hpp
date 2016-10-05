@@ -69,12 +69,20 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
         std::numeric_limits<typename RNGType::result_type>::digits;
     static constexpr std::size_t ualign = alignof(UIntType);
     static constexpr std::size_t talign = alignof(UIntType);
+    static constexpr bool direct =
+        // Zero min, no need to shift to right
+        RNGType::min() == 0 &&
+        // Full range, no need to discard high bits
+        RNGTraits<RNGType>::is_full_range &&
+        // All ouptut of rng() are random bits
+        rbits == tbits &&
+        // One or multiple rng() can fill exactly one output integer
+        ubits >= tbits && ubits % tbits == 0 &&
+        // Alignment requirement
+        ualign >= talign && ualign % talign == 0;
 
-    uniform_bits_distribution_impl(rng, n, r,
-        std::integral_constant<bool,
-            (RNGType::min() == 0 && RNGTraits<RNGType>::is_full_range &&
-                rbits == tbits && ubits >= tbits && ubits % tbits == 0 &&
-                ualign >= talign && ualign % talign == 0)>());
+    uniform_bits_distribution_impl(
+        rng, n, r, std::integral_constant<bool, direct>());
 }
 
 template <typename UIntType, typename RNGType>
@@ -111,8 +119,15 @@ class UniformBitsDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &)
     {
-        return generate(rng,
-            std::integral_constant<bool, RNGTraits<RNGType>::is_full_range>());
+        static constexpr int w = std::numeric_limits<UIntType>::digits;
+        static constexpr int r = RNGTraits<RNGType>::bits;
+        static constexpr bool patch =
+            // rng() - RNGType::min() uniform on {0,...,2^r - 1}
+            RNGTraits<RNGType>::is_full_range &&
+            // One or multiple rng() can fill exactly one output integer
+            (w % r == 0 || r >= w);
+
+        return generate(rng, std::integral_constant<bool, patch>());
     }
 
     template <typename RNGType>
