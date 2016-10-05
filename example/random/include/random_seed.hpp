@@ -36,6 +36,22 @@
 #include "random_common.hpp"
 
 template <typename ResultType>
+inline std::uint32_t random_seed_val(const ResultType &s)
+{
+    static constexpr std::size_t M =
+        sizeof(ResultType) / sizeof(std::uint32_t);
+
+    union {
+        std::array<std::uint32_t, M> v;
+        ResultType s;
+    } buf;
+
+    buf.s = s;
+
+    return std::get<0>(buf.v);
+}
+
+template <typename ResultType>
 inline void random_seed(std::size_t N, const std::string &name)
 {
     using result_type = typename mckl::SeedGenerator<ResultType>::result_type;
@@ -53,6 +69,27 @@ inline void random_seed(std::size_t N, const std::string &name)
     auto &s1r = mckl::SeedGenerator<ResultType, id1, true>::instance();
     auto &s2r = mckl::SeedGenerator<ResultType, id2, true>::instance();
     auto &s3r = mckl::SeedGenerator<ResultType, id3, true>::instance();
+
+    mckl::StopWatch watch1;
+    mckl::StopWatch watch2;
+
+    watch1.start();
+    for (std::size_t i = 0; i != N; ++i) {
+        s0.get();
+        s1.get();
+        s2.get();
+        s3.get();
+    }
+    watch1.stop();
+
+    watch2.start();
+    for (std::size_t i = 0; i != N; ++i) {
+        s0r.get();
+        s1r.get();
+        s2r.get();
+        s3r.get();
+    }
+    watch2.stop();
 
     s0.partition(1, 0);
     s1.partition(1, 0);
@@ -127,24 +164,57 @@ inline void random_seed(std::size_t N, const std::string &name)
     bool pass4 = set4.size() == N * 4;
     bool pass4r = set4r.size() == N * 4;
 
+    std::size_t bytes = N * 4 * sizeof(result_type);
+    double c1 = 1.0 * watch1.cycles() / bytes;
+    double c2 = 1.0 * watch2.cycles() / bytes;
+
     std::cout << std::setw(20) << std::left << name;
+    std::cout << std::setw(10) << std::right << c1;
+    std::cout << std::setw(10) << std::right << c2;
     std::cout << std::setw(15) << std::right << random_pass(pass1);
     std::cout << std::setw(15) << std::right << random_pass(pass4);
     std::cout << std::setw(15) << std::right << random_pass(pass1r);
     std::cout << std::setw(15) << std::right << random_pass(pass4r);
     std::cout << std::endl;
+
+    std::ofstream os(
+        "random_seed_" + std::to_string(sizeof(result_type)) + ".txt");
+    os << std::hex << std::uppercase;
+    os << std::setw(10) << std::right << "s0";
+    os << std::setw(10) << std::right << "s1";
+    os << std::setw(10) << std::right << "s2";
+    os << std::setw(10) << std::right << "s3";
+    os << std::setw(10) << std::right << "s0r";
+    os << std::setw(10) << std::right << "s1r";
+    os << std::setw(10) << std::right << "s2r";
+    os << std::setw(10) << std::right << "s3r";
+    os << '\n';
+    for (std::size_t i = 0; i != N; ++i) {
+        os << std::setw(10) << std::right << random_seed_val(s0.get());
+        os << std::setw(10) << std::right << random_seed_val(s1.get());
+        os << std::setw(10) << std::right << random_seed_val(s2.get());
+        os << std::setw(10) << std::right << random_seed_val(s3.get());
+        os << std::setw(10) << std::right << random_seed_val(s0r.get());
+        os << std::setw(10) << std::right << random_seed_val(s1r.get());
+        os << std::setw(10) << std::right << random_seed_val(s2r.get());
+        os << std::setw(10) << std::right << random_seed_val(s3r.get());
+        os << '\n';
+    }
 }
 
 inline void random_seed(std::size_t N)
 {
-    std::cout << std::string(80, '=') << std::endl;
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << std::string(100, '=') << std::endl;
     std::cout << std::setw(20) << std::left << "ResultType";
+    std::cout << std::setw(10) << std::right << "CPB";
+    std::cout << std::setw(10) << std::right << "CPB (R)";
     std::cout << std::setw(15) << std::right << "np = 1";
     std::cout << std::setw(15) << std::right << "np = 4";
     std::cout << std::setw(15) << std::right << "np = 1 (R)";
     std::cout << std::setw(15) << std::right << "np = 4 (R)";
     std::cout << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
+    std::cout << std::string(100, '-') << std::endl;
     random_seed<std::uint32_t>(N, "uint32_t");
     random_seed<std::uint64_t>(N, "uint64_t");
     random_seed<std::array<std::uint32_t, 1>>(N, "uint32_t[1]");
@@ -157,7 +227,7 @@ inline void random_seed(std::size_t N)
     random_seed<std::array<std::uint64_t, 4>>(N, "uint64_t[4]");
     random_seed<std::array<std::uint64_t, 8>>(N, "uint64_t[8]");
     random_seed<std::array<std::uint64_t, 16>>(N, "uint64_t[16]");
-    std::cout << std::string(80, '-') << std::endl;
+    std::cout << std::string(100, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_SEED_HPP

@@ -220,6 +220,30 @@ class SeedGenerator
     }
 
     result_type randomize(
+        const std::array<seed_type, M_> &k, std::integral_constant<int, 32>)
+    {
+        union {
+            std::array<std::uint16_t, 2> state;
+            std::array<seed_type, M_> k;
+            result_type result;
+        } buf;
+
+        buf.k = k;
+        std::uint16_t x = std::get<0>(buf.state);
+        std::uint16_t y = std::get<1>(buf.state);
+        for (int i = 0; i != 22; ++i) {
+            x = static_cast<std::uint16_t>((x << 9) | (x >> 7));
+            x += y;
+            y = static_cast<std::uint16_t>((y << 2) | (y >> 14));
+            y ^= x;
+        }
+        std::get<0>(buf.state) = x;
+        std::get<1>(buf.state) = y;
+
+        return buf.result;
+    }
+
+    result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, 64>)
     {
         return randomize<Threefry2x32>(k);
