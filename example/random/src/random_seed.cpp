@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_seed.cpp.in
+// MCKL/example/random/src/random_seed.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -46,9 +46,7 @@ int main(int argc, char **argv)
         }
     }
 
-    // clang-format off
-    random_seed<@RNGType@>(N, "@RNGName@");
-    // clang-format on
+    random_seed(N);
 
     return 0;
 }

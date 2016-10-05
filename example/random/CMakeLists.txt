@@ -33,6 +33,7 @@ PROJECT(MCKLExample-random CXX)
 
 MCKL_ADD_EXAMPLE(random)
 
+MCKL_ADD_TEST(random seed)
 MCKL_ADD_TEST(random threefish)
 MCKL_ADD_TEST(random u01)
 IF(AESNI_FOUND)
@@ -43,7 +44,6 @@ IF(MKL_FOUND)
 ENDIF(MKL_FOUND)
 
 MCKL_ADD_TEST_RNG(random rng)
-MCKL_ADD_TEST_RNG(random seed)
 MCKL_ADD_TEST_RNG(random test)
 MCKL_ADD_TEST_RNG(random uniform_bits)
 

@@ -135,7 +135,7 @@ class SeedGenerator
     SeedGenerator() : seed_(1) { partition(1, 0); }
 
     private:
-    static constexpr std::size_t M_ = sizeof(result_type) % sizeof(seed_type);
+    static constexpr std::size_t M_ = sizeof(result_type) / sizeof(seed_type);
 
     seed_type np_;
     seed_type rank_;
