@@ -34,20 +34,18 @@ class ThreefryKBox
 {
     public:
     template <std::size_t I>
-    static T key(const std::array<T, K + 1> &par)
+    static T key(const std::array<T, K + 4> &par)
     {
         static constexpr std::size_t S = N / 4;
 
-        static constexpr T t[3] = {Constants::tweaks[0], Constants::tweaks[1],
-            Constants::tweaks[0] ^ Constants::tweaks[1]};
-
-        static constexpr T p = (I + 1 == K ? S : 0) +
-            (I + 2 == K ? t[(S + 1) % 3] : 0) + (I + 3 == K ? t[S % 3] : 0);
+        const T p = (I + 1 == K ? S : 0) +
+            (I + 2 == K ? std::get<K + 1 + (S + 1) % 3>(par) : 0) +
+            (I + 3 == K ? std::get<K + 1 + (S + 0) % 3>(par) : 0);
 
         return std::get<(S + I) % (K + 1)>(par) + p;
     }
 
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
+    static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
         eval<0>(state, par, std::integral_constant<bool, 0 < K>());
     }
@@ -55,12 +53,12 @@ class ThreefryKBox
     private:
     template <std::size_t>
     static void eval(
-        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
+        std::array<T, K> &, const std::array<T, K + 4> &, std::false_type)
     {
     }
 
     template <std::size_t I>
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par,
+    static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par,
         std::true_type)
     {
         std::get<I>(state) += key<I>(par);
@@ -257,7 +255,7 @@ class ThreefryGeneratorGenericImpl
     public:
     static constexpr bool batch() { return false; }
 
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
+    static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
         round<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
     }
@@ -265,12 +263,12 @@ class ThreefryGeneratorGenericImpl
     private:
     template <std::size_t>
     static void round(
-        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
+        std::array<T, K> &, const std::array<T, K + 4> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void round(std::array<T, K> &state, const std::array<T, K + 1> &par,
+    static void round(std::array<T, K> &state, const std::array<T, K + 4> &par,
         std::true_type)
     {
         sbox<N>(state);
@@ -281,7 +279,7 @@ class ThreefryGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void kbox(std::array<T, K> &state, const std::array<T, K + 1> &par)
+    static void kbox(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
         kbox<N>(state, par,
             std::integral_constant<bool, (N % 4 == 0 && N <= Rounds)>());
@@ -289,12 +287,12 @@ class ThreefryGeneratorGenericImpl
 
     template <std::size_t N>
     static void kbox(
-        std::array<T, K> &, const std::array<T, K + 1> &, std::false_type)
+        std::array<T, K> &, const std::array<T, K + 4> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void kbox(std::array<T, K> &state, const std::array<T, K + 1> &par,
+    static void kbox(std::array<T, K> &state, const std::array<T, K + 4> &par,
         std::true_type)
     {
         ThreefryKBox<T, K, N, Constants>::eval(state, par);

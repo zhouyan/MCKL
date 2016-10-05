@@ -56,8 +56,6 @@ class ThreefryConstantsImpl<T, 2, 32>
     public:
     static constexpr T parity = UINT32_C(0x1BD11BDA);
 
-    static constexpr T tweaks[2] = {0, 0};
-
     static constexpr int rotate[1][8] = {{13, 15, 26, 6, 17, 29, 16, 24}};
 
     static constexpr std::size_t permute[2] = {0, 1};
@@ -68,8 +66,6 @@ class ThreefryConstantsImpl<T, 4, 32>
 {
     public:
     static constexpr T parity = UINT32_C(0x1BD11BDA);
-
-    static constexpr T tweaks[2] = {0, 0};
 
     static constexpr int rotate[2][8] = {
         {10, 11, 13, 23, 6, 17, 25, 18}, {26, 21, 27, 5, 20, 11, 10, 20}};
@@ -83,8 +79,6 @@ class ThreefryConstantsImpl<T, 2, 64>
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
 
-    static constexpr T tweaks[2] = {0, 0};
-
     static constexpr int rotate[1][8] = {{16, 42, 12, 31, 16, 32, 24, 21}};
 
     static constexpr std::size_t permute[2] = {0, 1};
@@ -95,8 +89,6 @@ class ThreefryConstantsImpl<T, 4, 64>
 {
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
-
-    static constexpr T tweaks[2] = {0, 0};
 
     static constexpr int rotate[2][8] = {
         {14, 52, 23, 5, 25, 46, 58, 32}, {16, 57, 40, 37, 33, 12, 22, 32}};
@@ -110,8 +102,6 @@ class ThreefryConstantsImpl<T, 8, 64>
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
 
-    static constexpr T tweaks[2] = {0, 0};
-
     static constexpr int rotate[4][8] = {{46, 33, 17, 44, 39, 13, 25, 8},
         {36, 27, 49, 9, 30, 50, 29, 35}, {19, 14, 36, 54, 34, 10, 39, 56},
         {37, 42, 39, 56, 24, 17, 43, 22}};
@@ -124,8 +114,6 @@ class ThreefryConstantsImpl<T, 16, 64>
 {
     public:
     static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
-
-    static constexpr T tweaks[2] = {0, 0};
 
     static constexpr int rotate[8][8] = {{24, 38, 33, 5, 41, 16, 31, 9},
         {13, 19, 4, 20, 9, 34, 44, 48}, {8, 10, 51, 48, 37, 56, 47, 35},
@@ -221,9 +209,24 @@ class ThreefryGenerator
         static constexpr T p = Constants::parity;
 
         std::copy(key.begin(), key.end(), par_.begin());
-        par_.back() = p;
+        std::get<K>(par_) = p;
         for (std::size_t i = 0; i != key.size(); ++i)
-            par_.back() ^= par_[i];
+            std::get<K>(par_) ^= par_[i];
+        std::get<K + 1>(par_) = 0;
+        std::get<K + 2>(par_) = 0;
+        std::get<K + 3>(par_) = 0;
+    }
+
+    std::pair<T, T> tweak() const
+    {
+        return std::make_pair(std::get<K + 1>(par_), std::get<K + 2>(par_));
+    }
+
+    void tweak(T t0, T t1)
+    {
+        std::get<K + 1>(par_) = t0;
+        std::get<K + 2>(par_) = t1;
+        std::get<K + 3>(par_) = t0 ^ t1;
     }
 
     void enc(const ctr_type &ctr, ctr_type &buffer) const
@@ -309,7 +312,7 @@ class ThreefryGenerator
     }
 
     private:
-    std::array<T, K + 1> par_;
+    std::array<T, K + 4> par_;
 
     template <typename ResultType>
     void generate(ctr_type &ctr, std::size_t n, ResultType *buffer,

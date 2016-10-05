@@ -37,14 +37,14 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
     static constexpr std::size_t blocks() { return 64 / K; }
 
-    static void eval(std::array<T, K> &state, const std::array<T, K + 1> &par)
+    static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
         ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             state, par);
     }
 
     static void eval(std::array<std::array<T, K>, blocks()> &state,
-        const std::array<T, K + 1> &par)
+        const std::array<T, K + 4> &par)
     {
         std::array<__m256i, 16> s;
         __m256i *sptr = nullptr;
@@ -199,14 +199,14 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     static constexpr std::size_t M_ = 16 / K;
 
     template <std::size_t>
-    static void round(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
+    static void round(std::array<__m256i, 16> &, const std::array<T, K + 4> &,
         std::false_type)
     {
     }
 
     template <std::size_t N>
     static void round(std::array<__m256i, 16> &s,
-        const std::array<T, K + 1> &par, std::true_type)
+        const std::array<T, K + 4> &par, std::true_type)
     {
         sbox<N>(s);
         pbox<N>(s);
@@ -216,21 +216,21 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
     template <std::size_t N>
     static void kbox(
-        std::array<__m256i, 16> &s, const std::array<T, K + 1> &par)
+        std::array<__m256i, 16> &s, const std::array<T, K + 4> &par)
     {
         kbox<N>(s, par,
             std::integral_constant<bool, (N % 4 == 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void kbox(std::array<__m256i, 16> &, const std::array<T, K + 1> &,
+    static void kbox(std::array<__m256i, 16> &, const std::array<T, K + 4> &,
         std::false_type)
     {
     }
 
     template <std::size_t N>
     static void kbox(std::array<__m256i, 16> &s,
-        const std::array<T, K + 1> &par, std::true_type)
+        const std::array<T, K + 4> &par, std::true_type)
     {
         std::array<__m256i, K> k;
         set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
@@ -380,14 +380,14 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     }
 
     template <std::size_t, std::size_t>
-    static void set_key(std::array<__m256i, K> &, const std::array<T, K + 1> &,
+    static void set_key(std::array<__m256i, K> &, const std::array<T, K + 4> &,
         std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t I>
     static void set_key(std::array<__m256i, K> &k,
-        const std::array<T, K + 1> &par, std::true_type)
+        const std::array<T, K + 4> &par, std::true_type)
     {
         std::get<I>(k) = _mm256_set1_epi64x(static_cast<MCKL_INT64>(
             ThreefryKBox<T, K, N, Constants>::template key<I>(par)));
