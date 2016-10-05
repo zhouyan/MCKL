@@ -48,3 +48,6 @@ rng :
 
 distribution :
 	./random_distribution.pl --run --write
+
+clean :
+	rm -f *.tex *.log *.aux *.pdf
