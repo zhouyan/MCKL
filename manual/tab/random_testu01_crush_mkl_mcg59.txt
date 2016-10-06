@@ -1,0 +1,197 @@
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        STD
+ Number of statistics:  144
+ Total CPU time:   00:42:21.82
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  6  CollisionOver, t = 4            2.6e-8
+  8  CollisionOver, t = 8          2.1e-234
+ 10  CollisionOver, t = 20          1 - eps1
+ 11  BirthdaySpacings, t = 2          eps  
+ 12  BirthdaySpacings, t = 3          eps  
+ 13  BirthdaySpacings, t = 4          eps  
+ 14  BirthdaySpacings, t = 7        1.3e-13
+ 15  BirthdaySpacings, t = 7          eps  
+ 16  BirthdaySpacings, t = 8          eps  
+ 17  BirthdaySpacings, t = 8          eps  
+ 24  SimpPoker, d = 16                eps  
+ 28  CouponCollector, d = 4           eps  
+ 33  Gap, r = 0                       eps  
+ 34  Gap, r = 22                      eps  
+ 73  LempelZiv                      1 - eps1
+ 74  Fourier3, r = 0                1.6e-72
+ 75  Fourier3, r = 20                 eps  
+ 76  LongestHeadRun, r = 0            eps  
+ 80  HammingWeight2, r = 0            eps  
+ 81  HammingWeight2, r = 20           eps  
+ 85  HammingIndep, L = 30            9.6e-4
+ 91  Run of bits, r = 0             8.6e-11
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01
+ Number of statistics:  144
+ Total CPU time:   00:37:09.72
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps  
+ 12  BirthdaySpacings, t = 3          eps  
+ 13  BirthdaySpacings, t = 4          eps  
+ 15  BirthdaySpacings, t = 7          eps  
+ 16  BirthdaySpacings, t = 8          eps  
+ 17  BirthdaySpacings, t = 8          eps  
+ 28  CouponCollector, d = 4         2.1e-11
+ 33  Gap, r = 0                       eps  
+ 34  Gap, r = 22                      eps  
+ 75  Fourier3, r = 20               2.0e-70
+ 80  HammingWeight2, r = 0         4.0e-180
+ 81  HammingWeight2, r = 20         5.3e-51
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CC
+ Number of statistics:  144
+ Total CPU time:   00:38:50.89
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps  
+ 12  BirthdaySpacings, t = 3          eps  
+ 13  BirthdaySpacings, t = 4          eps  
+ 14  BirthdaySpacings, t = 7         9.1e-4
+ 15  BirthdaySpacings, t = 7          eps  
+ 16  BirthdaySpacings, t = 8          eps  
+ 17  BirthdaySpacings, t = 8          eps  
+ 28  CouponCollector, d = 4          4.7e-5
+ 33  Gap, r = 0                       eps  
+ 34  Gap, r = 22                      eps  
+ 80  HammingWeight2, r = 0          4.1e-21
+ 81  HammingWeight2, r = 20          6.5e-8
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CO
+ Number of statistics:  144
+ Total CPU time:   00:38:43.68
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps  
+ 12  BirthdaySpacings, t = 3          eps  
+ 13  BirthdaySpacings, t = 4          eps  
+ 14  BirthdaySpacings, t = 7         2.1e-4
+ 15  BirthdaySpacings, t = 7          eps  
+ 16  BirthdaySpacings, t = 8          eps  
+ 17  BirthdaySpacings, t = 8          eps  
+ 28  CouponCollector, d = 4          8.0e-6
+ 33  Gap, r = 0                       eps  
+ 34  Gap, r = 22                      eps  
+ 80  HammingWeight2, r = 0          4.4e-16
+ 81  HammingWeight2, r = 20          3.5e-7
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OC
+ Number of statistics:  144
+ Total CPU time:   00:39:26.81
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps  
+ 12  BirthdaySpacings, t = 3          eps  
+ 13  BirthdaySpacings, t = 4          eps  
+ 15  BirthdaySpacings, t = 7          eps  
+ 16  BirthdaySpacings, t = 8          eps  
+ 17  BirthdaySpacings, t = 8          eps  
+ 28  CouponCollector, d = 4          2.7e-4
+ 33  Gap, r = 0                       eps  
+ 34  Gap, r = 22                      eps  
+ 80  HammingWeight2, r = 0           5.0e-7
+ 81  HammingWeight2, r = 20          2.8e-4
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OO
+ Number of statistics:  144
+ Total CPU time:   00:39:14.21
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps  
+ 12  BirthdaySpacings, t = 3          eps  
+ 13  BirthdaySpacings, t = 4          eps  
+ 15  BirthdaySpacings, t = 7          eps  
+ 16  BirthdaySpacings, t = 8          eps  
+ 17  BirthdaySpacings, t = 8          eps  
+ 28  CouponCollector, d = 4          2.1e-5
+ 33  Gap, r = 0                       eps  
+ 34  Gap, r = 22                      eps  
+ 80  HammingWeight2, r = 0           2.4e-4
+ ----------------------------------------------
+ All other tests were passed
+
+
+

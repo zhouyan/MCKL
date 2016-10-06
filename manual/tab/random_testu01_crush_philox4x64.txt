@@ -1,0 +1,79 @@
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        STD
+ Number of statistics:  144
+ Total CPU time:   00:50:05.32
+
+ All tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01
+ Number of statistics:  144
+ Total CPU time:   00:45:50.64
+
+ All tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CC
+ Number of statistics:  144
+ Total CPU time:   00:41:50.00
+
+ All tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CO
+ Number of statistics:  144
+ Total CPU time:   00:40:50.15
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+ 68  RandomWalk1 R (L = 1000)        0.9998 
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OC
+ Number of statistics:  144
+ Total CPU time:   00:41:20.90
+
+ All tests were passed
+
+
+
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OO
+ Number of statistics:  144
+ Total CPU time:   00:40:45.01
+
+ All tests were passed
+
+
+
