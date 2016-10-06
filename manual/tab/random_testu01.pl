@@ -37,11 +37,13 @@ use Getopt::Long;
 my $failure = 1e-10;
 my $suspect = 1e-4;
 my $verbose = 0;
+my $pdf = 0;
 
 GetOptions(
     "failure=f" => \$failure,
     "suspect=f" => \$suspect,
-    "verbose=f" => \$verbose,
+    "verbose"   => \$verbose,
+    "pdf"       => \$pdf,
 );
 $suspect = $failure if ($suspect < $failure);
 
@@ -66,7 +68,7 @@ my @mkl = qw(MKL_ARS5 MKL_ARS5_64 MKL_PHILOX4X32X10 MKL_PHILOX4X32X10_64
 MKL_MCG59 MKL_MCG59_64 MKL_MT19937 MKL_MT19937_64 MKL_MT2203 MKL_MT2203_64
 MKL_SFMT19937 MKL_SFMT19937_64 MKL_NONDETERM MKL_NONDETERM_64);
 
-my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64)
+my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64);
 
 my %instd;
 $instd{$_} = 1 for (@std);
@@ -82,33 +84,40 @@ my %rngs = (
 
 my @keys = qw(std aesni philox threefry mkl);
 
-open my $texfile, '>', 'random_testu01.tex';
-say $texfile '\documentclass[';
-say $texfile '  a4paper,';
-say $texfile '  lines=42,';
-say $texfile '  linespread=1.2,';
-say $texfile '  fontsize=11pt,';
-say $texfile '  fontset=Minion,';
-say $texfile '  monofont=TheSansMonoCd,';
-say $texfile '  monoscale=MatchLowercase,';
-say $texfile ']{mbook}';
-say $texfile '\pagestyle{empty}';
-say $texfile '\begin{document}';
+my $texfile;
+if ($pdf) {
+    open $texfile, '>', 'random_testu01.tex';
+    say $texfile '\documentclass[';
+    say $texfile '  a4paper,';
+    say $texfile '  lines=42,';
+    say $texfile '  linespread=1.2,';
+    say $texfile '  fontsize=11pt,';
+    say $texfile '  fontset=Minion,';
+    say $texfile '  monofont=TheSansMonoCd,';
+    say $texfile '  monoscale=MatchLowercase,';
+    say $texfile ']{mbook}';
+    say $texfile '\pagestyle{empty}';
+    say $texfile '\begin{document}';
+}
 for my $b (@battery) {
     my $table = &table($b);
     if ($table) {
         my $this_tex = "random_testu01_\L$b";
         open my $this_texfile, '>', "$this_tex.tex";
         say $this_texfile $table if $table;
-        say $texfile '\begin{table}';
-        say $texfile "\\input{$this_tex}%";
-        say $texfile "\\caption{$b}";
-        say $texfile '\end{table}';
+        if ($pdf) {
+            say $texfile '\begin{table}';
+            say $texfile "\\input{$this_tex}%";
+            say $texfile "\\caption{$b}";
+            say $texfile '\end{table}';
+        }
     }
 }
-say $texfile '\end{document}';
-close $texfile;
-`lualatex -interaction=batchmode random_testu01.tex`;
+if ($pdf) {
+    say $texfile '\end{document}';
+    close $texfile;
+    `lualatex -interaction=batchmode random_testu01.tex`;
+}
 
 sub table
 {
