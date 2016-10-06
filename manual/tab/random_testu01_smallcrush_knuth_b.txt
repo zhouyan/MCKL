@@ -1,0 +1,72 @@
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        STD
+ Number of statistics:  15
+ Total CPU time:   00:00:13.06
+
+ All tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01
+ Number of statistics:  15
+ Total CPU time:   00:00:42.02
+
+ All tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CC
+ Number of statistics:  15
+ Total CPU time:   00:00:25.23
+
+ All tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CO
+ Number of statistics:  15
+ Total CPU time:   00:00:25.15
+
+ All tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OC
+ Number of statistics:  15
+ Total CPU time:   00:00:25.62
+
+ All tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OO
+ Number of statistics:  15
+ Total CPU time:   00:00:25.78
+
+ All tests were passed
+
+
+

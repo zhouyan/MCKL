@@ -1,0 +1,108 @@
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        STD
+ Number of statistics:  15
+ Total CPU time:   00:00:16.89
+
+ All tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01
+ Number of statistics:  15
+ Total CPU time:   00:00:19.53
+
+ All tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CC
+ Number of statistics:  15
+ Total CPU time:   00:00:14.43
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  3  Gap                            4.4e-10
+  4  SimpPoker                        eps  
+  7  WeightDistrib                    eps  
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01CO
+ Number of statistics:  15
+ Total CPU time:   00:00:14.46
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  3  Gap                             2.0e-6
+  4  SimpPoker                        eps  
+  5  CouponCollector                 3.8e-4
+  7  WeightDistrib                  9.0e-13
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OC
+ Number of statistics:  15
+ Total CPU time:   00:00:14.23
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  3  Gap                             3.7e-6
+  4  SimpPoker                        eps  
+  7  WeightDistrib                    eps  
+ ----------------------------------------------
+ All other tests were passed
+
+
+
+
+========= Summary results of SmallCrush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OO
+ Number of statistics:  15
+ Total CPU time:   00:00:12.76
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+  4  SimpPoker                        eps  
+  7  WeightDistrib                  2.4e-12
+ ----------------------------------------------
+ All other tests were passed
+
+
+
