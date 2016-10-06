@@ -4,14 +4,14 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  15
- Total CPU time:   00:00:14.50
+ Total CPU time:   00:00:14.32
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
 
        Test                          p-value
  ----------------------------------------------
-  6  MaxOft                         1 -  3.0e-5
+ 10  RandomWalk1 R                   9.3e-4
  ----------------------------------------------
  All other tests were passed
 
@@ -23,7 +23,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  15
- Total CPU time:   00:00:14.32
+ Total CPU time:   00:00:14.67
 
  All tests were passed
 
@@ -35,17 +35,17 @@
  Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  15
- Total CPU time:   00:00:11.64
+ Total CPU time:   00:00:12.25
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
 
        Test                          p-value
  ----------------------------------------------
-  3  Gap                            1.2e-13
+  3  Gap                            9.0e-12
   4  SimpPoker                        eps  
-  5  CouponCollector                 3.1e-4
   7  WeightDistrib                    eps  
+  9  HammingIndep                    2.1e-4
  ----------------------------------------------
  All other tests were passed
 
@@ -57,16 +57,16 @@
  Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  15
- Total CPU time:   00:00:11.70
+ Total CPU time:   00:00:12.11
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
 
        Test                          p-value
  ----------------------------------------------
-  3  Gap                             1.2e-4
+  3  Gap                             5.5e-5
   4  SimpPoker                        eps  
-  7  WeightDistrib                  1.0e-15
+  7  WeightDistrib                  6.2e-13
  ----------------------------------------------
  All other tests were passed
 
@@ -78,14 +78,14 @@
  Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  15
- Total CPU time:   00:00:11.78
+ Total CPU time:   00:00:12.04
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
 
        Test                          p-value
  ----------------------------------------------
-  3  Gap                             7.6e-8
+  3  Gap                            1.3e-12
   4  SimpPoker                        eps  
   7  WeightDistrib                    eps  
  ----------------------------------------------
@@ -99,16 +99,16 @@
  Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  15
- Total CPU time:   00:00:12.01
+ Total CPU time:   00:00:11.31
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
 
        Test                          p-value
  ----------------------------------------------
-  3  Gap                             3.8e-4
+  3  Gap                             6.4e-7
   4  SimpPoker                        eps  
-  7  WeightDistrib                    eps  
+  7  WeightDistrib                  1.1e-16
  ----------------------------------------------
  All other tests were passed
 

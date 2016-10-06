@@ -4,7 +4,7 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  15
- Total CPU time:   00:00:11.90
+ Total CPU time:   00:00:11.77
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -13,7 +13,6 @@
  ----------------------------------------------
   1  BirthdaySpacings                 eps  
   2  Collision                      1 - eps1
-  3  Gap                              eps  
  ----------------------------------------------
  All other tests were passed
 
@@ -25,7 +24,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  15
- Total CPU time:   00:00:15.42
+ Total CPU time:   00:00:15.32
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -46,7 +45,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  15
- Total CPU time:   00:00:12.31
+ Total CPU time:   00:00:11.84
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -55,6 +54,7 @@
  ----------------------------------------------
   1  BirthdaySpacings                 eps  
   2  Collision                      1 - eps1
+  3  Gap                             4.8e-4
   6  MaxOft                           eps  
  ----------------------------------------------
  All other tests were passed
@@ -67,7 +67,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  15
- Total CPU time:   00:00:12.22
+ Total CPU time:   00:00:11.68
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -88,7 +88,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  15
- Total CPU time:   00:00:12.32
+ Total CPU time:   00:00:11.92
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -109,7 +109,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  15
- Total CPU time:   00:00:12.34
+ Total CPU time:   00:00:12.04
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -119,6 +119,7 @@
   1  BirthdaySpacings                 eps  
   2  Collision                      1 - eps1
   6  MaxOft                           eps  
+  8  MatrixRank                      3.8e-4
  ----------------------------------------------
  All other tests were passed
 

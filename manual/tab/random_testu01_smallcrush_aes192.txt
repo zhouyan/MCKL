@@ -4,7 +4,7 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  15
- Total CPU time:   00:00:15.11
+ Total CPU time:   00:00:14.33
 
  All tests were passed
 
@@ -16,7 +16,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  15
- Total CPU time:   00:00:10.80
+ Total CPU time:   00:00:10.58
 
  All tests were passed
 
@@ -28,7 +28,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  15
- Total CPU time:   00:00:09.92
+ Total CPU time:   00:00:10.29
 
  All tests were passed
 
@@ -40,7 +40,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  15
- Total CPU time:   00:00:09.74
+ Total CPU time:   00:00:09.81
 
  All tests were passed
 
@@ -52,7 +52,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  15
- Total CPU time:   00:00:09.86
+ Total CPU time:   00:00:09.89
 
  All tests were passed
 
@@ -64,7 +64,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  15
- Total CPU time:   00:00:10.00
+ Total CPU time:   00:00:09.81
 
  All tests were passed
 

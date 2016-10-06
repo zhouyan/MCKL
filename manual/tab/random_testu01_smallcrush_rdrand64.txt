@@ -4,7 +4,7 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  15
- Total CPU time:   00:00:26.98
+ Total CPU time:   00:00:32.25
 
  All tests were passed
 
@@ -16,7 +16,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  15
- Total CPU time:   00:00:26.96
+ Total CPU time:   00:00:31.25
 
  All tests were passed
 
@@ -28,7 +28,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  15
- Total CPU time:   00:00:27.35
+ Total CPU time:   00:00:32.29
 
  All tests were passed
 
@@ -40,7 +40,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  15
- Total CPU time:   00:00:26.81
+ Total CPU time:   00:00:33.33
 
  All tests were passed
 
@@ -52,9 +52,16 @@
  Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  15
- Total CPU time:   00:00:27.18
+ Total CPU time:   00:00:32.71
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
 
- All tests were passed
+       Test                          p-value
+ ----------------------------------------------
+  3  Gap                             1.2e-4
+ ----------------------------------------------
+ All other tests were passed
 
 
 
@@ -64,7 +71,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  15
- Total CPU time:   00:00:27.06
+ Total CPU time:   00:00:32.84
 
  All tests were passed
 
