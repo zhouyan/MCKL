@@ -59,8 +59,10 @@ class TestU01
         return testu01;
     }
 
+    /// \brief Return true if the TestU01 generator is not set or released
     bool empty() const { return gen_ == nullptr; }
 
+    /// \brief Reset the TestU01 generator to specified RNG and distribution
     template <typename RNGType, typename U01Type>
     void reset(const std::string &name)
     {
@@ -69,6 +71,7 @@ class TestU01
             const_cast<char *>(name.c_str()), u01<RNGType, U01Type>);
     }
 
+    /// \brief Release the TestU01 generator
     void release()
     {
         if (gen_ != nullptr)
@@ -76,14 +79,24 @@ class TestU01
         gen_ = nullptr;
     }
 
+    /// \brief Get the TestU01 generator
     ::unif01_Gen *gen() const { return gen_; }
 
+    /// \brief Apply a battery that accepts a `unif01_Gen` pointer as input
     template <typename Battery>
     void operator()(Battery &&battery)
     {
         battery(gen_);
     }
 
+    /// \brief Apply a battery that accepts a `unif01_Gen` pointer as the first
+    /// input, and an array of type `int` that specifies that replication
+    /// number
+    ///
+    /// \details
+    /// Each element in the array is set to `n`. This currently only work with
+    /// `bbattery_RepeatSmallCrush` due to TestU01's internal limits of at most
+    /// 200 p-values can be returned by a single battery.
     template <typename BatteryRepeat>
     void operator()(BatteryRepeat &&battery_repeat, int n)
     {
@@ -91,6 +104,13 @@ class TestU01
         battery_repeat(gen_, rep.data());
     }
 
+    /// \brief Apply a battery that accepts a `unif01_Gen` pointer as the first
+    /// input, and an array of type `int` that specifies that replication
+    /// number
+    ///
+    /// \details
+    /// The range [`first`, `last`) contains enumeration numbers of tests to be
+    /// repeated. Each will be repeated `n` times.
     template <typename BatteryRepeat, typename InputIter>
     void operator()(
         BatteryRepeat &&battery_repeat, InputIter first, InputIter last, int n)

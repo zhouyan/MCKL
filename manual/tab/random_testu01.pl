@@ -37,14 +37,12 @@ use Getopt::Long;
 my $failure = 1e-6;
 my $suspect = 1e-3;
 my $verbose = 0;
-my $repeat = 3;
 my $pdf = 0;
 
 GetOptions(
     "failure=f" => \$failure,
     "suspect=f" => \$suspect,
     "verbose"   => \$verbose,
-    "repeat=n"  => \$repeat,
     "pdf"       => \$pdf,
 );
 $suspect = $failure if ($suspect < $failure);
@@ -167,35 +165,24 @@ sub filter
     s/\s+$/\n/ for @lines;
     my $lines = "@lines";
 
-    $lines =~ /(STD\n.*?tests were passed)/s;   my $STD   = $1;
-    $lines =~ /(U01\n.*?tests were passed)/s;   my $U01   = $1;
-    $lines =~ /(U01CC\n.*?tests were passed)/s; my $U01CC = $1;
-    $lines =~ /(U01CO\n.*?tests were passed)/s; my $U01CO = $1;
-    $lines =~ /(U01OC\n.*?tests were passed)/s; my $U01OC = $1;
-    $lines =~ /(U01OO\n.*?tests were passed)/s; my $U01OO = $1;
+    my ($STD,   $detailSTD)   = &check(&extract("STD",   $lines));
+    my ($U01,   $detailU01)   = &check(&extract("U01",   $lines));
+    my ($U01CC, $detailU01CC) = &check(&extract("U01CC", $lines));
+    my ($U01CO, $detailU01CO) = &check(&extract("U01CO", $lines));
+    my ($U01OC, $detailU01OC) = &check(&extract("U01OC", $lines));
+    my ($U01OO, $detailU01OO) = &check(&extract("U01OO", $lines));
 
-    ($STD,   my $detailSTD)   = &check($STD);
-    ($U01,   my $detailU01)   = &check($U01);
-    ($U01CC, my $detailU01CC) = &check($U01CC);
-    ($U01CO, my $detailU01CO) = &check($U01CO);
-    ($U01OC, my $detailU01OC) = &check($U01OC);
-    ($U01OO, my $detailU01OO) = &check($U01OO);
-
+    if ($verbose) {
+        &detail("STD",   $bat, $rng, $detailSTD);
+        &detail("U01",   $bat, $rng, $detailU01);
+        &detail("U01CC", $bat, $rng, $detailU01CC);
+        &detail("U01CO", $bat, $rng, $detailU01CO);
+        &detail("U01OC", $bat, $rng, $detailU01OC);
+        &detail("U01OO", $bat, $rng, $detailU01OO);
+    }
 
     my $tline;
     if ($STD or $U01 or $U01CC or $U01CO or $U01OC or $U01OO) {
-        if ($verbose) {
-            say '=' x 80;
-            say "$bat $rng";
-            say '-' x 80;
-            &detail("STD",   $detailSTD);
-            &detail("U01",   $detailU01);
-            &detail("U01CC", $detailU01CC);
-            &detail("U01CO", $detailU01CO);
-            &detail("U01OC", $detailU01OC);
-            &detail("U01OO", $detailU01OO);
-            say '-' x 80;
-        }
         $rng =~ s/_/\\_/g;
         $tline .= "\\texttt{$rng}";
         $tline .= " & $STD";
@@ -209,17 +196,34 @@ sub filter
     $tline;
 }
 
+sub extract
+{
+    my $u01 = shift;
+    my $lines = shift;
+    my $pattern = "$u01\n.*?tests were passed";
+    my $tests;
+    my $repeat = 0;
+    while ($lines =~ /($pattern)/s) {
+        my $this_tests = $1;
+        if ($this_tests =~ /--+\s*(.*?)\s*--+/s) {
+            $tests .= $1 . "\n";
+            $repeat++;
+        }
+        $lines =~ s/$pattern//s
+    }
+    $tests =~ s/ *(.*) */$1/g;
+
+    ($repeat, $tests);
+}
+
 sub check
 {
-    my $lines = shift;
-    my $tests;
-    $tests = $1 if ($lines =~ /--+\s*(.*?)\s*--+/s);
-    my @tests = split "\n", $tests;
+    my $repeat = shift;
+    my @tests = split "\n", $_[0];
 
     my %failure;
     my $details;
     for (@tests) {
-        s/ *(.*) */$1/;
         $details .= $_ . "\n";
         my ($num, $pval) = (split)[0, -1];
         $pval = 1 - $pval;
@@ -241,12 +245,15 @@ sub check
 sub detail
 {
     my $u01 = shift;
-    my @detail = split "\n", $_[0];
+    my $bat = shift;
+    my $rng = shift;
+    my @detail = sort(split "\n", $_[0]);
     if (@detail) {
-        printf('%-6s', $u01);
-        say &format($detail[0]);
-        shift @detail;
-        say ' ' x 6, &format($_) for @detail;
+        say '=' x 50;
+        say "$bat $u01 $rng";
+        say '-' x 50;
+        say &format($_) for @detail;
+        say '-' x 50;
     }
 }
 
