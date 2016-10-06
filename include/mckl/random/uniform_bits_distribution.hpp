@@ -119,13 +119,7 @@ class UniformBitsDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &)
     {
-        static constexpr int w = std::numeric_limits<UIntType>::digits;
-        static constexpr int r = RNGTraits<RNGType>::bits;
-        static constexpr bool patch =
-            // rng() - RNGType::min() uniform on {0,...,2^r - 1}
-            RNGTraits<RNGType>::is_full_range &&
-            // One or multiple rng() can fill exactly one output integer
-            (w % r == 0 || r >= w);
+        static constexpr bool patch = RNGTraits<RNGType>::is_full_range;
 
         return generate(rng, std::integral_constant<bool, patch>());
     }

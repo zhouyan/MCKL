@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_uniform_bits.cpp.in
+// MCKL/example/random/src/random_uniform_bits.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -56,9 +56,7 @@ int main(int argc, char **argv)
         }
     }
 
-    // clang-format off
-    random_uniform_bits<@RNGType@>(N, M, "@RNGName@");
-    // clang-format on
+    random_uniform_bits(N, M);
 
     return 0;
 }

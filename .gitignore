@@ -6,7 +6,6 @@
 /example/random/src/random_distribution_perf_*.cpp
 /example/random/src/random_rng_*.cpp
 /example/random/src/random_test_*.cpp
-/example/random/src/random_uniform_bits_*.cpp
 /manual/fig/pf.pdf
 /manual/manual.aux
 /manual/manual.bbl
