@@ -249,11 +249,14 @@ sub detail
     my $rng = shift;
     my @detail = sort(split "\n", $_[0]);
     if (@detail) {
-        say '=' x 50;
-        say "$bat $u01 $rng";
-        say '-' x 50;
-        say &format($_) for @detail;
-        say '-' x 50;
+        say '=' x 85;
+        for (@detail) {
+            printf('%-11s', $bat);
+            printf('%-21s', $rng);
+            printf('%-6s', $u01);
+            say &format($_);
+        }
+        say '-' x 85;
     }
 }
 

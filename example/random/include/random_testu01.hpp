@@ -108,37 +108,33 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         U01OO = true;
     }
 
-    int repeat = rep.size() == 0 ? 3 : 1;
-
     if (redirect)
         std::freopen(filename.c_str(), "w", stdout);
     if (!verbose)
         ::swrite_Basic = FALSE;
-    for (int r = 0; r != repeat; ++r) {
-        if (STD) {
-            random_testu01<RNGType, std::uniform_real_distribution<double>>(
-                    "STD", std::forward<Battery>(battery), rep);
-        }
-        if (U01) {
-            random_testu01<RNGType, mckl::U01Distribution<double>>(
-                    "U01", std::forward<Battery>(battery), rep);
-        }
-        if (U01CC) {
-            random_testu01<RNGType, mckl::U01CCDistribution<double>>(
-                    "U01CC", std::forward<Battery>(battery), rep);
-        }
-        if (U01CO) {
-            random_testu01<RNGType, mckl::U01CODistribution<double>>(
-                    "U01CO", std::forward<Battery>(battery), rep);
-        }
-        if (U01OC) {
-            random_testu01<RNGType, mckl::U01OCDistribution<double>>(
-                    "U01OC", std::forward<Battery>(battery), rep);
-        }
-        if (U01OO) {
-            random_testu01<RNGType, mckl::U01OODistribution<double>>(
-                    "U01OO", std::forward<Battery>(battery), rep);
-        }
+    if (STD) {
+        random_testu01<RNGType, std::uniform_real_distribution<double>>(
+            "STD", std::forward<Battery>(battery), rep);
+    }
+    if (U01) {
+        random_testu01<RNGType, mckl::U01Distribution<double>>(
+            "U01", std::forward<Battery>(battery), rep);
+    }
+    if (U01CC) {
+        random_testu01<RNGType, mckl::U01CCDistribution<double>>(
+            "U01CC", std::forward<Battery>(battery), rep);
+    }
+    if (U01CO) {
+        random_testu01<RNGType, mckl::U01CODistribution<double>>(
+            "U01CO", std::forward<Battery>(battery), rep);
+    }
+    if (U01OC) {
+        random_testu01<RNGType, mckl::U01OCDistribution<double>>(
+            "U01OC", std::forward<Battery>(battery), rep);
+    }
+    if (U01OO) {
+        random_testu01<RNGType, mckl::U01OODistribution<double>>(
+            "U01OO", std::forward<Battery>(battery), rep);
     }
     if (redirect)
         std::fclose(stdout);
