@@ -96,6 +96,7 @@ if ($pdf) {
     say $texfile '  monofont=TheSansMonoCd,';
     say $texfile '  monoscale=MatchLowercase,';
     say $texfile ']{mbook}';
+    say $texfile '\input{../tex/macro}';
     say $texfile '\pagestyle{empty}';
     say $texfile '\begin{document}';
 }
@@ -126,8 +127,8 @@ sub table
     my $header;
     $header .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
     $header .= '\toprule' . "\n";
-    $header .= '\textsc{rng}';
-    $header .= ' & \textsc{std}';
+    $header .= '\rng';
+    $header .= ' & \std';
     $header .= ' & \textsc{u01}';
     $header .= ' & \textsc{u01cc}';
     $header .= ' & \textsc{u01co}';

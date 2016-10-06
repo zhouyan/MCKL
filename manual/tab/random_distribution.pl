@@ -41,20 +41,22 @@ my $simd;
 my $llvm = "../../build/llvm-release-sys";
 my $gnu = "../../build/gnu-release-sys";
 my $intel = "../../build/intel-release-sys";
+my $compiler = "llvm";
 my $make = "ninja";
 my $name;
 my $write = 0;
 GetOptions(
-    "run"      => \$run,
-    "pdf"      => \$pdf,
-    "build"    => \$build,
-    "simd=s"   => \$simd,
-    "llvm=s"   => \$llvm,
-    "gnu=s"    => \$gnu,
-    "intel=s"  => \$intel,
-    "make=s"   => \$make,
-    "name=s"   => \$name,
-    "write"    => \$write,
+    "run"        => \$run,
+    "pdf"        => \$pdf,
+    "build"      => \$build,
+    "simd=s"     => \$simd,
+    "llvm=s"     => \$llvm,
+    "gnu=s"      => \$gnu,
+    "intel=s"    => \$intel,
+    "compiler=s" => \$compiler,
+    "make=s"     => \$make,
+    "name=s"     => \$name,
+    "write"      => \$write,
 );
 
 if ($simd) {
@@ -156,6 +158,9 @@ for my $k (@keys) {
         say $texfile "\\caption{\\textsc{$k ($_, parallel)}}";
         say $texfile '\end{table}';
     }
+    my $this_tex = "random_distribution_\L$k";
+    `cp ${this_tex}_${compiler}_${simd}.tex   ${this_tex}_${simd}.tex`;
+    `cp ${this_tex}_${compiler}_${simd}_p.tex ${this_tex}_${simd}_p.tex`;
     say $texfile '\clearpage';
 }
 say $texfile '\end{document}';

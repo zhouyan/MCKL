@@ -1,0 +1,105 @@
+% ============================================================================
+%  MCKL/manual/tex/perf_random_distribution.tex
+% ----------------------------------------------------------------------------
+%  MCKL: Monte Carlo Kernel Library
+% ----------------------------------------------------------------------------
+%  Copyright (c) 2013-2016, Yan Zhou
+%  All rights reserved.
+%
+%  Redistribution and use in source and binary forms, with or without
+%  modification, are permitted provided that the following conditions are met:
+%
+%    Redistributions of source code must retain the above copyright notice,
+%    this list of conditions and the following disclaimer.
+%
+%    Redistributions in binary form must reproduce the above copyright notice,
+%    this list of conditions and the following disclaimer in the documentation
+%    and/or other materials provided with the distribution.
+%
+%  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+%  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+%  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+%  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+%  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+%  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+%  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+%  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+%  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+%  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+%  POSSIBILITY OF SUCH DAMAGE.
+% ============================================================================
+
+\chapter{TestU01 results}
+\label{chap:TestU01 results}
+
+All \rng{}s implemented in \mckl and those in the standard library are tested
+with the \testu library~\cite{Lecuyer:2007hv}. The tests are performed as the
+following, for each \rng, we initialize eight instances, each with a random
+seed. The random stream feed into \testu batteries are such that, the first
+thousand random integers come from the first instance of the \rng, then another
+thousand from the second instance, and so on. After all eight instances are
+used, we start with the first instance again. And repeat the process. This is
+similar to the usage pattern of \rng{}s in a parallel program.
+
+The method of generating standard uniform random numbers from random integers
+affect the quality of the random stream feed into the \testu batteries as well
+as the \rng itself. For each \rng we test five standard uniform distributions,
+\begin{verbatim}
+std::uniform_real_distribution<double>;
+U01Distribution<double>;
+U01CCDistribution<double>;
+U01CODistribution<double>;
+U01OCDistribution<double>;
+U01OODistribution<double>;
+\end{verbatim}
+They are labeled as ``\std'', ``\textsc{u01}'', ``\textsc{u01cc}'',
+``\textsc{u01co}'', ``\textsc{u01oc}'' and ``\textsc{u01oo}'', respectively, in
+the tables below. See section~\ref{sec:Standard uniform distribution} for
+details of the last five distributions. The configuration macro
+|MCKL_U01_USE_FIXED_POINT| is set to false. The \std method uses
+|std::generate_canonical|.
+
+The SmallCrush, Crush and BigCrush batteries are applied to each \rng. If the
+$p$-value of a test is within the range $(10^{-4}, 1 - 10^{-4})$, then it is
+said to pass the test. If it is outside the range $(10^{-10}, 1 - 10^{-10})$,
+then it is said to fail the test. Otherwise, we mark the results as suspicious.
+In table~\ref{tab:TestU01 SmallCrush results} to~\ref{tab:TestU01 BigCrush
+results}, we list the number of tests failed by each \rng. The number within
+parentheses are the number of tests with suspicious $p$-values. For \rng{}s
+without any observed failures or suspicious $p$-values, they are omitted from
+the tables.
+
+Note that, if an \rng passes considerably more tests with the \std method than
+one of the \mckl distributions, then it is most likely to be some weakness of
+the \rng at bit level randomness. As described in section~\ref{sec:Uniform bits
+distribution}, the random integers are first combined into 32 or 64 random bits
+before process by the standard uniform distributions. That is, for an \rng with
+range $R = 2^V$, we assume that all $V$ bits are random.
+
+One shall the choose the combination of \rng{}s and distributions carefully
+based on the results in the tables below. In particular, almost all standard
+library distributions make use of |std::generate_canonical|, while all
+distributions in \mckl use one of the fixed point distribution. A rule of thumb
+is to always use an \mckl \rng when using an \mckl distribution for better
+performance when generating a large number of random numbers. They are much
+faster than any standard library \rng with the same crush-resistant quality.
+
+\newpage
+
+\begin{table}
+  \input{tab/random_testu01_smallcrush}%
+  \caption{\testu SmallCrush results}
+  \label{tab:TestU01 SmallCrush results}
+\end{table}
+
+\begin{table}
+  \input{tab/random_testu01_crush}%
+  \caption{\testu Crush results}
+  \label{tab:TestU01 Crush results}
+\end{table}
+
+\begin{table}
+  % \input{tab/random_testu01_bigcrush}%
+  \caption{\testu BigCrush results}
+  \label{tab:TestU01 BigCrush results}
+\end{table}

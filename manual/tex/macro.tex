@@ -93,8 +93,57 @@
 \def\ypos{Y_{\mathrm{pos}}}
 \def\yvel{Y_{\mathrm{vel}}}
 
-\def\cpuversion{Intel Core~i7-4960\textsc{hq}\xspace}
-\def\gnuversion{\gnu \gcc (vesion~6.2.0)\xspace}
-\def\intelversion{Intel \cpp compiler (version~17.0.0)\xspace}
-\def\llvmversion{\llvm clang (version Apple~8.0.0)\xspace}
-\def\osversion{macOS Sierra (version~10.12)\xspace}
+\def\system{Two \cpu and operation system combinations are tested. The first is
+  an Intel Xeon~W3550, running at~3.07~GHz base frequency with four physical
+  cores and eight logical ones through hyperthreading, with CentOS
+  (verison~7.2) and the second is an Intel Core~i7-4960\textsc{hq}, running
+  at~2.60~Ghz base frequency with four physical cores and eight logical ones
+  through hyperthreading, with macOS Sierra (version~10.12). They are labeled
+  as ``Nehalem'' and ``Haswell'', respectively, based on their \cpu
+  microarchitecture. Both single core and parallel (using number of threads
+  equal the number of the \cpu logical cores) performance are tested. They are
+labeled as ``sequential'' and ``parallel'', respectively.}
+
+\def\compiler{Three compilers are tested on each system, \llvm clang
+  (version~3.9.1 on CentOS and version Apple~8.0.0 on macOS), \gnu \gcc
+(version~6.2.0), and Intel \cpp compiler (version~17.0.0).}
+
+\def\compilerone{\compiler{} The results shown here is with the \llvm clang
+compiler.}
+
+\def\compilerthree{\compiler{} They are labeled as ``\llvm'', ``\gnu'' and
+``\intel'', respectively.}
+
+\ExplSyntaxOn
+\def\perftable#1#2#3#4{
+  \file_if_exist:nT{tab/random_#1_#2_sse2.tex}{
+    \begin{table}
+      \input{tab/random_#1_#2_sse2}
+      \caption{Performance~of~#3~(Nehalem,~sequential)}
+      \label{tab:Performance~of~#4~(Nehalem,~sequential)}
+    \end{table}
+  }
+  \file_if_exist:nT{tab/random_#1_#2_sse2_p.tex}{
+    \begin{table}
+      \input{tab/random_#1_#2_sse2_p}
+      \caption{Performance~of~#3~(Nehalem,~parallel)}
+      \label{tab:Performance~of~#4~(Nehalem,~parallel)}
+    \end{table}
+  }
+  \file_if_exist:nT{tab/random_#1_#2_avx2.tex}{
+    \begin{table}
+      \input{tab/random_#1_#2_avx2}
+      \caption{Performance~of~#3~(Haswell,~sequential)}
+      \label{tab:Performance~of~#4~(Haswell,~sequential)}
+    \end{table}
+  }
+  \file_if_exist:nT{tab/random_#1_#2_avx2_p.tex}{
+    \begin{table}
+      \input{tab/random_#1_#2_avx2_p}
+      \caption{Performance~of~#3~(Haswell,~parallel)}
+      \label{tab:Performance~of~#4~(Haswell,~parallel)}
+    \end{table}
+  }
+  \clearpage
+}
+\ExplSyntaxOff

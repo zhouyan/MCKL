@@ -32,13 +32,9 @@
 \chapter{Performance of RNG}
 \label{chap:Performance of RNG}
 
-The performance of \rng{}s in sections~\ref{sec:Counter-based RNG}
-to~\ref{sec:Non-deterministic RNG} are measured in single core cycles per byte
-(\cpb). The processor used is \cpuversion. The operating system is \osversion.
+\system
 
-Three compilers are tested. The \llvmversion, the \gnuversion and the
-\intelversion. They are labeled ``\llvm'', ``\gnu'', and ``\intel'',
-respectively, in tables below.
+\compilerthree
 
 Two usage cases of \rng{}s are considered. The first is generating random
 integers within a loop, each iteration generate a single random integer,
@@ -58,43 +54,16 @@ number of bytes generated. This gives the performance measurement in \cpb. This
 experiment is repeated ten times, and the best results are shown. The two cases
 are labeled ``\single'' and ``\batch'', respectively, in the tables below.
 
-\ExplSyntaxOn
-\def\rngtable#1#2#3{
-  \file_if_exist:nT{tab/random_rng_#1_sse2.tex}{
-    \begin{table}
-      \input{tab/random_rng_#1_sse2}
-      \caption{Performance~of~#2~(Nehalem,~sequential)}
-      \label{tab:Performance~of~#3~(Nehalem,~sequential)}
-    \end{table}
-  }
-  \file_if_exist:nT{tab/random_rng_#1_sse2_p.tex}{
-    \begin{table}
-      \input{tab/random_rng_#1_sse2_p}
-      \caption{Performance~of~#2~(Nehalem,~parallel)}
-      \label{tab:Performance~of~#3~(Nehalem,~parallel)}
-    \end{table}
-  }
-  \file_if_exist:nT{tab/random_rng_#1_avx2.tex}{
-    \begin{table}
-      \input{tab/random_rng_#1_avx2}
-      \caption{Performance~of~#2~(Haswell,~sequential)}
-      \label{tab:Performance~of~#3~(Haswell,~sequential)}
-    \end{table}
-  }
-  \file_if_exist:nT{tab/random_rng_#1_avx2_p.tex}{
-    \begin{table}
-      \input{tab/random_rng_#1_avx2_p}
-      \caption{Performance~of~#2~(Haswell,~parallel)}
-      \label{tab:Performance~of~#3~(Haswell,~parallel)}
-    \end{table}
-  }
-  \clearpage
-}
-\ExplSyntaxOff
+\newpage
 
-\rngtable{std}{\rng in the standard library}{RNG in the standard library}
-\rngtable{aesni}{\protect\texttt{AESNIEngine}}{AESNIEngine}
-\rngtable{philox}{\protect\texttt{PhiloxEngine}}{PhiloxEngine}
-\rngtable{threefry}{\protect\texttt{ThreefryEngine}}{ThreefryEngine}
-\rngtable{mkl}{\mkl \rng}{MKL RNG}
-\rngtable{rdrand}{non-deterministic \rng}{non-deterministic RNG}
+\perftable{rng}{std}{\rng in the standard library}{RNG in the standard library}
+
+\perftable{rng}{aesni}{\protect\texttt{AESNIEngine}}{AESNIEngine}
+
+\perftable{rng}{philox}{\protect\texttt{PhiloxEngine}}{PhiloxEngine}
+
+\perftable{rng}{threefry}{\protect\texttt{ThreefryEngine}}{ThreefryEngine}
+
+\perftable{rng}{mkl}{\mkl \rng}{MKL RNG}
+
+\perftable{rng}{rdrand}{non-deterministic \rng}{non-deterministic RNG}
