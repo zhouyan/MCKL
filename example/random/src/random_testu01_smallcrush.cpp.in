@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/test.hpp
+// MCKL/example/random/src/random_testu01_smallcrush.cpp.in
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,23 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_TEST_HPP
-#define MCKL_RANDOM_TEST_HPP
+#include "random_testu01.hpp"
 
-#include <mckl/random/internal/common.hpp>
-#include <mckl/random/birthday_spacings_test.hpp>
-#include <mckl/random/chi_squared_test.hpp>
-#include <mckl/random/collision_test.hpp>
-#include <mckl/random/coupon_collector_test.hpp>
-#include <mckl/random/gap_test.hpp>
-#include <mckl/random/maximum_of_t_test.hpp>
-#include <mckl/random/permutation_test.hpp>
-#include <mckl/random/poisson_test.hpp>
-#include <mckl/random/poker_test.hpp>
-#include <mckl/random/run_test.hpp>
-#include <mckl/random/serial_test.hpp>
-#if MCKL_HAS_TESTU01
-#include <mckl/random/testu01.hpp>
-#endif
+int main(int argc, char **argv)
+{
+    // clang-format off
+    random_testu01<@RNGType@>(
+        ::bbattery_SmallCrush, ::bbattery_RepeatSmallCrush, argc, argv);
+    // clang-format on
 
-#endif // MCKL_RANDOM_TEST_HPP
+    return 0;
+}

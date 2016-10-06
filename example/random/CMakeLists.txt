@@ -46,6 +46,11 @@ ENDIF(MKL_FOUND)
 
 MCKL_ADD_TEST_RNG(random rng)
 MCKL_ADD_TEST_RNG(random test)
+IF(TestU01_FOUND)
+    MCKL_ADD_TEST_RNG(random testu01_smallcrush)
+    MCKL_ADD_TEST_RNG(random testu01_crush)
+    MCKL_ADD_TEST_RNG(random testu01_bigcrush)
+ENDIF(TestU01_FOUND)
 
 MCKL_ADD_TEST_DISTRIBUTION(random distribution)
 MCKL_ADD_TEST_DISTRIBUTION(random distribution_perf)

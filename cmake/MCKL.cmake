@@ -279,6 +279,19 @@ ELSE(HDF5_FOUND)
     SET(HDF5_FOUND FALSE CACHE BOOL "NOT Found HDF5")
 ENDIF(HDF5_FOUND)
 
+# TestU01
+INCLUDE(FindTestU01)
+IF(TestU01_FOUND)
+    SET(FEATURES ${FEATURES} "TestU01")
+    SET(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_TESTU01=1)
+    SET(MCKL_INCLUDE_DIRS ${MCKL_INCLUDE_DIRS} ${TestU01_INCLUDE_DIR})
+    SET(MCKL_LINK_LIBRARIES ${MCKL_LINK_LIBRARIES} ${TestU01_LINK_LIBRARIES})
+ELSE(TestU01_FOUND)
+    SET(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_TESTU01=0)
+    UNSET(TestU01_FOUND CACHE)
+    SET(TestU01_FOUND FALSE CACHE BOOL "NOT Found TestU01")
+ENDIF(TestU01_FOUND)
+
 ##############################################################################
 # Macros
 ##############################################################################

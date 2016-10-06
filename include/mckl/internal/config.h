@@ -116,6 +116,10 @@
 #define MCKL_HAS_HDF5 0
 #endif
 
+#ifndef MCKL_HAS_TESTU01
+#define MCKL_HAS_TESTU01 0
+#endif
+
 #ifndef MCKL_HAS_TBB
 #define MCKL_HAS_TBB 0
 #endif
