@@ -64,7 +64,9 @@ Threefish512 Threefish512_64 Threefish1024 Threefish1024_64);
 
 my @mkl = qw(MKL_ARS5 MKL_ARS5_64 MKL_PHILOX4X32X10 MKL_PHILOX4X32X10_64
 MKL_MCG59 MKL_MCG59_64 MKL_MT19937 MKL_MT19937_64 MKL_MT2203 MKL_MT2203_64
-MKL_SFMT19937 MKL_SFMT19937_64);
+MKL_SFMT19937 MKL_SFMT19937_64 MKL_NONDETERM MKL_NONDETERM_64);
+
+my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64)
 
 my %instd;
 $instd{$_} = 1 for (@std);
@@ -75,6 +77,7 @@ my %rngs = (
     philox   => [@philox],
     threefry => [@threefry],
     mkl      => [@mkl],
+    rdrand   => [@rdrand],
 );
 
 my @keys = qw(std aesni philox threefry mkl);
