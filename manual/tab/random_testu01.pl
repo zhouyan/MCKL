@@ -34,8 +34,8 @@
 use v5.16;
 use Getopt::Long;
 
-my $failure = 1e-10;
-my $suspect = 1e-4;
+my $failure = 1e-6;
+my $suspect = 1e-3;
 my $verbose = 0;
 my $pdf = 0;
 

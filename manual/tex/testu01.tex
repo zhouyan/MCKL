@@ -60,14 +60,16 @@ details of the last five distributions. The configuration macro
 |std::generate_canonical|.
 
 The SmallCrush, Crush and BigCrush batteries are applied to each \rng. If the
-$p$-value of a test is within the range $(10^{-4}, 1 - 10^{-4})$, then it is
-said to pass the test. If it is outside the range $(10^{-10}, 1 - 10^{-10})$,
-then it is said to fail the test. Otherwise, we mark the results as suspicious.
-In table~\ref{tab:TestU01 SmallCrush results} to~\ref{tab:TestU01 BigCrush
-results}, we list the number of tests failed by each \rng. The number within
-parentheses are the number of tests with suspicious $p$-values. For \rng{}s
-without any observed failures or suspicious $p$-values, they are omitted from
-the tables.
+$p$-value of a test is within the range $(10^{-3}, 1 - 10^{-3})$, then it is
+said to pass the test. If it is outside the range $(10^{-6}, 1 - 10^{-6})$,
+then it is said to fail the test. Otherwise, the results are considered
+suspicious. In this case, we repeat the specific tests ten times and mark it as
+failure unless the majority of the these repeated tests have $p$-values within
+the range $(10^{-3}, 1 - 10^{-3})$ and none of them produce a $p$-value outside
+the range $(10^{-6}, 1 - 10^{-6})$. In table~\ref{tab:TestU01 SmallCrush
+results} to~\ref{tab:TestU01 BigCrush results}, we list the number of tests
+failed by each \rng. For \rng{}s without any observed failures they are omitted
+from the tables.
 
 Note that, if an \rng passes considerably more tests with the \std method than
 one of the \mckl distributions, then it is most likely to be some weakness of
