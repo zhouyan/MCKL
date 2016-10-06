@@ -34,8 +34,7 @@
 int main(int argc, char **argv)
 {
     // clang-format off
-    random_testu01<@RNGType@>(
-        ::bbattery_Crush, ::bbattery_RepeatCrush, argc, argv);
+    random_testu01<@RNGType@>(::bbattery_RepeatCrush, argc, argv);
     // clang-format on
 
     return 0;

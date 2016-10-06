@@ -84,9 +84,16 @@ class TestU01
         battery(gen_);
     }
 
+    template <typename BatteryRepeat>
+    void operator()(BatteryRepeat &&battery_repeat, int n)
+    {
+        Vector<int> rep(repeat(n));
+        battery_repeat(gen_, rep.data());
+    }
+
     template <typename BatteryRepeat, typename InputIter>
-    void operator()(BatteryRepeat &&battery_repeat, InputIter first,
-        InputIter last, int n = 10)
+    void operator()(
+        BatteryRepeat &&battery_repeat, InputIter first, InputIter last, int n)
     {
         Vector<int> rep(repeat(first, last, n));
         battery_repeat(gen_, rep.data());
@@ -120,6 +127,8 @@ class TestU01
 
         return result[index++];
     }
+
+    static Vector<int> repeat(int n) { return Vector<int>(128, n); }
 
     template <typename InputIter>
     static Vector<int> repeat(InputIter first, InputIter last, int n)

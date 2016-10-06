@@ -37,12 +37,14 @@ use Getopt::Long;
 my $failure = 1e-6;
 my $suspect = 1e-3;
 my $verbose = 0;
+my $repeat = 3;
 my $pdf = 0;
 
 GetOptions(
     "failure=f" => \$failure,
     "suspect=f" => \$suspect,
     "verbose"   => \$verbose,
+    "repeat=n"  => \$repeat,
     "pdf"       => \$pdf,
 );
 $suspect = $failure if ($suspect < $failure);
@@ -194,12 +196,6 @@ sub filter
             &detail("U01OO", $detailU01OO);
             say '-' x 80;
         }
-        $STD   = '--' if not $STD;
-        $U01   = '--' if not $U01;
-        $U01CC = '--' if not $U01CC;
-        $U01CO = '--' if not $U01CO;
-        $U01OC = '--' if not $U01OC;
-        $U01OO = '--' if not $U01OO;
         $rng =~ s/_/\\_/g;
         $tline .= "\\texttt{$rng}";
         $tline .= " & $STD";
@@ -220,26 +216,26 @@ sub check
     $tests = $1 if ($lines =~ /--+\s*(.*?)\s*--+/s);
     my @tests = split "\n", $tests;
 
-    my $nfailure = 0;
-    my $nsuspect = 0;
+    my %failure;
     my $details;
     for (@tests) {
         s/ *(.*) */$1/;
         $details .= $_ . "\n";
-        my $pval = (split)[-1];
+        my ($num, $pval) = (split)[0, -1];
         $pval = 1 - $pval;
         if ($pval < $failure or 1 - $pval < $failure) {
-            $nfailure++;
+            $failure{$num} += 0xFFFF;
         } elsif ($pval < $suspect or 1 - $pval < $suspect) {
-            $nsuspect++;
+            $failure{$num} += 1;
         }
     }
 
-    my $result;
-    $result .= $nfailure if $nfailure;
-    $result .= " \\textcolor{MGrey}{($nsuspect)}" if $nsuspect;
+    my $nfailure = 0;
+    for (values %failure) {
+        $nfailure++ if $_ / $repeat > 0.5;
+    }
 
-    ($result, $details);
+    ($nfailure, $details);
 }
 
 sub detail
