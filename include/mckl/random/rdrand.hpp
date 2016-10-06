@@ -105,6 +105,8 @@ class RDRANDEngine
     public:
     using result_type = ResultType;
 
+    RDRANDEngine() {}
+
     template <typename Seed>
     explicit RDRANDEngine(const Seed &)
     {
