@@ -71,9 +71,6 @@ inline void random_testu01(
         if (arg.find("STD") != std::string::npos) {
             STD = true;
             all = false;
-        } else if (arg.find("U01") != std::string::npos) {
-            U01 = true;
-            all = false;
         } else if (arg.find("U01CC") != std::string::npos) {
             U01CC = true;
             all = false;
@@ -85,6 +82,9 @@ inline void random_testu01(
             all = false;
         } else if (arg.find("U01OO") != std::string::npos) {
             U01OO = true;
+            all = false;
+        } else if (arg.find("U01") != std::string::npos) {
+            U01 = true;
             all = false;
         } else if (arg.find("verbose") != std::string::npos) {
             verbose = true;
