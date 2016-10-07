@@ -33,7 +33,6 @@
 
 use v5.16;
 use Getopt::Long;
-use Data::Dumper;
 
 my $failure = 1e-6;
 my $suspect = 1e-3;
@@ -193,6 +192,7 @@ sub recheck
                             my $cmd = "random_testu01_\L${b}_${r}";
                             push @target, "${cmd}_\L${u}.txt";
                             say $makefile "${cmd}_\L${u}.txt :";
+                            print $makefile "\tninja -C ../.. ${cmd}\n";
                             print $makefile "\t./${cmd} $u stdout \\\n\t\t";
                             print $makefile "$_ " for @num;
                             print $makefile "\\\n";
@@ -204,6 +204,9 @@ sub recheck
         }
         if (@target) {
             say $makefile "run : \\";
+            say $makefile "\t$_ \\" for @target;
+            say $makefile "\n";
+            say $makefile ".PHONY : \\";
             say $makefile "\t$_ \\" for @target;
         }
         say $makefile "\n# vim:ft=make";

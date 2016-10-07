@@ -54,7 +54,6 @@ template <typename RNGType, typename Battery>
 inline void random_testu01(Battery &&battery, int argc, char **argv)
 {
     std::string filename(*argv);
-    filename += ".txt";
     --argc;
     ++argv;
 
@@ -108,10 +107,17 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         U01OO = true;
     }
 
+    std::ifstream seedin(filename + ".seed");
+    if (seedin)
+        seedin >> mckl::Seed<RNGType>::instance();
+    seedin.close();
+
     if (redirect)
-        std::freopen(filename.c_str(), "w", stdout);
+        std::freopen((filename + ".txt").c_str(), "w", stdout);
+
     if (!verbose)
         ::swrite_Basic = FALSE;
+
     if (STD) {
         random_testu01<RNGType, std::uniform_real_distribution<double>>(
             "STD", std::forward<Battery>(battery), rep);
@@ -136,8 +142,14 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         random_testu01<RNGType, mckl::U01OODistribution<double>>(
             "U01OO", std::forward<Battery>(battery), rep);
     }
+
     if (redirect)
         std::fclose(stdout);
+
+    std::ofstream seedout(filename + ".seed");
+    if (seedout)
+        seedout << mckl::Seed<RNGType>::instance() << std::endl;
+    seedout.close();
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_TESTU01_HPP
