@@ -12,7 +12,7 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  142
- Total CPU time:   00:43:30.26
+ Total CPU time:   00:43:27.46
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -20,15 +20,13 @@
        Test                          p-value
  ----------------------------------------------
   1  SerialOver, t = 2              1 - eps1
-  2  SerialOver, t = 4              1 - eps1
+  2  SerialOver, t = 4                eps  
   3  CollisionOver, t = 2           1 - eps1
   4  CollisionOver, t = 2           1 - eps1
   5  CollisionOver, t = 4           1 - eps1
   6  CollisionOver, t = 4           1 - eps1
   7  CollisionOver, t = 8           1 - eps1
-  8  CollisionOver, t = 8           1.2e-55
-  9  CollisionOver, t = 20          1 -  5.3e-5
- 10  CollisionOver, t = 20           0.9998 
+  8  CollisionOver, t = 8           9.7e-58
  11  BirthdaySpacings, t = 2          eps  
  12  BirthdaySpacings, t = 3          eps  
  13  BirthdaySpacings, t = 4          eps  
@@ -41,33 +39,26 @@
  18  ClosePairs mNP1, t = 2           eps  
  18  ClosePairs mNP2, t = 2           eps  
  18  ClosePairs NJumps, t = 2       1 - eps1
- 19  ClosePairs NP, t = 3          6.0e-153
+ 19  ClosePairs NP, t = 3          3.2e-157
  19  ClosePairs mNP, t = 3         3.2e-157
  19  ClosePairs mNP1, t = 3           eps  
  19  ClosePairs NJumps, t = 3       1 - eps1
- 20  ClosePairs NP, t = 7           8.8e-53
+ 20  ClosePairs NP, t = 7           6.0e-41
  20  ClosePairs mNP, t = 7          1.8e-79
  20  ClosePairs mNP1, t = 7           eps  
  20  ClosePairs NJumps, t = 7       1 - eps1
  21  ClosePairsBitMatch, t = 2      1 - eps1
  22  ClosePairsBitMatch, t = 4      1 -  4.8e-7
- 33  Gap, r = 0                       eps  
- 34  Gap, r = 22                      eps  
- 37  Permutation, r = 0             1 - eps1
- 38  Permutation, r = 15            1 - eps1
- 40  CollisionPermut, r = 15         0.9996 
+ 29  CouponCollector, d = 16         5.4e-4
+ 33  Gap, r = 0                      1.2e-7
+ 37  Permutation, r = 0               eps  
+ 38  Permutation, r = 15              eps  
+ 39  CollisionPermut, r = 0          0.9996 
  41  MaxOft, t = 5                  1 - eps1
  42  MaxOft, t = 10                 1 - eps1
- 43  MaxOft, t = 20                 1 - eps1
- 44  MaxOft, t = 30                 1 - eps1
- 73  LempelZiv                      1 - eps1
- 74  Fourier3, r = 0                8.3e-72
- 75  Fourier3, r = 20                 eps  
- 76  LongestHeadRun, r = 0            eps  
- 78  PeriodsInStrings, r = 0         0.9995 
- 80  HammingWeight2, r = 0            eps  
- 81  HammingWeight2, r = 20           eps  
- 91  Run of bits, r = 0              3.2e-4
+ 43  MaxOft, t = 20                 1.6e-12
+ 85  HammingIndep, L = 30            2.5e-6
+ 87  HammingIndep, L = 300          4.8e-14
  ----------------------------------------------
  All other tests were passed
 
@@ -77,13 +68,17 @@
 *********  gofs_AndersonDarling:   N <= 0
 *********  WARNING in file  fbar.c  on line  499
 *********  fbar_AndersonDarling:   N < 1
+*********  WARNING in file  gofs.c  on line  462
+*********  gofs_AndersonDarling:   N <= 0
+*********  WARNING in file  fbar.c  on line  499
+*********  fbar_AndersonDarling:   N < 1
 
 ========= Summary results of Crush =========
 
  Version:          TestU01 1.2.3
  Generator:        U01
- Number of statistics:  144
- Total CPU time:   00:51:34.63
+ Number of statistics:  142
+ Total CPU time:   00:49:26.88
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -112,25 +107,23 @@
  18  ClosePairs mNP1, t = 2           eps  
  18  ClosePairs mNP2, t = 2           eps  
  18  ClosePairs NJumps, t = 2       1 - eps1
- 19  ClosePairs NP, t = 3          9.6e-121
+ 19  ClosePairs NP, t = 3          1.0e-130
  19  ClosePairs mNP, t = 3         3.2e-157
  19  ClosePairs mNP1, t = 3           eps  
  19  ClosePairs NJumps, t = 3       1 - eps1
- 20  ClosePairs NP, t = 7           1.1e-30
+ 20  ClosePairs NP, t = 7           1.8e-79
  20  ClosePairs mNP, t = 7          1.8e-79
  20  ClosePairs mNP1, t = 7           eps  
  20  ClosePairs NJumps, t = 7       1 - eps1
- 20  ClosePairs mNP2S, t = 7         3.5e-4
  21  ClosePairsBitMatch, t = 2      1 - eps1
  22  ClosePairsBitMatch, t = 4      1 - eps1
+ 37  Permutation, r = 0              0.9998 
  41  MaxOft, t = 5                    eps  
  42  MaxOft, t = 10                   eps  
  43  MaxOft, t = 20                   eps  
  44  MaxOft, t = 30                   eps  
- 76  LongestHeadRun, r = 0           4.0e-6
- 80  HammingWeight2, r = 0          9.6e-44
- 81  HammingWeight2, r = 20          7.7e-5
- 91  Run of bits, r = 0               eps  
+ 76  LongestHeadRun, r = 0           1.4e-4
+ 91  Run of bits, r = 0              9.4e-5
  ----------------------------------------------
  All other tests were passed
 
@@ -146,23 +139,23 @@
  Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  144
- Total CPU time:   00:43:50.09
+ Total CPU time:   00:44:16.71
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
 
        Test                          p-value
  ----------------------------------------------
-  1  SerialOver, t = 2              1 - eps1
-  2  SerialOver, t = 4              1 - eps1
+  1  SerialOver, t = 2                eps  
+  2  SerialOver, t = 4                eps  
   3  CollisionOver, t = 2           1 - eps1
   4  CollisionOver, t = 2           1 - eps1
   5  CollisionOver, t = 4           1 - eps1
   6  CollisionOver, t = 4           1 - eps1
   7  CollisionOver, t = 8           1 - eps1
   8  CollisionOver, t = 8           1 - eps1
-  9  CollisionOver, t = 20          1 -  6.0e-8
- 10  CollisionOver, t = 20          1 -  1.1e-7
+  9  CollisionOver, t = 20           0.9998 
+ 10  CollisionOver, t = 20          1 -  3.5e-5
  11  BirthdaySpacings, t = 2          eps  
  12  BirthdaySpacings, t = 3          eps  
  13  BirthdaySpacings, t = 4          eps  
@@ -175,27 +168,26 @@
  18  ClosePairs mNP1, t = 2           eps  
  18  ClosePairs mNP2, t = 2           eps  
  18  ClosePairs NJumps, t = 2       1 - eps1
- 19  ClosePairs NP, t = 3          6.7e-120
+ 19  ClosePairs NP, t = 3          4.3e-131
  19  ClosePairs mNP, t = 3         3.2e-157
  19  ClosePairs mNP1, t = 3           eps  
  19  ClosePairs NJumps, t = 3       1 - eps1
- 20  ClosePairs NP, t = 7           4.5e-37
+ 20  ClosePairs NP, t = 7           4.1e-47
  20  ClosePairs mNP, t = 7          1.8e-79
  20  ClosePairs mNP1, t = 7           eps  
  20  ClosePairs NJumps, t = 7       1 - eps1
+ 20  ClosePairs mNP2S, t = 7         4.8e-9
  21  ClosePairsBitMatch, t = 2      1 - eps1
  22  ClosePairsBitMatch, t = 4      1 -  4.8e-7
- 37  Permutation, r = 0               eps  
- 38  Permutation, r = 15              eps  
+ 37  Permutation, r = 0             1 - eps1
  41  MaxOft, t = 5                    eps  
  42  MaxOft, t = 10                   eps  
  43  MaxOft, t = 20                   eps  
  44  MaxOft, t = 30                   eps  
- 63  GCD, r = 0                      7.1e-4
- 73  LempelZiv                       0.9994 
- 76  LongestHeadRun, r = 0           5.8e-8
- 80  HammingWeight2, r = 0          1.0e-20
- 91  Run of bits, r = 0             1.3e-15
+ 73  LempelZiv                       0.9996 
+ 76  LongestHeadRun, r = 0           3.0e-7
+ 85  HammingIndep, L = 30            2.2e-6
+ 91  Run of bits, r = 0             1.3e-13
  ----------------------------------------------
  All other tests were passed
 
@@ -211,7 +203,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  144
- Total CPU time:   00:43:35.25
+ Total CPU time:   00:43:15.88
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -226,8 +218,8 @@
   6  CollisionOver, t = 4           1 - eps1
   7  CollisionOver, t = 8           1 - eps1
   8  CollisionOver, t = 8           1 - eps1
-  9  CollisionOver, t = 20           0.9999 
- 10  CollisionOver, t = 20          1 -  6.7e-7
+  9  CollisionOver, t = 20          1 -  6.0e-6
+ 10  CollisionOver, t = 20          1 -  1.5e-5
  11  BirthdaySpacings, t = 2          eps  
  12  BirthdaySpacings, t = 3          eps  
  13  BirthdaySpacings, t = 4          eps  
@@ -240,38 +232,44 @@
  18  ClosePairs mNP1, t = 2           eps  
  18  ClosePairs mNP2, t = 2           eps  
  18  ClosePairs NJumps, t = 2       1 - eps1
- 19  ClosePairs NP, t = 3          1.8e-111
+ 19  ClosePairs NP, t = 3          1.3e-127
  19  ClosePairs mNP, t = 3         3.2e-157
  19  ClosePairs mNP1, t = 3           eps  
  19  ClosePairs NJumps, t = 3       1 - eps1
- 20  ClosePairs NP, t = 7           1.7e-43
+ 20  ClosePairs NP, t = 7           3.5e-61
  20  ClosePairs mNP, t = 7          1.8e-79
  20  ClosePairs mNP1, t = 7           eps  
  20  ClosePairs NJumps, t = 7       1 - eps1
  21  ClosePairsBitMatch, t = 2      1 - eps1
  22  ClosePairsBitMatch, t = 4      1 -  4.8e-7
- 37  Permutation, r = 0               eps  
- 38  Permutation, r = 15              eps  
+ 34  Gap, r = 22                     1.8e-4
+ 37  Permutation, r = 0             1 - eps1
  41  MaxOft, t = 5                    eps  
  42  MaxOft, t = 10                   eps  
  43  MaxOft, t = 20                   eps  
  44  MaxOft, t = 30                   eps  
- 72  LinearComp, r = 29              1.7e-4
- 76  LongestHeadRun, r = 0           1.0e-4
- 80  HammingWeight2, r = 0          2.9e-16
- 91  Run of bits, r = 0             4.8e-15
+ 76  LongestHeadRun, r = 0           1.3e-4
+ 91  Run of bits, r = 0             2.9e-14
  ----------------------------------------------
  All other tests were passed
 
 
 
+*********  WARNING in file  gofs.c  on line  462
+*********  gofs_AndersonDarling:   N <= 0
+*********  WARNING in file  fbar.c  on line  499
+*********  fbar_AndersonDarling:   N < 1
+*********  WARNING in file  gofs.c  on line  462
+*********  gofs_AndersonDarling:   N <= 0
+*********  WARNING in file  fbar.c  on line  499
+*********  fbar_AndersonDarling:   N < 1
 
 ========= Summary results of Crush =========
 
  Version:          TestU01 1.2.3
  Generator:        U01OC
- Number of statistics:  144
- Total CPU time:   00:43:46.72
+ Number of statistics:  142
+ Total CPU time:   00:43:34.13
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -286,7 +284,8 @@
   6  CollisionOver, t = 4           1 - eps1
   7  CollisionOver, t = 8           1 - eps1
   8  CollisionOver, t = 8           1 - eps1
-  9  CollisionOver, t = 20           0.9995 
+  9  CollisionOver, t = 20          1 -  3.0e-6
+ 10  CollisionOver, t = 20          1 -  1.1e-6
  11  BirthdaySpacings, t = 2          eps  
  12  BirthdaySpacings, t = 3          eps  
  13  BirthdaySpacings, t = 4          eps  
@@ -294,35 +293,40 @@
  15  BirthdaySpacings, t = 7          eps  
  16  BirthdaySpacings, t = 8          eps  
  17  BirthdaySpacings, t = 8          eps  
- 18  ClosePairs NP, t = 2          1.5e-133
+ 18  ClosePairs NP, t = 2          3.2e-157
  18  ClosePairs mNP, t = 2         3.2e-157
  18  ClosePairs mNP1, t = 2           eps  
+ 18  ClosePairs mNP2, t = 2           eps  
  18  ClosePairs NJumps, t = 2       1 - eps1
- 19  ClosePairs NP, t = 3           8.7e-86
+ 19  ClosePairs NP, t = 3          2.4e-120
  19  ClosePairs mNP, t = 3         3.2e-157
  19  ClosePairs mNP1, t = 3           eps  
  19  ClosePairs NJumps, t = 3       1 - eps1
- 20  ClosePairs NP, t = 7           1.6e-27
+ 20  ClosePairs NP, t = 7           1.8e-79
  20  ClosePairs mNP, t = 7          1.8e-79
  20  ClosePairs mNP1, t = 7           eps  
  20  ClosePairs NJumps, t = 7       1 - eps1
  21  ClosePairsBitMatch, t = 2      1 - eps1
  22  ClosePairsBitMatch, t = 4      1 -  4.8e-7
- 31  Gap, r = 0                      2.4e-5
- 37  Permutation, r = 0              3.9e-4
+ 27  CouponCollector, d = 4          4.4e-6
+ 29  CouponCollector, d = 16         7.3e-6
+ 31  Gap, r = 0                     2.0e-11
+ 32  Gap, r = 27                      eps  
+ 33  Gap, r = 0                      7.5e-6
+ 34  Gap, r = 22                    7.6e-13
+ 37  Permutation, r = 0               eps  
  38  Permutation, r = 15              eps  
- 39  CollisionPermut, r = 0          0.9996 
+ 39  CollisionPermut, r = 0           eps  
+ 40  CollisionPermut, r = 15          eps  
  41  MaxOft, t = 5                    eps  
  42  MaxOft, t = 10                   eps  
  43  MaxOft, t = 20                   eps  
  44  MaxOft, t = 30                   eps  
- 63  GCD, r = 0                     3.7e-13
- 64  GCD, r = 10                     3.7e-4
- 73  LempelZiv                       0.9991 
- 76  LongestHeadRun, r = 0           1.2e-8
- 80  HammingWeight2, r = 0           5.6e-5
- 85  HammingIndep, L = 30           6.0e-11
- 91  Run of bits, r = 0             8.0e-11
+ 63  GCD, r = 0                     1.1e-16
+ 64  GCD, r = 10                     9.5e-7
+ 78  PeriodsInStrings, r = 0         1.3e-9
+ 85  HammingIndep, L = 30            1.6e-6
+ 91  Run of bits, r = 0             6.4e-10
  ----------------------------------------------
  All other tests were passed
 
@@ -332,13 +336,17 @@
 *********  gofs_AndersonDarling:   N <= 0
 *********  WARNING in file  fbar.c  on line  499
 *********  fbar_AndersonDarling:   N < 1
+*********  WARNING in file  gofs.c  on line  462
+*********  gofs_AndersonDarling:   N <= 0
+*********  WARNING in file  fbar.c  on line  499
+*********  fbar_AndersonDarling:   N < 1
 
 ========= Summary results of Crush =========
 
  Version:          TestU01 1.2.3
  Generator:        U01OO
- Number of statistics:  144
- Total CPU time:   00:43:46.04
+ Number of statistics:  142
+ Total CPU time:   00:43:55.11
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -346,14 +354,15 @@
        Test                          p-value
  ----------------------------------------------
   1  SerialOver, t = 2              1 - eps1
-  2  SerialOver, t = 4                eps  
+  2  SerialOver, t = 4              1 - eps1
   3  CollisionOver, t = 2           1 - eps1
   4  CollisionOver, t = 2           1 - eps1
   5  CollisionOver, t = 4           1 - eps1
   6  CollisionOver, t = 4           1 - eps1
   7  CollisionOver, t = 8           1 - eps1
   8  CollisionOver, t = 8           1 - eps1
- 10  CollisionOver, t = 20          1 -  6.7e-7
+  9  CollisionOver, t = 20          1 -  1.1e-7
+ 10  CollisionOver, t = 20           0.9997 
  11  BirthdaySpacings, t = 2          eps  
  12  BirthdaySpacings, t = 3          eps  
  13  BirthdaySpacings, t = 4          eps  
@@ -361,16 +370,16 @@
  15  BirthdaySpacings, t = 7          eps  
  16  BirthdaySpacings, t = 8          eps  
  17  BirthdaySpacings, t = 8          eps  
- 18  ClosePairs NP, t = 2          6.9e-156
+ 18  ClosePairs NP, t = 2          3.2e-157
  18  ClosePairs mNP, t = 2         3.2e-157
  18  ClosePairs mNP1, t = 2           eps  
  18  ClosePairs mNP2, t = 2           eps  
  18  ClosePairs NJumps, t = 2       1 - eps1
- 19  ClosePairs NP, t = 3          8.3e-100
+ 19  ClosePairs NP, t = 3          3.2e-157
  19  ClosePairs mNP, t = 3         3.2e-157
  19  ClosePairs mNP1, t = 3           eps  
  19  ClosePairs NJumps, t = 3       1 - eps1
- 20  ClosePairs NP, t = 7           2.1e-67
+ 20  ClosePairs NP, t = 7           3.2e-52
  20  ClosePairs mNP, t = 7          1.8e-79
  20  ClosePairs mNP1, t = 7           eps  
  20  ClosePairs NJumps, t = 7       1 - eps1
@@ -381,10 +390,9 @@
  42  MaxOft, t = 10                   eps  
  43  MaxOft, t = 20                   eps  
  44  MaxOft, t = 30                   eps  
- 73  LempelZiv                       0.9993 
- 76  LongestHeadRun, r = 0           1.3e-6
- 80  HammingWeight2, r = 0           1.1e-5
- 91  Run of bits, r = 0             1.2e-15
+ 73  LempelZiv                       0.9995 
+ 76  LongestHeadRun, r = 0           1.1e-5
+ 91  Run of bits, r = 0              4.3e-8
  ----------------------------------------------
  All other tests were passed
 

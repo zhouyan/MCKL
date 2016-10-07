@@ -4,9 +4,16 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  144
- Total CPU time:   00:54:38.42
+ Total CPU time:   00:55:28.26
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
 
- All tests were passed
+       Test                          p-value
+ ----------------------------------------------
+  9  CollisionOver, t = 20           0.9991 
+ ----------------------------------------------
+ All other tests were passed
 
 
 
@@ -16,7 +23,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  144
- Total CPU time:   01:02:01.38
+ Total CPU time:   01:02:35.30
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -25,15 +32,15 @@
  ----------------------------------------------
   9  CollisionOver, t = 20            eps  
  10  CollisionOver, t = 20            eps  
- 23  SimpPoker, d = 16               5.8e-4
- 27  CouponCollector, d = 4          1.0e-9
- 28  CouponCollector, d = 4         2.9e-11
+ 27  CouponCollector, d = 4          4.0e-6
+ 28  CouponCollector, d = 4          4.3e-7
  31  Gap, r = 0                       eps  
- 32  Gap, r = 27                      eps  
- 39  CollisionPermut, r = 0        1.2e-153
- 40  CollisionPermut, r = 15       2.1e-183
- 46  SampleProd, t = 30             1 -  6.7e-6
- 47  SampleMean                     3.1e-24
+ 32  Gap, r = 27                    6.0e-10
+ 39  CollisionPermut, r = 0        3.3e-172
+ 40  CollisionPermut, r = 15       1.1e-155
+ 46  SampleProd, t = 30             1 -  1.0e-6
+ 47  SampleMean                     1.8e-24
+ 53  WeightDistrib, r = 16           2.2e-4
  55  SumCollector                     eps  
  62  Savir2                           eps  
  ----------------------------------------------
@@ -47,7 +54,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  144
- Total CPU time:   00:50:11.04
+ Total CPU time:   00:49:46.79
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -75,14 +82,14 @@
  44  MaxOft, t = 30                   eps  
  44  MaxOft AD, t = 30              1 - eps1
  46  SampleProd, t = 30             1 - eps1
- 47  SampleMean                     4.6e-20
+ 47  SampleMean                     7.7e-20
  51  WeightDistrib, r = 0             eps  
  52  WeightDistrib, r = 8             eps  
  53  WeightDistrib, r = 16            eps  
  54  WeightDistrib, r = 24            eps  
  55  SumCollector                     eps  
  62  Savir2                           eps  
- 87  HammingIndep, L = 300          3.3e-16
+ 87  HammingIndep, L = 300          1.2e-10
  88  HammingIndep, L = 300            eps  
  ----------------------------------------------
  All other tests were passed
@@ -95,7 +102,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  144
- Total CPU time:   00:50:05.15
+ Total CPU time:   00:50:15.80
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -104,6 +111,7 @@
  ----------------------------------------------
   9  CollisionOver, t = 20            eps  
  10  CollisionOver, t = 20            eps  
+ 22  ClosePairsBitMatch, t = 4       2.2e-4
  23  SimpPoker, d = 16                eps  
  24  SimpPoker, d = 16                eps  
  25  SimpPoker, d = 64                eps  
@@ -123,16 +131,15 @@
  44  MaxOft, t = 30                   eps  
  44  MaxOft AD, t = 30              1 - eps1
  46  SampleProd, t = 30             1 - eps1
- 47  SampleMean                     6.4e-21
+ 47  SampleMean                     1.2e-19
  51  WeightDistrib, r = 0             eps  
  52  WeightDistrib, r = 8             eps  
  53  WeightDistrib, r = 16            eps  
  54  WeightDistrib, r = 24            eps  
  55  SumCollector                     eps  
  62  Savir2                           eps  
- 68  RandomWalk1 R (L = 1000)        1.1e-4
- 87  HammingIndep, L = 300          1.1e-16
- 88  HammingIndep, L = 300            eps  
+ 87  HammingIndep, L = 300            eps  
+ 88  HammingIndep, L = 300          1.1e-16
  ----------------------------------------------
  All other tests were passed
 
@@ -144,7 +151,7 @@
  Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  144
- Total CPU time:   00:48:58.20
+ Total CPU time:   00:49:42.23
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -172,14 +179,15 @@
  44  MaxOft, t = 30                   eps  
  44  MaxOft AD, t = 30              1 - eps1
  46  SampleProd, t = 30             1 - eps1
- 47  SampleMean                     1.4e-20
+ 47  SampleMean                     2.2e-25
  51  WeightDistrib, r = 0             eps  
  52  WeightDistrib, r = 8             eps  
  53  WeightDistrib, r = 16            eps  
  54  WeightDistrib, r = 24            eps  
  55  SumCollector                     eps  
  62  Savir2                           eps  
- 87  HammingIndep, L = 300          4.1e-15
+ 67  RandomWalk1 H (L = 1000)        9.0e-5
+ 87  HammingIndep, L = 300            eps  
  88  HammingIndep, L = 300            eps  
  ----------------------------------------------
  All other tests were passed
@@ -192,14 +200,14 @@
  Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  144
- Total CPU time:   00:49:35.49
+ Total CPU time:   00:36:13.02
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
 
        Test                          p-value
  ----------------------------------------------
-  7  CollisionOver, t = 8            6.9e-4
+  7  CollisionOver, t = 8            0.9993 
   9  CollisionOver, t = 20            eps  
  10  CollisionOver, t = 20            eps  
  23  SimpPoker, d = 16                eps  
@@ -221,15 +229,15 @@
  44  MaxOft, t = 30                   eps  
  44  MaxOft AD, t = 30              1 - eps1
  46  SampleProd, t = 30             1 - eps1
- 47  SampleMean                     3.7e-23
+ 47  SampleMean                     5.0e-17
  51  WeightDistrib, r = 0             eps  
  52  WeightDistrib, r = 8             eps  
  53  WeightDistrib, r = 16            eps  
  54  WeightDistrib, r = 24            eps  
  55  SumCollector                     eps  
  62  Savir2                           eps  
- 87  HammingIndep, L = 300          3.2e-14
- 88  HammingIndep, L = 300            eps  
+ 87  HammingIndep, L = 300            eps  
+ 88  HammingIndep, L = 300          7.8e-16
  ----------------------------------------------
  All other tests were passed
 
