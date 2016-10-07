@@ -47,7 +47,7 @@ inline void random_testu01(
     testu01.reset<RNGType, U01Type>(name);
     rep.size() == 0 ?
         testu01(std::forward<Battery>(battery), 1) :
-        testu01(std::forward<Battery>(battery), rep.begin(), rep.end(), 5);
+        testu01(std::forward<Battery>(battery), rep.begin(), rep.end(), 2);
 }
 
 template <typename RNGType, typename Battery>

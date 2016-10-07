@@ -33,6 +33,7 @@
 
 use v5.16;
 use Getopt::Long;
+use Data::Dumper;
 
 my $failure = 1e-6;
 my $suspect = 1e-3;
@@ -70,9 +71,6 @@ MKL_SFMT19937 MKL_SFMT19937_64 MKL_NONDETERM MKL_NONDETERM_64);
 
 my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64);
 
-my %instd;
-$instd{$_} = 1 for (@std);
-
 my %rngs = (
     std      => [@std],
     aesni    => [@aesni],
@@ -83,6 +81,27 @@ my %rngs = (
 );
 
 my @keys = qw(std aesni philox threefry mkl);
+
+my %failure;
+my %suspect;
+
+for my $b (@battery) {
+    for my $u (@u01) {
+        for my $k (@keys) {
+            &check($b, $_, $u) for @{$rngs{$k}};
+        }
+    }
+}
+&recheck();
+
+for my $b (@battery) {
+    for my $u (@u01) {
+        for my $k (@keys) {
+            &check($b, $_, $u, "_$u") for @{$rngs{$k}};
+        }
+    }
+}
+&recheck();
 
 my $texfile;
 if ($pdf) {
@@ -120,14 +139,85 @@ if ($pdf) {
     `lualatex -interaction=batchmode random_testu01.tex`;
 }
 
+sub check
+{
+    my $bat = shift;
+    my $rng = shift;
+    my $u01 = shift;
+    my $suffix = shift;
+    my $txt = "random_testu01_\L${bat}_${rng}${suffix}.txt";
+    if (-e $txt) {
+        open my $txtfile, '<', $txt;
+        my @lines = <$txtfile>;
+        s/\+$/\n/ for @lines;
+        my $lines = "@lines";
+        if ($lines =~ /$u01\n(.*?)tests were passed/s) {
+            my $result = $1;
+            if ($result =~ /--+\s*(.*?)\s*--+/s) {
+                my @tests = split "\n", $1;
+                for (@tests) {
+                    my ($num, $pval) = (split)[0, -1];
+                    $pval = 1 - $pval;
+                    if ($pval < $failure or 1 - $pval < $failure) {
+                        $failure{$bat}{$rng}{$u01}{$num} += 1;
+                    } elsif ($pval < $suspect or 1 - $pval < $suspect) {
+                        $suspect{$bat}{$rng}{$u01}{$num} += 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+sub recheck
+{
+    for my $b (@battery) {
+        open my $makefile, '>', "random_testu01_\L$b.make";
+        say $makefile ".PHONY : all run\n";
+        say $makefile "all :\n";
+        my @target;
+        for my $u (@u01) {
+            for my $k (@keys) {
+                for my $r (@{$rngs{$k}}) {
+                    if ($suspect{$b}{$r}{$u}) {
+                        my @num;
+                        for (keys $suspect{$b}{$r}{$u}) {
+                            if ($suspect{$b}{$r}{$u}{$_} > 1) {
+                                $failure{$b}{$r}{$u}{$_} += 1;
+                            } else {
+                                push @num, $_;
+                            }
+                        }
+                        if (@num) {
+                            @num = sort @num;
+                            my $cmd = "random_testu01_\L${b}_${r}";
+                            push @target, "${cmd}_\L${u}.txt";
+                            say $makefile "${cmd}_\L${u}.txt :";
+                            print $makefile "\t./${cmd} $u stdout \\\n\t\t";
+                            print $makefile "$_ " for @num;
+                            print $makefile "\\\n";
+                            print $makefile "\t\t>${cmd}_\L${u}.txt\n\n";
+                        }
+                    }
+                }
+            }
+        }
+        if (@target) {
+            say $makefile "run : \\";
+            say $makefile "\t$_ \\" for @target;
+        }
+        say $makefile "\n# vim:ft=make";
+    }
+}
+
 sub table
 {
     my $b = shift;
 
     my $header;
     $header .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
-    $header .= '\toprule' . "\n";
-    $header .= '\rng';
+    $header .= ' ' x 2 . '\toprule' . "\n";
+    $header .= ' ' x 2 . '\rng';
     $header .= ' & \std';
     $header .= ' & \textsc{u01}';
     $header .= ' & \textsc{u01cc}';
@@ -135,139 +225,35 @@ sub table
     $header .= ' & \textsc{u01oc}';
     $header .= ' & \textsc{u01oo}';
     $header .= " \\\\\n";
-    $header .= '\midrule' . "\n";
+    $header .= ' ' x 2 . '\midrule' . "\n";
 
     my $footer;
-    $footer .= '\bottomrule' . "\n";
+    $footer .= ' ' x 2 . '\bottomrule' . "\n";
     $footer .= '\end{tabularx}' . "\n";
 
     my $table;
     for my $k (@keys) {
         my @val = @{$rngs{$k}};
         for my $r (@val) {
-            my $txt = "random_testu01_\L${b}_$r.txt";
-            if (-e $txt) {
-                $table .= &filter($txt, $b, $r);
+            my $f = 0;
+            for (@u01) {
+                $f += 1 if $failure{$b}{$r}{$_};
+            }
+            if ($f) {
+                $table .= ' ' x 2 . sprintf('%-20s', $r);
+                for (@u01) {
+                    my $num;
+                    if ($failure{$b}{$r}{$_}) {
+                        $num = ' & ' . keys $failure{$b}{$r}{$_};
+                    } else {
+                        $num .= ' & 0';
+                    }
+                    $table .= sprintf('%-6s', $num);
+                }
+                $table .= " \\\\\n";
             }
         }
     }
     $table = $header . $table . $footer if $table;
     $table;
-}
-
-sub filter
-{
-    my $txt = shift;
-    my $bat = shift;
-    my $rng = shift;
-    open my $txtfile, '<', $txt;
-    my @lines = <$txtfile>;
-    s/\s+$/\n/ for @lines;
-    my $lines = "@lines";
-
-    my ($STD,   $detailSTD)   = &check(&extract("STD",   $lines));
-    my ($U01,   $detailU01)   = &check(&extract("U01",   $lines));
-    my ($U01CC, $detailU01CC) = &check(&extract("U01CC", $lines));
-    my ($U01CO, $detailU01CO) = &check(&extract("U01CO", $lines));
-    my ($U01OC, $detailU01OC) = &check(&extract("U01OC", $lines));
-    my ($U01OO, $detailU01OO) = &check(&extract("U01OO", $lines));
-
-    if ($verbose) {
-        &detail("STD",   $bat, $rng, $detailSTD);
-        &detail("U01",   $bat, $rng, $detailU01);
-        &detail("U01CC", $bat, $rng, $detailU01CC);
-        &detail("U01CO", $bat, $rng, $detailU01CO);
-        &detail("U01OC", $bat, $rng, $detailU01OC);
-        &detail("U01OO", $bat, $rng, $detailU01OO);
-    }
-
-    my $tline;
-    if ($STD or $U01 or $U01CC or $U01CO or $U01OC or $U01OO) {
-        $rng =~ s/_/\\_/g;
-        $tline .= "\\texttt{$rng}";
-        $tline .= " & $STD";
-        $tline .= " & $U01";
-        $tline .= " & $U01CC";
-        $tline .= " & $U01CO";
-        $tline .= " & $U01OC";
-        $tline .= " & $U01OO";
-        $tline .= " \\\\\n";
-    }
-    $tline;
-}
-
-sub extract
-{
-    my $u01 = shift;
-    my $lines = shift;
-    my $pattern = "$u01\n.*?tests were passed";
-    my $tests;
-    my $repeat = 0;
-    while ($lines =~ /($pattern)/s) {
-        my $this_tests = $1;
-        if ($this_tests =~ /--+\s*(.*?)\s*--+/s) {
-            $tests .= $1 . "\n";
-            $repeat++;
-        }
-        $lines =~ s/$pattern//s
-    }
-    $tests =~ s/ *(.*) */$1/g;
-
-    ($repeat, $tests);
-}
-
-sub check
-{
-    my $repeat = shift;
-    my @tests = split "\n", $_[0];
-
-    my %failure;
-    my $details;
-    for (@tests) {
-        $details .= $_ . "\n";
-        my ($num, $pval) = (split)[0, -1];
-        $pval = 1 - $pval;
-        if ($pval < $failure or 1 - $pval < $failure) {
-            $failure{$num} += 0xFFFF;
-        } elsif ($pval < $suspect or 1 - $pval < $suspect) {
-            $failure{$num} += 1;
-        }
-    }
-
-    my $nfailure = 0;
-    for (values %failure) {
-        $nfailure++ if $_ / $repeat > 0.5;
-    }
-
-    ($nfailure, $details);
-}
-
-sub detail
-{
-    my $u01 = shift;
-    my $bat = shift;
-    my $rng = shift;
-    my @detail = sort(split "\n", $_[0]);
-    if (@detail) {
-        say '=' x 85;
-        for (@detail) {
-            printf('%-11s', $bat);
-            printf('%-21s', $rng);
-            printf('%-6s', $u01);
-            say &format($_);
-        }
-        say '-' x 85;
-    }
-}
-
-sub format
-{
-    my $line = shift;
-    my $num = (split ' ', $line)[0];
-    if ($num < 10) {
-        $line = '  ' . $line;
-    } elsif ($num < 100) {
-        $line = ' ' . $line;
-    }
-    $line;
 }
