@@ -145,7 +145,7 @@ sub check
     my $rng = shift;
     my $u01 = shift;
     my $suffix = shift;
-    my $txt = "random_testu01_\L${bat}_${rng}${suffix}.txt";
+    my $txt = "testu01/random_testu01_\L${bat}_${rng}${suffix}.txt";
     if (-e $txt) {
         open my $txtfile, '<', $txt;
         my @lines = <$txtfile>;
@@ -175,7 +175,7 @@ sub check
 sub recheck
 {
     for my $b (@battery) {
-        open my $makefile, '>', "random_testu01_\L$b.make";
+        open my $makefile, '>', "testu01/random_testu01_\L$b.make";
         say $makefile ".PHONY : all run\n";
         say $makefile "all :\n";
         my @target;
@@ -245,7 +245,9 @@ sub table
                 $f += 1 if $failure{$b}{$r}{$_};
             }
             if ($f) {
-                $table .= ' ' x 2 . sprintf('%-20s', $r);
+                my $name = $r;
+                $name =~ s/_/\\_/g;
+                $table .= ' ' x 2 . sprintf('%-30s', "\\texttt{$name}");
                 for (@u01) {
                     my $num;
                     if ($failure{$b}{$r}{$_}) {

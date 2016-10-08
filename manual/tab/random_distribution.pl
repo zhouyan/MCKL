@@ -187,7 +187,7 @@ sub run
     say $dir;
     my $txtfile;
     open $txtfile, '>',
-    "random_distribution_$_[0]_$simd.txt" if $all and $write;
+    "distribution/random_distribution_$_[0]_$simd.txt" if $all and $write;
     my $header = 1;
     my @header;
     for my $dist (@dists) {
@@ -222,7 +222,7 @@ sub read
 {
     my @val = @{$dists{$_[0]}};
     shift @_;
-    open my $txtfile, '<', "random_distribution_$_[0]_$simd.txt";
+    open my $txtfile, '<', "distribution/random_distribution_$_[0]_$simd.txt";
     my @txt = grep {
     $_ =~ /(.*)<(double|u?int.._t)>.*(Passed|Failed).*/ } <$txtfile>;
     my $record;

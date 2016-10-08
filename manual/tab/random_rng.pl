@@ -177,7 +177,7 @@ sub run
     my $dir = $build_dir{$_[0]};
     say $dir;
     my $txtfile;
-    open $txtfile, '>', "random_rng_$_[0]_$simd.txt" if $all and $write;
+    open $txtfile, '>', "rng/random_rng_$_[0]_$simd.txt" if $all and $write;
     my $header = 1;
     my @header;
     for my $rng (@rngs) {
@@ -218,7 +218,7 @@ sub read
 {
     my @val = @{$rngs{$_[0]}};
     shift @_;
-    open my $txtfile, '<', "random_rng_$_[0]_$simd.txt";
+    open my $txtfile, '<', "rng/random_rng_$_[0]_$simd.txt";
     my @txt = grep { $_ =~ /Passed|Failed/ } <$txtfile>;
     my $record;
     for (@txt) {
