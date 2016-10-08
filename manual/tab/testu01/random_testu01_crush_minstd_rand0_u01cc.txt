@@ -10,14 +10,10 @@
 
        Test                          p-value
  ----------------------------------------------
-  9  CollisionOver, t = 20           0.9994 
-  9  CollisionOver, t = 20           0.9999 
- 10  CollisionOver, t = 20          1 -  9.5e-6
- 39  CollisionPermut, r = 0         1 -  8.3e-6
- 39  CollisionPermut, r = 0         1 -  1.2e-9
- 65  RandomWalk1 M (L = 90)          8.7e-4
- 65  RandomWalk1 J (L = 90)           eps  
- 65  RandomWalk1 J (L = 90)          2.6e-6
+  9  CollisionOver, t = 20          1 -  5.3e-5
+ 10  CollisionOver, t = 20          1 -  2.3e-5
+ 65  RandomWalk1 J (L = 90)          7.0e-6
+ 65  RandomWalk1 J (L = 90)         5.6e-10
  ----------------------------------------------
  All other tests were passed
 

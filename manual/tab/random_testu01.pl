@@ -184,24 +184,17 @@ sub recheck
             for my $k (@keys) {
                 for my $r (@{$rngs{$k}}) {
                     if ($suspect{$b}{$r}{$u}) {
-                        my @num;
-                        for (keys $suspect{$b}{$r}{$u}) {
-                            push @num, $_;
-                            if ($suspect{$b}{$r}{$u}{$_} > 1) {
-                                $failure{$b}{$r}{$u}{$_} += 1;
-                            }
-                        }
-                        if (@num) {
-                            @num = sort @num;
+                        my @keys = sort(keys $suspect{$b}{$r}{$u});
+                        if (@keys) {
                             my $bin = "random_testu01_\L${b}_${r}";
-                            my $tar = $bin . "_$u";
-                            my $cmd;
-                            $cmd .= "$tar :\n";
-                            $cmd .= "\tninja -C ../.. $bin\n";
-                            $cmd .= "\t./$bin $u";
-                            $cmd .= " $_" for @num;
-                            $cmd .= "\n";
-                            $target{$tar} = $cmd;
+                            $target{$bin} .= "\t./$bin $u";
+                            for (@keys) {
+                                $target{$bin} .= " $_";
+                                if ($suspect{$b}{$r}{$u}{$_} > 1) {
+                                    $failure{$b}{$r}{$u}{$_} += 1;
+                                }
+                            }
+                            $target{$bin} .= "\n";
                         }
                     }
                 }
@@ -217,7 +210,12 @@ sub recheck
             print $makefile "run :";
             print $makefile " \\\n\t$_" for @keys;
             print $makefile "\n\n";
-            print $makefile "$target{$_}\n" for @keys;
+            for (@keys) {
+                print $makefile "$_ :\n";
+                print $makefile "\tninja -C ../.. $_\n";
+                print $makefile $target{$_};
+                print $makefile "\n";
+            }
             print $makefile "# vim:ft=make\n";
         }
     }

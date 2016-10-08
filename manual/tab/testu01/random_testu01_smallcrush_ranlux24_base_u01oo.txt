@@ -10,10 +10,9 @@
 
        Test                          p-value
  ----------------------------------------------
-  3  Gap                             5.9e-6
-  3  Gap                             3.9e-4
-  5  CouponCollector                 7.8e-5
+  3  Gap                             3.6e-4
  ----------------------------------------------
+ All other tests were passed
 
 
 
