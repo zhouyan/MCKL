@@ -29,6 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <mckl/random/rng.hpp>
 #include <mckl/random/uniform_bits_distribution.hpp>
 #include "random_common.hpp"
 

@@ -31,4 +31,32 @@
 
 #include "random_u01.hpp"
 
-MCKL_EXAMPLE_RANDOM_MAIN(u01, 100000, 100)
+int main(int argc, char **argv)
+{
+    --argc;
+    ++argv;
+
+    std::size_t N = 100000;
+    if (argc > 0) {
+        std::size_t n = static_cast<std::size_t>(std::atoi(*argv));
+        if (n != 0) {
+            N = n;
+            --argc;
+            ++argv;
+        }
+    }
+
+    std::size_t M = 100;
+    if (argc > 0) {
+        std::size_t m = static_cast<std::size_t>(std::atoi(*argv));
+        if (m != 0) {
+            M = m;
+            --argc;
+            ++argv;
+        }
+    }
+
+    random_u01(N, M);
+
+    return 0;
+}

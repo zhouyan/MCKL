@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_testu01_crush.cpp.in
+// MCKL/include/mckl/random/internal/threefry_constant.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,18 +29,4 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_U01_USE_FIXED_POINT 0
-
-#define MCKL_U01_USE_64BITS_DOUBLE 0
-
-#include <@RNGHeader@>
-#include "random_testu01.hpp"
-
-int main(int argc, char **argv)
-{
-    // clang-format off
-    random_testu01<@RNGType@>(::bbattery_RepeatCrush, argc, argv);
-    // clang-format on
-
-    return 0;
-}
+#ifndef MCKL_RANDOM_INTERNAL_THREEFRY_CONSTANTS_HPP

@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_testu01_crush.cpp.in
+// MCKL/include/mckl/random/internal/philox_constants.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,18 +29,65 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_U01_USE_FIXED_POINT 0
+#ifndef MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP
+#define MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP
 
-#define MCKL_U01_USE_64BITS_DOUBLE 0
-
-#include <@RNGHeader@>
-#include "random_testu01.hpp"
-
-int main(int argc, char **argv)
+namespace mckl
 {
-    // clang-format off
-    random_testu01<@RNGType@>(::bbattery_RepeatCrush, argc, argv);
-    // clang-format on
 
-    return 0;
-}
+namespace internal
+{
+
+template <typename, std::size_t, int>
+class PhiloxConstantsImpl;
+
+template <typename T>
+class PhiloxConstantsImpl<T, 2, 32>
+{
+    public:
+    static constexpr T weyl[1] = {UINT32_C(0x9E3779B9)};
+
+    static constexpr T multiplier[1] = {UINT32_C(0xD256D193)};
+}; // class PhiloxConstantsImpl
+
+template <typename T>
+class PhiloxConstantsImpl<T, 4, 32>
+{
+    public:
+    static constexpr T weyl[2] = {UINT32_C(0x9E3779B9), UINT32_C(0xBB67AE85)};
+
+    static constexpr T multiplier[2] = {
+        UINT32_C(0xCD9E8D57), UINT32_C(0xD2511F53)};
+}; // class PhiloxConstantsImpl
+
+template <typename T>
+class PhiloxConstantsImpl<T, 2, 64>
+{
+    public:
+    static constexpr T weyl[1] = {UINT64_C(0x9E3779B97F4A7C15)};
+
+    static constexpr T multiplier[1] = {UINT64_C(0xD2B74407B1CE6E93)};
+}; // class PhiloxConstantsImpl
+
+template <typename T>
+class PhiloxConstantsImpl<T, 4, 64>
+{
+    public:
+    static constexpr T weyl[2] = {
+        UINT64_C(0x9E3779B97F4A7C15), UINT64_C(0xBB67AE8584CAA73B)};
+
+    static constexpr T multiplier[2] = {
+        UINT64_C(0xCA5A826395121157), UINT64_C(0xD2E7470EE14C6C93)};
+}; // class PhiloxConstantsImpl
+
+} // namespace mckl::internal
+
+/// \brief Default Philox constants
+/// \ingroup Philox
+template <typename T, std::size_t K>
+using PhiloxConstants =
+    internal::PhiloxConstantsImpl<T, K, std::numeric_limits<T>::digits>;
+
+} // namespace mckl
+
+#endif // MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP

@@ -29,6 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <@RNGHeader@>
 #include "random_test.hpp"
 
 int main(int argc, char **argv)

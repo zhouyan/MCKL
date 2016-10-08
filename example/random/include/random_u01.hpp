@@ -32,6 +32,7 @@
 #ifndef MCKL_EXAMPLE_RANDOM_U01_HPP
 #define MCKL_EXAMPLE_RANDOM_U01_HPP
 
+#include <mckl/random/threefry.hpp>
 #include <mckl/random/u01.hpp>
 #include <mckl/randomc/u01.h>
 #include "random_common.hpp"
@@ -185,7 +186,7 @@ inline void random_u01(
     std::cout << std::endl;
 }
 
-inline void random_u01(std::size_t N, std::size_t M, int, char **)
+inline void random_u01(std::size_t N, std::size_t M)
 {
     const int nwid = 45;
     const int swid = 15;

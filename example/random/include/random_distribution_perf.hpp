@@ -127,18 +127,9 @@ inline void random_distribution_perf_s(std::size_t N, std::size_t M,
     using result_type = typename MCKLDistType::result_type;
     using std_type = typename RandomDistributionTrait<MCKLDistType>::std_type;
 
-#if MCKL_HAS_AESNI
-    mckl::ARS rng;
-#else
-    mckl::Philox4x32 rng;
-#endif
-
+    MCKLRNGType rng;
 #if MCKL_HAS_MKL
-#if MCKL_HAS_AESNI
-    mckl::MKL_ARS5 rng_mkl;
-#else
-    mckl::MKL_PHILOX4X32X10 rng_mkl;
-#endif
+    MKLRNGType rng_mkl;
 #endif
 
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
@@ -263,18 +254,14 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
 
     std::size_t P = std::thread::hardware_concurrency();
 
-#if MCKL_HAS_AESNI
-    mckl::RNGSetVector<mckl::ARS> rs(P);
-#else
-    mckl::RNGSetVector<mckl::Philox4x32> rs(P);
-#endif
+    mckl::Vector<MCKLRNGType> rs(P);
+    for (std::size_t i = 0; i != P; ++i)
+        rs[i].seed(static_cast<unsigned>(i + 1));
 
 #if MCKL_HAS_MKL
-#if MCKL_HAS_AESNI
-    mckl::RNGSetVector<mckl::MKL_ARS5> rs_mkl(P);
-#else
-    mckl::RNGSetVector<mckl::MKL_PHILOX4X32X10> rs_mkl(P);
-#endif
+    mckl::Vector<MKLRNGType> rs_mkl(P);
+    for (std::size_t i = 0; i != P; ++i)
+        rs_mkl[i].seed(static_cast<unsigned>(i + 1));
 #endif
 
     mckl::Vector<MCKLDistType> dist_mckl(

@@ -32,11 +32,8 @@
 #ifndef MCKL_EXAMPLE_RANDOM_TESTU01_HPP
 #define MCKL_EXAMPLE_RANDOM_TESTU01_HPP
 
-#define MCKL_U01_USE_FIXED_POINT 0
-
-#define MCKL_U01_USE_64BITS_DOUBLE 0
-
 #include <mckl/random/testu01.hpp>
+#include <mckl/random/u01_distribution.hpp>
 #include "random_common.hpp"
 
 template <typename RNGType, typename U01Type, typename Battery>

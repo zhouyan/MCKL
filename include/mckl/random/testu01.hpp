@@ -33,7 +33,7 @@
 #define MCKL_RANDOM_TESTU01_HPP
 
 #include <mckl/random/internal/common.hpp>
-#include <mckl/random/rng_set.hpp>
+#include <mckl/random/seed.hpp>
 
 extern "C" {
 
@@ -120,7 +120,7 @@ class TestU01
     }
 
     private:
-    TestU01() : gen_(nullptr) { reset<RNG, U01Distribution<double>>("U01"); }
+    TestU01() : gen_(nullptr) {}
 
     ::unif01_Gen *gen_;
 
@@ -131,10 +131,16 @@ class TestU01
         static const std::size_t M = std::thread::hardware_concurrency();
 
         static std::size_t index = N * M;
-        static RNGSetVector<RNGType> rs(M);
+        static Vector<RNGType> rs(M);
         static Vector<double> result(N * M);
+        static bool init = false;
 
         if (index == N * M) {
+            if (!init) {
+                for (auto &rng : rs)
+                    rng.seed(Seed<RNGType>::instance().get());
+                init = true;
+            }
             double *r = result.data();
             for (std::size_t i = 0; i != M; ++i, r += N) {
                 RNGType rng(std::move(rs[i]));

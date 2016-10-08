@@ -29,6 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+// clang-format off
+#define MCKL_@DISTNAME@_DISTRIBUTION 1
+// clang-format on
+
+#include <@DistHeader@>
 #include "random_distribution_perf.hpp"
 
 int main(int argc, char **argv)
@@ -57,7 +62,9 @@ int main(int argc, char **argv)
     }
 
     // clang-format off
-    random_distribution_perf<@DistributionType@,
-        typename @DistributionType@<>::result_type>(N, M);
+    random_distribution_perf<@DistType@,
+        typename @DistType@<>::result_type>(N, M);
     // clang-format on
+
+    return 0;
 }

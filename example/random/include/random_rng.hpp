@@ -32,8 +32,30 @@
 #ifndef MCKL_EXAMPLE_RANDOM_RNG_HPP
 #define MCKL_EXAMPLE_RANDOM_RNG_HPP
 
-#include <mckl/random/rng_set.hpp>
-#include <mckl/random/seed.hpp>
+#ifndef MCKL_RNG_STD
+#define MCKL_RNG_STD 0
+#endif
+
+#ifndef MCKL_RNG_AESNI
+#define MCKL_RNG_AESNI 0
+#endif
+
+#ifndef MCKL_RNG_PHILOX
+#define MCKL_RNG_PHILOX 0
+#endif
+
+#ifndef MCKL_RNG_THREEFRY
+#define MCKL_RNG_THREEFRY 0
+#endif
+
+#ifndef MCKL_RNG_MKL
+#define MCKL_RNG_MKL 0
+#endif
+
+#ifndef MCKL_RNG_RDRAND
+#define MCKL_RNG_RDRAND 0
+#endif
+
 #include <mckl/random/uniform_bits_distribution.hpp>
 #include "random_common.hpp"
 
@@ -50,11 +72,15 @@ inline mckl::Vector<T> random_rng_kat(const std::string &filename)
     return k;
 }
 
+#if MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
+
 template <typename RNGType>
 inline bool random_rng_kat(RNGType &)
 {
     return true;
 }
+
+#else // MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
 
 template <typename T, typename RNGType>
 inline bool random_rng_kat(RNGType &rng, const std::string &filename)
@@ -68,6 +94,38 @@ inline bool random_rng_kat(RNGType &rng, const std::string &filename)
             sizeof(typename RNGType::result_type) * 256) == 0;
 }
 
+#endif // MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
+
+#if MCKL_HAS_AESNI && MCKL_RNG_AESNI
+
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::AES128Engine<ResultType, Rounds> &rng)
+{
+    return random_rng_kat<std::uint64_t>(rng, "random_AES128.txt");
+}
+
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::AES192Engine<ResultType, Rounds> &rng)
+{
+    return random_rng_kat<std::uint64_t>(rng, "random_AES192.txt");
+}
+
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::AES256Engine<ResultType, Rounds> &rng)
+{
+    return random_rng_kat<std::uint64_t>(rng, "random_AES256.txt");
+}
+
+template <typename ResultType, std::size_t Rounds>
+inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
+{
+    return random_rng_kat<std::uint64_t>(rng, "random_ARS.txt");
+}
+
+#endif // MCKL_HAS_AESNI && MCKL_RNG_AESNI
+
+#if MCKL_RNG_PHILOX
+
 template <typename ResultType, typename T, std::size_t K>
 inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
 {
@@ -77,6 +135,10 @@ inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
 
     return random_rng_kat<T>(rng, filename);
 }
+
+#endif // MCKL_RNG_PHILOX
+
+#if MCKL_RNG_THREEFRY
 
 template <typename ResultType, typename T, std::size_t K>
 inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
@@ -106,51 +168,7 @@ inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
     return random_rng_kat<std::uint64_t>(rng, "random_Threefish1024.txt");
 }
 
-#if MCKL_HAS_AESNI
-
-template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::AES128Engine<ResultType, Rounds> &rng)
-{
-    return random_rng_kat<std::uint64_t>(rng, "random_AES128.txt");
-}
-
-template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::AES192Engine<ResultType, Rounds> &rng)
-{
-    return random_rng_kat<std::uint64_t>(rng, "random_AES192.txt");
-}
-
-template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::AES256Engine<ResultType, Rounds> &rng)
-{
-    return random_rng_kat<std::uint64_t>(rng, "random_AES256.txt");
-}
-
-template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
-{
-    return random_rng_kat<std::uint64_t>(rng, "random_ARS.txt");
-}
-
-#endif // MCKL_HAS_AESNI
-
-template <typename RNGType>
-inline std::string random_rng_size(const RNGType &)
-{
-    return std::to_string(sizeof(RNGType));
-}
-
-template <typename ResultType, typename Generator>
-inline std::string random_rng_size(
-    const mckl::CounterEngine<ResultType, Generator> &)
-{
-    using RNGType = mckl::CounterEngine<ResultType, Generator>;
-
-    std::size_t size = sizeof(typename Generator::ctr_type) * 2 +
-        sizeof(typename Generator::key_type) + sizeof(unsigned);
-
-    return std::to_string(size) + "/" + std::to_string(sizeof(RNGType));
-}
+#endif // MCKL_RNG_THREEFRY
 
 template <typename RNGType>
 using ResultType = typename std::conditional<
@@ -174,11 +192,8 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
     RNGType rng;
     bool pass = random_rng_kat(rng);
 
-    mckl::Seed<RNGType>::instance().set(1);
-    RNGType rng1(mckl::Seed<RNGType>::instance().get());
-
-    mckl::Seed<RNGType>::instance().set(1);
-    RNGType rng2(mckl::Seed<RNGType>::instance().get());
+    RNGType rng1;
+    RNGType rng2;
 
     mckl::Vector<result_type> r1(N);
     mckl::Vector<result_type> r2(N);
@@ -233,11 +248,8 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
     RNGType rng;
     bool pass = true;
 
-    mckl::Seed<RNGType>::instance().set(1);
-    RNGType rng1(mckl::Seed<RNGType>::instance().get());
-
-    mckl::Seed<RNGType>::instance().set(1);
-    RNGType rng2(mckl::Seed<RNGType>::instance().get());
+    RNGType rng1;
+    RNGType rng2;
 
     mckl::Vector<result_type> r1(N);
     mckl::Vector<result_type> r2(N);
@@ -282,11 +294,12 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 
     std::size_t P = std::thread::hardware_concurrency();
 
-    mckl::Seed<RNGType>::instance().set(1);
-    mckl::RNGSetVector<RNGType> rs1(P);
-
-    mckl::Seed<RNGType>::instance().set(1);
-    mckl::RNGSetVector<RNGType> rs2(P);
+    mckl::Vector<RNGType> rs1(P);
+    mckl::Vector<RNGType> rs2(P);
+    for (unsigned i = 0; i != P; ++i) {
+        rs1[i].seed(i + 1);
+        rs2[i].seed(i + 1);
+    }
 
     mckl::Vector<result_type> r1(N * P);
     mckl::Vector<result_type> r2(N * P);
@@ -440,7 +453,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::string(lwid, '-') << std::endl;
 
     std::cout << std::setw(nwid) << std::left << name;
-    std::cout << std::setw(swid) << std::right << random_rng_size(RNGType());
+    std::cout << std::setw(swid) << std::right << sizeof(RNGType);
     std::cout << std::setw(swid) << std::right << alignof(RNGType);
     std::cout << std::setw(twid) << std::right << perf_s.c1;
     std::cout << std::setw(twid) << std::right << perf_s.c2;

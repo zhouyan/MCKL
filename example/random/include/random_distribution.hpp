@@ -32,11 +32,122 @@
 #ifndef MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 #define MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 
+#ifndef MCKL_FISHER_F_DISTRIBUTION
+#define MCKL_FISHER_F_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_STUDENT_T_DISTRIBUTION
+#define MCKL_STUDENT_T_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_CHI_SQUARED_DISTRIBUTION
+#define MCKL_CHI_SQUARED_DISTRIBUTION                                         \
+    (MCKL_STUDENT_T_DISTRIBUTION || MCKL_FISHER_F_DISTRIBUTION)
+#endif
+
+#ifndef MCKL_GAMMA_DISTRIBUTION
+#define MCKL_GAMMA_DISTRIBUTION MCKL_CHI_SQUARED_DISTRIBUTION
+#endif
+
+#ifndef MCKL_STABLE_DISTRIBUTION
+#define MCKL_STABLE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_CAUCHY_DISTRIBUTION
+#define MCKL_CAUCHY_DISTRIBUTION MCKL_STABLE_DISTRIBUTION
+#endif
+
+#ifndef MCKL_LEVY_DISTRIBUTION
+#define MCKL_LEVY_DISTRIBUTION MCKL_STABLE_DISTRIBUTION
+#endif
+
+#ifndef MCKL_NORMAL_DISTRIBUTION
+#define MCKL_NORMAL_DISTRIBUTION MCKL_STABLE_DISTRIBUTION
+#endif
+
+#ifndef MCKL_ARCSINE_DISTRIBUTION
+#define MCKL_ARCSINE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_BETA_DISTRIBUTION
+#define MCKL_BETA_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXPONENTIAL_DISTRIBUTION
+#define MCKL_EXPONENTIAL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXTREME_VALUE_DISTRIBUTION
+#define MCKL_EXTREME_VALUE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_LAPLACE_DISTRIBUTION
+#define MCKL_LAPLACE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_LOGISTIC_DISTRIBUTION
+#define MCKL_LOGISTIC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_LOGNORMAL_DISTRIBUTION
+#define MCKL_LOGNORMAL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_PARETO_DISTRIBUTION
+#define MCKL_PARETO_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_RAYLEIGH_DISTRIBUTION
+#define MCKL_RAYLEIGH_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_U01_DISTRIBUTION
+#define MCKL_U01_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_UNIFORM_REAL_DISTRIBUTION
+#define MCKL_UNIFORM_REAL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_WEIBULL_DISTRIBUTION
+#define MCKL_WEIBULL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_GEOMETRIC_DISTRIBUTION
+#define MCKL_GEOMETRIC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_UNIFORM_INT_DISTRIBUTION
+#define MCKL_UNIFORM_INT_DISTRIBUTION 0
+#endif
+
 #include <mckl/math/beta.hpp>
 #include <mckl/math/erf.hpp>
 #include <mckl/math/gamma.hpp>
-#include <mckl/random/distribution.hpp>
 #include "random_common.hpp"
+
+#if MCKL_STABLE_DISTRIBUTION
+#include <mckl/random/cauchy_distribution.hpp>
+#include <mckl/random/levy_distribution.hpp>
+#include <mckl/random/normal_distribution.hpp>
+#endif
+
+#if MCKL_HAS_AESNI
+#include <mckl/random/aesni.hpp>
+using MCKLRNGType = mckl::ARS;
+#else
+#include <mckl/random/philox.hpp>
+using MCKLRNGType = mckl::Philox4x32;
+#endif
+
+#if MCKL_HAS_MKL
+#include <mckl/random/mkl.hpp>
+#if MCKL_HAS_AESNI
+using MKLRNGType = mckl::MKL_ARS5;
+#else
+using MKLRNGType = mckl::MKL_PHILOX4X32X10;
+#endif
+#endif
 
 template <typename RNGType>
 class RNG01 : public RNGType
@@ -194,6 +305,8 @@ class RandomDistributionTraitBase
 template <typename DistType>
 class RandomDistributionTrait;
 
+#if MCKL_ARCSINE_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
@@ -229,6 +342,10 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_ARCSINE_DISTRIBUTION
+
+#if MCKL_BETA_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
@@ -276,6 +393,10 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     }
 };
 
+#endif // MCKL_BETA_DISTRIBUTION
+
+#if MCKL_CAUCHY_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
@@ -311,6 +432,10 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_CAUCHY_DISTRIBUTION
+
+#if MCKL_GAMMA_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
@@ -353,6 +478,10 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
     }
 };
 
+#endif // MCKL_GAMMA_DISTRIBUTION
+
+#if MCKL_CHI_SQUARED_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
@@ -390,6 +519,10 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
     }
 };
 
+#endif // MCKL_CHI_SQUARED_DISTRIBUTION
+
+#if MCKL_EXPONENTIAL_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
@@ -422,6 +555,10 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_EXPONENTIAL_DISTRIBUTION
+
+#if MCKL_EXTREME_VALUE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
@@ -456,6 +593,10 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_EXTREME_VALUE_DISTRIBUTION
+
+#if MCKL_FISHER_F_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
@@ -496,6 +637,10 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
     }
 };
 
+#endif // MCKL_FISHER_F_DISTRIBUTION
+
+#if MCKL_LAPLACE_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
@@ -534,6 +679,10 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
     }
 };
 
+#endif // MCKL_LAPLACE_DISTRIBUTION
+
+#if MCKL_LEVY_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
@@ -568,6 +717,10 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
     }
 };
 
+#endif // MCKL_LEVY_DISTRIBUTION
+
+#if MCKL_LOGISTIC_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
@@ -601,6 +754,10 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_LOGISTIC_DISTRIBUTION
+
+#if MCKL_LOGNORMAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
@@ -638,6 +795,10 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
     }
 };
 
+#endif // MCKL_LOGNORMAL_DISTRIBUTION
+
+#if MCKL_NORMAL_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
@@ -672,6 +833,10 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_NORMAL_DISTRIBUTION
+
+#if MCKL_PARETO_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
@@ -708,6 +873,10 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
     }
 };
 
+#endif // MCKL_PARETO_DISTRIBUTION
+
+#if MCKL_RAYLEIGH_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
@@ -741,6 +910,10 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_RAYLEIGH_DISTRIBUTION
+
+#if MCKL_STABLE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::StableDistribution<RealType>>
@@ -785,6 +958,10 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
     }
 };
 
+#endif // MCKL_STABLE_DISTRIBUTION
+
+#if MCKL_STUDENT_T_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
@@ -823,6 +1000,10 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
     }
 };
 
+#endif // MCKL_STUDENT_T_DISTRIBUTION
+
+#if MCKL_U01_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::U01Distribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
@@ -849,6 +1030,10 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
         return mckl::Vector<std::array<RealType, 0>>(1);
     }
 };
+
+#endif // MCKL_U01_DISTRIBUTION
+
+#if MCKL_UNIFORM_REAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
@@ -884,6 +1069,10 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     }
 };
 
+#endif // MCKL_UNIFORM_REAL_DISTRIBUTION
+
+#if MCKL_WEIBULL_DISTRIBUTION
+
 template <typename RealType>
 class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
@@ -918,6 +1107,10 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
         return params;
     }
 };
+
+#endif // MCKL_WEIBULL_DISTRIBUTION
+
+#if MCKL_GEOMETRIC_DISTRIBUTION
 
 template <typename IntType>
 class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
@@ -967,6 +1160,10 @@ class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
         return probability;
     }
 };
+
+#endif // MCKL_GEOMETRIC_DISTRIBUTION
+
+#if MCKL_UNIFORM_INT_DISTRIBUTION
 
 template <typename IntType>
 class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
@@ -1020,6 +1217,8 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
         return params;
     }
 };
+
+#endif // MCKL_UNIFORM_INT_DISTRIBUTION
 
 template <typename DistType, typename ParamType>
 inline DistType random_distribution_init(const std::array<ParamType, 0> &)
@@ -1221,7 +1420,7 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     RandomDistributionTrait<MCKLDistType> trait;
     names.push_back(trait.name(param));
 
-    mckl::RNGFast rng;
+    MCKLRNGType rng;
     MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));
     std_type dist_std(random_distribution_init<std_type>(param));
 
@@ -1253,7 +1452,7 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     random_distribution_pval(chi2, ksad, pval);
 
 #if MCKL_HAS_MKL
-    mckl::MKL_MT2203 random_mkl;
+    MKLRNGType random_mkl;
     for (std::size_t i = 0; i != M; ++i) {
         mckl::rand(random_mkl, dist_mckl, N, r.data());
         chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);

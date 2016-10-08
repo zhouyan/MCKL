@@ -44,8 +44,5 @@
 #include <mckl/random/poker_test.hpp>
 #include <mckl/random/run_test.hpp>
 #include <mckl/random/serial_test.hpp>
-#if MCKL_HAS_TESTU01
-#include <mckl/random/testu01.hpp>
-#endif
 
 #endif // MCKL_RANDOM_TEST_HPP

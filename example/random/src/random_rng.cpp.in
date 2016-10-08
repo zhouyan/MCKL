@@ -29,6 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+// clang-format off
+#define MCKL_RNG_@RNG@ 1
+// clang-format on
+
+#include <@RNGHeader@>
 #include "random_rng.hpp"
 
 int main(int argc, char **argv)
