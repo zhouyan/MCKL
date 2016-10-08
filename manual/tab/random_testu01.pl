@@ -154,15 +154,18 @@ sub check
             my $result = $1;
             if ($result =~ /--+\s*(.*?)\s*--+/s) {
                 my @tests = split "\n", $1;
+                my %this_failure;
+                my %this_suspect;
                 for (@tests) {
                     my ($num, $pval) = (split)[0, -1];
-                    $pval = 1 - $pval;
                     if ($pval < $failure or 1 - $pval < $failure) {
-                        $failure{$bat}{$rng}{$u01}{$num} += 1;
+                        $this_failure{$num} = 1;
                     } elsif ($pval < $suspect or 1 - $pval < $suspect) {
-                        $suspect{$bat}{$rng}{$u01}{$num} += 1;
+                        $this_suspect{$num} = 1;
                     }
                 }
+                $failure{$bat}{$rng}{$u01}{$_} += 1 for (keys %this_failure);
+                $suspect{$bat}{$rng}{$u01}{$_} += 1 for (keys %this_suspect);
             }
         }
     }
@@ -181,10 +184,9 @@ sub recheck
                     if ($suspect{$b}{$r}{$u}) {
                         my @num;
                         for (keys $suspect{$b}{$r}{$u}) {
+                            push @num, $_;
                             if ($suspect{$b}{$r}{$u}{$_} > 1) {
                                 $failure{$b}{$r}{$u}{$_} += 1;
-                            } else {
-                                push @num, $_;
                             }
                         }
                         if (@num) {
