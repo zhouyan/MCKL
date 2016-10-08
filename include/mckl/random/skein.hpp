@@ -50,18 +50,13 @@ class Skein
     public:
     using generator_type = Generator;
 
+    /// \brief Simple hashing
     void operator()(std::size_t Nm, const void *msg, std::size_t No, void *out)
     {
-        static constexpr int tbits = std::numeric_limits<T>::digits;
-        static constexpr T tcfg0 = 0;
-        static constexpr T tcfg1 = static_cast<T>(4) << (tbits - 8);
-        static constexpr T tmsg0 = 0;
-        static constexpr T tmsg1 = static_cast<T>(48) << (tbits - 8);
-
         key_type Kp = {{0}};
         std::array<std::uint32_t, 8> C = configure(No);
-        key_type G0 = ubi(Kp, 256, C.data(), tcfg0, tcfg1);
-        key_type G1 = ubi(G0, Nm, msg, tmsg0, tmsg1);
+        key_type G0 = ubi(Kp, 256, C.data(), 0, t_cfg_);
+        key_type G1 = ubi(G0, Nm, msg, 0, t_msg_);
         output(G1, No, out);
     }
 
@@ -70,17 +65,27 @@ class Skein
     using ctr_type = typename generator_type::ctr_type;
     using T = typename key_type::value_type;
 
+    static constexpr std::size_t Nb_ = sizeof(key_type);
+    static constexpr int tbits_ = std::numeric_limits<T>::digits;
+
+    static constexpr T mark_last_ = const_one<T>() << (tbits_ - 1);
+    static constexpr T mark_first_ = const_one<T>() << (tbits_ - 2);
+    static constexpr T mark_bpad_ = const_one<T>() << (tbits_ - 9);
+
+    static constexpr T t_key_ = static_cast<T>(0x00) << (tbits_ - 8);
+    static constexpr T t_cfg_ = static_cast<T>(0x04) << (tbits_ - 8);
+    static constexpr T t_prs_ = static_cast<T>(0x08) << (tbits_ - 8);
+    static constexpr T t_pub_ = static_cast<T>(0x0C) << (tbits_ - 8);
+    static constexpr T t_kdf_ = static_cast<T>(0x10) << (tbits_ - 8);
+    static constexpr T t_non_ = static_cast<T>(0x14) << (tbits_ - 8);
+    static constexpr T t_msg_ = static_cast<T>(0x30) << (tbits_ - 8);
+    static constexpr T t_out_ = static_cast<T>(0x3F) << (tbits_ - 8);
+
     generator_type generator_;
 
     key_type ubi(
         const key_type &G, std::size_t Nbit, const void *msg, T t0, T t1)
     {
-        static constexpr std::size_t Nb = sizeof(key_type);
-        static constexpr int tbits = std::numeric_limits<T>::digits;
-        static constexpr T last = const_one<T>() << (tbits - 1);
-        static constexpr T first = const_one<T>() << (tbits - 2);
-        static constexpr T bpad = const_one<T>() << (tbits - 9);
-
         const char *cmsg = static_cast<const char *>(msg);
 
         union {
@@ -92,35 +97,38 @@ class Skein
         ctr_type M = {{0}};
 
         // Process only one block
-        if (Nbit <= Nb * CHAR_BIT) {
+        if (Nbit <= Nb_ * CHAR_BIT) {
             t0 += block(cmsg, M, Nbit);
-            t1 |= first;
-            t1 |= last;
-            t1 |= Nbit % CHAR_BIT == 0 ? 0 : bpad;
+            t1 |= mark_first_;
+            t1 |= mark_last_;
+            t1 |= Nbit % CHAR_BIT == 0 ? 0 : mark_bpad_;
             buf.result = chain(buf.H, M, t0, t1);
 
             return buf.H;
         }
 
+        // Process first block
         t0 += block(cmsg, M);
-        t1 |= first;
-        t1 &= ~last;
-        t1 &= ~bpad;
+        t1 |= mark_first_;
+        t1 &= ~mark_last_;
+        t1 &= ~mark_bpad_;
         buf.result = chain(buf.H, M, t0, t1);
-        Nbit -= Nb * CHAR_BIT;
-        cmsg += Nb;
+        Nbit -= Nb_ * CHAR_BIT;
+        cmsg += Nb_;
 
-        t1 &= ~first;
-        while (Nbit > Nb * CHAR_BIT) {
+        // Process all intermediate blocks
+        t1 &= ~mark_first_;
+        while (Nbit > Nb_ * CHAR_BIT) {
             t0 += block(cmsg, M);
             buf.result = chain(buf.H, M, t0, t1);
-            Nbit -= Nb * CHAR_BIT;
-            cmsg += Nb;
+            Nbit -= Nb_ * CHAR_BIT;
+            cmsg += Nb_;
         }
 
+        // Process last block
         t0 += block(cmsg, M, Nbit);
-        t1 |= last;
-        t1 |= Nbit % CHAR_BIT == 0 ? 0 : bpad;
+        t1 |= mark_last_;
+        t1 |= Nbit % CHAR_BIT == 0 ? 0 : mark_bpad_;
         buf.result = chain(buf.H, M, t0, t1);
 
         return buf.H;
@@ -128,10 +136,6 @@ class Skein
 
     void output(const key_type &G, std::size_t No, void *out)
     {
-        static constexpr int tbits = std::numeric_limits<T>::digits;
-        static constexpr T tout0 = 0;
-        static constexpr T tout1 = static_cast<T>(63) << (tbits - 8);
-
         const std::size_t Nbyte = No / CHAR_BIT + (No % CHAR_BIT == 0 ? 0 : 1);
         const std::size_t n = Nbyte / sizeof(ctr_type);
 
@@ -144,20 +148,20 @@ class Skein
         ctr_type ctr = {{0}};
         for (std::size_t i = 0; i != m; ++i) {
             for (std::size_t j = 0; j != k; ++j) {
-                buffer[j] = ubi(G, 8 * CHAR_BIT, ctr.data(), tout0, tout1);
+                buffer[j] = ubi(G, 8 * CHAR_BIT, ctr.data(), 0, t_out_);
                 increment(ctr);
             }
             std::memcpy(cout, buffer.data(), sizeof(ctr_type) * k);
             cout += sizeof(ctr_type) * k;
         }
         for (std::size_t j = 0; j != l; ++j) {
-            buffer[j] = ubi(G, 8 * CHAR_BIT, ctr.data(), tout0, tout1);
+            buffer[j] = ubi(G, 8 * CHAR_BIT, ctr.data(), 0, t_out_);
             increment(ctr);
         }
         std::memcpy(cout, buffer.data(), sizeof(ctr_type) * l);
         cout += sizeof(ctr_type) * l;
         if (Nbyte % sizeof(ctr_type) != 0) {
-            buffer[0] = ubi(G, 8 * CHAR_BIT, ctr.data(), tout0, tout1);
+            buffer[0] = ubi(G, 8 * CHAR_BIT, ctr.data(), 0, t_out_);
             std::memcpy(cout, buffer.data(), Nbyte % sizeof(ctr_type));
         }
     }

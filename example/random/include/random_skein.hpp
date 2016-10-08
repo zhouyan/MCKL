@@ -53,6 +53,7 @@ inline void random_skein_output(std::size_t n, const std::uint8_t *buf)
 }
 
 #include "random_skein_inc.hpp"
+#include "random_skein_rand.hpp"
 #include "random_skein_zero.hpp"
 
 inline void random_skein()
@@ -60,6 +61,7 @@ inline void random_skein()
     bool pass = true;
 
     pass = pass && random_skein_inc();
+    pass = pass && random_skein_rand();
     pass = pass && random_skein_zero();
 
     if (pass)

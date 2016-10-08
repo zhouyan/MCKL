@@ -1046,8 +1046,8 @@ inline bool random_skein_zero(
         std::cout << std::string(50, '=') << std::endl;
         std::cout << "Function: Skein-" + std::to_string(bits) << std::endl;
         std::cout << "Data:     'zero'" << std::endl;
-        std::cout << "Message:  " << Nm << " bits" << std::endl;
-        std::cout << "Output:   " << No << " bits" << std::endl;
+        std::cout << "Message:  " << std::dec << Nm << " bits" << std::endl;
+        std::cout << "Output:   " << std::dec << No << " bits" << std::endl;
         std::cout << std::string(50, '-') << std::endl;
         std::cout << "Expected" << std::endl;
         random_skein_output(No, expected);
