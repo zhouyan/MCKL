@@ -175,10 +175,7 @@ sub check
 sub recheck
 {
     for my $b (@battery) {
-        open my $makefile, '>', "testu01/random_testu01_\L$b.make";
-        say $makefile ".PHONY : all run\n";
-        say $makefile "all :\n";
-        my @target;
+        my %target;
         for my $u (@u01) {
             for my $k (@keys) {
                 for my $r (@{$rngs{$k}}) {
@@ -191,27 +188,33 @@ sub recheck
                             }
                         }
                         if (@num) {
-                            @num = sort @num;
-                            my $cmd = "random_testu01_\L${b}_${r}";
-                            push @target, "${cmd}_\L${u}.txt";
-                            say $makefile "${cmd}_\L${u}.txt :";
-                            print $makefile "\tninja -C ../.. ${cmd}\n";
-                            print $makefile "\t./${cmd} $u";
-                            print $makefile " $_" for @num;
-                            say $makefile "\n";
+                            my $bin = "random_testu01_\L${b}_${r}";
+                            my $tar = $bin . "_$u";
+                            my $cmd;
+                            $cmd .= "$tar :\n";
+                            $cmd .= "\tninja -C ../.. $bin\n";
+                            $cmd .= "\t./$bin $u";
+                            $cmd .= " $_" for @num;
+                            $cmd .= "\n";
+                            $target{$tar} = $cmd;
                         }
                     }
                 }
             }
         }
-        if (@target) {
-            say $makefile "run : \\";
-            say $makefile "\t$_ \\" for @target;
-            say $makefile "\n";
-            say $makefile ".PHONY : \\";
-            say $makefile "\t$_ \\" for @target;
+        if (%target) {
+            my @keys = sort(keys %target);
+            open my $makefile, '>', "testu01/random_testu01_\L$b.make";
+            print $makefile ".PHONY : all run";
+            print $makefile " \\\n\t$_" for @keys;
+            print $makefile "\n";
+            print $makefile "all :\n\n";
+            print $makefile "run :";
+            print $makefile " \\\n\t$_" for @keys;
+            print $makefile "\n\n";
+            print $makefile "$target{$_}\n" for @keys;
+            print $makefile "# vim:ft=make\n";
         }
-        say $makefile "\n# vim:ft=make";
     }
 }
 
