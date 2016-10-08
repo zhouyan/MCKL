@@ -202,6 +202,31 @@ inline void random_seed(std::size_t N, const std::string &name)
     }
 }
 
+template <typename T>
+inline void random_seed(std::size_t N)
+{
+    std::string type =
+        "uint" + std::to_string(std::numeric_limits<T>::digits) + "_t";
+
+    random_seed<T>(N, type);
+    random_seed<std::array<T, 0x01>>(N, type + "[0x01]");
+    random_seed<std::array<T, 0x02>>(N, type + "[0x02]");
+    random_seed<std::array<T, 0x03>>(N, type + "[0x03]");
+    random_seed<std::array<T, 0x04>>(N, type + "[0x04]");
+    random_seed<std::array<T, 0x05>>(N, type + "[0x05]");
+    random_seed<std::array<T, 0x06>>(N, type + "[0x06]");
+    random_seed<std::array<T, 0x07>>(N, type + "[0x07]");
+    random_seed<std::array<T, 0x08>>(N, type + "[0x08]");
+    random_seed<std::array<T, 0x09>>(N, type + "[0x09]");
+    random_seed<std::array<T, 0x0A>>(N, type + "[0x0A]");
+    random_seed<std::array<T, 0x0B>>(N, type + "[0x0B]");
+    random_seed<std::array<T, 0x0C>>(N, type + "[0x0C]");
+    random_seed<std::array<T, 0x0D>>(N, type + "[0x0D]");
+    random_seed<std::array<T, 0x0E>>(N, type + "[0x0E]");
+    random_seed<std::array<T, 0x0F>>(N, type + "[0x0F]");
+    random_seed<std::array<T, 0x10>>(N, type + "[0x10]");
+}
+
 inline void random_seed(std::size_t N)
 {
     std::cout << std::fixed << std::setprecision(2);
@@ -215,18 +240,8 @@ inline void random_seed(std::size_t N)
     std::cout << std::setw(15) << std::right << "np = 4 (R)";
     std::cout << std::endl;
     std::cout << std::string(100, '-') << std::endl;
-    random_seed<std::uint32_t>(N, "uint32_t");
-    random_seed<std::uint64_t>(N, "uint64_t");
-    random_seed<std::array<std::uint32_t, 1>>(N, "uint32_t[1]");
-    random_seed<std::array<std::uint32_t, 2>>(N, "uint32_t[2]");
-    random_seed<std::array<std::uint32_t, 4>>(N, "uint32_t[4]");
-    random_seed<std::array<std::uint32_t, 8>>(N, "uint32_t[8]");
-    random_seed<std::array<std::uint32_t, 16>>(N, "uint32_t[16]");
-    random_seed<std::array<std::uint64_t, 1>>(N, "uint64_t[1]");
-    random_seed<std::array<std::uint64_t, 2>>(N, "uint64_t[2]");
-    random_seed<std::array<std::uint64_t, 4>>(N, "uint64_t[4]");
-    random_seed<std::array<std::uint64_t, 8>>(N, "uint64_t[8]");
-    random_seed<std::array<std::uint64_t, 16>>(N, "uint64_t[16]");
+    random_seed<std::uint32_t>(N);
+    random_seed<std::uint64_t>(N);
     std::cout << std::string(100, '-') << std::endl;
 }
 
