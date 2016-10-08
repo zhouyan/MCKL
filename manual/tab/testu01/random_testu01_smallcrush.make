@@ -69,11 +69,11 @@ random_testu01_smallcrush_philox2x64_U01CC :
 
 random_testu01_smallcrush_ranlux24_base_U01OC :
 	ninja -C ../.. random_testu01_smallcrush_ranlux24_base
-	./random_testu01_smallcrush_ranlux24_base U01OC 9 5
+	./random_testu01_smallcrush_ranlux24_base U01OC 5 9
 
 random_testu01_smallcrush_ranlux24_base_U01OO :
 	ninja -C ../.. random_testu01_smallcrush_ranlux24_base
-	./random_testu01_smallcrush_ranlux24_base U01OO 5 3
+	./random_testu01_smallcrush_ranlux24_base U01OO 3 5
 
 random_testu01_smallcrush_ranlux48_base_STD :
 	ninja -C ../.. random_testu01_smallcrush_ranlux48_base

@@ -4,7 +4,6 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  6
- Total CPU time:   00:01:21.54
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):

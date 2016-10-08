@@ -4,7 +4,6 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  144
- Total CPU time:   00:42:21.82
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -44,7 +43,6 @@
  Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  144
- Total CPU time:   00:37:09.72
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -76,7 +74,6 @@
  Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  144
- Total CPU time:   00:38:50.89
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -108,7 +105,6 @@
  Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  144
- Total CPU time:   00:38:43.68
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -140,7 +136,6 @@
  Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  144
- Total CPU time:   00:39:26.81
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):
@@ -171,7 +166,6 @@
  Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  144
- Total CPU time:   00:39:14.21
  The following tests gave p-values outside [0.001, 0.9990]:
  (eps  means a value < 1.0e-300):
  (eps1 means a value < 1.0e-15):

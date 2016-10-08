@@ -4,7 +4,6 @@
  Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  2
- Total CPU time:   00:01:54.03
 
  All tests were passed
 

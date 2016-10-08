@@ -150,6 +150,10 @@ sub check
         open my $txtfile, '<', $txt;
         my @lines = <$txtfile>;
         s/\+$/\n/ for @lines;
+        open my $txtfile, '>', $txt;
+        for (@lines) {
+            print $txtfile $_ if not /Total CPU time/;
+        }
         my $lines = "@lines";
         if ($lines =~ /$u01\n(.*?)tests were passed/s) {
             my $result = $1;
@@ -188,6 +192,7 @@ sub recheck
                             }
                         }
                         if (@num) {
+                            @num = sort @num;
                             my $bin = "random_testu01_\L${b}_${r}";
                             my $tar = $bin . "_$u";
                             my $cmd;

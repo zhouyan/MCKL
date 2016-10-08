@@ -4,7 +4,6 @@
  Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  2
- Total CPU time:   00:01:43.60
 
  All tests were passed
 

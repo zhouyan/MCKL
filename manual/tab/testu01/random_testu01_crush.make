@@ -297,7 +297,7 @@ random_testu01_crush_ars_U01OC :
 
 random_testu01_crush_knuth_b_STD :
 	ninja -C ../.. random_testu01_crush_knuth_b
-	./random_testu01_crush_knuth_b STD 79 44
+	./random_testu01_crush_knuth_b STD 44 79
 
 random_testu01_crush_knuth_b_U01OC :
 	ninja -C ../.. random_testu01_crush_knuth_b
@@ -305,7 +305,7 @@ random_testu01_crush_knuth_b_U01OC :
 
 random_testu01_crush_minstd_rand0_STD :
 	ninja -C ../.. random_testu01_crush_minstd_rand0
-	./random_testu01_crush_minstd_rand0 STD 29 9 78 27
+	./random_testu01_crush_minstd_rand0 STD 27 29 78 9
 
 random_testu01_crush_minstd_rand0_U01 :
 	ninja -C ../.. random_testu01_crush_minstd_rand0
@@ -313,15 +313,15 @@ random_testu01_crush_minstd_rand0_U01 :
 
 random_testu01_crush_minstd_rand0_U01CC :
 	ninja -C ../.. random_testu01_crush_minstd_rand0
-	./random_testu01_crush_minstd_rand0 U01CC 34 39 10 65 9 66
+	./random_testu01_crush_minstd_rand0 U01CC 10 34 39 65 66 9
 
 random_testu01_crush_minstd_rand0_U01CO :
 	ninja -C ../.. random_testu01_crush_minstd_rand0
-	./random_testu01_crush_minstd_rand0 U01CO 65 10
+	./random_testu01_crush_minstd_rand0 U01CO 10 65
 
 random_testu01_crush_minstd_rand0_U01OC :
 	ninja -C ../.. random_testu01_crush_minstd_rand0
-	./random_testu01_crush_minstd_rand0 U01OC 32 33 10 85 65
+	./random_testu01_crush_minstd_rand0 U01OC 10 32 33 65 85
 
 random_testu01_crush_minstd_rand0_U01OO :
 	ninja -C ../.. random_testu01_crush_minstd_rand0
@@ -329,23 +329,23 @@ random_testu01_crush_minstd_rand0_U01OO :
 
 random_testu01_crush_minstd_rand_STD :
 	ninja -C ../.. random_testu01_crush_minstd_rand
-	./random_testu01_crush_minstd_rand STD 85 39 29
+	./random_testu01_crush_minstd_rand STD 29 39 85
 
 random_testu01_crush_minstd_rand_U01 :
 	ninja -C ../.. random_testu01_crush_minstd_rand
-	./random_testu01_crush_minstd_rand U01 37 91 76
+	./random_testu01_crush_minstd_rand U01 37 76 91
 
 random_testu01_crush_minstd_rand_U01CC :
 	ninja -C ../.. random_testu01_crush_minstd_rand
-	./random_testu01_crush_minstd_rand U01CC 10 85 9 73
+	./random_testu01_crush_minstd_rand U01CC 10 73 85 9
 
 random_testu01_crush_minstd_rand_U01CO :
 	ninja -C ../.. random_testu01_crush_minstd_rand
-	./random_testu01_crush_minstd_rand U01CO 76 9 10 34
+	./random_testu01_crush_minstd_rand U01CO 10 34 76 9
 
 random_testu01_crush_minstd_rand_U01OC :
 	ninja -C ../.. random_testu01_crush_minstd_rand
-	./random_testu01_crush_minstd_rand U01OC 27 9 85 10 33 29
+	./random_testu01_crush_minstd_rand U01OC 10 27 29 33 85 9
 
 random_testu01_crush_minstd_rand_U01OO :
 	ninja -C ../.. random_testu01_crush_minstd_rand
@@ -365,7 +365,7 @@ random_testu01_crush_mkl_mcg59_64_STD :
 
 random_testu01_crush_mkl_mcg59_64_U01CO :
 	ninja -C ../.. random_testu01_crush_mkl_mcg59_64
-	./random_testu01_crush_mkl_mcg59_64 U01CO 81 32
+	./random_testu01_crush_mkl_mcg59_64 U01CO 32 81
 
 random_testu01_crush_mkl_mcg59_64_U01OC :
 	ninja -C ../.. random_testu01_crush_mkl_mcg59_64
@@ -377,7 +377,7 @@ random_testu01_crush_mkl_mcg59_STD :
 
 random_testu01_crush_mkl_mcg59_U01CC :
 	ninja -C ../.. random_testu01_crush_mkl_mcg59
-	./random_testu01_crush_mkl_mcg59 U01CC 28 14
+	./random_testu01_crush_mkl_mcg59 U01CC 14 28
 
 random_testu01_crush_mkl_mcg59_U01CO :
 	ninja -C ../.. random_testu01_crush_mkl_mcg59
@@ -385,7 +385,7 @@ random_testu01_crush_mkl_mcg59_U01CO :
 
 random_testu01_crush_mkl_mcg59_U01OC :
 	ninja -C ../.. random_testu01_crush_mkl_mcg59
-	./random_testu01_crush_mkl_mcg59 U01OC 81 28
+	./random_testu01_crush_mkl_mcg59 U01OC 28 81
 
 random_testu01_crush_mkl_mcg59_U01OO :
 	ninja -C ../.. random_testu01_crush_mkl_mcg59
@@ -409,7 +409,7 @@ random_testu01_crush_mkl_mt19937_STD :
 
 random_testu01_crush_mkl_mt19937_U01 :
 	ninja -C ../.. random_testu01_crush_mkl_mt19937
-	./random_testu01_crush_mkl_mt19937 U01 90 70
+	./random_testu01_crush_mkl_mt19937 U01 70 90
 
 random_testu01_crush_mkl_mt2203_64_U01 :
 	ninja -C ../.. random_testu01_crush_mkl_mt2203_64
@@ -437,7 +437,7 @@ random_testu01_crush_mkl_philox4x32x10_64_U01OC :
 
 random_testu01_crush_mkl_philox4x32x10_64_U01OO :
 	ninja -C ../.. random_testu01_crush_mkl_philox4x32x10_64
-	./random_testu01_crush_mkl_philox4x32x10_64 U01OO 72 26
+	./random_testu01_crush_mkl_philox4x32x10_64 U01OO 26 72
 
 random_testu01_crush_mkl_philox4x32x10_U01CC :
 	ninja -C ../.. random_testu01_crush_mkl_philox4x32x10
@@ -449,7 +449,7 @@ random_testu01_crush_mt19937_64_STD :
 
 random_testu01_crush_mt19937_64_U01OO :
 	ninja -C ../.. random_testu01_crush_mt19937_64
-	./random_testu01_crush_mt19937_64 U01OO 79 56 90
+	./random_testu01_crush_mt19937_64 U01OO 56 79 90
 
 random_testu01_crush_mt19937_U01OC :
 	ninja -C ../.. random_testu01_crush_mt19937
@@ -529,11 +529,11 @@ random_testu01_crush_ranlux48_U01OC :
 
 random_testu01_crush_ranlux48_base_STD :
 	ninja -C ../.. random_testu01_crush_ranlux48_base
-	./random_testu01_crush_ranlux48_base STD 46 28 27
+	./random_testu01_crush_ranlux48_base STD 27 28 46
 
 random_testu01_crush_ranlux48_base_U01 :
 	ninja -C ../.. random_testu01_crush_ranlux48_base
-	./random_testu01_crush_ranlux48_base U01 46 28
+	./random_testu01_crush_ranlux48_base U01 28 46
 
 random_testu01_crush_ranlux48_base_U01CC :
 	ninja -C ../.. random_testu01_crush_ranlux48_base
@@ -577,7 +577,7 @@ random_testu01_crush_threefish1024_64_U01CO :
 
 random_testu01_crush_threefish1024_64_U01OO :
 	ninja -C ../.. random_testu01_crush_threefish1024_64
-	./random_testu01_crush_threefish1024_64 U01OO 85 32
+	./random_testu01_crush_threefish1024_64 U01OO 32 85
 
 random_testu01_crush_threefish1024_STD :
 	ninja -C ../.. random_testu01_crush_threefish1024
@@ -641,7 +641,7 @@ random_testu01_crush_threefry2x64_64_U01OC :
 
 random_testu01_crush_threefry2x64_U01 :
 	ninja -C ../.. random_testu01_crush_threefry2x64
-	./random_testu01_crush_threefry2x64 U01 81 77
+	./random_testu01_crush_threefry2x64 U01 77 81
 
 random_testu01_crush_threefry2x64_U01OO :
 	ninja -C ../.. random_testu01_crush_threefry2x64
