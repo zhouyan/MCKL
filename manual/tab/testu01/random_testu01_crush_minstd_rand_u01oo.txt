@@ -10,10 +10,9 @@
 
        Test                          p-value
  ----------------------------------------------
- 10  CollisionOver, t = 20           0.9998 
- 10  CollisionOver, t = 20           0.9998 
- 76  LongestHeadRun, r = 0           2.0e-5
- 76  LongestHeadRun, r = 0           5.7e-8
+ 10  CollisionOver, t = 20          1 - 6.5e-10
+ 76  LongestHeadRun, r = 0           2.5e-9
+ 76  LongestHeadRun, r = 0           1.0e-4
  ----------------------------------------------
  All other tests were passed
 

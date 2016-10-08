@@ -10,10 +10,9 @@
 
        Test                          p-value
  ----------------------------------------------
-  9  CollisionOver, t = 20          1 -  5.2e-7
-  9  CollisionOver, t = 20          1 -  4.3e-5
- 10  CollisionOver, t = 20           0.9999 
- 10  CollisionOver, t = 20          1 -  8.0e-5
+  9  CollisionOver, t = 20          1 -  1.8e-7
+  9  CollisionOver, t = 20          1 -  1.2e-5
+ 10  CollisionOver, t = 20          1 -  1.9e-5
  ----------------------------------------------
  All other tests were passed
 
