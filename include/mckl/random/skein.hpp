@@ -33,7 +33,6 @@
 #define MCKL_RANDOM_SKEIN_HPP
 
 #include <mckl/random/internal/common.hpp>
-#include <mckl/random/counter.hpp>
 #include <mckl/random/threefry.hpp>
 
 namespace mckl

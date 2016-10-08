@@ -117,6 +117,7 @@ MCKL_ADD_HEADER_TEST(mckl/random/counter  TRUE)
 MCKL_ADD_HEADER_TEST(mckl/random/mkl      ${MKL_FOUND})
 MCKL_ADD_HEADER_TEST(mckl/random/philox   TRUE)
 MCKL_ADD_HEADER_TEST(mckl/random/rdrand   ${RDRAND_FOUND})
+MCKL_ADD_HEADER_TEST(mckl/random/skein    TRUE)
 MCKL_ADD_HEADER_TEST(mckl/random/threefry TRUE)
 
 MCKL_ADD_HEADER_TEST(mckl/random/test TRUE)
