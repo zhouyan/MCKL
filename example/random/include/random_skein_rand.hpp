@@ -1030,11 +1030,11 @@ static const std::uint8_t random_skein_rand_1024_2049_1024[] = {0x0F, 0x60,
     0x82, 0xBC, 0x76, 0x98, 0x86, 0x35, 0x8A, 0x73, 0x0A, 0x1B, 0x5A, 0x8F,
     0x17, 0x30, 0xC8, 0xB6, 0x71, 0xC0};
 
-template <typename HashType>
+template <typename Hash>
 inline bool random_skein_rand(
     std::size_t Nm, std::size_t No, const std::uint8_t *expected)
 {
-    std::size_t bits = sizeof(typename HashType::generator_type::key_type) * 8;
+    std::size_t bits = Hash::bits();
     std::size_t Bo = No / 8 + (No % 8 == 0 ? 0 : 1);
 
     static const std::uint8_t msg[] = {0xFB, 0xD1, 0x7C, 0x26, 0xB6, 0x1A,
@@ -1062,8 +1062,7 @@ inline bool random_skein_rand(
 
     std::uint8_t out[1024] = {0};
 
-    HashType hash;
-    hash(Nm, msg, No, out);
+    Hash::hash(Nm, msg, No, out);
     if (std::memcmp(out, expected, Bo) != 0) {
         std::cout << std::string(50, '=') << std::endl;
         std::cout << "Function: Skein-" + std::to_string(bits) << std::endl;

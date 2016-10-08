@@ -36,7 +36,7 @@
 
 inline void random_skein_output(std::size_t n, const std::uint8_t *buf)
 {
-    n /= CHAR_BIT;
+    n /= 8;
     std::cout << std::hex << std::uppercase;
     for (std::size_t i = 0; i != n; ++i, ++buf) {
         unsigned m = *buf;
