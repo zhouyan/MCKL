@@ -33,7 +33,7 @@
 #define MCKL_RANDOM_SEED_HPP
 
 #include <mckl/random/internal/common.hpp>
-#include <mckl/random/counter.hpp>
+#include <mckl/random/skein.hpp>
 #include <mckl/random/threefry.hpp>
 
 namespace mckl
@@ -216,7 +216,11 @@ class SeedGenerator
     result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, D>)
     {
-        return randomize(k, std::false_type());
+        result_type result;
+        Skein<typename Threefry4x64::generator_type> hash;
+        hash(D, k.data(), D, &result);
+
+        return result;
     }
 
     result_type randomize(

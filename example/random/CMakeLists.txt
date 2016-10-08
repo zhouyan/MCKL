@@ -34,6 +34,7 @@ PROJECT(MCKLExample-random CXX)
 MCKL_ADD_EXAMPLE(random)
 
 MCKL_ADD_TEST(random seed)
+MCKL_ADD_TEST(random skein)
 MCKL_ADD_TEST(random threefish)
 MCKL_ADD_TEST(random u01)
 MCKL_ADD_TEST(random uniform_bits)
