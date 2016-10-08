@@ -53,7 +53,7 @@ inline void random_testu01(
 template <typename RNGType, typename Battery>
 inline void random_testu01(Battery &&battery, int argc, char **argv)
 {
-    std::string filename(*argv);
+    std::string basename(*argv);
     --argc;
     ++argv;
 
@@ -110,15 +110,33 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
     const unsigned seed =
         1U + (rep.size() == 0 ? 0U : std::thread::hardware_concurrency() * 6U);
 
-    std::ifstream seedin(filename + ".seed");
+    std::string seedfile(basename + ".seed");
+    std::ifstream seedin(seedfile);
     if (seedin)
         seedin >> mckl::Seed<RNGType>::instance();
     else
         mckl::Seed<RNGType>::instance().set(seed);
     seedin.close();
 
-    if (redirect)
-        std::freopen((filename + ".txt").c_str(), "w", stdout);
+    if (redirect) {
+        std::string resultfile(basename);
+        if (!all) {
+            if (STD)
+                resultfile += "_std";
+            if (U01)
+                resultfile += "_u01";
+            if (U01CC)
+                resultfile += "_u01cc";
+            if (U01CO)
+                resultfile += "_u01co";
+            if (U01OC)
+                resultfile += "_u01oc";
+            if (U01OO)
+                resultfile += "_u01oo";
+        }
+        resultfile += ".txt";
+        std::freopen(resultfile.c_str(), "w", stdout);
+    }
 
     if (!verbose)
         ::swrite_Basic = FALSE;
@@ -151,7 +169,7 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
     if (redirect)
         std::fclose(stdout);
 
-    std::ofstream seedout(filename + ".seed");
+    std::ofstream seedout(seedfile);
     if (seedout)
         seedout << mckl::Seed<RNGType>::instance() << std::endl;
     seedout.close();

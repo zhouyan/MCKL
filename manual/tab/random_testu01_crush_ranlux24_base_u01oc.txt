@@ -1,0 +1,20 @@
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OC
+ Number of statistics:  10
+ Total CPU time:   00:01:13.26
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+ 67  RandomWalk1 H (L = 1000)        1.0e-6
+ 67  RandomWalk1 H (L = 1000)        1.2e-4
+ ----------------------------------------------
+ All other tests were passed
+
+
+

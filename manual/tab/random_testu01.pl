@@ -33,6 +33,7 @@
 
 use v5.16;
 use Getopt::Long;
+use Data::Dumper;
 
 my $failure = 1e-6;
 my $suspect = 1e-3;
@@ -79,7 +80,7 @@ my %rngs = (
     rdrand   => [@rdrand],
 );
 
-my @keys = qw(std aesni philox threefry mkl);
+my @keys = qw(std aesni philox threefry mkl rdrand);
 
 my %failure;
 my %suspect;
@@ -195,10 +196,9 @@ sub recheck
                             push @target, "${cmd}_\L${u}.txt";
                             say $makefile "${cmd}_\L${u}.txt :";
                             print $makefile "\tninja -C ../.. ${cmd}\n";
-                            print $makefile "\t./${cmd} $u stdout \\\n\t\t";
-                            print $makefile "$_ " for @num;
-                            print $makefile "\\\n";
-                            print $makefile "\t\t>${cmd}_\L${u}.txt\n\n";
+                            print $makefile "\t./${cmd} $u";
+                            print $makefile " $_" for @num;
+                            say $makefile "\n";
                         }
                     }
                 }

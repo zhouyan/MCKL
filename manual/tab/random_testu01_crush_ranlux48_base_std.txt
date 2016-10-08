@@ -1,0 +1,22 @@
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        STD
+ Number of statistics:  6
+ Total CPU time:   00:01:21.54
+ The following tests gave p-values outside [0.001, 0.9990]:
+ (eps  means a value < 1.0e-300):
+ (eps1 means a value < 1.0e-15):
+
+       Test                          p-value
+ ----------------------------------------------
+ 27  CouponCollector, d = 4         4.0e-11
+ 27  CouponCollector, d = 4          2.5e-9
+ 28  CouponCollector, d = 4          4.2e-5
+ 46  SampleProd, t = 30             1 -  4.3e-8
+ 46  SampleProd, t = 30             1 -  3.4e-8
+ ----------------------------------------------
+
+
+

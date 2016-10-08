@@ -1,0 +1,12 @@
+
+========= Summary results of Crush =========
+
+ Version:          TestU01 1.2.3
+ Generator:        U01OC
+ Number of statistics:  4
+ Total CPU time:   00:03:26.74
+
+ All tests were passed
+
+
+
