@@ -107,9 +107,14 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         U01OO = true;
     }
 
+    const unsigned seed =
+        1U + (rep.size() == 0 ? 0U : std::thread::hardware_concurrency() * 6U);
+
     std::ifstream seedin(filename + ".seed");
     if (seedin)
         seedin >> mckl::Seed<RNGType>::instance();
+    else
+        mckl::Seed<RNGType>::instance().set(seed);
     seedin.close();
 
     if (redirect)
