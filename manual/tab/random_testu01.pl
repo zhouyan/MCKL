@@ -177,8 +177,12 @@ sub check
                         $this_suspect{$num} = 1;
                     }
                 }
-                $failure{$bat}{$rng}{$u01}{$_} += 1 for (keys %this_failure);
-                $suspect{$bat}{$rng}{$u01}{$_} += 1 for (keys %this_suspect);
+                $failure{$bat}{$rng}{$u01}{$_} += 1 for keys %this_failure;
+                for (keys %this_suspect) {
+                    if (!$failure{$bat}{$rng}{$u01}{$_}) {
+                        $suspect{$bat}{$rng}{$u01}{$_} += 1;
+                    }
+                }
             }
         }
     }
