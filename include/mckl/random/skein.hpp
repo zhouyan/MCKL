@@ -102,9 +102,8 @@ class Skein
     static void hash(const param_type &M, std::size_t N, void *H)
     {
         key_type Kp = {{0}};
-        std::array<std::uint32_t, 8> config = configure(N);
-        param_type C(256, config.data(), t_cfg_);
-        key_type G0 = ubi(Kp, C, 0, t_cfg_);
+        std::array<std::uint32_t, 8> C = configure(N);
+        key_type G0 = ubi(Kp, param_type(256, C.data()), 0, t_cfg_);
         key_type G1 = ubi(G0, M, 0, t_msg_);
         output(G1, N, H);
     }
@@ -207,7 +206,7 @@ class Skein
         const std::size_t l = n % k;
         // FIXME Big-endian need to swap bytes
         std::uint64_t ctr = 0;
-        param_type M(64, &ctr, t_out_);
+        param_type M(64, &ctr);
         for (std::size_t i = 0; i != m; ++i) {
             for (std::size_t j = 0; j != k; ++j, ++ctr)
                 buffer[j] = ubi(G, M, 0, t_out_);
