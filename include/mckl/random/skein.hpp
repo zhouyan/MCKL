@@ -172,78 +172,18 @@ class Skein
     /// \param M The message
     /// \param t0 The lower half of the initial tweak value
     /// \param t1 The upper half of the initial tweak value
+    /// \param Yl Tree leaf size
+    /// \param Yf Tree fan-out
+    /// \param Ym Tree maximum height
     ///
     /// \details
     /// `M.type()` is ignored
-    static key_type ubi(
-        const key_type &G, const param_type &M, value_type t0, value_type t1)
+    static key_type ubi(const key_type &G, const param_type &M, value_type t0,
+        value_type t1, int Yl = 0, int Yf = 0, int Ym = 0)
     {
-        std::size_t N = M.bits();
-        const char *C = static_cast<const char *>(M.data());
-        const std::size_t k = internal::BufferSize<ctr_type>::value;
-        alignas(32) std::array<ctr_type, k> buffer;
-
-        const bool B = N % CHAR_BIT != 0;
-
-        union {
-            key_type G;
-            ctr_type H;
-        } buf;
-        buf.G = G;
-
-        // Process the only block
-        if (N <= bits()) {
-            get_block(t0, C, buffer[0], N);
-            set_flags(t1, true, true, B);
-            enc_block(buf.G, buffer[0], t0, t1, buf.H);
-
-            return buf.G;
-        }
-
-        // Process the first block
-        set_flags(t1, true, false, B);
-        get_block(t0, C, buffer[0]);
-        enc_block(buf.G, buffer[0], t0, t1, buf.H);
-        N -= bits();
-        C += bytes();
-
-        // Process the second and the last block
-        if (N <= bits()) {
-            get_block(t0, C, buffer[0], N);
-            set_flags(t1, false, true, B);
-            enc_block(buf.G, buffer[0], t0, t1, buf.H);
-
-            return buf.G;
-        }
-
-        // Process the intermediate blocks
-        set_flags(t1, false, false, B);
-        const std::size_t n = N / bits() - (N % bits() == 0 ? 1 : 0);
-        const std::size_t m = n / k;
-        const std::size_t l = n % k;
-        for (std::size_t i = 0; i != m; ++i) {
-            std::memcpy(buffer.data(), C, bytes() * k);
-            for (std::size_t j = 0; j != k; ++j) {
-                t0 += bytes();
-                enc_block(buf.G, buffer[j], t0, t1, buf.H);
-            }
-            N -= bits() * k;
-            C += bytes() * k;
-        }
-        std::memcpy(buffer.data(), C, bytes() * l);
-        for (std::size_t j = 0; j != l; ++j) {
-            t0 += bytes();
-            enc_block(buf.G, buffer[j], t0, t1, buf.H);
-        }
-        N -= bits() * l;
-        C += bytes() * l;
-
-        // Process the last block
-        set_flags(t1, false, true, B);
-        get_block(t0, C, buffer[0], N);
-        enc_block(buf.G, buffer[0], t0, t1, buf.H);
-
-        return buf.G;
+        return (Yl | Yf | Ym) == 0 && M.type() == type_field::msg() ?
+            ubi_block(G, M, t0, t1) :
+            ubi_tree(G, M, t0, t1, Yl, Yf, Ym);
     }
 
     /// \brief Output
@@ -315,6 +255,83 @@ class Skein
     static_assert(sizeof(key_type) == sizeof(ctr_type),
         "**Skein** used with a Generator with counter and key different in "
         "size");
+
+    static key_type ubi_block(
+        const key_type &G, const param_type &M, value_type t0, value_type t1)
+    {
+        std::size_t N = M.bits();
+        const char *C = static_cast<const char *>(M.data());
+        const std::size_t k = internal::BufferSize<ctr_type>::value;
+        alignas(32) std::array<ctr_type, k> buffer;
+
+        const bool B = N % CHAR_BIT != 0;
+
+        union {
+            key_type G;
+            ctr_type H;
+        } buf;
+        buf.G = G;
+
+        // Process the only block
+        if (N <= bits()) {
+            get_block(t0, C, buffer[0], N);
+            set_flags(t1, true, true, B);
+            enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+            return buf.G;
+        }
+
+        // Process the first block
+        set_flags(t1, true, false, B);
+        get_block(t0, C, buffer[0]);
+        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+        N -= bits();
+        C += bytes();
+
+        // Process the second and the last block
+        if (N <= bits()) {
+            get_block(t0, C, buffer[0], N);
+            set_flags(t1, false, true, B);
+            enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+            return buf.G;
+        }
+
+        // Process the intermediate blocks
+        set_flags(t1, false, false, B);
+        const std::size_t n = N / bits() - (N % bits() == 0 ? 1 : 0);
+        const std::size_t m = n / k;
+        const std::size_t l = n % k;
+        for (std::size_t i = 0; i != m; ++i) {
+            std::memcpy(buffer.data(), C, bytes() * k);
+            for (std::size_t j = 0; j != k; ++j) {
+                t0 += bytes();
+                enc_block(buf.G, buffer[j], t0, t1, buf.H);
+            }
+            N -= bits() * k;
+            C += bytes() * k;
+        }
+        std::memcpy(buffer.data(), C, bytes() * l);
+        for (std::size_t j = 0; j != l; ++j) {
+            t0 += bytes();
+            enc_block(buf.G, buffer[j], t0, t1, buf.H);
+        }
+        N -= bits() * l;
+        C += bytes() * l;
+
+        // Process the last block
+        set_flags(t1, false, true, B);
+        get_block(t0, C, buffer[0], N);
+        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+        return buf.G;
+    }
+
+    static key_type ubi_tree(const key_type &G, const param_type &M,
+        value_type t0, value_type t1, int, int, int)
+    {
+        return ubi_block(G, M, t0, t1);
+    }
 
     static void enc_block(const key_type &G, const ctr_type &M, value_type t0,
         value_type t1, ctr_type &H)
