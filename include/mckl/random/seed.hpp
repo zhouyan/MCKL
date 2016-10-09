@@ -217,8 +217,8 @@ class SeedGenerator
         const std::array<seed_type, M_> &k, std::integral_constant<int, D>)
     {
         result_type result;
-        Skein<typename Threefry4x64::generator_type> hash;
-        hash(D, k.data(), D, &result);
+        Skein<typename Threefry4x64::generator_type>::hash(
+            D, k.data(), D, &result);
 
         return result;
     }
