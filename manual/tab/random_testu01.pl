@@ -149,10 +149,18 @@ sub check
     if (-e $txt) {
         open my $txtfile, '<', $txt;
         my @lines = <$txtfile>;
-        s/\+$/\n/ for @lines;
+        s/\s+$/\n/ for @lines;
         open my $txtfile, '>', $txt;
         for (@lines) {
-            print $txtfile $_ if not /Total CPU time/;
+            next if /^$/;
+            next if /Version:/;
+            next if /Total CPU time:/;
+            next if /The following tests gave p-values outside/;
+            next if /(eps  means a value)/;
+            next if /(eps1 means a value)/;
+            next if /Test\s+p-value/;
+            print $txtfile $_;
+            print $txtfile "\n" if /tests were passed/;
         }
         my $lines = "@lines";
         if ($lines =~ /$u01\n(.*?)tests were passed/s) {

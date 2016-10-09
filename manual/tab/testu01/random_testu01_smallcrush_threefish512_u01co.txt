@@ -1,11 +1,5 @@
-
 ========= Summary results of SmallCrush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  10
-
  All tests were passed
-
-
 

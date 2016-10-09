@@ -1,66 +1,30 @@
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  144
-
  All tests were passed
-
-
-
 
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  144
-
  All tests were passed
-
-
 

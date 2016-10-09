@@ -1,81 +1,37 @@
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        STD
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  144
- The following tests gave p-values outside [0.001, 0.9990]:
- (eps  means a value < 1.0e-300):
- (eps1 means a value < 1.0e-15):
-
-       Test                          p-value
  ----------------------------------------------
  28  CouponCollector, d = 4          3.5e-4
  ----------------------------------------------
  All other tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01OC
  Number of statistics:  144
-
  All tests were passed
 
-
-
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01OO
  Number of statistics:  144
- The following tests gave p-values outside [0.001, 0.9990]:
- (eps  means a value < 1.0e-300):
- (eps1 means a value < 1.0e-15):
-
-       Test                          p-value
  ----------------------------------------------
- 67  RandomWalk1 M (L = 1000)        0.9990 
- 70  RandomWalk1 R (L = 10000)       0.9993 
+ 67  RandomWalk1 M (L = 1000)        0.9990
+ 70  RandomWalk1 R (L = 10000)       0.9993
  ----------------------------------------------
  All other tests were passed
-
-
 

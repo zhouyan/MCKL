@@ -1,11 +1,5 @@
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01CC
  Number of statistics:  10
-
  All tests were passed
-
-
 

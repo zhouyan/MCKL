@@ -1,23 +1,13 @@
-
 ========= Summary results of Crush =========
-
- Version:          TestU01 1.2.3
  Generator:        U01CO
  Number of statistics:  10
- The following tests gave p-values outside [0.001, 0.9990]:
- (eps  means a value < 1.0e-300):
- (eps1 means a value < 1.0e-15):
-
-       Test                          p-value
  ----------------------------------------------
   9  CollisionOver, t = 20          1 -  3.1e-7
-  9  CollisionOver, t = 20           0.9998 
+  9  CollisionOver, t = 20           0.9998
  10  CollisionOver, t = 20          1 -  1.8e-6
- 10  CollisionOver, t = 20           0.9997 
+ 10  CollisionOver, t = 20           0.9997
  76  LongestHeadRun, r = 0          8.6e-11
  76  LongestHeadRun, r = 0          5.3e-11
  ----------------------------------------------
  All other tests were passed
-
-
 
