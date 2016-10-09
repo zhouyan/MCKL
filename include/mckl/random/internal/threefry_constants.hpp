@@ -47,7 +47,7 @@ template <typename T>
 class ThreefryConstantsImpl<T, 2, 32>
 {
     public:
-    static constexpr T parity = UINT32_C(0x1BD11BDA);
+    static constexpr T parity = 0x1BD11BDA;
 
     static constexpr int rotate[1][8] = {{13, 15, 26, 6, 17, 29, 16, 24}};
 
@@ -58,7 +58,7 @@ template <typename T>
 class ThreefryConstantsImpl<T, 4, 32>
 {
     public:
-    static constexpr T parity = UINT32_C(0x1BD11BDA);
+    static constexpr T parity = 0x1BD11BDA;
 
     static constexpr int rotate[2][8] = {
         {10, 11, 13, 23, 6, 17, 25, 18}, {26, 21, 27, 5, 20, 11, 10, 20}};
@@ -70,7 +70,7 @@ template <typename T>
 class ThreefryConstantsImpl<T, 2, 64>
 {
     public:
-    static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
+    static constexpr T parity = 0x1BD11BDAA9FC1A22;
 
     static constexpr int rotate[1][8] = {{16, 42, 12, 31, 16, 32, 24, 21}};
 
@@ -81,7 +81,7 @@ template <typename T>
 class ThreefryConstantsImpl<T, 4, 64>
 {
     public:
-    static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
+    static constexpr T parity = 0x1BD11BDAA9FC1A22;
 
     static constexpr int rotate[2][8] = {
         {14, 52, 23, 5, 25, 46, 58, 32}, {16, 57, 40, 37, 33, 12, 22, 32}};
@@ -93,7 +93,7 @@ template <typename T>
 class ThreefryConstantsImpl<T, 8, 64>
 {
     public:
-    static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
+    static constexpr T parity = 0x1BD11BDAA9FC1A22;
 
     static constexpr int rotate[4][8] = {{46, 33, 17, 44, 39, 13, 25, 8},
         {36, 27, 49, 9, 30, 50, 29, 35}, {19, 14, 36, 54, 34, 10, 39, 56},
@@ -106,7 +106,7 @@ template <typename T>
 class ThreefryConstantsImpl<T, 16, 64>
 {
     public:
-    static constexpr T parity = UINT64_C(0x1BD11BDAA9FC1A22);
+    static constexpr T parity = 0x1BD11BDAA9FC1A22;
 
     static constexpr int rotate[8][8] = {{24, 38, 33, 5, 41, 16, 31, 9},
         {13, 19, 4, 20, 9, 34, 44, 48}, {8, 10, 51, 48, 37, 56, 47, 35},

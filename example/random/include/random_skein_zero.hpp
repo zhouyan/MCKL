@@ -1030,382 +1030,148 @@ static const std::uint8_t random_skein_zero_1024_2049_1024[] = {0xE0, 0x61,
     0x5E, 0x03, 0xC5, 0xBC, 0xDA, 0xF9, 0xE9, 0xAF, 0xF9, 0x07, 0xC8, 0xA1,
     0x68, 0x09, 0x83, 0x96, 0x5A, 0xDE};
 
-template <typename Hash>
-inline bool random_skein_zero(
-    std::size_t Nm, std::size_t No, const std::uint8_t *expected)
-{
-    std::size_t bits = Hash::bits();
-    std::size_t Bo = No / 8 + (No % 8 == 0 ? 0 : 1);
-
-    std::uint8_t msg[1024] = {0};
-    std::uint8_t out[1024] = {0};
-
-    Hash::hash(Nm, msg, No, out);
-    if (std::memcmp(out, expected, Bo) != 0) {
-        std::cout << std::string(50, '=') << std::endl;
-        std::cout << "Function: Skein-" + std::to_string(bits) << std::endl;
-        std::cout << "Data:     Zero" << std::endl;
-        std::cout << "Message:  " << std::dec << Nm << " bits" << std::endl;
-        std::cout << "Output:   " << std::dec << No << " bits" << std::endl;
-        std::cout << std::string(50, '-') << std::endl;
-        std::cout << "Expected" << std::endl;
-        random_skein_output(No, expected);
-        std::cout << std::string(50, '-') << std::endl;
-        std::cout << "Result" << std::endl;
-        random_skein_output(No, out);
-        std::cout << std::string(50, '-') << std::endl;
-        return false;
-    }
-
-    return true;
-}
+static const std::uint8_t random_skein_zero_message[] = {0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00};
 
 inline bool random_skein_zero()
 {
     bool pass = true;
 
-    pass = random_skein_zero<mckl::Skein256>(
-               0, 256, random_skein_zero_256_0_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1, 256, random_skein_zero_256_1_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               2, 256, random_skein_zero_256_2_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               3, 256, random_skein_zero_256_3_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               4, 256, random_skein_zero_256_4_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               5, 256, random_skein_zero_256_5_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               6, 256, random_skein_zero_256_6_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               7, 256, random_skein_zero_256_7_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               8, 256, random_skein_zero_256_8_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               9, 256, random_skein_zero_256_9_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               10, 256, random_skein_zero_256_10_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               32, 256, random_skein_zero_256_32_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               64, 256, random_skein_zero_256_64_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               128, 256, random_skein_zero_256_128_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               192, 256, random_skein_zero_256_192_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               255, 256, random_skein_zero_256_255_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               256, 256, random_skein_zero_256_256_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               257, 256, random_skein_zero_256_257_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               384, 256, random_skein_zero_256_384_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               511, 256, random_skein_zero_256_511_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               512, 256, random_skein_zero_256_512_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               513, 256, random_skein_zero_256_513_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               768, 256, random_skein_zero_256_768_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1023, 256, random_skein_zero_256_1023_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 160, random_skein_zero_256_1024_160) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 224, random_skein_zero_256_1024_224) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 256, random_skein_zero_256_1024_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 384, random_skein_zero_256_1024_384) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 512, random_skein_zero_256_1024_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 1024, random_skein_zero_256_1024_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 264, random_skein_zero_256_1024_264) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 520, random_skein_zero_256_1024_520) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 1032, random_skein_zero_256_1024_1032) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1024, 2056, random_skein_zero_256_1024_2056) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               1025, 256, random_skein_zero_256_1025_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               2047, 256, random_skein_zero_256_2047_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               2048, 256, random_skein_zero_256_2048_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein256>(
-               2049, 256, random_skein_zero_256_2049_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               0, 512, random_skein_zero_512_0_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1, 512, random_skein_zero_512_1_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               2, 512, random_skein_zero_512_2_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               3, 512, random_skein_zero_512_3_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               4, 512, random_skein_zero_512_4_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               5, 512, random_skein_zero_512_5_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               6, 512, random_skein_zero_512_6_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               7, 512, random_skein_zero_512_7_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               8, 512, random_skein_zero_512_8_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               9, 512, random_skein_zero_512_9_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               10, 512, random_skein_zero_512_10_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               32, 512, random_skein_zero_512_32_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               64, 512, random_skein_zero_512_64_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               128, 512, random_skein_zero_512_128_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               192, 512, random_skein_zero_512_192_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               255, 512, random_skein_zero_512_255_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               256, 512, random_skein_zero_512_256_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               257, 512, random_skein_zero_512_257_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               384, 512, random_skein_zero_512_384_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               511, 512, random_skein_zero_512_511_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               512, 512, random_skein_zero_512_512_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               513, 512, random_skein_zero_512_513_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               768, 512, random_skein_zero_512_768_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1023, 512, random_skein_zero_512_1023_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 160, random_skein_zero_512_1024_160) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 224, random_skein_zero_512_1024_224) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 256, random_skein_zero_512_1024_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 384, random_skein_zero_512_1024_384) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 512, random_skein_zero_512_1024_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 1024, random_skein_zero_512_1024_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 264, random_skein_zero_512_1024_264) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 520, random_skein_zero_512_1024_520) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 1032, random_skein_zero_512_1024_1032) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1024, 2056, random_skein_zero_512_1024_2056) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               1025, 512, random_skein_zero_512_1025_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               2047, 512, random_skein_zero_512_2047_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               2048, 512, random_skein_zero_512_2048_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein512>(
-               2049, 512, random_skein_zero_512_2049_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               0, 1024, random_skein_zero_1024_0_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1, 1024, random_skein_zero_1024_1_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               2, 1024, random_skein_zero_1024_2_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               3, 1024, random_skein_zero_1024_3_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               4, 1024, random_skein_zero_1024_4_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               5, 1024, random_skein_zero_1024_5_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               6, 1024, random_skein_zero_1024_6_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               7, 1024, random_skein_zero_1024_7_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               8, 1024, random_skein_zero_1024_8_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               9, 1024, random_skein_zero_1024_9_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               10, 1024, random_skein_zero_1024_10_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               32, 1024, random_skein_zero_1024_32_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               64, 1024, random_skein_zero_1024_64_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               128, 1024, random_skein_zero_1024_128_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               192, 1024, random_skein_zero_1024_192_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               255, 1024, random_skein_zero_1024_255_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               256, 1024, random_skein_zero_1024_256_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               257, 1024, random_skein_zero_1024_257_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               384, 1024, random_skein_zero_1024_384_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               511, 1024, random_skein_zero_1024_511_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               512, 1024, random_skein_zero_1024_512_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               513, 1024, random_skein_zero_1024_513_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               768, 1024, random_skein_zero_1024_768_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1023, 1024, random_skein_zero_1024_1023_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 160, random_skein_zero_1024_1024_160) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 224, random_skein_zero_1024_1024_224) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 256, random_skein_zero_1024_1024_256) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 384, random_skein_zero_1024_1024_384) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 512, random_skein_zero_1024_1024_512) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 1024, random_skein_zero_1024_1024_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 264, random_skein_zero_1024_1024_264) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 520, random_skein_zero_1024_1024_520) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 1032, random_skein_zero_1024_1024_1032) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1024, 2056, random_skein_zero_1024_1024_2056) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               1025, 1024, random_skein_zero_1024_1025_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               2047, 1024, random_skein_zero_1024_2047_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               2048, 1024, random_skein_zero_1024_2048_1024) &&
-        pass;
-    pass = random_skein_zero<mckl::Skein1024>(
-               2049, 1024, random_skein_zero_1024_2049_1024) &&
-        pass;
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 0, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 2, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 3, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 4, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 5, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 6, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 7, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 8, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 9, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 10, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 32, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 64, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 128, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 192, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 255, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 256, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 257, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 384, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 511, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 512, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 513, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 768, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1023, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 160, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 224, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 384, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 264, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 520, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 1032, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1024, 2056, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 1025, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 2047, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 2048, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(256, 2049, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 0, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 2, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 3, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 4, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 5, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 6, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 7, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 8, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 9, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 10, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 32, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 64, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 128, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 192, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 255, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 256, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 257, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 384, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 511, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 512, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 513, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 768, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1023, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 160, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 224, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 384, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 264, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 520, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 1032, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1024, 2056, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 1025, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 2047, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 2048, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(512, 2049, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 0, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 2, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 3, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 4, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 5, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 6, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 7, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 8, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 9, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 10, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 32, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 64, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 128, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 192, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 255, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 256, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 257, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 384, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 511, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 512, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 513, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 768, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1023, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 160, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 224, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 256, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 384, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 512, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 264, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 520, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 1032, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1024, 2056, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 1025, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 2047, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 2048, 1024, zero)
+    MCKL_EXAMPLE_RANDOM_SKEIN_TEST(1024, 2049, 1024, zero)
 
     return pass;
 }

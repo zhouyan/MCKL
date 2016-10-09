@@ -186,12 +186,12 @@ using is_seed_seq = std::integral_constant<bool, std::is_class<T>::value &&
 
 class is_little_endian_impl
 {
-    static constexpr unsigned char c[2] = {0xAB, 0xCB};
-    static constexpr unsigned char c0 = c[0];
-    static constexpr unsigned u = 0xCDABU;
+    static constexpr char c[2] = {0x01, 0x02};
+    static constexpr char c0 = c[0];
+    static constexpr int u = 0x0201;
 
     public:
-    static constexpr bool value = (u & 0xFFU) == c0;
+    static constexpr bool value = static_cast<char>(u & 0xFF) == c0;
 };
 
 using is_little_endian =

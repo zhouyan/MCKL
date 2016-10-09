@@ -45,39 +45,37 @@ template <typename T>
 class PhiloxConstantsImpl<T, 2, 32>
 {
     public:
-    static constexpr T weyl[1] = {UINT32_C(0x9E3779B9)};
+    static constexpr T weyl[1] = {0x9E3779B9};
 
-    static constexpr T multiplier[1] = {UINT32_C(0xD256D193)};
+    static constexpr T multiplier[1] = {0xD256D193};
 }; // class PhiloxConstantsImpl
 
 template <typename T>
 class PhiloxConstantsImpl<T, 4, 32>
 {
     public:
-    static constexpr T weyl[2] = {UINT32_C(0x9E3779B9), UINT32_C(0xBB67AE85)};
+    static constexpr T weyl[2] = {0x9E3779B9, 0xBB67AE85};
 
-    static constexpr T multiplier[2] = {
-        UINT32_C(0xCD9E8D57), UINT32_C(0xD2511F53)};
+    static constexpr T multiplier[2] = {0xCD9E8D57, 0xD2511F53};
 }; // class PhiloxConstantsImpl
 
 template <typename T>
 class PhiloxConstantsImpl<T, 2, 64>
 {
     public:
-    static constexpr T weyl[1] = {UINT64_C(0x9E3779B97F4A7C15)};
+    static constexpr T weyl[1] = {0x9E3779B97F4A7C15};
 
-    static constexpr T multiplier[1] = {UINT64_C(0xD2B74407B1CE6E93)};
+    static constexpr T multiplier[1] = {0xD2B74407B1CE6E93};
 }; // class PhiloxConstantsImpl
 
 template <typename T>
 class PhiloxConstantsImpl<T, 4, 64>
 {
     public:
-    static constexpr T weyl[2] = {
-        UINT64_C(0x9E3779B97F4A7C15), UINT64_C(0xBB67AE8584CAA73B)};
+    static constexpr T weyl[2] = {0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
 
     static constexpr T multiplier[2] = {
-        UINT64_C(0xCA5A826395121157), UINT64_C(0xD2E7470EE14C6C93)};
+        0xCA5A826395121157, 0xD2E7470EE14C6C93};
 }; // class PhiloxConstantsImpl
 
 } // namespace mckl::internal

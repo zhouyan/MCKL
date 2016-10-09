@@ -50,38 +50,79 @@ class Skein
     /// \brief Type of the key and tweak words
     using value_type = typename key_type::value_type;
 
-    /// \brief Number of bytes of internal state
+    /// \brief Type of input paramters such as keys and messages
+    class param_type
+    {
+        public:
+        /// \brief Construct a parameter given a buffer
+        ///
+        /// \param N The length of the buffer in bits
+        /// \param data The address of the buffer
+        /// \param type The type of the parameter
+        param_type(std::size_t N, const void *data, value_type type = 0)
+            : N_(N), data_(data), type_(type)
+        {
+        }
+
+        /// \brief The length of the buffer in bits
+        std::size_t bits() const { return N_; }
+
+        /// \brief The length of the buffer in bytes
+        std::size_t bytes() const
+        {
+            return N_ / CHAR_BIT + (N_ % CHAR_BIT == 0 ? 0 : 1);
+        }
+
+        /// \brief The address of the buffer
+        const void *data() const { return data_; }
+
+        /// \brief The type of the buffer
+        value_type type() const { return type_; }
+
+        private:
+        std::size_t N_;
+        const void *data_;
+        value_type type_;
+    }; // class param_type
+
+    /// \brief The number of bytes of internal state
     static constexpr std::size_t bytes() { return sizeof(key_type); }
 
-    /// \brief Number of bits of internal state
+    /// \brief The number of bits of internal state
     static constexpr std::size_t bits() { return sizeof(key_type) * CHAR_BIT; }
 
     /// \brief Simple hashing
     ///
-    /// \param Nm The length of the message in bits
     /// \param M The message
-    /// \param Nh The lenght of the hash value in bits
+    /// \param N The lenght of the hash value in bits
     /// \param H The hash value
-    static void hash(std::size_t Nm, const void *M, std::size_t Nh, void *H)
+    ///
+    /// \details
+    /// `M.type()` is ignored
+    static void hash(const param_type &M, std::size_t N, void *H)
     {
         key_type Kp = {{0}};
-        std::array<std::uint32_t, 8> C = configure(Nh);
-        key_type G0 = ubi(Kp, 256, C.data(), 0, t_cfg_);
-        key_type G1 = ubi(G0, Nm, M, 0, t_msg_);
-        output(G1, Nh, H);
+        std::array<std::uint32_t, 8> config = configure(N);
+        param_type C(256, config.data(), t_cfg_);
+        key_type G0 = ubi(Kp, C, 0, t_cfg_);
+        key_type G1 = ubi(G0, M, 0, t_msg_);
+        output(G1, N, H);
     }
 
     /// \brief UBI
     ///
     /// \param G The input key
-    /// \param N The length of the message in bits
     /// \param M The message
     /// \param t0 The lower half of the initial tweak value
     /// \param t1 The upper half of the initial tweak value
-    static key_type ubi(const key_type &G, std::size_t N, const void *M,
-        value_type t0, value_type t1)
+    ///
+    /// \details
+    /// `M.type()` is ignored
+    static key_type ubi(
+        const key_type &G, const param_type &M, value_type t0, value_type t1)
     {
-        const char *C = static_cast<const char *>(M);
+        std::size_t N = M.bits();
+        const char *C = static_cast<const char *>(M.data());
         const std::size_t k = internal::BufferSize<ctr_type>::value;
         alignas(32) std::array<ctr_type, k> buffer;
 
@@ -164,19 +205,21 @@ class Skein
         const std::size_t r = N % bytes(); // Number of remaining bytes
         const std::size_t m = n / k;
         const std::size_t l = n % k;
-        std::uint64_t M = 0;
+        // FIXME Big-endian need to swap bytes
+        std::uint64_t ctr = 0;
+        param_type M(64, &ctr, t_out_);
         for (std::size_t i = 0; i != m; ++i) {
-            for (std::size_t j = 0; j != k; ++j, ++M)
-                buffer[j] = ubi(G, 64, &M, 0, t_out_);
+            for (std::size_t j = 0; j != k; ++j, ++ctr)
+                buffer[j] = ubi(G, M, 0, t_out_);
             std::memcpy(C, buffer.data(), bytes() * k);
             C += bytes() * k;
         }
-        for (std::size_t j = 0; j != l; ++j, ++M)
-            buffer[j] = ubi(G, 64, &M, 0, t_out_);
+        for (std::size_t j = 0; j != l; ++j, ++ctr)
+            buffer[j] = ubi(G, M, 0, t_out_);
         std::memcpy(C, buffer.data(), bytes() * l);
         C += bytes() * l;
         if (r != 0) {
-            buffer[0] = ubi(G, 64, &M, 0, t_out_);
+            buffer[0] = ubi(G, M, 0, t_out_);
             std::memcpy(C, buffer.data(), r);
         }
     }
@@ -269,7 +312,7 @@ class Skein
 
         std::array<char, bytes()> tmp = {{0}};
         std::size_t n = N / CHAR_BIT + (N % CHAR_BIT == 0 ? 0 : 1);
-        std::copy_n(C, n < bytes() ? n : bytes(), tmp.begin());
+        std::copy_n(C, n, tmp.begin());
 
         N %= CHAR_BIT;
         if (N != 0) {
@@ -292,13 +335,13 @@ class Skein
         std::uint32_t Yl, std::uint32_t Yf, std::uint32_t Ym, std::true_type)
     {
         std::array<std::uint32_t, 8> C = {{0}};
-        std::get<0>(C) = UINT32_C(0x33414853);
+        std::get<0>(C) = 0x33414853;
         std::get<1>(C) = 1;
         std::get<2>(C) = static_cast<std::uint32_t>(N);
         std::get<3>(C) = static_cast<std::uint32_t>(N >> 32);
-        std::get<4>(C) += (Yl & UINT32_C(0xFF));
-        std::get<4>(C) += (Yf & UINT32_C(0xFF)) << 8;
-        std::get<4>(C) += (Ym & UINT32_C(0xFF)) << 16;
+        std::get<4>(C) += (Yl & 0xFF);
+        std::get<4>(C) += (Yf & 0xFF) << 8;
+        std::get<4>(C) += (Ym & 0xFF) << 16;
 
         return C;
     }
@@ -311,11 +354,11 @@ class Skein
             std::array<std::uint32_t, 8> u;
         } buf;
         std::fill(buf.u.begin(), buf.u.end(), 0);
-        std::get<0x00>(buf.c) = UINT8_C(0x53);
-        std::get<0x01>(buf.c) = UINT8_C(0x48);
-        std::get<0x02>(buf.c) = UINT8_C(0x41);
-        std::get<0x03>(buf.c) = UINT8_C(0x33);
-        std::get<0x04>(buf.c) = UINT8_C(0x01);
+        std::get<0x00>(buf.c) = 0x53;
+        std::get<0x01>(buf.c) = 0x48;
+        std::get<0x02>(buf.c) = 0x41;
+        std::get<0x03>(buf.c) = 0x33;
+        std::get<0x04>(buf.c) = 0x01;
         std::get<0x08>(buf.c) = static_cast<std::uint8_t>(N & 0xFF);
         std::get<0x09>(buf.c) = static_cast<std::uint8_t>((N >> 8) & 0xFF);
         std::get<0x0A>(buf.c) = static_cast<std::uint8_t>((N >> 16) & 0xFF);

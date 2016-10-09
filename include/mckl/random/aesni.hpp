@@ -88,7 +88,7 @@ class ARSConstants
 {
     public:
     static constexpr std::uint64_t weyl[2] = {
-        UINT64_C(0x9E3779B97F4A7C15), UINT64_C(0xBB67AE8584CAA73B)};
+        0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
 }; // class ARSConstants
 
 namespace internal
@@ -449,7 +449,7 @@ class AES192KeySeqGenerator
         xmm6_ = _mm_setzero_si128();
         xmm4_ = _mm_shuffle_epi32(xmm7_, 0x4F); // pshufd xmm4, xmm7, 0x4F
 
-        std::array<unsigned char, Rp1 * 16 + 16> rk_tmp;
+        std::array<char, Rp1 * 16 + 16> rk_tmp;
         generate_seq<1, Rp1>(
             rk_tmp.data(), std::integral_constant<bool, 24 < Rp1 * 16>());
         copy_key(
@@ -466,12 +466,12 @@ class AES192KeySeqGenerator
     __m128i xmm7_;
 
     template <std::size_t, std::size_t>
-    void generate_seq(unsigned char *, std::false_type)
+    void generate_seq(char *, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(unsigned char *rk_ptr, std::true_type)
+    void generate_seq(char *rk_ptr, std::true_type)
     {
         generate_key<N>(rk_ptr);
         complete_key<N>(
@@ -481,7 +481,7 @@ class AES192KeySeqGenerator
     }
 
     template <std::size_t N>
-    void generate_key(unsigned char *rk_ptr)
+    void generate_key(char *rk_ptr)
     {
         // In entry, N * 24 < Rp1 * 16
         // Required Storage: N * 24 + 16;
@@ -492,12 +492,12 @@ class AES192KeySeqGenerator
     }
 
     template <std::size_t>
-    void complete_key(unsigned char *, std::false_type)
+    void complete_key(char *, std::false_type)
     {
     }
 
     template <std::size_t N>
-    void complete_key(unsigned char *rk_ptr, std::true_type)
+    void complete_key(char *rk_ptr, std::true_type)
     {
         // In entry, N * 24 + 16 < Rp1 * 16
         // Required storage: N * 24 + 32
@@ -532,16 +532,15 @@ class AES192KeySeqGenerator
     }
 
     template <std::size_t Rp1>
-    void copy_key(
-        std::array<__m128i, Rp1> &, const unsigned char *, std::false_type)
+    void copy_key(std::array<__m128i, Rp1> &, const char *, std::false_type)
     {
     }
 
     template <std::size_t Rp1>
-    void copy_key(std::array<__m128i, Rp1> &rk, const unsigned char *rk_ptr,
-        std::true_type)
+    void copy_key(
+        std::array<__m128i, Rp1> &rk, const char *rk_ptr, std::true_type)
     {
-        unsigned char *dst = reinterpret_cast<unsigned char *>(rk.data());
+        char *dst = reinterpret_cast<char *>(rk.data());
         std::memcpy(dst + 24, rk_ptr + 24, Rp1 * 16 - 24);
     }
 }; // class AES192KeySeqGenerator

@@ -32,9 +32,15 @@
 #ifndef MCKL_EXAMPLE_RANDOM_SKEIN_HPP
 #define MCKL_EXAMPLE_RANDOM_SKEIN_HPP
 
+#define MCKL_EXAMPLE_RANDOM_SKEIN_TEST(Nb, Nm, Nh, M)                         \
+    pass = random_skein<mckl::Skein##Nb>(Nm, Nh,                              \
+               random_skein_##M##_##Nb##_##Nm##_##Nh,                         \
+               random_skein_##M##_message) &&                                 \
+        pass;
+
 #include <mckl/random/skein.hpp>
 
-inline void random_skein_output(std::size_t n, const std::uint8_t *buf)
+inline void random_skein_print(std::size_t n, const std::uint8_t *buf)
 {
     n /= 8;
     std::cout << std::hex << std::uppercase;
@@ -52,7 +58,42 @@ inline void random_skein_output(std::size_t n, const std::uint8_t *buf)
     }
 }
 
-#include "random_skein_inc.hpp"
+template <typename Hash>
+inline bool random_skein_check(std::size_t Nm, std::size_t Nh,
+    const std::uint8_t *expected, const std::uint8_t *result)
+{
+    std::size_t n = Nh / CHAR_BIT + (Nh % CHAR_BIT == 0 ? 0 : 1);
+    if (std::memcmp(expected, result, n) == 0)
+        return true;
+
+    std::cout << std::string(50, '=') << std::endl;
+    std::cout << "Hash:    Skein-" << Hash::bits() << std::endl;
+    std::cout << "Data:    Incrementing" << std::endl;
+    std::cout << "Message: " << std::dec << Nm << " bits" << std::endl;
+    std::cout << "Output:  " << std::dec << Nh << " bits" << std::endl;
+    std::cout << std::string(50, '-') << std::endl;
+    std::cout << "Expected" << std::endl;
+    random_skein_print(Nh, expected);
+    std::cout << std::string(50, '-') << std::endl;
+    std::cout << "Result" << std::endl;
+    random_skein_print(Nh, result);
+    std::cout << std::string(50, '-') << std::endl;
+
+    return false;
+}
+
+template <typename Hash>
+inline bool random_skein(std::size_t Nm, std::size_t Nh,
+    const std::uint8_t *expected, const std::uint8_t *message)
+{
+    std::uint8_t result[1024] = {0};
+    typename Hash::param_type M(Nm, message);
+    Hash::hash(M, Nh, result);
+
+    return random_skein_check<Hash>(Nm, Nh, expected, result);
+}
+
+#include "random_skein_incr.hpp"
 #include "random_skein_rand.hpp"
 #include "random_skein_zero.hpp"
 
@@ -60,7 +101,7 @@ inline void random_skein()
 {
     bool pass = true;
 
-    pass = random_skein_inc() && pass;
+    pass = random_skein_incr() && pass;
     pass = random_skein_rand() && pass;
     pass = random_skein_zero() && pass;
 
