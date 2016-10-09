@@ -5176,6 +5176,10 @@ int main()
     MCKL_EXAMPLE_RANDOM_SKEIN_TREE(1024, 12200, 1024, 02, 01, ff, tree)
     MCKL_EXAMPLE_RANDOM_SKEIN_TREE(1024, 16288, 1024, 02, 01, ff, tree)
 
+    random_skein256_perf();
+    random_skein512_perf();
+    random_skein1024_perf();
+
     if (pass)
         std::cout << "All tests passed" << std::endl;
 

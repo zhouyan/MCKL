@@ -121,7 +121,16 @@ class Skein
     /// \brief The number of bits of internal state
     static constexpr std::size_t bits() { return sizeof(key_type) * CHAR_BIT; }
 
-    /// \brief Simple hashing with key and multiple messages with types
+    /// \brief Simple hashing
+    /// \param M The messages
+    /// \param N The lenght of the hash value in bits
+    /// \param H The hash value
+    static void hash(const param_type &M, std::size_t N, void *H)
+    {
+        hash(1, &M, N, H);
+    }
+
+    /// \brief Full Skein interface
     ///
     /// \param n The number of messages
     /// \param M The messages
@@ -175,9 +184,6 @@ class Skein
     /// \param Yl Tree leaf size
     /// \param Yf Tree fan-out
     /// \param Ym Tree maximum height
-    ///
-    /// \details
-    /// `M.type()` is ignored
     static key_type ubi(const key_type &G, const param_type &M, value_type t0,
         value_type t1, int Yl = 0, int Yf = 0, int Ym = 0)
     {

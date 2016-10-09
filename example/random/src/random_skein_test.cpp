@@ -30,6 +30,7 @@
 //============================================================================
 
 #include <mckl/random/skein.hpp>
+#include <mckl/utility/stop_watch.hpp>
 #include "random_skein.hpp"
 
 inline void random_skein_print(std::size_t n, const std::uint8_t *buf)
@@ -111,6 +112,34 @@ inline bool random_skein_tree(const char *, std::size_t, std::size_t, int, int,
     return true;
 }
 
+template <typename Hash>
+inline void random_skein_perf()
+{
+    std::size_t N = 100000;
+    std::size_t M = 100;
+    mckl::Threefry4x64_64 rng;
+    mckl::Vector<std::uint64_t> r(N);
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    std::uniform_int_distribution<std::size_t> rbits(0, 8);
+    std::array<char, Hash::bytes()> H;
+    std::size_t n = 0;
+    mckl::StopWatch watch;
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = rsize(rng);
+        n += K;
+        mckl::rand(rng, K, r.data());
+        watch.start();
+        Hash::hash(typename Hash::param_type(K * 64 - rbits(rng), r.data()),
+            Hash::bits(), H.data());
+        watch.stop();
+    }
+    std::cout << std::setw(16) << std::left
+              << "Skein-" + std::to_string(Hash::bits()) << std::fixed
+              << std::setprecision(2)
+              << 1.0 * watch.cycles() / (n * sizeof(std::uint64_t)) << " cpb"
+              << std::endl;
+}
+
 bool random_skein256(const char *data, std::size_t Nm, std::size_t Nh,
     const std::uint8_t *expected, const std::uint8_t *message)
 {
@@ -176,3 +205,9 @@ bool random_skein1024_tree(const char *data, std::size_t Nm, std::size_t Nh,
     return random_skein_tree<mckl::Skein1024>(
         data, Nm, Nh, Yl, Yf, Ym, expected, message);
 }
+
+void random_skein256_perf() { random_skein_perf<mckl::Skein256>(); }
+
+void random_skein512_perf() { random_skein_perf<mckl::Skein512>(); }
+
+void random_skein1024_perf() { random_skein_perf<mckl::Skein1024>(); }

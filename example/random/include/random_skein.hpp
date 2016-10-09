@@ -61,3 +61,9 @@ extern bool random_skein512_tree(const char *, std::size_t, std::size_t, int,
 
 extern bool random_skein1024_tree(const char *, std::size_t, std::size_t, int,
     int, int, const std::uint8_t *, const std::uint8_t *);
+
+extern void random_skein256_perf();
+
+extern void random_skein512_perf();
+
+extern void random_skein1024_perf();
