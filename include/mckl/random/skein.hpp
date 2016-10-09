@@ -195,40 +195,63 @@ class Skein
     /// \param H The output
     static void output(const key_type &G, std::size_t N, void *H)
     {
-        char *C = static_cast<char *>(H);
-        const std::size_t k = internal::BufferSize<key_type>::value;
-        alignas(32) std::array<key_type, k> buffer;
-
         N = N / CHAR_BIT + (N % CHAR_BIT == 0 ? 0 : 1);
-        const std::size_t n = N / bytes(); // Number of full blocks
-        const std::size_t r = N % bytes(); // Number of remaining bytes
-        const std::size_t m = n / k;
-        const std::size_t l = n % k;
-        // FIXME Big-endian need to swap bytes
-        std::uint64_t ctr = 0;
-        param_type M(64, &ctr);
-        for (std::size_t i = 0; i != m; ++i) {
-            for (std::size_t j = 0; j != k; ++j, ++ctr)
-                buffer[j] = ubi(G, M, 0, t_out_);
-            std::memcpy(C, buffer.data(), bytes() * k);
-            C += bytes() * k;
-        }
-        for (std::size_t j = 0; j != l; ++j, ++ctr)
-            buffer[j] = ubi(G, M, 0, t_out_);
-        std::memcpy(C, buffer.data(), bytes() * l);
-        C += bytes() * l;
-        if (r != 0) {
-            buffer[0] = ubi(G, M, 0, t_out_);
-            std::memcpy(C, buffer.data(), r);
+        char *C = static_cast<char *>(H);
+
+        value_type t0 = sizeof(std::uint64_t);
+        value_type t1 = t_out_;
+        set_flags(t1, true, true, false);
+        Generator generator;
+        generator.reset(G);
+        generator.tweak(t0, t1);
+
+        // FIXME Big-endian
+
+        ctr_type ctr = {{0}};
+        ctr_type buf = {{0}};
+        const std::size_t n = N / bytes();
+        const std::size_t m = N % bytes();
+        if (n < std::numeric_limits<typename ctr_type::value_type>::max()) {
+            for (std::size_t i = 0; i != n; ++i) {
+                generator.enc(ctr, buf);
+                buf.front() ^= ctr.front();
+                std::memcpy(C, buf.data(), bytes());
+                ++ctr.front();
+                C += bytes();
+            }
+            if (m != 0) {
+                generator.enc(ctr, buf);
+                buf.front() ^= ctr.front();
+                std::memcpy(C, buf.data(), m);
+            }
+        } else {
+            for (std::size_t i = 0; i != n; ++i) {
+                generator.enc(ctr, buf);
+                buf.front() ^= ctr.front();
+                for (std::size_t j = 0; j != ctr.size(); ++j)
+                    buf[j] ^= ctr[j];
+                std::memcpy(C, buf.data(), bytes());
+                increment(ctr);
+                C += bytes();
+            }
+            if (m != 0) {
+                generator.enc(ctr, buf);
+                for (std::size_t j = 0; j != ctr.size(); ++j)
+                    buf[j] ^= ctr[j];
+                std::memcpy(C, buf.data(), m);
+            }
         }
     }
 
     private:
     using ctr_type = typename Generator::ctr_type;
 
-    static_assert(bits() % 8 == 0,
-        "**Skein** used on a platform where one byte is a multiple of eight "
-        "bits");
+    static_assert(bits() >= 64,
+        "**Skein** used with a Generator with less than 64 bits");
+
+    static_assert(std::numeric_limits<value_type>::digits >= 32,
+        "**Skein** used with a Generator with key_type::value_type less than "
+        "32 bits");
 
     static_assert(sizeof(key_type) == sizeof(ctr_type),
         "**Skein** used with a Generator with counter and key different in "
