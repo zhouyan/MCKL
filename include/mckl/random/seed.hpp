@@ -131,9 +131,6 @@ class SeedGenerator
         return is;
     }
 
-    protected:
-    SeedGenerator() : seed_(1) { partition(1, 0); }
-
     private:
     static constexpr std::size_t M_ = sizeof(result_type) / sizeof(seed_type);
 
@@ -141,6 +138,8 @@ class SeedGenerator
     seed_type rank_;
     seed_type maxs_;
     std::atomic<seed_type> seed_;
+
+    SeedGenerator() : seed_(1) { partition(1, 0); }
 
     void partition(seed_type np, seed_type rank, std::true_type)
     {
