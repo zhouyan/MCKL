@@ -50,6 +50,35 @@ class Skein
     /// \brief Type of the key and tweak words
     using value_type = typename key_type::value_type;
 
+    /// \brief Values of the type field
+    class type_field
+    {
+        public:
+        /// \brief Key (for MAC or KDF)
+        static constexpr value_type key() { return 0; }
+
+        /// \brief Configuration block
+        static constexpr value_type cfg() { return 4; }
+
+        /// \brief Personalization string
+        static constexpr value_type prs() { return 8; }
+
+        /// \brief Public key (for digital signature hashing)
+        static constexpr value_type pub() { return 12; }
+
+        /// \brief Key identifier (KDF)
+        static constexpr value_type kdf() { return 16; }
+
+        /// \brief Nonce (for stream cipher or randomized hashing)
+        static constexpr value_type non() { return 20; }
+
+        /// \brief Message
+        static constexpr value_type msg() { return 48; }
+
+        /// \brief Output
+        static constexpr value_type out() { return 63; }
+    }; // class type
+
     /// \brief Type of input paramters such as keys and messages
     class param_type
     {
@@ -59,7 +88,8 @@ class Skein
         /// \param N The length of the buffer in bits
         /// \param data The address of the buffer
         /// \param type The type of the parameter
-        param_type(std::size_t N, const void *data, value_type type = 0)
+        param_type(std::size_t N = 0, const void *data = nullptr,
+            value_type type = type_field::msg())
             : N_(N), data_(data), type_(type)
         {
         }
@@ -91,21 +121,49 @@ class Skein
     /// \brief The number of bits of internal state
     static constexpr std::size_t bits() { return sizeof(key_type) * CHAR_BIT; }
 
-    /// \brief Simple hashing
+    /// \brief Simple hashing with key and multiple messages with types
     ///
-    /// \param M The message
+    /// \param n The number of messages
+    /// \param M The messages
     /// \param N The lenght of the hash value in bits
     /// \param H The hash value
+    /// \param K The optional key
+    /// \param Yl Tree leaf size
+    /// \param Yf Tree fan-out
+    /// \param Ym Tree maximum height
     ///
     /// \details
-    /// `M.type()` is ignored
-    static void hash(const param_type &M, std::size_t N, void *H)
+    /// `K.type()` is ignored. No operation will be done if the types of
+    /// messages are not valid. And runtime assertions will be rasied if
+    /// assertion is not disabled.
+    ///
+    /// Tree hashing is ignored for now
+    static void hash(std::size_t n, const param_type *M, std::size_t N,
+        void *H, const param_type &K = param_type(), int Yl = 0, int Yf = 0,
+        int Ym = 0)
     {
-        key_type Kp = {{0}};
-        std::array<std::uint32_t, 8> C = configure(N);
-        key_type G0 = ubi(Kp, param_type(256, C.data()), 0, t_cfg_);
-        key_type G1 = ubi(G0, M, 0, t_msg_);
-        output(G1, N, H);
+        if (!check_type(n, M))
+            return;
+
+        key_type G = {{0}};
+        std::array<std::uint64_t, 4> C = configure(N, Yl, Yf, Ym);
+        value_type t0 = 0;
+        value_type t1 = 0;
+
+        if (K.bits() != 0) {
+            set_type(t1, type_field::key());
+            G = ubi(G, K, t0, t1);
+        }
+
+        set_type(t1, type_field::cfg());
+        G = ubi(G, param_type(256, C.data()), t0, t1);
+
+        for (std::size_t i = 0; i != n; ++i) {
+            set_type(t1, M[i].type());
+            G = ubi(G, M[i], t0, t1);
+        }
+
+        output(G, N, H);
     }
 
     /// \brief UBI
@@ -199,7 +257,8 @@ class Skein
         char *C = static_cast<char *>(H);
 
         value_type t0 = sizeof(std::uint64_t);
-        value_type t1 = t_out_;
+        value_type t1 = 0;
+        set_type(t1, type_field::out());
         set_flags(t1, true, true, false);
         Generator generator;
         generator.reset(G);
@@ -257,25 +316,6 @@ class Skein
         "**Skein** used with a Generator with counter and key different in "
         "size");
 
-    static constexpr int tbits_ = std::numeric_limits<value_type>::digits;
-
-    static constexpr value_type t_key_ = static_cast<value_type>(0x00)
-        << (tbits_ - 8);
-    static constexpr value_type t_cfg_ = static_cast<value_type>(0x04)
-        << (tbits_ - 8);
-    static constexpr value_type t_prs_ = static_cast<value_type>(0x08)
-        << (tbits_ - 8);
-    static constexpr value_type t_pub_ = static_cast<value_type>(0x0C)
-        << (tbits_ - 8);
-    static constexpr value_type t_kdf_ = static_cast<value_type>(0x10)
-        << (tbits_ - 8);
-    static constexpr value_type t_non_ = static_cast<value_type>(0x14)
-        << (tbits_ - 8);
-    static constexpr value_type t_msg_ = static_cast<value_type>(0x30)
-        << (tbits_ - 8);
-    static constexpr value_type t_out_ = static_cast<value_type>(0x3F)
-        << (tbits_ - 8);
-
     static void enc_block(const key_type &G, const ctr_type &M, value_type t0,
         value_type t1, ctr_type &H)
     {
@@ -287,14 +327,25 @@ class Skein
             H[i] ^= M[i];
     }
 
+    static void set_type(value_type &t1, value_type type)
+    {
+        static constexpr int N = std::numeric_limits<value_type>::digits;
+
+        const value_type mask = 0x3F;
+        t1 &= ~(mask << (N - 8));
+        t1 ^= (type & mask) << (N - 8);
+    }
+
     static void set_flags(value_type &t1, bool first, bool last, bool bpad)
     {
+        static constexpr int N = std::numeric_limits<value_type>::digits;
+
         static constexpr value_type mark_first = const_one<value_type>()
-            << (tbits_ - 2);
+            << (N - 2);
         static constexpr value_type mark_last = const_one<value_type>()
-            << (tbits_ - 1);
+            << (N - 1);
         static constexpr value_type mark_bpad = const_one<value_type>()
-            << (tbits_ - 9);
+            << (N - 9);
 
         if (first)
             t1 |= mark_first;
@@ -347,35 +398,34 @@ class Skein
         t0 += n;
     }
 
-    static std::array<std::uint32_t, 8> configure(std::uint64_t N,
-        std::uint32_t Yl = 0, std::uint32_t Yf = 0, std::uint32_t Ym = 0)
+    static std::array<std::uint64_t, 4> configure(
+        std::size_t N, int Yl = 0, int Yf = 0, int Ym = 0)
     {
         return configure(N, Yl, Yf, Ym, internal::is_little_endian());
     }
 
-    static std::array<std::uint32_t, 8> configure(std::uint64_t N,
-        std::uint32_t Yl, std::uint32_t Yf, std::uint32_t Ym, std::true_type)
+    static std::array<std::uint64_t, 4> configure(
+        std::size_t N, int Yl, int Yf, int Ym, std::true_type)
     {
-        std::array<std::uint32_t, 8> C = {{0}};
-        std::get<0>(C) = 0x33414853;
-        std::get<1>(C) = 1;
-        std::get<2>(C) = static_cast<std::uint32_t>(N);
-        std::get<3>(C) = static_cast<std::uint32_t>(N >> 32);
-        std::get<4>(C) += (Yl & 0xFF);
-        std::get<4>(C) += (Yf & 0xFF) << 8;
-        std::get<4>(C) += (Ym & 0xFF) << 16;
+        std::array<std::uint64_t, 4> C = {{0}};
+        std::get<0>(C) = 0x133414853;
+        std::get<1>(C) = static_cast<std::uint64_t>(N);
+        std::get<2>(C) += static_cast<std::uint64_t>(Yl & 0xFF);
+        std::get<2>(C) += static_cast<std::uint64_t>(Yf & 0xFF) << 8;
+        std::get<2>(C) += static_cast<std::uint64_t>(Ym & 0xFF) << 16;
 
         return C;
     }
 
-    static std::array<std::uint32_t, 8> configure(std::uint64_t N,
-        std::uint32_t Yl, std::uint32_t Yf, std::uint32_t Ym, std::false_type)
+    static std::array<std::uint64_t, 4> configure(
+        std::size_t N, unsigned Yl, unsigned Yf, unsigned Ym, std::false_type)
     {
         union {
             std::array<std::uint8_t, 32> c;
-            std::array<std::uint32_t, 8> u;
+            std::array<std::uint64_t, 4> u;
         } buf;
         std::fill(buf.u.begin(), buf.u.end(), 0);
+
         std::get<0x00>(buf.c) = 0x53;
         std::get<0x01>(buf.c) = 0x48;
         std::get<0x02>(buf.c) = 0x41;
@@ -394,6 +444,34 @@ class Skein
         std::get<0x12>(buf.c) = static_cast<std::uint8_t>(Ym);
 
         return buf.u;
+    }
+
+    static bool check_type(std::size_t n, const param_type *M)
+    {
+        if (n == 0)
+            return false;
+
+        if (M[0].type() <= type_field::cfg()) {
+            runtime_assert(
+                false, "**Skein::hash** M[0].type() <= type_field::cfg()");
+            return false;
+        }
+
+        for (std::size_t i = 1; i < n; ++i) {
+            if (M[i].type() <= M[i - 1].type()) {
+                runtime_assert(
+                    false, "**Skein::hash** M[i].type() <= M[i - 1].type()");
+                return false;
+            }
+        }
+
+        if (M[n - 1].type() >= type_field::out()) {
+            runtime_assert(
+                false, "**Skein::hash** M[n - 1].type() >= type_field::out()");
+            return false;
+        }
+
+        return true;
     }
 }; // class Skein
 

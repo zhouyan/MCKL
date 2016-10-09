@@ -32,11 +32,32 @@
 #include <cstddef>
 #include <cstdint>
 
-extern bool random_skein256(
-    std::size_t, std::size_t, const std::uint8_t *, const std::uint8_t *);
+extern bool random_skein256(const char *, std::size_t, std::size_t,
+    const std::uint8_t *, const std::uint8_t *);
 
-extern bool random_skein512(
-    std::size_t, std::size_t, const std::uint8_t *, const std::uint8_t *);
+extern bool random_skein512(const char *, std::size_t, std::size_t,
+    const std::uint8_t *, const std::uint8_t *);
 
-extern bool random_skein1024(
-    std::size_t, std::size_t, const std::uint8_t *, const std::uint8_t *);
+extern bool random_skein1024(const char *, std::size_t, std::size_t,
+    const std::uint8_t *, const std::uint8_t *);
+
+extern bool random_skein256_mac(const char *, std::size_t, std::size_t,
+    std::size_t, const std::uint8_t *, const std::uint8_t *,
+    const std::uint8_t *);
+
+extern bool random_skein512_mac(const char *, std::size_t, std::size_t,
+    std::size_t, const std::uint8_t *, const std::uint8_t *,
+    const std::uint8_t *);
+
+extern bool random_skein1024_mac(const char *, std::size_t, std::size_t,
+    std::size_t, const std::uint8_t *, const std::uint8_t *,
+    const std::uint8_t *);
+
+extern bool random_skein256_tree(const char *, std::size_t, std::size_t, int,
+    int, int, const std::uint8_t *, const std::uint8_t *);
+
+extern bool random_skein512_tree(const char *, std::size_t, std::size_t, int,
+    int, int, const std::uint8_t *, const std::uint8_t *);
+
+extern bool random_skein1024_tree(const char *, std::size_t, std::size_t, int,
+    int, int, const std::uint8_t *, const std::uint8_t *);

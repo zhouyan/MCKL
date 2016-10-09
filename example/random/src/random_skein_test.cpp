@@ -51,8 +51,8 @@ inline void random_skein_print(std::size_t n, const std::uint8_t *buf)
 }
 
 template <typename Hash>
-inline bool random_skein_check(std::size_t Nm, std::size_t Nh,
-    const std::uint8_t *expected, const std::uint8_t *result)
+inline bool random_skein_check(const char *data, std::size_t Nm,
+    std::size_t Nh, const std::uint8_t *expected, const std::uint8_t *result)
 {
     std::size_t n = Nh / CHAR_BIT + (Nh % CHAR_BIT == 0 ? 0 : 1);
     if (std::memcmp(expected, result, n) == 0)
@@ -60,7 +60,7 @@ inline bool random_skein_check(std::size_t Nm, std::size_t Nh,
 
     std::cout << std::string(50, '=') << std::endl;
     std::cout << "Hash:    Skein-" << Hash::bits() << std::endl;
-    std::cout << "Data:    Incrementing" << std::endl;
+    std::cout << "Data:    " << data << std::endl;
     std::cout << "Message: " << std::dec << Nm << " bits" << std::endl;
     std::cout << "Output:  " << std::dec << Nh << " bits" << std::endl;
     std::cout << std::string(50, '-') << std::endl;
@@ -75,30 +75,104 @@ inline bool random_skein_check(std::size_t Nm, std::size_t Nh,
 }
 
 template <typename Hash>
-inline bool random_skein(std::size_t Nm, std::size_t Nh,
+inline bool random_skein(const char *data, std::size_t Nm, std::size_t Nh,
     const std::uint8_t *expected, const std::uint8_t *message)
 {
     std::uint8_t result[1024] = {0};
     typename Hash::param_type M(Nm, message);
-    Hash::hash(M, Nh, result);
+    Hash::hash(1, &M, Nh, result);
 
-    return random_skein_check<Hash>(Nm, Nh, expected, result);
+    return random_skein_check<Hash>(data, Nm, Nh, expected, result);
 }
 
-bool random_skein256(std::size_t Nm, std::size_t Nh,
-    const std::uint8_t *expected, const std::uint8_t *message)
+template <typename Hash>
+inline bool random_skein_mac(const char *data, std::size_t Nm, std::size_t Nh,
+    std::size_t Nk, const std::uint8_t *expected, const std::uint8_t *message,
+    const std::uint8_t *key)
 {
-    return random_skein<mckl::Skein256>(Nm, Nh, expected, message);
+    std::uint8_t result[1024] = {0};
+    typename Hash::param_type K(Nk * 8, key);
+    typename Hash::param_type M(Nm, message, Hash::type_field::msg());
+    Hash::hash(1, &M, Nh, result, K);
+
+    return random_skein_check<Hash>(data, Nm, Nh, expected, result);
 }
 
-bool random_skein512(std::size_t Nm, std::size_t Nh,
-    const std::uint8_t *expected, const std::uint8_t *message)
+template <typename Hash>
+inline bool random_skein_tree(const char *, std::size_t, std::size_t, int, int,
+    int, const std::uint8_t *, const std::uint8_t *)
 {
-    return random_skein<mckl::Skein512>(Nm, Nh, expected, message);
+    // FIXME
+    // std::uint8_t result[1024] = {0};
+    // typename Hash::param_type M(Nm, message, Hash::type_field::msg());
+    // Hash::hash(K, Yl, Yf, Ym, M, Nh, result);
+
+    // return random_skein_check<Hash>(data, Nm, Nh, expected, result);
+    return true;
 }
 
-bool random_skein1024(std::size_t Nm, std::size_t Nh,
+bool random_skein256(const char *data, std::size_t Nm, std::size_t Nh,
     const std::uint8_t *expected, const std::uint8_t *message)
 {
-    return random_skein<mckl::Skein1024>(Nm, Nh, expected, message);
+    return random_skein<mckl::Skein256>(data, Nm, Nh, expected, message);
+}
+
+bool random_skein512(const char *data, std::size_t Nm, std::size_t Nh,
+    const std::uint8_t *expected, const std::uint8_t *message)
+{
+    return random_skein<mckl::Skein512>(data, Nm, Nh, expected, message);
+}
+
+bool random_skein1024(const char *data, std::size_t Nm, std::size_t Nh,
+    const std::uint8_t *expected, const std::uint8_t *message)
+{
+    return random_skein<mckl::Skein1024>(data, Nm, Nh, expected, message);
+}
+
+bool random_skein256_mac(const char *data, std::size_t Nm, std::size_t Nh,
+    std::size_t Nk, const std::uint8_t *expected, const std::uint8_t *message,
+    const std::uint8_t *key)
+{
+    return random_skein_mac<mckl::Skein256>(
+        data, Nm, Nh, Nk, expected, message, key);
+}
+
+bool random_skein512_mac(const char *data, std::size_t Nm, std::size_t Nh,
+    std::size_t Nk, const std::uint8_t *expected, const std::uint8_t *message,
+    const std::uint8_t *key)
+{
+    return random_skein_mac<mckl::Skein512>(
+        data, Nm, Nh, Nk, expected, message, key);
+}
+
+bool random_skein1024_mac(const char *data, std::size_t Nm, std::size_t Nh,
+    std::size_t Nk, const std::uint8_t *expected, const std::uint8_t *message,
+    const std::uint8_t *key)
+{
+    return random_skein_mac<mckl::Skein1024>(
+        data, Nm, Nh, Nk, expected, message, key);
+}
+
+bool random_skein256_tree(const char *data, std::size_t Nm, std::size_t Nh,
+    int Yl, int Yf, int Ym, const std::uint8_t *expected,
+    const std::uint8_t *message)
+{
+    return random_skein_tree<mckl::Skein256>(
+        data, Nm, Nh, Yl, Yf, Ym, expected, message);
+}
+
+bool random_skein512_tree(const char *data, std::size_t Nm, std::size_t Nh,
+    int Yl, int Yf, int Ym, const std::uint8_t *expected,
+    const std::uint8_t *message)
+{
+    return random_skein_tree<mckl::Skein512>(
+        data, Nm, Nh, Yl, Yf, Ym, expected, message);
+}
+
+bool random_skein1024_tree(const char *data, std::size_t Nm, std::size_t Nh,
+    int Yl, int Yf, int Ym, const std::uint8_t *expected,
+    const std::uint8_t *message)
+{
+    return random_skein_tree<mckl::Skein1024>(
+        data, Nm, Nh, Yl, Yf, Ym, expected, message);
 }
