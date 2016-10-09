@@ -29,84 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_RANDOM_SKEIN_HPP
-#define MCKL_EXAMPLE_RANDOM_SKEIN_HPP
+#include <cstddef>
+#include <cstdint>
 
-#define MCKL_EXAMPLE_RANDOM_SKEIN_TEST(Nb, Nm, Nh, M)                         \
-    pass = random_skein<mckl::Skein##Nb>(Nm, Nh,                              \
-               random_skein_##M##_##Nb##_##Nm##_##Nh,                         \
-               random_skein_##M##_message) &&                                 \
-        pass;
+extern bool random_skein256(
+    std::size_t, std::size_t, const std::uint8_t *, const std::uint8_t *);
 
-#include <mckl/random/skein.hpp>
+extern bool random_skein512(
+    std::size_t, std::size_t, const std::uint8_t *, const std::uint8_t *);
 
-inline void random_skein_print(std::size_t n, const std::uint8_t *buf)
-{
-    n /= 8;
-    std::cout << std::hex << std::uppercase;
-    for (std::size_t i = 0; i != n; ++i, ++buf) {
-        unsigned m = *buf;
-        if (m <= 0xFU)
-            std::cout << '0';
-        std::cout << m;
-        if ((i + 1) % 16 == 0 || i == n - 1)
-            std::cout << '\n';
-        else if ((i + 1) % 4 == 0)
-            std::cout << "  ";
-        else
-            std::cout << ' ';
-    }
-}
-
-template <typename Hash>
-inline bool random_skein_check(std::size_t Nm, std::size_t Nh,
-    const std::uint8_t *expected, const std::uint8_t *result)
-{
-    std::size_t n = Nh / CHAR_BIT + (Nh % CHAR_BIT == 0 ? 0 : 1);
-    if (std::memcmp(expected, result, n) == 0)
-        return true;
-
-    std::cout << std::string(50, '=') << std::endl;
-    std::cout << "Hash:    Skein-" << Hash::bits() << std::endl;
-    std::cout << "Data:    Incrementing" << std::endl;
-    std::cout << "Message: " << std::dec << Nm << " bits" << std::endl;
-    std::cout << "Output:  " << std::dec << Nh << " bits" << std::endl;
-    std::cout << std::string(50, '-') << std::endl;
-    std::cout << "Expected" << std::endl;
-    random_skein_print(Nh, expected);
-    std::cout << std::string(50, '-') << std::endl;
-    std::cout << "Result" << std::endl;
-    random_skein_print(Nh, result);
-    std::cout << std::string(50, '-') << std::endl;
-
-    return false;
-}
-
-template <typename Hash>
-inline bool random_skein(std::size_t Nm, std::size_t Nh,
-    const std::uint8_t *expected, const std::uint8_t *message)
-{
-    std::uint8_t result[1024] = {0};
-    typename Hash::param_type M(Nm, message);
-    Hash::hash(M, Nh, result);
-
-    return random_skein_check<Hash>(Nm, Nh, expected, result);
-}
-
-#include "random_skein_incr.hpp"
-#include "random_skein_rand.hpp"
-#include "random_skein_zero.hpp"
-
-inline void random_skein()
-{
-    bool pass = true;
-
-    pass = random_skein_incr() && pass;
-    pass = random_skein_rand() && pass;
-    pass = random_skein_zero() && pass;
-
-    if (pass)
-        std::cout << "All tests passed" << std::endl;
-}
-
-#endif // MCKL_EXAMPLE_RANDOM_SKEIN_HPP
+extern bool random_skein1024(
+    std::size_t, std::size_t, const std::uint8_t *, const std::uint8_t *);

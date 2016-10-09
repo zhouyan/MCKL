@@ -192,6 +192,9 @@ IF(MKL_FOUND)
     MCKL_ADD_TEST(random mkl_brng)
 ENDIF(MKL_FOUND)
 
+TARGET_SOURCES(random_skein
+    PUBLIC ${PROJECT_SOURCE_DIR}/src/random_skein_test.cpp)
+
 MCKL_ADD_TEST_RNG(rng)
 MCKL_ADD_TEST_RNG(test)
 IF(TestU01_FOUND)
