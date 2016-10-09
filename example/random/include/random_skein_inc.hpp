@@ -1035,8 +1035,8 @@ inline bool random_skein_inc(
     std::size_t Nm, std::size_t No, const std::uint8_t *expected)
 {
     std::size_t bits = Hash::bits();
-    std::size_t Bm = Nm / 8 + (Nm % 8 == 0 ? 0 : 1);
-    std::size_t Bo = No / 8 + (No % 8 == 0 ? 0 : 1);
+    std::size_t Bm = Nm / CHAR_BIT + (Nm % CHAR_BIT == 0 ? 0 : 1);
+    std::size_t Bo = No / CHAR_BIT + (No % CHAR_BIT == 0 ? 0 : 1);
 
     std::uint8_t msg[1024] = {0};
     std::uint8_t out[1024] = {0};
@@ -1050,7 +1050,7 @@ inline bool random_skein_inc(
     if (std::memcmp(out, expected, Bo) != 0) {
         std::cout << std::string(50, '=') << std::endl;
         std::cout << "Function: Skein-" + std::to_string(bits) << std::endl;
-        std::cout << "Data:     'incrementing'" << std::endl;
+        std::cout << "Data:     Incrementing" << std::endl;
         std::cout << "Message:  " << std::dec << Nm << " bits" << std::endl;
         std::cout << "Output:   " << std::dec << No << " bits" << std::endl;
         std::cout << std::string(50, '-') << std::endl;
@@ -1070,6 +1070,7 @@ inline bool random_skein_inc()
 {
     bool pass = true;
 
+    /*
     pass =
         random_skein_inc<mckl::Skein256>(0, 256, random_skein_inc_256_0_256) &&
         pass;
@@ -1292,9 +1293,11 @@ inline bool random_skein_inc()
     pass = random_skein_inc<mckl::Skein512>(
                2047, 512, random_skein_inc_512_2047_512) &&
         pass;
+    */
     pass = random_skein_inc<mckl::Skein512>(
                2048, 512, random_skein_inc_512_2048_512) &&
         pass;
+    /*
     pass = random_skein_inc<mckl::Skein512>(
                2049, 512, random_skein_inc_512_2049_512) &&
         pass;
@@ -1412,6 +1415,7 @@ inline bool random_skein_inc()
     pass = random_skein_inc<mckl::Skein1024>(
                2049, 1024, random_skein_inc_1024_2049_1024) &&
         pass;
+    */
 
     return pass;
 }

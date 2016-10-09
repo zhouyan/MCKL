@@ -60,9 +60,9 @@ inline void random_skein()
 {
     bool pass = true;
 
-    pass = pass && random_skein_inc();
-    pass = pass && random_skein_rand();
-    pass = pass && random_skein_zero();
+    pass = random_skein_inc() && pass;
+    pass = random_skein_rand() && pass;
+    pass = random_skein_zero() && pass;
 
     if (pass)
         std::cout << "All tests passed" << std::endl;

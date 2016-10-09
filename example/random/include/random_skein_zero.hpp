@@ -1044,7 +1044,7 @@ inline bool random_skein_zero(
     if (std::memcmp(out, expected, Bo) != 0) {
         std::cout << std::string(50, '=') << std::endl;
         std::cout << "Function: Skein-" + std::to_string(bits) << std::endl;
-        std::cout << "Data:     'zero'" << std::endl;
+        std::cout << "Data:     Zero" << std::endl;
         std::cout << "Message:  " << std::dec << Nm << " bits" << std::endl;
         std::cout << "Output:   " << std::dec << No << " bits" << std::endl;
         std::cout << std::string(50, '-') << std::endl;

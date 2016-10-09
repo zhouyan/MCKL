@@ -44,96 +44,156 @@ template <typename Generator>
 class Skein
 {
     public:
+    /// \brief Type of the key
     using key_type = typename Generator::key_type;
+
+    /// \brief Type of the key and tweak words
     using value_type = typename key_type::value_type;
 
     /// \brief Number of bytes of internal state
     static constexpr std::size_t bytes() { return sizeof(key_type); }
 
     /// \brief Number of bits of internal state
-    static constexpr std::size_t bits()
-    {
-        return std::numeric_limits<value_type>::digits *
-            std::tuple_size<key_type>::value;
-    }
+    static constexpr std::size_t bits() { return sizeof(key_type) * CHAR_BIT; }
 
     /// \brief Simple hashing
-    static void hash(
-        std::size_t Nm, const void *msg, std::size_t No, void *out)
+    ///
+    /// \param Nm The length of the message in bits
+    /// \param M The message
+    /// \param Nh The lenght of the hash value in bits
+    /// \param H The hash value
+    static void hash(std::size_t Nm, const void *M, std::size_t Nh, void *H)
     {
         key_type Kp = {{0}};
-        std::array<std::uint32_t, 8> C = configure(No);
+        std::array<std::uint32_t, 8> C = configure(Nh);
         key_type G0 = ubi(Kp, 256, C.data(), 0, t_cfg_);
-        key_type G1 = ubi(G0, Nm, msg, 0, t_msg_);
-        output(G1, No, out);
+        key_type G1 = ubi(G0, Nm, M, 0, t_msg_);
+        output(G1, Nh, H);
     }
 
-    /// \brief UBI chaining
-    static key_type ubi(const key_type &G, std::size_t Nbit, const void *msg,
+    /// \brief UBI
+    ///
+    /// \param G The input key
+    /// \param N The length of the message in bits
+    /// \param M The message
+    /// \param t0 The lower half of the initial tweak value
+    /// \param t1 The upper half of the initial tweak value
+    static key_type ubi(const key_type &G, std::size_t N, const void *M,
         value_type t0, value_type t1)
     {
-        const std::uint8_t *msg8 = static_cast<const std::uint8_t *>(msg);
+        const char *C = static_cast<const char *>(M);
+        const std::size_t k = internal::BufferSize<ctr_type>::value;
+        alignas(32) std::array<ctr_type, k> buffer;
+
+        const bool B = N % CHAR_BIT != 0;
 
         union {
-            key_type H;
-            ctr_type result;
+            key_type G;
+            ctr_type H;
         } buf;
-        buf.H = G;
+        buf.G = G;
 
-        ctr_type M = {{0}};
+        // Process the only block
+        if (N <= bits()) {
+            get_block(t0, C, buffer[0], N);
+            set_flags(t1, true, true, B);
+            enc_block(buf.G, buffer[0], t0, t1, buf.H);
 
-        // Process only one block
-        if (Nbit <= bits()) {
-            t0 += block(msg8, M, Nbit);
-            t1 |= mark_first_;
-            t1 |= mark_last_;
-            t1 |= Nbit % 8 == 0 ? 0 : mark_bpad_;
-            buf.result = chain(buf.H, M, t0, t1);
-
-            return buf.H;
+            return buf.G;
         }
 
-        // Process first block
-        t0 += block(msg8, M);
-        t1 |= mark_first_;
-        t1 &= ~mark_last_;
-        t1 &= ~mark_bpad_;
-        buf.result = chain(buf.H, M, t0, t1);
-        Nbit -= bits();
-        msg8 += bytes();
+        // Process the first block
+        set_flags(t1, true, false, B);
+        get_block(t0, C, buffer[0]);
+        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+        N -= bits();
+        C += bytes();
 
-        // Process all intermediate blocks
-        t1 &= ~mark_first_;
-        while (Nbit > bits()) {
-            t0 += block(msg8, M);
-            buf.result = chain(buf.H, M, t0, t1);
-            Nbit -= bits();
-            msg8 += bytes();
+        // Process the second and the last block
+        if (N <= bits()) {
+            get_block(t0, C, buffer[0], N);
+            set_flags(t1, false, true, B);
+            enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+            return buf.G;
         }
 
-        // Process last block
-        t0 += block(msg8, M, Nbit);
-        t1 |= mark_last_;
-        t1 |= Nbit % 8 == 0 ? 0 : mark_bpad_;
-        buf.result = chain(buf.H, M, t0, t1);
+        // Process the intermediate blocks
+        set_flags(t1, false, false, B);
+        const std::size_t n = N / bits() - (N % bits() == 0 ? 1 : 0);
+        const std::size_t m = n / k;
+        const std::size_t l = n % k;
+        for (std::size_t i = 0; i != m; ++i) {
+            std::memcpy(buffer.data(), C, bytes() * k);
+            for (std::size_t j = 0; j != k; ++j) {
+                t0 += bytes();
+                enc_block(buf.G, buffer[j], t0, t1, buf.H);
+            }
+            N -= bits() * k;
+            C += bytes() * k;
+        }
+        std::memcpy(buffer.data(), C, bytes() * l);
+        for (std::size_t j = 0; j != l; ++j) {
+            t0 += bytes();
+            enc_block(buf.G, buffer[j], t0, t1, buf.H);
+        }
+        N -= bits() * l;
+        C += bytes() * l;
 
-        return buf.H;
+        // Process the last block
+        set_flags(t1, false, true, B);
+        get_block(t0, C, buffer[0], N);
+        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+        return buf.G;
+    }
+
+    /// \brief Output
+    ///
+    /// \param G The chaining value
+    /// \param N The length of the output in bits
+    /// \param H The output
+    static void output(const key_type &G, std::size_t N, void *H)
+    {
+        char *C = static_cast<char *>(H);
+        const std::size_t k = internal::BufferSize<key_type>::value;
+        alignas(32) std::array<key_type, k> buffer;
+
+        N = N / CHAR_BIT + (N % CHAR_BIT == 0 ? 0 : 1);
+        const std::size_t n = N / bytes(); // Number of full blocks
+        const std::size_t r = N % bytes(); // Number of remaining bytes
+        const std::size_t m = n / k;
+        const std::size_t l = n % k;
+        std::uint64_t M = 0;
+        for (std::size_t i = 0; i != m; ++i) {
+            for (std::size_t j = 0; j != k; ++j, ++M)
+                buffer[j] = ubi(G, 64, &M, 0, t_out_);
+            std::memcpy(C, buffer.data(), bytes() * k);
+            C += bytes() * k;
+        }
+        for (std::size_t j = 0; j != l; ++j, ++M)
+            buffer[j] = ubi(G, 64, &M, 0, t_out_);
+        std::memcpy(C, buffer.data(), bytes() * l);
+        C += bytes() * l;
+        if (r != 0) {
+            buffer[0] = ubi(G, 64, &M, 0, t_out_);
+            std::memcpy(C, buffer.data(), r);
+        }
     }
 
     private:
-    static_assert(bytes() * 8 == bits(),
-        "**Skein** used on a platform where one byte is not eight bits");
-
     using ctr_type = typename Generator::ctr_type;
+
+    static_assert(bits() % 8 == 0,
+        "**Skein** used on a platform where one byte is a multiple of eight "
+        "bits");
+
+    static_assert(sizeof(key_type) == sizeof(ctr_type),
+        "**Skein** used with a Generator with counter and key different in "
+        "size");
 
     static constexpr int tbits_ = std::numeric_limits<value_type>::digits;
 
-    static constexpr value_type mark_last_ = const_one<value_type>()
-        << (tbits_ - 1);
-    static constexpr value_type mark_first_ = const_one<value_type>()
-        << (tbits_ - 2);
-    static constexpr value_type mark_bpad_ = const_one<value_type>()
-        << (tbits_ - 9);
     static constexpr value_type t_key_ = static_cast<value_type>(0x00)
         << (tbits_ - 8);
     static constexpr value_type t_cfg_ = static_cast<value_type>(0x04)
@@ -151,96 +211,91 @@ class Skein
     static constexpr value_type t_out_ = static_cast<value_type>(0x3F)
         << (tbits_ - 8);
 
-    static void output(const key_type &G, std::size_t No, void *out)
+    static void enc_block(const key_type &G, const ctr_type &M, value_type t0,
+        value_type t1, ctr_type &H)
     {
-        const std::size_t Nbyte = No / 8 + (No % 8 == 0 ? 0 : 1);
-        const std::size_t n = Nbyte / bytes();
-
-        std::uint8_t *out8 = static_cast<std::uint8_t *>(out);
-
-        const std::size_t k = internal::BufferSize<key_type>::value;
-        const std::size_t m = n / k;
-        const std::size_t l = n % k;
-        std::array<key_type, k> buffer;
-        std::uint64_t c = 0;
-        for (std::size_t i = 0; i != m; ++i) {
-            for (std::size_t j = 0; j != k; ++j, ++c)
-                buffer[j] = ubi(G, 64, &c, 0, t_out_);
-            std::memcpy(out8, buffer.data(), bytes() * k);
-            out8 += bytes() * k;
-        }
-        for (std::size_t j = 0; j != l; ++j, ++c)
-            buffer[j] = ubi(G, 64, &c, 0, t_out_);
-        std::memcpy(out8, buffer.data(), bytes() * l);
-        out8 += bytes() * l;
-        if (Nbyte % bytes() != 0) {
-            buffer[0] = ubi(G, 64, &c, 0, t_out_);
-            std::memcpy(out8, buffer.data(), Nbyte % bytes());
-        }
-    }
-
-    static ctr_type chain(
-        const key_type &G, const ctr_type &M, value_type t0, value_type t1)
-    {
-        ctr_type result;
         Generator generator;
         generator.reset(G);
         generator.tweak(t0, t1);
-        generator.enc(M, result);
+        generator.enc(M, H);
         for (std::size_t i = 0; i != M.size(); ++i)
-            result[i] ^= M[i];
-
-        return result;
+            H[i] ^= M[i];
     }
 
-    static std::size_t block(const std::uint8_t *msg8, ctr_type &M)
+    static void set_flags(value_type &t1, bool first, bool last, bool bpad)
     {
-        std::memcpy(M.data(), msg8, bytes());
+        static constexpr value_type mark_first = const_one<value_type>()
+            << (tbits_ - 2);
+        static constexpr value_type mark_last = const_one<value_type>()
+            << (tbits_ - 1);
+        static constexpr value_type mark_bpad = const_one<value_type>()
+            << (tbits_ - 9);
 
-        return bytes();
+        if (first)
+            t1 |= mark_first;
+        else
+            t1 &= ~mark_first;
+
+        if (last) {
+            t1 |= mark_last;
+            if (bpad)
+                t1 |= mark_bpad;
+            else
+                t1 &= ~mark_bpad;
+        } else {
+            t1 &= ~mark_last;
+            t1 &= ~mark_bpad;
+        }
     }
 
-    static std::size_t block(
-        const std::uint8_t *msg8, ctr_type &M, std::size_t Nbit)
+    static void get_block(value_type &t0, const char *C, ctr_type &M)
     {
-        if (Nbit == 0) {
+        std::memcpy(M.data(), C, bytes());
+        t0 += bytes();
+    }
+
+    static void get_block(
+        value_type &t0, const char *C, ctr_type &M, std::size_t N)
+    {
+        if (N == 0) {
             std::fill(M.begin(), M.end(), 0);
-            return 0;
+            return;
         }
 
-        if (Nbit >= bits())
-            return block(msg8, M);
+        if (N >= bits()) {
+            get_block(t0, C, M);
+            return;
+        }
 
-        std::array<std::uint8_t, bytes()> tmp = {{0}};
-        std::size_t n = Nbit / 8 + (Nbit % 8 == 0 ? 0 : 1);
-        std::copy_n(msg8, n < bytes() ? n : bytes(), tmp.begin());
+        std::array<char, bytes()> tmp = {{0}};
+        std::size_t n = N / CHAR_BIT + (N % CHAR_BIT == 0 ? 0 : 1);
+        std::copy_n(C, n < bytes() ? n : bytes(), tmp.begin());
 
-        Nbit %= 8;
-        if (Nbit != 0) {
-            int R = 7 - static_cast<int>(Nbit);
+        N %= CHAR_BIT;
+        if (N != 0) {
+            int R = 7 - static_cast<int>(N);
             tmp[n - 1] >>= R;
             tmp[n - 1] |= 1;
             tmp[n - 1] <<= R;
         }
         std::memcpy(M.data(), tmp.data(), bytes());
-
-        return n;
+        t0 += n;
     }
 
-    static std::array<std::uint32_t, 8> configure(std::uint64_t No,
+    static std::array<std::uint32_t, 8> configure(std::uint64_t N,
         std::uint32_t Yl = 0, std::uint32_t Yf = 0, std::uint32_t Ym = 0)
     {
-        return configure(No, Yl, Yf, Ym, internal::is_little_endian());
+        return configure(N, Yl, Yf, Ym, internal::is_little_endian());
     }
 
-    static std::array<std::uint32_t, 8> configure(std::uint64_t No,
+    static std::array<std::uint32_t, 8> configure(std::uint64_t N,
         std::uint32_t Yl, std::uint32_t Yf, std::uint32_t Ym, std::true_type)
     {
         std::array<std::uint32_t, 8> C = {{0}};
         std::get<0>(C) = UINT32_C(0x33414853);
         std::get<1>(C) = 1;
-        std::get<2>(C) = static_cast<std::uint32_t>(No);
-        std::get<3>(C) = static_cast<std::uint32_t>(No >> 32);
+        std::get<2>(C) = static_cast<std::uint32_t>(N);
+        std::get<3>(C) = static_cast<std::uint32_t>(N >> 32);
         std::get<4>(C) += (Yl & UINT32_C(0xFF));
         std::get<4>(C) += (Yf & UINT32_C(0xFF)) << 8;
         std::get<4>(C) += (Ym & UINT32_C(0xFF)) << 16;
@@ -248,7 +303,7 @@ class Skein
         return C;
     }
 
-    static std::array<std::uint32_t, 8> configure(std::uint64_t No,
+    static std::array<std::uint32_t, 8> configure(std::uint64_t N,
         std::uint32_t Yl, std::uint32_t Yf, std::uint32_t Ym, std::false_type)
     {
         union {
@@ -261,14 +316,14 @@ class Skein
         std::get<0x02>(buf.c) = UINT8_C(0x41);
         std::get<0x03>(buf.c) = UINT8_C(0x33);
         std::get<0x04>(buf.c) = UINT8_C(0x01);
-        std::get<0x08>(buf.c) = static_cast<std::uint8_t>(No & 0xFF);
-        std::get<0x09>(buf.c) = static_cast<std::uint8_t>((No >> 8) & 0xFF);
-        std::get<0x0A>(buf.c) = static_cast<std::uint8_t>((No >> 16) & 0xFF);
-        std::get<0x0B>(buf.c) = static_cast<std::uint8_t>((No >> 24) & 0xFF);
-        std::get<0x0C>(buf.c) = static_cast<std::uint8_t>((No >> 32) & 0xFF);
-        std::get<0x0D>(buf.c) = static_cast<std::uint8_t>((No >> 40) & 0xFF);
-        std::get<0x0E>(buf.c) = static_cast<std::uint8_t>((No >> 48) & 0xFF);
-        std::get<0x0F>(buf.c) = static_cast<std::uint8_t>((No >> 56) & 0xFF);
+        std::get<0x08>(buf.c) = static_cast<std::uint8_t>(N & 0xFF);
+        std::get<0x09>(buf.c) = static_cast<std::uint8_t>((N >> 8) & 0xFF);
+        std::get<0x0A>(buf.c) = static_cast<std::uint8_t>((N >> 16) & 0xFF);
+        std::get<0x0B>(buf.c) = static_cast<std::uint8_t>((N >> 24) & 0xFF);
+        std::get<0x0C>(buf.c) = static_cast<std::uint8_t>((N >> 32) & 0xFF);
+        std::get<0x0D>(buf.c) = static_cast<std::uint8_t>((N >> 40) & 0xFF);
+        std::get<0x0E>(buf.c) = static_cast<std::uint8_t>((N >> 48) & 0xFF);
+        std::get<0x0F>(buf.c) = static_cast<std::uint8_t>((N >> 56) & 0xFF);
         std::get<0x10>(buf.c) = static_cast<std::uint8_t>(Yl);
         std::get<0x11>(buf.c) = static_cast<std::uint8_t>(Yf);
         std::get<0x12>(buf.c) = static_cast<std::uint8_t>(Ym);
