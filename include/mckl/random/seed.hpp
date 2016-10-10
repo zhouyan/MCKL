@@ -294,10 +294,10 @@ class SeedGenerator
 
 /// \brief RNG default seed generator
 /// \ingroup Random
-template <typename RNGType, typename ID = std::integral_constant<std::size_t,
-                                sizeof(typename SeedType<RNGType>::type)>,
-    bool Randomize = true>
-using Seed = SeedGenerator<typename SeedType<RNGType>::type, ID, Randomize>;
+template <typename RNGType>
+class Seed : public SeedGenerator<typename SeedType<RNGType>::type>
+{
+};
 
 } // namespace mckl
 
