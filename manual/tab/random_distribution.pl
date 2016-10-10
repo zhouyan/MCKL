@@ -175,8 +175,11 @@ sub build
         `$make -C $dir random_distribution_perf 2>&1`;
     } else {
         my @target;
-        push @target, "random_distribution_perf_\L$_" for (@dists);
-        push @target, "random_distribution_perf_\L${_}_novml" for (@dists);
+        for (@dists) {
+            my $name = &distname($_);
+            push @target, "random_distribution_perf_\L${name}";
+            push @target, "random_distribution_perf_\L${name}_novml";
+        }
         `$make -C $dir @target`;
     }
 }
@@ -191,10 +194,11 @@ sub run
     my $header = 1;
     my @header;
     for my $dist (@dists) {
+        my $name = &distname($dist);
         my $cmd1 =
-        "$make -C $dir random_distribution_perf_\L$dist-check 2>&1";
+        "$make -C $dir random_distribution_perf_\L${name}-check 2>&1";
         my $cmd2 =
-        "$make -C $dir random_distribution_perf_\L${dist}_novml-check 2>&1";
+        "$make -C $dir random_distribution_perf_\L${name}_novml-check 2>&1";
         my $out;
         $out .= `$cmd1`;
         $out .= `$cmd2`;
@@ -221,10 +225,8 @@ sub run
 sub read
 {
     my @val = @{$dists{$_[0]}};
-    shift @_;
-    open my $txtfile, '<', "distribution/random_distribution_$_[0]_$simd.txt";
-    my @txt = grep {
-    $_ =~ /(.*)<(double|u?int.._t)>.*(Passed|Failed).*/ } <$txtfile>;
+    open my $txtfile, '<', "distribution/random_distribution_$_[1]_$simd.txt";
+    my @txt = grep { /(.*)<(double|u?int.._t)>.*(Passed|Failed).*/ } <$txtfile>;
     my $record;
     for (@txt) {
         my @this_record = split;
@@ -382,6 +384,14 @@ sub table
     close $texfile_p;
 
     $table;
+}
+
+sub distname
+{
+    my $name = shift;
+    $name =~ s/([A-Z])/_$1/g;
+    $name =~ s/^_//g;
+    $name
 }
 
 sub format
