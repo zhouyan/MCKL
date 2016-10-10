@@ -328,6 +328,10 @@ class Skein
     static_assert(bits() >= 64,
         "**Skein** used with a Generator with less than 64 bits");
 
+    static_assert(std::is_unsigned<value_type>::value,
+        "**Skein** used with a Generator with key_type::value_type not an "
+        "unsigned integer type");
+
     static_assert(std::numeric_limits<value_type>::digits >= 32,
         "**Skein** used with a Generator with key_type::value_type less than "
         "32 bits");

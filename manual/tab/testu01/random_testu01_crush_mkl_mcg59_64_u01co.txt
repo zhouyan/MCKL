@@ -1,9 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01CO
- Number of statistics:  4
- ----------------------------------------------
- 32  Gap, r = 27                     8.4e-7
- 32  Gap, r = 27                    1.6e-10
- ----------------------------------------------
- All other tests were passed
-

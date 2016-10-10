@@ -1,5 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01
- Number of statistics:  4
- All tests were passed
-

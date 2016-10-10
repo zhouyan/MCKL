@@ -33,188 +33,100 @@
 
 use v5.16;
 use Getopt::Long;
-use Data::Dumper;
 
 my $failure = 1e-6;
 my $suspect = 1e-3;
-my $verbose = 0;
 my $pdf = 0;
-
 GetOptions(
     "failure=f" => \$failure,
     "suspect=f" => \$suspect,
-    "verbose"   => \$verbose,
     "pdf"       => \$pdf,
 );
-$suspect = $failure if ($suspect < $failure);
+$suspect = sqrt($failure) if ($suspect < $failure);
 
-my @battery = qw(SmallCrush Crush BigCrush);
+my @bat = qw(SmallCrush Crush BigCrush);
 
 my @u01 = qw(STD U01 U01CC U01CO U01OC U01OO);
 
-my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
-ranlux48_base ranlux24 ranlux48 knuth_b);
-
-my @aesni = qw(AES128 AES128_64 AES192 AES192_64 AES256 AES256_64 ARS ARS_64);
-
-my @philox = qw(Philox2x32 Philox2x32_64 Philox4x32 Philox4x32_64 Philox2x64
-Philox2x64_64 Philox4x64 Philox4x64_64);
-
-my @threefry = qw(Threefry2x32 Threefry2x32_64 Threefry4x32 Threefry4x32_64
-Threefry2x64 Threefry2x64_64 Threefry4x64 Threefry4x64_64 Threefry8x64
-Threefry8x64_64 Threefry16x64 Threefry16x64_64 Threefish256 Threefish256_64
-Threefish512 Threefish512_64 Threefish1024 Threefish1024_64);
-
-my @mkl = qw(MKL_ARS5 MKL_ARS5_64 MKL_PHILOX4X32X10 MKL_PHILOX4X32X10_64
-MKL_MCG59 MKL_MCG59_64 MKL_MT19937 MKL_MT19937_64 MKL_MT2203 MKL_MT2203_64
-MKL_SFMT19937 MKL_SFMT19937_64 MKL_NONDETERM MKL_NONDETERM_64);
-
-my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64);
-
-my %rngs = (
-    std      => [@std],
-    aesni    => [@aesni],
-    philox   => [@philox],
-    threefry => [@threefry],
-    mkl      => [@mkl],
-    rdrand   => [@rdrand],
-);
-
-my @keys = qw(std aesni philox threefry mkl rdrand);
+my @rng = qw(
+mt19937 mt19937_64
+minstd_rand0 minstd_rand
+ranlux24_base ranlux48_base
+ranlux24 ranlux48
+knuth_b
+AES128 AES128_64
+AES192 AES192_64
+AES256 AES256_64
+ARS ARS_64
+Philox2x32 Philox2x32_64
+Philox4x32 Philox4x32_64
+Philox2x64 Philox2x64_64
+Philox4x64 Philox4x64_64
+Threefry2x32 Threefry2x32_64
+Threefry4x32 Threefry4x32_64
+Threefry2x64 Threefry2x64_64
+Threefry4x64 Threefry4x64_64
+Threefry8x64 Threefry8x64_64
+Threefry16x64 Threefry16x64_64
+Threefish256 Threefish256_64
+Threefish512 Threefish512_64
+Threefish1024 Threefish1024_64
+MKL_ARS5 MKL_ARS5_64
+MKL_PHILOX4X32X10 MKL_PHILOX4X32X10_64
+MKL_MCG59 MKL_MCG59_64
+MKL_MT19937 MKL_MT19937_64
+MKL_MT2203 MKL_MT2203_64
+MKL_SFMT19937 MKL_SFMT19937_64
+MKL_NONDETERM MKL_NONDETERM_64
+RDRAND16 RDRAND32 RDRAND64);
 
 my %failure;
 my %suspect;
 
-for my $b (@battery) {
-    for my $u (@u01) {
-        for my $k (@keys) {
-            &check($b, $_, $u) for @{$rngs{$k}};
-        }
-    }
-}
-&recheck();
+&filter;
+&check;
+&target;
+&recheck;
+&check_suspect;
+&table;
+&pdf;
 
-for my $b (@battery) {
-    for my $u (@u01) {
-        for my $k (@keys) {
-            &check($b, $_, $u, "_$u") for @{$rngs{$k}};
-        }
-    }
-}
-&recheck();
-
-my $texfile;
-if ($pdf) {
-    open $texfile, '>', 'random_testu01.tex';
-    say $texfile '\documentclass[';
-    say $texfile '  a4paper,';
-    say $texfile '  lines=42,';
-    say $texfile '  linespread=1.2,';
-    say $texfile '  fontsize=11pt,';
-    say $texfile '  fontset=Minion,';
-    say $texfile '  monofont=TheSansMonoCd,';
-    say $texfile '  monoscale=MatchLowercase,';
-    say $texfile ']{mbook}';
-    say $texfile '\input{../tex/macro}';
-    say $texfile '\pagestyle{empty}';
-    say $texfile '\begin{document}';
-}
-for my $b (@battery) {
-    my $table = &table($b);
-    if ($table) {
-        my $this_tex = "random_testu01_\L$b";
-        open my $this_texfile, '>', "$this_tex.tex";
-        say $this_texfile $table if $table;
-        if ($pdf) {
-            say $texfile '\begin{table}';
-            say $texfile "\\input{$this_tex}%";
-            say $texfile "\\caption{$b}";
-            say $texfile '\end{table}';
-        }
-    }
-}
-if ($pdf) {
-    say $texfile '\end{document}';
-    close $texfile;
-    `lualatex -interaction=batchmode random_testu01.tex`;
-}
-
-sub check
-{
-    my $bat = shift;
-    my $rng = shift;
-    my $u01 = shift;
-    my $suffix = shift;
-    my $txt = "testu01/random_testu01_\L${bat}_${rng}${suffix}.txt";
-    if (-e $txt) {
-        open my $txtfile, '<', $txt;
-        my @lines = <$txtfile>;
-        s/\s+$/\n/ for @lines;
-        open my $txtfile, '>', $txt;
-        for (@lines) {
-            next if /^$/;
-            next if /Version:/;
-            next if /Total CPU time:/;
-            next if /The following tests gave p-values outside/;
-            next if /(eps  means a value)/;
-            next if /(eps1 means a value)/;
-            next if /Test\s+p-value/;
-            print $txtfile $_;
-            print $txtfile "\n" if /tests were passed/;
-        }
-        my $lines = "@lines";
-        if ($lines =~ /$u01\n(.*?)tests were passed/s) {
-            my $result = $1;
-            if ($result =~ /--+\s*(.*?)\s*--+/s) {
-                my @tests = split "\n", $1;
-                my %this_failure;
-                my %this_suspect;
-                for (@tests) {
-                    my ($num, $pval) = (split)[0, -1];
-                    if ($pval < $failure or 1 - $pval < $failure) {
-                        $this_failure{$num} = 1;
-                    } elsif ($pval < $suspect or 1 - $pval < $suspect) {
-                        $this_suspect{$num} = 1;
-                    }
-                }
-                $failure{$bat}{$rng}{$u01}{$_} += 1 for keys %this_failure;
-                for (keys %this_suspect) {
-                    if (!$failure{$bat}{$rng}{$u01}{$_}) {
-                        $suspect{$bat}{$rng}{$u01}{$_} += 1;
-                    }
-                }
+sub filter {
+    for my $b (@bat) {
+        for my $r (@rng) {
+            &filter_txt("${b}_${r}");
+            for my $u (@u01) {
+                &filter_txt("${b}_${r}_${u}");
             }
         }
     }
 }
 
-sub recheck
-{
-    for my $b (@battery) {
+sub check {
+    for my $b (@bat) {
+        for my $r (@rng) {
+            for my $u (@u01) {
+                &check_txt("${b}_${r}", $b, $r, $u);
+            }
+        }
+    }
+}
+
+sub target {
+    for my $b (keys %suspect) {
         my %target;
-        for my $u (@u01) {
-            for my $k (@keys) {
-                for my $r (@{$rngs{$k}}) {
-                    if ($suspect{$b}{$r}{$u}) {
-                        my @keys = sort(keys $suspect{$b}{$r}{$u});
-                        if (@keys) {
-                            my $bin = "random_testu01_\L${b}_${r}";
-                            $target{$bin} .= "\t./$bin $u";
-                            for (@keys) {
-                                $target{$bin} .= " $_";
-                                if ($suspect{$b}{$r}{$u}{$_} > 1) {
-                                    $failure{$b}{$r}{$u}{$_} += 1;
-                                }
-                            }
-                            $target{$bin} .= "\n";
-                        }
-                    }
-                }
+        for my $r (keys $suspect{$b}) {
+            for my $u (sort keys $suspect{$b}{$r}) {
+                my @keys = sort keys $suspect{$b}{$r}{$u};
+                my $bin = "\Lrandom_testu01_${b}_${r}";
+                $target{$bin} .= "\t./$bin $u";
+                $target{$bin} .= " $_" for @keys;
+                $target{$bin} .= "\n";
             }
         }
         if (%target) {
-            my @keys = sort(keys %target);
-            open my $makefile, '>', "testu01/random_testu01_\L$b.make";
+            my @keys = sort keys %target;
+            open my $makefile, ">", "\Ltestu01/random_testu01_$b.make";
             print $makefile ".PHONY : all run";
             print $makefile " \\\n\t$_" for @keys;
             print $makefile "\n";
@@ -233,14 +145,35 @@ sub recheck
     }
 }
 
-sub table
-{
-    my $b = shift;
+sub recheck {
+    for my $b (@bat) {
+        for my $r (@rng) {
+            for my $u (@u01) {
+                &check_txt("${b}_${r}_${u}", $b, $r, $u);
+            }
+        }
+    }
+}
 
+sub check_suspect {
+    for my $b (keys %suspect) {
+        for my $r (keys $suspect{$b}) {
+            for my $u (keys $suspect{$b}{$r}) {
+                for my $n (keys $suspect{$b}{$r}{$u}) {
+                    if ($suspect{$b}{$r}{$u}{$n} > 1) {
+                        $failure{$b}{$r}{$u}{$n} = 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+sub table {
     my $header;
     $header .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
-    $header .= ' ' x 2 . '\toprule' . "\n";
-    $header .= ' ' x 2 . '\rng';
+    $header .= " " x 2 . '\toprule' . "\n";
+    $header .= " " x 2 . '\rng';
     $header .= ' & \std';
     $header .= ' & \textsc{u01}';
     $header .= ' & \textsc{u01cc}';
@@ -248,37 +181,113 @@ sub table
     $header .= ' & \textsc{u01oc}';
     $header .= ' & \textsc{u01oo}';
     $header .= " \\\\\n";
-    $header .= ' ' x 2 . '\midrule' . "\n";
+    $header .= " " x 2 . '\midrule' . "\n";
 
     my $footer;
-    $footer .= ' ' x 2 . '\bottomrule' . "\n";
+    $footer .= " " x 2 . '\bottomrule' . "\n";
     $footer .= '\end{tabularx}' . "\n";
 
-    my $table;
-    for my $k (@keys) {
-        my @val = @{$rngs{$k}};
-        for my $r (@val) {
-            my $f = 0;
-            for (@u01) {
-                $f += 1 if $failure{$b}{$r}{$_};
-            }
-            if ($f) {
+    for my $b (keys %failure) {
+        my $table;
+        for my $r (@rng) {
+            if ($failure{$b}{$r}) {
                 my $name = $r;
                 $name =~ s/_/\\_/g;
-                $table .= ' ' x 2 . sprintf('%-30s', "\\texttt{$name}");
-                for (@u01) {
-                    my $num;
-                    if ($failure{$b}{$r}{$_}) {
-                        $num = ' & ' . keys $failure{$b}{$r}{$_};
+                $table .= " " x 2 . sprintf("%-30s", "\\texttt{$name}");
+                for my $u (@u01)  {
+                    $table .= " & ";
+                    if ($failure{$b}{$r}{$u}) {
+                        my $num = keys $failure{$b}{$r}{$u};
+                        $table .= sprintf("%-6s", $num);
                     } else {
-                        $num .= ' & 0';
+                        $table .= sprintf("%-6s", 0);
                     }
-                    $table .= sprintf('%-6s', $num);
                 }
-                $table .= " \\\\\n";
+                $table .= " \\\\\n"
             }
         }
+        open my $texfile, ">", "\Lrandom_testu01_$b.tex";
+        print $texfile $header;
+        print $texfile $table;
+        print $texfile $footer;
     }
-    $table = $header . $table . $footer if $table;
-    $table;
+}
+
+sub pdf {
+    return unless $pdf;
+
+    open my $incfile, "<", "../tex/inc.tex";
+    my @oldinc = <$incfile>;
+    open my $incfile, ">", "../tex/inc.tex";
+    say $incfile '\includeonly{tex/testu01}';
+    my $cmd;
+    $cmd .= "cd ..;";
+    $cmd .= " latexmk -f -silent";
+    $cmd .= " -jobname=tab/random_testu01";
+    $cmd .= " manual.tex";
+    `$cmd`;
+    open my $incfile, ">", "../tex/inc.tex";
+    print $incfile $_ for @oldinc;
+}
+
+sub filter_txt {
+    my $txt = "\Ltestu01/random_testu01_$_[0].txt";
+    return unless -e $txt;
+
+    open my $txtfile, "<", $txt;
+    my @lines = <$txtfile>;
+    s/\s+$/\n/ for @lines;
+    my $lines;
+    $lines .= $_ for @lines;
+    my @lines;
+    while ($lines =~ s/(==+.*?tests were passed)//s) {
+        if ($1 =~ /(.*All other tests were passed.*)/s) {
+            push @lines, (split "\n", $1);
+        }
+    }
+    if (@lines) {
+        open my $txtfile, ">", $txt;
+        for (@lines) {
+            next if /^$/;
+            next if /Version:/;
+            next if /Total CPU time:/;
+            next if /The following tests gave p-values outside/;
+            next if /eps  means a value/;
+            next if /eps1 means a value/;
+            next if /Test\s+p-value/;
+            say $txtfile $_;
+            print $txtfile "\n" if /All other tests were passed/;
+        }
+    } else {
+        unlink $txt;
+    }
+}
+
+sub check_txt {
+    my $txt = "\Ltestu01/random_testu01_$_[0].txt";
+    return unless -e $txt;
+
+    shift;
+    my ($b, $r, $u) = @_;
+
+    open my $txtfile, "<", $txt;
+    my @lines = <$txtfile>;
+    my $lines = "@lines";
+    if ($lines =~ /$u\n(.*?)All other tests were passed/s) {
+        if ($1 =~ /--+\s*(.*?)\s*--+/s) {
+            my @tests = split "\n", $1;
+            my %this_failure;
+            my %this_suspect;
+            for (@tests) {
+                my ($n, $p) = (split)[0, -1];
+                if ($p < $failure or 1 - $p < $failure) {
+                    $this_failure{$n} = 1;
+                } elsif ($p < $suspect or 1 - $p < $suspect) {
+                    $this_suspect{$n} = 1;
+                }
+            }
+            $failure{$b}{$r}{$u}{$_} += 1 for keys %this_failure;
+            $suspect{$b}{$r}{$u}{$_} += 1 for keys %this_suspect;
+        }
+    }
 }

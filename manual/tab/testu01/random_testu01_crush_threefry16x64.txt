@@ -1,19 +1,4 @@
 ========= Summary results of Crush =========
- Generator:        STD
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01CC
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
  Generator:        U01CO
  Number of statistics:  144
  ----------------------------------------------
@@ -21,14 +6,4 @@
  69  RandomWalk1 M (L = 10000)       0.9994
  ----------------------------------------------
  All other tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01OC
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01OO
- Number of statistics:  144
- All tests were passed
 

@@ -1,14 +1,4 @@
 ========= Summary results of Crush =========
- Generator:        STD
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
  Generator:        U01CC
  Number of statistics:  144
  ----------------------------------------------
@@ -17,20 +7,10 @@
  All other tests were passed
 
 ========= Summary results of Crush =========
- Generator:        U01CO
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
  Generator:        U01OC
  Number of statistics:  144
  ----------------------------------------------
  62  Savir2                          7.6e-4
  ----------------------------------------------
  All other tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01OO
- Number of statistics:  144
- All tests were passed
 

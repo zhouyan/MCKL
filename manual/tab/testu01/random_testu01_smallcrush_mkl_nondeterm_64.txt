@@ -1,30 +1,8 @@
 ========= Summary results of SmallCrush =========
- Generator:        STD
- Number of statistics:  15
- All tests were passed
-
-========= Summary results of SmallCrush =========
  Generator:        U01
  Number of statistics:  15
- All tests were passed
-
-========= Summary results of SmallCrush =========
- Generator:        U01CC
- Number of statistics:  15
- All tests were passed
-
-========= Summary results of SmallCrush =========
- Generator:        U01CO
- Number of statistics:  15
- All tests were passed
-
-========= Summary results of SmallCrush =========
- Generator:        U01OC
- Number of statistics:  15
- All tests were passed
-
-========= Summary results of SmallCrush =========
- Generator:        U01OO
- Number of statistics:  15
- All tests were passed
+ ----------------------------------------------
+  9  HammingIndep                    8.7e-5
+ ----------------------------------------------
+ All other tests were passed
 

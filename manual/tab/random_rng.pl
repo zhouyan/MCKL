@@ -35,41 +35,27 @@ use v5.16;
 use Getopt::Long;
 
 my $run = 0;
-my $pdf = 0;
 my $build = 0;
-my $simd;
 my $llvm = "../../build/llvm-release-sys";
 my $gnu = "../../build/gnu-release-sys";
 my $intel = "../../build/intel-release-sys";
 my $make = "ninja";
 my $name;
 my $write = 0;
+my $pdf = 0;
 GetOptions(
     "run"      => \$run,
-    "pdf"      => \$pdf,
     "build"    => \$build,
-    "simd=s"   => \$simd,
     "llvm=s"   => \$llvm,
     "gnu=s"    => \$gnu,
     "intel=s"  => \$intel,
     "make=s"   => \$make,
     "name=s"   => \$name,
     "write"    => \$write,
+    "pdf"      => \$pdf,
 );
-
-if ($simd) {
-    $run = 0;
-    $build = 0;
-} else {
-    my $cpuid = `cpuid_info`;
-    $simd = "sse2" if $cpuid =~ "SSE2";
-    $simd = "avx2" if $cpuid =~ "AVX2";
-}
-
-my $all = 0;
-$all = 1 if not $name or $name =~ /all/;
-
-my %build_dir = (llvm => $llvm, gnu => $gnu, intel => $intel);
+$build = 1 if $run;
+$write = 0 if $name;
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
@@ -90,7 +76,7 @@ MKL_MT19937_64 MKL_MT2203_64 MKL_SFMT19937_64 MKL_NONDETERM_64);
 
 my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64);
 
-my %rngs = (
+my %rng = (
     std      => [@std],
     aesni    => [@aesni],
     philox   => [@philox],
@@ -101,224 +87,220 @@ my %rngs = (
 
 my @keys = qw(std aesni philox threefry mkl rdrand);
 
-my @rngs;
+my @rng;
 for my $k (@keys) {
-    my @val = @{$rngs{$k}};
-    for (@val) {
-        push @rngs, $_, if $_ =~ /$name/ or $k =~ /$name/ or $all;
+    for my $r (@{$rng{$k}}) {
+        push @rng, $r if $r =~ /$name/i or $k =~ /$name/i or !$name;
     }
 }
 
-if ($run or $build) {
-    &build("llvm");
-    &build("gnu");
-    &build("intel");
-    exit if (not $run);
-}
+my $cpuid = `cpuid_info`;
+my $simd = "sse2" if $cpuid =~ "SSE2";
+my $simd = "avx2" if $cpuid =~ "AVX2";
+my @simd = qw(sse2 avx2);
 
-if ($run) {
-    &run("llvm");
-    &run("gnu");
-    &run("intel");
-    exit;
-}
+my %compiler = (llvm => $llvm, gnu => $gnu, intel => $intel);
+my @compiler = qw(llvm gnu intel);
 
-open my $texfile, '>', "random_rng_$simd.tex";
-say $texfile '\documentclass[';
-say $texfile '  a4paper,';
-say $texfile '  lines=42,';
-say $texfile '  linespread=1.2,';
-say $texfile '  fontsize=11pt,';
-say $texfile '  fontset=Minion,';
-say $texfile '  monofont=TheSansMonoCd,';
-say $texfile '  monoscale=MatchLowercase,';
-say $texfile ']{mbook}';
-say $texfile '\input{../tex/macro}';
-say $texfile '\pagestyle{empty}';
-say $texfile '\begin{document}';
-for (@keys) {
-    my $this_tex = "random_rng";
-    $this_tex .= "_\L$_";
-    $this_tex .= "_$simd";
-    if (&table($this_tex,
-            &read($_, "llvm"),
-            &read($_, "gnu"),
-            &read($_, "intel"))) {
-        say $texfile '\begin{table}';
-        say $texfile "\\input{$this_tex}%";
-        say $texfile "\\caption{\\textsc{$_ (sequential)}}";
-        say $texfile '\end{table}';
-        say $texfile '\begin{table}';
-        say $texfile "\\input{${this_tex}_p}%";
-        say $texfile "\\caption{\\textsc{$_ (parallel)}}";
-        say $texfile '\end{table}';
-    }
-    say $texfile '\clearpage';
-}
-say $texfile '\end{document}';
-close $texfile;
-`lualatex -interaction=batchmode random_rng_$simd.tex` if $pdf;
+my %cpb_s;
+my %cpb_b;
+my %cpb_sp;
+my %cpb_bp;
 
-sub build
-{
-    my $dir = $build_dir{$_[0]};
-    say $dir;
-    if ($all) {
-        `$make -C $dir random_rng 2>&1`;
-    } else {
-        my @target;
-        push @target, "random_rng_\L$_" for (@rngs);
-        `$make -C $dir @target`;
+&build;
+&run;
+&read;
+&table;
+&pdf;
+
+sub build {
+    return unless $build;
+
+    my @target;
+    push @target, "\Lrandom_rng_$_" for @rng;
+    for my $c (@compiler) {
+        my $d = $compiler{$c};
+        say $d;
+        if ($name) {
+            `$make -C $d @target 2>&1`;
+        } else {
+            `$make -C $d random_rng 2>&1`;
+        }
     }
 }
 
-sub run
-{
-    my $dir = $build_dir{$_[0]};
-    say $dir;
-    my $txtfile;
-    open $txtfile, '>', "rng/random_rng_$_[0]_$simd.txt" if $all and $write;
-    my $header = 1;
-    my @header;
-    for my $rng (@rngs) {
-        my $cmd = "$make -C $dir random_rng_\L$rng-check 2>&1";
-        my @result;
-        my $cpb = 0xFFFF;
-        for (1..5) {
-            my @lines = split "\n", `$cmd`;
-            if ($header) {
-                @header = grep { $_ =~ /Deterministics/ } @lines;
-                if (@header) {
-                    say '=' x length($header[0]);
-                    say $header[0];
-                    say '-' x length($header[0]);
-                    $header = 0;
+sub run {
+    return unless $run;
+
+    for my $c (@compiler) {
+        my $result;
+        my $d = $compiler{$c};
+        say $d;
+        for my $r (@rng) {
+            my $cmd = "$make -C $d \Lrandom_rng_$r-check 2>&1";
+            my $cpb_s = 0xFF;
+            my $cpb_b = 0xFF;
+            my $cpb_sp = 0xFF;
+            my $cpb_bp = 0xFF;
+            for (1..5) {
+                my @lines = grep { $_ =~ /Passed|Failed/ } split "\n", `$cmd`;
+                $result .= $_ for @lines;
+                for (@lines) {
+                    my @cpb = (split)[3..6];
+                    $cpb_s  = $cpb[0] if $cpb[0] < $cpb_s;
+                    $cpb_b  = $cpb[1] if $cpb[1] < $cpb_b;
+                    $cpb_sp = $cpb[2] if $cpb[2] < $cpb_sp;
+                    $cpb_bp = $cpb[3] if $cpb[3] < $cpb_bp;
                 }
             }
-            my @this_result = grep { $_ =~ /Passed|Failed/ } @lines;
-            if (@this_result) {
-                for (@this_result) {
-                    my $this_cpb = (split)[4];
-                    if ($this_cpb < $cpb) {
-                        $cpb = $this_cpb;
-                        @result = @this_result;
+            my $line;
+            $line .= sprintf("%-20s", $r);
+            $line .= &format($cpb_s);
+            $line .= &format($cpb_b);
+            $line .= &format($cpb_sp);
+            $line .= &format($cpb_bp);
+            say $line;
+        }
+        if ($write) {
+            open my $txtfile, ">", "rng/random_rng_${c}_${simd}.txt";
+            say $txtfile $result;
+        }
+    }
+}
+
+sub read {
+    for my $c (@compiler) {
+        for my $s (@simd) {
+            open my $txtfile, "<", "rng/random_rng_${c}_${s}.txt";
+            my @lines = <$txtfile>;
+            for my $r (@rng) {
+                my @result = grep { /$r\s+/ } @lines;
+                if (@result) {
+                    $cpb_s{$c}{$s}{$r} = 0xFF;
+                    $cpb_b{$c}{$s}{$r} = 0xFF;
+                    $cpb_sp{$c}{$s}{$r} = 0xFF;
+                    $cpb_bp{$c}{$s}{$r} = 0xFF;
+                    for (@result) {
+                        my @cpb = (split)[3..6];
+                        if ($cpb[0] < $cpb_s{$c}{$s}{$r}) {
+                            $cpb_s{$c}{$s}{$r} = $cpb[0]
+                        }
+                        if ($cpb[1] < $cpb_b{$c}{$s}{$r}) {
+                            $cpb_b{$c}{$s}{$r} = $cpb[1];
+                        }
+                        if ($cpb[2] < $cpb_sp{$c}{$s}{$r}) {
+                            $cpb_sp{$c}{$s}{$r} = $cpb[2];
+                        }
+                        if ($cpb[3] < $cpb_bp{$c}{$s}{$r}) {
+                            $cpb_bp{$c}{$s}{$r} = $cpb[3];
+                        }
                     }
                 }
-                last if $cpb > 10;
             }
         }
-        say @result if @result;
-        say $txtfile @result if @result and $all and $write;
     }
-    say '-' x length($header[0]);
-    close $txtfile if $all and $write;
 }
 
-sub read
-{
-    my @val = @{$rngs{$_[0]}};
-    shift @_;
-    open my $txtfile, '<', "rng/random_rng_$_[0]_$simd.txt";
-    my @txt = grep { $_ =~ /Passed|Failed/ } <$txtfile>;
-    my $record;
-    for (@txt) {
-        my @this_record = (split)[0, 3..6];
-        my $name = $this_record[0];
-        $record .= "@this_record\n" if (grep /^$name$/, @val);
-    }
-    $record;
-}
-
-sub table
-{
-    my $tex = shift @_;
-    my @name;
-    my @cpb1;
-    my @cpb2;
-    my @cpb1p;
-    my @cpb2p;
-    my $wid = 0;
-    for (@_) {
-        my @lines = split "\n", $_;
-        my $index = 0;
-        for (@lines) {
-            my @record = split;
-            my $name = $record[0];
-            $name =~ s/_/\\_/g;
-            $name[$index] = '\texttt{' . $name . '}';
-            $cpb1[$index] .= &format($record[1]);
-            $cpb2[$index] .= &format($record[2]);
-            $cpb1p[$index] .= &format($record[3]);
-            $cpb2p[$index] .= &format($record[4]);
-            if ($wid < length($name[-1])) {
-                $wid = length($name[-1]);
-            }
-            $index++;
-        }
-    }
-
+sub table {
     my $header;
     $header .= '\tbfigures' . "\n";
     $header .= '\begin{tabularx}{\textwidth}{p{1.5in}RRRRRR}' . "\n";
-    $header .= ' ' x 2 . '\toprule' . "\n";
-    $header .= ' ' x 2;
+    $header .= " " x 2 . '\toprule' . "\n";
+    $header .= " " x 2;
     $header .= '& \multicolumn{3}{c}{\single} ';
     $header .= '& \multicolumn{3}{c}{\batch}';
     $header .= " \\\\\n";
-    $header .= ' ' x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
-    $header .= ' ' x 2 . '\rng';
+    $header .= " " x 2 . '\cmidrule(lr){2-4}\cmidrule(lr){5-7}' . "\n";
+    $header .= " " x 2 . '\rng';
     $header .= ' & \llvm & \gnu & \intel';
     $header .= ' & \llvm & \gnu & \intel';
     $header .= " \\\\\n";
-    $header .= ' ' x 2 . '\midrule' . "\n";
+    $header .= " " x 2 . '\midrule' . "\n";
 
     my $footer;
-    $footer .= ' ' x 2 . '\bottomrule' . "\n";
+    $footer .= " " x 2 . '\bottomrule' . "\n";
     $footer .= '\end{tabularx}' . "\n";
-    $footer;
 
-    my $table;
-    my $table_p;
-    if (@name) {
-        my $index = 0;
-        for (@name) {
-            $table .= ' ' x 2;
-            $table .= sprintf "%-${wid}s", $name[$index];
-            $table .= $cpb1[$index];
-            $table .= $cpb2[$index];
-            $table .= " \\\\\n";
-
-            $table_p .= ' ' x 2;
-            $table_p .= sprintf "%-${wid}s", $name[$index];
-            $table_p .= $cpb1p[$index];
-            $table_p .= $cpb2p[$index];
-            $table_p .= " \\\\\n";
-
-            $index++;
+    for my $k (@keys) {
+        for my $s (@simd) {
+            my $table;
+            my $table_p;
+            for my $r (@{$rng{$k}}) {
+                my $line_s;
+                my $line_b;
+                my $line_sp;
+                my $line_bp;
+                for my $c (@compiler) {
+                    if ($cpb_s{$c}{$s}{$r}) {
+                        $line_s .= " & ";
+                        $line_s .= &format($cpb_s{$c}{$s}{$r});
+                    }
+                    if ($cpb_b{$c}{$s}{$r}) {
+                        $line_b .= " & ";
+                        $line_b .= &format($cpb_b{$c}{$s}{$r});
+                    }
+                    if ($cpb_sp{$c}{$s}{$r}) {
+                        $line_sp .= " & ";
+                        $line_sp .= &format($cpb_sp{$c}{$s}{$r});
+                    }
+                    if ($cpb_bp{$c}{$s}{$r}) {
+                        $line_bp .= " & ";
+                        $line_bp .= &format($cpb_bp{$c}{$s}{$r});
+                    }
+                }
+                my $name = $r;
+                $name =~ s/_/\\_/g;
+                $name = " " x 2 . sprintf("%-30s", "\\texttt{$name}");
+                if ($line_s and $line_b) {
+                    $table .= $name . $line_s . $line_b . "\\\\\n";
+                }
+                if ($line_sp and $line_bp) {
+                    $table_p .= $name . $line_sp . $line_bp . "\\\\\n";
+                }
+            }
+            if ($table) {
+                open my $texfile, ">", "\Lrandom_rng_${k}_${s}.tex";
+                print $texfile $header;
+                print $texfile $table;
+                print $texfile $footer;
+            }
+            if ($table_p) {
+                open my $texfile_p, ">", "\Lrandom_rng_${k}_${s}_p.tex";
+                print $texfile_p $header;
+                print $texfile_p $table_p;
+                print $texfile_p $footer;
+            }
         }
-        $table = $header . $table . $footer;
-        $table_p = $header . $table_p . $footer;
-
-        open my $texfile, '>', "$tex.tex";
-        print $texfile $table;
-        close $texfile;
-
-        open my $texfile_p, '>', "${tex}_p.tex";
-        print $texfile_p $table_p;
-        close $texfile_p;
     }
+}
 
-    $table;
+sub pdf {
+    return unless $pdf;
+
+    open my $incfile, "<", "../tex/inc.tex";
+    my @oldinc = <$incfile>;
+    open my $incfile, ">", "../tex/inc.tex";
+    say $incfile '\includeonly{tex/perf_random_rng}';
+    my $cmd;
+    $cmd .= "cd ..;";
+    $cmd .= " latexmk -f -silent";
+    $cmd .= " -jobname=tab/random_rng";
+    $cmd .= " manual.tex";
+    `$cmd`;
+    open my $incfile, ">", "../tex/inc.tex";
+    print $incfile $_ for @oldinc;
 }
 
 sub format
 {
-    my $num = shift @_;
-    if ($num > 100) {
-        ' & ' . sprintf('%-6.0f', $num);
+    my $num = shift;
+    if ($num eq "--") {
+        sprintf("%-6s", $num);
+    } elsif ($num > 100) {
+        sprintf("%-6.0f", $num);
     } elsif ($num > 10) {
-        ' & ' . sprintf('%-6.1f', $num);
+        sprintf("%-6.1f", $num);
     } else {
-        ' & ' . sprintf('%-6.2f', $num);
+        sprintf("%-6.2f", $num);
     }
 }

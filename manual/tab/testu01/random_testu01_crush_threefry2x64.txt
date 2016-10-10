@@ -1,9 +1,4 @@
 ========= Summary results of Crush =========
- Generator:        STD
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
  Generator:        U01
  Number of statistics:  144
  ----------------------------------------------
@@ -11,21 +6,6 @@
  81  HammingWeight2, r = 20          0.9994
  ----------------------------------------------
  All other tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01CC
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01CO
- Number of statistics:  144
- All tests were passed
-
-========= Summary results of Crush =========
- Generator:        U01OC
- Number of statistics:  144
- All tests were passed
 
 ========= Summary results of Crush =========
  Generator:        U01OO

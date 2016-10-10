@@ -1,7 +1,0 @@
-========= Summary results of SmallCrush =========
- Generator:        U01CO
- Number of statistics:  2
- ----------------------------------------------
-  3  Gap                             4.5e-7
-  3  Gap                             7.7e-4
- ----------------------------------------------

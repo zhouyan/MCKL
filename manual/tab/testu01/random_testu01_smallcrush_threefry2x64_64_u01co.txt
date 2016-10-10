@@ -1,5 +1,0 @@
-========= Summary results of SmallCrush =========
- Generator:        U01CO
- Number of statistics:  2
- All tests were passed
-
