@@ -49,11 +49,13 @@ inline void random_skein_print(std::size_t n, const std::uint8_t *buf)
         else
             std::cout << ' ';
     }
+    std::cout << std::dec;
 }
 
 template <typename Hash>
 inline bool random_skein_check(const char *data, std::size_t Nm,
-    std::size_t Nh, const std::uint8_t *expected, const std::uint8_t *result)
+    std::size_t Nh, const std::uint8_t *expected, const std::uint8_t *result,
+    const std::string &info = std::string())
 {
     std::size_t n = Nh / CHAR_BIT + (Nh % CHAR_BIT == 0 ? 0 : 1);
     if (std::memcmp(expected, result, n) == 0)
@@ -64,6 +66,8 @@ inline bool random_skein_check(const char *data, std::size_t Nm,
     std::cout << "Data:    " << data << std::endl;
     std::cout << "Message: " << std::dec << Nm << " bits" << std::endl;
     std::cout << "Output:  " << std::dec << Nh << " bits" << std::endl;
+    if (info.size() != 0)
+        std::cout << info << std::endl;
     std::cout << std::string(50, '-') << std::endl;
     std::cout << "Expected" << std::endl;
     random_skein_print(Nh, expected);
@@ -92,24 +96,27 @@ inline bool random_skein_mac(const char *data, std::size_t Nm, std::size_t Nh,
     const std::uint8_t *key)
 {
     std::uint8_t result[1024] = {0};
-    typename Hash::param_type K(Nk * 8, key);
     typename Hash::param_type M(Nm, message, Hash::type_field::msg());
+    typename Hash::param_type K(Nk * 8, key);
     Hash::hash(1, &M, Nh, result, K);
 
-    return random_skein_check<Hash>(data, Nm, Nh, expected, result);
+    return random_skein_check<Hash>(data, Nm, Nh, expected, result,
+        std::string("Key size " + std::to_string(Nk) + " bytes"));
 }
 
 template <typename Hash>
-inline bool random_skein_tree(const char *, std::size_t, std::size_t, int, int,
-    int, const std::uint8_t *, const std::uint8_t *)
+inline bool random_skein_tree(const char *data, std::size_t Nm, std::size_t Nh,
+    int Yl, int Yf, int Ym, const std::uint8_t *expected,
+    const std::uint8_t *message)
 {
-    // FIXME
-    // std::uint8_t result[1024] = {0};
-    // typename Hash::param_type M(Nm, message, Hash::type_field::msg());
-    // Hash::hash(K, Yl, Yf, Ym, M, Nh, result);
+    std::uint8_t result[1024] = {0};
+    typename Hash::param_type M(Nm, message, Hash::type_field::msg());
+    typename Hash::param_type K(0);
+    Hash::hash(1, &M, Nh, result, K, Yl, Yf, Ym);
 
-    // return random_skein_check<Hash>(data, Nm, Nh, expected, result);
-    return true;
+    return random_skein_check<Hash>(data, Nm, Nh, expected, result,
+        std::string("Yl = " + std::to_string(Yl) + "; " + "Yf = " +
+            std::to_string(Yf) + "; " + "Ym = " + std::to_string(Ym)));
 }
 
 template <typename Hash>

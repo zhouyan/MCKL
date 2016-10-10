@@ -55,28 +55,28 @@ class Skein
     {
         public:
         /// \brief Key (for MAC or KDF)
-        static constexpr value_type key() { return 0; }
+        static constexpr int key() { return 0; }
 
         /// \brief Configuration block
-        static constexpr value_type cfg() { return 4; }
+        static constexpr int cfg() { return 4; }
 
         /// \brief Personalization string
-        static constexpr value_type prs() { return 8; }
+        static constexpr int prs() { return 8; }
 
         /// \brief Public key (for digital signature hashing)
-        static constexpr value_type pub() { return 12; }
+        static constexpr int pub() { return 12; }
 
         /// \brief Key identifier (KDF)
-        static constexpr value_type kdf() { return 16; }
+        static constexpr int kdf() { return 16; }
 
         /// \brief Nonce (for stream cipher or randomized hashing)
-        static constexpr value_type non() { return 20; }
+        static constexpr int non() { return 20; }
 
         /// \brief Message
-        static constexpr value_type msg() { return 48; }
+        static constexpr int msg() { return 48; }
 
         /// \brief Output
-        static constexpr value_type out() { return 63; }
+        static constexpr int out() { return 63; }
     }; // class type
 
     /// \brief Type of input paramters such as keys and messages
@@ -89,8 +89,8 @@ class Skein
         /// \param data The address of the buffer
         /// \param type The type of the parameter
         param_type(std::size_t N = 0, const void *data = nullptr,
-            value_type type = type_field::msg())
-            : N_(N), data_(data), type_(type)
+            int type = type_field::msg())
+            : N_(N), data_(static_cast<const char *>(data)), type_(type & 0x3F)
         {
         }
 
@@ -104,15 +104,15 @@ class Skein
         }
 
         /// \brief The address of the buffer
-        const void *data() const { return data_; }
+        const char *data() const { return data_; }
 
         /// \brief The type of the buffer
-        value_type type() const { return type_; }
+        int type() const { return type_; }
 
         private:
         std::size_t N_;
-        const void *data_;
-        value_type type_;
+        const char *data_;
+        int type_;
     }; // class param_type
 
     /// \brief The number of bytes of internal state
@@ -154,8 +154,13 @@ class Skein
         if (!check_type(n, M))
             return;
 
+        Yl &= 0xFF;
+        Yf &= 0xFF;
+        Ym &= 0xFF;
+
         key_type G = {{0}};
         std::array<std::uint64_t, 4> C = configure(N, Yl, Yf, Ym);
+
         value_type t0 = 0;
         value_type t1 = 0;
 
@@ -167,9 +172,18 @@ class Skein
         set_type(t1, type_field::cfg());
         G = ubi(G, param_type(256, C.data()), t0, t1);
 
-        for (std::size_t i = 0; i != n; ++i) {
-            set_type(t1, M[i].type());
-            G = ubi(G, M[i], t0, t1);
+        if ((Yl | Yf | Ym) == 0) {
+            for (std::size_t i = 0; i != n; ++i) {
+                set_type(t1, M[i].type());
+                G = ubi(G, M[i], t0, t1);
+            }
+        } else {
+            for (std::size_t i = 0; i != n; ++i) {
+                set_type(t1, M[i].type());
+                G = M[i].type() == type_field::msg() ?
+                    ubi_tree(G, M[i], Yl, Yf, Ym, 0) :
+                    ubi(G, M[i], t0, t1);
+            }
         }
 
         output(G, N, H);
@@ -181,15 +195,75 @@ class Skein
     /// \param M The message
     /// \param t0 The lower half of the initial tweak value
     /// \param t1 The upper half of the initial tweak value
-    /// \param Yl Tree leaf size
-    /// \param Yf Tree fan-out
-    /// \param Ym Tree maximum height
-    static key_type ubi(const key_type &G, const param_type &M, value_type t0,
-        value_type t1, int Yl = 0, int Yf = 0, int Ym = 0)
+    static key_type ubi(
+        const key_type &G, const param_type &M, value_type t0, value_type t1)
     {
-        return (Yl | Yf | Ym) == 0 && M.type() == type_field::msg() ?
-            ubi_block(G, M, t0, t1) :
-            ubi_tree(G, M, t0, t1, Yl, Yf, Ym);
+        std::size_t N = M.bits();
+        const char *C = M.data();
+        const std::size_t k = internal::BufferSize<ctr_type>::value;
+        alignas(32) std::array<ctr_type, k> buffer;
+
+        const bool B = N % CHAR_BIT != 0;
+
+        union {
+            key_type G;
+            ctr_type H;
+        } buf;
+        buf.G = G;
+
+        // Process the only block
+        if (N <= bits()) {
+            get_block(t0, C, buffer[0], N);
+            set_flags(t1, true, true, B);
+            enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+            return buf.G;
+        }
+
+        // Process the first block
+        set_flags(t1, true, false, B);
+        get_block(t0, C, buffer[0]);
+        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+        N -= bits();
+        C += bytes();
+
+        // Process the second and the last block
+        if (N <= bits()) {
+            get_block(t0, C, buffer[0], N);
+            set_flags(t1, false, true, B);
+            enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+            return buf.G;
+        }
+
+        // Process the intermediate blocks
+        set_flags(t1, false, false, B);
+        const std::size_t n = N / bits() - (N % bits() == 0 ? 1 : 0);
+        const std::size_t m = n / k;
+        const std::size_t l = n % k;
+        for (std::size_t i = 0; i != m; ++i) {
+            std::memcpy(buffer.data(), C, bytes() * k);
+            for (std::size_t j = 0; j != k; ++j) {
+                t0 += bytes();
+                enc_block(buf.G, buffer[j], t0, t1, buf.H);
+            }
+            N -= bits() * k;
+            C += bytes() * k;
+        }
+        std::memcpy(buffer.data(), C, bytes() * l);
+        for (std::size_t j = 0; j != l; ++j) {
+            t0 += bytes();
+            enc_block(buf.G, buffer[j], t0, t1, buf.H);
+        }
+        N -= bits() * l;
+        C += bytes() * l;
+
+        // Process the last block
+        set_flags(t1, false, true, B);
+        get_block(t0, C, buffer[0], N);
+        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+
+        return buf.G;
     }
 
     /// \brief Output
@@ -262,81 +336,66 @@ class Skein
         "**Skein** used with a Generator with counter and key different in "
         "size");
 
-    static key_type ubi_block(
-        const key_type &G, const param_type &M, value_type t0, value_type t1)
+    static key_type ubi_tree(
+        const key_type &G, const param_type &M, int Yl, int Yf, int Ym, int l)
     {
-        std::size_t N = M.bits();
-        const char *C = static_cast<const char *>(M.data());
-        const std::size_t k = internal::BufferSize<ctr_type>::value;
-        alignas(32) std::array<ctr_type, k> buffer;
+        // FIXME Memory can be reused
 
-        const bool B = N % CHAR_BIT != 0;
+        value_type t0 = 0;
+        value_type t1 = 0;
 
-        union {
-            key_type G;
-            ctr_type H;
-        } buf;
-        buf.G = G;
+        // Process the first level
+        if (l == 0) {
+            if (M.bits() == 0) {
+                t0 = 0;
+                set_level(t1, 1);
+                set_type(t1, type_field::msg());
+                return ubi(G, M, t0, t1);
+            }
+            std::size_t Nl = bytes() * (const_one<std::size_t>() << Yl);
+            std::size_t k1 = M.bytes() / Nl + (M.bytes() % Nl == 0 ? 0 : 1);
+            Vector<key_type> M1(k1);
+            set_level(t1, 1);
+            set_type(t1, type_field::msg());
+            for (std::size_t i = 0; i != k1; ++i) {
+                t0 = static_cast<value_type>(i * Nl);
+                std::size_t N =
+                    i + 1 == k1 ? M.bits() - i * Nl * CHAR_BIT : Nl * CHAR_BIT;
+                M1[i] = ubi(G, param_type(N, M.data() + i * Nl), t0, t1);
+            }
+            return ubi_tree(
+                G, param_type(bits() * k1, M1.data()), Yl, Yf, Ym, 1);
+        }
 
         // Process the only block
-        if (N <= bits()) {
-            get_block(t0, C, buffer[0], N);
-            set_flags(t1, true, true, B);
-            enc_block(buf.G, buffer[0], t0, t1, buf.H);
-
-            return buf.G;
+        if (M.bits() == bits()) {
+            key_type H = {{0}};
+            std::memcpy(H.data(), M.data(), bytes());
+            return H;
         }
 
-        // Process the first block
-        set_flags(t1, true, false, B);
-        get_block(t0, C, buffer[0]);
-        enc_block(buf.G, buffer[0], t0, t1, buf.H);
-        N -= bits();
-        C += bytes();
-
-        // Process the second and the last block
-        if (N <= bits()) {
-            get_block(t0, C, buffer[0], N);
-            set_flags(t1, false, true, B);
-            enc_block(buf.G, buffer[0], t0, t1, buf.H);
-
-            return buf.G;
+        // Process the maximum level
+        if (l + 1 == Ym) {
+            t0 = 0;
+            set_level(t1, Ym);
+            set_type(t1, type_field::msg());
+            return ubi(G, M, t0, t1);
         }
 
-        // Process the intermediate blocks
-        set_flags(t1, false, false, B);
-        const std::size_t n = N / bits() - (N % bits() == 0 ? 1 : 0);
-        const std::size_t m = n / k;
-        const std::size_t l = n % k;
-        for (std::size_t i = 0; i != m; ++i) {
-            std::memcpy(buffer.data(), C, bytes() * k);
-            for (std::size_t j = 0; j != k; ++j) {
-                t0 += bytes();
-                enc_block(buf.G, buffer[j], t0, t1, buf.H);
-            }
-            N -= bits() * k;
-            C += bytes() * k;
+        std::size_t Nn = bytes() * (const_one<std::size_t>() << Yf);
+        std::size_t kl = M.bytes() / Nn + (M.bytes() % Nn == 0 ? 0 : 1);
+        Vector<key_type> Ml(kl);
+        set_level(t1, l + 1);
+        set_type(t1, type_field::msg());
+        for (std::size_t i = 0; i != kl; ++i) {
+            t0 = static_cast<value_type>(i * Nn);
+            std::size_t N =
+                i + 1 == kl ? M.bits() - i * Nn * CHAR_BIT : Nn * CHAR_BIT;
+            Ml[i] = ubi(G, param_type(N, M.data() + i * Nn), t0, t1);
         }
-        std::memcpy(buffer.data(), C, bytes() * l);
-        for (std::size_t j = 0; j != l; ++j) {
-            t0 += bytes();
-            enc_block(buf.G, buffer[j], t0, t1, buf.H);
-        }
-        N -= bits() * l;
-        C += bytes() * l;
 
-        // Process the last block
-        set_flags(t1, false, true, B);
-        get_block(t0, C, buffer[0], N);
-        enc_block(buf.G, buffer[0], t0, t1, buf.H);
-
-        return buf.G;
-    }
-
-    static key_type ubi_tree(const key_type &G, const param_type &M,
-        value_type t0, value_type t1, int, int, int)
-    {
-        return ubi_block(G, M, t0, t1);
+        return ubi_tree(
+            G, param_type(bits() * kl, Ml.data()), Yl, Yf, Ym, l + 1);
     }
 
     static void enc_block(const key_type &G, const ctr_type &M, value_type t0,
@@ -348,15 +407,6 @@ class Skein
         generator.enc(M, H);
         for (std::size_t i = 0; i != M.size(); ++i)
             H[i] ^= M[i];
-    }
-
-    static void set_type(value_type &t1, value_type type)
-    {
-        static constexpr int N = std::numeric_limits<value_type>::digits;
-
-        const value_type mask = 0x3F;
-        t1 &= ~(mask << (N - 8));
-        t1 ^= (type & mask) << (N - 8);
     }
 
     static void set_flags(value_type &t1, bool first, bool last, bool bpad)
@@ -385,6 +435,26 @@ class Skein
             t1 &= ~mark_last;
             t1 &= ~mark_bpad;
         }
+    }
+
+    static void set_type(value_type &t1, int type)
+    {
+        static constexpr int N = std::numeric_limits<value_type>::digits;
+        static constexpr value_type mask = static_cast<value_type>(0x3F)
+            << (N - 8);
+
+        t1 &= ~mask;
+        t1 ^= (static_cast<value_type>(type) << (N - 8)) & mask;
+    }
+
+    static void set_level(value_type &t1, int level)
+    {
+        static constexpr int N = std::numeric_limits<value_type>::digits;
+        static constexpr value_type mask = static_cast<value_type>(0x7F)
+            << (N - 16);
+
+        t1 &= ~mask;
+        t1 ^= (static_cast<value_type>(level) << (N - 16)) & mask;
     }
 
     static void get_block(value_type &t0, const char *C, ctr_type &M)
@@ -433,15 +503,15 @@ class Skein
         std::array<std::uint64_t, 4> C = {{0}};
         std::get<0>(C) = 0x133414853;
         std::get<1>(C) = static_cast<std::uint64_t>(N);
-        std::get<2>(C) += static_cast<std::uint64_t>(Yl & 0xFF);
-        std::get<2>(C) += static_cast<std::uint64_t>(Yf & 0xFF) << 8;
-        std::get<2>(C) += static_cast<std::uint64_t>(Ym & 0xFF) << 16;
+        std::get<2>(C) += static_cast<std::uint64_t>(Yl);
+        std::get<2>(C) += static_cast<std::uint64_t>(Yf << 8);
+        std::get<2>(C) += static_cast<std::uint64_t>(Ym << 16);
 
         return C;
     }
 
     static std::array<std::uint64_t, 4> configure(
-        std::size_t N, unsigned Yl, unsigned Yf, unsigned Ym, std::false_type)
+        std::size_t N, int Yl, int Yf, int Ym, std::false_type)
     {
         union {
             std::array<std::uint8_t, 32> c;
