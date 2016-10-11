@@ -29,22 +29,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <mckl/random/skein.hpp>
+#include <mckl/utility/stop_watch.hpp>
 #include "random_skein.hpp"
-#include <iostream>
 
 #define MCKL_EXAMPLE_RANDOM_SKEIN(Nb, Nm, Nh, M)                              \
     pass = pass &&                                                            \
-        random_skein##Nb(#M, Nm, Nh, random_skein_##M##_##Nb##_##Nm##_##Nh,   \
-            random_skein_##M##_msg);
+        random_skein<mckl::Skein##Nb>(#M, Nm, Nh,                             \
+            random_skein_##M##_##Nb##_##Nm##_##Nh, random_skein_##M##_msg);
 
 #define MCKL_EXAMPLE_RANDOM_SKEIN_MAC(Nb, Nm, Nh, Nk, M)                      \
-    pass = pass && random_skein##Nb##_mac(#M, Nm, Nh, Nk,                     \
+    pass = pass && random_skein_mac<mckl::Skein##Nb>(#M, Nm, Nh, Nk,          \
                        random_skein_##M##_##Nb##_##Nm##_##Nh##_##Nk,          \
                        random_skein_##M##_msg, random_skein_##M##_key);
 
 #define MCKL_EXAMPLE_RANDOM_SKEIN_TREE(Nb, Nm, Nh, Yl, Yf, Ym, M)             \
     pass = pass &&                                                            \
-        random_skein##Nb##_tree(#M, Nm, Nh, 0x##Yl, 0x##Yf, 0x##Ym,           \
+        random_skein_tree<mckl::Skein##Nb>(#M, Nm, Nh, 0x##Yl, 0x##Yf,        \
+            0x##Ym,                                                           \
             random_skein_##M##_##Nb##_##Nm##_##Nh##_##Yl##_##Yf##_##Ym,       \
             random_skein_##M##_##Nb##_##Nm##_##Nh##_##Yl##_##Yf##_##Ym##_msg);
 
@@ -6220,6 +6222,92 @@ static const std::uint8_t random_skein_tree_1024_16288_1024_02_01_ff_msg[] = {
     0xE0, 0x03, 0xE2, 0x03, 0xE4, 0x03, 0xE6, 0x03, 0xE8, 0x03, 0xEA, 0x03,
     0xEC, 0x03, 0xEE, 0x03, 0xF0, 0x03, 0xF2, 0x03};
 
+inline void random_skein_print(std::size_t n, const std::uint8_t *buf)
+{
+    n /= 8;
+    std::cout << std::hex << std::uppercase;
+    for (std::size_t i = 0; i != n; ++i, ++buf) {
+        unsigned m = *buf;
+        if (m <= 0xFU)
+            std::cout << '0';
+        std::cout << m;
+        if ((i + 1) % 16 == 0 || i == n - 1)
+            std::cout << '\n';
+        else if ((i + 1) % 4 == 0)
+            std::cout << "  ";
+        else
+            std::cout << ' ';
+    }
+    std::cout << std::dec;
+}
+
+template <typename Hash>
+inline bool random_skein_check(const char *data, std::size_t Nm,
+    std::size_t Nh, const std::uint8_t *expected, const std::uint8_t *result,
+    const std::string &info = std::string())
+{
+    std::size_t n = Nh / CHAR_BIT + (Nh % CHAR_BIT == 0 ? 0 : 1);
+    if (std::memcmp(expected, result, n) == 0)
+        return true;
+
+    std::cout << std::string(50, '=') << std::endl;
+    std::cout << "Hash:    Skein-" << Hash::bits() << std::endl;
+    std::cout << "Data:    " << data << std::endl;
+    std::cout << "Message: " << std::dec << Nm << " bits" << std::endl;
+    std::cout << "Output:  " << std::dec << Nh << " bits" << std::endl;
+    if (info.size() != 0)
+        std::cout << info << std::endl;
+    std::cout << std::string(50, '-') << std::endl;
+    std::cout << "Expected" << std::endl;
+    random_skein_print(Nh, expected);
+    std::cout << std::string(50, '-') << std::endl;
+    std::cout << "Result" << std::endl;
+    random_skein_print(Nh, result);
+    std::cout << std::string(50, '-') << std::endl;
+
+    return false;
+}
+
+template <typename Hash>
+inline bool random_skein(const char *data, std::size_t Nm, std::size_t Nh,
+    const std::uint8_t *expected, const std::uint8_t *message)
+{
+    std::uint8_t result[1024] = {0};
+    typename Hash::param_type M(Nm, message);
+    Hash::hash(1, &M, Nh, result);
+
+    return random_skein_check<Hash>(data, Nm, Nh, expected, result);
+}
+
+template <typename Hash>
+inline bool random_skein_mac(const char *data, std::size_t Nm, std::size_t Nh,
+    std::size_t Nk, const std::uint8_t *expected, const std::uint8_t *message,
+    const std::uint8_t *key)
+{
+    std::uint8_t result[1024] = {0};
+    typename Hash::param_type M(Nm, message, Hash::type_field::msg());
+    typename Hash::param_type K(Nk * 8, key);
+    Hash::hash(1, &M, Nh, result, K);
+
+    return random_skein_check<Hash>(data, Nm, Nh, expected, result,
+        std::string("Key size " + std::to_string(Nk) + " bytes"));
+}
+
+template <typename Hash>
+inline bool random_skein_tree(const char *data, std::size_t Nm, std::size_t Nh,
+    int Yl, int Yf, int Ym, const std::uint8_t *expected,
+    const std::uint8_t *message)
+{
+    std::uint8_t result[1024] = {0};
+    typename Hash::param_type M(Nm, message, Hash::type_field::msg());
+    typename Hash::param_type K(0);
+    Hash::hash(1, &M, Nh, result, K, Yl, Yf, Ym);
+
+    return random_skein_check<Hash>(data, Nm, Nh, expected, result,
+        std::string("Yl = " + std::to_string(Yl) + "; " + "Yf = " +
+            std::to_string(Yf) + "; " + "Ym = " + std::to_string(Ym)));
+}
+
 int main()
 {
     bool pass = true;
@@ -6742,10 +6830,6 @@ int main()
 
     if (pass)
         std::cout << "All tests passed" << std::endl;
-
-    random_skein256_perf();
-    random_skein512_perf();
-    random_skein1024_perf();
 
     return 0;
 }
