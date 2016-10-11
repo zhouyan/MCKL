@@ -35,9 +35,7 @@ use v5.16;
 use Getopt::Long;
 
 my $run = 0;
-my $pdf = 0;
 my $build = 0;
-my $simd;
 my $llvm = "../../build/llvm-release-sys";
 my $gnu = "../../build/gnu-release-sys";
 my $intel = "../../build/intel-release-sys";
@@ -45,11 +43,10 @@ my $compiler = "llvm";
 my $make = "ninja";
 my $name;
 my $write = 0;
+my $pdf = 0;
 GetOptions(
     "run"        => \$run,
-    "pdf"        => \$pdf,
     "build"      => \$build,
-    "simd=s"     => \$simd,
     "llvm=s"     => \$llvm,
     "gnu=s"      => \$gnu,
     "intel=s"    => \$intel,
@@ -57,42 +54,31 @@ GetOptions(
     "make=s"     => \$make,
     "name=s"     => \$name,
     "write"      => \$write,
+    "pdf"        => \$pdf,
 );
-
-if ($simd) {
-    $run = 0;
-    $build = 0;
-} else {
-    my $cpuid = `cpuid_info`;
-    $simd = "sse2" if $cpuid =~ "SSE2";
-    $simd = "avx2" if $cpuid =~ "AVX2";
-}
-
-my $all = 0;
-$all = 1 if not $name or $name =~ /all/;
-
-my %build_dir = (llvm => $llvm, gnu => $gnu, intel => $intel);
+$build = 1 if $run;
+$write = 0 if $name;
 
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
+
 my @beta = qw(Beta);
+
 my @chisquared = qw(ChiSquared);
+
 my @gamma = qw(Gamma);
+
 my @fisherf = qw(FisherF);
+
 my @normal = qw(Normal Lognormal Levy);
+
 my @stable = qw(Stable);
+
 my @studentt = qw(StudentT);
+
 my @int = qw(Geometric UniformInt);
 
-my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh Stable);
-my @nomkl = qw(Arcsine Pareto Stable);
-
-my %nostd;
-my %nomkl;
-$nostd{$_} = 1 for @nostd;
-$nomkl{$_} = 1 for @nomkl;
-
-my %dists = (
+my %distribution = (
     inverse    => [@inverse],
     beta       => [@beta],
     chisquared => [@chisquared],
@@ -107,226 +93,145 @@ my %dists = (
 my @keys = qw(inverse beta chisquared gamma fisherf normal stable studentt
 int);
 
-my @dists;
+my @distribution;
 for my $k (@keys) {
-    my @val = @{$dists{$k}};
-    for (@val) {
-        push @dists, $_, if $_ =~ /$name/ or $k =~ /$name/ or $all;
+    for my $r (@{$distribution{$k}}) {
+        push @distribution, $r if $r =~ /$name/i or $k =~ /$name/i or !$name;
     }
 }
 
-if ($run or $build) {
-    &build("llvm");
-    &build("gnu");
-    &build("intel");
-    exit if (not $run);
-}
+my $cpuid = `cpuid_info`;
+my $simd = "sse2" if $cpuid =~ "SSE2";
+my $simd = "avx2" if $cpuid =~ "AVX2";
+my @simd = qw(sse2 avx2);
 
-if ($run) {
-    &run("llvm");
-    &run("gnu");
-    &run("intel");
-    exit;
-}
+my %compiler = (llvm => $llvm, gnu => $gnu, intel => $intel);
+my @compiler = qw(llvm gnu intel);
 
-open my $texfile, '>', "random_distribution_$simd.tex";
-say $texfile '\documentclass[';
-say $texfile '  a4paper,';
-say $texfile '  lines=42,';
-say $texfile '  linespread=1.2,';
-say $texfile '  fontsize=11pt,';
-say $texfile '  fontset=Minion,';
-say $texfile '  monofont=TheSansMonoCd,';
-say $texfile '  monoscale=MatchLowercase,';
-say $texfile ']{mbook}';
-say $texfile '\input{../tex/macro}';
-say $texfile '\pagestyle{empty}';
-say $texfile '\begin{document}';
-for my $k (@keys) {
-    for (qw(llvm gnu intel)) {
-        my $this_tex = "random_distribution";
-        $this_tex .= "_\L$k";
-        $this_tex .= "_$_";
-        $this_tex .= "_$simd";
-        &table($this_tex, &read($k, $_));
-        say $texfile '\begin{table}';
-        say $texfile "\\input{$this_tex}%";
-        say $texfile "\\caption{\\textsc{$k ($_, sequential)}}";
-        say $texfile '\end{table}';
-        say $texfile '\begin{table}';
-        say $texfile "\\input{${this_tex}_p}%";
-        say $texfile "\\caption{\\textsc{$k ($_, parallel)}}";
-        say $texfile '\end{table}';
+my %nostd;
+my %nomkl;
+my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh Stable);
+my @nomkl = qw(Arcsine Pareto Stable);
+$nostd{$_} = 1 for @nostd;
+$nomkl{$_} = 1 for @nomkl;
+
+my %cpe_s;
+my %cpe_m;
+my %cpe_b;
+my %cpe_v;
+my %cpe_i;
+my %cpe_sp;
+my %cpe_mp;
+my %cpe_bp;
+my %cpe_vp;
+my %cpe_ip;
+
+&build;
+&run;
+&read;
+&table;
+&pdf;
+
+sub build {
+    return unless $build;
+
+    my @target;
+    for my $r (@distribution) {
+        my $name = &distribution_name($r);
+        push @target, "\Lrandom_distribution_perf_${name}";
+        push @target, "\Lrandom_distribution_perf_${name}_novml";
     }
-    my $this_tex = "random_distribution_\L$k";
-    `cp ${this_tex}_${compiler}_${simd}.tex   ${this_tex}_${simd}.tex`;
-    `cp ${this_tex}_${compiler}_${simd}_p.tex ${this_tex}_${simd}_p.tex`;
-    say $texfile '\clearpage';
-}
-say $texfile '\end{document}';
-close $texfile;
-`lualatex -interaction=batchmode random_distribution_$simd.tex` if $pdf;
-
-sub build
-{
-    my $dir = $build_dir{$_[0]};
-    say $dir;
-    if ($all) {
-        `$make -C $dir random_distribution_perf 2>&1`;
-    } else {
-        my @target;
-        push @target, "random_distribution_perf_\L$_" for (@dists);
-        push @target, "random_distribution_perf_\L${_}_novml" for (@dists);
-        `$make -C $dir @target`;
+    for my $c (@compiler) {
+        my $d = $compiler{$c};
+        say $d;
+        if ($name) {
+            `$make -C $d @target 2>&1`;
+        } else {
+            `$make -C $d random_distribution_perf 2>&1`;
+        }
     }
 }
 
-sub run
-{
-    my $dir = $build_dir{$_[0]};
-    say $dir;
-    my $txtfile;
-    open $txtfile, '>',
-    "distribution/random_distribution_$_[0]_$simd.txt" if $all and $write;
-    my $header = 1;
-    my @header;
-    for my $dist (@dists) {
-        my $cmd1 =
-        "$make -C $dir random_distribution_perf_\L$dist-check 2>&1";
-        my $cmd2 =
-        "$make -C $dir random_distribution_perf_\L${dist}_novml-check 2>&1";
-        my $out;
-        $out .= `$cmd1`;
-        $out .= `$cmd2`;
-        my @lines = split "\n", $out;
-        if ($header) {
-            @header = grep { $_ =~ /Deterministics/ } @lines;
-            if (@header) {
-                say '=' x length($header[0]);
-                say $header[0];
-                say '-' x length($header[0]);
-                $header = 0;
+sub run {
+    return unless $run;
+
+    for my $c (@compiler) {
+        my $result;
+        my $d = $compiler{$c};
+        say $d;
+        my $result;
+        for my $r (@distribution) {
+            my $name = &distribution_name($r);
+            my $cmd1 = "$make -C $d";
+            my $cmd2 = "$make -C $d";
+            $cmd1 .= " \Lrandom_distribution_perf_${name}-check 2>&1";
+            $cmd2 .= " \Lrandom_distribution_perf_${name}_novml-check 2>&1";
+            my @lines1 = grep { /Passed|Failed/ } split "\n", `$cmd1`;
+            $result .= $_ for @lines1;
+            say $_ for @lines1;
+            my @lines2 = grep { /Passed|Failed/ } split "\n", `$cmd2`;
+            $result .= $_ for @lines2;
+            say $_ for @lines2;
+        }
+        if ($write) {
+            open my $txtfile, ">",
+            "distribution/random_distribution_${c}_${simd}.txt";
+            say $txtfile $result;
+        }
+    }
+
+}
+
+sub read {
+    for my $s (@simd) {
+        open my $txtfile, "<",
+        "distribution/random_distribution_${compiler}_${s}.txt";
+        my @lines = <$txtfile>;
+        for my $r (@distribution) {
+            my @result = grep { /$r<(double|int32_t)>/ } @lines;
+            for (@result) {
+                my ($name, $cpe_s, $cpe_m, $cpe_b, $cpe_i, $lib) = (split);
+                $name =~ s/(.*)<.*>(.*)/$1$2/;
+                $cpe_s{$s}{$name} = 0xFFFF unless $cpe_s{$s}{$name};
+                $cpe_m{$s}{$name} = 0xFFFF unless $cpe_m{$s}{$name};
+                $cpe_b{$s}{$name} = 0xFFFF unless $cpe_b{$s}{$name};
+                $cpe_v{$s}{$name} = 0xFFFF unless $cpe_v{$s}{$name};
+                $cpe_i{$s}{$name} = 0xFFFF unless $cpe_i{$s}{$name};
+                $cpe_sp{$s}{$name} = 0xFFFF unless $cpe_sp{$s}{$name};
+                $cpe_mp{$s}{$name} = 0xFFFF unless $cpe_mp{$s}{$name};
+                $cpe_bp{$s}{$name} = 0xFFFF unless $cpe_bp{$s}{$name};
+                $cpe_vp{$s}{$name} = 0xFFFF unless $cpe_vp{$s}{$name};
+                $cpe_ip{$s}{$name} = 0xFFFF unless $cpe_ip{$s}{$name};
+                if ($lib eq "SCPP") {
+                    $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
+                    $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
+                    $cpe_b{$s}{$name} = $cpe_b if $cpe_b < $cpe_b{$s}{$name};
+                    $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
+                }
+                if ($lib eq "PCPP") {
+                    $cpe_sp{$s}{$name} = $cpe_s if $cpe_s < $cpe_sp{$s}{$name};
+                    $cpe_mp{$s}{$name} = $cpe_m if $cpe_m < $cpe_mp{$s}{$name};
+                    $cpe_bp{$s}{$name} = $cpe_b if $cpe_b < $cpe_bp{$s}{$name};
+                    $cpe_ip{$s}{$name} = $cpe_i if $cpe_i < $cpe_ip{$s}{$name};
+                }
+                if ($lib eq "SVML") {
+                    $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
+                    $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
+                    $cpe_v{$s}{$name} = $cpe_b if $cpe_b < $cpe_v{$s}{$name};
+                    $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
+                }
+                if ($lib eq "PVML") {
+                    $cpe_sp{$s}{$name} = $cpe_s if $cpe_s < $cpe_sp{$s}{$name};
+                    $cpe_mp{$s}{$name} = $cpe_m if $cpe_m < $cpe_mp{$s}{$name};
+                    $cpe_vp{$s}{$name} = $cpe_b if $cpe_b < $cpe_vp{$s}{$name};
+                    $cpe_ip{$s}{$name} = $cpe_i if $cpe_i < $cpe_ip{$s}{$name};
+                }
             }
         }
-        my @result = grep { $_ =~ /Passed|Failed/ } @lines;
-        say $_ for @result;
-        say '-' x length($header[0]);
-        if ($all and $write) {
-            say $txtfile $_ for @result;
-        }
     }
-    close $txtfile if $all and $write;
 }
 
-sub read
-{
-    my @val = @{$dists{$_[0]}};
-    shift @_;
-    open my $txtfile, '<', "distribution/random_distribution_$_[0]_$simd.txt";
-    my @txt = grep {
-    $_ =~ /(.*)<(double|u?int.._t)>.*(Passed|Failed).*/ } <$txtfile>;
-    my $record;
-    for (@txt) {
-        my @this_record = split;
-        my $name = shift @this_record;
-        my $distname = $name;
-        $distname =~ s/(.*)\(.*/$1/;
-        $distname =~ s/(.*)<.*/$1/;
-        $name =~ s/(.*)<double>(.*)/$1$2/;
-        if (grep /^$distname$/, @val) {
-            $record .= "$distname $name @this_record\n";
-        }
-    }
-    $record;
-}
-
-sub table
-{
-    my $tex = shift @_;
-    my @lines = split "\n", $_[0];
-    my @scpp = grep { /SCPP/ } @lines;
-    my @pcpp = grep { /PCPP/ } @lines;
-    my @svml = grep { /SVML/ } @lines;
-    my @pvml = grep { /PVML/ } @lines;
-
-    my $wid = 0;
-    my @dist;
-    my @name;
-    my @std_s;
-    my @std_p;
-    my @mckl_s;
-    my @mckl_p;
-    my @batch_scpp;
-    my @batch_svml;
-    my @batch_pcpp;
-    my @batch_pvml;
-    my @mkl_s;
-    my @mkl_p;
-    my $index = 0;
-    for (@scpp) {
-        my $dist;
-        my $name;
-        my $std;
-        my $mckl;
-        my $batch;
-        my $mkl;
-        my $std_s = 0xFFF;
-        my $std_p = 0xFFF;
-        my $mckl_s = 0xFFF;
-        my $mckl_p = 0xFFF;
-        my $batch_scpp = 0xFFF;
-        my $batch_svml = 0xFFF;
-        my $batch_pcpp = 0xFFF;
-        my $batch_pvml = 0xFFF;
-        my $mkl_s = 0xFFF;
-        my $mkl_p = 0xFFF;
-
-        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $scpp[$index];
-        $std_s      = $std  if $std  < $std_s;
-        $mckl_s     = $mckl if $mckl < $mckl_s;
-        $batch_scpp = $batch;
-        $mkl_s      = $mkl  if $mkl  < $mkl_s;
-
-        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $pcpp[$index];
-        $std_p      = $std  if $std  < $std_p;
-        $mckl_p     = $mckl if $mckl < $mckl_p;
-        $batch_pcpp = $batch;
-        $mkl_p      = $mkl  if $mkl  < $mkl_p;
-
-        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $svml[$index];
-        $std_s      = $std  if $std  < $std_s;
-        $mckl_s     = $mckl if $mckl < $mckl_s;
-        $batch_svml = $batch;
-        $mkl_s      = $mkl  if $mkl  < $mkl_s;
-
-        ($dist, $name, $std, $mckl, $batch, $mkl) = split ' ', $pvml[$index];
-        $std_p      = $std  if $std  < $std_p;
-        $mckl_p     = $mckl if $mckl < $mckl_p;
-        $batch_pvml = $batch;
-        $mkl_p      = $mkl  if $mkl  < $mkl_p;
-
-        $name =~ s/_/\\_/g;
-        $name = '\texttt{' . $name . '}';
-        if ($wid < length($name[-1])) {
-            $wid = length($name[-1])
-        }
-
-        push @dist,       $dist;
-        push @name,       $name;
-        push @std_s,      $std_s;
-        push @std_p,      $std_p;
-        push @mckl_s,     $mckl_s;
-        push @mckl_p,     $mckl_p;
-        push @batch_scpp, $batch_scpp;
-        push @batch_svml, $batch_svml;
-        push @batch_pcpp, $batch_pcpp;
-        push @batch_pvml, $batch_pvml;
-        push @mkl_s,      $mkl_s;
-        push @mkl_p,      $mkl_p;
-
-        $index++;
-    }
-
+sub table {
     my $header;
     $header .= '\tbfigures' . "\n";
     $header .= '\begin{tabularx}{\textwidth}{p{2in}RRRRR}' . "\n";
@@ -338,60 +243,96 @@ sub table
     my $footer;
     $footer .= ' ' x 2 . '\bottomrule' . "\n";
     $footer .= '\end{tabularx}' . "\n";
-    $footer;
 
-    my $table;
-    my $table_p;
-    $index = 0;
-    for (@name) {
-        $table .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
-        $table_p .= ' ' x 2 . sprintf("%-${wid}s", $name[$index]);
-        if ($nostd{$dist[$index]}) {
-            $table .= ' & ' . sprintf('%-6s', '--');
-            $table_p .= ' & ' . sprintf('%-6s', '--');
-        } else {
-            $table .= &format($std_s[$index]);
-            $table_p .= &format($std_p[$index]);
+    for my $k (@keys) {
+        for my $s (@simd) {
+            my $table;
+            my $table_p;
+            for my $r (@{$distribution{$k}}) {
+                my @name = sort grep { /$r/ } keys $cpe_s{$s};
+                for my $name (@name) {
+                    $table .= " " x 2 . sprintf("%-40s", "\\texttt{$name}");
+                    $table .= " & ";
+                    if ($nostd{$r}) {
+                        $table .= &format("--");
+                    } else {
+                        $table .= &format($cpe_s{$s}{$name});
+                    }
+                    $table .= " & " . &format($cpe_m{$s}{$name});
+                    $table .= " & " . &format($cpe_b{$s}{$name});
+                    $table .= " & " . &format($cpe_v{$s}{$name});
+                    $table .= " & ";
+                    if ($nomkl{$r}) {
+                        $table .= &format("--");
+                    } else {
+                        $table .= &format($cpe_i{$s}{$name});
+                    }
+                    $table .= "\\\\\n";
+                    $table_p .= " " x 2 . sprintf("%-40s", "\\texttt{$name}");
+                    $table_p .= " & ";
+                    if ($nostd{$r}) {
+                        $table_p .= &format("--");
+                    } else {
+                        $table_p .= &format($cpe_sp{$s}{$name});
+                    }
+                    $table_p .= " & " . &format($cpe_mp{$s}{$name});
+                    $table_p .= " & " . &format($cpe_bp{$s}{$name});
+                    $table_p .= " & " . &format($cpe_vp{$s}{$name});
+                    $table_p .= " & ";
+                    if ($nomkl{$r}) {
+                        $table_p .= &format("--");
+                    } else {
+                        $table_p .= &format($cpe_ip{$s}{$name});
+                    }
+                    $table_p .= "\\\\\n";
+                }
+            }
+            open my $texfile, ">", "\Lrandom_distribution_${k}_${s}.tex";
+            print $texfile $header;
+            print $texfile $table;
+            print $texfile $footer;
+            open my $texfile_p, ">", "\Lrandom_distribution_${k}_${s}_p.tex";
+            print $texfile_p $header;
+            print $texfile_p $table_p;
+            print $texfile_p $footer;
         }
-        $table .= &format($mckl_s[$index]);
-        $table .= &format($batch_scpp[$index]);
-        $table .= &format($batch_svml[$index]);
-        $table_p .= &format($mckl_p[$index]);
-        $table_p .= &format($batch_pcpp[$index]);
-        $table_p .= &format($batch_pvml[$index]);
-        if ($nomkl{$dist[$index]}) {
-            $table .= ' & ' . sprintf('%-6s', '--');
-            $table_p .= ' & ' . sprintf('%-6s', '--');
-        } else {
-            $table .= &format($mkl_s[$index]);
-            $table_p .= &format($mkl_p[$index]);
-        }
-        $table .= " \\\\\n";
-        $table_p .= " \\\\\n";
-        $index++;
     }
-    $table = $header . $table . $footer;
-    $table_p = $header . $table_p . $footer;
+}
 
-    open my $texfile, '>', "$tex.tex";
-    print $texfile $table;
-    close $texfile;
+sub pdf {
+    return unless $pdf;
 
-    open my $texfile_p, '>', "${tex}_p.tex";
-    print $texfile_p $table_p;
-    close $texfile_p;
+    open my $incfile, "<", "../tex/inc.tex";
+    my @oldinc = <$incfile>;
+    open my $incfile, ">", "../tex/inc.tex";
+    say $incfile '\includeonly{tex/perf_random_distribution}';
+    my $cmd;
+    $cmd .= "cd ..;";
+    $cmd .= " latexmk -f -silent";
+    $cmd .= " -jobname=tab/random_distribution";
+    $cmd .= " manual.tex";
+    `$cmd`;
+    open my $incfile, ">", "../tex/inc.tex";
+    print $incfile $_ for @oldinc;
+}
 
-    $table;
+sub distribution_name {
+    my $name = shift;
+    $name =~ s/([A-Z])/_$1/g;
+    $name =~ s/^_//g;
+    $name
 }
 
 sub format
 {
-    my $num = shift @_;
-    if ($num > 100) {
-        ' & ' . sprintf('%-6.0f', $num);
+    my $num = shift;
+    if ($num eq "--") {
+        sprintf("%-6s", $num);
+    } elsif ($num > 100) {
+        sprintf('%-6.0f', $num);
     } elsif ($num > 10) {
-        ' & ' . sprintf('%-6.1f', $num);
+        sprintf('%-6.1f', $num);
     } else {
-        ' & ' . sprintf('%-6.2f', $num);
+        sprintf('%-6.2f', $num);
     }
 }

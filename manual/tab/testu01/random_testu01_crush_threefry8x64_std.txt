@@ -1,5 +1,0 @@
-========= Summary results of Crush =========
- Generator:        STD
- Number of statistics:  10
- All tests were passed
-

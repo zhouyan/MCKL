@@ -32,24 +32,23 @@
 .PHONY : all pdf rng distribution
 
 all :
-	./random_rng.pl --simd sse2
-	./random_rng.pl --simd avx2
-	./random_distribution.pl --simd sse2
-	./random_distribution.pl --simd avx2
+	./random_distribution.pl
+	./random_rng.pl
 	./random_testu01.pl
 
 pdf :
-	./random_rng.pl --pdf --simd sse2
-	./random_rng.pl --pdf --simd avx2
-	./random_distribution.pl --pdf --simd sse2
-	./random_distribution.pl --pdf --simd avx2
+	./random_distribution.pl --pdf
+	./random_rng.pl --pdf
 	./random_testu01.pl --pdf
-
-rng :
-	./random_rng.pl --run --write
 
 distribution :
 	./random_distribution.pl --run --write
 
+rng :
+	./random_rng.pl --run --write
+
 clean :
-	rm -f *.tex *.log *.aux *.pdf
+	latexmk -c -f -silent random_distribution.tex
+	latexmk -c -f -silent random_rng.tex
+	latexmk -c -f -silent random_testu01.tex
+	rm *.tex

@@ -1,40 +1,10 @@
 .PHONY : all run \
-	random_testu01_crush_aes128 \
-	random_testu01_crush_aes192 \
-	random_testu01_crush_aes192_64 \
-	random_testu01_crush_aes256 \
-	random_testu01_crush_aes256_64 \
-	random_testu01_crush_ars \
-	random_testu01_crush_ars_64 \
-	random_testu01_crush_knuth_b \
-	random_testu01_crush_minstd_rand \
-	random_testu01_crush_minstd_rand0 \
-	random_testu01_crush_mkl_ars5 \
-	random_testu01_crush_mkl_mcg59 \
-	random_testu01_crush_mkl_mcg59_64 \
-	random_testu01_crush_mkl_mt19937 \
-	random_testu01_crush_mkl_mt19937_64 \
-	random_testu01_crush_mkl_mt2203 \
-	random_testu01_crush_mkl_mt2203_64 \
-	random_testu01_crush_mkl_nondeterm \
-	random_testu01_crush_mkl_nondeterm_64 \
-	random_testu01_crush_mkl_philox4x32x10 \
-	random_testu01_crush_mkl_philox4x32x10_64 \
-	random_testu01_crush_mt19937 \
-	random_testu01_crush_mt19937_64 \
-	random_testu01_crush_philox2x32 \
 	random_testu01_crush_philox2x32_64 \
 	random_testu01_crush_philox2x64 \
 	random_testu01_crush_philox2x64_64 \
 	random_testu01_crush_philox4x32_64 \
 	random_testu01_crush_philox4x64 \
 	random_testu01_crush_philox4x64_64 \
-	random_testu01_crush_ranlux24_base \
-	random_testu01_crush_ranlux48 \
-	random_testu01_crush_ranlux48_base \
-	random_testu01_crush_rdrand16 \
-	random_testu01_crush_rdrand32 \
-	random_testu01_crush_rdrand64 \
 	random_testu01_crush_threefish1024 \
 	random_testu01_crush_threefish1024_64 \
 	random_testu01_crush_threefish256 \
@@ -54,42 +24,12 @@
 all :
 
 run : \
-	random_testu01_crush_aes128 \
-	random_testu01_crush_aes192 \
-	random_testu01_crush_aes192_64 \
-	random_testu01_crush_aes256 \
-	random_testu01_crush_aes256_64 \
-	random_testu01_crush_ars \
-	random_testu01_crush_ars_64 \
-	random_testu01_crush_knuth_b \
-	random_testu01_crush_minstd_rand \
-	random_testu01_crush_minstd_rand0 \
-	random_testu01_crush_mkl_ars5 \
-	random_testu01_crush_mkl_mcg59 \
-	random_testu01_crush_mkl_mcg59_64 \
-	random_testu01_crush_mkl_mt19937 \
-	random_testu01_crush_mkl_mt19937_64 \
-	random_testu01_crush_mkl_mt2203 \
-	random_testu01_crush_mkl_mt2203_64 \
-	random_testu01_crush_mkl_nondeterm \
-	random_testu01_crush_mkl_nondeterm_64 \
-	random_testu01_crush_mkl_philox4x32x10 \
-	random_testu01_crush_mkl_philox4x32x10_64 \
-	random_testu01_crush_mt19937 \
-	random_testu01_crush_mt19937_64 \
-	random_testu01_crush_philox2x32 \
 	random_testu01_crush_philox2x32_64 \
 	random_testu01_crush_philox2x64 \
 	random_testu01_crush_philox2x64_64 \
 	random_testu01_crush_philox4x32_64 \
 	random_testu01_crush_philox4x64 \
 	random_testu01_crush_philox4x64_64 \
-	random_testu01_crush_ranlux24_base \
-	random_testu01_crush_ranlux48 \
-	random_testu01_crush_ranlux48_base \
-	random_testu01_crush_rdrand16 \
-	random_testu01_crush_rdrand32 \
-	random_testu01_crush_rdrand64 \
 	random_testu01_crush_threefish1024 \
 	random_testu01_crush_threefish1024_64 \
 	random_testu01_crush_threefish256 \
@@ -107,140 +47,9 @@ run : \
 	random_testu01_crush_threefry8x64 \
 	random_testu01_crush_threefry8x64_64
 
-random_testu01_crush_aes128 :
-	ninja -C ../.. random_testu01_crush_aes128
-	./random_testu01_crush_aes128 U01CC 28
-	./random_testu01_crush_aes128 U01OO 70
-
-random_testu01_crush_aes192 :
-	ninja -C ../.. random_testu01_crush_aes192
-	./random_testu01_crush_aes192 U01OC 70
-
-random_testu01_crush_aes192_64 :
-	ninja -C ../.. random_testu01_crush_aes192_64
-	./random_testu01_crush_aes192_64 U01CO 66
-
-random_testu01_crush_aes256 :
-	ninja -C ../.. random_testu01_crush_aes256
-	./random_testu01_crush_aes256 U01 36
-	./random_testu01_crush_aes256 U01CO 68
-	./random_testu01_crush_aes256 U01OC 40
-
-random_testu01_crush_aes256_64 :
-	ninja -C ../.. random_testu01_crush_aes256_64
-	./random_testu01_crush_aes256_64 U01 36
-	./random_testu01_crush_aes256_64 U01OC 66
-
-random_testu01_crush_ars :
-	ninja -C ../.. random_testu01_crush_ars
-	./random_testu01_crush_ars U01 68
-	./random_testu01_crush_ars U01CC 18
-	./random_testu01_crush_ars U01OC 19
-
-random_testu01_crush_ars_64 :
-	ninja -C ../.. random_testu01_crush_ars_64
-	./random_testu01_crush_ars_64 U01 68
-	./random_testu01_crush_ars_64 U01OC 8
-	./random_testu01_crush_ars_64 U01OO 19
-
-random_testu01_crush_knuth_b :
-	ninja -C ../.. random_testu01_crush_knuth_b
-	./random_testu01_crush_knuth_b STD 44 79
-	./random_testu01_crush_knuth_b U01OC 76
-
-random_testu01_crush_minstd_rand :
-	ninja -C ../.. random_testu01_crush_minstd_rand
-	./random_testu01_crush_minstd_rand STD 29 39 85
-	./random_testu01_crush_minstd_rand U01 37 76 91
-	./random_testu01_crush_minstd_rand U01CC 10 73 85 9
-	./random_testu01_crush_minstd_rand U01CO 10 34 76 9
-	./random_testu01_crush_minstd_rand U01OC 10 27 29 33 85 9
-	./random_testu01_crush_minstd_rand U01OO 10 73 76
-
-random_testu01_crush_minstd_rand0 :
-	ninja -C ../.. random_testu01_crush_minstd_rand0
-	./random_testu01_crush_minstd_rand0 STD 27 29 78 9
-	./random_testu01_crush_minstd_rand0 U01 49 9
-	./random_testu01_crush_minstd_rand0 U01CC 10 34 39 65 66 9
-	./random_testu01_crush_minstd_rand0 U01CO 10 65
-	./random_testu01_crush_minstd_rand0 U01OC 10 32 33 65 85
-	./random_testu01_crush_minstd_rand0 U01OO 76 9
-
-random_testu01_crush_mkl_ars5 :
-	ninja -C ../.. random_testu01_crush_mkl_ars5
-	./random_testu01_crush_mkl_ars5 U01CO 19
-	./random_testu01_crush_mkl_ars5 U01OC 10
-
-random_testu01_crush_mkl_mcg59 :
-	ninja -C ../.. random_testu01_crush_mkl_mcg59
-	./random_testu01_crush_mkl_mcg59 STD 85
-	./random_testu01_crush_mkl_mcg59 U01CC 14 28
-	./random_testu01_crush_mkl_mcg59 U01CO 14 28
-	./random_testu01_crush_mkl_mcg59 U01OC 28 81
-	./random_testu01_crush_mkl_mcg59 U01OO 28 80
-
-random_testu01_crush_mkl_mcg59_64 :
-	ninja -C ../.. random_testu01_crush_mkl_mcg59_64
-	./random_testu01_crush_mkl_mcg59_64 STD 85
-	./random_testu01_crush_mkl_mcg59_64 U01CO 32 81
-	./random_testu01_crush_mkl_mcg59_64 U01OC 6 76 80
-
-random_testu01_crush_mkl_mt19937 :
-	ninja -C ../.. random_testu01_crush_mkl_mt19937
-	./random_testu01_crush_mkl_mt19937 STD 84
-	./random_testu01_crush_mkl_mt19937 U01 70 90
-
-random_testu01_crush_mkl_mt19937_64 :
-	ninja -C ../.. random_testu01_crush_mkl_mt19937_64
-	./random_testu01_crush_mkl_mt19937_64 STD 84
-	./random_testu01_crush_mkl_mt19937_64 U01 70 90
-	./random_testu01_crush_mkl_mt19937_64 U01OC 67
-
-random_testu01_crush_mkl_mt2203 :
-	ninja -C ../.. random_testu01_crush_mkl_mt2203
-	./random_testu01_crush_mkl_mt2203 U01 73
-
-random_testu01_crush_mkl_mt2203_64 :
-	ninja -C ../.. random_testu01_crush_mkl_mt2203_64
-	./random_testu01_crush_mkl_mt2203_64 U01 73
-	./random_testu01_crush_mkl_mt2203_64 U01OO 93
-
-random_testu01_crush_mkl_nondeterm :
-	ninja -C ../.. random_testu01_crush_mkl_nondeterm
-	./random_testu01_crush_mkl_nondeterm U01 91
-	./random_testu01_crush_mkl_nondeterm U01CO 23 67
-
-random_testu01_crush_mkl_nondeterm_64 :
-	ninja -C ../.. random_testu01_crush_mkl_nondeterm_64
-	./random_testu01_crush_mkl_nondeterm_64 STD 8
-	./random_testu01_crush_mkl_nondeterm_64 U01 73
-
-random_testu01_crush_mkl_philox4x32x10 :
-	ninja -C ../.. random_testu01_crush_mkl_philox4x32x10
-	./random_testu01_crush_mkl_philox4x32x10 U01CC 69
-
-random_testu01_crush_mkl_philox4x32x10_64 :
-	ninja -C ../.. random_testu01_crush_mkl_philox4x32x10_64
-	./random_testu01_crush_mkl_philox4x32x10_64 U01OC 76
-	./random_testu01_crush_mkl_philox4x32x10_64 U01OO 26 72
-
-random_testu01_crush_mt19937 :
-	ninja -C ../.. random_testu01_crush_mt19937
-	./random_testu01_crush_mt19937 U01OC 34 9
-
-random_testu01_crush_mt19937_64 :
-	ninja -C ../.. random_testu01_crush_mt19937_64
-	./random_testu01_crush_mt19937_64 STD 9
-	./random_testu01_crush_mt19937_64 U01OO 56 79 90
-
-random_testu01_crush_philox2x32 :
-	ninja -C ../.. random_testu01_crush_philox2x32
-	./random_testu01_crush_philox2x32 U01CC 37
-	./random_testu01_crush_philox2x32 U01CO 19
-
 random_testu01_crush_philox2x32_64 :
 	ninja -C ../.. random_testu01_crush_philox2x32_64
-	./random_testu01_crush_philox2x32_64 U01OC 84
+	./random_testu01_crush_philox2x32_64 U01CO 46
 
 random_testu01_crush_philox2x64 :
 	ninja -C ../.. random_testu01_crush_philox2x64
@@ -264,41 +73,6 @@ random_testu01_crush_philox4x64_64 :
 	ninja -C ../.. random_testu01_crush_philox4x64_64
 	./random_testu01_crush_philox4x64_64 U01CC 67
 	./random_testu01_crush_philox4x64_64 U01OC 70
-
-random_testu01_crush_ranlux24_base :
-	ninja -C ../.. random_testu01_crush_ranlux24_base
-	./random_testu01_crush_ranlux24_base STD 9
-	./random_testu01_crush_ranlux24_base U01 27 46 53
-	./random_testu01_crush_ranlux24_base U01CO 22
-	./random_testu01_crush_ranlux24_base U01OC 67
-	./random_testu01_crush_ranlux24_base U01OO 7
-
-random_testu01_crush_ranlux48 :
-	ninja -C ../.. random_testu01_crush_ranlux48
-	./random_testu01_crush_ranlux48 U01CC 89
-	./random_testu01_crush_ranlux48 U01OC 67
-
-random_testu01_crush_ranlux48_base :
-	ninja -C ../.. random_testu01_crush_ranlux48_base
-	./random_testu01_crush_ranlux48_base STD 27 28 46
-	./random_testu01_crush_ranlux48_base U01 28 46
-	./random_testu01_crush_ranlux48_base U01CC 67 79
-
-random_testu01_crush_rdrand16 :
-	ninja -C ../.. random_testu01_crush_rdrand16
-	./random_testu01_crush_rdrand16 U01CO 10
-	./random_testu01_crush_rdrand16 U01OC 10 45
-
-random_testu01_crush_rdrand32 :
-	ninja -C ../.. random_testu01_crush_rdrand32
-	./random_testu01_crush_rdrand32 U01 58
-	./random_testu01_crush_rdrand32 U01CC 20
-	./random_testu01_crush_rdrand32 U01OC 20
-
-random_testu01_crush_rdrand64 :
-	ninja -C ../.. random_testu01_crush_rdrand64
-	./random_testu01_crush_rdrand64 STD 17
-	./random_testu01_crush_rdrand64 U01CC 4
 
 random_testu01_crush_threefish1024 :
 	ninja -C ../.. random_testu01_crush_threefish1024

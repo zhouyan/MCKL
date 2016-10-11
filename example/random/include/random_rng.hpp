@@ -380,13 +380,13 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 }
 
 template <typename RNGType>
-inline double random_rng_c(const RNGType &, std::size_t, std::size_t)
+inline double random_rng_e(const RNGType &, std::size_t, std::size_t)
 {
     return 0;
 }
 
 template <typename ResultType, typename Generator>
-inline double random_rng_c(
+inline double random_rng_e(
     const mckl::CounterEngine<ResultType, Generator> &rng, std::size_t N,
     std::size_t M)
 {
@@ -429,7 +429,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     bool pass_d = random_rng_d<RNGType>(N, M);
     RandomRNGPerf perf_s = random_rng_s<RNGType>(N, M);
     RandomRNGPerf perf_p = random_rng_p<RNGType>(N, M);
-    double cpb = random_rng_c(RNGType(), N, M);
+    double cpb = random_rng_e(RNGType(), N, M);
 
     std::cout << std::fixed << std::setprecision(2);
 
@@ -446,7 +446,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(twid) << std::right << "SP/BP";
     std::cout << std::setw(twid) << std::right << "S/SP";
     std::cout << std::setw(twid) << std::right << "B/BP";
-    std::cout << std::setw(twid) << std::right << "C";
+    std::cout << std::setw(twid) << std::right << "E";
     std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
