@@ -1,0 +1,24 @@
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+ 73  LempelZiv                      1 -  7.4e-5
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+ 34  Gap, r = 22                     3.8e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+ 14  BirthdaySpacings, t = 7         0.9994
+ ----------------------------------------------
+ All other tests were passed
+

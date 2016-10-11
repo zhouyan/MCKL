@@ -1,0 +1,16 @@
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  144
+ ----------------------------------------------
+ 69  RandomWalk1 M (L = 10000)       2.1e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+ 67  RandomWalk1 M (L = 1000)        3.9e-4
+ ----------------------------------------------
+ All other tests were passed
+
