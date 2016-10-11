@@ -101,25 +101,25 @@ inline bool random_rng_kat(RNGType &rng, const std::string &filename)
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::AES128Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat<std::uint64_t>(rng, "random_AES128.txt");
+    return random_rng_kat<std::uint64_t>(rng, "random_aes128.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::AES192Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat<std::uint64_t>(rng, "random_AES192.txt");
+    return random_rng_kat<std::uint64_t>(rng, "random_aes192.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::AES256Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat<std::uint64_t>(rng, "random_AES256.txt");
+    return random_rng_kat<std::uint64_t>(rng, "random_aes256.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat<std::uint64_t>(rng, "random_ARS.txt");
+    return random_rng_kat<std::uint64_t>(rng, "random_ars.txt");
 }
 
 #endif // MCKL_HAS_AESNI && MCKL_RNG_AESNI
@@ -129,7 +129,7 @@ inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
 template <typename ResultType, typename T, std::size_t K>
 inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
 {
-    std::string filename("random_Philox");
+    std::string filename("random_philox");
     filename += std::to_string(K) + "x";
     filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
 
@@ -143,7 +143,7 @@ inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
 template <typename ResultType, typename T, std::size_t K>
 inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
 {
-    std::string filename("random_Threefry");
+    std::string filename("random_threefry");
     filename += std::to_string(K) + "x";
     filename += std::to_string(std::numeric_limits<T>::digits) + ".txt";
 
@@ -153,19 +153,19 @@ inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
 template <typename ResultType>
 inline bool random_rng_kat(mckl::Threefish256Engine<ResultType> &rng)
 {
-    return random_rng_kat<std::uint64_t>(rng, "random_Threefish256.txt");
+    return random_rng_kat<std::uint64_t>(rng, "random_threefish256.txt");
 }
 
 template <typename ResultType>
 inline bool random_rng_kat(mckl::Threefish512Engine<ResultType> &rng)
 {
-    return random_rng_kat<std::uint64_t>(rng, "random_Threefish512.txt");
+    return random_rng_kat<std::uint64_t>(rng, "random_threefish512.txt");
 }
 
 template <typename ResultType>
 inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
 {
-    return random_rng_kat<std::uint64_t>(rng, "random_Threefish1024.txt");
+    return random_rng_kat<std::uint64_t>(rng, "random_threefish1024.txt");
 }
 
 #endif // MCKL_RNG_THREEFRY
