@@ -105,8 +105,9 @@ for my $k (@keys) {
 }
 
 my $cpuid = `cpuid_info`;
-my $simd = "sse2" if $cpuid =~ "SSE2";
-my $simd = "avx2" if $cpuid =~ "AVX2";
+my $simd;
+$simd = "sse2" if $cpuid =~ "SSE2";
+$simd = "avx2" if $cpuid =~ "AVX2";
 my @simd = qw(sse2 avx2);
 
 my %compiler = (llvm => $llvm, gnu => $gnu, intel => $intel);
@@ -163,7 +164,7 @@ sub run {
         my $result;
         my $d = $compiler{$c};
         say $d;
-        my $result;
+        my @result;
         for my $r (@distribution) {
             my $name = &distribution_name($r);
             my $cmd1 = "$make -C $d";
@@ -171,16 +172,16 @@ sub run {
             $cmd1 .= " \Lrandom_distribution_perf_${name}-check 2>&1";
             $cmd2 .= " \Lrandom_distribution_perf_${name}_novml-check 2>&1";
             my @lines1 = grep { /Passed|Failed/ } split "\n", `$cmd1`;
-            $result .= $_ for @lines1;
+            push @result, @lines1;
             say $_ for @lines1;
             my @lines2 = grep { /Passed|Failed/ } split "\n", `$cmd2`;
-            $result .= $_ for @lines2;
+            push @result, @lines2;
             say $_ for @lines2;
         }
         if ($write) {
             open my $txtfile, ">",
             "distribution/random_distribution_${c}_${simd}.txt";
-            say $txtfile $result;
+            say $txtfile $_ for @result;
         }
     }
 
@@ -309,7 +310,7 @@ sub pdf {
     open my $incfile, "<", "../tex/inc.tex";
     my @oldinc = <$incfile>;
     open my $incfile, ">", "../tex/inc.tex";
-    say $incfile '\includeonly{tex/perf_random_distribution}';
+    say $incfile '\includeonly{tex/random_distribution}';
     my $cmd;
     $cmd .= "cd ..;";
     $cmd .= " latexmk -f -silent";

@@ -219,7 +219,7 @@ sub pdf {
     open my $incfile, "<", "../tex/inc.tex";
     my @oldinc = <$incfile>;
     open my $incfile, ">", "../tex/inc.tex";
-    say $incfile '\includeonly{tex/testu01}';
+    say $incfile '\includeonly{tex/random_testu01}';
     my $cmd;
     $cmd .= "cd ..;";
     $cmd .= " latexmk -f -silent";

@@ -99,8 +99,9 @@ for my $k (@keys) {
 }
 
 my $cpuid = `cpuid_info`;
-my $simd = "sse2" if $cpuid =~ "SSE2";
-my $simd = "avx2" if $cpuid =~ "AVX2";
+my $simd;
+$simd = "sse2" if $cpuid =~ "SSE2";
+$simd = "avx2" if $cpuid =~ "AVX2";
 my @simd = qw(sse2 avx2);
 
 my %compiler = (llvm => $llvm, gnu => $gnu, intel => $intel);
@@ -137,7 +138,7 @@ sub run {
     return unless $run;
 
     for my $c (@compiler) {
-        my $result;
+        my @result;
         my $d = $compiler{$c};
         say $d;
         for my $r (@rng) {
@@ -150,7 +151,7 @@ sub run {
             my $pass = 1;
             for (1..5) {
                 my @lines = grep { $_ =~ /Passed|Failed/ } split "\n", `$cmd`;
-                $result .= $_ for @lines;
+                push @result, @lines;
                 for (@lines) {
                     $count++;
                     $pass = 0 if (/Failed/);
@@ -174,7 +175,7 @@ sub run {
         }
         if ($write) {
             open my $txtfile, ">", "rng/random_rng_${c}_${simd}.txt";
-            say $txtfile $result;
+            say $txtfile $_ for @result;
         }
     }
 }
@@ -291,7 +292,7 @@ sub pdf {
     open my $incfile, "<", "../tex/inc.tex";
     my @oldinc = <$incfile>;
     open my $incfile, ">", "../tex/inc.tex";
-    say $incfile '\includeonly{tex/perf_random_rng}';
+    say $incfile '\includeonly{tex/random_rng}';
     my $cmd;
     $cmd .= "cd ..;";
     $cmd .= " latexmk -f -silent";
