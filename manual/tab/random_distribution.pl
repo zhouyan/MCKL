@@ -34,11 +34,15 @@
 use v5.16;
 use Getopt::Long;
 
+my $libm;
+$libm = "sys" if ($^O eq "darwin");
+$libm = "imf" if ($^O eq "linux");
+
 my $run = 0;
 my $build = 0;
-my $llvm = "../../build/llvm-release-sys";
-my $gnu = "../../build/gnu-release-sys";
-my $intel = "../../build/intel-release-sys";
+my $llvm = "../../build/llvm-release-$libm";
+my $gnu = "../../build/gnu-release-$libm";
+my $intel = "../../build/intel-release-$libm";
 my $compiler = "llvm";
 my $make = "ninja";
 my $name;

@@ -38,53 +38,111 @@ namespace mckl
 namespace internal
 {
 
-template <typename, std::size_t, int>
-class PhiloxConstantsImpl;
+template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
+class PhiloxConstantsWeyl;
 
 template <typename T>
-class PhiloxConstantsImpl<T, 2, 32>
+class PhiloxConstantsWeyl<T, 2, 32>
 {
     public:
-    static constexpr T weyl[1] = {0x9E3779B9};
-
-    static constexpr T multiplier[1] = {0xD256D193};
-}; // class PhiloxConstantsImpl
+    static constexpr T value[1] = {0x9E3779B9};
+}; // class PhiloxConstantsWeyl
 
 template <typename T>
-class PhiloxConstantsImpl<T, 4, 32>
+class PhiloxConstantsWeyl<T, 4, 32>
 {
     public:
-    static constexpr T weyl[2] = {0x9E3779B9, 0xBB67AE85};
-
-    static constexpr T multiplier[2] = {0xCD9E8D57, 0xD2511F53};
-}; // class PhiloxConstantsImpl
+    static constexpr T value[2] = {0x9E3779B9, 0xBB67AE85};
+}; // class PhiloxConstantsWeyl
 
 template <typename T>
-class PhiloxConstantsImpl<T, 2, 64>
+class PhiloxConstantsWeyl<T, 2, 64>
 {
     public:
-    static constexpr T weyl[1] = {0x9E3779B97F4A7C15};
-
-    static constexpr T multiplier[1] = {0xD2B74407B1CE6E93};
-}; // class PhiloxConstantsImpl
+    static constexpr T value[1] = {0x9E3779B97F4A7C15};
+}; // class PhiloxConstantsWeyl
 
 template <typename T>
-class PhiloxConstantsImpl<T, 4, 64>
+class PhiloxConstantsWeyl<T, 4, 64>
 {
     public:
-    static constexpr T weyl[2] = {0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
+    static constexpr T value[2] = {0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
+}; // class PhiloxConstantsWeyl
 
-    static constexpr T multiplier[2] = {
-        0xCA5A826395121157, 0xD2E7470EE14C6C93};
-}; // class PhiloxConstantsImpl
+template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
+class PhiloxConstantsMultiplier;
+
+template <typename T>
+class PhiloxConstantsMultiplier<T, 2, 32>
+{
+    public:
+    static constexpr T value[1] = {0xD256D193};
+}; // class PhiloxConstantsMultiplier
+
+template <typename T>
+class PhiloxConstantsMultiplier<T, 4, 32>
+{
+    public:
+    static constexpr T value[2] = {0xCD9E8D57, 0xD2511F53};
+}; // class PhiloxConstantsMultiplier
+
+template <typename T>
+class PhiloxConstantsMultiplier<T, 2, 64>
+{
+    public:
+    static constexpr T value[1] = {0xD2B74407B1CE6E93};
+}; // class PhiloxConstantsMultiplier
+
+template <typename T>
+class PhiloxConstantsMultiplier<T, 4, 64>
+{
+    public:
+    static constexpr T value[2] = {0xCA5A826395121157, 0xD2E7470EE14C6C93};
+}; // class PhiloxConstantsMultiplier
+
+template <typename, std::size_t>
+class PhiloxConstantsPermute;
+
+template <typename T>
+class PhiloxConstantsPermute<T, 2>
+{
+    public:
+    static constexpr std::size_t value[2] = {0, 1};
+}; // class PhiloxConstantsPermute
+
+template <typename T>
+class PhiloxConstantsPermute<T, 4>
+{
+    public:
+    static constexpr std::size_t value[4] = {0, 3, 2, 1};
+}; // class PhiloxConstantsPermute
+
+template <typename T>
+class PhiloxConstantsPermute<T, 8>
+{
+    public:
+    static constexpr std::size_t value[8] = {2, 1, 4, 7, 6, 5, 0, 3};
+}; // class PhiloxConstantsPermute
+
+template <typename T>
+class PhiloxConstantsPermute<T, 16>
+{
+    static constexpr std::size_t value[16] = {
+        0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1};
+}; // class PhiloxConstantsPermute
 
 } // namespace mckl::internal
 
 /// \brief Default Philox constants
 /// \ingroup Philox
 template <typename T, std::size_t K>
-using PhiloxConstants =
-    internal::PhiloxConstantsImpl<T, K, std::numeric_limits<T>::digits>;
+class PhiloxConstants
+{
+    public:
+    using weyl = internal::PhiloxConstantsWeyl<T, K>;
+    using multiplier = internal::PhiloxConstantsMultiplier<T, K>;
+    using permute = internal::PhiloxConstantsPermute<T, K>;
+}; // class PhiloxConstants
 
 } // namespace mckl
 

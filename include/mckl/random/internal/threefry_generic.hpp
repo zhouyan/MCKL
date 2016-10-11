@@ -84,7 +84,7 @@ class ThreefrySBox
     template <std::size_t I>
     static void eval(std::array<T, K> &state, std::true_type)
     {
-        static constexpr int L = Constants::rotate[I / 2][(N - 1) % 8];
+        static constexpr int L = Constants::rotate::value[I / 2][(N - 1) % 8];
         static constexpr int R = std::numeric_limits<T>::digits - L;
 
         T x = std::get<I + 1>(state);
@@ -125,7 +125,7 @@ class ThreefryPBox
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        static constexpr std::size_t P = Constants::permute[I];
+        static constexpr std::size_t P = Constants::permute::value[I];
 
         std::get<I>(tmp) = std::get<P>(state);
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
@@ -139,7 +139,7 @@ class ThreefryPBox
     template <std::size_t I>
     static void eval(const T *state, std::array<T, K> &tmp, std::true_type)
     {
-        static constexpr std::size_t P = Constants::permute[I];
+        static constexpr std::size_t P = Constants::permute::value[I];
 
         std::get<I>(tmp) = state[P];
         eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());

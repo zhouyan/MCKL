@@ -52,11 +52,13 @@ class PhiloxGeneratorImplSSE2_32
         static constexpr std::size_t i0 = 0 % (K / 2);
         static constexpr std::size_t i1 = 1 % (K / 2);
 
-        static constexpr int w0 = static_cast<int>(Constants::weyl[i0]);
-        static constexpr int w1 = static_cast<int>(Constants::weyl[i1]);
+        static constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);
+        static constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);
 
-        static constexpr int m0 = static_cast<int>(Constants::multiplier[i0]);
-        static constexpr int m1 = static_cast<int>(Constants::multiplier[i1]);
+        static constexpr int m0 =
+            static_cast<int>(Constants::multiplier::value[i0]);
+        static constexpr int m1 =
+            static_cast<int>(Constants::multiplier::value[i1]);
 
         const int p0 = static_cast<int>(std::get<i0>(key));
         const int p1 = static_cast<int>(std::get<i1>(key));
@@ -250,11 +252,13 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
 
     static void eval(std::array<T, 4> &state, const std::array<T, 2> &key)
     {
-        static constexpr int w0 = static_cast<int>(Constants::weyl[0]);
-        static constexpr int w1 = static_cast<int>(Constants::weyl[1]);
+        static constexpr int w0 = static_cast<int>(Constants::weyl::value[0]);
+        static constexpr int w1 = static_cast<int>(Constants::weyl::value[1]);
 
-        static constexpr int m0 = static_cast<int>(Constants::multiplier[0]);
-        static constexpr int m1 = static_cast<int>(Constants::multiplier[1]);
+        static constexpr int m0 =
+            static_cast<int>(Constants::multiplier::value[0]);
+        static constexpr int m1 =
+            static_cast<int>(Constants::multiplier::value[1]);
 
         const int p0 = static_cast<int>(std::get<0>(key));
         const int p1 = static_cast<int>(std::get<1>(key));

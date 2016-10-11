@@ -115,7 +115,7 @@ class ThreefryGenerator
 
     void reset(const key_type &key)
     {
-        static constexpr T p = Constants::parity;
+        static constexpr T p = Constants::parity::value;
 
         std::copy(key.begin(), key.end(), par_.begin());
         std::get<K>(par_) = p;

@@ -40,91 +40,119 @@ namespace mckl
 namespace internal
 {
 
-template <typename, std::size_t, int>
-class ThreefryConstantsImpl;
+template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
+class ThreefryConstantsParity;
 
-template <typename T>
-class ThreefryConstantsImpl<T, 2, 32>
+template <typename T, std::size_t K>
+class ThreefryConstantsParity<T, K, 32>
 {
     public:
-    static constexpr T parity = 0x1BD11BDA;
+    static constexpr T value = 0x1BD11BDA;
+}; // class ThreefryConstantsParity
 
-    static constexpr int rotate[1][8] = {{13, 15, 26, 6, 17, 29, 16, 24}};
-
-    static constexpr std::size_t permute[2] = {0, 1};
-}; // class ThreefryConstantsImpl
-
-template <typename T>
-class ThreefryConstantsImpl<T, 4, 32>
+template <typename T, std::size_t K>
+class ThreefryConstantsParity<T, K, 64>
 {
     public:
-    static constexpr T parity = 0x1BD11BDA;
+    static constexpr T value = 0x1BD11BDAA9FC1A22;
+}; // class ThreefryConstantsParity
 
-    static constexpr int rotate[2][8] = {
+template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
+class ThreefryConstantsRotate;
+
+template <typename T>
+class ThreefryConstantsRotate<T, 2, 32>
+{
+    public:
+    static constexpr int value[1][8] = {{13, 15, 26, 6, 17, 29, 16, 24}};
+}; // class ThreefryConstantsRotate
+
+template <typename T>
+class ThreefryConstantsRotate<T, 4, 32>
+{
+    public:
+    static constexpr int value[2][8] = {
         {10, 11, 13, 23, 6, 17, 25, 18}, {26, 21, 27, 5, 20, 11, 10, 20}};
-
-    static constexpr std::size_t permute[4] = {0, 3, 2, 1};
-}; // class ThreefryConstantsImpl
+}; // class ThreefryConstantsRotate
 
 template <typename T>
-class ThreefryConstantsImpl<T, 2, 64>
+class ThreefryConstantsRotate<T, 2, 64>
 {
     public:
-    static constexpr T parity = 0x1BD11BDAA9FC1A22;
-
-    static constexpr int rotate[1][8] = {{16, 42, 12, 31, 16, 32, 24, 21}};
-
-    static constexpr std::size_t permute[2] = {0, 1};
-}; // class ThreefryConstantsImpl
+    static constexpr int value[1][8] = {{16, 42, 12, 31, 16, 32, 24, 21}};
+}; // class ThreefryConstantsRotate
 
 template <typename T>
-class ThreefryConstantsImpl<T, 4, 64>
+class ThreefryConstantsRotate<T, 4, 64>
 {
     public:
-    static constexpr T parity = 0x1BD11BDAA9FC1A22;
-
-    static constexpr int rotate[2][8] = {
+    static constexpr int value[2][8] = {
         {14, 52, 23, 5, 25, 46, 58, 32}, {16, 57, 40, 37, 33, 12, 22, 32}};
-
-    static constexpr std::size_t permute[4] = {0, 3, 2, 1};
-}; // class ThreefryConstantsImpl
+}; // class ThreefryConstantsRotate
 
 template <typename T>
-class ThreefryConstantsImpl<T, 8, 64>
+class ThreefryConstantsRotate<T, 8, 64>
 {
     public:
-    static constexpr T parity = 0x1BD11BDAA9FC1A22;
-
-    static constexpr int rotate[4][8] = {{46, 33, 17, 44, 39, 13, 25, 8},
+    static constexpr int value[4][8] = {{46, 33, 17, 44, 39, 13, 25, 8},
         {36, 27, 49, 9, 30, 50, 29, 35}, {19, 14, 36, 54, 34, 10, 39, 56},
         {37, 42, 39, 56, 24, 17, 43, 22}};
-
-    static constexpr std::size_t permute[8] = {2, 1, 4, 7, 6, 5, 0, 3};
-}; // class ThreefryConstantsImpl
+}; // class ThreefryConstantsRotate
 
 template <typename T>
-class ThreefryConstantsImpl<T, 16, 64>
+class ThreefryConstantsRotate<T, 16, 64>
 {
     public:
-    static constexpr T parity = 0x1BD11BDAA9FC1A22;
-
-    static constexpr int rotate[8][8] = {{24, 38, 33, 5, 41, 16, 31, 9},
+    static constexpr int value[8][8] = {{24, 38, 33, 5, 41, 16, 31, 9},
         {13, 19, 4, 20, 9, 34, 44, 48}, {8, 10, 51, 48, 37, 56, 47, 35},
         {47, 55, 13, 41, 31, 51, 46, 52}, {8, 49, 34, 47, 12, 4, 19, 23},
         {17, 18, 41, 28, 47, 53, 42, 31}, {22, 23, 59, 16, 44, 42, 44, 37},
         {37, 52, 17, 25, 30, 41, 25, 20}};
+}; // class ThreefryConstantsRotate
 
-    static constexpr std::size_t permute[16] = {
+template <typename, std::size_t>
+class ThreefryConstantsPermute;
+
+template <typename T>
+class ThreefryConstantsPermute<T, 2>
+{
+    public:
+    static constexpr std::size_t value[2] = {0, 1};
+}; // class ThreefryConstantsPermute
+
+template <typename T>
+class ThreefryConstantsPermute<T, 4>
+{
+    public:
+    static constexpr std::size_t value[4] = {0, 3, 2, 1};
+}; // class ThreefryConstantsPermute
+
+template <typename T>
+class ThreefryConstantsPermute<T, 8>
+{
+    public:
+    static constexpr std::size_t value[8] = {2, 1, 4, 7, 6, 5, 0, 3};
+}; // class ThreefryConstantsPermute
+
+template <typename T>
+class ThreefryConstantsPermute<T, 16>
+{
+    static constexpr std::size_t value[16] = {
         0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1};
-}; // class ThreefryConstantsImpl
+}; // class ThreefryConstantsPermute
 
 } // namespace mckl::internal
 
 /// \brief Default Threefry constants
 /// \ingroup Threefry
 template <typename T, std::size_t K>
-using ThreefryConstants =
-    internal::ThreefryConstantsImpl<T, K, std::numeric_limits<T>::digits>;
+class ThreefryConstants
+{
+    public:
+    using parity = internal::ThreefryConstantsParity<T, K>;
+    using rotate = internal::ThreefryConstantsRotate<T, K>;
+    using permute = internal::ThreefryConstantsPermute<T, K>;
+}; // class ThreefryConstants
 
 } // namespace mckl
 

@@ -54,15 +54,19 @@ class PhiloxGeneratorImplAVX2_32
         static constexpr std::size_t i2 = 2 % (K / 2);
         static constexpr std::size_t i3 = 3 % (K / 2);
 
-        static constexpr int w0 = static_cast<int>(Constants::weyl[i0]);
-        static constexpr int w1 = static_cast<int>(Constants::weyl[i1]);
-        static constexpr int w2 = static_cast<int>(Constants::weyl[i2]);
-        static constexpr int w3 = static_cast<int>(Constants::weyl[i3]);
+        static constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);
+        static constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);
+        static constexpr int w2 = static_cast<int>(Constants::weyl::value[i2]);
+        static constexpr int w3 = static_cast<int>(Constants::weyl::value[i3]);
 
-        static constexpr int m0 = static_cast<int>(Constants::multiplier[i0]);
-        static constexpr int m1 = static_cast<int>(Constants::multiplier[i1]);
-        static constexpr int m2 = static_cast<int>(Constants::multiplier[i2]);
-        static constexpr int m3 = static_cast<int>(Constants::multiplier[i3]);
+        static constexpr int m0 =
+            static_cast<int>(Constants::multiplier::value[i0]);
+        static constexpr int m1 =
+            static_cast<int>(Constants::multiplier::value[i1]);
+        static constexpr int m2 =
+            static_cast<int>(Constants::multiplier::value[i2]);
+        static constexpr int m3 =
+            static_cast<int>(Constants::multiplier::value[i3]);
 
         const int p0 = static_cast<int>(std::get<i0>(key));
         const int p1 = static_cast<int>(std::get<i1>(key));

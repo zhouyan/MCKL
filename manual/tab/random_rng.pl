@@ -34,11 +34,15 @@
 use v5.16;
 use Getopt::Long;
 
+my $libm;
+$libm = "sys" if ($^O eq "darwin");
+$libm = "imf" if ($^O eq "linux");
+
 my $run = 0;
 my $build = 0;
-my $llvm = "../../build/llvm-release-sys";
-my $gnu = "../../build/gnu-release-sys";
-my $intel = "../../build/intel-release-sys";
+my $llvm = "../../build/llvm-release-$libm";
+my $gnu = "../../build/gnu-release-$libm";
+my $intel = "../../build/intel-release-$libm";
 my $make = "ninja";
 my $name;
 my $write = 0;
@@ -138,14 +142,18 @@ sub run {
         say $d;
         for my $r (@rng) {
             my $cmd = "$make -C $d \Lrandom_rng_$r-check 2>&1";
-            my $cpb_s = 0xFF;
-            my $cpb_b = 0xFF;
-            my $cpb_sp = 0xFF;
-            my $cpb_bp = 0xFF;
+            my $cpb_s = 0xFFFF;
+            my $cpb_b = 0xFFFF;
+            my $cpb_sp = 0xFFFF;
+            my $cpb_bp = 0xFFFF;
+            my $count = 0;
+            my $pass = 1;
             for (1..5) {
                 my @lines = grep { $_ =~ /Passed|Failed/ } split "\n", `$cmd`;
                 $result .= $_ for @lines;
                 for (@lines) {
+                    $count++;
+                    $pass = 0 if (/Failed/);
                     my @cpb = (split)[3..6];
                     $cpb_s  = $cpb[0] if $cpb[0] < $cpb_s;
                     $cpb_b  = $cpb[1] if $cpb[1] < $cpb_b;
@@ -154,12 +162,15 @@ sub run {
                 }
             }
             my $line;
-            $line .= sprintf("%-20s", $r);
-            $line .= &format($cpb_s);
-            $line .= &format($cpb_b);
-            $line .= &format($cpb_sp);
-            $line .= &format($cpb_bp);
-            say $line;
+            if ($count) {
+                $line .= sprintf("%-20s", $r);
+                $line .= &format($cpb_s);
+                $line .= &format($cpb_b);
+                $line .= &format($cpb_sp);
+                $line .= &format($cpb_bp);
+                $line .= $pass ? "Passed" : "Failed";
+                say $line;
+            }
         }
         if ($write) {
             open my $txtfile, ">", "rng/random_rng_${c}_${simd}.txt";
@@ -176,10 +187,10 @@ sub read {
             for my $r (@rng) {
                 my @result = grep { /$r\s+/ } @lines;
                 if (@result) {
-                    $cpb_s{$c}{$s}{$r} = 0xFF;
-                    $cpb_b{$c}{$s}{$r} = 0xFF;
-                    $cpb_sp{$c}{$s}{$r} = 0xFF;
-                    $cpb_bp{$c}{$s}{$r} = 0xFF;
+                    $cpb_s{$c}{$s}{$r} = 0xFFFF unless $cpb_s{$c}{$s}{$r};
+                    $cpb_b{$c}{$s}{$r} = 0xFFFF unless $cpb_b{$c}{$s}{$r};
+                    $cpb_sp{$c}{$s}{$r} = 0xFFFF unless $cpb_sp{$c}{$s}{$r};
+                    $cpb_bp{$c}{$s}{$r} = 0xFFFF unless $cpb_bp{$c}{$s}{$r};
                     for (@result) {
                         my @cpb = (split)[3..6];
                         if ($cpb[0] < $cpb_s{$c}{$s}{$r}) {

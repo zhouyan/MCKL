@@ -131,7 +131,7 @@ class PhiloxKBox
     template <std::size_t I>
     static void eval(std::array<T, K / 2> &par, std::true_type)
     {
-        static constexpr T w = Constants::weyl[I];
+        static constexpr T w = Constants::weyl::value[I];
 
         std::get<I>(par) += w;
         eval<I + 1>(par, std::integral_constant<bool, I + 1 < K / 2>());
@@ -144,7 +144,7 @@ class PhiloxKBox<T, 2, N, Constants>
     public:
     static void eval(std::array<T, 1> &par)
     {
-        static constexpr T w0 = Constants::weyl[0];
+        static constexpr T w0 = Constants::weyl::value[0];
 
         std::get<0>(par) += w0;
     }
@@ -156,8 +156,8 @@ class PhiloxKBox<T, 4, N, Constants>
     public:
     static void eval(std::array<T, 2> &par)
     {
-        static constexpr T w0 = Constants::weyl[0];
-        static constexpr T w1 = Constants::weyl[1];
+        static constexpr T w0 = Constants::weyl::value[0];
+        static constexpr T w1 = Constants::weyl::value[1];
 
         std::get<0>(par) += w0;
         std::get<1>(par) += w1;
@@ -184,7 +184,7 @@ class PhiloxSBox
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &par,
         std::true_type)
     {
-        static constexpr T m = Constants::multiplier[I / 2];
+        static constexpr T m = Constants::multiplier::value[I / 2];
 
         T x = std::get<I + 1>(state) ^ std::get<I / 2>(par);
         PhiloxHiLo<T>::eval(
@@ -200,7 +200,7 @@ class PhiloxSBox<T, 2, N, Constants>
     public:
     static void eval(std::array<T, 2> &state, const std::array<T, 1> &par)
     {
-        static constexpr T m0 = Constants::multiplier[0];
+        static constexpr T m0 = Constants::multiplier::value[0];
 
         T x = std::get<1>(state) ^ std::get<0>(par);
         PhiloxHiLo<T>::eval(
@@ -215,8 +215,8 @@ class PhiloxSBox<T, 4, N, Constants>
     public:
     static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
     {
-        static constexpr T m0 = Constants::multiplier[0];
-        static constexpr T m2 = Constants::multiplier[1];
+        static constexpr T m0 = Constants::multiplier::value[0];
+        static constexpr T m2 = Constants::multiplier::value[1];
 
         T x0 = std::get<1>(state) ^ std::get<0>(par);
         T x2 = std::get<3>(state) ^ std::get<1>(par);
@@ -251,8 +251,7 @@ class PhiloxPBox
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        static constexpr std::size_t P =
-            ThreefryConstants<T, K>::permute[K - I - 1];
+        static constexpr std::size_t P = Constants::permute::value[K - I - 1];
         static constexpr std::size_t J = K - P - 1;
 
         std::get<I>(tmp) = std::get<J>(state);

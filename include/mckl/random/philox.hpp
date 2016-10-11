@@ -34,7 +34,6 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/philox_constants.hpp>
-#include <mckl/random/internal/threefry_constants.hpp>
 #include <mckl/random/counter.hpp>
 
 /// \brief PhiloxGenerator default rounds
