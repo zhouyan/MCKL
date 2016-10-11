@@ -205,6 +205,61 @@ MCKL_FLATTEN inline void increment(
     ctr = ctr_block.back();
 }
 
+namespace internal
+{
+
+template <typename T, std::size_t K,
+    bool = (sizeof(T) * K) % sizeof(std::uint_fast8_t) == 0,
+    bool = (sizeof(T) * K) % sizeof(std::uint_fast16_t) == 0,
+    bool = (sizeof(T) * K) % sizeof(std::uint_fast32_t) == 0,
+    bool = (sizeof(T) * K) % sizeof(std::uint_fast64_t) == 0>
+class CounterImpl
+{
+    public:
+    using type = std::array<T, K>;
+}; // class CounterImpl
+
+template <typename T, std::size_t K>
+class CounterImpl<T, K, true, false, false, false>
+{
+    public:
+    using type = std::array<std::uint_fast8_t,
+        sizeof(T) * K / sizeof(std::uint_fast8_t)>;
+}; // class CounterImpl
+
+template <typename T, std::size_t K>
+class CounterImpl<T, K, true, true, false, false>
+{
+    public:
+    using type = std::array<std::uint_fast16_t,
+        sizeof(T) * K / sizeof(std::uint_fast16_t)>;
+}; // class CounterImpl
+
+template <typename T, std::size_t K>
+class CounterImpl<T, K, true, true, true, false>
+{
+    public:
+    using type = std::array<std::uint_fast32_t,
+        sizeof(T) * K / sizeof(std::uint_fast32_t)>;
+}; // class CounterImpl
+
+template <typename T, std::size_t K>
+class CounterImpl<T, K, true, true, true, true>
+{
+    public:
+    using type = std::array<std::uint_fast64_t,
+        sizeof(T) * K / sizeof(std::uint_fast64_t)>;
+}; // class CounterImpl
+
+} // namespace internal
+
+/// \brief A counter type with the same width as `std::array<T, K>` but with
+/// possibly fewer elements
+///
+/// \ingroup Random
+template <typename T, std::size_t K>
+using Counter = typename internal::CounterImpl<T, K>::type;
+
 /// \brief Counter based RNG engine
 /// \ingroup Random
 ///
@@ -266,7 +321,7 @@ class CounterEngine
     void seed(result_type s)
     {
         key_type key;
-        std::memset(key.data(), 0, sizeof(key_type));
+        std::fill(key.begin(), key.end(), 0);
         std::memcpy(key.data(), &s, std::min(sizeof(s), sizeof(key)));
         reset(key);
     }
@@ -455,7 +510,7 @@ class CounterEngine
 
     void reset(const key_type key)
     {
-        ctr_.fill(0);
+        std::fill(ctr_.begin(), ctr_.end(), 0);
         generator_.reset(key);
         index_ = M_;
     }

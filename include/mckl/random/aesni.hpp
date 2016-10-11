@@ -874,7 +874,7 @@ class AESNIGenerator
         "**AESNIGenerate** used with KeySeqType::rounds() equal to zero");
 
     public:
-    using ctr_type = std::array<std::uint64_t, 2>;
+    using ctr_type = Counter<std::uint64_t, 2>;
     using key_type = typename KeySeqType::key_type;
 
     static constexpr std::size_t size() { return sizeof(__m128i); }

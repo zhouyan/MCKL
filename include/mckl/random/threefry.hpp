@@ -100,10 +100,7 @@ class ThreefryGenerator
         Rounds != 0, "**ThreefryGenerator** used with rounds equal to zero");
 
     public:
-    using ctr_type =
-        typename std::conditional<(sizeof(T) * K) % sizeof(std::uint64_t) == 0,
-            std::array<std::uint64_t, (sizeof(T) * K) / sizeof(std::uint64_t)>,
-            std::array<T, K>>::type;
+    using ctr_type = Counter<T, K>;
     using key_type = std::array<T, K>;
 
     static constexpr std::size_t size() { return sizeof(T) * K; }
