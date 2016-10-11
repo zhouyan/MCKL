@@ -122,102 +122,116 @@ inline void random_test(std::size_t N, std::size_t M, const std::string &name)
     std::cout << name << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
 
+    std::size_t b = 1;
+    std::size_t p = 0;
+    while (N % b == 0) {
+        b *= 10;
+        p += 1;
+    }
+    b /= 10;
+    p -= 1;
+
+    std::string nstr = p == 0 ?
+        std::to_string(N) :
+        (N == b ? std::string() : std::to_string(N / b) + " * ") + "10^" +
+            std::to_string(p);
+
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::BirthdaySpacingsTest<2, 40>(N),
-        "BirthdaySpacings (n = 10^5, d = 2, t = 40)");
+        "BirthdaySpacings (n = " + nstr + ", d = 2, t = 40)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::BirthdaySpacingsTest<2, 42>(N),
-        "BirthdaySpacings (n = 10^5, d = 2, t = 42)");
+        "BirthdaySpacings (n = " + nstr + ", d = 2, t = 42)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::BirthdaySpacingsTest<2, 44>(N),
-        "BirthdaySpacings (n = 10^5, d = 2, t = 44)");
+        "BirthdaySpacings (n = " + nstr + ", d = 2, t = 44)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::BirthdaySpacingsTest<2, 46>(N),
-        "BirthdaySpacings (n = 10^5, d = 2, t = 46)");
+        "BirthdaySpacings (n = " + nstr + ", d = 2, t = 46)");
 
     random_test(M, nwid, swid, twid, lwid, rng, mckl::CollisionTest<2, 20>(N),
-        "Collision (n = 10^5, d = 2, t = 20)");
+        "Collision (n = " + nstr + ", d = 2, t = 20)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::CollisionTest<2, 30>(N),
-        "Collision (n = 10^5, d = 2, t = 30)");
+        "Collision (n = " + nstr + ", d = 2, t = 30)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::CollisionTest<2, 40>(N),
-        "Collision (n = 10^5, d = 2, t = 40)");
+        "Collision (n = " + nstr + ", d = 2, t = 40)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::CollisionTest<2, 50>(N),
-        "Collision (n = 10^5, d = 2, t = 50)");
+        "Collision (n = " + nstr + ", d = 2, t = 50)");
 
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::CouponCollectorTest<2>(N),
-        "CouponCollector (n = 10^5, d = 2^1)");
+        "CouponCollector (n = " + nstr + ", d = 2^1)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::CouponCollectorTest<4>(N),
-        "CouponCollector (n = 10^5, d = 2^2)");
+        "CouponCollector (n = " + nstr + ", d = 2^2)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::CouponCollectorTest<8>(N),
-        "CouponCollector (n = 10^5, d = 2^3)");
+        "CouponCollector (n = " + nstr + ", d = 2^3)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::CouponCollectorTest<16>(N),
-        "CouponCollector (n = 10^5, d = 2^4)");
+        "CouponCollector (n = " + nstr + ", d = 2^4)");
 
     random_test(M, nwid, swid, twid, lwid, rng, mckl::GapTest<>(N, 0, 0.5),
-        "Gap (n = 10^5, alpha = 0, beta = 2^-1)");
+        "Gap (n = " + nstr + ", alpha = 0, beta = 2^-1)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::GapTest<>(N, 0, 0.25),
-        "Gap (n = 10^5, alpha = 0, beta = 2^-2)");
+        "Gap (n = " + nstr + ", alpha = 0, beta = 2^-2)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::GapTest<>(N, 0, 0.125),
-        "Gap (n = 10^5, alpha = 0, beta = 2^-3)");
+        "Gap (n = " + nstr + ", alpha = 0, beta = 2^-3)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::GapTest<>(N, 0, 0.0625),
-        "Gap (n = 10^5, alpha = 0, beta = 2^-4)");
+        "Gap (n = " + nstr + ", alpha = 0, beta = 2^-4)");
 
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::MaximumOfTTest<1024, 8>(N),
-        "MaximumOfT (n = 10^5, d = 2^10, t = 3)");
+        "MaximumOfT (n = " + nstr + ", d = 2^10, t = 3)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::MaximumOfTTest<2048, 16>(N),
-        "MaximumOfT (n = 10^5, d = 2^11, t = 4)");
+        "MaximumOfT (n = " + nstr + ", d = 2^11, t = 4)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::MaximumOfTTest<4096, 32>(N),
-        "MaximumOfT (n = 10^5, d = 2^12, t = 5)");
+        "MaximumOfT (n = " + nstr + ", d = 2^12, t = 5)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::MaximumOfTTest<8192, 64>(N),
-        "MaximumOfT (n = 10^5, d = 2^13, t = 6)");
+        "MaximumOfT (n = " + nstr + ", d = 2^13, t = 6)");
 
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PermutationTest<3>(N),
-        "Permutation (n = 10^5, t = 3)");
+        "Permutation (n = " + nstr + ", t = 3)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PermutationTest<5>(N),
-        "Permutation (n = 10^5, t = 5)");
+        "Permutation (n = " + nstr + ", t = 5)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PermutationTest<7>(N),
-        "Permutation (n = 10^5, t = 7)");
+        "Permutation (n = " + nstr + ", t = 7)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PermutationTest<11>(N),
-        "Permutation (n = 10^5, t = 11)");
+        "Permutation (n = " + nstr + ", t = 11)");
 
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PokerTest<16, 16>(N),
-        "Poker (n = 10^5, d = 2^3, t = 2^3)");
+        "Poker (n = " + nstr + ", d = 2^3, t = 2^3)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PokerTest<8, 16>(N),
-        "Poker (n = 10^5, d = 2^3, t = 2^4)");
+        "Poker (n = " + nstr + ", d = 2^3, t = 2^4)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PokerTest<16, 8>(N),
-        "Poker (n = 10^5, d = 2^4, t = 2^3)");
+        "Poker (n = " + nstr + ", d = 2^4, t = 2^3)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::PokerTest<16, 16>(N),
-        "Poker (n = 10^5, d = 2^4, t = 2^4)");
+        "Poker (n = " + nstr + ", d = 2^4, t = 2^4)");
 
     random_test(M, nwid, swid, twid, lwid, rng, mckl::RunTest<false, false>(N),
-        "Run (n = 10^5, Independent = false, Up = false)");
+        "Run (n = " + nstr + ", Independent = false, Up = false)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::RunTest<false, true>(N),
-        "Run (n = 10^5, Independent = false, Up = true)");
+        "Run (n = " + nstr + ", Independent = false, Up = true)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::RunTest<true, false>(N),
-        "Run (n = 10^5, Independent = true, Up = false)");
+        "Run (n = " + nstr + ", Independent = true, Up = false)");
     random_test(M, nwid, swid, twid, lwid, rng, mckl::RunTest<true, true>(N),
-        "Run (n = 10^5, Independent = true, Up = true)");
+        "Run (n = " + nstr + ", Independent = true, Up = true)");
 
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::SerialTest<64, 2, false>(N),
-        "Serial (n = 10^5, d = 2^6, t = 2, overlap = false)");
+        "Serial (n = " + nstr + ", d = 2^6, t = 2, overlap = false)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::SerialTest<16, 3, false>(N),
-        "Serial (n = 10^5, d = 2^4, t = 3, overlap = false)");
+        "Serial (n = " + nstr + ", d = 2^4, t = 3, overlap = false)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::SerialTest<64, 2, true>(N),
-        "Serial (n = 10^5, d = 2^6, t = 2, overlap = true)");
+        "Serial (n = " + nstr + ", d = 2^6, t = 2, overlap = true)");
     random_test(M, nwid, swid, twid, lwid, rng,
         mckl::SerialTest<16, 3, true>(N),
-        "Serial (n = 10^5, d = 2^4, t = 3, overlap = true)");
+        "Serial (n = " + nstr + ", d = 2^4, t = 3, overlap = true)");
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_TEST_HPP
