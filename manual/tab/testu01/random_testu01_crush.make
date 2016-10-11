@@ -5,6 +5,7 @@
 	random_testu01_crush_aes256_64 \
 	random_testu01_crush_ars \
 	random_testu01_crush_ars_64 \
+	random_testu01_crush_knuth_b \
 	random_testu01_crush_minstd_rand \
 	random_testu01_crush_minstd_rand0 \
 	random_testu01_crush_mkl_ars5 \
@@ -54,6 +55,7 @@ run : \
 	random_testu01_crush_aes256_64 \
 	random_testu01_crush_ars \
 	random_testu01_crush_ars_64 \
+	random_testu01_crush_knuth_b \
 	random_testu01_crush_minstd_rand \
 	random_testu01_crush_minstd_rand0 \
 	random_testu01_crush_mkl_ars5 \
@@ -128,6 +130,11 @@ random_testu01_crush_ars_64 :
 	./random_testu01_crush_ars_64 U01 68
 	./random_testu01_crush_ars_64 U01OC 8
 	./random_testu01_crush_ars_64 U01OO 19
+
+random_testu01_crush_knuth_b :
+	ninja -C ../.. random_testu01_crush_knuth_b
+	./random_testu01_crush_knuth_b STD 44 79
+	./random_testu01_crush_knuth_b U01OC 76
 
 random_testu01_crush_minstd_rand :
 	ninja -C ../.. random_testu01_crush_minstd_rand

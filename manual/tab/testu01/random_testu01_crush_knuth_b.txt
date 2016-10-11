@@ -1,0 +1,21 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+ 11  BirthdaySpacings, t = 2       3.3e-185
+ 41  MaxOft, t = 5                  1 - eps1
+ 42  MaxOft, t = 10                 1 - eps1
+ 43  MaxOft, t = 20                 1 - eps1
+ 44  MaxOft, t = 30                 1 -  7.3e-6
+ 79  PeriodsInStrings, r = 15        2.6e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+ 76  LongestHeadRun, r = 0           0.9998
+ ----------------------------------------------
+ All other tests were passed
+
