@@ -12,11 +12,5 @@
 *.toc
 .DS_Store
 /build
-/example/pf/src/pf_cv_*.cpp
-/example/random/src/random_distribution_*.cpp
-/example/random/src/random_distribution_perf_*.cpp
-/example/random/src/random_rng_*.cpp
-/example/random/src/random_test_*.cpp
-/example/random/src/random_testu01_*.cpp
 /manual/tab/*.tex
 /manual/tex/inc.tex
