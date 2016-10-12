@@ -1,0 +1,16 @@
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  144
+ ----------------------------------------------
+ 89  HammingIndep, L = 1200          4.2e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+ 67  RandomWalk1 M (L = 1000)       1 -  2.0e-5
+ ----------------------------------------------
+ All other tests were passed
+

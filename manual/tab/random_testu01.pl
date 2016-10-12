@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # ============================================================================
 #  MCKL/manual/tab/random_testu01.pl
