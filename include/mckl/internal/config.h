@@ -69,25 +69,28 @@
 // OS dependent macros
 
 #ifndef MCKL_OPENCL
-#if defined(__APPLE__) || defined(__MACOSX)
+#ifdef __APPLE__
 #include <Availability.h>
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(__MAC_10_5)
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
 #ifndef MCKL_HAS_POSIX
 #define MCKL_HAS_POSIX 1
 #endif
-#endif
-#else // __APPLE__
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+#endif // __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
+#endif // defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(__MAC_10_5)
+#elif defined(__POSIX_C_SOURCE)
+#if _POSIX_C_SOURCE >= 200112L
 #ifndef MCKL_HAS_POSIX
 #define MCKL_HAS_POSIX 1
 #endif
 #endif // _POSIX_C_SOURCE >= 200112L
-#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
+#elif defined(_XOPEN_SOURCE)
+#if _XOPEN_SOURCE >= 600
 #ifndef MCKL_HAS_POSIX
 #define MCKL_HAS_POSIX 1
 #endif
 #endif // _XOPEN_SOURCE >= 600
-#endif // MCKL_MACOSX
+#endif // __APPLE__
 #endif // MCKL_OPENCL
 
 #ifndef MCKL_HAS_POSIX
