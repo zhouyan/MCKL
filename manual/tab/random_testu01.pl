@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # ============================================================================
 #  MCKL/manual/tab/random_testu01.pl
@@ -115,9 +115,9 @@ sub check {
 sub target {
     for my $b (keys %suspect) {
         my %target;
-        for my $r (keys $suspect{$b}) {
-            for my $u (sort keys $suspect{$b}{$r}) {
-                my @keys = sort keys $suspect{$b}{$r}{$u};
+        for my $r (keys %{$suspect{$b}}) {
+            for my $u (sort keys %{$suspect{$b}{$r}}) {
+                my @keys = sort keys %{$suspect{$b}{$r}{$u}};
                 my $bin = "\Lrandom_testu01_${b}_${r}";
                 $target{$bin} .= "\t./$bin $u";
                 $target{$bin} .= " $_" for @keys;
@@ -157,9 +157,9 @@ sub recheck {
 
 sub check_suspect {
     for my $b (keys %suspect) {
-        for my $r (keys $suspect{$b}) {
-            for my $u (keys $suspect{$b}{$r}) {
-                for my $n (keys $suspect{$b}{$r}{$u}) {
+        for my $r (keys %{$suspect{$b}}) {
+            for my $u (keys %{$suspect{$b}{$r}}) {
+                for my $n (keys %{$suspect{$b}{$r}{$u}}) {
                     if ($suspect{$b}{$r}{$u}{$n} > 1) {
                         $failure{$b}{$r}{$u}{$n} = 1;
                     }
@@ -197,7 +197,7 @@ sub table {
                 for my $u (@u01)  {
                     $table .= " & ";
                     if ($failure{$b}{$r}{$u}) {
-                        my $num = keys $failure{$b}{$r}{$u};
+                        my $num = keys %{$failure{$b}{$r}{$u}};
                         $table .= sprintf("%-6s", $num);
                     } else {
                         $table .= sprintf("%-6s", 0);

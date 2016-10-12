@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+ 10  CollisionOver, t = 20           0.9991
+ ----------------------------------------------
+ All other tests were passed
+

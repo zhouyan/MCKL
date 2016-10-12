@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # ============================================================================
 #  MCKL/manual/tab/random_distribution.pl
@@ -254,7 +254,7 @@ sub table {
             my $table;
             my $table_p;
             for my $r (@{$distribution{$k}}) {
-                my @name = sort grep { /$r/ } keys $cpe_s{$s};
+                my @name = sort grep { /$r/ } keys %{$cpe_s{$s}};
                 for my $name (@name) {
                     $table .= " " x 2 . sprintf("%-40s", "\\texttt{$name}");
                     $table .= " & ";
