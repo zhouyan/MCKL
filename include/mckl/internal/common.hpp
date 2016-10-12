@@ -207,6 +207,18 @@ class BufferSize
 {
 }; // class BufferSize;
 
+inline bool is_little_endian()
+{
+    union {
+        char c[sizeof(int)];
+        int i;
+    } buf;
+
+    buf.i = 0x01;
+
+    return buf.c[0] = 0x01;
+}
+
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &ostream(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)

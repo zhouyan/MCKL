@@ -284,8 +284,6 @@ class Skein
         generator.reset(G);
         generator.tweak(t0, t1);
 
-        // FIXME Big-endian
-
         ctr_type ctr = {{0}};
         ctr_type buf = {{0}};
         const std::size_t n = N / bytes();
@@ -343,8 +341,6 @@ class Skein
     static key_type ubi_tree(
         const key_type &G, const param_type &M, int Yl, int Yf, int Ym, int l)
     {
-        // FIXME Memory can be reused
-
         value_type t0 = 0;
         value_type t1 = 0;
 
@@ -416,28 +412,27 @@ class Skein
     static void set_flags(value_type &t1, bool first, bool last, bool bpad)
     {
         static constexpr int N = std::numeric_limits<value_type>::digits;
-
-        static constexpr value_type mark_first = const_one<value_type>()
+        static constexpr value_type mask_first = const_one<value_type>()
             << (N - 2);
-        static constexpr value_type mark_last = const_one<value_type>()
+        static constexpr value_type mask_last = const_one<value_type>()
             << (N - 1);
-        static constexpr value_type mark_bpad = const_one<value_type>()
+        static constexpr value_type mask_bpad = const_one<value_type>()
             << (N - 9);
 
         if (first)
-            t1 |= mark_first;
+            t1 |= mask_first;
         else
-            t1 &= ~mark_first;
+            t1 &= ~mask_first;
 
         if (last) {
-            t1 |= mark_last;
+            t1 |= mask_last;
             if (bpad)
-                t1 |= mark_bpad;
+                t1 |= mask_bpad;
             else
-                t1 &= ~mark_bpad;
+                t1 &= ~mask_bpad;
         } else {
-            t1 &= ~mark_last;
-            t1 &= ~mark_bpad;
+            t1 &= ~mask_last;
+            t1 &= ~mask_bpad;
         }
     }
 
@@ -498,11 +493,12 @@ class Skein
     static std::array<std::uint64_t, 4> configure(
         std::size_t N, int Yl = 0, int Yf = 0, int Ym = 0)
     {
-        return configure(N, Yl, Yf, Ym, internal::is_little_endian());
+        return internal::is_little_endian() ? configure_le(N, Yl, Yf, Ym) :
+                                              configure_be(N, Yl, Yf, Ym);
     }
 
-    static std::array<std::uint64_t, 4> configure(
-        std::size_t N, int Yl, int Yf, int Ym, std::true_type)
+    static std::array<std::uint64_t, 4> configure_le(
+        std::size_t N, int Yl, int Yf, int Ym)
     {
         std::array<std::uint64_t, 4> C = {{0}};
         std::get<0>(C) = 0x133414853;
@@ -514,8 +510,8 @@ class Skein
         return C;
     }
 
-    static std::array<std::uint64_t, 4> configure(
-        std::size_t N, int Yl, int Yf, int Ym, std::false_type)
+    static std::array<std::uint64_t, 4> configure_be(
+        std::size_t N, int Yl, int Yf, int Ym)
     {
         union {
             std::array<std::uint8_t, 32> c;

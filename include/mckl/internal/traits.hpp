@@ -184,19 +184,6 @@ using is_seed_seq = std::integral_constant<bool, std::is_class<T>::value &&
         !std::is_convertible<T, typename RNGType::result_type>::value &&
         !std::is_convertible<T, KeyType>::value>;
 
-class is_little_endian_impl
-{
-    static constexpr char c[2] = {0x01, 0x02};
-    static constexpr char c0 = c[0];
-    static constexpr int u = 0x0201;
-
-    public:
-    static constexpr bool value = static_cast<char>(u & 0xFF) == c0;
-};
-
-using is_little_endian =
-    std::integral_constant<bool, is_little_endian_impl::value>;
-
 } // namespace mckl::internal
 
 } // namespace mckl
