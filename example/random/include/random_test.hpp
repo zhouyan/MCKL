@@ -84,6 +84,7 @@ inline void random_test(std::size_t M, int nwid, int swid, int twid,
     const std::string &name)
 {
     std::uniform_real_distribution<double> u01std(0, 1);
+    mckl::U01Distribution<double> u01;
     mckl::U01CCDistribution<double> u01cc;
     mckl::U01CODistribution<double> u01co;
     mckl::U01OCDistribution<double> u01oc;
@@ -101,6 +102,7 @@ inline void random_test(std::size_t M, int nwid, int swid, int twid,
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
     random_test(M, nwid, swid, twid, rng, u01std, test, "STD");
+    random_test(M, nwid, swid, twid, rng, u01, test, "U01");
     random_test(M, nwid, swid, twid, rng, u01cc, test, "U01CC");
     random_test(M, nwid, swid, twid, rng, u01co, test, "U01CO");
     random_test(M, nwid, swid, twid, rng, u01oc, test, "U01OC");
