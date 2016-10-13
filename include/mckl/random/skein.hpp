@@ -314,7 +314,7 @@ class Skein
                 C += bytes();
             }
             if (m != 0) {
-                key_type M = M;
+                key_type M = ctr;
                 internal::union_le<char>(M);
                 generator.enc(M.data(), buf.data());
                 for (std::size_t j = 0; j != M.size(); ++j)
@@ -473,7 +473,8 @@ class Skein
     {
         if (N == 0) {
             std::fill(M.begin(), M.end(), 0);
-            return; }
+            return;
+        }
 
         if (N >= bits()) {
             get_block(t0, C, M);

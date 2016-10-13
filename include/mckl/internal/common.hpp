@@ -235,20 +235,20 @@ inline U swap_bytes(U u, std::true_type)
     static constexpr U mask = (~const_zero<U>()) >> (bits - p);
 
     return ((u & mask) << l) +
-        swap_bytes<Bytes, N + 1>(u >> p,
-            std::integral_constant<bool, (r + p < bits)>());
+        swap_bytes<Bytes, N + 1>(
+            u >> p, std::integral_constant<bool, (r + p < bits)>());
 }
 
 template <int Bytes, typename T>
 inline T swap_bytes(T x)
 {
     static_assert(sizeof(T) % Bytes == 0,
-            "**swap_bytes** sizeof(T) is not divisible by Bytes");
+        "**swap_bytes** sizeof(T) is not divisible by Bytes");
 
     using U = typename std::make_unsigned<T>::type;
 
-    return static_cast<T>(swap_bytes<Bytes, 0>(static_cast<U>(x),
-                std::integral_constant<bool, Bytes < sizeof(U)>()));
+    return static_cast<T>(swap_bytes<Bytes, 0>(
+        static_cast<U>(x), std::integral_constant < bool, Bytes<sizeof(U)>()));
 }
 
 #if MCKL_HAS_LITTLE_ENDIAN
@@ -294,17 +294,17 @@ template <typename U, typename T, std::size_t K>
 inline void union_le(std::array<T, K> &buf)
 {
     static_assert(sizeof(U) % sizeof(T) == 0 || sizeof(T) % sizeof(U) == 0,
-            "**union_le** called with sizeof(U) and sizeof(T) with neither of them a multiple of the other");
+        "**union_le** called with sizeof(U) and sizeof(T) with neither of "
+        "them a multiple of the other");
 
 #if MCKL_HAS_BIG_ENDIAN
-    union_le<U>(buf,
-            std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
-            std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
+    union_le<U>(buf, std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+        std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
 #else
     if (is_big_endian()) {
         union_le<U>(buf,
-                std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
-                std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
+            std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+            std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
     }
 #endif
 }

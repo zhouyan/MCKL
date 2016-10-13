@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <stdlib.h>
 #include <cassert>
+#include <stdlib.h>
 
 int main()
 {

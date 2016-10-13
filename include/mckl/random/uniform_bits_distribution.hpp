@@ -181,12 +181,12 @@ class UniformBitsDistribution
         UIntType u = static_cast<UIntType>(rng() - RNGType::min())
             << static_cast<UIntType>(p);
 
-        return u + patch_le<N + 1>(rng,
-                std::integral_constant<bool, (q < w)>());
+        return u +
+            patch_le<N + 1>(rng, std::integral_constant<bool, (q < w)>());
     }
 
     template <int N, typename RNGType>
-    static UIntType patch_be(RNGType &rng, std::false_type)
+    static UIntType patch_be(RNGType &, std::false_type)
     {
         return 0;
     }
@@ -204,8 +204,8 @@ class UniformBitsDistribution
         u <<= static_cast<UIntType>(pl);
         u >>= static_cast<UIntType>(pr);
 
-        return u + patch_be<N + 1>(rng,
-                std::integral_constant<bool, (q < w)>());
+        return u +
+            patch_be<N + 1>(rng, std::integral_constant<bool, (q < w)>());
     }
 }; // class UniformBitsDistribution
 
