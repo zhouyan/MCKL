@@ -207,7 +207,7 @@ class BufferSize
 {
 }; // class BufferSize;
 
-inline bool is_big_endian()
+inline bool is_little_endian()
 {
     union {
         char c[sizeof(int)];
@@ -216,34 +216,67 @@ inline bool is_big_endian()
 
     buf.i = 0x01;
 
-    return buf.c[0] == 0;
+    return buf.c[0] == 0x01;
 }
 
-template <int, typename U>
+template <int, int, typename U>
 inline U swap_bytes(U, std::false_type)
 {
     return 0;
 }
 
-template <int N, typename U>
+template <int Bytes, int N, typename U>
 inline U swap_bytes(U u, std::true_type)
 {
     static constexpr int bits = sizeof(U) * CHAR_BIT;
-    static constexpr int r = CHAR_BIT * N;
-    static constexpr int l = bits - r - CHAR_BIT;
-    static constexpr U mask = (~const_zero<U>()) >> (bits - CHAR_BIT);
+    static constexpr int p = Bytes * CHAR_BIT;
+    static constexpr int r = p * N;
+    static constexpr int l = bits - r - p;
+    static constexpr U mask = (~const_zero<U>()) >> (bits - p);
 
     return ((u & mask) << l) +
-        swap_bytes<N + 1>(u >> CHAR_BIT,
-            std::integral_constant<bool, (r + CHAR_BIT < bits)>());
+        swap_bytes<Bytes, N + 1>(u >> p,
+            std::integral_constant<bool, (r + p < bits)>());
 }
 
-template <typename T>
+template <int Bytes, typename T>
 inline T swap_bytes(T x)
 {
+    static_assert(sizeof(T) % Bytes == 0,
+            "**swap_bytes** sizeof(T) is not divisible by Bytes");
+
     using U = typename std::make_unsigned<T>::type;
 
-    return static_cast<T>(swap_bytes<0>(static_cast<U>(x), std::true_type()));
+    return static_cast<T>(swap_bytes<Bytes, 0>(static_cast<U>(x),
+                std::integral_constant<bool, Bytes < sizeof(U)>()));
+}
+
+template <typename T, std::size_t K, typename U>
+inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &,
+        std::false_type, std::false_type)
+{
+}
+
+template <typename T, std::size_t K, typename U>
+inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &,
+        std::false_type, std::true_type)
+{
+}
+
+template <typename T, std::size_t K, typename U>
+inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &r,
+        std::true_type, std::true_type)
+{
+    for (std::size_t i = 0; i != sizeof(T) * K / sizeof(U); ++i)
+        r[i] = swap_bytes<sizeof(T)>(r[i]);
+}
+
+template <typename T, std::size_t K, typename U>
+inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &r)
+{
+    swap_words<T, K>(r,
+            std::integral_constant<bool, (sizeof(T) < sizeof(U))>(),
+            std::integral_constant<bool, (sizeof(T) > sizeof(U))>());
 }
 
 template <typename CharT, typename Traits, typename T, std::size_t N>

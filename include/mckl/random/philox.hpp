@@ -128,6 +128,14 @@ class PhiloxGenerator
         buf.ctr = ctr;
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
             buf.state, key_);
+// #if MCKL_REQUIRE_ENDIANNESS_NEUTRUAL
+// #if MCKL_HAS_BIG_ENDIAN
+//         internal::swap_words<T, K>(buf.result);
+// #elif !MCKL_HAS_LITTLE_ENDIAN
+//         if (!internal::is_little_endian())
+//             internal::swap_words<T, K>(buf.result);
+// #endif
+// #endif // MCKL_REQUIRE_ENDIANNESS_NEUTRUAL
         std::copy(buf.result.begin(), buf.result.end(), buffer);
     }
 

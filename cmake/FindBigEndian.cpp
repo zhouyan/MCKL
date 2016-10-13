@@ -39,9 +39,9 @@ int main()
         int i;
     } buf;
 
-    buf.i = 0x01;
+    buf.i = 0x01 << (sizeof(int) * CHAR_BIT - CHAR_BIT);
 
-    assert(buf.c[0] == 0x00);
+    assert(buf.c[0] == 0x01);
 
     return 0;
 }

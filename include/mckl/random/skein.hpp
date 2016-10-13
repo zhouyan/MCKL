@@ -460,8 +460,7 @@ class Skein
     {
         if (N == 0) {
             std::fill(M.begin(), M.end(), 0);
-            return;
-        }
+            return; }
 
         if (N >= bits()) {
             get_block(t0, C, M);
@@ -491,8 +490,8 @@ class Skein
 #elif MCKL_HAS_BIG_ENDIAN
         return configure_be(N, Yl, Yf, Ym);
 #else
-        return internal::is_big_endian() ? configure_be(N, Yl, Yf, Ym) :
-                                           configure_le(N, Yl, Yf, Ym);
+        return internal::is_little_endian() ? configure_le(N, Yl, Yf, Ym) :
+                                              configure_be(N, Yl, Yf, Ym);
 #endif
     }
 
@@ -505,19 +504,21 @@ class Skein
         } buf;
         std::fill(buf.u.begin(), buf.u.end(), 0);
 
+        std::uint64_t n = static_cast<std::uint64_t>(N);
+
         std::get<0x00>(buf.c) = 0x53;
         std::get<0x01>(buf.c) = 0x48;
         std::get<0x02>(buf.c) = 0x41;
         std::get<0x03>(buf.c) = 0x33;
         std::get<0x04>(buf.c) = 0x01;
-        std::get<0x08>(buf.c) = static_cast<std::uint8_t>(N & 0xFF);
-        std::get<0x09>(buf.c) = static_cast<std::uint8_t>((N >> 8) & 0xFF);
-        std::get<0x0A>(buf.c) = static_cast<std::uint8_t>((N >> 16) & 0xFF);
-        std::get<0x0B>(buf.c) = static_cast<std::uint8_t>((N >> 24) & 0xFF);
-        std::get<0x0C>(buf.c) = static_cast<std::uint8_t>((N >> 32) & 0xFF);
-        std::get<0x0D>(buf.c) = static_cast<std::uint8_t>((N >> 40) & 0xFF);
-        std::get<0x0E>(buf.c) = static_cast<std::uint8_t>((N >> 48) & 0xFF);
-        std::get<0x0F>(buf.c) = static_cast<std::uint8_t>((N >> 56) & 0xFF);
+        std::get<0x08>(buf.c) = static_cast<std::uint8_t>(n & 0xFF);
+        std::get<0x09>(buf.c) = static_cast<std::uint8_t>((n >> 8) & 0xFF);
+        std::get<0x0A>(buf.c) = static_cast<std::uint8_t>((n >> 16) & 0xFF);
+        std::get<0x0B>(buf.c) = static_cast<std::uint8_t>((n >> 24) & 0xFF);
+        std::get<0x0C>(buf.c) = static_cast<std::uint8_t>((n >> 32) & 0xFF);
+        std::get<0x0D>(buf.c) = static_cast<std::uint8_t>((n >> 40) & 0xFF);
+        std::get<0x0E>(buf.c) = static_cast<std::uint8_t>((n >> 48) & 0xFF);
+        std::get<0x0F>(buf.c) = static_cast<std::uint8_t>((n >> 56) & 0xFF);
         std::get<0x10>(buf.c) = static_cast<std::uint8_t>(Yl);
         std::get<0x11>(buf.c) = static_cast<std::uint8_t>(Yf);
         std::get<0x12>(buf.c) = static_cast<std::uint8_t>(Ym);

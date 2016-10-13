@@ -89,9 +89,16 @@ inline bool random_rng_kat(RNGType &rng, const std::string &filename)
     mckl::Vector<typename RNGType::result_type> r(256);
     mckl::rand(rng, 256, r.data());
 
+    for (int i = 0; i != 10; ++i) {
+        std::cout << std::hex << std::uppercase;
+        std::cout << std::setw(20) << std::right << k[i];
+        std::cout << std::setw(20) << std::right << r[i];
+        std::cout << std::endl;
+        std::cout << std::dec;
+    }
+
     return k.size() >= r.size() &&
-        std::memcmp(k.data(), r.data(),
-            sizeof(typename RNGType::result_type) * 256) == 0;
+        std::memcmp(k.data(), r.data(), sizeof(T) * 256) == 0;
 }
 
 #endif // MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
@@ -244,8 +251,10 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
     mckl::Vector<std::uint64_t> r1(N);
     mckl::Vector<std::uint64_t> r2(N);
 
-    double c1 = std::numeric_limits<double>::max();
-    double c2 = std::numeric_limits<double>::max();
+    bool has_cycles = mckl::StopWatch::has_cycles();
+
+    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
     for (std::size_t k = 0; k != 10; ++k) {
         std::size_t n = 0;
         mckl::StopWatch watch1;
@@ -268,8 +277,13 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
             pass = pass && (r1[idx] == r2[idx] || rng != rng);
         }
         std::size_t bytes = sizeof(std::uint64_t) * n;
-        c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
-        c2 = std::min(c2, 1.0 * watch2.cycles() / bytes);
+        if (has_cycles) {
+            c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
+            c2 = std::min(c2, 1.0 * watch2.cycles() / bytes);
+        } else {
+            c1 = std::max(c1, bytes / watch1.seconds() * 1e-9);
+            c2 = std::max(c2, bytes / watch2.seconds() * 1e-9);
+        }
     }
 
     return {pass, c1, c2};
@@ -329,8 +343,10 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
         rs2[p] = std::move(rng);
     };
 
-    double c1 = std::numeric_limits<double>::max();
-    double c2 = std::numeric_limits<double>::max();
+    bool has_cycles = mckl::StopWatch::has_cycles();
+
+    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
     for (std::size_t k = 0; k != 10; ++k) {
         mckl::StopWatch watch1;
         mckl::StopWatch watch2;
@@ -360,8 +376,13 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
             std::accumulate(n1.begin(), n1.end(), static_cast<std::size_t>(0));
         std::size_t bytes2 = sizeof(std::uint64_t) *
             std::accumulate(n2.begin(), n2.end(), static_cast<std::size_t>(0));
-        c1 = std::min(c1, 1.0 * watch1.cycles() / bytes1);
-        c2 = std::min(c2, 1.0 * watch2.cycles() / bytes2);
+        if (has_cycles) {
+            c1 = std::min(c1, 1.0 * watch1.cycles() / bytes1);
+            c2 = std::min(c2, 1.0 * watch2.cycles() / bytes2);
+        } else {
+            c1 = std::max(c1, bytes1 / watch1.seconds() * 1e-9);
+            c2 = std::max(c2, bytes2 / watch2.seconds() * 1e-9);
+        }
     }
 
     return {pass, c1, c2};
@@ -387,7 +408,9 @@ inline double random_rng_e(
     mckl::Vector<ctr_type> r(N);
     mckl::StopWatch watch;
 
-    double c = std::numeric_limits<double>::max();
+    bool has_cycles = mckl::StopWatch::has_cycles();
+
+    double c = has_cycles ? std::numeric_limits<double>::max() : 0.0;
     for (std::size_t i = 0; i != M; ++i) {
         std::size_t K = rsize(rngs);
         watch.start();
@@ -400,7 +423,9 @@ inline double random_rng_e(
         std::size_t idx = ridx(rngs);
         if (r[idx].front() == 0)
             continue;
-        c = std::min(c, 1.0 * watch.cycles() / (K * sizeof(ctr_type)));
+        std::size_t bytes = K * sizeof(ctr_type);
+        c = has_cycles ? std::min(c, 1.0 * watch.cycles() / bytes) :
+                         std::max(c, bytes / watch.seconds() * 1e-9);
     }
 
     return c;

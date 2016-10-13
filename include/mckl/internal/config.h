@@ -66,6 +66,12 @@
 #define MCKL_RUNTIME_WARNING_AS_EXCEPTION 0
 #endif
 
+/// \brief Produce exact the same results regardless of endianness
+/// \ingroup Config
+#ifndef MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+#define MCKL_REQUIRE_ENDIANNESS_NEUTURAL 1
+#endif
+
 // OS dependent macros
 
 #ifndef MCKL_OPENCL

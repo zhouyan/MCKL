@@ -144,11 +144,13 @@ inline void random_distribution_perf_s(std::size_t N, std::size_t M,
     mckl::Vector<result_type> r4(N);
 #endif
 
-    double c1 = std::numeric_limits<double>::max();
-    double c2 = std::numeric_limits<double>::max();
-    double c3 = std::numeric_limits<double>::max();
+    bool has_cycles = mckl::StopWatch::has_cycles();
+
+    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c3 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
 #if MCKL_HAS_MKL
-    double c4 = std::numeric_limits<double>::max();
+    double c4 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
 #endif
     for (std::size_t k = 0; k != 10; ++k) {
         std::size_t num = 0;
@@ -194,12 +196,21 @@ inline void random_distribution_perf_s(std::size_t N, std::size_t M,
             pass = pass && r1 != r4;
 #endif
         }
-        c1 = std::min(c1, 1.0 * watch1.cycles() / num);
-        c2 = std::min(c2, 1.0 * watch2.cycles() / num);
-        c3 = std::min(c3, 1.0 * watch3.cycles() / num);
+        if (has_cycles) {
+            c1 = std::min(c1, 1.0 * watch1.cycles() / num);
+            c2 = std::min(c2, 1.0 * watch2.cycles() / num);
+            c3 = std::min(c3, 1.0 * watch3.cycles() / num);
 #if MCKL_HAS_MKL
-        c4 = std::min(c4, 1.0 * watch4.cycles() / num);
+            c4 = std::min(c4, 1.0 * watch4.cycles() / num);
 #endif
+        } else {
+            c1 = std::max(c1, num / watch1.seconds() * 1e-6);
+            c2 = std::max(c2, num / watch2.seconds() * 1e-6);
+            c3 = std::max(c3, num / watch3.seconds() * 1e-6);
+#if MCKL_HAS_MKL
+            c4 = std::max(c4, num / watch4.seconds() * 1e-6);
+#endif
+        }
     }
 
     RandomDistributionTrait<MCKLDistType> trait;
@@ -344,11 +355,13 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
     };
 #endif
 
-    double c1 = std::numeric_limits<double>::max();
-    double c2 = std::numeric_limits<double>::max();
-    double c3 = std::numeric_limits<double>::max();
+    bool has_cycles = mckl::StopWatch::has_cycles();
+
+    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c3 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
 #if MCKL_HAS_MKL
-    double c4 = std::numeric_limits<double>::max();
+    double c4 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
 #endif
     for (std::size_t k = 0; k != 10; ++k) {
         mckl::StopWatch watch1;
@@ -412,12 +425,21 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
         std::size_t num4 =
             std::accumulate(n4.begin(), n4.end(), static_cast<std::size_t>(0));
 #endif
-        c1 = std::min(c1, 1.0 * watch1.cycles() / num1);
-        c2 = std::min(c2, 1.0 * watch2.cycles() / num2);
-        c3 = std::min(c3, 1.0 * watch3.cycles() / num3);
+        if (has_cycles) {
+            c1 = std::min(c1, 1.0 * watch1.cycles() / num1);
+            c2 = std::min(c2, 1.0 * watch2.cycles() / num2);
+            c3 = std::min(c3, 1.0 * watch3.cycles() / num3);
 #if MCKL_HAS_MKL
-        c4 = std::min(c4, 1.0 * watch4.cycles() / num4);
+            c4 = std::min(c4, 1.0 * watch4.cycles() / num4);
 #endif
+        } else {
+            c1 = std::max(c1, num1 / watch1.seconds() * 1e-6);
+            c2 = std::max(c2, num2 / watch2.seconds() * 1e-6);
+            c3 = std::max(c3, num3 / watch3.seconds() * 1e-6);
+#if MCKL_HAS_MKL
+            c4 = std::max(c4, num4 / watch4.seconds() * 1e-6);
+#endif
+        }
     }
 
     RandomDistributionTrait<MCKLDistType> trait;

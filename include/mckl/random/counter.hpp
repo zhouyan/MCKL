@@ -322,7 +322,7 @@ class CounterEngine
     {
         key_type key;
         std::fill(key.begin(), key.end(), 0);
-        std::memcpy(key.data(), &s, std::min(sizeof(s), sizeof(key)));
+        key.front() = static_cast<typename key_type::value_type>(s);
         reset(key);
     }
 
@@ -331,9 +331,7 @@ class CounterEngine
         typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
     {
         key_type key;
-        std::array<unsigned, sizeof(key) / sizeof(unsigned) + 1> s;
-        seq.generator(s.begin(), s.end());
-        std::memcpy(key.data(), s.data(), std::min(sizeof(s), sizeof(key)));
+        seq.generator(key.begin(), key.end());
         reset(key);
     }
 
