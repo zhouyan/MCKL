@@ -216,7 +216,7 @@ inline bool is_little_endian()
 
     buf.i = 0x01;
 
-    return buf.c[0] = 0x01;
+    return buf.c[0] == 0x01;
 }
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
