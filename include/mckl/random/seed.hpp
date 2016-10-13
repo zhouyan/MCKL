@@ -286,7 +286,7 @@ class SeedGenerator
 
         buf.k = k;
         RNGType rng(0);
-        rng.enc(buf.ctr, buf.ctr);
+        rng.generator().enc(buf.ctr.data(), buf.ctr.data());
 
         return buf.result;
     }

@@ -106,17 +106,13 @@ class PhiloxGenerator
 
     void reset(const key_type &key) { key_ = key; }
 
-    void enc(const ctr_type &ctr, ctr_type &buffer) const
+    void enc(const void *plain, void *cipher) const
     {
-        alignas(32) union {
-            std::array<T, K> state;
-            ctr_type result;
-        } buf;
-
-        buf.result = ctr;
+        alignas(32) std::array<T, K> state;
+        std::memcpy(state.data(), plain, size());
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buf.state, key_);
-        buffer = buf.result;
+            state, key_);
+        std::memcpy(cipher, state.data(), size());
     }
 
     template <typename ResultType>

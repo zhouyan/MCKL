@@ -170,12 +170,6 @@ inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
 
 #endif // MCKL_RNG_THREEFRY
 
-template <typename RNGType>
-using ResultType = typename std::conditional<
-    std::numeric_limits<typename RNGType::result_type>::digits == 32 ||
-        std::numeric_limits<typename RNGType::result_type>::digits == 64,
-    typename RNGType::result_type, std::uint64_t>::type;
-
 struct RandomRNGPerf {
     bool pass;
     double c1;
@@ -185,9 +179,7 @@ struct RandomRNGPerf {
 template <typename RNGType>
 inline bool random_rng_d(std::size_t N, std::size_t M)
 {
-    using result_type = ResultType<RNGType>;
-
-    mckl::UniformBitsDistribution<result_type> ubits;
+    mckl::UniformBitsDistribution<std::uint64_t> ubits;
     std::uniform_int_distribution<std::size_t> rsize(0, N);
     RNGType rng;
     bool pass = random_rng_kat(rng);
@@ -195,8 +187,8 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
     RNGType rng1;
     RNGType rng2;
 
-    mckl::Vector<result_type> r1(N);
-    mckl::Vector<result_type> r2(N);
+    mckl::Vector<std::uint64_t> r1(N);
+    mckl::Vector<std::uint64_t> r2(N);
 
     for (std::size_t i = 0; i != M; ++i) {
         std::size_t K = rsize(rng);
@@ -205,7 +197,7 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
             r1[j] = mckl::rand(rng1, ubits);
         mckl::rand(rng2, ubits, K, r2.data());
         bool equal =
-            std::memcmp(r1.data(), r2.data(), sizeof(result_type) * K) == 0;
+            std::memcmp(r1.data(), r2.data(), sizeof(std::uint64_t) * K) == 0;
         pass = pass && (equal || rng != rng);
 
         rng1.discard(static_cast<unsigned>(K));
@@ -241,9 +233,7 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
 template <typename RNGType>
 inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
 {
-    using result_type = ResultType<RNGType>;
-
-    mckl::UniformBitsDistribution<result_type> ubits;
+    mckl::UniformBitsDistribution<std::uint64_t> ubits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
     RNGType rng;
     bool pass = true;
@@ -251,8 +241,8 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
     RNGType rng1;
     RNGType rng2;
 
-    mckl::Vector<result_type> r1(N);
-    mckl::Vector<result_type> r2(N);
+    mckl::Vector<std::uint64_t> r1(N);
+    mckl::Vector<std::uint64_t> r2(N);
 
     double c1 = std::numeric_limits<double>::max();
     double c2 = std::numeric_limits<double>::max();
@@ -277,7 +267,7 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
             std::size_t idx = ridx(rng);
             pass = pass && (r1[idx] == r2[idx] || rng != rng);
         }
-        std::size_t bytes = sizeof(result_type) * n;
+        std::size_t bytes = sizeof(std::uint64_t) * n;
         c1 = std::min(c1, 1.0 * watch1.cycles() / bytes);
         c2 = std::min(c2, 1.0 * watch2.cycles() / bytes);
     }
@@ -288,8 +278,6 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
 template <typename RNGType>
 inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 {
-    using result_type = ResultType<RNGType>;
-
     bool pass = true;
 
     std::size_t P = std::thread::hardware_concurrency();
@@ -301,18 +289,18 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
         rs2[i].seed(i + 1);
     }
 
-    mckl::Vector<result_type> r1(N * P);
-    mckl::Vector<result_type> r2(N * P);
-    mckl::Vector<result_type> s1(M * P);
-    mckl::Vector<result_type> s2(M * P);
+    mckl::Vector<std::uint64_t> r1(N * P);
+    mckl::Vector<std::uint64_t> r2(N * P);
+    mckl::Vector<std::uint64_t> s1(M * P);
+    mckl::Vector<std::uint64_t> s2(M * P);
     mckl::Vector<std::size_t> n1(M * P);
     mckl::Vector<std::size_t> n2(M * P);
 
     auto worker1 = [N, M, &rs1, &r1, &s1, &n1](std::size_t p) {
-        mckl::UniformBitsDistribution<result_type> ubits;
+        mckl::UniformBitsDistribution<std::uint64_t> ubits;
         std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
         RNGType rng = std::move(rs1[p]);
-        result_type *const r = r1.data() + N * p;
+        std::uint64_t *const r = r1.data() + N * p;
         for (std::size_t i = 0; i != M; ++i) {
             std::size_t K = rsize(rng);
             for (std::size_t j = 0; j != K; ++j)
@@ -326,10 +314,10 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
     };
 
     auto worker2 = [N, M, &rs2, &r2, &s2, &n2](std::size_t p) {
-        mckl::UniformBitsDistribution<result_type> ubits;
+        mckl::UniformBitsDistribution<std::uint64_t> ubits;
         std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
         RNGType rng = std::move(rs2[p]);
-        result_type *const r = r2.data() + N * p;
+        std::uint64_t *const r = r2.data() + N * p;
         for (std::size_t i = 0; i != M; ++i) {
             std::size_t K = rsize(rng);
             mckl::rand(rng, ubits, K, r);
@@ -368,9 +356,9 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
         pass = pass && (s1 == s2 || rs1[0] != rs1[0]);
         pass = pass && (n1 == n2 || rs1[0] != rs1[0]);
 
-        std::size_t bytes1 = sizeof(result_type) *
+        std::size_t bytes1 = sizeof(std::uint64_t) *
             std::accumulate(n1.begin(), n1.end(), static_cast<std::size_t>(0));
-        std::size_t bytes2 = sizeof(result_type) *
+        std::size_t bytes2 = sizeof(std::uint64_t) *
             std::accumulate(n2.begin(), n2.end(), static_cast<std::size_t>(0));
         c1 = std::min(c1, 1.0 * watch1.cycles() / bytes1);
         c2 = std::min(c2, 1.0 * watch2.cycles() / bytes2);
@@ -404,7 +392,7 @@ inline double random_rng_e(
         std::size_t K = rsize(rngs);
         watch.start();
         for (std::size_t j = 0; j != K; ++j) {
-            rng.enc(ctr, r[j]);
+            rng.generator().enc(ctr.data(), r[j].data());
             ++ctr.front();
         }
         watch.stop();
