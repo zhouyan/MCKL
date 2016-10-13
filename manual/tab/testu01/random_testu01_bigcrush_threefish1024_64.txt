@@ -1,0 +1,17 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  160
+ ----------------------------------------------
+ 64  WeightDistrib, r = 26           0.9994
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01OC
+ Number of statistics:  160
+ ----------------------------------------------
+ 12  CollisionOver, t = 21           1.3e-4
+ 74  RandomWalk1 C (L=50, r=0)       5.8e-4
+ ----------------------------------------------
+ All other tests were passed
+

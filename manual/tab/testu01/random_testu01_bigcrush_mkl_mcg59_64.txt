@@ -1,0 +1,174 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  160
+ ----------------------------------------------
+  2  SerialOver, r = 22             1 - eps1
+  6  CollisionOver, t = 3           1 - eps1
+  8  CollisionOver, t = 7           1 - eps1
+ 10  CollisionOver, t = 14            eps
+ 12  CollisionOver, t = 21          1 - eps1
+ 13  BirthdaySpacings, t = 2          eps
+ 14  BirthdaySpacings, t = 3          eps
+ 15  BirthdaySpacings, t = 4          eps
+ 16  BirthdaySpacings, t = 7        1.8e-57
+ 17  BirthdaySpacings, t = 7          eps
+ 18  BirthdaySpacings, t = 8          eps
+ 19  BirthdaySpacings, t = 8          eps
+ 21  BirthdaySpacings, t = 16         eps
+ 27  SimpPoker, r = 27                eps
+ 29  SimpPoker, r = 25                eps
+ 33  CouponCollector, r = 27          eps
+ 35  Gap, r = 25                      eps
+ 61  WeightDistrib, r = 28            eps
+ 76  RandomWalk1 R (L=1000, r=0)     0.9992
+ 85  Fourier3, r = 27                1.2e-4
+ 87  LongestHeadRun, r = 27           eps
+ 96  HammingIndep, L=30, r=27        9.4e-4
+ 102  Run of bits, r = 27              eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01
+ Number of statistics:  160
+ ----------------------------------------------
+  2  SerialOver, r = 22             1 - eps1
+  6  CollisionOver, t = 3           1 - 1.1e-10
+  8  CollisionOver, t = 7           1 - eps1
+ 10  CollisionOver, t = 14          1 - eps1
+ 13  BirthdaySpacings, t = 2          eps
+ 14  BirthdaySpacings, t = 3          eps
+ 15  BirthdaySpacings, t = 4          eps
+ 16  BirthdaySpacings, t = 7        6.7e-24
+ 17  BirthdaySpacings, t = 7          eps
+ 18  BirthdaySpacings, t = 8          eps
+ 19  BirthdaySpacings, t = 8          eps
+ 21  BirthdaySpacings, t = 16         eps
+ 29  SimpPoker, r = 25               1.2e-7
+ 33  CouponCollector, r = 27          eps
+ 35  Gap, r = 25                     3.5e-6
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  160
+ ----------------------------------------------
+  2  SerialOver, r = 22             1 - eps1
+  6  CollisionOver, t = 3           1 - eps1
+  8  CollisionOver, t = 7           1 - eps1
+ 10  CollisionOver, t = 14            eps
+ 12  CollisionOver, t = 21            eps
+ 13  BirthdaySpacings, t = 2          eps
+ 14  BirthdaySpacings, t = 3          eps
+ 15  BirthdaySpacings, t = 4          eps
+ 16  BirthdaySpacings, t = 7          eps
+ 17  BirthdaySpacings, t = 7          eps
+ 18  BirthdaySpacings, t = 8          eps
+ 19  BirthdaySpacings, t = 8          eps
+ 20  BirthdaySpacings, t = 16        6.0e-7
+ 21  BirthdaySpacings, t = 16         eps
+ 27  SimpPoker, r = 27                eps
+ 29  SimpPoker, r = 25                eps
+ 32  CouponCollector, r = 20          eps
+ 33  CouponCollector, r = 27          eps
+ 35  Gap, r = 25                      eps
+ 58  AppearanceSpacings, r = 27      3.5e-4
+ 61  WeightDistrib, r = 28            eps
+ 64  WeightDistrib, r = 26            eps
+ 85  Fourier3, r = 27               5.0e-19
+ 87  LongestHeadRun, r = 27           eps
+ 96  HammingIndep, L=30, r=27       4.2e-51
+ 100  HammingIndep, L=1200, r=25     2.1e-15
+ 102  Run of bits, r = 27              eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  160
+ ----------------------------------------------
+  2  SerialOver, r = 22             1 - eps1
+  6  CollisionOver, t = 3           1 -  1.3e-7
+  8  CollisionOver, t = 7           1 - eps1
+ 10  CollisionOver, t = 14            eps
+ 12  CollisionOver, t = 21          1 - eps1
+ 13  BirthdaySpacings, t = 2          eps
+ 14  BirthdaySpacings, t = 3          eps
+ 15  BirthdaySpacings, t = 4          eps
+ 16  BirthdaySpacings, t = 7       7.2e-130
+ 17  BirthdaySpacings, t = 7          eps
+ 18  BirthdaySpacings, t = 8          eps
+ 19  BirthdaySpacings, t = 8          eps
+ 21  BirthdaySpacings, t = 16         eps
+ 27  SimpPoker, r = 27                eps
+ 29  SimpPoker, r = 25                eps
+ 32  CouponCollector, r = 20         8.2e-4
+ 33  CouponCollector, r = 27          eps
+ 35  Gap, r = 25                      eps
+ 55  SampleCorr, k = 1               3.1e-4
+ 61  WeightDistrib, r = 28            eps
+ 64  WeightDistrib, r = 26           1.9e-9
+ 77  RandomWalk1 C (L=1000, r=20)    5.7e-4
+ 87  LongestHeadRun, r = 27           eps
+ 102  Run of bits, r = 27              eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01OC
+ Number of statistics:  160
+ ----------------------------------------------
+  2  SerialOver, r = 22             1 - eps1
+  6  CollisionOver, t = 3           1 - eps1
+  8  CollisionOver, t = 7           1 - eps1
+ 10  CollisionOver, t = 14            eps
+ 12  CollisionOver, t = 21          1 - eps1
+ 13  BirthdaySpacings, t = 2          eps
+ 14  BirthdaySpacings, t = 3          eps
+ 15  BirthdaySpacings, t = 4          eps
+ 16  BirthdaySpacings, t = 7        1.4e-63
+ 17  BirthdaySpacings, t = 7          eps
+ 18  BirthdaySpacings, t = 8          eps
+ 19  BirthdaySpacings, t = 8          eps
+ 21  BirthdaySpacings, t = 16         eps
+ 27  SimpPoker, r = 27                eps
+ 29  SimpPoker, r = 25              2.0e-15
+ 33  CouponCollector, r = 27          eps
+ 35  Gap, r = 25                     1.1e-6
+ 61  WeightDistrib, r = 28            eps
+ 85  Fourier3, r = 27                3.0e-4
+ 87  LongestHeadRun, r = 27           eps
+ 102  Run of bits, r = 27              eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01OO
+ Number of statistics:  160
+ ----------------------------------------------
+  2  SerialOver, r = 22             1 - eps1
+  6  CollisionOver, t = 3           1 - eps1
+  8  CollisionOver, t = 7           1 - eps1
+ 10  CollisionOver, t = 14            eps
+ 12  CollisionOver, t = 21          1 - eps1
+ 13  BirthdaySpacings, t = 2          eps
+ 14  BirthdaySpacings, t = 3          eps
+ 15  BirthdaySpacings, t = 4          eps
+ 16  BirthdaySpacings, t = 7       3.7e-128
+ 17  BirthdaySpacings, t = 7          eps
+ 18  BirthdaySpacings, t = 8          eps
+ 19  BirthdaySpacings, t = 8          eps
+ 21  BirthdaySpacings, t = 16         eps
+ 27  SimpPoker, r = 27                eps
+ 29  SimpPoker, r = 25                eps
+ 33  CouponCollector, r = 27          eps
+ 35  Gap, r = 25                      eps
+ 61  WeightDistrib, r = 28            eps
+ 64  WeightDistrib, r = 26           6.2e-8
+ 85  Fourier3, r = 27                6.4e-8
+ 87  LongestHeadRun, r = 27           eps
+ 102  Run of bits, r = 27              eps
+ ----------------------------------------------
+ All other tests were passed
+
