@@ -207,7 +207,7 @@ class BufferSize
 {
 }; // class BufferSize;
 
-inline bool is_little_endian()
+inline bool is_big_endian()
 {
     union {
         char c[sizeof(int)];
@@ -216,7 +216,34 @@ inline bool is_little_endian()
 
     buf.i = 0x01;
 
-    return buf.c[0] == 0x01;
+    return buf.c[0] == 0;
+}
+
+template <int, typename U>
+inline U swap_bytes(U, std::false_type)
+{
+    return 0;
+}
+
+template <int N, typename U>
+inline U swap_bytes(U u, std::true_type)
+{
+    static constexpr int bits = sizeof(U) * CHAR_BIT;
+    static constexpr int r = CHAR_BIT * N;
+    static constexpr int l = bits - r - CHAR_BIT;
+    static constexpr U mask = (~const_zero<U>()) >> (bits - CHAR_BIT);
+
+    return ((u & mask) << l) +
+        swap_bytes<N + 1>(u >> CHAR_BIT,
+            std::integral_constant<bool, (r + CHAR_BIT < bits)>());
+}
+
+template <typename T>
+inline T swap_bytes(T x)
+{
+    using U = typename std::make_unsigned<T>::type;
+
+    return static_cast<T>(swap_bytes<0>(static_cast<U>(x), std::true_type()));
 }
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
@@ -296,6 +323,100 @@ inline std::basic_istream<CharT, Traits> &istream(
 
     return is;
 }
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
+#if MCKL_HAS_SSE2
+
+template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
+    std::size_t N>
+static void transpose4x32_si128(std::array<__m128i, N> &s)
+{
+    __m128i s0 = _mm_unpacklo_epi32(std::get<i0>(s), std::get<i1>(s));
+    __m128i s1 = _mm_unpacklo_epi32(std::get<i2>(s), std::get<i3>(s));
+    __m128i t0 = _mm_unpackhi_epi32(std::get<i0>(s), std::get<i1>(s));
+    __m128i t1 = _mm_unpackhi_epi32(std::get<i2>(s), std::get<i3>(s));
+
+    std::get<i0>(s) = _mm_unpacklo_epi64(s0, s1);
+    std::get<i1>(s) = _mm_unpackhi_epi64(s0, s1);
+    std::get<i2>(s) = _mm_unpacklo_epi64(t0, t1);
+    std::get<i3>(s) = _mm_unpackhi_epi64(t0, t1);
+}
+
+template <std::size_t i0, std::size_t i1, std::size_t N>
+static void transpose2x64_si128(std::array<__m128i, N> &s)
+{
+    __m128i s0 = _mm_unpacklo_epi64(std::get<i0>(s), std::get<i1>(s));
+    __m128i t0 = _mm_unpackhi_epi64(std::get<i0>(s), std::get<i1>(s));
+
+    std::get<i0>(s) = s0;
+    std::get<i1>(s) = t0;
+}
+
+#endif // MCKL_HAS_SSE2
+
+#if MCKL_HAS_AVX2
+
+template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
+    std::size_t i4, std::size_t i5, std::size_t i6, std::size_t i7,
+    std::size_t N>
+static void transpose8x32_si256(std::array<__m256i, N> &s)
+{
+    __m256i s0 = _mm256_unpacklo_epi32(std::get<i0>(s), std::get<i1>(s));
+    __m256i s1 = _mm256_unpacklo_epi32(std::get<i2>(s), std::get<i3>(s));
+    __m256i s2 = _mm256_unpacklo_epi32(std::get<i4>(s), std::get<i5>(s));
+    __m256i s3 = _mm256_unpacklo_epi32(std::get<i6>(s), std::get<i7>(s));
+    __m256i t0 = _mm256_unpackhi_epi32(std::get<i0>(s), std::get<i1>(s));
+    __m256i t1 = _mm256_unpackhi_epi32(std::get<i2>(s), std::get<i3>(s));
+    __m256i t2 = _mm256_unpackhi_epi32(std::get<i4>(s), std::get<i5>(s));
+    __m256i t3 = _mm256_unpackhi_epi32(std::get<i6>(s), std::get<i7>(s));
+
+    __m256i u0 = _mm256_unpacklo_epi64(s0, s1);
+    __m256i u1 = _mm256_unpacklo_epi64(s2, s3);
+    __m256i u2 = _mm256_unpacklo_epi64(t0, t1);
+    __m256i u3 = _mm256_unpacklo_epi64(t2, t3);
+    __m256i v0 = _mm256_unpackhi_epi64(s0, s1);
+    __m256i v1 = _mm256_unpackhi_epi64(s2, s3);
+    __m256i v2 = _mm256_unpackhi_epi64(t0, t1);
+    __m256i v3 = _mm256_unpackhi_epi64(t2, t3);
+
+    std::get<i0>(s) = _mm256_permute2x128_si256(u0, u1, 0x20);
+    std::get<i1>(s) = _mm256_permute2x128_si256(v0, v1, 0x20);
+    std::get<i2>(s) = _mm256_permute2x128_si256(u2, u3, 0x20);
+    std::get<i3>(s) = _mm256_permute2x128_si256(v2, v3, 0x20);
+    std::get<i4>(s) = _mm256_permute2x128_si256(u0, u1, 0x31);
+    std::get<i5>(s) = _mm256_permute2x128_si256(v0, v1, 0x31);
+    std::get<i6>(s) = _mm256_permute2x128_si256(u2, u3, 0x31);
+    std::get<i7>(s) = _mm256_permute2x128_si256(v2, v3, 0x31);
+}
+
+template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
+    std::size_t N>
+static void transpose4x64_si256(std::array<__m256i, N> &s)
+{
+    __m256i s0 = _mm256_unpacklo_epi64(std::get<i0>(s), std::get<i1>(s));
+    __m256i s1 = _mm256_unpacklo_epi64(std::get<i2>(s), std::get<i3>(s));
+    __m256i t0 = _mm256_unpackhi_epi64(std::get<i0>(s), std::get<i1>(s));
+    __m256i t1 = _mm256_unpackhi_epi64(std::get<i2>(s), std::get<i3>(s));
+
+    std::get<i0>(s) = _mm256_permute2x128_si256(s0, s1, 0x20);
+    std::get<i1>(s) = _mm256_permute2x128_si256(t0, t1, 0x20);
+    std::get<i2>(s) = _mm256_permute2x128_si256(s0, s1, 0x31);
+    std::get<i3>(s) = _mm256_permute2x128_si256(t0, t1, 0x31);
+}
+
+#endif // MCKL_HAS_AVX2
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 } // namespace mckl::internal
 

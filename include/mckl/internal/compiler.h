@@ -91,6 +91,18 @@
 #endif
 #endif
 
+#ifndef MCKL_HAS_LITTLE_ENDIAN
+#if MCKL_HAS_X86 || MCKL_HAS_X86_64
+#define MCKL_HAS_LITTLE_ENDIAN 1
+#else
+#define MCKL_HAS_LITTLE_ENDIAN 0
+#endif
+#endif
+
+#ifndef MCKL_HAS_BIG_ENDIAN
+#define MCKL_HAS_BIG_ENDIAN 0
+#endif
+
 #ifndef MCKL_HAS_AESNI
 #define MCKL_HAS_AESNI 0
 #endif

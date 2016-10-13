@@ -209,10 +209,10 @@ namespace internal
 {
 
 template <typename T, std::size_t K,
-    bool = (sizeof(T) * K) % sizeof(std::uint_fast8_t) == 0,
-    bool = (sizeof(T) * K) % sizeof(std::uint_fast16_t) == 0,
-    bool = (sizeof(T) * K) % sizeof(std::uint_fast32_t) == 0,
-    bool = (sizeof(T) * K) % sizeof(std::uint_fast64_t) == 0>
+    bool = (sizeof(T) * K) % sizeof(std::uint8_t) == 0,
+    bool = (sizeof(T) * K) % sizeof(std::uint16_t) == 0,
+    bool = (sizeof(T) * K) % sizeof(std::uint32_t) == 0,
+    bool = (sizeof(T) * K) % sizeof(std::uint64_t) == 0>
 class CounterImpl
 {
     public:
@@ -223,32 +223,32 @@ template <typename T, std::size_t K>
 class CounterImpl<T, K, true, false, false, false>
 {
     public:
-    using type = std::array<std::uint_fast8_t,
-        sizeof(T) * K / sizeof(std::uint_fast8_t)>;
+    using type =
+        std::array<std::uint8_t, sizeof(T) * K / sizeof(std::uint8_t)>;
 }; // class CounterImpl
 
 template <typename T, std::size_t K>
 class CounterImpl<T, K, true, true, false, false>
 {
     public:
-    using type = std::array<std::uint_fast16_t,
-        sizeof(T) * K / sizeof(std::uint_fast16_t)>;
+    using type =
+        std::array<std::uint16_t, sizeof(T) * K / sizeof(std::uint16_t)>;
 }; // class CounterImpl
 
 template <typename T, std::size_t K>
 class CounterImpl<T, K, true, true, true, false>
 {
     public:
-    using type = std::array<std::uint_fast32_t,
-        sizeof(T) * K / sizeof(std::uint_fast32_t)>;
+    using type =
+        std::array<std::uint32_t, sizeof(T) * K / sizeof(std::uint32_t)>;
 }; // class CounterImpl
 
 template <typename T, std::size_t K>
 class CounterImpl<T, K, true, true, true, true>
 {
     public:
-    using type = std::array<std::uint_fast64_t,
-        sizeof(T) * K / sizeof(std::uint_fast64_t)>;
+    using type =
+        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
 }; // class CounterImpl
 
 } // namespace internal

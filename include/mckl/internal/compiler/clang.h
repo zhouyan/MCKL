@@ -35,6 +35,18 @@
 #define MCKL_CLANG_VERSION                                                    \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ifndef MCKL_HAS_LITTLE_ENDIAN
+#define MCKL_HAS_LITTLE_ENDIAN 1
+#endif
+#endif
+
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#ifndef MCKL_HAS_BIG_ENDIAN
+#define MCKL_HAS_BIG_ENDIAN 1
+#endif
+#endif
+
 #ifdef __AES__
 #ifndef MCKL_HAS_AESNI
 #define MCKL_HAS_AESNI 1

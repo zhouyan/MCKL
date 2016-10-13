@@ -34,6 +34,14 @@
 
 #define MCKL_MSVC_VERSION _MSC_VER
 
+#ifndef MCKL_HAS_LITTLE_ENDIAN
+#define MCKL_HAS_LITTLE_ENDIAN 1
+#endif
+
+#ifndef MCKL_HAS_BIG_ENDIAN
+#define MCKL_HAS_BIG_ENDIAN 0
+#endif
+
 #ifdef __SSE2__
 #ifndef MCKL_HAS_SSE2
 #define MCKL_HAS_SSE2 1

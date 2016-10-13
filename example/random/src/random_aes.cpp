@@ -37,27 +37,26 @@
     typename mckl::AES##N::ctr_type test_vec##N;                              \
     std::array<typename mckl::AES##N::ctr_type, 4> test_ctr##N;               \
     std::array<typename mckl::AES##N::ctr_type, 4> test_res##N;               \
-    std::array<typename mckl::AES##N::ctr_type, 4> test_buf##N;               \
     std::memcpy(test_key##N.data(), key##N, sizeof(test_key##N));             \
     std::memcpy(test_vec##N.data(), vec##N, sizeof(test_vec##N));             \
     std::memcpy(test_ctr##N.data(), ctr##N, sizeof(test_ctr##N));             \
-    std::memcpy(test_res##N.data(), res##N, sizeof(test_res##N));             \
     generator##N.reset(test_key##N);                                          \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
         test_vec##N[i] = test_ctr##N[0][i] ^ test_vec##N[i];                  \
-    generator##N.enc(test_vec##N.data(), test_buf##N[0].data());              \
+    generator##N.enc(test_vec##N.data(), test_res##N[0].data());              \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
-        test_vec##N[i] = test_ctr##N[1][i] ^ test_buf##N[0][i];               \
-    generator##N.enc(test_vec##N.data(), test_buf##N[1].data());              \
+        test_vec##N[i] = test_ctr##N[1][i] ^ test_res##N[0][i];               \
+    generator##N.enc(test_vec##N.data(), test_res##N[1].data());              \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
-        test_vec##N[i] = test_ctr##N[2][i] ^ test_buf##N[1][i];               \
-    generator##N.enc(test_vec##N.data(), test_buf##N[2].data());              \
+        test_vec##N[i] = test_ctr##N[2][i] ^ test_res##N[1][i];               \
+    generator##N.enc(test_vec##N.data(), test_res##N[2].data());              \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
-        test_vec##N[i] = test_ctr##N[3][i] ^ test_buf##N[2][i];               \
-    generator##N.enc(test_vec##N.data(), test_buf##N[3].data());              \
+        test_vec##N[i] = test_ctr##N[3][i] ^ test_res##N[2][i];               \
+    generator##N.enc(test_vec##N.data(), test_res##N[3].data());              \
+    bool pass##N =                                                            \
+        std::memcpy(test_res##N.data(), res##N, sizeof(test_res##N)) == 0;    \
     std::cout << std::setw(16) << std::left << std::string("AES-" #N ":")     \
-              << (test_buf##N == test_res##N ? "Passed" : "Failed")           \
-              << std::endl;
+              << (pass##N ? "Passed" : "Failed") << std::endl;
 
 static const std::uint8_t key128[] = {0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2,
     0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, 0x3C};

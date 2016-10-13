@@ -486,21 +486,14 @@ class Skein
     static std::array<std::uint64_t, 4> configure(
         std::size_t N, int Yl = 0, int Yf = 0, int Ym = 0)
     {
-        return internal::is_little_endian() ? configure_le(N, Yl, Yf, Ym) :
-                                              configure_be(N, Yl, Yf, Ym);
-    }
-
-    static std::array<std::uint64_t, 4> configure_le(
-        std::size_t N, int Yl, int Yf, int Ym)
-    {
-        std::array<std::uint64_t, 4> C = {{0}};
-        std::get<0>(C) = 0x133414853;
-        std::get<1>(C) = static_cast<std::uint64_t>(N);
-        std::get<2>(C) += static_cast<std::uint64_t>(Yl);
-        std::get<2>(C) += static_cast<std::uint64_t>(Yf << 8);
-        std::get<2>(C) += static_cast<std::uint64_t>(Ym << 16);
-
-        return C;
+#if MCKL_HAS_LITTLE_ENDIAN
+        return configure_le(N, Yl, Yf, Ym);
+#elif MCKL_HAS_BIG_ENDIAN
+        return configure_be(N, Yl, Yf, Ym);
+#else
+        return internal::is_big_endian() ? configure_be(N, Yl, Yf, Ym) :
+                                           configure_le(N, Yl, Yf, Ym);
+#endif
     }
 
     static std::array<std::uint64_t, 4> configure_be(
@@ -530,6 +523,19 @@ class Skein
         std::get<0x12>(buf.c) = static_cast<std::uint8_t>(Ym);
 
         return buf.u;
+    }
+
+    static std::array<std::uint64_t, 4> configure_le(
+        std::size_t N, int Yl, int Yf, int Ym)
+    {
+        std::array<std::uint64_t, 4> C = {{0}};
+        std::get<0>(C) = 0x133414853;
+        std::get<1>(C) = static_cast<std::uint64_t>(N);
+        std::get<2>(C) += static_cast<std::uint64_t>(Yl);
+        std::get<2>(C) += static_cast<std::uint64_t>(Yf << 8);
+        std::get<2>(C) += static_cast<std::uint64_t>(Ym << 16);
+
+        return C;
     }
 
     static bool check_type(std::size_t n, const param_type *M)
