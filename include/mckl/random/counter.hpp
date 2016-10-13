@@ -260,6 +260,11 @@ class CounterImpl<T, K, true, true, true, true>
 template <typename T, std::size_t K>
 using Counter = typename internal::CounterImpl<T, K>::type;
 
+namespace internal
+{
+
+} // namespace mckl::internal
+
 /// \brief Counter based RNG engine
 /// \ingroup Random
 ///

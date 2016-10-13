@@ -36,10 +36,13 @@
     typename mckl::Threefish##N::key_type test_key##N;                        \
     typename mckl::Threefish##N::ctr_type test_ctr##N;                        \
     typename mckl::Threefish##N::ctr_type test_res##N;                        \
-    typename mckl::Threefish##N::key_type::value_type test_tweak##N[2];       \
+    std::array<typename mckl::Threefish##N::key_type::value_type, 2>          \
+        test_tweak##N;                                                        \
     std::memcpy(test_key##N.data(), key##N, sizeof(test_key##N));             \
+    std::memcpy(test_tweak##N.data(), tweak##N, sizeof(test_tweak##N));       \
     std::memcpy(test_ctr##N.data(), ctr##N, sizeof(test_ctr##N));             \
-    std::memcpy(test_tweak##N, tweak##N, sizeof(test_tweak##N));              \
+    mckl::internal::union_le<std::uint8_t>(test_key##N);                      \
+    mckl::internal::union_le<std::uint8_t>(test_tweak##N);                    \
     generator##N.reset(test_key##N);                                          \
     generator##N.tweak(test_tweak##N[0], test_tweak##N[1]);                   \
     generator##N.enc(test_ctr##N.data(), test_res##N.data());                 \

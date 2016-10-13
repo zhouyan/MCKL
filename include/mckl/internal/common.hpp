@@ -207,14 +207,14 @@ class BufferSize
 {
 }; // class BufferSize;
 
-inline bool is_little_endian()
+inline bool is_big_endian()
 {
     union {
         char c[sizeof(int)];
         int i;
     } buf;
 
-    buf.i = 0x01;
+    buf.i = 0x01 << (sizeof(int) * CHAR_BIT - CHAR_BIT);
 
     return buf.c[0] == 0x01;
 }
@@ -251,33 +251,65 @@ inline T swap_bytes(T x)
                 std::integral_constant<bool, Bytes < sizeof(U)>()));
 }
 
-template <typename T, std::size_t K, typename U>
-inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &,
-        std::false_type, std::false_type)
+#if MCKL_HAS_LITTLE_ENDIAN
+
+template <typename, typename T, std::size_t K>
+inline void union_le(std::array<T, K> &)
 {
 }
 
-template <typename T, std::size_t K, typename U>
-inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &,
-        std::false_type, std::true_type)
+#else // MCKL_HAS_LITTLE_ENDIAN
+
+// Let in the following union
+// union {
+//    U u[sizeof(T) * sizeof(K) / sizeof(U);
+//    T t[K]
+// } buf;
+// buf.u is given the exact value
+// transform buf.t such that its value will be as if we are using little endian
+template <typename U, typename T, std::size_t K>
+inline void union_le(std::array<T, K> &, std::false_type, std::false_type)
 {
 }
 
-template <typename T, std::size_t K, typename U>
-inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &r,
-        std::true_type, std::true_type)
+template <typename U, typename T, std::size_t K>
+inline void union_le(std::array<T, K> &buf, std::false_type, std::true_type)
 {
-    for (std::size_t i = 0; i != sizeof(T) * K / sizeof(U); ++i)
-        r[i] = swap_bytes<sizeof(T)>(r[i]);
+    static constexpr std::size_t m = sizeof(U) / sizeof(T);
+    static constexpr std::size_t l = K / m;
+
+    T *b = buf.data();
+    for (std::size_t i = 0; i != l; ++i, b += m)
+        std::reverse(b, b + m);
 }
 
-template <typename T, std::size_t K, typename U>
-inline void swap_words(std::array<U, sizeof(T) * K / sizeof(U)> &r)
+template <typename U, typename T, std::size_t K>
+inline void union_le(std::array<T, K> &buf, std::true_type, std::false_type)
 {
-    swap_words<T, K>(r,
-            std::integral_constant<bool, (sizeof(T) < sizeof(U))>(),
-            std::integral_constant<bool, (sizeof(T) > sizeof(U))>());
+    for (std::size_t i = 0; i != K; ++i)
+        buf[i] = swap_bytes<sizeof(U)>(buf[i]);
 }
+
+template <typename U, typename T, std::size_t K>
+inline void union_le(std::array<T, K> &buf)
+{
+    static_assert(sizeof(U) % sizeof(T) == 0 || sizeof(T) % sizeof(U) == 0,
+            "**union_le** called with sizeof(U) and sizeof(T) with neither of them a multiple of the other");
+
+#if MCKL_HAS_BIG_ENDIAN
+    union_le<U>(buf,
+            std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+            std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
+#else
+    if (is_big_endian()) {
+        union_le<U>(buf,
+                std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+                std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
+    }
+#endif
+}
+
+#endif // MCKL_HAS_LITTLE_ENDIAN
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &ostream(

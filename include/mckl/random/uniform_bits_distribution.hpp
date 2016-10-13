@@ -154,17 +154,24 @@ class UniformBitsDistribution
     template <typename RNGType>
     static UIntType generate_patch(RNGType &rng, std::false_type)
     {
-        return patch<0>(rng, std::true_type());
+#if MCKL_HAS_LITTLE_ENDIAN || !MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        return patch_le<0>(rng, std::true_type());
+#elif MCKL_HAS_BIG_ENDIAN
+        return patch_be<0>(rng, std::true_type());
+#else
+        return internal::is_big_endian() ? patch_be<0>(rng, std::true_type()) :
+                                           patch_le<0>(rng, std::true_type());
+#endif
     }
 
     template <int, typename RNGType>
-    static UIntType patch(RNGType &, std::false_type)
+    static UIntType patch_le(RNGType &, std::false_type)
     {
         return 0;
     }
 
     template <int N, typename RNGType>
-    static UIntType patch(RNGType &rng, std::true_type)
+    static UIntType patch_le(RNGType &rng, std::true_type)
     {
         static constexpr int w = std::numeric_limits<UIntType>::digits;
         static constexpr int r = RNGTraits<RNGType>::bits;
@@ -174,7 +181,31 @@ class UniformBitsDistribution
         UIntType u = static_cast<UIntType>(rng() - RNGType::min())
             << static_cast<UIntType>(p);
 
-        return u + patch<N + 1>(rng, std::integral_constant<bool, (q < w)>());
+        return u + patch_le<N + 1>(rng,
+                std::integral_constant<bool, (q < w)>());
+    }
+
+    template <int N, typename RNGType>
+    static UIntType patch_be(RNGType &rng, std::false_type)
+    {
+        return 0;
+    }
+
+    template <int N, typename RNGType>
+    static UIntType patch_be(RNGType &rng, std::true_type)
+    {
+        static constexpr int w = std::numeric_limits<UIntType>::digits;
+        static constexpr int r = RNGTraits<RNGType>::bits;
+        static constexpr int q = r * N + r;
+        static constexpr int pl = q < w ? w - q : 0;
+        static constexpr int pr = q < w ? 0 : q - w;
+
+        UIntType u = static_cast<UIntType>(rng() - RNGType::min());
+        u <<= static_cast<UIntType>(pl);
+        u >>= static_cast<UIntType>(pr);
+
+        return u + patch_be<N + 1>(rng,
+                std::integral_constant<bool, (q < w)>());
     }
 }; // class UniformBitsDistribution
 

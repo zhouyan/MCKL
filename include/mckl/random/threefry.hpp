@@ -140,11 +140,17 @@ class ThreefryGenerator
 
     void enc(const void *plain, void *cipher) const
     {
-        alignas(32) std::array<T, K> state;
-        std::memcpy(state.data(), plain, size());
+        alignas(32) union {
+            std::array<T, K> state;
+            std::array<char, size()> result;
+        } buf;
+
+        std::memcpy(buf.state.data(), plain, size());
+        internal::union_le<char>(buf.state);
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-            state, par_);
-        std::memcpy(cipher, state.data(), size());
+            buf.state, par_);
+        internal::union_le<T>(buf.result);
+        std::memcpy(cipher, buf.state.data(), size());
     }
 
     template <typename ResultType>
@@ -158,8 +164,14 @@ class ThreefryGenerator
 
         MCKL_FLATTEN_CALL increment(ctr);
         buf.ctr = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<typename ctr_type::value_type>(buf.state);
+#endif // MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
             buf.state, par_);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<T>(buf.result);
+#endif // MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         std::copy(buf.result.begin(), buf.result.end(), buffer);
     }
 

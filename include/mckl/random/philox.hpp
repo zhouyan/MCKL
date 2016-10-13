@@ -108,11 +108,17 @@ class PhiloxGenerator
 
     void enc(const void *plain, void *cipher) const
     {
-        alignas(32) std::array<T, K> state;
-        std::memcpy(state.data(), plain, size());
+        alignas(32) union {
+            std::array<T, K> state;
+            std::array<char, size()> result;
+        } buf;
+
+        std::memcpy(buf.state.data(), plain, size());
+        internal::union_le<char>(buf.state);
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
-            state, key_);
-        std::memcpy(cipher, state.data(), size());
+            buf.state, key_);
+        internal::union_le<T>(buf.result);
+        std::memcpy(cipher, buf.state.data(), size());
     }
 
     template <typename ResultType>
@@ -123,19 +129,16 @@ class PhiloxGenerator
             ctr_type ctr;
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
-
         MCKL_FLATTEN_CALL increment(ctr);
         buf.ctr = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<typename ctr_type::value_type>(buf.state);
+#endif // MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
             buf.state, key_);
-// #if MCKL_REQUIRE_ENDIANNESS_NEUTRUAL
-// #if MCKL_HAS_BIG_ENDIAN
-//         internal::swap_words<T, K>(buf.result);
-// #elif !MCKL_HAS_LITTLE_ENDIAN
-//         if (!internal::is_little_endian())
-//             internal::swap_words<T, K>(buf.result);
-// #endif
-// #endif // MCKL_REQUIRE_ENDIANNESS_NEUTRUAL
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<T>(buf.result);
+#endif // MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         std::copy(buf.result.begin(), buf.result.end(), buffer);
     }
 

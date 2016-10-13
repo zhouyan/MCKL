@@ -69,7 +69,7 @@
 /// \brief Produce exact the same results regardless of endianness
 /// \ingroup Config
 #ifndef MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-#define MCKL_REQUIRE_ENDIANNESS_NEUTURAL 1
+#define MCKL_REQUIRE_ENDIANNESS_NEUTURAL 0
 #endif
 
 // OS dependent macros

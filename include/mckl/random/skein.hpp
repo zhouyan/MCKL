@@ -159,7 +159,9 @@ class Skein
         Ym &= 0xFF;
 
         key_type G = {{0}};
+
         std::array<std::uint64_t, 4> C = configure(N, Yl, Yf, Ym);
+        internal::union_le<char>(C);
 
         value_type t0 = 0;
         value_type t1 = 0;
@@ -285,31 +287,38 @@ class Skein
         const std::size_t m = N % bytes();
         if (n < std::numeric_limits<typename key_type::value_type>::max()) {
             for (std::size_t i = 0; i != n; ++i) {
-                generator.enc(ctr.data(), buf.data());
-                buf.front() ^= ctr.front();
+                key_type M = ctr;
+                internal::union_le<char>(M);
+                generator.enc(M.data(), buf.data());
+                buf.front() ^= M.front();
                 std::memcpy(C, buf.data(), bytes());
                 ++ctr.front();
                 C += bytes();
             }
             if (m != 0) {
-                generator.enc(ctr.data(), buf.data());
-                buf.front() ^= ctr.front();
+                key_type M = ctr;
+                internal::union_le<char>(M);
+                generator.enc(M.data(), buf.data());
+                buf.front() ^= M.front();
                 std::memcpy(C, buf.data(), m);
             }
         } else {
             for (std::size_t i = 0; i != n; ++i) {
-                generator.enc(ctr.data(), buf.data());
-                buf.front() ^= ctr.front();
-                for (std::size_t j = 0; j != ctr.size(); ++j)
-                    buf[j] ^= ctr[j];
+                key_type M = ctr;
+                generator.enc(M.data(), buf.data());
+                buf.front() ^= M.front();
+                for (std::size_t j = 0; j != M.size(); ++j)
+                    buf[j] ^= M[j];
                 std::memcpy(C, buf.data(), bytes());
                 increment(ctr);
                 C += bytes();
             }
             if (m != 0) {
-                generator.enc(ctr.data(), buf.data());
-                for (std::size_t j = 0; j != ctr.size(); ++j)
-                    buf[j] ^= ctr[j];
+                key_type M = M;
+                internal::union_le<char>(M);
+                generator.enc(M.data(), buf.data());
+                for (std::size_t j = 0; j != M.size(); ++j)
+                    buf[j] ^= M[j];
                 std::memcpy(C, buf.data(), m);
             }
         }
@@ -355,6 +364,7 @@ class Skein
                 std::size_t N =
                     i + 1 == k1 ? M.bits() - i * Nl * CHAR_BIT : Nl * CHAR_BIT;
                 M1[i] = ubi(G, param_type(N, M.data() + i * Nl), t0, t1);
+                internal::union_le<char>(M1[i]);
             }
             return ubi_tree(
                 G, param_type(bits() * k1, M1.data()), Yl, Yf, Ym, 1);
@@ -364,6 +374,7 @@ class Skein
         if (M.bits() == bits()) {
             key_type H = {{0}};
             std::memcpy(H.data(), M.data(), bytes());
+            internal::union_le<char>(H);
             return H;
         }
 
@@ -385,6 +396,7 @@ class Skein
             std::size_t N =
                 i + 1 == kl ? M.bits() - i * Nn * CHAR_BIT : Nn * CHAR_BIT;
             Ml[i] = ubi(G, param_type(N, M.data() + i * Nn), t0, t1);
+            internal::union_le<char>(Ml[i]);
         }
 
         return ubi_tree(
@@ -400,6 +412,7 @@ class Skein
         generator.enc(M.data(), H.data());
         for (std::size_t i = 0; i != M.size(); ++i)
             H[i] ^= M[i];
+        internal::union_le<char>(H);
     }
 
     static void set_flags(value_type &t1, bool first, bool last, bool bpad)
@@ -483,50 +496,6 @@ class Skein
     }
 
     static std::array<std::uint64_t, 4> configure(
-        std::size_t N, int Yl = 0, int Yf = 0, int Ym = 0)
-    {
-#if MCKL_HAS_LITTLE_ENDIAN
-        return configure_le(N, Yl, Yf, Ym);
-#elif MCKL_HAS_BIG_ENDIAN
-        return configure_be(N, Yl, Yf, Ym);
-#else
-        return internal::is_little_endian() ? configure_le(N, Yl, Yf, Ym) :
-                                              configure_be(N, Yl, Yf, Ym);
-#endif
-    }
-
-    static std::array<std::uint64_t, 4> configure_be(
-        std::size_t N, int Yl, int Yf, int Ym)
-    {
-        union {
-            std::array<std::uint8_t, 32> c;
-            std::array<std::uint64_t, 4> u;
-        } buf;
-        std::fill(buf.u.begin(), buf.u.end(), 0);
-
-        std::uint64_t n = static_cast<std::uint64_t>(N);
-
-        std::get<0x00>(buf.c) = 0x53;
-        std::get<0x01>(buf.c) = 0x48;
-        std::get<0x02>(buf.c) = 0x41;
-        std::get<0x03>(buf.c) = 0x33;
-        std::get<0x04>(buf.c) = 0x01;
-        std::get<0x08>(buf.c) = static_cast<std::uint8_t>(n & 0xFF);
-        std::get<0x09>(buf.c) = static_cast<std::uint8_t>((n >> 8) & 0xFF);
-        std::get<0x0A>(buf.c) = static_cast<std::uint8_t>((n >> 16) & 0xFF);
-        std::get<0x0B>(buf.c) = static_cast<std::uint8_t>((n >> 24) & 0xFF);
-        std::get<0x0C>(buf.c) = static_cast<std::uint8_t>((n >> 32) & 0xFF);
-        std::get<0x0D>(buf.c) = static_cast<std::uint8_t>((n >> 40) & 0xFF);
-        std::get<0x0E>(buf.c) = static_cast<std::uint8_t>((n >> 48) & 0xFF);
-        std::get<0x0F>(buf.c) = static_cast<std::uint8_t>((n >> 56) & 0xFF);
-        std::get<0x10>(buf.c) = static_cast<std::uint8_t>(Yl);
-        std::get<0x11>(buf.c) = static_cast<std::uint8_t>(Yf);
-        std::get<0x12>(buf.c) = static_cast<std::uint8_t>(Ym);
-
-        return buf.u;
-    }
-
-    static std::array<std::uint64_t, 4> configure_le(
         std::size_t N, int Yl, int Yf, int Ym)
     {
         std::array<std::uint64_t, 4> C = {{0}};

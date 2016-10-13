@@ -46,6 +46,8 @@ ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 PROJECT(MCKL VERSION 0.1 LANGUAGES C CXX)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
+SET(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
+
 SET (MCKL_GOOD_COMPILER TRUE)
 IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
     IF(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
@@ -142,8 +144,7 @@ ENDIF(MCKL_ENABLE_EXAMPLE)
 
 MESSAGE(STATUS "=======================================================")
 IF (NOT MCKL_GOOD_COMPILER)
-    MESSAGE(STATUS "Runtime library and some examples are disabled due to")
-    MESSAGE(STATUS "known issues with compilers")
+    MESSAGE(STATUS "Some examples disabled due to known issues with compilers")
     MESSAGE (STATUS
         "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
     MESSAGE(STATUS "=======================================================")

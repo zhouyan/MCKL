@@ -62,7 +62,7 @@
 #if MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
 
 template <typename RNGType>
-inline bool random_rng_kat(RNGType &)
+inline bool random_rng_k(const RNGType &)
 {
     return true;
 }
@@ -70,7 +70,7 @@ inline bool random_rng_kat(RNGType &)
 #else // MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
 
 template <typename RNGType>
-inline bool random_rng_kat(RNGType &, const std::string &filename)
+inline bool random_rng_k(const RNGType &, const std::string &filename)
 {
     using result_type = typename RNGType::result_type;
 
@@ -85,14 +85,6 @@ inline bool random_rng_kat(RNGType &, const std::string &filename)
     mckl::Vector<result_type> r(k.size());
     mckl::rand(rng, k.size(), r.data());
 
-    for (int i = 0; i != 10; ++i) {
-        std::cout << std::hex << std::uppercase;
-        std::cout << std::setw(20) << std::right << k[i];
-        std::cout << std::setw(20) << std::right << r[i];
-        std::cout << std::endl;
-        std::cout << std::dec;
-    }
-
     return k == r;
 }
 
@@ -101,27 +93,27 @@ inline bool random_rng_kat(RNGType &, const std::string &filename)
 #if MCKL_HAS_AESNI && MCKL_RNG_AESNI
 
 template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::AES128Engine<ResultType, Rounds> &rng)
+inline bool random_rng_k(const mckl::AES128Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat(rng, "random_aes128.txt");
+    return random_rng_k(rng, "random_aes128.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::AES192Engine<ResultType, Rounds> &rng)
+inline bool random_rng_k(const mckl::AES192Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat(rng, "random_aes192.txt");
+    return random_rng_k(rng, "random_aes192.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::AES256Engine<ResultType, Rounds> &rng)
+inline bool random_rng_k(const mckl::AES256Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat(rng, "random_aes256.txt");
+    return random_rng_k(rng, "random_aes256.txt");
 }
 
 template <typename ResultType, std::size_t Rounds>
-inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
+inline bool random_rng_k(const mckl::ARSEngine<ResultType, Rounds> &rng)
 {
-    return random_rng_kat(rng, "random_ars.txt");
+    return random_rng_k(rng, "random_ars.txt");
 }
 
 #endif // MCKL_HAS_AESNI && MCKL_RNG_AESNI
@@ -129,7 +121,7 @@ inline bool random_rng_kat(mckl::ARSEngine<ResultType, Rounds> &rng)
 #if MCKL_RNG_PHILOX
 
 template <typename ResultType, typename T, std::size_t K>
-inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
+inline bool random_rng_k(const mckl::PhiloxEngine<ResultType, T, K> &rng)
 {
     std::string filename("random_philox");
     filename += std::to_string(K) + "x";
@@ -138,7 +130,7 @@ inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
         filename += "_64";
     filename += ".txt";
 
-    return random_rng_kat(rng, filename);
+    return random_rng_k(rng, filename);
 }
 
 #endif // MCKL_RNG_PHILOX
@@ -146,7 +138,7 @@ inline bool random_rng_kat(mckl::PhiloxEngine<ResultType, T, K> &rng)
 #if MCKL_RNG_THREEFRY
 
 template <typename ResultType, typename T, std::size_t K>
-inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
+inline bool random_rng_k(const mckl::ThreefryEngine<ResultType, T, K> &rng)
 {
     std::string filename("random_threefry");
     filename += std::to_string(K) + "x";
@@ -155,40 +147,40 @@ inline bool random_rng_kat(mckl::ThreefryEngine<ResultType, T, K> &rng)
         filename += "_64";
     filename += ".txt";
 
-    return random_rng_kat(rng, filename);
+    return random_rng_k(rng, filename);
 }
 
 template <typename ResultType>
-inline bool random_rng_kat(mckl::Threefish256Engine<ResultType> &rng)
+inline bool random_rng_k(const mckl::Threefish256Engine<ResultType> &rng)
 {
     std::string filename("random_threefish256");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
     filename += ".txt";
 
-    return random_rng_kat(rng, filename);
+    return random_rng_k(rng, filename);
 }
 
 template <typename ResultType>
-inline bool random_rng_kat(mckl::Threefish512Engine<ResultType> &rng)
+inline bool random_rng_k(const mckl::Threefish512Engine<ResultType> &rng)
 {
     std::string filename("random_threefish512");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
     filename += ".txt";
 
-    return random_rng_kat(rng, filename);
+    return random_rng_k(rng, filename);
 }
 
 template <typename ResultType>
-inline bool random_rng_kat(mckl::Threefish1024Engine<ResultType> &rng)
+inline bool random_rng_k(const mckl::Threefish1024Engine<ResultType> &rng)
 {
     std::string filename("random_threefish1024");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
     filename += ".txt";
 
-    return random_rng_kat(rng, filename);
+    return random_rng_k(rng, filename);
 }
 
 #endif // MCKL_RNG_THREEFRY
@@ -202,26 +194,29 @@ struct RandomRNGPerf {
 template <typename RNGType>
 inline bool random_rng_d(std::size_t N, std::size_t M)
 {
-    mckl::UniformBitsDistribution<std::uint64_t> ubits;
+    using result_type = typename RNGType::result_type;
+
     std::uniform_int_distribution<std::size_t> rsize(0, N);
     RNGType rng;
-    bool pass = random_rng_kat(rng);
+    bool pass = true;
 
     RNGType rng1;
     RNGType rng2;
 
-    mckl::Vector<std::uint64_t> r1(N);
-    mckl::Vector<std::uint64_t> r2(N);
+    mckl::Vector<result_type> r1(N);
+    mckl::Vector<result_type> r2(N);
+    r1.reserve(N);
+    r2.reserve(N);
 
     for (std::size_t i = 0; i != M; ++i) {
         std::size_t K = rsize(rng);
+        r1.resize(K);
+        r2.resize(K);
 
         for (std::size_t j = 0; j != K; ++j)
-            r1[j] = mckl::rand(rng1, ubits);
-        mckl::rand(rng2, ubits, K, r2.data());
-        bool equal =
-            std::memcmp(r1.data(), r2.data(), sizeof(std::uint64_t) * K) == 0;
-        pass = pass && (equal || rng != rng);
+            r1[j] = rng1();
+        mckl::rand(rng2, K, r2.data());
+        pass = pass && (r1 == r2 || rng != rng);
 
         rng1.discard(static_cast<unsigned>(K));
         typename RNGType::result_type next = rng1();
@@ -234,19 +229,19 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
 
         std::stringstream ss;
         ss << rng;
-        mckl::rand(rng, ubits, K, r1.data());
+        mckl::rand(rng, K, r1.data());
         ss >> rng;
-        mckl::rand(rng, ubits, K, r2.data());
+        mckl::rand(rng, K, r2.data());
         pass = pass && (r1 == r2 || rng != rng);
 
         RNGType tmp(rng);
-        mckl::rand(rng, ubits, K, r1.data());
-        mckl::rand(tmp, ubits, K, r2.data());
+        mckl::rand(rng, K, r1.data());
+        mckl::rand(tmp, K, r2.data());
         pass = pass && (r1 == r2 || rng != rng);
 
         tmp = rng;
-        mckl::rand(rng, ubits, K, r1.data());
-        mckl::rand(tmp, ubits, K, r2.data());
+        mckl::rand(rng, K, r1.data());
+        mckl::rand(tmp, K, r2.data());
         pass = pass && (r1 == r2 || rng != rng);
     }
 
@@ -455,6 +450,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     const int twid = 7;
     const std::size_t lwid = nwid + swid * 2 + twid * 9 + 15;
 
+    bool pass_k = random_rng_k(RNGType());
     bool pass_d = random_rng_d<RNGType>(N, M);
     RandomRNGPerf perf_s = random_rng_s<RNGType>(N, M);
     RandomRNGPerf perf_p = random_rng_p<RNGType>(N, M);
@@ -498,10 +494,11 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
         std::cout << std::setw(twid) << std::right << "---";
 
     std::string pass;
+    pass += pass_k ? "-" : "*";
     pass += pass_d ? "-" : "*";
     pass += perf_s.pass ? "-" : "*";
     pass += perf_p.pass ? "-" : "*";
-    pass += random_pass(pass_d && perf_s.pass && perf_p.pass);
+    pass += random_pass(pass_k && pass_d && perf_s.pass && perf_p.pass);
     std::cout << std::setw(15) << std::right << pass;
     std::cout << std::endl;
 
