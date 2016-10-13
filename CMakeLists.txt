@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
 ##############################################################################
 # Disable in source build
@@ -43,7 +43,7 @@ ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 # Basics
 ##############################################################################
 
-PROJECT(MCKL VERSION 0.1 LANGUAGES CXX)
+PROJECT(MCKL VERSION 0.1 LANGUAGES C CXX)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 SET (MCKL_GOOD_COMPILER TRUE)
