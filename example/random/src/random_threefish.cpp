@@ -42,7 +42,7 @@
     std::memcpy(test_res##N.data(), res##N, sizeof(test_res##N));             \
     generator##N.reset(test_key##N);                                          \
     generator##N.tweak(tweak##N[0], tweak##N[1]);                             \
-    generator##N.enc(test_ctr##N, test_buf##N);                               \
+    generator##N.enc(test_ctr##N.data(), test_buf##N.data());                 \
     std::cout << std::setw(16) << std::left                                   \
               << std::string("Threefish-" #N ":")                             \
               << (test_buf##N == test_res##N ? "Passed" : "Failed")           \

@@ -45,16 +45,16 @@
     generator##N.reset(test_key##N);                                          \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
         test_vec##N[i] = test_ctr##N[0][i] ^ test_vec##N[i];                  \
-    generator##N.enc(test_vec##N, test_buf##N[0]);                            \
+    generator##N.enc(test_vec##N.data(), test_buf##N[0].data());              \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
         test_vec##N[i] = test_ctr##N[1][i] ^ test_buf##N[0][i];               \
-    generator##N.enc(test_vec##N, test_buf##N[1]);                            \
+    generator##N.enc(test_vec##N.data(), test_buf##N[1].data());              \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
         test_vec##N[i] = test_ctr##N[2][i] ^ test_buf##N[1][i];               \
-    generator##N.enc(test_vec##N, test_buf##N[2]);                            \
+    generator##N.enc(test_vec##N.data(), test_buf##N[2].data());              \
     for (std::size_t i = 0; i != test_vec##N.size(); ++i)                     \
         test_vec##N[i] = test_ctr##N[3][i] ^ test_buf##N[2][i];               \
-    generator##N.enc(test_vec##N, test_buf##N[3]);                            \
+    generator##N.enc(test_vec##N.data(), test_buf##N[3].data());              \
     std::cout << std::setw(16) << std::left << std::string("AES-" #N ":")     \
               << (test_buf##N == test_res##N ? "Passed" : "Failed")           \
               << std::endl;

@@ -200,30 +200,25 @@ class Skein
     {
         std::size_t N = M.bits();
         const char *C = M.data();
-        const std::size_t k = internal::BufferSize<ctr_type>::value;
-        alignas(32) std::array<ctr_type, k> buffer;
+        const std::size_t k = internal::BufferSize<key_type>::value;
+        alignas(32) std::array<key_type, k> buffer;
 
         const bool B = N % CHAR_BIT != 0;
-
-        union {
-            key_type G;
-            ctr_type H;
-        } buf;
-        buf.G = G;
+        key_type H = G;
 
         // Process the only block
         if (N <= bits()) {
             get_block(t0, C, buffer[0], N);
             set_flags(t1, true, true, B);
-            enc_block(buf.G, buffer[0], t0, t1, buf.H);
+            enc_block(H, buffer[0], t0, t1);
 
-            return buf.G;
+            return H;
         }
 
         // Process the first block
         set_flags(t1, true, false, B);
         get_block(t0, C, buffer[0]);
-        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+        enc_block(H, buffer[0], t0, t1);
         N -= bits();
         C += bytes();
 
@@ -231,9 +226,9 @@ class Skein
         if (N <= bits()) {
             get_block(t0, C, buffer[0], N);
             set_flags(t1, false, true, B);
-            enc_block(buf.G, buffer[0], t0, t1, buf.H);
+            enc_block(H, buffer[0], t0, t1);
 
-            return buf.G;
+            return H;
         }
 
         // Process the intermediate blocks
@@ -245,7 +240,7 @@ class Skein
             std::memcpy(buffer.data(), C, bytes() * k);
             for (std::size_t j = 0; j != k; ++j) {
                 t0 += bytes();
-                enc_block(buf.G, buffer[j], t0, t1, buf.H);
+                enc_block(H, buffer[j], t0, t1);
             }
             N -= bits() * k;
             C += bytes() * k;
@@ -253,7 +248,7 @@ class Skein
         std::memcpy(buffer.data(), C, bytes() * l);
         for (std::size_t j = 0; j != l; ++j) {
             t0 += bytes();
-            enc_block(buf.G, buffer[j], t0, t1, buf.H);
+            enc_block(H, buffer[j], t0, t1);
         }
         N -= bits() * l;
         C += bytes() * l;
@@ -261,9 +256,9 @@ class Skein
         // Process the last block
         set_flags(t1, false, true, B);
         get_block(t0, C, buffer[0], N);
-        enc_block(buf.G, buffer[0], t0, t1, buf.H);
+        enc_block(H, buffer[0], t0, t1);
 
-        return buf.G;
+        return H;
     }
 
     /// \brief Output
@@ -284,26 +279,26 @@ class Skein
         generator.reset(G);
         generator.tweak(t0, t1);
 
-        ctr_type ctr = {{0}};
-        ctr_type buf = {{0}};
+        key_type ctr = {{0}};
+        key_type buf = {{0}};
         const std::size_t n = N / bytes();
         const std::size_t m = N % bytes();
-        if (n < std::numeric_limits<typename ctr_type::value_type>::max()) {
+        if (n < std::numeric_limits<typename key_type::value_type>::max()) {
             for (std::size_t i = 0; i != n; ++i) {
-                generator.enc(ctr, buf);
+                generator.enc(ctr.data(), buf.data());
                 buf.front() ^= ctr.front();
                 std::memcpy(C, buf.data(), bytes());
                 ++ctr.front();
                 C += bytes();
             }
             if (m != 0) {
-                generator.enc(ctr, buf);
+                generator.enc(ctr.data(), buf.data());
                 buf.front() ^= ctr.front();
                 std::memcpy(C, buf.data(), m);
             }
         } else {
             for (std::size_t i = 0; i != n; ++i) {
-                generator.enc(ctr, buf);
+                generator.enc(ctr.data(), buf.data());
                 buf.front() ^= ctr.front();
                 for (std::size_t j = 0; j != ctr.size(); ++j)
                     buf[j] ^= ctr[j];
@@ -312,7 +307,7 @@ class Skein
                 C += bytes();
             }
             if (m != 0) {
-                generator.enc(ctr, buf);
+                generator.enc(ctr.data(), buf.data());
                 for (std::size_t j = 0; j != ctr.size(); ++j)
                     buf[j] ^= ctr[j];
                 std::memcpy(C, buf.data(), m);
@@ -321,8 +316,6 @@ class Skein
     }
 
     private:
-    using ctr_type = typename Generator::ctr_type;
-
     static_assert(bits() >= 64,
         "**Skein** used with a Generator with less than 64 bits");
 
@@ -334,8 +327,8 @@ class Skein
         "**Skein** used with a Generator with key_type::value_type less than "
         "32 bits");
 
-    static_assert(sizeof(key_type) == sizeof(ctr_type),
-        "**Skein** used with a Generator with counter and key different in "
+    static_assert(sizeof(key_type) == Generator::size(),
+        "**Skein** used with a Generator with block and key different in "
         "size");
 
     static key_type ubi_tree(
@@ -398,13 +391,13 @@ class Skein
             G, param_type(bits() * kl, Ml.data()), Yl, Yf, Ym, l + 1);
     }
 
-    static void enc_block(const key_type &G, const ctr_type &M, value_type t0,
-        value_type t1, ctr_type &H)
+    static void enc_block(
+        key_type &H, const key_type &M, value_type t0, value_type t1)
     {
         Generator generator;
-        generator.reset(G);
+        generator.reset(H);
         generator.tweak(t0, t1);
-        generator.enc(M, H);
+        generator.enc(M.data(), H.data());
         for (std::size_t i = 0; i != M.size(); ++i)
             H[i] ^= M[i];
     }
@@ -456,14 +449,14 @@ class Skein
         t1 ^= (static_cast<value_type>(level) << (N - 16)) & mask;
     }
 
-    static void get_block(value_type &t0, const char *C, ctr_type &M)
+    static void get_block(value_type &t0, const char *C, key_type &M)
     {
         std::memcpy(M.data(), C, bytes());
         t0 += bytes();
     }
 
     static void get_block(
-        value_type &t0, const char *C, ctr_type &M, std::size_t N)
+        value_type &t0, const char *C, key_type &M, std::size_t N)
     {
         if (N == 0) {
             std::fill(M.begin(), M.end(), 0);

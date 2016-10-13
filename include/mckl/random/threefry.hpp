@@ -138,17 +138,13 @@ class ThreefryGenerator
         std::get<K + 3>(par_) = t0 ^ t1;
     }
 
-    void enc(const ctr_type &ctr, ctr_type &buffer) const
+    void enc(const void *plain, void *cipher) const
     {
-        alignas(32) union {
-            std::array<T, K> state;
-            ctr_type result;
-        } buf;
-
-        buf.result = ctr;
+        alignas(32) std::array<T, K> state;
+        std::memcpy(state.data(), plain, size());
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buf.state, par_);
-        buffer = buf.result;
+            state, par_);
+        std::memcpy(cipher, state.data(), size());
     }
 
     template <typename ResultType>

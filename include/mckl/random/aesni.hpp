@@ -883,18 +883,13 @@ class AESNIGenerator
 
     void reset(const key_type &key) { key_seq_.reset(key); }
 
-    void enc(const ctr_type &ctr, ctr_type &buffer) const
+    void enc(const void *plain, void *cipher) const
     {
-        alignas(32) union {
-            __m128i state;
-            ctr_type result;
-        } buf;
-
+        __m128i state =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
         std::array<__m128i, rounds_ + 1> rk(key_seq_.get());
-
-        buf.result = ctr;
         internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
-        buffer = buf.result;
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), state);
     }
 
     template <typename ResultType>
