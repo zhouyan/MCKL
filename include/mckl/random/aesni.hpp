@@ -888,7 +888,7 @@ class AESNIGenerator
         __m128i state =
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
         std::array<__m128i, rounds_ + 1> rk(key_seq_.get());
-        internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
+        internal::AESNIGeneratorImpl<KeySeqType>::eval(state, rk);
         _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), state);
     }
 
