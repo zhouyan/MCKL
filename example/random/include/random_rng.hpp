@@ -95,25 +95,45 @@ inline bool random_rng_k(const RNGType &, const std::string &filename)
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_k(const mckl::AES128Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_k(rng, "random_aes128.txt");
+    std::string filename("random_ase128");
+    if (std::numeric_limits<ResultType>::digits == 64)
+        filename += "_64";
+    filename += ".txt";
+
+    return random_rng_k(rng, filename);
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_k(const mckl::AES192Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_k(rng, "random_aes192.txt");
+    std::string filename("random_ase192");
+    if (std::numeric_limits<ResultType>::digits == 64)
+        filename += "_64";
+    filename += ".txt";
+
+    return random_rng_k(rng, filename);
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_k(const mckl::AES256Engine<ResultType, Rounds> &rng)
 {
-    return random_rng_k(rng, "random_aes256.txt");
+    std::string filename("random_ase256");
+    if (std::numeric_limits<ResultType>::digits == 64)
+        filename += "_64";
+    filename += ".txt";
+
+    return random_rng_k(rng, filename);
 }
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_k(const mckl::ARSEngine<ResultType, Rounds> &rng)
 {
-    return random_rng_k(rng, "random_ars.txt");
+    std::string filename("random_ars");
+    if (std::numeric_limits<ResultType>::digits == 64)
+        filename += "_64";
+    filename += ".txt";
+
+    return random_rng_k(rng, filename);
 }
 
 #endif // MCKL_HAS_AESNI && MCKL_RNG_AESNI

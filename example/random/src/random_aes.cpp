@@ -54,7 +54,7 @@
         test_vec##N[i] = test_ctr##N[3][i] ^ test_res##N[2][i];               \
     generator##N.enc(test_vec##N.data(), test_res##N[3].data());              \
     bool pass##N =                                                            \
-        std::memcpy(test_res##N.data(), res##N, sizeof(test_res##N)) == 0;    \
+        std::memcmp(test_res##N.data(), res##N, sizeof(test_res##N)) == 0;    \
     std::cout << std::setw(16) << std::left << std::string("AES-" #N ":")     \
               << (pass##N ? "Passed" : "Failed") << std::endl;
 
