@@ -35,11 +35,11 @@
 #include <mckl/utility/hdf5.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-#define MCKL_HDF5_TEST(orig, load)                                            \
-    hdf5_test<orig, load>(nrow, ncol, #orig, #load);
+#define MCKL_EXAMPLE_UTILITY_HDF5_TEST(orig, load)                            \
+    utility_hdf5_test<orig, load>(nrow, ncol, #orig, #load);
 
 template <typename OrigType, typename LoadType>
-inline bool hdf5_check(
+inline bool utility_hdf5_check(
     const mckl::Vector<OrigType> &orig, const mckl::Vector<LoadType> &load)
 {
     for (std::size_t i = 0; i != orig.size(); ++i)
@@ -49,7 +49,7 @@ inline bool hdf5_check(
 }
 
 template <typename OrigType, typename LoadType>
-inline void hdf5_test(std::size_t nrow, std::size_t ncol,
+inline void utility_hdf5_test(std::size_t nrow, std::size_t ncol,
     const std::string &orig_type, const std::string &load_type)
 {
     std::cout << std::setw(20) << std::left << orig_type << std::setw(20)
@@ -88,17 +88,17 @@ inline void hdf5_test(std::size_t nrow, std::size_t ncol,
     passed = passed && n == mckl::hdf5load_size(filename, "data/m3");
     passed = passed && n == mckl::hdf5load_size(filename, "data/m4");
     mckl::hdf5load(filename, "data/x1", load.begin());
-    passed = passed && hdf5_check(orig, load);
+    passed = passed && utility_hdf5_check(orig, load);
     mckl::hdf5load(filename, "data/x2", load.data());
-    passed = passed && hdf5_check(orig, load);
+    passed = passed && utility_hdf5_check(orig, load);
     mckl::hdf5load(filename, "data/m1", load.begin());
-    passed = passed && hdf5_check(orig, load);
+    passed = passed && utility_hdf5_check(orig, load);
     mckl::hdf5load(filename, "data/m2", load.data());
-    passed = passed && hdf5_check(orig, load);
+    passed = passed && utility_hdf5_check(orig, load);
     mckl::hdf5load(filename, "data/m3", load.begin());
-    passed = passed && hdf5_check(orig, load);
+    passed = passed && utility_hdf5_check(orig, load);
     mckl::hdf5load(filename, "data/m4", load.data());
-    passed = passed && hdf5_check(orig, load);
+    passed = passed && utility_hdf5_check(orig, load);
     watch_load.stop();
 
     std::cout << std::setw(20) << std::right << std::fixed
@@ -106,6 +106,26 @@ inline void hdf5_test(std::size_t nrow, std::size_t ncol,
               << std::fixed << watch_load.milliseconds() << std::setw(20)
               << std::right << (passed ? "Passed" : "Failed") << std::endl;
     std::cout << std::string(100, '-') << std::endl;
+}
+
+inline void utility_hdf5(std::size_t nrow, std::size_t ncol)
+{
+    std::cout << std::string(100, '=') << std::endl;
+    std::cout << std::setw(20) << std::left << "Orignal type" << std::setw(20)
+              << std::left << "Load type" << std::setw(20) << std::right
+              << std::fixed << "Time (ms) store" << std::setw(20) << std::right
+              << std::fixed << "Time (ms) load" << std::setw(20) << std::right
+              << "Test" << std::endl;
+    std::cout << std::string(100, '-') << std::endl;
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(float, float);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(float, double);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(float, long double);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(double, float);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(double, double);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(double, long double);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(long double, float);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(long double, float);
+    MCKL_EXAMPLE_UTILITY_HDF5_TEST(long double, long double);
 }
 
 #endif // MCKL_EXAMPLE_UTILITY_HDF5_HPP

@@ -37,7 +37,7 @@
 #include <mckl/randomc/u01.h>
 #include "random_common.hpp"
 
-#define MCKL_DEFINE_RANDOMC_U01_TEST(                                         \
+#define MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(                                 \
     ubits, fsuffix, lr, Lower, Upper, RealType)                               \
     template <>                                                               \
     inline RealType random_u01_c<std::uint##ubits##_t, RealType, mckl::Lower, \
@@ -46,7 +46,7 @@
         return mckl_u01_##lr##_u##ubits##fsuffix(u);                          \
     }
 
-#define MCKL_RANDOM_U01_TEST(Lower, Upper)                                    \
+#define MCKL_EXAMPLE_RANDOM_U01_TEST(Lower, Upper)                            \
     random_u01<std::uint32_t, float, mckl::Lower, mckl::Upper>(               \
         N, M, nwid, swid, twid);                                              \
     random_u01<std::uint64_t, float, mckl::Lower, mckl::Upper>(               \
@@ -63,33 +63,33 @@
 template <typename UIntType, typename RealType, typename, typename>
 inline RealType random_u01_c(UIntType u);
 
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, cc, Closed, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, cc, Closed, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, cc, Closed, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, cc, Closed, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, cc, Closed, Closed, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, cc, Closed, Closed, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, cc, Closed, Closed, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, cc, Closed, Closed, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, cc, Closed, Closed, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, cc, Closed, Closed, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, cc, Closed, Closed, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, cc, Closed, Closed, long double)
 
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, co, Closed, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, co, Closed, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, co, Closed, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, co, Closed, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, co, Closed, Open, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, co, Closed, Open, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, co, Closed, Open, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, co, Closed, Open, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, co, Closed, Open, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, co, Closed, Open, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, co, Closed, Open, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, co, Closed, Open, long double)
 
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, oc, Open, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, oc, Open, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, oc, Open, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, oc, Open, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, oc, Open, Closed, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, oc, Open, Closed, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, oc, Open, Closed, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, oc, Open, Closed, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, oc, Open, Closed, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, oc, Open, Closed, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, oc, Open, Closed, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, oc, Open, Closed, long double)
 
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, oo, Open, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, oo, Open, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, oo, Open, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, oo, Open, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, oo, Open, Open, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, oo, Open, Open, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, oo, Open, Open, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, oo, Open, Open, float)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, oo, Open, Open, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, oo, Open, Open, double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, oo, Open, Open, long double)
+MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, oo, Open, Open, long double)
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline std::string random_u01_function_name()
@@ -203,13 +203,13 @@ inline void random_u01(std::size_t N, std::size_t M)
     std::cout << std::setw(twid) << std::right << "Batch";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Closed, Closed);
+    MCKL_EXAMPLE_RANDOM_U01_TEST(Closed, Closed);
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Closed, Open);
+    MCKL_EXAMPLE_RANDOM_U01_TEST(Closed, Open);
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Open, Closed);
+    MCKL_EXAMPLE_RANDOM_U01_TEST(Open, Closed);
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Open, Open);
+    MCKL_EXAMPLE_RANDOM_U01_TEST(Open, Open);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 

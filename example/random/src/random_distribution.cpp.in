@@ -30,7 +30,7 @@
 //============================================================================
 
 // clang-format off
-#define MCKL_@DISTNAME@_DISTRIBUTION 1
+#define MCKL_EXAMPLE_RANDOM_@DISTNAME@_DISTRIBUTION 1
 // clang-format on
 
 #include <@DistHeader@>

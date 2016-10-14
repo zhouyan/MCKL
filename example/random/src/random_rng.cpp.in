@@ -30,7 +30,7 @@
 //============================================================================
 
 // clang-format off
-#define MCKL_RNG_@RNG@ 1
+#define MCKL_EXAMPLE_RANDOM_@RNG@_RNG 1
 // clang-format on
 
 #include <@RNGHeader@>

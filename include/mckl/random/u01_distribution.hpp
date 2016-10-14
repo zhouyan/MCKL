@@ -48,7 +48,7 @@
 #define MCKL_U01_USE_64BITS_DOUBLE 0
 #endif
 
-#define MCKL_DEFINE_U01_DISTRIBUTION(Name, name)                              \
+#define MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(Name, name)                       \
     template <typename RealType>                                              \
     class Name##Distribution                                                  \
     {                                                                         \
@@ -76,7 +76,7 @@
         }                                                                     \
     };
 
-#define MCKL_DEFINE_U01_DISTRIBUTION_IMPL(name)                               \
+#define MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(name)                        \
     template <std::size_t K, typename RealType, typename RNGType>             \
     inline void name##_distribution_impl(                                     \
         RNGType &rng, std::size_t n, RealType *r)                             \
@@ -114,10 +114,10 @@ using U01UIntType =
 
 #endif // MCKL_U01_USE_64BITS_DOUBLE
 
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_cc)
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_co)
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_oc)
-MCKL_DEFINE_U01_DISTRIBUTION_IMPL(u01_oo)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_cc)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_co)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oc)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oo)
 
 #if MCKL_U01_USE_FIXED_POINT
 
@@ -178,19 +178,19 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OO, u01_oo, RealType)
 
 /// \brief Standard uniform distribution on [0, 1]
 /// \ingroup Distribution
-MCKL_DEFINE_U01_DISTRIBUTION(U01CC, u01_cc)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01CC, u01_cc)
 
 /// \brief Standard uniform distribution on [0, 1)
 /// \ingroup Distribution
-MCKL_DEFINE_U01_DISTRIBUTION(U01CO, u01_co)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01CO, u01_co)
 
 /// \brief Standard uniform distribution on (0, 1]
 /// \ingroup Distribution
-MCKL_DEFINE_U01_DISTRIBUTION(U01OC, u01_oc)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01OC, u01_oc)
 
 /// \brief Standard uniform distribution on (0, 1)
 /// \ingroup Distribution
-MCKL_DEFINE_U01_DISTRIBUTION(U01OO, u01_oo)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01OO, u01_oo)
 
 #if MCKL_U01_USE_FIXED_POINT
 

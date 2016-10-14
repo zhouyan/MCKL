@@ -37,7 +37,7 @@
 #include <mckl/utility/stop_watch.hpp>
 
 template <typename T, std::size_t Alignment, typename Memory>
-inline void aligned_memory_test(std::size_t N, std::size_t m,
+inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
     const std::string &tname, const std::string &memory)
 {
     std::cout << std::string(80, '=') << std::endl;
@@ -130,26 +130,26 @@ inline void aligned_memory_test(std::size_t N, std::size_t m,
 }
 
 template <typename T, std::size_t Alignment>
-inline void aligned_memory_test(
+inline void utility_aligned_memory_test(
     std::size_t n, std::size_t m, const std::string &tname)
 {
-    aligned_memory_test<T, Alignment, mckl::AlignedMemorySTD>(
+    utility_aligned_memory_test<T, Alignment, mckl::AlignedMemorySTD>(
         n, m, tname, "AlignedMemorySTD");
 #if MCKL_HAS_POSIX || defined(MCKL_MSVC)
-    aligned_memory_test<T, Alignment, mckl::AlignedMemorySYS>(
+    utility_aligned_memory_test<T, Alignment, mckl::AlignedMemorySYS>(
         n, m, tname, "AlignedMemorySYS");
 #endif
 #if MCKL_HAS_TBB
-    aligned_memory_test<T, Alignment, mckl::AlignedMemoryTBB>(
+    utility_aligned_memory_test<T, Alignment, mckl::AlignedMemoryTBB>(
         n, m, tname, "AlignedMemoryTBB");
 #endif
 }
 
 template <typename T>
-inline void aligned_memory_test(
+inline void utility_aligned_memory(
     std::size_t n, std::size_t m, const std::string &tname)
 {
-    aligned_memory_test<T, 32>(n, m, tname);
+    utility_aligned_memory_test<T, 32>(n, m, tname);
 }
 
 #endif // MCKL_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP

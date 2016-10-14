@@ -32,93 +32,98 @@
 #ifndef MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 #define MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 
-#ifndef MCKL_FISHER_F_DISTRIBUTION
-#define MCKL_FISHER_F_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_STUDENT_T_DISTRIBUTION
-#define MCKL_STUDENT_T_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_CHI_SQUARED_DISTRIBUTION
-#define MCKL_CHI_SQUARED_DISTRIBUTION                                         \
-    (MCKL_STUDENT_T_DISTRIBUTION || MCKL_FISHER_F_DISTRIBUTION)
+#ifndef MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION                          \
+    (MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION ||                            \
+        MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION)
 #endif
 
-#ifndef MCKL_GAMMA_DISTRIBUTION
-#define MCKL_GAMMA_DISTRIBUTION MCKL_CHI_SQUARED_DISTRIBUTION
+#ifndef MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION                                \
+    MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
 #endif
 
-#ifndef MCKL_STABLE_DISTRIBUTION
-#define MCKL_STABLE_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_CAUCHY_DISTRIBUTION
-#define MCKL_CAUCHY_DISTRIBUTION MCKL_STABLE_DISTRIBUTION
+#ifndef MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION                               \
+    MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
 #endif
 
-#ifndef MCKL_LEVY_DISTRIBUTION
-#define MCKL_LEVY_DISTRIBUTION MCKL_STABLE_DISTRIBUTION
+#ifndef MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION                                 \
+    MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
 #endif
 
-#ifndef MCKL_NORMAL_DISTRIBUTION
-#define MCKL_NORMAL_DISTRIBUTION MCKL_STABLE_DISTRIBUTION
+#ifndef MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION                               \
+    MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
 #endif
 
-#ifndef MCKL_ARCSINE_DISTRIBUTION
-#define MCKL_ARCSINE_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_BETA_DISTRIBUTION
-#define MCKL_BETA_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_EXPONENTIAL_DISTRIBUTION
-#define MCKL_EXPONENTIAL_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_EXTREME_VALUE_DISTRIBUTION
-#define MCKL_EXTREME_VALUE_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_LAPLACE_DISTRIBUTION
-#define MCKL_LAPLACE_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_LOGISTIC_DISTRIBUTION
-#define MCKL_LOGISTIC_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_LOGNORMAL_DISTRIBUTION
-#define MCKL_LOGNORMAL_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_PARETO_DISTRIBUTION
-#define MCKL_PARETO_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_RAYLEIGH_DISTRIBUTION
-#define MCKL_RAYLEIGH_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_U01_DISTRIBUTION
-#define MCKL_U01_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_UNIFORM_REAL_DISTRIBUTION
-#define MCKL_UNIFORM_REAL_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_WEIBULL_DISTRIBUTION
-#define MCKL_WEIBULL_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_GEOMETRIC_DISTRIBUTION
-#define MCKL_GEOMETRIC_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_UNIFORM_INT_DISTRIBUTION
-#define MCKL_UNIFORM_INT_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION 0
 #endif
 
 #include <mckl/math/beta.hpp>
@@ -126,7 +131,7 @@
 #include <mckl/math/gamma.hpp>
 #include "random_common.hpp"
 
-#if MCKL_STABLE_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
 #include <mckl/random/cauchy_distribution.hpp>
 #include <mckl/random/levy_distribution.hpp>
 #include <mckl/random/normal_distribution.hpp>
@@ -305,7 +310,7 @@ class RandomDistributionTraitBase
 template <typename DistType>
 class RandomDistributionTrait;
 
-#if MCKL_ARCSINE_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
@@ -343,9 +348,9 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
     }
 };
 
-#endif // MCKL_ARCSINE_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION
 
-#if MCKL_BETA_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
@@ -393,9 +398,9 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     }
 };
 
-#endif // MCKL_BETA_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION
 
-#if MCKL_CAUCHY_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
@@ -433,9 +438,9 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
     }
 };
 
-#endif // MCKL_CAUCHY_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION
 
-#if MCKL_GAMMA_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
@@ -478,9 +483,9 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
     }
 };
 
-#endif // MCKL_GAMMA_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION
 
-#if MCKL_CHI_SQUARED_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
@@ -519,9 +524,9 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
     }
 };
 
-#endif // MCKL_CHI_SQUARED_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
 
-#if MCKL_EXPONENTIAL_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
@@ -556,9 +561,9 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
     }
 };
 
-#endif // MCKL_EXPONENTIAL_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION
 
-#if MCKL_EXTREME_VALUE_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
@@ -594,9 +599,9 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
     }
 };
 
-#endif // MCKL_EXTREME_VALUE_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION
 
-#if MCKL_FISHER_F_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
@@ -637,9 +642,9 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
     }
 };
 
-#endif // MCKL_FISHER_F_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION
 
-#if MCKL_LAPLACE_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
@@ -679,9 +684,9 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
     }
 };
 
-#endif // MCKL_LAPLACE_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION
 
-#if MCKL_LEVY_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
@@ -717,9 +722,9 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
     }
 };
 
-#endif // MCKL_LEVY_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION
 
-#if MCKL_LOGISTIC_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
@@ -755,9 +760,9 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
     }
 };
 
-#endif // MCKL_LOGISTIC_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION
 
-#if MCKL_LOGNORMAL_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
@@ -795,9 +800,9 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
     }
 };
 
-#endif // MCKL_LOGNORMAL_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION
 
-#if MCKL_NORMAL_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
@@ -834,9 +839,9 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
     }
 };
 
-#endif // MCKL_NORMAL_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION
 
-#if MCKL_PARETO_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
@@ -873,9 +878,9 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
     }
 };
 
-#endif // MCKL_PARETO_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION
 
-#if MCKL_RAYLEIGH_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
@@ -911,9 +916,9 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
     }
 };
 
-#endif // MCKL_RAYLEIGH_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION
 
-#if MCKL_STABLE_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::StableDistribution<RealType>>
@@ -958,9 +963,9 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
     }
 };
 
-#endif // MCKL_STABLE_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
 
-#if MCKL_STUDENT_T_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
@@ -1000,9 +1005,9 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
     }
 };
 
-#endif // MCKL_STUDENT_T_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION
 
-#if MCKL_U01_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::U01Distribution<RealType>>
@@ -1031,9 +1036,9 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
     }
 };
 
-#endif // MCKL_U01_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION
 
-#if MCKL_UNIFORM_REAL_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
@@ -1069,9 +1074,9 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     }
 };
 
-#endif // MCKL_UNIFORM_REAL_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
 
-#if MCKL_WEIBULL_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
@@ -1108,9 +1113,9 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
     }
 };
 
-#endif // MCKL_WEIBULL_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION
 
-#if MCKL_GEOMETRIC_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION
 
 template <typename IntType>
 class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
@@ -1161,9 +1166,9 @@ class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
     }
 };
 
-#endif // MCKL_GEOMETRIC_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION
 
-#if MCKL_UNIFORM_INT_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION
 
 template <typename IntType>
 class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
@@ -1218,7 +1223,7 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
     }
 };
 
-#endif // MCKL_UNIFORM_INT_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION
 
 template <typename DistType, typename ParamType>
 inline DistType random_distribution_init(const std::array<ParamType, 0> &)
@@ -1459,7 +1464,7 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
         ksad[i] = random_distribution_ksad(N, r.data(), dist_mckl);
     }
     random_distribution_pval(chi2, ksad, pval);
-#endif // MCKL_HAS_MKL
+#endif
 }
 
 template <typename MCKLDistType>

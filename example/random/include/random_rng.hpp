@@ -32,34 +32,35 @@
 #ifndef MCKL_EXAMPLE_RANDOM_RNG_HPP
 #define MCKL_EXAMPLE_RANDOM_RNG_HPP
 
-#ifndef MCKL_RNG_STD
-#define MCKL_RNG_STD 0
+#ifndef MCKL_EXAMPLE_RANDOM_STD_RNG
+#define MCKL_EXAMPLE_RANDOM_STD_RNG 0
 #endif
 
-#ifndef MCKL_RNG_AESNI
-#define MCKL_RNG_AESNI 0
+#ifndef MCKL_EXAMPLE_RANDOM_AESNI_RNG
+#define MCKL_EXAMPLE_RANDOM_AESNI_RNG 0
 #endif
 
-#ifndef MCKL_RNG_PHILOX
-#define MCKL_RNG_PHILOX 0
+#ifndef MCKL_EXAMPLE_RANDOM_PHILOX_RNG
+#define MCKL_EXAMPLE_RANDOM_PHILOX_RNG 0
 #endif
 
-#ifndef MCKL_RNG_THREEFRY
-#define MCKL_RNG_THREEFRY 0
+#ifndef MCKL_EXAMPLE_RANDOM_THREEFRY_RNG
+#define MCKL_EXAMPLE_RANDOM_THREEFRY_RNG 0
 #endif
 
-#ifndef MCKL_RNG_MKL
-#define MCKL_RNG_MKL 0
+#ifndef MCKL_EXAMPLE_RANDOM_MKL_RNG
+#define MCKL_EXAMPLE_RANDOM_MKL_RNG 0
 #endif
 
-#ifndef MCKL_RNG_RDRAND
-#define MCKL_RNG_RDRAND 0
+#ifndef MCKL_EXAMPLE_RANDOM_RDRAND_RNG
+#define MCKL_EXAMPLE_RANDOM_RDRAND_RNG 0
 #endif
 
 #include <mckl/random/uniform_bits_distribution.hpp>
 #include "random_common.hpp"
 
-#if MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
+#if MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_MKL_RNG ||             \
+    MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
 template <typename RNGType>
 inline bool random_rng_k(const RNGType &)
@@ -67,7 +68,8 @@ inline bool random_rng_k(const RNGType &)
     return true;
 }
 
-#else // MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
+#else // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_MKL_RNG ||
+// MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
 template <typename RNGType>
 inline bool random_rng_k(const RNGType &, const std::string &filename)
@@ -88,9 +90,10 @@ inline bool random_rng_k(const RNGType &, const std::string &filename)
     return k == r;
 }
 
-#endif // MCKL_RNG_STD || MCKL_RNG_MKL || MCKL_RNG_RDRAND
+#endif // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_MKL_RNG ||
+       // MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
-#if MCKL_HAS_AESNI && MCKL_RNG_AESNI
+#if MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AESNI_RNG
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_k(const mckl::AES128Engine<ResultType, Rounds> &rng)
@@ -136,9 +139,9 @@ inline bool random_rng_k(const mckl::ARSEngine<ResultType, Rounds> &rng)
     return random_rng_k(rng, filename);
 }
 
-#endif // MCKL_HAS_AESNI && MCKL_RNG_AESNI
+#endif // MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AESNI_RNG
 
-#if MCKL_RNG_PHILOX
+#if MCKL_EXAMPLE_RANDOM_PHILOX_RNG
 
 template <typename ResultType, typename T, std::size_t K>
 inline bool random_rng_k(const mckl::PhiloxEngine<ResultType, T, K> &rng)
@@ -153,9 +156,9 @@ inline bool random_rng_k(const mckl::PhiloxEngine<ResultType, T, K> &rng)
     return random_rng_k(rng, filename);
 }
 
-#endif // MCKL_RNG_PHILOX
+#endif // MCKL_EXAMPLE_RANDOM_PHILOX_RNG
 
-#if MCKL_RNG_THREEFRY
+#if MCKL_EXAMPLE_RANDOM_THREEFRY_RNG
 
 template <typename ResultType, typename T, std::size_t K>
 inline bool random_rng_k(const mckl::ThreefryEngine<ResultType, T, K> &rng)
@@ -203,7 +206,7 @@ inline bool random_rng_k(const mckl::Threefish1024Engine<ResultType> &rng)
     return random_rng_k(rng, filename);
 }
 
-#endif // MCKL_RNG_THREEFRY
+#endif // MCKL_EXAMPLE_RANDOM_THREEFRY_RNG
 
 struct RandomRNGPerf {
     bool pass;

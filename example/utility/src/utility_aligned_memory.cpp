@@ -41,14 +41,14 @@ int main(int argc, char **argv)
     if (argc > 2)
         m = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    // aligned_memory_test<char>(n, m, "char");
-    // aligned_memory_test<short>(n, m, "short");
-    // aligned_memory_test<int>(n, m, "int");
-    // aligned_memory_test<long>(n, m, "long");
-    // aligned_memory_test<long long>(n, m, "long long");
-    // aligned_memory_test<float>(n, m, "float");
-    aligned_memory_test<double>(n, m, "double");
-    // aligned_memory_test<long double>(n, m, "long double");
+    utility_aligned_memory<char>(n, m, "char");
+    utility_aligned_memory<short>(n, m, "short");
+    utility_aligned_memory<int>(n, m, "int");
+    utility_aligned_memory<long>(n, m, "long");
+    utility_aligned_memory<long long>(n, m, "long long");
+    utility_aligned_memory<float>(n, m, "float");
+    utility_aligned_memory<double>(n, m, "double");
+    utility_aligned_memory<long double>(n, m, "long double");
 
     return 0;
 }
