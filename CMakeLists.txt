@@ -106,10 +106,6 @@ ELSE(MCKL_ENABLE_EXAMPLE)
     RETURN()
 ENDIF(MCKL_ENABLE_EXAMPLE)
 
-IF (NOT (MKL_FOUND OR BLAS_FOUND))
-    RETURN()
-ENDIF (NOT (MKL_FOUND OR BLAS_FOUND))
-
 ##############################################################################
 # Enable backends
 ##############################################################################
