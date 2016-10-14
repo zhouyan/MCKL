@@ -102,6 +102,33 @@ system or \cpu types. Their default values are therefore platform dependent.
 The library tries its best to determine the correct values. But in the case of
 errors, define these macros to override the default values.
 
+\paragraph{\texttt{MCKL\_REQUIRE\_ENDIANNESS\_NEUTURAL}} The implementations of
+\rng{}s in the library by default assume little-endian. When used on a
+big-endian platform, the output will be different. For example, |Philox4x64|
+has an array of 64-bit unsigned integers as internal states. Each time a 32-bit
+integer (its |result_type|) is required, the lower half of the each 64-bit
+unsigned integer comes first. Then the higher half. On a big-endian platform,
+they will be returned in a reversed order. This will not effect the quality of
+the \rng in any way. If exact reproducibility is desired, then one can set this
+macro to true. The library then will take care to make sure that the output of
+\rng{}s are always the same regardless of endianness. Note that, there might be
+a noticeable performance hit on big-endian platforms when this macro set to
+true.
+
+\paragraph{\texttt{MCKL\_HAS\_LITTLE\_ENDIAN}} Set this macro to true if it is
+known at compile time that the platform is of little-endian. Note that, setting
+this macro to false \emph{does not} indicate that the platform is of
+big-endian. It merely tells the library it is unknown and the endianness shall
+be detected at runtime.
+
+\paragraph{\texttt{MCKL\_HAS\_BIG\_ENDIAN}} Set this macro to true if it is
+known at compile time that the platform is of big-endian. Note that, setting
+this macro to false \emph{does not} indicate that the platform is of
+little-endian. It merely tells the library it is unknown and the endianness
+shall be detected at runtime. Note that, if both this and the above macro are
+true, then it is a compile-time error. A platform cannot be of both little- and
+big-endian.
+
 \paragraph{\texttt{MCKL\_HAS\_X86}} Determine if the \cpu is x86 compatible. In
 a few rare occasions the library uses features known to exist on x86 \cpu{}s,
 for example the little-endian memory layout, etc.

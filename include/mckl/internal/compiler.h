@@ -103,6 +103,10 @@
 #define MCKL_HAS_BIG_ENDIAN 0
 #endif
 
+#if MCKL_HAS_LITTLE_ENDIAN && MCKL_HAS_BIG_ENDIAN
+#error The platform cannot be both little and big endian
+#endif
+
 #ifndef MCKL_HAS_AESNI
 #define MCKL_HAS_AESNI 0
 #endif
