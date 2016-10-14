@@ -893,14 +893,14 @@ class AESNIGenerator
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, ResultType *buffer) const
+    void operator()(ctr_type &ctr, ResultType *result) const
     {
         std::array<__m128i, rounds_ + 1> rk(key_seq_.get());
-        generate(ctr, buffer, rk);
+        generate(ctr, result, rk);
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, std::size_t n, ResultType *buffer) const
+    void operator()(ctr_type &ctr, std::size_t n, ResultType *result) const
     {
         static constexpr std::size_t stride = size() / sizeof(ResultType);
         static constexpr std::size_t blocks =
@@ -915,13 +915,13 @@ class AESNIGenerator
 
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, buffer += stride * blocks) {
+        for (std::size_t i = 0; i != m; ++i, result += stride * blocks) {
             MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
             internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
-            std::memcpy(buffer, buf.state.data(), size() * blocks);
+            std::memcpy(result, buf.state.data(), size() * blocks);
         }
-        for (std::size_t i = 0; i != l; ++i, buffer += stride)
-            generate(ctr, buffer, rk);
+        for (std::size_t i = 0; i != l; ++i, result += stride)
+            generate(ctr, result, rk);
     }
 
     friend bool operator==(const AESNIGenerator<KeySeqType> &gen1,
@@ -971,7 +971,7 @@ class AESNIGenerator
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
 
     template <typename ResultType>
-    void generate(ctr_type &ctr, ResultType *buffer,
+    void generate(ctr_type &ctr, ResultType *result,
         const std::array<__m128i, rounds_ + 1> &rk) const
     {
         alignas(32) union {
@@ -983,7 +983,7 @@ class AESNIGenerator
         MCKL_FLATTEN_CALL increment(ctr);
         buf.ctr = ctr;
         internal::AESNIGeneratorImpl<KeySeqType>::eval(buf.state, rk);
-        std::copy(buf.result.begin(), buf.result.end(), buffer);
+        std::memcpy(result, buf.result.data(), size());
     }
 }; // class AESNIGenerator
 

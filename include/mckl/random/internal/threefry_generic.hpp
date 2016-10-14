@@ -104,14 +104,14 @@ class ThreefryPBox
     {
         std::array<T, K> tmp;
         eval<0>(state, tmp, std::integral_constant<bool, 0 < N>());
-        state = tmp;
+        std::memcpy(state.data(), tmp.data(), sizeof(T) * K);
     }
 
     static void eval(T *state)
     {
         std::array<T, K> tmp;
         eval<0>(state, tmp, std::integral_constant<bool, 0 < N>());
-        std::copy(tmp.begin(), tmp.end(), state);
+        std::memcpy(state, tmp.data(), sizeof(T) * K);
     }
 
     private:

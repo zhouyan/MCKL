@@ -269,22 +269,20 @@ namespace internal
 /// \ingroup Random
 ///
 /// \tparam ResultType The ouptut integer type of the counter-based RNG engine
-/// \tparam Generator The generator that transfer counter and key to random
-/// integer buffer.
+/// \tparam Generator The generator that transfer counter and key to a result
+/// block
 /// - Requirement
 /// ~~~{.cpp}
 /// ctr_type; // counter type
 /// key_type; // key type
-/// static constexpr std::size_t size(); // Size of buffer in bytes
+/// static constexpr std::size_t size(); // Size of the result block in bytes
 /// void reset(const key_type &key);     // reset generator key
 ///
-/// // Increment counter and generate one random buffer
-/// void operator()(ctr_type &ctr,
-///     std::array<ResultType, size() / sizeof(ResultType)> &buffer);
+/// // Increment counter once and generate one result block
+/// void operator()(ctr_type &ctr, result_type *result);
 ///
-/// // Increment counter and generate n random buffers
-/// void operator()(ctr_type &ctr, std::size_t n,
-///     std::array<ResultType, size() / sizeof(ResultType)> *buffer);
+/// // Increment counter n times and generate n result blocks
+/// void operator()(ctr_type &ctr, std::size_t n, result_type *result);
 /// ~~~
 /// - Restrictions: `size() % sizeof(ResultType) == 0`
 template <typename ResultType, typename Generator>
@@ -361,11 +359,11 @@ class CounterEngine
     result_type operator()()
     {
         if (index_ == M_) {
-            generator_(ctr_, buffer_.data());
+            generator_(ctr_, result_.data());
             index_ = 0;
         }
 
-        return buffer_[static_cast<std::size_t>(index_++)];
+        return result_[static_cast<std::size_t>(index_++)];
     }
 
     void operator()(std::size_t n, result_type *r)
@@ -373,12 +371,12 @@ class CounterEngine
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
 
         if (n < remain) {
-            std::copy_n(buffer_.data() + index_, n, r);
+            std::memcpy(r, result_.data() + index_, sizeof(result_type) * n);
             index_ += static_cast<unsigned>(n);
             return;
         }
 
-        std::copy_n(buffer_.data() + index_, remain, r);
+        std::memcpy(r, result_.data() + index_, sizeof(result_type) * remain);
         r += remain;
         n -= remain;
         index_ = M_;
@@ -388,12 +386,12 @@ class CounterEngine
         r += m * M_;
         n -= m * M_;
 
-        generator_(ctr_, buffer_.data());
-        std::copy_n(buffer_.data(), n, r);
+        generator_(ctr_, result_.data());
+        std::memcpy(r, result_.data(), sizeof(result_type) * n);
         index_ = static_cast<unsigned>(n);
     }
 
-    /// \brief Discard the buffer
+    /// \brief Discard the result
     std::size_t discard()
     {
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
@@ -416,11 +414,11 @@ class CounterEngine
         index_ = M_;
 
         skip_type M = static_cast<skip_type>(M_);
-        std::size_t buf_size = sizeof(buffer_type);
+        std::size_t res_size = sizeof(result_type) * M_;
         std::size_t ctr_size = sizeof(ctr_type);
-        skip_type rate = static_cast<skip_type>(buf_size / ctr_size);
+        skip_type rate = static_cast<skip_type>(res_size / ctr_size);
         increment(ctr_, nskip / M * rate);
-        generator_(ctr_, buffer_.data());
+        generator_(ctr_, result_.data());
         index_ = static_cast<unsigned>(nskip % M);
     }
 
@@ -440,7 +438,7 @@ class CounterEngine
     friend bool operator==(const CounterEngine<ResultType, Generator> &eng1,
         const CounterEngine<ResultType, Generator> &eng2)
     {
-        if (eng1.buffer_ != eng2.buffer_)
+        if (eng1.result_ != eng2.result_)
             return false;
         if (eng1.ctr_ != eng2.ctr_)
             return false;
@@ -468,7 +466,7 @@ class CounterEngine
         if (!os)
             return os;
 
-        os << eng.buffer_ << ' ';
+        os << eng.result_ << ' ';
         os << eng.ctr_ << ' ';
         os << eng.generator_ << ' ';
         os << eng.index_;
@@ -485,7 +483,7 @@ class CounterEngine
             return is;
 
         CounterEngine<ResultType, Generator> eng_tmp;
-        is >> std::ws >> eng_tmp.buffer_;
+        is >> std::ws >> eng_tmp.result_;
         is >> std::ws >> eng_tmp.ctr_;
         is >> std::ws >> eng_tmp.generator_;
         is >> std::ws >> eng_tmp.index_;
@@ -499,9 +497,7 @@ class CounterEngine
     private:
     static constexpr unsigned M_ = Generator::size() / sizeof(ResultType);
 
-    using buffer_type = std::array<ResultType, M_>;
-
-    buffer_type buffer_;
+    std::array<result_type, M_> result_;
     ctr_type ctr_;
     generator_type generator_;
     unsigned index_;

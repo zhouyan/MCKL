@@ -83,10 +83,10 @@ class Skein
     class param_type
     {
         public:
-        /// \brief Construct a parameter given a buffer
+        /// \brief Construct a parameter given bit strings
         ///
-        /// \param N The length of the buffer in bits
-        /// \param data The address of the buffer
+        /// \param N The length of the bit string
+        /// \param data The address of the bit string
         /// \param type The type of the parameter
         param_type(std::size_t N = 0, const void *data = nullptr,
             int type = type_field::msg())
@@ -94,19 +94,19 @@ class Skein
         {
         }
 
-        /// \brief The length of the buffer in bits
+        /// \brief The length of the string in bits
         std::size_t bits() const { return N_; }
 
-        /// \brief The length of the buffer in bytes
+        /// \brief The length of the string in bytes
         std::size_t bytes() const
         {
             return N_ / CHAR_BIT + (N_ % CHAR_BIT == 0 ? 0 : 1);
         }
 
-        /// \brief The address of the buffer
+        /// \brief The address of the string
         const char *data() const { return data_; }
 
-        /// \brief The type of the buffer
+        /// \brief The type of the string
         int type() const { return type_; }
 
         private:
@@ -203,32 +203,32 @@ class Skein
         std::size_t N = M.bits();
         const char *C = M.data();
         const std::size_t k = internal::BufferSize<key_type>::value;
-        alignas(32) std::array<key_type, k> buffer;
+        alignas(32) std::array<key_type, k> message;
 
         const bool B = N % CHAR_BIT != 0;
         key_type H = G;
 
         // Process the only block
         if (N <= bits()) {
-            get_block(t0, C, buffer[0], N);
+            get_block(t0, C, message[0], N);
             set_flags(t1, true, true, B);
-            enc_block(H, buffer[0], t0, t1);
+            enc_block(H, message[0], t0, t1);
 
             return H;
         }
 
         // Process the first block
         set_flags(t1, true, false, B);
-        get_block(t0, C, buffer[0]);
-        enc_block(H, buffer[0], t0, t1);
+        get_block(t0, C, message[0]);
+        enc_block(H, message[0], t0, t1);
         N -= bits();
         C += bytes();
 
         // Process the second and the last block
         if (N <= bits()) {
-            get_block(t0, C, buffer[0], N);
+            get_block(t0, C, message[0], N);
             set_flags(t1, false, true, B);
-            enc_block(H, buffer[0], t0, t1);
+            enc_block(H, message[0], t0, t1);
 
             return H;
         }
@@ -239,26 +239,26 @@ class Skein
         const std::size_t m = n / k;
         const std::size_t l = n % k;
         for (std::size_t i = 0; i != m; ++i) {
-            std::memcpy(buffer.data(), C, bytes() * k);
+            std::memcpy(message.data(), C, bytes() * k);
             for (std::size_t j = 0; j != k; ++j) {
                 t0 += bytes();
-                enc_block(H, buffer[j], t0, t1);
+                enc_block(H, message[j], t0, t1);
             }
             N -= bits() * k;
             C += bytes() * k;
         }
-        std::memcpy(buffer.data(), C, bytes() * l);
+        std::memcpy(message.data(), C, bytes() * l);
         for (std::size_t j = 0; j != l; ++j) {
             t0 += bytes();
-            enc_block(H, buffer[j], t0, t1);
+            enc_block(H, message[j], t0, t1);
         }
         N -= bits() * l;
         C += bytes() * l;
 
         // Process the last block
         set_flags(t1, false, true, B);
-        get_block(t0, C, buffer[0], N);
-        enc_block(H, buffer[0], t0, t1);
+        get_block(t0, C, message[0], N);
+        enc_block(H, message[0], t0, t1);
 
         return H;
     }
@@ -483,7 +483,7 @@ class Skein
 
         std::array<char, bytes()> tmp = {{0}};
         std::size_t n = N / CHAR_BIT + (N % CHAR_BIT == 0 ? 0 : 1);
-        std::copy_n(C, n, tmp.begin());
+        std::memcpy(tmp.data(), C, n);
 
         N %= CHAR_BIT;
         if (N != 0) {

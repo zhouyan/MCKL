@@ -108,7 +108,7 @@ class ThreefryGenerator
     key_type key() const
     {
         key_type key;
-        std::copy_n(par_.begin(), K, key.begin());
+        std::memcpy(key.data(), par_.data(), sizeof(T) * K);
 
         return key;
     }
@@ -117,7 +117,7 @@ class ThreefryGenerator
     {
         static constexpr T p = Constants::parity::value;
 
-        std::copy(key.begin(), key.end(), par_.begin());
+        std::memcpy(par_.data(), key.data(), sizeof(T) * K);
         std::get<K>(par_) = p;
         for (std::size_t i = 0; i != key.size(); ++i)
             std::get<K>(par_) ^= par_[i];
@@ -154,7 +154,7 @@ class ThreefryGenerator
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, ResultType *buffer) const
+    void operator()(ctr_type &ctr, ResultType *result) const
     {
         alignas(32) union {
             std::array<T, K> state;
@@ -172,13 +172,13 @@ class ThreefryGenerator
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         internal::union_le<T>(buf.result);
 #endif
-        std::copy(buf.result.begin(), buf.result.end(), buffer);
+        std::memcpy(result, buf.result.data(), size());
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, std::size_t n, ResultType *buffer) const
+    void operator()(ctr_type &ctr, std::size_t n, ResultType *result) const
     {
-        generate(ctr, n, buffer,
+        generate(ctr, n, result,
             std::integral_constant<bool, internal::ThreefryGeneratorImpl<T, K,
                                              Rounds, Constants>::batch()>());
     }
@@ -232,38 +232,47 @@ class ThreefryGenerator
     std::array<T, K + 4> par_;
 
     template <typename ResultType>
-    void generate(ctr_type &ctr, std::size_t n, ResultType *buffer,
+    void generate(ctr_type &ctr, std::size_t n, ResultType *result,
         std::false_type) const
     {
         static constexpr std::size_t stride = size() / sizeof(ResultType);
 
-        for (std::size_t i = 0; i != n; ++i, buffer += stride)
-            operator()(ctr, buffer);
+        for (std::size_t i = 0; i != n; ++i, result += stride)
+            operator()(ctr, result);
     }
 
     template <typename ResultType>
     void generate(
-        ctr_type &ctr, std::size_t n, ResultType *buffer, std::true_type) const
+        ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
     {
         static constexpr std::size_t stride = size() / sizeof(ResultType);
         static constexpr std::size_t blocks =
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
         alignas(32) union {
-            std::array<std::array<T, K>, blocks> state;
+            std::array<T, K * blocks> state;
+            std::array<std::array<T, K>, blocks> state_block;
             std::array<ctr_type, blocks> ctr_block;
+            std::array<ResultType, size() / sizeof(ResultType) * blocks>
+                result;
         } buf;
 
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, buffer += stride * blocks) {
+        for (std::size_t i = 0; i != m; ++i, result += stride * blocks) {
             MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+            internal::union_le<typename ctr_type::value_type>(buf.state);
+#endif
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-                buf.state, par_);
-            std::memcpy(buffer, buf.state.data(), size() * blocks);
+                buf.state_block, par_);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+            internal::union_le<T>(buf.result);
+#endif
+            std::memcpy(result, buf.result.data(), size() * blocks);
         }
-        for (std::size_t i = 0; i != l; ++i, buffer += stride)
-            operator()(ctr, buffer);
+        for (std::size_t i = 0; i != l; ++i, result += stride)
+            operator()(ctr, result);
     }
 }; // class ThreefryGenerator
 

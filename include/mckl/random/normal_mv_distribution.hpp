@@ -327,19 +327,21 @@ class NormalMVDistribution
 
         void init_mean(const result_type *mean)
         {
-            std::copy_n(mean, mean_.size(), mean_.begin());
+            std::memcpy(
+                mean_.data(), mean, sizeof(result_type) * mean_.size());
         }
 
         void init_chol(result_type chol)
         {
-            std::fill(chol_.begin(), chol_.end(), 0);
+            std::memset(chol_.data(), 0, sizeof(result_type) * chol_.size());
             for (std::size_t i = 0; i != dim(); ++i)
                 chol_[i * (i + 1) / 2 + i] = chol;
         }
 
         void init_chol(const result_type *chol)
         {
-            std::copy_n(chol, chol_.size(), chol_.begin());
+            std::memcpy(
+                chol, chol_.data(), sizeof(result_type) * chol_.size());
         }
     }; // class param_type
 

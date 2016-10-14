@@ -879,7 +879,7 @@ class MKLEngine
             index_ = 0;
         }
 
-        return buffer_[static_cast<std::size_t>(index_++)];
+        return result_[static_cast<std::size_t>(index_++)];
     }
 
     void operator()(std::size_t n, result_type *r)
@@ -889,12 +889,12 @@ class MKLEngine
         const std::size_t remain = M_ - index_;
 
         if (n < remain) {
-            std::copy_n(buffer_.data() + index_, n, r);
+            std::memcpy(r, result_.data() + index_, sizeof(result_type) * n);
             index_ += n;
             return;
         }
 
-        std::copy_n(buffer_.data() + index_, remain, r);
+        std::memcpy(r, result_.data() + index_, sizeof(result_type) * remain);
         r += remain;
         n -= remain;
         index_ = M_;
@@ -905,11 +905,11 @@ class MKLEngine
         n -= m;
 
         generate();
-        std::copy_n(buffer_.data(), n, r);
+        std::memcpy(r, result_.data(), sizeof(result_type) * n);
         index_ = static_cast<unsigned>(n);
     }
 
-    /// \brief Discard the buffer
+    /// \brief Discard the result
     std::size_t discard()
     {
         const std::size_t remain = M_ - index_;
@@ -1001,7 +1001,7 @@ class MKLEngine
     {
         if (eng1.stream_ != eng2.stream_)
             return false;
-        if (eng1.buffer_ != eng2.buffer_)
+        if (eng1.result_ != eng2.result_)
             return false;
         if (eng1.index_ != eng2.index_)
             return false;
@@ -1026,7 +1026,7 @@ class MKLEngine
             return os;
 
         os << eng.stream_ << ' ';
-        os << eng.buffer_ << ' ';
+        os << eng.result_ << ' ';
         os << eng.index_;
 
         return os;
@@ -1040,15 +1040,15 @@ class MKLEngine
             return is;
 
         MKLStream stream;
-        buffer_type buffer;
+        std::array<result_type, M_> result;
         unsigned index;
         is >> std::ws >> stream;
-        is >> std::ws >> buffer;
+        is >> std::ws >> result;
         is >> std::ws >> index;
 
         if (is) {
             eng.stream_ = std::move(stream);
-            eng.buffer_ = buffer;
+            eng.result_ = result;
             eng.index_ = index;
         }
 
@@ -1058,16 +1058,14 @@ class MKLEngine
     private:
     static constexpr std::size_t M_ = 256;
 
-    using buffer_type = std::array<result_type, M_>;
-
-    buffer_type buffer_;
+    std::array<result_type, M_> result_;
     MKLStream stream_;
     unsigned index_;
 
     void generate()
     {
         internal::MKLUniformBits<BRNG, Bits>::eval(
-            stream_, static_cast<MKL_INT>(M_), buffer_.data());
+            stream_, static_cast<MKL_INT>(M_), result_.data());
     }
 
     void generate(std::size_t n, result_type *r)
