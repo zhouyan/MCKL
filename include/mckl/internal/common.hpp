@@ -48,6 +48,7 @@
 #include <atomic>
 #include <bitset>
 #include <cassert>
+#include <cctype>
 #include <climits>
 #include <cmath>
 #include <complex>
@@ -206,6 +207,18 @@ class BufferSize
           8192 / (sizeof(T) * K) == 0 ? 1 : 8192 / (sizeof(T) * K)>
 {
 }; // class BufferSize;
+
+inline bool is_little_endian()
+{
+    union {
+        char c[sizeof(int)];
+        int i;
+    } buf;
+
+    buf.i = 0x01;
+
+    return buf.c[0] == 0x01;
+}
 
 inline bool is_big_endian()
 {

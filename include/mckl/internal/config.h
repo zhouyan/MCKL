@@ -105,6 +105,10 @@
 
 // Optional libraries
 
+#ifndef MCKL_HAS_OPENCL
+#define MCKL_HAS_OPENCL 0
+#endif
+
 #ifndef MCKL_HAS_OMP
 #ifdef _OPENMP
 #define MCKL_HAS_OMP 1
@@ -115,18 +119,6 @@
 
 #ifndef MCKL_USE_OMP
 #define MCKL_USE_OMP MCKL_HAS_OMP
-#endif
-
-#ifndef MCKL_HAS_OPENCL
-#define MCKL_HAS_OPENCL 0
-#endif
-
-#ifndef MCKL_HAS_HDF5
-#define MCKL_HAS_HDF5 0
-#endif
-
-#ifndef MCKL_HAS_TESTU01
-#define MCKL_HAS_TESTU01 0
 #endif
 
 #ifndef MCKL_HAS_TBB
@@ -163,6 +155,14 @@
 
 #ifndef MCKL_USE_CBLAS
 #define MCKL_USE_CBLAS MCKL_USE_MKL_CBLAS
+#endif
+
+#ifndef MCKL_HAS_HDF5
+#define MCKL_HAS_HDF5 0
+#endif
+
+#ifndef MCKL_HAS_TESTU01
+#define MCKL_HAS_TESTU01 0
 #endif
 
 #endif // MCKL_INTERNAL_CONFIG_H
