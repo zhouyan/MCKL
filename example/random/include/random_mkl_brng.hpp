@@ -32,13 +32,13 @@
 #ifndef MCKL_EXAMPLE_RANDOM_MKL_BRNG_HPP
 #define MCKL_EXAMPLE_RANDOM_MKL_BRNG_HPP
 
-#include <mckl/random/rng.hpp>
+#include <mckl/random/mkl.hpp>
 
 #define MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(BRNG)                           \
-    random_mkl_brng_features(BRNG, #BRNG, nwid, twid)
+    random_mkl_brng_features(BRNG, #BRNG, nwid, twid);
 
 #define MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(BRNG)                         \
-    random_mkl_brng_properties(BRNG, #BRNG, nwid, twid)
+    random_mkl_brng_properties(BRNG, #BRNG, nwid, twid);
 
 inline void random_mkl_brng_features(
     int brng, const std::string &name, int nwid, int twid)
@@ -77,28 +77,32 @@ inline void random_mkl_brng()
     const std::size_t lwid = nwid + twid * 4;
 
     std::cout << std::string(lwid, '=') << std::endl;
+
     std::cout << std::setw(nwid) << std::left << "BRNG";
     std::cout << std::setw(twid) << std::right << "leap";
     std::cout << std::setw(twid) << std::right << "skip";
     std::cout << std::setw(twid) << std::right << "ubits32";
     std::cout << std::setw(twid) << std::right << "ubits64";
     std::cout << std::endl;
+
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MCG31);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_R250);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MRG32K3A);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MCG59);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_WH);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MT19937);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MT2203);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_SFMT19937);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_SOBOL);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_NIEDERR);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_NONDETERM);
+
 #if MCKL_HAS_AESNI
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_ARS5);
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_ARS5)
 #endif
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_PHILOX4X32X10);
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_PHILOX4X32X10)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MCG31)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_R250)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MRG32K3A)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MCG59)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_WH)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MT19937)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_MT2203)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_SFMT19937)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_SOBOL)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_NIEDERR)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_FEATURES(VSL_BRNG_NONDETERM)
+
     std::cout << std::string(lwid, '-') << std::endl;
 
     std::cout << std::string(lwid, '=') << std::endl;
@@ -108,41 +112,24 @@ inline void random_mkl_brng()
     std::cout << std::setw(twid) << std::right << "WordSize";
     std::cout << std::setw(twid) << std::right << "NBits";
     std::cout << std::endl;
+
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MCG31);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_R250);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MRG32K3A);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MCG59);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_WH);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MT19937);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MT2203);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_SFMT19937);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_SOBOL);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_NIEDERR);
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_NONDETERM);
+
 #if MCKL_HAS_AESNI
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_ARS5);
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_ARS5)
 #endif
-    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_PHILOX4X32X10);
-    std::cout << std::string(lwid, '-') << std::endl;
-
-#ifdef MCKL_RNG_DEFINE_MACRO
-#undef MCKL_RNG_DEFINE_MACRO
-#endif
-
-#ifdef MCKL_RNG_DEFINE_MACRO_NA
-#undef MCKL_RNG_DEFINE_MACRO_NA
-#endif
-
-#define MCKL_RNG_DEFINE_MACRO(RNGType, Name, name)                            \
-    {                                                                         \
-        int brng = mckl::mkl_brng<RNGType>();                                 \
-        random_mkl_brng_properties(brng, #Name, nwid, twid);                  \
-    }
-
-#include <mckl/random/internal/rng_define_macro_std.hpp>
-
-#include <mckl/random/internal/rng_define_macro.hpp>
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_PHILOX4X32X10)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MCG31)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_R250)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MRG32K3A)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MCG59)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_WH)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MT19937)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_MT2203)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_SFMT19937)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_SOBOL)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_NIEDERR)
+    MCKL_EXAMPLE_RANDOM_MKL_BRNG_PROPERTIES(VSL_BRNG_NONDETERM)
 
     std::cout << std::string(lwid, '-') << std::endl;
 }

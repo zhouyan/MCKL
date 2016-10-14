@@ -220,26 +220,62 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
     using result_type = typename RNGType::result_type;
 
     std::uniform_int_distribution<std::size_t> rsize(0, N);
+    mckl::UniformBitsDistribution<std::uint16_t> ubits16;
+    mckl::UniformBitsDistribution<std::uint32_t> ubits32;
+    mckl::UniformBitsDistribution<std::uint64_t> ubits64;
     RNGType rng;
     bool pass = true;
 
     RNGType rng1;
     RNGType rng2;
 
-    mckl::Vector<result_type> r1(N);
-    mckl::Vector<result_type> r2(N);
+    mckl::Vector<result_type> r1;
+    mckl::Vector<result_type> r2;
+    mckl::Vector<std::uint16_t> u16_1;
+    mckl::Vector<std::uint16_t> u16_2;
+    mckl::Vector<std::uint32_t> u32_1;
+    mckl::Vector<std::uint32_t> u32_2;
+    mckl::Vector<std::uint64_t> u64_1;
+    mckl::Vector<std::uint64_t> u64_2;
     r1.reserve(N);
     r2.reserve(N);
+    u16_1.reserve(N);
+    u16_2.reserve(N);
+    u32_1.reserve(N);
+    u32_2.reserve(N);
+    u64_1.reserve(N);
+    u64_2.reserve(N);
 
     for (std::size_t i = 0; i != M; ++i) {
         std::size_t K = rsize(rng);
         r1.resize(K);
         r2.resize(K);
+        u16_1.resize(K);
+        u16_2.resize(K);
+        u32_1.resize(K);
+        u32_2.resize(K);
+        u64_1.resize(K);
+        u64_2.resize(K);
 
         for (std::size_t j = 0; j != K; ++j)
             r1[j] = rng1();
         mckl::rand(rng2, K, r2.data());
         pass = pass && (r1 == r2 || rng != rng);
+
+        for (std::size_t j = 0; j != K; ++j)
+            u16_1[j] = mckl::rand(rng1, ubits16);
+        mckl::rand(rng2, ubits16, K, u16_2.data());
+        pass = pass && (u16_1 == u16_2 || rng != rng);
+
+        for (std::size_t j = 0; j != K; ++j)
+            u32_1[j] = mckl::rand(rng1, ubits32);
+        mckl::rand(rng2, ubits32, K, u32_2.data());
+        pass = pass && (u32_1 == u32_2 || rng != rng);
+
+        for (std::size_t j = 0; j != K; ++j)
+            u64_1[j] = mckl::rand(rng1, ubits64);
+        mckl::rand(rng2, ubits64, K, u64_2.data());
+        pass = pass && (u64_1 == u64_2 || rng != rng);
 
         rng1.discard(static_cast<unsigned>(K));
         typename RNGType::result_type next = rng1();
