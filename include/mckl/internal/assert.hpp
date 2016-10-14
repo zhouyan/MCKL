@@ -35,7 +35,7 @@
 #include <mckl/internal/config.h>
 
 #include <cassert>
-#include <cstdio>
+#include <iostream>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -65,14 +65,11 @@ inline void runtime_assert(bool, const char *, bool) {}
 inline void runtime_assert(bool cond, const char *msg, bool soft = false)
 {
 #if MCKL_RUNTIME_ASSERT_AS_EXCEPTION
-    if (!cond) {
+    if (!cond)
         throw ::mckl::RuntimeAssert(msg);
-    }
 #else  // MCKL_RUNTIME_ASSERT_AS_EXCEPTION
-    if (!cond) {
-        std::fprintf(stderr, "MCKL runtime assertion failed:%s\n", msg);
-        std::fflush(stderr);
-    }
+    if (!cond)
+        std::cerr << "MCKL runtime assertion failed: " << msg << std::endl;
     if (!soft)
         assert(cond);
 #endif // MCKL_RUNTIME_ASSERT_AS_EXCEPTION

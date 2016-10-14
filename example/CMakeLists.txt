@@ -65,7 +65,7 @@ ADD_SUBDIRECTORY(utility)
 # Enable examples
 ##############################################################################
 
-MESSAGE(STATUS "=================== Enable examples ===================")
+MESSAGE(STATUS "=================== Examples ==========================")
 FOREACH(example ${EXAMPLES})
     MESSAGE(STATUS ${example})
 ENDFOREACH(example ${EXAMPLES})
