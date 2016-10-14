@@ -166,12 +166,12 @@ class ThreefryGenerator
         buf.ctr = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         internal::union_le<typename ctr_type::value_type>(buf.state);
-#endif // MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+#endif
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
             buf.state, par_);
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         internal::union_le<T>(buf.result);
-#endif // MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+#endif
         std::copy(buf.result.begin(), buf.result.end(), buffer);
     }
 

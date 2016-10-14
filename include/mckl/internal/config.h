@@ -72,6 +72,10 @@
 #define MCKL_REQUIRE_ENDIANNESS_NEUTURAL 0
 #endif
 
+#ifndef MCKL_CROSS_COMPILING
+#define MCKL_CROSS_COMPILING 0
+#endif
+
 // OS dependent macros
 
 #ifndef MCKL_OPENCL
