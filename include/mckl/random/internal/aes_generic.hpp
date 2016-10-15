@@ -388,42 +388,28 @@ class AESGeneratorImpl
         const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &rk,
         std::true_type)
     {
-        const std::uint32_t *table = aes_table();
+        const std::uint32_t *const table0 = aes_table() + 256 * 0;
+        const std::uint32_t *const table1 = aes_table() + 256 * 1;
+        const std::uint32_t *const table2 = aes_table() + 256 * 2;
+        const std::uint32_t *const table3 = aes_table() + 256 * 3;
         std::array<std::uint32_t, 4> t(std::get<N>(rk));
-        std::get<0>(t) ^= table[std::get<0>(s) & 0xFF];
-        std::get<1>(t) ^= table[std::get<1>(s) & 0xFF];
-        std::get<2>(t) ^= table[std::get<2>(s) & 0xFF];
-        std::get<3>(t) ^= table[std::get<3>(s) & 0xFF];
 
-        table += 256;
-        std::get<0>(s) >>= 8;
-        std::get<1>(s) >>= 8;
-        std::get<2>(s) >>= 8;
-        std::get<3>(s) >>= 8;
-        std::get<0>(t) ^= table[std::get<1>(s) & 0xFF];
-        std::get<1>(t) ^= table[std::get<2>(s) & 0xFF];
-        std::get<2>(t) ^= table[std::get<3>(s) & 0xFF];
-        std::get<3>(t) ^= table[std::get<0>(s) & 0xFF];
-
-        table += 256;
-        std::get<0>(s) >>= 8;
-        std::get<1>(s) >>= 8;
-        std::get<2>(s) >>= 8;
-        std::get<3>(s) >>= 8;
-        std::get<0>(t) ^= table[std::get<2>(s) & 0xFF];
-        std::get<1>(t) ^= table[std::get<3>(s) & 0xFF];
-        std::get<2>(t) ^= table[std::get<0>(s) & 0xFF];
-        std::get<3>(t) ^= table[std::get<1>(s) & 0xFF];
-
-        table += 256;
-        std::get<0>(s) >>= 8;
-        std::get<1>(s) >>= 8;
-        std::get<2>(s) >>= 8;
-        std::get<3>(s) >>= 8;
-        std::get<0>(t) ^= table[std::get<3>(s) & 0xFF];
-        std::get<1>(t) ^= table[std::get<0>(s) & 0xFF];
-        std::get<2>(t) ^= table[std::get<1>(s) & 0xFF];
-        std::get<3>(t) ^= table[std::get<2>(s) & 0xFF];
+        std::get<0>(t) ^= table0[(std::get<0>(s) >> 0x00) & 0xFF];
+        std::get<1>(t) ^= table0[(std::get<1>(s) >> 0x00) & 0xFF];
+        std::get<2>(t) ^= table0[(std::get<2>(s) >> 0x00) & 0xFF];
+        std::get<3>(t) ^= table0[(std::get<3>(s) >> 0x00) & 0xFF];
+        std::get<0>(t) ^= table1[(std::get<1>(s) >> 0x08) & 0xFF];
+        std::get<1>(t) ^= table1[(std::get<2>(s) >> 0x08) & 0xFF];
+        std::get<2>(t) ^= table1[(std::get<3>(s) >> 0x08) & 0xFF];
+        std::get<3>(t) ^= table1[(std::get<0>(s) >> 0x08) & 0xFF];
+        std::get<0>(t) ^= table2[(std::get<2>(s) >> 0x10) & 0xFF];
+        std::get<1>(t) ^= table2[(std::get<3>(s) >> 0x10) & 0xFF];
+        std::get<2>(t) ^= table2[(std::get<0>(s) >> 0x10) & 0xFF];
+        std::get<3>(t) ^= table2[(std::get<1>(s) >> 0x10) & 0xFF];
+        std::get<0>(t) ^= table3[(std::get<3>(s) >> 0x18) & 0xFF];
+        std::get<1>(t) ^= table3[(std::get<0>(s) >> 0x18) & 0xFF];
+        std::get<2>(t) ^= table3[(std::get<1>(s) >> 0x18) & 0xFF];
+        std::get<3>(t) ^= table3[(std::get<2>(s) >> 0x18) & 0xFF];
 
         s = t;
     }
@@ -447,39 +433,25 @@ class AESGeneratorImpl
         const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &rk,
         std::true_type)
     {
-        const std::uint32_t *const table = aes_table() + 1024;
+        const std::uint32_t *const table4 = aes_table() + 1024;
         std::array<std::uint32_t, 4> t(std::get<N>(rk));
-        std::get<0>(t) ^= table[std::get<0>(s) & 0xFF] & 0x000000FF;
-        std::get<1>(t) ^= table[std::get<1>(s) & 0xFF] & 0x000000FF;
-        std::get<2>(t) ^= table[std::get<2>(s) & 0xFF] & 0x000000FF;
-        std::get<3>(t) ^= table[std::get<3>(s) & 0xFF] & 0x000000FF;
 
-        std::get<0>(s) >>= 8;
-        std::get<1>(s) >>= 8;
-        std::get<2>(s) >>= 8;
-        std::get<3>(s) >>= 8;
-        std::get<0>(t) ^= table[std::get<1>(s) & 0xFF] & 0x0000FF00;
-        std::get<1>(t) ^= table[std::get<2>(s) & 0xFF] & 0x0000FF00;
-        std::get<2>(t) ^= table[std::get<3>(s) & 0xFF] & 0x0000FF00;
-        std::get<3>(t) ^= table[std::get<0>(s) & 0xFF] & 0x0000FF00;
-
-        std::get<0>(s) >>= 8;
-        std::get<1>(s) >>= 8;
-        std::get<2>(s) >>= 8;
-        std::get<3>(s) >>= 8;
-        std::get<0>(t) ^= table[std::get<2>(s) & 0xFF] & 0x00FF0000;
-        std::get<1>(t) ^= table[std::get<3>(s) & 0xFF] & 0x00FF0000;
-        std::get<2>(t) ^= table[std::get<0>(s) & 0xFF] & 0x00FF0000;
-        std::get<3>(t) ^= table[std::get<1>(s) & 0xFF] & 0x00FF0000;
-
-        std::get<0>(s) >>= 8;
-        std::get<1>(s) >>= 8;
-        std::get<2>(s) >>= 8;
-        std::get<3>(s) >>= 8;
-        std::get<0>(t) ^= table[std::get<3>(s) & 0xFF] & 0xFF000000;
-        std::get<1>(t) ^= table[std::get<0>(s) & 0xFF] & 0xFF000000;
-        std::get<2>(t) ^= table[std::get<1>(s) & 0xFF] & 0xFF000000;
-        std::get<3>(t) ^= table[std::get<2>(s) & 0xFF] & 0xFF000000;
+        std::get<0>(t) ^= table4[(std::get<0>(s) >> 0x00) & 0xFF] & 0x000000FF;
+        std::get<1>(t) ^= table4[(std::get<1>(s) >> 0x00) & 0xFF] & 0x000000FF;
+        std::get<2>(t) ^= table4[(std::get<2>(s) >> 0x00) & 0xFF] & 0x000000FF;
+        std::get<3>(t) ^= table4[(std::get<3>(s) >> 0x00) & 0xFF] & 0x000000FF;
+        std::get<0>(t) ^= table4[(std::get<1>(s) >> 0x08) & 0xFF] & 0x0000FF00;
+        std::get<1>(t) ^= table4[(std::get<2>(s) >> 0x08) & 0xFF] & 0x0000FF00;
+        std::get<2>(t) ^= table4[(std::get<3>(s) >> 0x08) & 0xFF] & 0x0000FF00;
+        std::get<3>(t) ^= table4[(std::get<0>(s) >> 0x08) & 0xFF] & 0x0000FF00;
+        std::get<0>(t) ^= table4[(std::get<2>(s) >> 0x10) & 0xFF] & 0x00FF0000;
+        std::get<1>(t) ^= table4[(std::get<3>(s) >> 0x10) & 0xFF] & 0x00FF0000;
+        std::get<2>(t) ^= table4[(std::get<0>(s) >> 0x10) & 0xFF] & 0x00FF0000;
+        std::get<3>(t) ^= table4[(std::get<1>(s) >> 0x10) & 0xFF] & 0x00FF0000;
+        std::get<0>(t) ^= table4[(std::get<3>(s) >> 0x18) & 0xFF] & 0xFF000000;
+        std::get<1>(t) ^= table4[(std::get<0>(s) >> 0x18) & 0xFF] & 0xFF000000;
+        std::get<2>(t) ^= table4[(std::get<1>(s) >> 0x18) & 0xFF] & 0xFF000000;
+        std::get<3>(t) ^= table4[(std::get<2>(s) >> 0x18) & 0xFF] & 0xFF000000;
 
         s = t;
     }
