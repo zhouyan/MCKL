@@ -266,11 +266,15 @@ class AESGenerator
     static_assert(KeySeqType::rounds() != 0,
         "**AESGenerate** used with KeySeqType::rounds() equal to zero");
 
+    static_assert(sizeof(typename KeySeqType::state_type) * CHAR_BIT == 128,
+        "AESGenerator** used with KeySeqType::state_type with number of bits "
+        "other than 128");
+
     public:
-    using ctr_type = Counter<std::uint64_t, 2>;
+    using ctr_type = Counter<typename KeySeqType::state_type, 1>;
     using key_type = typename KeySeqType::key_type;
 
-    static constexpr std::size_t size() { return 128 / CHAR_BIT; }
+    static constexpr std::size_t size() { return sizeof(state_type); }
 
     key_type key() const { return key_seq_.key(); }
 

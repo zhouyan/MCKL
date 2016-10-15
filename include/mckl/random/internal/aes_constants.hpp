@@ -35,13 +35,24 @@
 namespace mckl
 {
 
+namespace internal
+{
+
+class ARSConstantsWeyl
+{
+    public:
+    static constexpr std::uint64_t value[2] = {
+        0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
+};
+
+} // namespace mckl::internal
+
 /// \brief Default ARS constants
 /// \ingroup AESNI
 class ARSConstants
 {
     public:
-    static constexpr std::uint64_t weyl[2] = {
-        0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
+    using weyl = internal::ARSConstantsWeyl;
 }; // class ARSConstants
 
 } // namespace mckl

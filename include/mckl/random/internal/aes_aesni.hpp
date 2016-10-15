@@ -300,7 +300,7 @@ class AES128KeySeqGenerator
 {
     public:
     using state_type = __m128i;
-    using key_type = std::array<std::uint64_t, 2>;
+    using key_type = std::array<std::uint32_t, 4>;
 
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
@@ -318,8 +318,10 @@ class AES128KeySeqGenerator
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
-            static_cast<MCKL_INT64>(std::get<0>(key)));
+        xmm1_ = _mm_set_epi32(static_cast<int>(std::get<3>(key)),
+            static_cast<int>(std::get<2>(key)),
+            static_cast<int>(std::get<1>(key)),
+            static_cast<int>(std::get<0>(key)));
         std::get<0>(rk) = xmm1_;
         generate_seq<1>(rk, std::integral_constant<bool, 1 < Rp1>());
     }
@@ -360,13 +362,13 @@ class AES192KeySeqGenerator
 {
     public:
     using state_type = __m128i;
-    using key_type = std::array<std::uint64_t, 3>;
+    using key_type = std::array<std::uint32_t, 6>;
 
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
         union {
-            std::array<std::uint64_t, 4> key;
+            std::array<std::uint32_t, 8> key;
             std::array<__m128i, 2> xmm;
         } buf;
 
@@ -376,6 +378,9 @@ class AES192KeySeqGenerator
         std::get<0>(key) = std::get<0>(buf.key);
         std::get<1>(key) = std::get<1>(buf.key);
         std::get<2>(key) = std::get<2>(buf.key);
+        std::get<3>(key) = std::get<3>(buf.key);
+        std::get<4>(key) = std::get<4>(buf.key);
+        std::get<5>(key) = std::get<5>(buf.key);
 
         return key;
     }
@@ -383,9 +388,12 @@ class AES192KeySeqGenerator
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
-            static_cast<MCKL_INT64>(std::get<0>(key)));
-        xmm7_ = _mm_set_epi64x(0, static_cast<MCKL_INT64>(std::get<2>(key)));
+        xmm1_ = _mm_set_epi32(static_cast<int>(std::get<3>(key)),
+            static_cast<int>(std::get<2>(key)),
+            static_cast<int>(std::get<1>(key)),
+            static_cast<int>(std::get<0>(key)));
+        xmm7_ = _mm_set_epi32(0, 0, static_cast<int>(std::get<5>(key)),
+            static_cast<int>(std::get<4>(key)));
         std::get<0>(rk) = xmm1_;
         std::get<1>(rk) = xmm7_;
 
@@ -493,7 +501,7 @@ class AES256KeySeqGenerator
 {
     public:
     using state_type = __m128i;
-    using key_type = std::array<std::uint64_t, 4>;
+    using key_type = std::array<std::uint32_t, 8>;
 
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
@@ -512,10 +520,14 @@ class AES256KeySeqGenerator
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        xmm1_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
-            static_cast<MCKL_INT64>(std::get<0>(key)));
-        xmm3_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(key)),
-            static_cast<MCKL_INT64>(std::get<2>(key)));
+        xmm1_ = _mm_set_epi32(static_cast<int>(std::get<3>(key)),
+            static_cast<int>(std::get<2>(key)),
+            static_cast<int>(std::get<1>(key)),
+            static_cast<int>(std::get<0>(key)));
+        xmm3_ = _mm_set_epi32(static_cast<int>(std::get<7>(key)),
+            static_cast<int>(std::get<6>(key)),
+            static_cast<int>(std::get<5>(key)),
+            static_cast<int>(std::get<4>(key)));
         std::get<0>(rk) = xmm1_;
         std::get<1>(rk) = xmm3_;
         generate_seq<2>(rk, std::integral_constant<bool, 2 < Rp1>());
@@ -585,7 +597,7 @@ class ARSKeySeqGenerator
 {
     public:
     using state_type = __m128i;
-    using key_type = std::array<std::uint64_t, 2>;
+    using key_type = std::array<std::uint32_t, 4>;
 
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
@@ -603,8 +615,10 @@ class ARSKeySeqGenerator
     template <std::size_t Rp1>
     void operator()(const key_type &key, std::array<__m128i, Rp1> &rk)
     {
-        key_ = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
-            static_cast<MCKL_INT64>(std::get<0>(key)));
+        key_ = _mm_set_epi32(static_cast<int>(std::get<3>(key)),
+            static_cast<int>(std::get<2>(key)),
+            static_cast<int>(std::get<1>(key)),
+            static_cast<int>(std::get<0>(key)));
         generate<0>(rk, std::integral_constant<bool, 0 < Rp1>());
     }
 
@@ -620,9 +634,9 @@ class ARSKeySeqGenerator
     void generate(std::array<__m128i, Rp1> &rk, std::true_type) const
     {
         static constexpr MCKL_INT64 w0 =
-            static_cast<MCKL_INT64>(Constants::weyl[0] * N);
+            static_cast<MCKL_INT64>(Constants::weyl::value[0] * N);
         static constexpr MCKL_INT64 w1 =
-            static_cast<MCKL_INT64>(Constants::weyl[1] * N);
+            static_cast<MCKL_INT64>(Constants::weyl::value[1] * N);
 
         __m128i w = _mm_set_epi64x(w1, w0);
         std::get<N>(rk) = _mm_add_epi64(key_, w);
