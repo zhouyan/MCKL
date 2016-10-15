@@ -918,7 +918,7 @@ class AESGeneratorImpl16
     static void eval(std::array<std::array<std::uint32_t, 4>, 16> &state,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
-        std::array<__m128i, 8> s;
+        std::array<__m128i, 16> s;
         __m128i *sptr = nullptr;
 
         sptr = reinterpret_cast<__m128i *>(state.data());
