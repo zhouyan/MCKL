@@ -32,6 +32,7 @@
 class AES128KeySeqGenerator
 {
     public:
+    using int128_type = std::array<std::uint64_t, 2>;
     using key_type = std::array<std::uint64_t, 2>;
 
     template <std::size_t Rp1>
@@ -54,6 +55,7 @@ class AES128KeySeqGenerator
 class AES192KeySeqGenerator
 {
     public:
+    using int128_type = std::array<std::uint64_t, 2>;
     using key_type = std::array<std::uint64_t, 3>;
 
     template <std::size_t Rp1>
@@ -76,6 +78,7 @@ class AES192KeySeqGenerator
 class AES256KeySeqGenerator
 {
     public:
+    using int128_type = std::array<std::uint64_t, 2>;
     using key_type = std::array<std::uint64_t, 4>;
 
     template <std::size_t Rp1>
@@ -99,5 +102,6 @@ template <typename Constants>
 class ARSKeySeqGenerator
 {
     public:
-    using key_seq
+    using int128_type = std::array<std::uint64_t, 2>;
+    using key_seq = std::array<std::uint64_t, 2>
 }; // class ARSKeySeqGenerator

@@ -47,4 +47,3 @@ class ARSConstants
 } // namespace mckl
 
 #endif // MCKL_RANDOM_INTERNAL_AES_COSNTANTS_HPP
-

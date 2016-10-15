@@ -299,7 +299,7 @@ MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFF, 0x8D)
 class AES128KeySeqGenerator
 {
     public:
-    using int128_type = __m128i;
+    using state_type = __m128i;
     using key_type = std::array<std::uint64_t, 2>;
 
     template <std::size_t Rp1>
@@ -359,7 +359,7 @@ class AES128KeySeqGenerator
 class AES192KeySeqGenerator
 {
     public:
-    using int128_type = __m128i;
+    using state_type = __m128i;
     using key_type = std::array<std::uint64_t, 3>;
 
     template <std::size_t Rp1>
@@ -492,7 +492,7 @@ class AES192KeySeqGenerator
 class AES256KeySeqGenerator
 {
     public:
-    using int128_type = __m128i;
+    using state_type = __m128i;
     using key_type = std::array<std::uint64_t, 4>;
 
     template <std::size_t Rp1>
@@ -584,7 +584,7 @@ template <typename Constants>
 class ARSKeySeqGenerator
 {
     public:
-    using int128_type = __m128i;
+    using state_type = __m128i;
     using key_type = std::array<std::uint64_t, 2>;
 
     template <std::size_t Rp1>
