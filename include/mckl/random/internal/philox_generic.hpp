@@ -45,13 +45,13 @@ class PhiloxHiLo<T, 32>
 
         buf.prod =
             static_cast<std::uint64_t>(a) * static_cast<std::uint64_t>(b);
-#if MCKL_HAS_X86 // little endian
+#if MCKL_HAS_LITTLE_ENDIAN
         lo = std::get<0>(buf.result);
         hi = std::get<1>(buf.result);
-#else  // MCKL_HAS_X86
+#else
         lo = static_cast<T>(buf.prod);
         hi = static_cast<T>(buf.prod >> 32);
-#endif // MCKL_HAS_X86
+#endif
     }
 }; // class PhiloxHiLo
 
@@ -66,7 +66,7 @@ class PhiloxHiLo<T, 64>
 #ifdef MCKL_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-#endif // MCKL_GCC
+#endif
         union {
             unsigned MCKL_INT128 prod;
             std::array<T, 2> result;
@@ -76,15 +76,15 @@ class PhiloxHiLo<T, 64>
             static_cast<unsigned MCKL_INT128>(b);
 #ifdef MCKL_GCC
 #pragma GCC diagnostic pop
-#endif // MCKL_GCC
+#endif
 
-#if MCKL_HAS_X86 // littel endia
+#if MCKL_HAS_LITTLE_ENDIAN
         lo = std::get<0>(buf.result);
         hi = std::get<1>(buf.result);
-#else  // MCKL_HAS_X86
+#else
         lo = static_cast<T>(buf.prod);
         hi = static_cast<T>(buf.prod >> 64);
-#endif // MCKL_HAS_X86
+#endif
 
 #elif defined(MCKL_MSVC)
 
