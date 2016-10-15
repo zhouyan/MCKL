@@ -29,11 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(N, val)                       \
+#define MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(N, rcon)                      \
     template <>                                                               \
     inline __m128i AESNIKeyGenAssist<N>(const __m128i &xmm)                   \
     {                                                                         \
-        return _mm_aeskeygenassist_si128(xmm, val);                           \
+        return _mm_aeskeygenassist_si128(xmm, rcon);                          \
     }
 
 template <std::size_t>
