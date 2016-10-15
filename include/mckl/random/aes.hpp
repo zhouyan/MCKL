@@ -73,7 +73,11 @@ namespace internal
 #endif
 #endif
 
+#if MCKL_HAS_AESNI
 #include <mckl/random/internal/aes_aesni.hpp>
+#else
+#include <mckl/random/internal/aes_generic.hpp>
+#endif
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -92,7 +96,7 @@ class AESKeySeqImpl
 
     key_type key() const { return KeySeqGenerator::key(rk_); }
 
-    void reset(const key_type &key)
+    void set(const key_type &key)
     {
         KeySeqGenerator generator;
         generator(key, rk_);
@@ -167,7 +171,7 @@ class ARSKeySeqImpl
 
     key_type key() const { return key_; }
 
-    void reset(const key_type &key) { key_ = key; }
+    void set(const key_type &key) { key_ = key; }
 
     std::array<state_type, rounds() + 1> get() const
     {
@@ -278,7 +282,7 @@ class AESGenerator
 
     key_type key() const { return key_seq_.key(); }
 
-    void reset(const key_type &key) { key_seq_.reset(key); }
+    void reset(const key_type &key) { key_seq_.set(key); }
 
     void enc(const void *plain, void *cipher) const
     {
@@ -370,10 +374,11 @@ class AESGenerator
 
     template <typename ResultType>
     void generate(ctr_type &ctr, std::size_t n, ResultType *result,
-        const std::array<state_type, rounds_ + 1> &rk, std::false_type) const
+        std::false_type) const
     {
         static constexpr std::size_t stride = size() / sizeof(ResultType);
 
+        std::array<state_type, rounds_ + 1> rk(key_seq_.get());
         for (std::size_t i = 0; i != n; ++i, result += stride)
             generate(ctr, result, rk);
     }

@@ -655,7 +655,7 @@ class AESGeneratorImpl8
     static void eval(__m128i &state,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
-        encfirst<0>(state, rk);
+        encfirst<0x0>(state, rk);
         enc<0x1>(state, rk);
         enc<0x2>(state, rk);
         enc<0x3>(state, rk);
