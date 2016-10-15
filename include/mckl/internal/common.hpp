@@ -266,13 +266,6 @@ inline T swap_bytes(T x)
 
 #if MCKL_HAS_LITTLE_ENDIAN
 
-template <typename, typename T, std::size_t K>
-inline void union_le(std::array<T, K> &)
-{
-}
-
-#else // MCKL_HAS_LITTLE_ENDIAN
-
 // Let in the following union
 // union {
 //    U u[sizeof(T) * sizeof(K) / sizeof(U);
@@ -280,6 +273,13 @@ inline void union_le(std::array<T, K> &)
 // } buf;
 // buf.u is given the exact value
 // transform buf.t such that its value will be as if we are using little endian
+template <typename, typename T>
+inline void union_le(T &)
+{
+}
+
+#else // MCKL_HAS_LITTLE_ENDIAN
+
 template <typename U, typename T, std::size_t K>
 inline void union_le(std::array<T, K> &, std::false_type, std::false_type)
 {

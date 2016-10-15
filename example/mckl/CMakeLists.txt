@@ -106,7 +106,7 @@ MCKL_ADD_TEST_HEADER(mckl/random/uniform_real_distribution  TRUE)
 MCKL_ADD_TEST_HEADER(mckl/random/weibull_distribution       TRUE)
 
 MCKL_ADD_TEST_HEADER(mckl/random/rng TRUE)
-MCKL_ADD_TEST_HEADER(mckl/random/aes      ${AESNI_FOUND})
+MCKL_ADD_TEST_HEADER(mckl/random/aes      TRUE)
 MCKL_ADD_TEST_HEADER(mckl/random/counter  TRUE)
 MCKL_ADD_TEST_HEADER(mckl/random/mkl      ${MKL_FOUND})
 MCKL_ADD_TEST_HEADER(mckl/random/philox   TRUE)

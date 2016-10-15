@@ -76,12 +76,9 @@
 #define MCKL_RNG_MINI_64_TYPE ::mckl::Philox2x32_64
 #endif
 
+#include <mckl/random/aes.hpp>
 #include <mckl/random/philox.hpp>
 #include <mckl/random/threefry.hpp>
-
-#if MCKL_HAS_AESNI
-#include <mckl/random/aes.hpp>
-#endif
 
 #if MCKL_HAS_MKL
 #include <mckl/random/mkl.hpp>

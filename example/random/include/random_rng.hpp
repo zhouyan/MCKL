@@ -75,6 +75,7 @@ template <typename RNGType>
 inline bool random_rng_k(const RNGType &, const std::string &filename)
 {
     using result_type = typename RNGType::result_type;
+    using key_type = typename RNGType::key_type;
 
     std::ifstream kat(filename);
     mckl::Vector<result_type> k;
@@ -87,13 +88,19 @@ inline bool random_rng_k(const RNGType &, const std::string &filename)
     mckl::Vector<result_type> r(k.size());
     mckl::rand(rng, k.size(), r.data());
 
-    return k == r;
+    key_type kk;
+    for (std::size_t i = 0; i != kk.size(); ++i)
+        kk[i] = static_cast<typename key_type::value_type>(rng());
+    rng.seed(kk);
+    key_type rk = rng.key();
+
+    return k == r && kk == rk;
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_MKL_RNG ||
        // MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
-#if MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AES_RNG
+#if MCKL_EXAMPLE_RANDOM_AES_RNG
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_k(const mckl::AES128Engine<ResultType, Rounds> &rng)
@@ -139,7 +146,7 @@ inline bool random_rng_k(const mckl::ARSEngine<ResultType, Rounds> &rng)
     return random_rng_k(rng, filename);
 }
 
-#endif // MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AES_RNG
+#endif // MCKL_EXAMPLE_RANDOM_AES_RNG
 
 #if MCKL_EXAMPLE_RANDOM_PHILOX_RNG
 

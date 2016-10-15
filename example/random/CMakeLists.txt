@@ -44,6 +44,14 @@ SET(MCKL_RNG_STD
     ranlux48
     knuth_b)
 
+SET(MCKL_RNG_AES_HEADER "mckl/random/aes.hpp")
+SET(MCKL_RNG_AES_NAMESPACE "mckl")
+SET(MCKL_RNG_AES
+    AES128 AES128_64
+    AES192 AES192_64
+    AES256 AES256_64
+    ARS    ARS_64)
+
 SET(MCKL_RNG_PHILOX_HEADER "mckl/random/philox.hpp")
 SET(MCKL_RNG_PHILOX_NAMESPACE "mckl")
 SET(MCKL_RNG_PHILOX
@@ -64,16 +72,6 @@ SET(MCKL_RNG_THREEFRY
     Threefish256  Threefish256_64
     Threefish512  Threefish512_64
     Threefish1024 Threefish1024_64)
-
-IF(AESNI_FOUND)
-    SET(MCKL_RNG_AES_HEADER "mckl/random/aes.hpp")
-    SET(MCKL_RNG_AES_NAMESPACE "mckl")
-    SET(MCKL_RNG_AES
-        AES128 AES128_64
-        AES192 AES192_64
-        AES256 AES256_64
-        ARS    ARS_64)
-ENDIF(AESNI_FOUND)
 
 IF(MKL_FOUND)
     SET(MCKL_RNG_MKL_HEADER "mckl/random/mkl.hpp")
@@ -98,10 +96,7 @@ IF(RDRAND_FOUND)
     SET(MCKL_RNG_RDRAND RDRAND16 RDRAND32 RDRAND64)
 ENDIF(RDRAND_FOUND)
 
-SET(MCKL_RNG STD PHILOX THREEFRY)
-IF(AESNI_FOUND)
-    SET(MCKL_RNG ${MCKL_RNG} AES)
-ENDIF(AESNI_FOUND)
+SET(MCKL_RNG STD AES PHILOX THREEFRY)
 IF(MKL_FOUND)
     SET(MCKL_RNG ${MCKL_RNG} MKL)
 ENDIF(MKL_FOUND)
@@ -180,13 +175,11 @@ ENDFUNCTION(MCKL_ADD_TEST_DISTRIBUTION)
 
 MCKL_ADD_EXAMPLE(random)
 
+MCKL_ADD_TEST(random aes)
 MCKL_ADD_TEST(random seed)
 MCKL_ADD_TEST(random skein)
 MCKL_ADD_TEST(random threefish)
 MCKL_ADD_TEST(random u01)
-IF(AESNI_FOUND)
-    MCKL_ADD_TEST(random aes)
-ENDIF(AESNI_FOUND)
 IF(MKL_FOUND)
     MCKL_ADD_TEST(random mkl_brng)
 ENDIF(MKL_FOUND)
@@ -209,6 +202,11 @@ ENDIF(TestU01_FOUND)
 
 MCKL_ADD_TEST_DISTRIBUTION(distribution)
 MCKL_ADD_TEST_DISTRIBUTION(distribution_perf)
+
+MCKL_ADD_FILE(random random_aes128.txt)
+MCKL_ADD_FILE(random random_aes192.txt)
+MCKL_ADD_FILE(random random_aes256.txt)
+MCKL_ADD_FILE(random random_ars.txt)
 
 MCKL_ADD_FILE(random random_philox2x32.txt)
 MCKL_ADD_FILE(random random_philox2x64.txt)
@@ -237,10 +235,3 @@ MCKL_ADD_FILE(random random_threefry16x64_64.txt)
 MCKL_ADD_FILE(random random_threefish256_64.txt)
 MCKL_ADD_FILE(random random_threefish512_64.txt)
 MCKL_ADD_FILE(random random_threefish1024_64.txt)
-
-IF(AESNI_FOUND)
-    MCKL_ADD_FILE(random random_aes128.txt)
-    MCKL_ADD_FILE(random random_aes192.txt)
-    MCKL_ADD_FILE(random random_aes256.txt)
-    MCKL_ADD_FILE(random random_ars.txt)
-ENDIF(AESNI_FOUND)

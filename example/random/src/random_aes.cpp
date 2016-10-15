@@ -38,6 +38,7 @@
     typename mckl::AES##N::ctr_type test_res##N;                              \
     std::memcpy(test_key##N.data(), key##N, sizeof(test_key##N));             \
     std::memcpy(test_ctr##N.data(), ctr##N, sizeof(test_ctr##N));             \
+    mckl::internal::union_le<std::uint8_t>(test_key##N);                      \
     generator##N.reset(test_key##N);                                          \
     generator##N.enc(test_ctr##N.data(), test_res##N.data());                 \
     bool pass##N =                                                            \

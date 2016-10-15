@@ -89,8 +89,8 @@ template <std::size_t Rounds, typename KeySeqGenerator>
 class AESKeySeqImpl
 {
     public:
-    using state_type = typename KeySeqGenerator::state_type;
     using key_type = typename KeySeqGenerator::key_type;
+    using rk_type = typename KeySeqGenerator::rk_type;
 
     static constexpr std::size_t rounds() { return Rounds; }
 
@@ -102,7 +102,7 @@ class AESKeySeqImpl
         generator(key, rk_);
     }
 
-    const std::array<state_type, rounds() + 1> get() const { return rk_; }
+    const std::array<rk_type, rounds() + 1> get() const { return rk_; }
 
     friend bool operator==(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
         const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
@@ -157,15 +157,15 @@ class AESKeySeqImpl
     }
 
     private:
-    std::array<state_type, rounds() + 1> rk_;
+    std::array<rk_type, rounds() + 1> rk_;
 }; // class AESKeySeqImpl
 
 template <std::size_t Rounds, typename Constants>
 class ARSKeySeqImpl
 {
     public:
-    using state_type = typename ARSKeySeqGenerator<Constants>::state_type;
     using key_type = typename ARSKeySeqGenerator<Constants>::key_type;
+    using rk_type = typename ARSKeySeqGenerator<Constants>::rk_type;
 
     static constexpr std::size_t rounds() { return Rounds; }
 
@@ -173,10 +173,10 @@ class ARSKeySeqImpl
 
     void set(const key_type &key) { key_ = key; }
 
-    std::array<state_type, rounds() + 1> get() const
+    std::array<rk_type, rounds() + 1> get() const
     {
         ARSKeySeqGenerator<Constants> generator;
-        std::array<state_type, rounds() + 1> rk;
+        std::array<rk_type, rounds() + 1> rk;
         generator(key_, rk);
 
         return rk;
@@ -270,15 +270,11 @@ class AESGenerator
     static_assert(KeySeqType::rounds() != 0,
         "**AESGenerate** used with KeySeqType::rounds() equal to zero");
 
-    static_assert(sizeof(typename KeySeqType::state_type) * CHAR_BIT == 128,
-        "AESGenerator** used with KeySeqType::state_type with number of bits "
-        "other than 128");
-
     public:
-    using ctr_type = Counter<typename KeySeqType::state_type, 1>;
+    using ctr_type = Counter<std::uint32_t, 4>;
     using key_type = typename KeySeqType::key_type;
 
-    static constexpr std::size_t size() { return sizeof(state_type); }
+    static constexpr std::size_t size() { return 128 / CHAR_BIT; }
 
     key_type key() const { return key_seq_.key(); }
 
@@ -286,17 +282,24 @@ class AESGenerator
 
     void enc(const void *plain, void *cipher) const
     {
-        alignas(32) state_type state;
-        std::memcpy(&state, plain, size());
-        std::array<state_type, rounds_ + 1> rk(key_seq_.get());
-        internal::AESGeneratorImpl<KeySeqType>::eval(state, rk);
-        std::memcpy(cipher, &state, size());
+        alignas(32) union {
+            std::array<std::uint32_t, 4> state;
+            std::array<char, size()> result;
+        } buf;
+
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
+
+        std::memcpy(buf.state.data(), plain, size());
+        internal::union_le<char>(buf.state);
+        internal::AESGeneratorImpl<KeySeqType>::eval(buf.state, rk);
+        internal::union_le<std::uint32_t>(buf.result);
+        std::memcpy(cipher, buf.state.data(), size());
     }
 
     template <typename ResultType>
     void operator()(ctr_type &ctr, ResultType *result) const
     {
-        std::array<state_type, rounds_ + 1> rk(key_seq_.get());
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
         generate(ctr, result, rk);
     }
 
@@ -350,7 +353,7 @@ class AESGenerator
     }
 
     private:
-    using state_type = typename KeySeqType::state_type;
+    using rk_type = typename KeySeqType::rk_type;
 
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
 
@@ -358,17 +361,23 @@ class AESGenerator
 
     template <typename ResultType>
     void generate(ctr_type &ctr, ResultType *result,
-        const std::array<state_type, rounds_ + 1> &rk) const
+        const std::array<rk_type, rounds_ + 1> &rk) const
     {
         alignas(32) union {
-            state_type state;
+            std::array<std::uint32_t, 4> state;
             ctr_type ctr;
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
         MCKL_FLATTEN_CALL increment(ctr);
         buf.ctr = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<typename ctr_type::value_type>(buf.state);
+#endif
         internal::AESGeneratorImpl<KeySeqType>::eval(buf.state, rk);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<std::uint32_t>(buf.result);
+#endif
         std::memcpy(result, buf.result.data(), size());
     }
 
@@ -378,7 +387,7 @@ class AESGenerator
     {
         static constexpr std::size_t stride = size() / sizeof(ResultType);
 
-        std::array<state_type, rounds_ + 1> rk(key_seq_.get());
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
         for (std::size_t i = 0; i != n; ++i, result += stride)
             generate(ctr, result, rk);
     }
@@ -392,19 +401,26 @@ class AESGenerator
             internal::AESGeneratorImpl<KeySeqType>::blocks();
 
         alignas(32) union {
-            std::array<state_type, blocks> state;
+            std::array<std::uint32_t, 4 * blocks> state;
+            std::array<std::array<std::uint32_t, 4>, blocks> state_block;
             std::array<ctr_type, blocks> ctr_block;
             std::array<ResultType, size() / sizeof(ResultType) * blocks>
                 result;
         } buf;
 
-        std::array<state_type, rounds_ + 1> rk(key_seq_.get());
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
 
         const std::size_t m = n / blocks;
         const std::size_t l = n % blocks;
         for (std::size_t i = 0; i != m; ++i, result += stride * blocks) {
             MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
-            internal::AESGeneratorImpl<KeySeqType>::eval(buf.state, rk);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+            internal::union_le<typename ctr_type::value_type>(buf.state);
+#endif
+            internal::AESGeneratorImpl<KeySeqType>::eval(buf.state_block, rk);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+            internal::union_le<std::uint32_t>(buf.result);
+#endif
             std::memcpy(result, buf.result.data(), size() * blocks);
         }
         for (std::size_t i = 0; i != l; ++i, result += stride)
