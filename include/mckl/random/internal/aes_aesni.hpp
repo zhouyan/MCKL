@@ -323,7 +323,7 @@ class AES128KeySeqGenerator
             static_cast<int>(std::get<1>(key)),
             static_cast<int>(std::get<0>(key)));
         std::get<0>(rk) = xmm1_;
-        generate_seq<1>(rk, std::integral_constant<bool, 1 < Rp1>());
+        generate<1>(rk, std::integral_constant<bool, 1 < Rp1>());
     }
 
     private:
@@ -332,17 +332,17 @@ class AES128KeySeqGenerator
     __m128i xmm3_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
+    void generate(std::array<__m128i, Rp1> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &rk, std::true_type)
+    void generate(std::array<__m128i, Rp1> &rk, std::true_type)
     {
         xmm2_ = AESNIKeyGenAssist<N % 256>(xmm1_);
         expand_key();
         std::get<N>(rk) = xmm1_;
-        generate_seq<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
+        generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     void expand_key()
@@ -402,7 +402,7 @@ class AES192KeySeqGenerator
         xmm4_ = _mm_shuffle_epi32(xmm7_, 0x4F); // pshufd xmm4, xmm7, 0x4F
 
         std::array<char, Rp1 * 16 + 16> rk_tmp;
-        generate_seq<1, Rp1>(
+        generate<1, Rp1>(
             rk_tmp.data(), std::integral_constant<bool, 24 < Rp1 * 16>());
         copy_key(
             rk, rk_tmp.data(), std::integral_constant<bool, 24 < Rp1 * 16>());
@@ -418,17 +418,17 @@ class AES192KeySeqGenerator
     __m128i xmm7_;
 
     template <std::size_t, std::size_t>
-    void generate_seq(char *, std::false_type)
+    void generate(char *, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(char *rk_ptr, std::true_type)
+    void generate(char *rk_ptr, std::true_type)
     {
         generate_key<N>(rk_ptr);
         complete_key<N>(
             rk_ptr, std::integral_constant<bool, N * 24 + 16 < Rp1 * 16>());
-        generate_seq<N + 1, Rp1>(
+        generate<N + 1, Rp1>(
             rk_ptr, std::integral_constant<bool, N * 24 + 24 < Rp1 * 16>());
     }
 
@@ -530,7 +530,7 @@ class AES256KeySeqGenerator
             static_cast<int>(std::get<4>(key)));
         std::get<0>(rk) = xmm1_;
         std::get<1>(rk) = xmm3_;
-        generate_seq<2>(rk, std::integral_constant<bool, 2 < Rp1>());
+        generate<2>(rk, std::integral_constant<bool, 2 < Rp1>());
     }
 
     private:
@@ -540,15 +540,15 @@ class AES256KeySeqGenerator
     __m128i xmm4_;
 
     template <std::size_t, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &, std::false_type)
+    void generate(std::array<__m128i, Rp1> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t Rp1>
-    void generate_seq(std::array<__m128i, Rp1> &rk, std::true_type)
+    void generate(std::array<__m128i, Rp1> &rk, std::true_type)
     {
         generate_key<N>(rk, std::integral_constant<bool, N % 2 == 0>());
-        generate_seq<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
+        generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
 
     template <std::size_t N, std::size_t Rp1>
