@@ -179,6 +179,18 @@
 #define MCKL_INT64 long long
 #endif
 
+#if MCKL_HAS_AESNI
+#ifdef MCKL_MSVC
+#include <immintrin.h>
+#else
+#include <wmmintrin.h>
+#endif
+#endif
+
+#if MCKL_HAS_RDRAND
+#include <immintrin.h>
+#endif
+
 #if MCKL_USE_SSE2
 #ifdef MCKL_MSVC
 #include <intrin.h>
