@@ -390,7 +390,6 @@ class AESGeneratorImpl
     {
         const std::uint32_t *table = aes_table();
         std::array<std::uint32_t, 4> t(std::get<N>(rk));
-
         std::get<0>(t) ^= table[std::get<0>(s) & 0xFF];
         std::get<1>(t) ^= table[std::get<1>(s) & 0xFF];
         std::get<2>(t) ^= table[std::get<2>(s) & 0xFF];
@@ -450,7 +449,6 @@ class AESGeneratorImpl
     {
         const std::uint32_t *const table = aes_table() + 1024;
         std::array<std::uint32_t, 4> t(std::get<N>(rk));
-
         std::get<0>(t) ^= table[std::get<0>(s) & 0xFF] & 0x000000FF;
         std::get<1>(t) ^= table[std::get<1>(s) & 0xFF] & 0x000000FF;
         std::get<2>(t) ^= table[std::get<2>(s) & 0xFF] & 0x000000FF;

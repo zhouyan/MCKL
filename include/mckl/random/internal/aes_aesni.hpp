@@ -305,14 +305,10 @@ class AES128KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        union {
-            key_type key;
-            __m128i xmm;
-        } buf;
+        key_type key;
+        std::memcpy(key.data(), rk.data(), sizeof(key_type));
 
-        buf.xmm = std::get<0>(rk);
-
-        return buf.key;
+        return key;
     }
 
     template <std::size_t Rp1>
@@ -367,20 +363,8 @@ class AES192KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        union {
-            std::array<std::uint32_t, 8> key;
-            std::array<__m128i, 2> xmm;
-        } buf;
-
         key_type key;
-        std::get<0>(buf.xmm) = std::get<0>(rk);
-        std::get<1>(buf.xmm) = std::get<1>(rk);
-        std::get<0>(key) = std::get<0>(buf.key);
-        std::get<1>(key) = std::get<1>(buf.key);
-        std::get<2>(key) = std::get<2>(buf.key);
-        std::get<3>(key) = std::get<3>(buf.key);
-        std::get<4>(key) = std::get<4>(buf.key);
-        std::get<5>(key) = std::get<5>(buf.key);
+        std::memcpy(key.data(), rk.data(), sizeof(key_type));
 
         return key;
     }
@@ -506,15 +490,10 @@ class AES256KeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        union {
-            key_type key;
-            std::array<__m128i, 2> xmm;
-        } buf;
+        key_type key;
+        std::memcpy(key.data(), rk.data(), sizeof(key_type));
 
-        std::get<0>(buf.xmm) = std::get<0>(rk);
-        std::get<1>(buf.xmm) = std::get<1>(rk);
-
-        return buf.key;
+        return key;
     }
 
     template <std::size_t Rp1>
@@ -602,14 +581,10 @@ class ARSKeySeqGenerator
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
-        union {
-            key_type key;
-            __m128i xmm;
-        } buf;
+        key_type key;
+        std::memcpy(key.data(), rk.data(), sizeof(key_type));
 
-        buf.xmm = std::get<0>(rk);
-
-        return buf.key;
+        return key;
     }
 
     template <std::size_t Rp1>
