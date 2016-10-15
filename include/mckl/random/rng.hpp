@@ -80,7 +80,7 @@
 #include <mckl/random/threefry.hpp>
 
 #if MCKL_HAS_AESNI
-#include <mckl/random/aesni.hpp>
+#include <mckl/random/aes.hpp>
 #endif
 
 #if MCKL_HAS_MKL

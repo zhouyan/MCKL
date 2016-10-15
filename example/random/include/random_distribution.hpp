@@ -138,7 +138,7 @@
 #endif
 
 #if MCKL_HAS_AESNI
-#include <mckl/random/aesni.hpp>
+#include <mckl/random/aes.hpp>
 using MCKLRNGType = mckl::ARS;
 #else
 #include <mckl/random/philox.hpp>

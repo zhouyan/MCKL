@@ -64,7 +64,7 @@ $write = 0 if $name;
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
 
-my @aesni = qw(AES128 AES192 AES256 ARS AES128_64 AES192_64 AES256_64 ARS_64);
+my @aes = qw(AES128 AES192 AES256 ARS AES128_64 AES192_64 AES256_64 ARS_64);
 
 my @philox = qw(Philox2x32 Philox4x32 Philox2x64 Philox4x64 Philox2x32_64
 Philox4x32_64 Philox2x64_64 Philox4x64_64);
@@ -82,14 +82,14 @@ my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64);
 
 my %rng = (
     std      => [@std],
-    aesni    => [@aesni],
+    aes      => [@aes],
     philox   => [@philox],
     threefry => [@threefry],
     mkl      => [@mkl],
     rdrand   => [@rdrand],
 );
 
-my @keys = qw(std aesni philox threefry mkl rdrand);
+my @keys = qw(std aes philox threefry mkl rdrand);
 
 my @rng;
 for my $k (@keys) {

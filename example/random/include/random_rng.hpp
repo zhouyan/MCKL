@@ -36,8 +36,8 @@
 #define MCKL_EXAMPLE_RANDOM_STD_RNG 0
 #endif
 
-#ifndef MCKL_EXAMPLE_RANDOM_AESNI_RNG
-#define MCKL_EXAMPLE_RANDOM_AESNI_RNG 0
+#ifndef MCKL_EXAMPLE_RANDOM_AES_RNG
+#define MCKL_EXAMPLE_RANDOM_AES_RNG 0
 #endif
 
 #ifndef MCKL_EXAMPLE_RANDOM_PHILOX_RNG
@@ -93,7 +93,7 @@ inline bool random_rng_k(const RNGType &, const std::string &filename)
 #endif // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_MKL_RNG ||
        // MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
-#if MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AESNI_RNG
+#if MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AES_RNG
 
 template <typename ResultType, std::size_t Rounds>
 inline bool random_rng_k(const mckl::AES128Engine<ResultType, Rounds> &rng)
@@ -139,7 +139,7 @@ inline bool random_rng_k(const mckl::ARSEngine<ResultType, Rounds> &rng)
     return random_rng_k(rng, filename);
 }
 
-#endif // MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AESNI_RNG
+#endif // MCKL_HAS_AESNI && MCKL_EXAMPLE_RANDOM_AES_RNG
 
 #if MCKL_EXAMPLE_RANDOM_PHILOX_RNG
 

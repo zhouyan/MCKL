@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/random/aesni.hpp>
+#include <mckl/random/aes.hpp>
 
 #define MCKL_EXAMPLE_RANDOM_AES(N)                                            \
     typename mckl::AES##N::generator_type generator##N;                       \
