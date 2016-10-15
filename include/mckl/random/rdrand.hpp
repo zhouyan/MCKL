@@ -33,7 +33,6 @@
 #define MCKL_RANDOM_RDRAND_HPP
 
 #include <mckl/random/internal/common.hpp>
-#include <immintrin.h>
 
 #ifndef MCKL_RDRAND_NTRIAL_MAX
 #define MCKL_RDRAND_NTRIAL_MAX 0

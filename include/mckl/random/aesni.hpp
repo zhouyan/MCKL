@@ -639,7 +639,7 @@ template <typename Constants>
 class ARSKeySeqGenerator
 {
     public:
-    using key_type = std::array<std::uint64_t, 4>;
+    using key_type = std::array<std::uint64_t, 2>;
 
     template <std::size_t Rp1>
     static key_type key(const std::array<__m128i, Rp1> &rk)
