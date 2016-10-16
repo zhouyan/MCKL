@@ -634,7 +634,7 @@ class AESGeneratorImpl8
 
         __m128i s = _mm_load_si128(sptr);
 
-        encfirst<0x0>(s, rk);
+        encfirst(s, rk);
         enc<0x1>(s, rk);
         enc<0x2>(s, rk);
         enc<0x3>(s, rk);
@@ -651,7 +651,7 @@ class AESGeneratorImpl8
         enc<0xE>(s, rk);
         enc<0xF>(s, rk);
         round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(s, rk);
+        enclast(s, rk);
 
         _mm_store_si128(sptr, s);
     }
@@ -672,24 +672,24 @@ class AESGeneratorImpl8
         std::get<6>(s) = _mm_load_si128(sptr++);
         std::get<7>(s) = _mm_load_si128(sptr++);
 
-        encfirst<0>(s, rk);
-        enc<0x01>(s, rk);
-        enc<0x02>(s, rk);
-        enc<0x03>(s, rk);
-        enc<0x04>(s, rk);
-        enc<0x05>(s, rk);
-        enc<0x06>(s, rk);
-        enc<0x07>(s, rk);
-        enc<0x08>(s, rk);
-        enc<0x09>(s, rk);
-        enc<0x0A>(s, rk);
-        enc<0x0B>(s, rk);
-        enc<0x0C>(s, rk);
-        enc<0x0D>(s, rk);
-        enc<0x0E>(s, rk);
-        enc<0x0F>(s, rk);
+        encfirst(s, rk);
+        enc<0x1>(s, rk);
+        enc<0x2>(s, rk);
+        enc<0x3>(s, rk);
+        enc<0x4>(s, rk);
+        enc<0x5>(s, rk);
+        enc<0x6>(s, rk);
+        enc<0x7>(s, rk);
+        enc<0x8>(s, rk);
+        enc<0x9>(s, rk);
+        enc<0xA>(s, rk);
+        enc<0xB>(s, rk);
+        enc<0xC>(s, rk);
+        enc<0xD>(s, rk);
+        enc<0xE>(s, rk);
+        enc<0xF>(s, rk);
         round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(s, rk);
+        enclast(s, rk);
 
         sptr = reinterpret_cast<__m128i *>(state.data());
         _mm_store_si128(sptr++, std::get<0>(s));
@@ -733,24 +733,10 @@ class AESGeneratorImpl8
         round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
-    template <std::size_t N>
     static void encfirst(
         __m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
-    }
-
-    template <std::size_t>
-    static void encfirst(
-        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void encfirst(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        s = _mm_xor_si128(s, std::get<N>(rk));
+        s = _mm_xor_si128(s, std::get<0>(rk));
     }
 
     template <std::size_t N>
@@ -772,43 +758,15 @@ class AESGeneratorImpl8
         s = _mm_aesenc_si128(s, std::get<N>(rk));
     }
 
-    template <std::size_t N>
     static void enclast(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
+        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
     }
 
-    template <std::size_t>
-    static void enclast(
-        __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enclast(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        s = _mm_aesenclast_si128(s, std::get<N>(rk));
-    }
-
-    template <std::size_t N>
     static void encfirst(
         std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
-    }
-
-    template <std::size_t>
-    static void encfirst(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void encfirst(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
+        const __m128i k = std::get<0>(rk);
         std::get<0>(s) = _mm_xor_si128(std::get<0>(s), k);
         std::get<1>(s) = _mm_xor_si128(std::get<1>(s), k);
         std::get<2>(s) = _mm_xor_si128(std::get<2>(s), k);
@@ -847,24 +805,10 @@ class AESGeneratorImpl8
         std::get<7>(s) = _mm_aesenc_si128(std::get<7>(s), k);
     }
 
-    template <std::size_t N>
     static void enclast(
         std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
-    }
-
-    template <std::size_t>
-    static void enclast(std::array<__m128i, 8> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enclast(std::array<__m128i, 8> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
+        const __m128i k = std::get<rounds_>(rk);
         std::get<0>(s) = _mm_aesenclast_si128(std::get<0>(s), k);
         std::get<1>(s) = _mm_aesenclast_si128(std::get<1>(s), k);
         std::get<2>(s) = _mm_aesenclast_si128(std::get<2>(s), k);
@@ -914,24 +858,24 @@ class AESGeneratorImpl16
         std::get<0xE>(s) = _mm_load_si128(sptr++);
         std::get<0xF>(s) = _mm_load_si128(sptr++);
 
-        encfirst<0>(s, rk);
-        enc<0x01>(s, rk);
-        enc<0x02>(s, rk);
-        enc<0x03>(s, rk);
-        enc<0x04>(s, rk);
-        enc<0x05>(s, rk);
-        enc<0x06>(s, rk);
-        enc<0x07>(s, rk);
-        enc<0x08>(s, rk);
-        enc<0x09>(s, rk);
-        enc<0x0A>(s, rk);
-        enc<0x0B>(s, rk);
-        enc<0x0C>(s, rk);
-        enc<0x0D>(s, rk);
-        enc<0x0E>(s, rk);
-        enc<0x0F>(s, rk);
+        encfirst(s, rk);
+        enc<0x1>(s, rk);
+        enc<0x2>(s, rk);
+        enc<0x3>(s, rk);
+        enc<0x4>(s, rk);
+        enc<0x5>(s, rk);
+        enc<0x6>(s, rk);
+        enc<0x7>(s, rk);
+        enc<0x8>(s, rk);
+        enc<0x9>(s, rk);
+        enc<0xA>(s, rk);
+        enc<0xB>(s, rk);
+        enc<0xC>(s, rk);
+        enc<0xD>(s, rk);
+        enc<0xE>(s, rk);
+        enc<0xF>(s, rk);
         round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(s, rk);
+        enclast(s, rk);
 
         sptr = reinterpret_cast<__m128i *>(state.data());
         _mm_store_si128(sptr++, std::get<0x0>(s));
@@ -969,24 +913,10 @@ class AESGeneratorImpl16
         round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
-    template <std::size_t N>
     static void encfirst(
         std::array<__m128i, 16> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
-    }
-
-    template <std::size_t>
-    static void encfirst(std::array<__m128i, 16> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void encfirst(std::array<__m128i, 16> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
+        const __m128i k = std::get<0>(rk);
         std::get<0x0>(s) = _mm_xor_si128(std::get<0x0>(s), k);
         std::get<0x1>(s) = _mm_xor_si128(std::get<0x1>(s), k);
         std::get<0x2>(s) = _mm_xor_si128(std::get<0x2>(s), k);
@@ -1041,24 +971,10 @@ class AESGeneratorImpl16
         std::get<0xF>(s) = _mm_aesenc_si128(std::get<0xF>(s), k);
     }
 
-    template <std::size_t N>
     static void enclast(
         std::array<__m128i, 16> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
-    }
-
-    template <std::size_t>
-    static void enclast(std::array<__m128i, 16> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enclast(std::array<__m128i, 16> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
+        const __m128i k = std::get<rounds_>(rk);
         std::get<0x0>(s) = _mm_aesenclast_si128(std::get<0x0>(s), k);
         std::get<0x1>(s) = _mm_aesenclast_si128(std::get<0x1>(s), k);
         std::get<0x2>(s) = _mm_aesenclast_si128(std::get<0x2>(s), k);

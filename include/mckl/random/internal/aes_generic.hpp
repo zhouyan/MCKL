@@ -305,7 +305,7 @@ class AESGeneratorImpl
         const std::array<std::array<std::uint32_t, 4>,
             KeySeqType::rounds() + 1> &rk)
     {
-        encfirst<0x0>(state, rk);
+        encfirst(state, rk);
         enc<0x1>(state, rk);
         enc<0x2>(state, rk);
         enc<0x3>(state, rk);
@@ -322,7 +322,7 @@ class AESGeneratorImpl
         enc<0xE>(state, rk);
         enc<0xF>(state, rk);
         round<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast<rounds_>(state, rk);
+        enclast(state, rk);
     }
 
     private:
@@ -344,29 +344,13 @@ class AESGeneratorImpl
         round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
-    template <std::size_t N>
     static void encfirst(std::array<std::uint32_t, 4> &s,
         const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &rk)
     {
-        encfirst<N>(s, rk, std::integral_constant<bool, N == 0>());
-    }
-
-    template <std::size_t>
-    static void encfirst(std::array<std::uint32_t, 4> &,
-        const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &,
-        std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void encfirst(std::array<std::uint32_t, 4> &s,
-        const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &rk,
-        std::true_type)
-    {
-        std::get<0>(s) ^= std::get<0>(std::get<N>(rk));
-        std::get<1>(s) ^= std::get<1>(std::get<N>(rk));
-        std::get<2>(s) ^= std::get<2>(std::get<N>(rk));
-        std::get<3>(s) ^= std::get<3>(std::get<N>(rk));
+        std::get<0>(s) ^= std::get<0>(std::get<0>(rk));
+        std::get<1>(s) ^= std::get<1>(std::get<0>(rk));
+        std::get<2>(s) ^= std::get<2>(std::get<0>(rk));
+        std::get<3>(s) ^= std::get<3>(std::get<0>(rk));
     }
 
     template <std::size_t N>
@@ -414,27 +398,11 @@ class AESGeneratorImpl
         s = t;
     }
 
-    template <std::size_t N>
     static void enclast(std::array<std::uint32_t, 4> &s,
         const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &rk)
     {
-        enclast<N>(s, rk, std::integral_constant<bool, N == rounds_>());
-    }
-
-    template <std::size_t>
-    static void enclast(std::array<std::uint32_t, 4> &,
-        const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &,
-        std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enclast(std::array<std::uint32_t, 4> &s,
-        const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> &rk,
-        std::true_type)
-    {
         const std::uint32_t *const table4 = aes_table() + 1024;
-        std::array<std::uint32_t, 4> t(std::get<N>(rk));
+        std::array<std::uint32_t, 4> t(std::get<rounds_>(rk));
 
         std::get<0>(t) ^= table4[(std::get<0>(s) >> 0x00) & 0xFF] & 0x000000FF;
         std::get<1>(t) ^= table4[(std::get<1>(s) >> 0x00) & 0xFF] & 0x000000FF;
