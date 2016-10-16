@@ -36,6 +36,18 @@
 #include <mckl/random/skein.hpp>
 #include <mckl/random/threefry.hpp>
 
+/// \brief SeedGeneartor by default use randomized output
+/// \ingroup Config
+#ifndef MCKL_SEED_RANDOMIZE
+#define MCKL_SEED_RANDOMIZE 1
+#endif
+
+/// \brief SeedGeneartor by default use atomic operation
+/// \ingroup Config
+#ifndef MCKL_SEED_ATOMIC
+#define MCKL_SEED_ATOMIC 1
+#endif
+
 namespace mckl
 {
 
@@ -43,7 +55,17 @@ namespace mckl
 /// \ingroup Random
 template <typename ResultType,
     typename ID = std::integral_constant<std::size_t, sizeof(ResultType)>,
-    bool Randomize = true>
+#if MCKL_SEED_RANDOMIZE
+    bool Randomize = true,
+#else
+    bool Randomize = false,
+#endif
+#if MCKL_SEED_ATOMIC
+    bool Atomic = true
+#else
+    bool Atomic = false
+#endif
+    >
 class SeedGenerator
 {
     static_assert(sizeof(ResultType) % sizeof(std::uint32_t) == 0,
@@ -58,14 +80,15 @@ class SeedGenerator
 
     using result_type = ResultType;
 
-    SeedGenerator(const SeedGenerator<ResultType, ID, Randomize> &) = delete;
+    SeedGenerator(
+        const SeedGenerator<ResultType, ID, Randomize, Atomic> &) = delete;
 
-    SeedGenerator<ResultType, ID, Randomize> &operator=(
-        const SeedGenerator<ResultType, ID, Randomize> &) = delete;
+    SeedGenerator<ResultType, ID, Randomize, Atomic> &operator=(
+        const SeedGenerator<ResultType, ID, Randomize, Atomic> &) = delete;
 
-    static SeedGenerator<ResultType, ID, Randomize> &instance()
+    static SeedGenerator<ResultType, ID, Randomize, Atomic> &instance()
     {
-        static SeedGenerator<ResultType, ID, Randomize> seed;
+        static SeedGenerator<ResultType, ID, Randomize, Atomic> seed;
 
         return seed;
     }
@@ -91,7 +114,7 @@ class SeedGenerator
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const SeedGenerator<ResultType, ID, Randomize> &sg)
+        const SeedGenerator<ResultType, ID, Randomize, Atomic> &sg)
     {
         if (!os)
             return os;
@@ -107,7 +130,7 @@ class SeedGenerator
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        SeedGenerator<ResultType, ID, Randomize> &sg)
+        SeedGenerator<ResultType, ID, Randomize, Atomic> &sg)
     {
         if (!is)
             return is;
@@ -137,7 +160,8 @@ class SeedGenerator
     seed_type np_;
     seed_type rank_;
     seed_type maxs_;
-    std::atomic<seed_type> seed_;
+    typename std::conditional<Atomic, std::atomic<seed_type>, seed_type>::type
+        seed_;
 
     SeedGenerator() : seed_(1) { partition(1, 0); }
 
@@ -173,7 +197,7 @@ class SeedGenerator
 
     result_type get(std::true_type)
     {
-        seed_type s = seed_.fetch_add(1);
+        seed_type s = seed_++;
         std::array<seed_type, M_> k = {{0}};
         k.front() = s;
         k.back() = rank_;
@@ -183,7 +207,7 @@ class SeedGenerator
 
     result_type get(std::false_type)
     {
-        seed_type s = seed_.fetch_add(1);
+        seed_type s = seed_++;
         s %= maxs_;
         s *= np_;
         s += rank_;
