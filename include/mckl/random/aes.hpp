@@ -32,6 +32,13 @@
 #ifndef MCKL_RANDOM_AES_HPP
 #define MCKL_RANDOM_AES_HPP
 
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_constants.hpp>
 #include <mckl/random/counter.hpp>
@@ -66,23 +73,10 @@ namespace mckl
 namespace internal
 {
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
-
 #if MCKL_HAS_AESNI
 #include <mckl/random/internal/aes_aesni.hpp>
 #else
 #include <mckl/random/internal/aes_generic.hpp>
-#endif
-
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
 #endif
 
 template <std::size_t Rounds, typename KeySeqGenerator>
@@ -487,5 +481,11 @@ using AES256_64 = AES256Engine<std::uint64_t>;
 using ARS_64 = ARSEngine<std::uint64_t>;
 
 } // namespace internal
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif // MCKL_RANDOM_AES_HPP
