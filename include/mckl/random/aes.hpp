@@ -32,16 +32,16 @@
 #ifndef MCKL_RANDOM_AES_HPP
 #define MCKL_RANDOM_AES_HPP
 
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/aes_constants.hpp>
+#include <mckl/random/counter.hpp>
+
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 #endif
-
-#include <mckl/random/internal/common.hpp>
-#include <mckl/random/internal/aes_constants.hpp>
-#include <mckl/random/counter.hpp>
 
 /// \brief AES128Engine default rounds
 /// \ingroup Config
