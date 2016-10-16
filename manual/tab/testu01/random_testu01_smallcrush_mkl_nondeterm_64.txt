@@ -1,8 +1,0 @@
-========= Summary results of SmallCrush =========
- Generator:        U01
- Number of statistics:  15
- ----------------------------------------------
-  9  HammingIndep                    8.7e-5
- ----------------------------------------------
- All other tests were passed
-
