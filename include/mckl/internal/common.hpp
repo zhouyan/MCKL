@@ -281,12 +281,14 @@ inline void union_le(T &)
 #else // MCKL_HAS_LITTLE_ENDIAN
 
 template <typename U, typename T, std::size_t K>
-inline void union_le(std::array<T, K> &, std::false_type, std::false_type)
+inline void union_le_array(
+    std::array<T, K> &, std::false_type, std::false_type)
 {
 }
 
 template <typename U, typename T, std::size_t K>
-inline void union_le(std::array<T, K> &buf, std::false_type, std::true_type)
+inline void union_le_array(
+    std::array<T, K> &buf, std::false_type, std::true_type)
 {
     static constexpr std::size_t m = sizeof(U) / sizeof(T);
     static constexpr std::size_t l = K / m;
@@ -297,29 +299,73 @@ inline void union_le(std::array<T, K> &buf, std::false_type, std::true_type)
 }
 
 template <typename U, typename T, std::size_t K>
-inline void union_le(std::array<T, K> &buf, std::true_type, std::false_type)
+inline void union_le_array(
+    std::array<T, K> &buf, std::true_type, std::false_type)
 {
     for (std::size_t i = 0; i != K; ++i)
         buf[i] = swap_bytes<sizeof(U)>(buf[i]);
 }
 
 template <typename U, typename T, std::size_t K>
-inline void union_le(std::array<T, K> &buf)
+inline void union_le_array(std::array<T, K> &buf)
 {
     static_assert(sizeof(U) % sizeof(T) == 0 || sizeof(T) % sizeof(U) == 0,
         "**union_le** called with sizeof(U) and sizeof(T) with neither of "
         "them a multiple of the other");
 
 #if MCKL_HAS_BIG_ENDIAN
-    union_le<U>(buf, std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+    union_le_array<U>(buf,
+        std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
         std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
 #else
     if (is_big_endian()) {
-        union_le<U>(buf,
+        union_le_array<U>(buf,
             std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
             std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
     }
 #endif
+}
+
+template <typename U, typename T>
+inline void union_le_scalar(T &x)
+{
+    static_assert(sizeof(U) % sizeof(T) == 0 || sizeof(T) % sizeof(U) == 0,
+        "**union_le** called with sizeof(U) and sizeof(T) with neither of "
+        "them a multiple of the other");
+
+    std::array<T, 1> buf = {{x}};
+#if MCKL_HAS_BIG_ENDIAN
+    union_le_array<U>(buf,
+        std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+        std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
+#else
+    if (is_big_endian()) {
+        union_le_array<U>(buf,
+            std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+            std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
+    }
+#endif
+    x = std::get<0>(buf);
+}
+
+template <typename U, typename T>
+class UnionLe
+{
+    public:
+    static void eval(T &x) { union_le_scalar<U>(x); }
+}; // class UnionLe
+
+template <typename U, typename T, std::size_t K>
+class UnionLe<U, std::array<T, K>>
+{
+    public:
+    static void eval(std::array<T, K> &x) { union_le_array<U>(x); }
+}; // class UnionLe
+
+template <typename U, typename T>
+inline void union_le(T &x)
+{
+    UnionLe<U, T>::eval(x);
 }
 
 #endif // MCKL_HAS_LITTLE_ENDIAN

@@ -35,44 +35,85 @@
 #include <mckl/random/seed.hpp>
 #include "random_common.hpp"
 
-template <typename ResultType>
-inline std::uint32_t random_seed_val(const ResultType &s)
+template <typename T, std::size_t K>
+class RandomSeedResultType
 {
-    static constexpr std::size_t M =
-        sizeof(ResultType) / sizeof(std::uint32_t);
+    public:
+    using type = std::array<T, K>;
+};
 
-    union {
-        std::array<std::uint32_t, M> v;
-        ResultType s;
-    } buf;
-
-    buf.s = s;
-
-    return std::get<0>(buf.v);
-}
-
-template <typename ResultType>
-inline void random_seed(std::size_t N, const std::string &name)
+template <typename T>
+class RandomSeedResultType<T, 1>
 {
-    using result_type = typename mckl::SeedGenerator<ResultType>::result_type;
+    public:
+    using type = T;
+};
+
+template <typename T, std::size_t K>
+inline void random_seed(std::size_t N)
+{
+    using result_type = typename RandomSeedResultType<T, K>::type;
+
+    static constexpr int bits = sizeof(T) * CHAR_BIT;
 
     class id0;
     class id1;
     class id2;
     class id3;
 
-    auto &s0 = mckl::SeedGenerator<ResultType, id0, false>::instance();
-    auto &s1 = mckl::SeedGenerator<ResultType, id1, false>::instance();
-    auto &s2 = mckl::SeedGenerator<ResultType, id2, false>::instance();
-    auto &s3 = mckl::SeedGenerator<ResultType, id3, false>::instance();
-    auto &s0r = mckl::SeedGenerator<ResultType, id0, true>::instance();
-    auto &s1r = mckl::SeedGenerator<ResultType, id1, true>::instance();
-    auto &s2r = mckl::SeedGenerator<ResultType, id2, true>::instance();
-    auto &s3r = mckl::SeedGenerator<ResultType, id3, true>::instance();
+    auto &s0 = mckl::SeedGenerator<result_type, id0, false>::instance();
+    auto &s1 = mckl::SeedGenerator<result_type, id1, false>::instance();
+    auto &s2 = mckl::SeedGenerator<result_type, id2, false>::instance();
+    auto &s3 = mckl::SeedGenerator<result_type, id3, false>::instance();
+    auto &s0r = mckl::SeedGenerator<result_type, id0, true>::instance();
+    auto &s1r = mckl::SeedGenerator<result_type, id1, true>::instance();
+    auto &s2r = mckl::SeedGenerator<result_type, id2, true>::instance();
+    auto &s3r = mckl::SeedGenerator<result_type, id3, true>::instance();
+
+    const std::string name(std::to_string(K) + "x" + std::to_string(bits));
+
+    mckl::Vector<T> k;
+    mckl::Vector<T> kr;
+    T x;
+    T xr;
+    std::ifstream kat("random_seed_" + name + ".txt");
+    while (kat >> x >> xr) {
+        k.push_back(x);
+        kr.push_back(xr);
+    }
+    kat.close();
+
+    mckl::Vector<T> r;
+    mckl::Vector<T> rr;
+    for (std::size_t i = 0; i != k.size() / K; ++i) {
+        union {
+            std::array<T, K> a;
+            result_type s;
+        } buf;
+        buf.s = s0.get();
+        for (std::size_t j = 0; j != K; ++j)
+            r.push_back(buf.a[j]);
+    }
+    for (std::size_t i = 0; i != k.size() / K; ++i) {
+        union {
+            std::array<T, K> a;
+            result_type s;
+        } buf;
+        buf.s = s0r.get();
+        for (std::size_t j = 0; j != K; ++j)
+            rr.push_back(buf.a[j]);
+    }
+
+    bool pass1 = k == r;
+    bool pass1r = kr == rr;
 
     mckl::StopWatch watch1;
     mckl::StopWatch watch2;
 
+    s0.set(1);
+    s1.set(1);
+    s2.set(1);
+    s3.set(1);
     watch1.start();
     for (std::size_t i = 0; i != N; ++i) {
         s0.get();
@@ -82,6 +123,10 @@ inline void random_seed(std::size_t N, const std::string &name)
     }
     watch1.stop();
 
+    s0r.set(1);
+    s1r.set(1);
+    s2r.set(1);
+    s3r.set(1);
     watch2.start();
     for (std::size_t i = 0; i != N; ++i) {
         s0r.get();
@@ -111,8 +156,8 @@ inline void random_seed(std::size_t N, const std::string &name)
         set1r.insert(s2r.get());
         set1r.insert(s3r.get());
     }
-    bool pass1 = set1.size() == N;
-    bool pass1r = set1r.size() == N;
+    pass1 = pass1 && set1.size() == N;
+    pass1r = pass1r && set1r.size() == N;
 
     std::stringstream ss0;
     std::stringstream ss1;
@@ -165,8 +210,12 @@ inline void random_seed(std::size_t N, const std::string &name)
     bool pass4r = set4r.size() == N * 4;
 
     std::size_t bytes = N * 4 * sizeof(result_type);
-    double c1 = 1.0 * watch1.cycles() / bytes;
-    double c2 = 1.0 * watch2.cycles() / bytes;
+    double c1 = mckl::StopWatch::has_cycles() ?
+        1.0 * watch1.cycles() / bytes :
+        bytes / watch1.seconds() * 1e-6;
+    double c2 = mckl::StopWatch::has_cycles() ?
+        1.0 * watch2.cycles() / bytes :
+        bytes / watch2.seconds() * 1e-6;
 
     std::cout << std::setw(20) << std::left << name;
     std::cout << std::setw(10) << std::right << c1;
@@ -176,30 +225,6 @@ inline void random_seed(std::size_t N, const std::string &name)
     std::cout << std::setw(15) << std::right << random_pass(pass1r);
     std::cout << std::setw(15) << std::right << random_pass(pass4r);
     std::cout << std::endl;
-
-    std::ofstream os(
-        "random_seed_" + std::to_string(sizeof(result_type)) + ".txt");
-    os << std::hex << std::uppercase;
-    os << std::setw(10) << std::right << "s0";
-    os << std::setw(10) << std::right << "s1";
-    os << std::setw(10) << std::right << "s2";
-    os << std::setw(10) << std::right << "s3";
-    os << std::setw(10) << std::right << "s0r";
-    os << std::setw(10) << std::right << "s1r";
-    os << std::setw(10) << std::right << "s2r";
-    os << std::setw(10) << std::right << "s3r";
-    os << '\n';
-    for (std::size_t i = 0; i != N; ++i) {
-        os << std::setw(10) << std::right << random_seed_val(s0.get());
-        os << std::setw(10) << std::right << random_seed_val(s1.get());
-        os << std::setw(10) << std::right << random_seed_val(s2.get());
-        os << std::setw(10) << std::right << random_seed_val(s3.get());
-        os << std::setw(10) << std::right << random_seed_val(s0r.get());
-        os << std::setw(10) << std::right << random_seed_val(s1r.get());
-        os << std::setw(10) << std::right << random_seed_val(s2r.get());
-        os << std::setw(10) << std::right << random_seed_val(s3r.get());
-        os << '\n';
-    }
 }
 
 template <typename T>
@@ -208,23 +233,22 @@ inline void random_seed(std::size_t N)
     std::string type =
         "uint" + std::to_string(std::numeric_limits<T>::digits) + "_t";
 
-    random_seed<T>(N, type);
-    random_seed<std::array<T, 0x01>>(N, type + "[0x01]");
-    random_seed<std::array<T, 0x02>>(N, type + "[0x02]");
-    random_seed<std::array<T, 0x03>>(N, type + "[0x03]");
-    random_seed<std::array<T, 0x04>>(N, type + "[0x04]");
-    random_seed<std::array<T, 0x05>>(N, type + "[0x05]");
-    random_seed<std::array<T, 0x06>>(N, type + "[0x06]");
-    random_seed<std::array<T, 0x07>>(N, type + "[0x07]");
-    random_seed<std::array<T, 0x08>>(N, type + "[0x08]");
-    random_seed<std::array<T, 0x09>>(N, type + "[0x09]");
-    random_seed<std::array<T, 0x0A>>(N, type + "[0x0A]");
-    random_seed<std::array<T, 0x0B>>(N, type + "[0x0B]");
-    random_seed<std::array<T, 0x0C>>(N, type + "[0x0C]");
-    random_seed<std::array<T, 0x0D>>(N, type + "[0x0D]");
-    random_seed<std::array<T, 0x0E>>(N, type + "[0x0E]");
-    random_seed<std::array<T, 0x0F>>(N, type + "[0x0F]");
-    random_seed<std::array<T, 0x10>>(N, type + "[0x10]");
+    random_seed<T, 0x01>(N);
+    random_seed<T, 0x02>(N);
+    random_seed<T, 0x03>(N);
+    random_seed<T, 0x04>(N);
+    random_seed<T, 0x05>(N);
+    random_seed<T, 0x06>(N);
+    random_seed<T, 0x07>(N);
+    random_seed<T, 0x08>(N);
+    random_seed<T, 0x09>(N);
+    random_seed<T, 0x0A>(N);
+    random_seed<T, 0x0B>(N);
+    random_seed<T, 0x0C>(N);
+    random_seed<T, 0x0D>(N);
+    random_seed<T, 0x0E>(N);
+    random_seed<T, 0x0F>(N);
+    random_seed<T, 0x10>(N);
 }
 
 inline void random_seed(std::size_t N)
@@ -232,8 +256,13 @@ inline void random_seed(std::size_t N)
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(100, '=') << std::endl;
     std::cout << std::setw(20) << std::left << "ResultType";
-    std::cout << std::setw(10) << std::right << "CPB";
-    std::cout << std::setw(10) << std::right << "CPB (R)";
+    if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(10) << std::right << "CPB";
+        std::cout << std::setw(10) << std::right << "CPB (R)";
+    } else {
+        std::cout << std::setw(10) << std::right << "MB/s";
+        std::cout << std::setw(10) << std::right << "MB/s (R)";
+    }
     std::cout << std::setw(15) << std::right << "np = 1";
     std::cout << std::setw(15) << std::right << "np = 4";
     std::cout << std::setw(15) << std::right << "np = 1 (R)";

@@ -195,11 +195,12 @@ class SeedGenerator
     result_type randomize(const std::array<seed_type, M_> &k, std::false_type)
     {
         union {
-            result_type result;
             std::array<seed_type, M_> k;
+            result_type result;
         } buf;
 
         buf.k = k;
+        internal::union_le<seed_type>(buf.result);
 
         return buf.result;
     }
@@ -215,10 +216,19 @@ class SeedGenerator
     result_type randomize(
         const std::array<seed_type, M_> &k, std::integral_constant<int, D>)
     {
-        result_type result;
-        Skein512::hash(Skein512::param_type(D, k.data()), D, &result);
+        union {
+            std::array<char, sizeof(seed_type) * M_> state;
+            std::array<seed_type, M_> k;
+            result_type result;
+        } buf;
 
-        return result;
+        buf.k = k;
+        internal::union_le<seed_type>(buf.state);
+        Skein512::hash(
+            Skein512::param_type(D, buf.state.data()), D, buf.state.data());
+        internal::union_le<char>(buf.result);
+
+        return buf.result;
     }
 
     result_type randomize(
@@ -231,6 +241,7 @@ class SeedGenerator
         } buf;
 
         buf.k = k;
+        internal::union_le<seed_type>(buf.state);
         std::uint16_t x = std::get<0>(buf.state);
         std::uint16_t y = std::get<1>(buf.state);
         for (int i = 0; i != 22; ++i) {
@@ -241,6 +252,7 @@ class SeedGenerator
         }
         std::get<0>(buf.state) = x;
         std::get<1>(buf.state) = y;
+        internal::union_le<std::uint16_t>(buf.result);
 
         return buf.result;
     }
@@ -279,14 +291,16 @@ class SeedGenerator
     result_type randomize(const std::array<seed_type, M_> &k)
     {
         union {
-            typename RNGType::ctr_type ctr;
+            std::array<char, sizeof(seed_type) * M_> state;
             std::array<seed_type, M_> k;
             result_type result;
         } buf;
 
         buf.k = k;
+        internal::union_le<seed_type>(buf.state);
         RNGType rng(0);
-        rng.generator().enc(buf.ctr.data(), buf.ctr.data());
+        rng.generator().enc(buf.state.data(), buf.state.data());
+        internal::union_le<char>(buf.result);
 
         return buf.result;
     }
