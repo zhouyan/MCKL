@@ -1,0 +1,11 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  14
+ ----------------------------------------------
+ 85  Fourier3, r = 27                8.1e-7
+ 85  Fourier3, r = 27                5.5e-7
+ 96  HammingIndep, L=30, r=27       4.1e-16
+ 96  HammingIndep, L=30, r=27       3.1e-13
+ ----------------------------------------------
+ All other tests were passed
+
