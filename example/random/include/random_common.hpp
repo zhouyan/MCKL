@@ -32,6 +32,7 @@
 #ifndef MCKL_EXAMPLE_RANDOM_COMMON_HPP
 #define MCKL_EXAMPLE_RANDOM_COMMON_HPP
 
+#include <mckl/random/internal/common.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
 template <typename>
