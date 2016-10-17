@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_testu01_smallcrush.cpp.in
+// MCKL/example/random/include/random_testu01_smallcrush.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,11 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "random_testu01_smallcrush.hpp"
+#ifndef MCKL_EXAMPLE_RANDOM_TESTU01_SMALLCRUSH_HPP
+#define MCKL_EXAMPLE_RANDOM_TESTU01_SMALLCRUSH_HPP
 
-int main(int argc, char **argv)
-{
-    random_testu01_smallcrush(argc, argv);
+extern void random_testu01_smallcrush(int, char **);
 
-    return 0;
-}
+#endif // MCKL_EXAMPLE_RANDOM_TESTU01_SMALLCRUSH_HPP

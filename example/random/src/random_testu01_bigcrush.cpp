@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_testu01_smallcrush.cpp.in
+// MCKL/example/random/src/random_testu01_bigcrush.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,11 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "random_testu01_smallcrush.hpp"
+#include "random_testu01_bigcrush.hpp"
+#include "random_testu01.hpp"
 
-int main(int argc, char **argv)
+void random_testu01_bigcrush(int argc, char **argv)
 {
-    random_testu01_smallcrush(argc, argv);
-
-    return 0;
+    random_testu01(::bbattery_RepeatBigCrush, argc, argv);
 }

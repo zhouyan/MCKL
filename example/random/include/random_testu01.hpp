@@ -33,21 +33,20 @@
 #define MCKL_EXAMPLE_RANDOM_TESTU01_HPP
 
 #include <mckl/random/testu01.hpp>
-#include <mckl/random/u01_distribution.hpp>
-#include "random_common.hpp"
+#include "random_rng_u01.hpp"
 
-template <typename RNGType, typename U01Type, typename Battery>
+template <typename U01Type, typename Battery>
 inline void random_testu01(
     const std::string &name, Battery &&battery, mckl::Vector<int> &rep)
 {
     mckl::TestU01 &testu01 = mckl::TestU01::instance();
-    testu01.reset<RNGType, U01Type>(name);
+    testu01.reset<RandomRNG, U01Type>(name);
     rep.size() == 0 ?
         testu01(std::forward<Battery>(battery), 1) :
         testu01(std::forward<Battery>(battery), rep.begin(), rep.end(), 2);
 }
 
-template <typename RNGType, typename Battery>
+template <typename Battery>
 inline void random_testu01(Battery &&battery, int argc, char **argv)
 {
     std::string basename(*argv);
@@ -103,18 +102,6 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         U01OC = true;
         U01OO = true;
     }
-
-    const unsigned seed =
-        1U + (rep.size() == 0 ? 0U : std::thread::hardware_concurrency() * 6U);
-
-    std::string seedfile(basename + ".seed");
-    std::ifstream seedin(seedfile);
-    if (seedin)
-        seedin >> mckl::Seed<RNGType>::instance();
-    else
-        mckl::Seed<RNGType>::instance().set(seed);
-    seedin.close();
-
     if (redirect) {
         std::string resultfile(basename);
         if (!all) {
@@ -139,37 +126,30 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         ::swrite_Basic = FALSE;
 
     if (STD) {
-        random_testu01<RNGType, std::uniform_real_distribution<double>>(
-            "STD", std::forward<Battery>(battery), rep);
+        random_testu01<RandomSTD>("STD", std::forward<Battery>(battery), rep);
     }
     if (U01) {
-        random_testu01<RNGType, mckl::U01Distribution<double>>(
-            "U01", std::forward<Battery>(battery), rep);
+        random_testu01<RandomU01>("U01", std::forward<Battery>(battery), rep);
     }
     if (U01CC) {
-        random_testu01<RNGType, mckl::U01CCDistribution<double>>(
+        random_testu01<RandomU01CC>(
             "U01CC", std::forward<Battery>(battery), rep);
     }
     if (U01CO) {
-        random_testu01<RNGType, mckl::U01CODistribution<double>>(
+        random_testu01<RandomU01CO>(
             "U01CO", std::forward<Battery>(battery), rep);
     }
     if (U01OC) {
-        random_testu01<RNGType, mckl::U01OCDistribution<double>>(
+        random_testu01<RandomU01OC>(
             "U01OC", std::forward<Battery>(battery), rep);
     }
     if (U01OO) {
-        random_testu01<RNGType, mckl::U01OODistribution<double>>(
+        random_testu01<RandomU01OO>(
             "U01OO", std::forward<Battery>(battery), rep);
     }
 
     if (redirect)
         std::fclose(stdout);
-
-    std::ofstream seedout(seedfile);
-    if (seedout)
-        seedout << mckl::Seed<RNGType>::instance() << std::endl;
-    seedout.close();
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_TESTU01_HPP

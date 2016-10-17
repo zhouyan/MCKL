@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_testu01_smallcrush.cpp.in
+// MCKL/example/random/src/random_testu01_smallcrush.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -30,10 +30,9 @@
 //============================================================================
 
 #include "random_testu01_smallcrush.hpp"
+#include "random_testu01.hpp"
 
-int main(int argc, char **argv)
+void random_testu01_smallcrush(int argc, char **argv)
 {
-    random_testu01_smallcrush(argc, argv);
-
-    return 0;
+    random_testu01(::bbattery_RepeatSmallCrush, argc, argv);
 }

@@ -108,11 +108,35 @@ SET(MCKL_DISTRIBUTION Arcsine Beta Cauchy ChiSquared Exponential ExtremeValue
     FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto
     Rayleigh Stable StudentT U01 UniformReal Weibull Geometric UniformInt)
 
+ADD_CUSTOM_TARGET(librandom_rng_u01)
+FOREACH(RNG ${MCKL_RNG})
+    STRING(TOLOWER ${RNG} rng)
+    SET(RNGHeader ${MCKL_RNG_${RNG}_HEADER})
+    FOREACH(alg ${MCKL_RNG_${RNG}})
+        SET(RNGType ::${MCKL_RNG_${RNG}_NAMESPACE}::${alg})
+        SET(RNGName ${alg})
+        STRING(TOLOWER ${RNGName} rngname)
+        STRING(TOUPPER ${RNGName} RNGNAME)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng_u01.cpp.in
+            ${PROJECT_BINARY_DIR}/src/random_rng_u01_${rngname}.cpp)
+        ADD_LIBRARY(librandom_rng_u01_${rngname}
+            ${PROJECT_BINARY_DIR}/src/random_rng_u01_${rngname}.cpp)
+        SET_TARGET_PROPERTIES(librandom_rng_u01_${rngname}
+            PROPERTIES OUTPUT_NAME random_rng_u01_${rngname})
+        ADD_DEPENDENCIES(librandom_rng_u01 librandom_rng_u01_${rngname})
+    ENDFOREACH(alg ${MCKL_RNG_${RNG}})
+ENDFOREACH(RNG ${MCKL_RNG})
+
 FUNCTION(MCKL_ADD_TEST_RNG testname)
     ADD_CUSTOM_TARGET(random_${testname})
     ADD_CUSTOM_TARGET(random_${testname}-check)
     ADD_DEPENDENCIES(random random_${testname})
     ADD_DEPENDENCIES(random-check random_${testname}-check)
+
+    ADD_LIBRARY(librandom_${testname}
+        ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+    SET_TARGET_PROPERTIES(librandom_${testname}
+        PROPERTIES OUTPUT_NAME random_${testname})
 
     FOREACH(RNG ${MCKL_RNG})
         STRING(TOLOWER ${RNG} rng)
@@ -130,6 +154,10 @@ FUNCTION(MCKL_ADD_TEST_RNG testname)
             CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
                 ${PROJECT_BINARY_DIR}/src/random_${testname}_${rngname}.cpp)
             MCKL_ADD_TEST(random ${testname}_${rngname} "BIN")
+            TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
+                librandom_${testname})
+            TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
+                librandom_rng_u01_${rngname})
             ADD_DEPENDENCIES(random_${testname}_${rng}
                 random_${testname}_${rngname})
             ADD_DEPENDENCIES(random_${testname}_${rng}-check

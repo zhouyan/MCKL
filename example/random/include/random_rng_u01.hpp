@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_testu01_smallcrush.cpp.in
+// MCKL/example/random/include/random_rng_u01.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,11 +29,95 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "random_testu01_smallcrush.hpp"
+#ifndef MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
+#define MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
 
-int main(int argc, char **argv)
+extern double random_rng_std();
+extern double random_rng_u01();
+extern double random_rng_u01cc();
+extern double random_rng_u01co();
+extern double random_rng_u01oc();
+extern double random_rng_u01oo();
+
+class RandomRNG
 {
-    random_testu01_smallcrush(argc, argv);
+    public:
+    template <typename T>
+    void seed(T)
+    {
+    }
+};
 
-    return 0;
-}
+class RandomSTD
+{
+    public:
+    using result_type = double;
+
+    template <typename T>
+    double operator()(T)
+    {
+        return random_rng_std();
+    }
+};
+
+class RandomU01
+{
+    public:
+    using result_type = double;
+
+    template <typename T>
+    double operator()(T)
+    {
+        return random_rng_u01();
+    }
+};
+
+class RandomU01CC
+{
+    public:
+    using result_type = double;
+
+    template <typename T>
+    double operator()(T)
+    {
+        return random_rng_u01cc();
+    }
+};
+
+class RandomU01CO
+{
+    public:
+    using result_type = double;
+
+    template <typename T>
+    double operator()(T)
+    {
+        return random_rng_u01co();
+    }
+};
+
+class RandomU01OC
+{
+    public:
+    using result_type = double;
+
+    template <typename T>
+    double operator()(T)
+    {
+        return random_rng_u01oc();
+    }
+};
+
+class RandomU01OO
+{
+    public:
+    using result_type = double;
+
+    template <typename T>
+    double operator()(T)
+    {
+        return random_rng_u01oo();
+    }
+};
+
+#endif // MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
