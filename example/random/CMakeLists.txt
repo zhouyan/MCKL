@@ -133,10 +133,12 @@ FUNCTION(MCKL_ADD_TEST_RNG testname)
     ADD_DEPENDENCIES(random random_${testname})
     ADD_DEPENDENCIES(random-check random_${testname}-check)
 
-    ADD_LIBRARY(librandom_${testname}
-        ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
-    SET_TARGET_PROPERTIES(librandom_${testname}
-        PROPERTIES OUTPUT_NAME random_${testname})
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+        ADD_LIBRARY(librandom_${testname}
+            ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+        SET_TARGET_PROPERTIES(librandom_${testname}
+            PROPERTIES OUTPUT_NAME random_${testname})
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
 
     FOREACH(RNG ${MCKL_RNG})
         STRING(TOLOWER ${RNG} rng)
@@ -154,10 +156,12 @@ FUNCTION(MCKL_ADD_TEST_RNG testname)
             CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
                 ${PROJECT_BINARY_DIR}/src/random_${testname}_${rngname}.cpp)
             MCKL_ADD_TEST(random ${testname}_${rngname} "BIN")
-            TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
-                librandom_${testname})
-            TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
-                librandom_rng_u01_${rngname})
+            IF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+                TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
+                    librandom_${testname})
+                TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
+                    librandom_rng_u01_${rngname})
+            ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
             ADD_DEPENDENCIES(random_${testname}_${rng}
                 random_${testname}_${rngname})
             ADD_DEPENDENCIES(random_${testname}_${rng}-check
