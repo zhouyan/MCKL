@@ -1165,58 +1165,11 @@ class MKLStreamState
 }; // class MKLStreamState
 
 template <typename RNGType>
-inline constexpr int mkl_nseeds(std::false_type)
-{
-    return (sizeof(typename RNGType::ctr_type) +
-               sizeof(typename RNGType::key_type)) /
-        sizeof(unsigned);
-}
-
-template <typename RNGType>
-inline constexpr int mkl_nseeds(std::true_type)
-{
-    return 1;
-}
-
-template <typename RNGType>
 inline constexpr int mkl_nseeds()
 {
-    return mkl_nseeds<RNGType>(std::integral_constant<bool,
-        (std::is_same<CtrType<RNGType>, NullType>::value ||
-            std::is_same<KeyType<RNGType>, NullType>::value)>());
-}
-
-template <typename RNGType>
-inline int mkl_init(
-    RNGType &rng, int n, const unsigned *param, std::false_type)
-{
-    int nc = static_cast<int>(
-        sizeof(typename RNGType::ctr_type) / sizeof(unsigned));
-    int nk = static_cast<int>(
-        sizeof(typename RNGType::key_type) / sizeof(unsigned));
-    new (static_cast<void *>(&rng)) RNGType();
-
-    if (n > 0) {
-        std::size_t size =
-            static_cast<std::size_t>(std::min(n, nk)) * sizeof(unsigned);
-        typename RNGType::key_type key;
-        std::fill(key.begin(), key.end(), 0);
-        std::memcpy(key.data(), param, size);
-        rng.key(key);
-    }
-
-    if (n > nk) {
-        n -= nk;
-        param += nk;
-        std::size_t size =
-            static_cast<std::size_t>(std::min(n, nc)) * sizeof(unsigned);
-        typename RNGType::ctr_type ctr;
-        std::fill(ctr.begin(), ctr.end(), 0);
-        std::memcpy(ctr.data(), param, size);
-        rng.ctr(ctr);
-    }
-
-    return 0;
+    return sizeof(typename SeedType<RNGType>::type) < sizeof(unsigned) ?
+        1 :
+        sizeof(typename SeedType<RNGType>::type) / sizeof(unsigned);
 }
 
 template <typename RNGType>
@@ -1239,10 +1192,18 @@ inline int mkl_init(
     RNGType &rng = (*static_cast<MKLStreamState<RNGType> *>(stream)).rng;
 
     if (method == VSL_INIT_METHOD_STANDARD) {
-        return mkl_init(rng, n, param,
-            std::integral_constant<bool,
-                (std::is_same<CtrType<RNGType>, NullType>::value ||
-                    std::is_same<KeyType<RNGType>, NullType>::value)>());
+        if (n == 0) {
+            new (static_cast<void *>(&rng)) RNGType();
+        } else {
+            static constexpr std::size_t ns = mkl_nseeds<RNGType>();
+            union {
+                typename SeedType<RNGType>::type seed;
+                std::array<unsigned, ns> useed;
+            } buf;
+            std::copy_n(param, std::min(static_cast<std::size_t>(n), ns),
+                buf.useed.data());
+            new (static_cast<void *>(&rng)) RNGType(buf.seed);
+        }
     }
 
     if (method == VSL_INIT_METHOD_LEAPFROG)

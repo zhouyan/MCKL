@@ -751,6 +751,31 @@ namespace internal
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(CtrType, ctr_type, NullType)
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
 
+class DummyRNG
+{
+}; // class DummyRNG
+
+template <typename DistributionType>
+class DummyDistribution
+{
+    public:
+    using result_type = double;
+
+    DummyDistribution(const DistributionType &distribution)
+        : distribution_(distribution)
+    {
+    }
+
+    template <typename RNGType>
+    double operator()(RNGType &)
+    {
+        return distribution_();
+    }
+
+    private:
+    DistributionType distribution_;
+}; // class DummyDistribution
+
 template <std::size_t N, std::size_t D, std::size_t T>
 inline std::size_t serial_index(const std::size_t *, std::false_type)
 {
@@ -1310,31 +1335,6 @@ inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
 
 namespace internal
 {
-
-class DummyRNG
-{
-}; // class DummyRNG
-
-template <typename DistributionType>
-class DummyDistribution
-{
-    public:
-    using result_type = double;
-
-    DummyDistribution(const DistributionType &distribution)
-        : distribution_(distribution)
-    {
-    }
-
-    template <typename RNGType>
-    double operator()(RNGType &)
-    {
-        return distribution_();
-    }
-
-    private:
-    DistributionType distribution_;
-}; // class DummyDistribution
 
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(
