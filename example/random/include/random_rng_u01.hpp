@@ -32,8 +32,8 @@
 #ifndef MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
 #define MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
 
-extern double random_rng_load_seed(const std::string &);
-extern double random_rng_store_seed(const std::string &);
+extern void random_rng_load_seed(const std::string &);
+extern void random_rng_store_seed(const std::string &);
 extern double random_rng_std();
 extern double random_rng_u01();
 extern double random_rng_u01cc();

@@ -38,7 +38,7 @@
 #include <@RNGHeader@>
 #include "random_rng_u01.hpp"
 
-inline void random_rng_load_seed(const std::string &basename)
+void random_rng_load_seed(const std::string &basename)
 {
     std::ifstream is(basename + ".seed");
     // clang-format off
@@ -47,7 +47,7 @@ inline void random_rng_load_seed(const std::string &basename)
     // clang-format on
 }
 
-inline void random_rng_store_seed(const std::string &basename)
+void random_rng_store_seed(const std::string &basename)
 {
     std::ofstream os(basename + ".seed");
     // clang-format off
