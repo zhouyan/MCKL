@@ -188,7 +188,7 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
     StateMatrixBase(StateMatrixBase<Layout, Dim, T> &&) = default;
 
     StateMatrixBase<Layout, Dim, T> &operator=(
-        StateMatrixBase<Layout, Dim, T> &&other) = default;
+        StateMatrixBase<Layout, Dim, T> &&) = default;
 
     void resize_data(size_type N, size_type dim)
     {
