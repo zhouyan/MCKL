@@ -38,44 +38,26 @@
 #include <@RNGHeader@>
 #include "random_rng_u01.hpp"
 
-class RandomRNGSeed
+inline void random_rng_load_seed(const std::string &basename)
 {
-    public:
-    RandomRNGSeed(const RandomRNGSeed &) = delete;
-    RandomRNGSeed &operator=(const RandomRNGSeed &) = delete;
+    std::ifstream is(basename + ".seed");
+    // clang-format off
+    if (is)
+        is >> mckl::Seed<@RNGType@>::instance();
+    // clang-format on
+}
 
-    static RandomRNGSeed &instance()
-    {
-        static RandomRNGSeed seed;
-
-        return seed;
-    }
-
-    private:
-    RandomRNGSeed()
-    {
-        std::ifstream is("random_rng_u01_@rngname@.seed");
-        // clang-format off
-        if (is)
-            is >> mckl::Seed<@RNGType@>::instance();
-        // clang-format on
-    }
-
-    ~RandomRNGSeed()
-    {
-        std::ofstream os("random_rng_u01_@rngname@.seed");
-        // clang-format off
-        if (os)
-            os << mckl::Seed<@RNGType@>::instance() << std::endl;
-        // clang-format on
-    }
-};
-
-inline void random_rng_init() { RandomRNGSeed::instance(); }
+inline void random_rng_store_seed(const std::string &basename)
+{
+    std::ofstream os(basename + ".seed");
+    // clang-format off
+    if (os)
+        os << mckl::Seed<@RNGType@>::instance() << std::endl;
+    // clang-format on
+}
 
 double random_rng_std()
 {
-    random_rng_init();
     static constexpr std::size_t M = 1U << 12;
     static mckl::Vector<double> r(M);
     static std::size_t index = M;
@@ -94,7 +76,6 @@ double random_rng_std()
 
 double random_rng_u01()
 {
-    random_rng_init();
     static constexpr std::size_t M = 1U << 12;
     static mckl::Vector<double> r(M);
     static std::size_t index = M;
@@ -113,7 +94,6 @@ double random_rng_u01()
 
 double random_rng_u01cc()
 {
-    random_rng_init();
     static constexpr std::size_t M = 1U << 12;
     static mckl::Vector<double> r(M);
     static std::size_t index = M;
@@ -132,7 +112,6 @@ double random_rng_u01cc()
 
 double random_rng_u01co()
 {
-    random_rng_init();
     static constexpr std::size_t M = 1U << 12;
     static mckl::Vector<double> r(M);
     static std::size_t index = M;
@@ -151,7 +130,6 @@ double random_rng_u01co()
 
 double random_rng_u01oc()
 {
-    random_rng_init();
     static constexpr std::size_t M = 1U << 12;
     static mckl::Vector<double> r(M);
     static std::size_t index = M;
@@ -170,7 +148,6 @@ double random_rng_u01oc()
 
 double random_rng_u01oo()
 {
-    random_rng_init();
     static constexpr std::size_t M = 1U << 12;
     static mckl::Vector<double> r(M);
     static std::size_t index = M;

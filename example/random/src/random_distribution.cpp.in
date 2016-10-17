@@ -62,8 +62,7 @@ int main(int argc, char **argv)
     }
 
     // clang-format off
-    random_distribution<@DistType@,
-        typename @DistType@<>::result_type>(N, M);
+    random_distribution<@DistType@, typename @DistType@<>::result_type>(N, M);
     // clang-format on
 
     return 0;

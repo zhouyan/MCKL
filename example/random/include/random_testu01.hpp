@@ -102,6 +102,7 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         U01OC = true;
         U01OO = true;
     }
+
     if (redirect) {
         std::string resultfile(basename);
         if (!all) {
@@ -125,6 +126,7 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
     if (!verbose)
         ::swrite_Basic = FALSE;
 
+    random_rng_load_seed(basename);
     if (STD) {
         random_testu01<RandomSTD>("STD", std::forward<Battery>(battery), rep);
     }
@@ -147,6 +149,7 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         random_testu01<RandomU01OO>(
             "U01OO", std::forward<Battery>(battery), rep);
     }
+    random_rng_store_seed(basename);
 
     if (redirect)
         std::fclose(stdout);
