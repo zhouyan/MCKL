@@ -42,7 +42,7 @@
 #define MCKL_HAS_BIG_ENDIAN 0
 #endif
 
-#ifdef __AVX__
+#ifdef __AVX2__
 #ifndef MCKL_HAS_AESNI
 #define MCKL_HAS_AESNI 1
 #endif

@@ -42,6 +42,18 @@
 #define MCKL_HAS_BIG_ENDIAN 0
 #endif
 
+#ifdef __AVX2__
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_RDRAND
+#define MCKL_HAS_RDRAND 1
+#endif
+#endif
+
 #ifdef __SSE2__
 #ifndef MCKL_HAS_SSE2
 #define MCKL_HAS_SSE2 1
