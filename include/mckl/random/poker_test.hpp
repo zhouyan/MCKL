@@ -65,6 +65,8 @@ class PokerTest : public ChiSquaredTest<PokerTest<D, T>>
         internal::group_np(static_cast<double>(n), np_all, np_, tmin_, tmax_);
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)
     {

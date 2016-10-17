@@ -53,6 +53,8 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
     public:
     MaximumOfTTest(std::size_t n) : n_(n) {}
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)
     {

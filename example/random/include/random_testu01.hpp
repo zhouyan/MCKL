@@ -35,19 +35,18 @@
 #include <mckl/random/testu01.hpp>
 #include "random_rng_u01.hpp"
 
-template <typename U01Type, typename Battery>
-inline void random_testu01(
-    const std::string &name, Battery &&battery, mckl::Vector<int> &rep)
+template <typename Battery>
+inline void random_testu01(const std::string &name, double (*u01)(),
+    Battery battery, mckl::Vector<int> &rep)
 {
     mckl::TestU01 &testu01 = mckl::TestU01::instance();
-    testu01.reset<RandomRNG, U01Type>(name);
-    rep.size() == 0 ?
-        testu01(std::forward<Battery>(battery), 1) :
-        testu01(std::forward<Battery>(battery), rep.begin(), rep.end(), 2);
+    testu01.reset(name, u01);
+    rep.size() == 0 ? testu01(battery, 1) :
+                      testu01(battery, rep.begin(), rep.end(), 2);
 }
 
 template <typename Battery>
-inline void random_testu01(Battery &&battery, int argc, char **argv)
+inline void random_testu01(Battery battery, int argc, char **argv)
 {
     std::string basename(*argv);
     --argc;
@@ -127,28 +126,18 @@ inline void random_testu01(Battery &&battery, int argc, char **argv)
         ::swrite_Basic = FALSE;
 
     random_rng_load_seed(basename);
-    if (STD) {
-        random_testu01<RandomSTD>("STD", std::forward<Battery>(battery), rep);
-    }
-    if (U01) {
-        random_testu01<RandomU01>("U01", std::forward<Battery>(battery), rep);
-    }
-    if (U01CC) {
-        random_testu01<RandomU01CC>(
-            "U01CC", std::forward<Battery>(battery), rep);
-    }
-    if (U01CO) {
-        random_testu01<RandomU01CO>(
-            "U01CO", std::forward<Battery>(battery), rep);
-    }
-    if (U01OC) {
-        random_testu01<RandomU01OC>(
-            "U01OC", std::forward<Battery>(battery), rep);
-    }
-    if (U01OO) {
-        random_testu01<RandomU01OO>(
-            "U01OO", std::forward<Battery>(battery), rep);
-    }
+    if (STD)
+        random_testu01("STD", random_rng_std, battery, rep);
+    if (U01)
+        random_testu01("U01", random_rng_u01, battery, rep);
+    if (U01CC)
+        random_testu01("U01CC", random_rng_u01cc, battery, rep);
+    if (U01CO)
+        random_testu01("U01CO", random_rng_u01co, battery, rep);
+    if (U01OC)
+        random_testu01("U01OC", random_rng_u01oc, battery, rep);
+    if (U01OO)
+        random_testu01("U01OO", random_rng_u01oo, battery, rep);
     random_rng_store_seed(basename);
 
     if (redirect)

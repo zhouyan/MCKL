@@ -57,6 +57,8 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
             std::log(static_cast<double>(K_)) - 2 * const_ln_2<double>());
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(std::size_t)
+
     template <typename RNGType, typename U01DistributionType>
     std::size_t operator()(RNGType &rng, U01DistributionType &u01)
     {

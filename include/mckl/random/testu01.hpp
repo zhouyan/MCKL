@@ -71,6 +71,13 @@ class TestU01
             const_cast<char *>(name.c_str()), u01<RNGType, U01Type>);
     }
 
+    void reset(const std::string &name, double (*u01)())
+    {
+        release();
+        gen_ =
+            ::unif01_CreateExternGen01(const_cast<char *>(name.c_str()), u01);
+    }
+
     /// \brief Release the TestU01 generator
     void release()
     {

@@ -55,6 +55,8 @@ class PermutationTest : public ChiSquaredTest<PermutationTest<T>>
     /// \param n The number of tuples
     PermutationTest(std::size_t n) : n_(n), np_(static_cast<double>(n) / M_) {}
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename DistributionType>
     double operator()(RNGType &rng, DistributionType &distribution)
     {

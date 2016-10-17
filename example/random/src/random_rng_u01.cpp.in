@@ -56,110 +56,75 @@ void random_rng_store_seed(const std::string &basename)
     // clang-format on
 }
 
-double random_rng_std()
+template <typename RNGType, typename U01Type>
+inline double random_rng_u01_impl()
 {
-    static constexpr std::size_t M = 1U << 12;
-    static mckl::Vector<double> r(M);
-    static std::size_t index = M;
-    // clang-format off
-    static @RNGType@ rng(mckl::Seed<@RNGType@>::instance().get());
-    // clang-format on
+    static const std::size_t N = mckl::internal::BufferSize<double>::value;
+    static const std::size_t M = std::thread::hardware_concurrency();
 
-    if (index == M) {
-        std::uniform_real_distribution<double> u01;
-        mckl::rand(rng, u01, M, r.data());
+    static std::size_t index = N * M;
+    static mckl::Vector<RNGType> rs(M);
+    static mckl::Vector<double> result(N * M);
+    static bool init = false;
+
+    if (index == N * M) {
+        if (!init) {
+            for (auto &rng : rs)
+                rng.seed(mckl::Seed<RNGType>::instance().get());
+            init = true;
+        }
+        double *r = result.data();
+        for (std::size_t i = 0; i != M; ++i, r += N) {
+            RNGType rng(std::move(rs[i]));
+            U01Type dist;
+            mckl::rand(rng, dist, N, r);
+            rs[i] = std::move(rng);
+        }
         index = 0;
     }
 
-    return r[index++];
+    return result[index++];
+}
+
+double random_rng_std()
+{
+    // clang-format off
+    return random_rng_u01_impl<@RNGType@,
+        std::uniform_real_distribution<double>>();
+    // clang-format on
 }
 
 double random_rng_u01()
 {
-    static constexpr std::size_t M = 1U << 12;
-    static mckl::Vector<double> r(M);
-    static std::size_t index = M;
     // clang-format off
-    static @RNGType@ rng(mckl::Seed<@RNGType@>::instance().get());
+    return random_rng_u01_impl<@RNGType@, mckl::U01Distribution<double>>();
     // clang-format on
-
-    if (index == M) {
-        mckl::U01Distribution<double> u01;
-        mckl::rand(rng, u01, M, r.data());
-        index = 0;
-    }
-
-    return r[index++];
 }
 
 double random_rng_u01cc()
 {
-    static constexpr std::size_t M = 1U << 12;
-    static mckl::Vector<double> r(M);
-    static std::size_t index = M;
     // clang-format off
-    static @RNGType@ rng(mckl::Seed<@RNGType@>::instance().get());
+    return random_rng_u01_impl<@RNGType@, mckl::U01CCDistribution<double>>();
     // clang-format on
-
-    if (index == M) {
-        mckl::U01CCDistribution<double> u01;
-        mckl::rand(rng, u01, M, r.data());
-        index = 0;
-    }
-
-    return r[index++];
 }
 
 double random_rng_u01co()
 {
-    static constexpr std::size_t M = 1U << 12;
-    static mckl::Vector<double> r(M);
-    static std::size_t index = M;
     // clang-format off
-    static @RNGType@ rng(mckl::Seed<@RNGType@>::instance().get());
+    return random_rng_u01_impl<@RNGType@, mckl::U01CODistribution<double>>();
     // clang-format on
-
-    if (index == M) {
-        mckl::U01CODistribution<double> u01;
-        mckl::rand(rng, u01, M, r.data());
-        index = 0;
-    }
-
-    return r[index++];
 }
 
 double random_rng_u01oc()
 {
-    static constexpr std::size_t M = 1U << 12;
-    static mckl::Vector<double> r(M);
-    static std::size_t index = M;
     // clang-format off
-    static @RNGType@ rng(mckl::Seed<@RNGType@>::instance().get());
+    return random_rng_u01_impl<@RNGType@, mckl::U01OCDistribution<double>>();
     // clang-format on
-
-    if (index == M) {
-        mckl::U01OCDistribution<double> u01;
-        mckl::rand(rng, u01, M, r.data());
-        index = 0;
-    }
-
-    return r[index++];
 }
 
 double random_rng_u01oo()
 {
-    static constexpr std::size_t M = 1U << 12;
-    static mckl::Vector<double> r(M);
-    static std::size_t index = M;
     // clang-format off
-    static @RNGType@ rng(mckl::Seed<@RNGType@>::instance().get());
+    return random_rng_u01_impl<@RNGType@, mckl::U01OODistribution<double>>();
     // clang-format on
-
-    if (index == M) {
-        mckl::U01OODistribution<double> u01;
-        mckl::rand(rng, u01, M, r.data());
-        index = 0;
-    }
-
-    return r[index++];
 }

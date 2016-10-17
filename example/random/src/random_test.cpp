@@ -41,18 +41,17 @@ inline std::string random_test_pass(double pass)
     return ss.str();
 }
 
-template <typename U01Type, typename TestType>
+template <typename TestType, typename U01Type>
 inline void random_test(std::size_t M, int nwid, int swid, int twid,
-    U01Type &u01, const TestType &test, const std::string &name)
+    const TestType &test, const U01Type &u01, const std::string &name)
 {
-    RandomRNG rng;
     std::array<double, 4> pass;
     pass.fill(0);
     mckl::StopWatch watch;
     watch.start();
     TestType t(test);
     for (std::size_t i = 0; i != M; ++i) {
-        typename TestType::result_type s = t(rng, u01);
+        typename TestType::result_type s = t(u01);
         std::get<0>(pass) += t.pass(1e-4, s) ? 1 : 0;
         std::get<1>(pass) += t.pass(1e-3, s) ? 1 : 0;
         std::get<2>(pass) += t.pass(1e-2, s) ? 1 : 0;
@@ -78,13 +77,6 @@ template <typename TestType>
 inline void random_test(std::size_t M, int nwid, int swid, int twid,
     std::size_t lwid, const TestType &test, const std::string &name)
 {
-    RandomSTD u01std;
-    RandomU01 u01;
-    RandomU01CC u01cc;
-    RandomU01CO u01co;
-    RandomU01OC u01oc;
-    RandomU01OO u01oo;
-
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << name << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
@@ -96,12 +88,12 @@ inline void random_test(std::size_t M, int nwid, int swid, int twid,
     std::cout << std::setw(twid) << std::right << "Time (s)";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;
-    random_test(M, nwid, swid, twid, u01std, test, "STD");
-    random_test(M, nwid, swid, twid, u01, test, "U01");
-    random_test(M, nwid, swid, twid, u01cc, test, "U01CC");
-    random_test(M, nwid, swid, twid, u01co, test, "U01CO");
-    random_test(M, nwid, swid, twid, u01oc, test, "U01OC");
-    random_test(M, nwid, swid, twid, u01oo, test, "U01OO");
+    random_test(M, nwid, swid, twid, test, random_rng_std, "STD");
+    random_test(M, nwid, swid, twid, test, random_rng_u01, "U01");
+    random_test(M, nwid, swid, twid, test, random_rng_u01cc, "U01CC");
+    random_test(M, nwid, swid, twid, test, random_rng_u01co, "U01CO");
+    random_test(M, nwid, swid, twid, test, random_rng_u01oc, "U01OC");
+    random_test(M, nwid, swid, twid, test, random_rng_u01oo, "U01OO");
     std::cout << std::string(lwid, '-') << std::endl;
 }
 

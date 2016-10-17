@@ -57,6 +57,8 @@ class SerialTestImpl<D, T, false>
     {
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)
     {
@@ -115,6 +117,8 @@ class SerialTestImpl<D, T, true>
         runtime_assert(
             n >= T, "**SerialTest** constructed with n less then T");
     }
+
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
 
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)

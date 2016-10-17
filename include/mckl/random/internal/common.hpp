@@ -731,6 +731,17 @@
         Name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)              \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
 
+#define MCKL_DEFINE_RANDOM_TEST_OPERATOR(ResultType)                          \
+    template <typename DistributionType>                                      \
+    ResultType operator()(DistributionType &&distribution)                    \
+    {                                                                         \
+        ::mckl::internal::DummyRNG rng;                                       \
+        ::mckl::internal::DummyDistribution<DistributionType> dist(           \
+            distribution);                                                    \
+                                                                              \
+        return operator()(rng, dist);                                         \
+    }
+
 namespace mckl
 {
 
@@ -1299,6 +1310,31 @@ inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
 
 namespace internal
 {
+
+class DummyRNG
+{
+}; // class DummyRNG
+
+template <typename DistributionType>
+class DummyDistribution
+{
+    public:
+    using result_type = double;
+
+    DummyDistribution(const DistributionType &distribution)
+        : distribution_(distribution)
+    {
+    }
+
+    template <typename RNGType>
+    double operator()(RNGType &)
+    {
+        return distribution_();
+    }
+
+    private:
+    DistributionType distribution_;
+}; // class DummyDistribution
 
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(
