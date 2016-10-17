@@ -143,8 +143,8 @@ sub build {
     my @target;
     for my $r (@distribution) {
         my $name = &distribution_name($r);
-        push @target, "\Lrandom_distribution_perf_${name}";
-        push @target, "\Lrandom_distribution_perf_${name}_novml";
+        push @target, "\Lrandom_distribution_${name}";
+        push @target, "\Lrandom_distribution_${name}_novml";
     }
     for my $c (@compiler) {
         my $d = $compiler{$c};
@@ -152,7 +152,7 @@ sub build {
         if ($name) {
             `$make -C $d @target 2>&1`;
         } else {
-            `$make -C $d random_distribution_perf 2>&1`;
+            `$make -C $d random_distribution 2>&1`;
         }
     }
 }
@@ -169,8 +169,8 @@ sub run {
             my $name = &distribution_name($r);
             my $cmd1 = "$make -C $d";
             my $cmd2 = "$make -C $d";
-            $cmd1 .= " \Lrandom_distribution_perf_${name}-check 2>&1";
-            $cmd2 .= " \Lrandom_distribution_perf_${name}_novml-check 2>&1";
+            $cmd1 .= " \Lrandom_distribution_${name}-check 2>&1";
+            $cmd2 .= " \Lrandom_distribution_${name}_novml-check 2>&1";
             my @lines1 = grep { /Passed|Failed/ } split "\n", `$cmd1`;
             push @result, @lines1;
             say $_ for @lines1;

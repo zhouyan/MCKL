@@ -748,9 +748,6 @@ namespace mckl
 namespace internal
 {
 
-MCKL_DEFINE_TYPE_DISPATCH_TRAIT(CtrType, ctr_type, NullType)
-MCKL_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
-
 class DummyRNG
 {
 }; // class DummyRNG

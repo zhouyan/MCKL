@@ -31,6 +31,49 @@
 
 PROJECT(MCKLExample-random CXX)
 
+MCKL_ADD_EXAMPLE(random)
+
+FUNCTION(MCKL_ADD_TEST_RNG testname)
+    ADD_CUSTOM_TARGET(random_${testname})
+    ADD_CUSTOM_TARGET(random_${testname}-check)
+    ADD_DEPENDENCIES(random random_${testname})
+    ADD_DEPENDENCIES(random-check random_${testname}-check)
+    IF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+        ADD_LIBRARY(librandom_${testname}
+            ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+        SET_TARGET_PROPERTIES(librandom_${testname}
+            PROPERTIES OUTPUT_NAME random_${testname})
+    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+    FOREACH(RNG ${MCKL_RNG})
+        STRING(TOLOWER ${RNG} rng)
+        ADD_CUSTOM_TARGET(random_${testname}_${rng})
+        ADD_CUSTOM_TARGET(random_${testname}_${rng}-check)
+        ADD_DEPENDENCIES(random_${testname} random_${testname}_${rng})
+        ADD_DEPENDENCIES(random_${testname}-check
+            random_${testname}_${rng}-check)
+        SET(RNGHeader ${MCKL_RNG_${RNG}_HEADER})
+        FOREACH(alg ${MCKL_RNG_${RNG}})
+            SET(RNGType ::${MCKL_RNG_${RNG}_NAMESPACE}::${alg})
+            SET(RNGName ${alg})
+            STRING(TOLOWER ${RNGName} rngname)
+            STRING(TOUPPER ${RNGName} RNGNAME)
+            CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
+                ${PROJECT_BINARY_DIR}/src/random_${testname}_${rngname}.cpp)
+            MCKL_ADD_TEST(random ${testname}_${rngname} "BIN")
+            IF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+                TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
+                    librandom_${testname})
+                TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
+                    librandom_rng_u01_${rngname})
+            ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
+            ADD_DEPENDENCIES(random_${testname}_${rng}
+                random_${testname}_${rngname})
+            ADD_DEPENDENCIES(random_${testname}_${rng}-check
+                random_${testname}_${rngname}-check)
+        ENDFOREACH(alg ${MCKL_RNG_${RNG}})
+    ENDFOREACH(RNG ${MCKL_RNG})
+ENDFUNCTION(MCKL_ADD_TEST_RNG)
+
 SET(MCKL_RNG_STD_HEADER "random")
 SET(MCKL_RNG_STD_NAMESPACE "std")
 SET(MCKL_RNG_STD
@@ -127,85 +170,37 @@ FOREACH(RNG ${MCKL_RNG})
     ENDFOREACH(alg ${MCKL_RNG_${RNG}})
 ENDFOREACH(RNG ${MCKL_RNG})
 
-FUNCTION(MCKL_ADD_TEST_RNG testname)
-    ADD_CUSTOM_TARGET(random_${testname})
-    ADD_CUSTOM_TARGET(random_${testname}-check)
-    ADD_DEPENDENCIES(random random_${testname})
-    ADD_DEPENDENCIES(random-check random_${testname}-check)
-
-    IF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
-        ADD_LIBRARY(librandom_${testname}
-            ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
-        SET_TARGET_PROPERTIES(librandom_${testname}
-            PROPERTIES OUTPUT_NAME random_${testname})
-    ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
-
-    FOREACH(RNG ${MCKL_RNG})
-        STRING(TOLOWER ${RNG} rng)
-        ADD_CUSTOM_TARGET(random_${testname}_${rng})
-        ADD_CUSTOM_TARGET(random_${testname}_${rng}-check)
-        ADD_DEPENDENCIES(random_${testname} random_${testname}_${rng})
-        ADD_DEPENDENCIES(random_${testname}-check
-            random_${testname}_${rng}-check)
-        SET(RNGHeader ${MCKL_RNG_${RNG}_HEADER})
-        FOREACH(alg ${MCKL_RNG_${RNG}})
-            SET(RNGType ::${MCKL_RNG_${RNG}_NAMESPACE}::${alg})
-            SET(RNGName ${alg})
-            STRING(TOLOWER ${RNGName} rngname)
-            STRING(TOUPPER ${RNGName} RNGNAME)
-            CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
-                ${PROJECT_BINARY_DIR}/src/random_${testname}_${rngname}.cpp)
-            MCKL_ADD_TEST(random ${testname}_${rngname} "BIN")
-            IF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
-                TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
-                    librandom_${testname})
-                TARGET_LINK_LIBRARIES(random_${testname}_${rngname}
-                    librandom_rng_u01_${rngname})
-            ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
-            ADD_DEPENDENCIES(random_${testname}_${rng}
-                random_${testname}_${rngname})
-            ADD_DEPENDENCIES(random_${testname}_${rng}-check
-                random_${testname}_${rngname}-check)
-        ENDFOREACH(alg ${MCKL_RNG_${RNG}})
-    ENDFOREACH(RNG ${MCKL_RNG})
-ENDFUNCTION(MCKL_ADD_TEST_RNG)
-
-FUNCTION(MCKL_ADD_TEST_DISTRIBUTION testname)
-    ADD_CUSTOM_TARGET(random_${testname})
-    ADD_CUSTOM_TARGET(random_${testname}-check)
-    ADD_DEPENDENCIES(random random_${testname})
-    ADD_DEPENDENCIES(random-check random_${testname}-check)
-
-    FOREACH(Dist ${MCKL_DISTRIBUTION})
-        SET(DistName ${Dist})
-        SET(DistType ::mckl::${Dist}Distribution)
-        STRING(REGEX REPLACE "([A-Z])" "_\\1" Dist ${Dist})
-        STRING(REGEX REPLACE "^_" "" Dist ${Dist})
-        STRING(TOLOWER ${Dist} distname)
-        STRING(TOUPPER ${Dist} DISTNAME)
-        SET(DistHeader "mckl/random/${distname}_distribution.hpp")
-        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
-            ${PROJECT_BINARY_DIR}/src/random_${testname}_${distname}.cpp)
-        MCKL_ADD_TEST(random ${testname}_${distname} "BIN")
-        ADD_DEPENDENCIES(random_${testname}
-            random_${testname}_${distname})
-        ADD_DEPENDENCIES(random_${testname}-check
-            random_${testname}_${distname}-check)
-        IF(MKL_FOUND)
-            CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp.in
-                ${PROJECT_BINARY_DIR}/src/random_${testname}_${distname}_novml.cpp)
-            MCKL_ADD_TEST(random ${testname}_${distname}_novml "BIN")
-            ADD_DEPENDENCIES(random_${testname}
-                random_${testname}_${distname}_novml)
-            ADD_DEPENDENCIES(random_${testname}-check
-                random_${testname}_${distname}_novml-check)
-            SET_TARGET_PROPERTIES(random_${testname}_${distname}_novml
-                PROPERTIES COMPILE_FLAGS "-DMCKL_USE_MKL_VML=0")
-        ENDIF(MKL_FOUND)
-    ENDFOREACH(Dist ${MCKL_DISTRIBUTION})
-ENDFUNCTION(MCKL_ADD_TEST_DISTRIBUTION)
-
-MCKL_ADD_EXAMPLE(random)
+ADD_CUSTOM_TARGET(random_distribution)
+ADD_CUSTOM_TARGET(random_distribution-check)
+ADD_DEPENDENCIES(random random_distribution)
+ADD_DEPENDENCIES(random-check random_distribution-check)
+FOREACH(Dist ${MCKL_DISTRIBUTION})
+    SET(DistName ${Dist})
+    SET(DistType ::mckl::${Dist}Distribution)
+    STRING(REGEX REPLACE "([A-Z])" "_\\1" Dist ${Dist})
+    STRING(REGEX REPLACE "^_" "" Dist ${Dist})
+    STRING(TOLOWER ${Dist} distname)
+    STRING(TOUPPER ${Dist} DISTNAME)
+    SET(DistHeader "mckl/random/${distname}_distribution.hpp")
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_distribution.cpp.in
+        ${PROJECT_BINARY_DIR}/src/random_distribution_${distname}.cpp)
+    MCKL_ADD_TEST(random distribution_${distname} "BIN")
+    ADD_DEPENDENCIES(random_distribution
+        random_distribution_${distname})
+    ADD_DEPENDENCIES(random_distribution-check
+        random_distribution_${distname}-check)
+    IF(MKL_FOUND)
+        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_distribution.cpp.in
+            ${PROJECT_BINARY_DIR}/src/random_distribution_${distname}_novml.cpp)
+        MCKL_ADD_TEST(random distribution_${distname}_novml "BIN")
+        ADD_DEPENDENCIES(random_distribution
+            random_distribution_${distname}_novml)
+        ADD_DEPENDENCIES(random_distribution-check
+            random_distribution_${distname}_novml-check)
+        SET_TARGET_PROPERTIES(random_distribution_${distname}_novml
+            PROPERTIES COMPILE_FLAGS "-DMCKL_USE_MKL_VML=0")
+    ENDIF(MKL_FOUND)
+ENDFOREACH(Dist ${MCKL_DISTRIBUTION})
 
 MCKL_ADD_TEST(random aes)
 MCKL_ADD_TEST(random seed)
@@ -231,9 +226,6 @@ IF(TestU01_FOUND)
     ADD_DEPENDENCIES(random_testu01-check random_testu01_crush-check)
     ADD_DEPENDENCIES(random_testu01-check random_testu01_smallcrush-check)
 ENDIF(TestU01_FOUND)
-
-MCKL_ADD_TEST_DISTRIBUTION(distribution)
-MCKL_ADD_TEST_DISTRIBUTION(distribution_perf)
 
 MCKL_ADD_FILE(random random_aes128.txt)
 MCKL_ADD_FILE(random random_aes192.txt)
