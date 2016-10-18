@@ -203,7 +203,7 @@ class PhiloxGenerator
     void generate(ctr_type &ctr, std::size_t n, ResultType *result,
         std::false_type) const
     {
-        static constexpr std::size_t stride = size() / sizeof(ResultType);
+        constexpr std::size_t stride = size() / sizeof(ResultType);
 
         for (std::size_t i = 0; i != n; ++i, result += stride)
             operator()(ctr, result);
@@ -213,8 +213,8 @@ class PhiloxGenerator
     void generate(
         ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
     {
-        static constexpr std::size_t stride = size() / sizeof(ResultType);
-        static constexpr std::size_t blocks =
+        constexpr std::size_t stride = size() / sizeof(ResultType);
+        constexpr std::size_t blocks =
             internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
         alignas(32) union {

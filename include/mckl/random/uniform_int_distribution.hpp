@@ -45,7 +45,7 @@ template <typename IntType>
 inline bool uniform_int_distribution_use_double_big(
     IntType a, IntType b, std::true_type)
 {
-    static constexpr IntType imax = const_one<IntType>() << 32;
+    constexpr IntType imax = const_one<IntType>() << 32;
 
     return a > -imax && b < imax;
 }
@@ -54,7 +54,7 @@ template <typename IntType>
 inline bool uniform_int_distribution_use_double_big(
     IntType, IntType b, std::false_type)
 {
-    static constexpr IntType imax = const_one<IntType>() << 32;
+    constexpr IntType imax = const_one<IntType>() << 32;
 
     return b < imax;
 }
@@ -154,10 +154,8 @@ class UniformIntDistribution
     {
         using UIntType = typename std::make_unsigned<result_type>::type;
 
-        static constexpr result_type imin =
-            std::numeric_limits<result_type>::min();
-        static constexpr result_type imax =
-            std::numeric_limits<result_type>::max();
+        constexpr result_type imin = std::numeric_limits<result_type>::min();
+        constexpr result_type imax = std::numeric_limits<result_type>::max();
 
         if (param.a() == param.b())
             return param.a();

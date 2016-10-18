@@ -243,18 +243,14 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     template <std::size_t N>
     static void sbox(std::array<__m128i, 8> &s, std::true_type)
     {
-        static constexpr int L0 =
-            Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
-        static constexpr int L1 =
-            Constants::rotate::value[1 % (K / 2)][(N - 1) % 8];
-        static constexpr int L2 =
-            Constants::rotate::value[2 % (K / 2)][(N - 1) % 8];
-        static constexpr int L3 =
-            Constants::rotate::value[3 % (K / 2)][(N - 1) % 8];
-        static constexpr int R0 = 64 - L0;
-        static constexpr int R1 = 64 - L1;
-        static constexpr int R2 = 64 - L2;
-        static constexpr int R3 = 64 - L3;
+        constexpr int L0 = Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
+        constexpr int L1 = Constants::rotate::value[1 % (K / 2)][(N - 1) % 8];
+        constexpr int L2 = Constants::rotate::value[2 % (K / 2)][(N - 1) % 8];
+        constexpr int L3 = Constants::rotate::value[3 % (K / 2)][(N - 1) % 8];
+        constexpr int R0 = 64 - L0;
+        constexpr int R1 = 64 - L1;
+        constexpr int R2 = 64 - L2;
+        constexpr int R3 = 64 - L3;
 
         std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<1>(s));
         std::get<2>(s) = _mm_add_epi64(std::get<2>(s), std::get<3>(s));

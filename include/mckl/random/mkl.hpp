@@ -1195,7 +1195,7 @@ inline int mkl_init(
         if (n == 0) {
             new (static_cast<void *>(&rng)) RNGType();
         } else {
-            static constexpr std::size_t ns = mkl_nseeds<RNGType>();
+            constexpr std::size_t ns = mkl_nseeds<RNGType>();
             union {
                 typename SeedType<RNGType>::type seed;
                 std::array<unsigned, ns> useed;

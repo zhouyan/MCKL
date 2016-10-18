@@ -888,7 +888,7 @@ inline IntType ftoi(RealType r)
 template <typename IntType, typename RealType>
 inline IntType ftoi(RealType x, std::true_type)
 {
-    static constexpr RealType maxval =
+    constexpr RealType maxval =
         static_cast<RealType>(std::numeric_limits<IntType>::max());
 
     return static_cast<IntType>(std::min(maxval, x));
@@ -897,7 +897,7 @@ inline IntType ftoi(RealType x, std::true_type)
 template <typename IntType, typename RealType>
 inline IntType ftoi(RealType x, std::false_type)
 {
-    static constexpr RealType maxval =
+    constexpr RealType maxval =
         static_cast<RealType>(std::numeric_limits<IntType>::max() / 2);
 
     return static_cast<IntType>(std::min(maxval, x));
@@ -906,8 +906,8 @@ inline IntType ftoi(RealType x, std::false_type)
 template <typename IntType, typename RealType>
 inline IntType ftoi(RealType x)
 {
-    static constexpr int W = std::numeric_limits<IntType>::digits;
-    static constexpr int M = std::numeric_limits<RealType>::digits;
+    constexpr int W = std::numeric_limits<IntType>::digits;
+    constexpr int M = std::numeric_limits<RealType>::digits;
 
     return ftoi<IntType>(x, std::integral_constant<bool, W <= M>());
 }

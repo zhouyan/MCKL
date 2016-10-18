@@ -379,7 +379,7 @@ class AESGenerator
     void generate(ctr_type &ctr, std::size_t n, ResultType *result,
         std::false_type) const
     {
-        static constexpr std::size_t stride = size() / sizeof(ResultType);
+        constexpr std::size_t stride = size() / sizeof(ResultType);
 
         std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
         for (std::size_t i = 0; i != n; ++i, result += stride)
@@ -390,8 +390,8 @@ class AESGenerator
     void generate(
         ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
     {
-        static constexpr std::size_t stride = size() / sizeof(ResultType);
-        static constexpr std::size_t blocks =
+        constexpr std::size_t stride = size() / sizeof(ResultType);
+        constexpr std::size_t blocks =
             internal::AESGeneratorImpl<KeySeqType>::blocks();
 
         alignas(32) union {

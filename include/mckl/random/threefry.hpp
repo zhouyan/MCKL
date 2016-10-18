@@ -115,7 +115,7 @@ class ThreefryGenerator
 
     void reset(const key_type &key)
     {
-        static constexpr T p = Constants::parity::value;
+        constexpr T p = Constants::parity::value;
 
         std::memcpy(par_.data(), key.data(), sizeof(T) * K);
         std::get<K>(par_) = p;
@@ -235,7 +235,7 @@ class ThreefryGenerator
     void generate(ctr_type &ctr, std::size_t n, ResultType *result,
         std::false_type) const
     {
-        static constexpr std::size_t stride = size() / sizeof(ResultType);
+        constexpr std::size_t stride = size() / sizeof(ResultType);
 
         for (std::size_t i = 0; i != n; ++i, result += stride)
             operator()(ctr, result);
@@ -245,8 +245,8 @@ class ThreefryGenerator
     void generate(
         ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
     {
-        static constexpr std::size_t stride = size() / sizeof(ResultType);
-        static constexpr std::size_t blocks =
+        constexpr std::size_t stride = size() / sizeof(ResultType);
+        constexpr std::size_t blocks =
             internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
 
         alignas(32) union {

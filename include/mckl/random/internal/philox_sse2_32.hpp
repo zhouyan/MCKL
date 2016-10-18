@@ -49,16 +49,14 @@ class PhiloxGeneratorImplSSE2_32
     static void eval(std::array<std::array<T, K>, blocks()> &state,
         const std::array<T, K / 2> &key)
     {
-        static constexpr std::size_t i0 = 0 % (K / 2);
-        static constexpr std::size_t i1 = 1 % (K / 2);
+        constexpr std::size_t i0 = 0 % (K / 2);
+        constexpr std::size_t i1 = 1 % (K / 2);
 
-        static constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);
-        static constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);
+        constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);
+        constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);
 
-        static constexpr int m0 =
-            static_cast<int>(Constants::multiplier::value[i0]);
-        static constexpr int m1 =
-            static_cast<int>(Constants::multiplier::value[i1]);
+        constexpr int m0 = static_cast<int>(Constants::multiplier::value[i0]);
+        constexpr int m1 = static_cast<int>(Constants::multiplier::value[i1]);
 
         const int p0 = static_cast<int>(std::get<i0>(key));
         const int p1 = static_cast<int>(std::get<i1>(key));
@@ -171,7 +169,7 @@ class PhiloxGeneratorImplSSE2_32
     static void spbox(std::array<__m128i, 4> &s, const __m128i &p,
         const __m128i &m, std::true_type)
     {
-        static constexpr int msk = static_cast<int>(0xFFFFFFFF);
+        constexpr int msk = static_cast<int>(0xFFFFFFFF);
 
         const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
 
@@ -252,13 +250,11 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
 
     static void eval(std::array<T, 4> &state, const std::array<T, 2> &key)
     {
-        static constexpr int w0 = static_cast<int>(Constants::weyl::value[0]);
-        static constexpr int w1 = static_cast<int>(Constants::weyl::value[1]);
+        constexpr int w0 = static_cast<int>(Constants::weyl::value[0]);
+        constexpr int w1 = static_cast<int>(Constants::weyl::value[1]);
 
-        static constexpr int m0 =
-            static_cast<int>(Constants::multiplier::value[0]);
-        static constexpr int m1 =
-            static_cast<int>(Constants::multiplier::value[1]);
+        constexpr int m0 = static_cast<int>(Constants::multiplier::value[0]);
+        constexpr int m1 = static_cast<int>(Constants::multiplier::value[1]);
 
         const int p0 = static_cast<int>(std::get<0>(key));
         const int p1 = static_cast<int>(std::get<1>(key));
@@ -363,7 +359,7 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
     static void spbox(std::array<__m128i, 1> &s, const __m128i &p,
         const __m128i &m, std::true_type)
     {
-        static constexpr int msk = static_cast<int>(0xFFFFFFFF);
+        constexpr int msk = static_cast<int>(0xFFFFFFFF);
 
         const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
 

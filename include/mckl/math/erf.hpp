@@ -50,12 +50,12 @@ inline T erfcinv(T y)
     if (y <= 0)
         return const_inf<T>();
 
-    static constexpr T a = static_cast<T>(0.70771);
-    static constexpr T b = static_cast<T>(2.30753);
-    static constexpr T c = static_cast<T>(0.27061);
-    static constexpr T d = static_cast<T>(0.99229);
-    static constexpr T e = static_cast<T>(0.04481);
-    static constexpr T f = static_cast<T>(1.12837916709551257);
+    constexpr T a = static_cast<T>(0.70771);
+    constexpr T b = static_cast<T>(2.30753);
+    constexpr T c = static_cast<T>(0.27061);
+    constexpr T d = static_cast<T>(0.99229);
+    constexpr T e = static_cast<T>(0.04481);
+    constexpr T f = static_cast<T>(1.12837916709551257);
 
     T z = y < 1 ? y : 2 - y;
     T t = std::sqrt(-2 * std::log(static_cast<T>(0.5) * z));

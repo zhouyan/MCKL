@@ -283,30 +283,22 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     template <std::size_t N>
     static void sbox(std::array<__m256i, 16> &s, std::true_type)
     {
-        static constexpr int L0 =
-            Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
-        static constexpr int L1 =
-            Constants::rotate::value[1 % (K / 2)][(N - 1) % 8];
-        static constexpr int L2 =
-            Constants::rotate::value[2 % (K / 2)][(N - 1) % 8];
-        static constexpr int L3 =
-            Constants::rotate::value[3 % (K / 2)][(N - 1) % 8];
-        static constexpr int L4 =
-            Constants::rotate::value[4 % (K / 2)][(N - 1) % 8];
-        static constexpr int L5 =
-            Constants::rotate::value[5 % (K / 2)][(N - 1) % 8];
-        static constexpr int L6 =
-            Constants::rotate::value[6 % (K / 2)][(N - 1) % 8];
-        static constexpr int L7 =
-            Constants::rotate::value[7 % (K / 2)][(N - 1) % 8];
-        static constexpr int R0 = 64 - L0;
-        static constexpr int R1 = 64 - L1;
-        static constexpr int R2 = 64 - L2;
-        static constexpr int R3 = 64 - L3;
-        static constexpr int R4 = 64 - L4;
-        static constexpr int R5 = 64 - L5;
-        static constexpr int R6 = 64 - L6;
-        static constexpr int R7 = 64 - L7;
+        constexpr int L0 = Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
+        constexpr int L1 = Constants::rotate::value[1 % (K / 2)][(N - 1) % 8];
+        constexpr int L2 = Constants::rotate::value[2 % (K / 2)][(N - 1) % 8];
+        constexpr int L3 = Constants::rotate::value[3 % (K / 2)][(N - 1) % 8];
+        constexpr int L4 = Constants::rotate::value[4 % (K / 2)][(N - 1) % 8];
+        constexpr int L5 = Constants::rotate::value[5 % (K / 2)][(N - 1) % 8];
+        constexpr int L6 = Constants::rotate::value[6 % (K / 2)][(N - 1) % 8];
+        constexpr int L7 = Constants::rotate::value[7 % (K / 2)][(N - 1) % 8];
+        constexpr int R0 = 64 - L0;
+        constexpr int R1 = 64 - L1;
+        constexpr int R2 = 64 - L2;
+        constexpr int R3 = 64 - L3;
+        constexpr int R4 = 64 - L4;
+        constexpr int R5 = 64 - L5;
+        constexpr int R6 = 64 - L6;
+        constexpr int R7 = 64 - L7;
 
         std::get<0x0>(s) =
             _mm256_add_epi64(std::get<0x0>(s), std::get<0x1>(s));

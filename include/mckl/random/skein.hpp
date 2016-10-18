@@ -417,13 +417,10 @@ class Skein
 
     static void set_flags(value_type &t1, bool first, bool last, bool bpad)
     {
-        static constexpr int N = std::numeric_limits<value_type>::digits;
-        static constexpr value_type mask_first = const_one<value_type>()
-            << (N - 2);
-        static constexpr value_type mask_last = const_one<value_type>()
-            << (N - 1);
-        static constexpr value_type mask_bpad = const_one<value_type>()
-            << (N - 9);
+        constexpr int N = std::numeric_limits<value_type>::digits;
+        constexpr value_type mask_first = const_one<value_type>() << (N - 2);
+        constexpr value_type mask_last = const_one<value_type>() << (N - 1);
+        constexpr value_type mask_bpad = const_one<value_type>() << (N - 9);
 
         if (first)
             t1 |= mask_first;
@@ -444,9 +441,8 @@ class Skein
 
     static void set_type(value_type &t1, int type)
     {
-        static constexpr int N = std::numeric_limits<value_type>::digits;
-        static constexpr value_type mask = static_cast<value_type>(0x3F)
-            << (N - 8);
+        constexpr int N = std::numeric_limits<value_type>::digits;
+        constexpr value_type mask = static_cast<value_type>(0x3F) << (N - 8);
 
         t1 &= ~mask;
         t1 ^= (static_cast<value_type>(type) << (N - 8)) & mask;
@@ -454,9 +450,8 @@ class Skein
 
     static void set_level(value_type &t1, int level)
     {
-        static constexpr int N = std::numeric_limits<value_type>::digits;
-        static constexpr value_type mask = static_cast<value_type>(0x7F)
-            << (N - 16);
+        constexpr int N = std::numeric_limits<value_type>::digits;
+        constexpr value_type mask = static_cast<value_type>(0x7F) << (N - 16);
 
         t1 &= ~mask;
         t1 ^= (static_cast<value_type>(level) << (N - 16)) & mask;

@@ -47,8 +47,8 @@ namespace internal
 
 inline double betai_acf(double a, double b, double x)
 {
-    static constexpr double eps = std::numeric_limits<double>::epsilon();
-    static constexpr double fpmin = std::numeric_limits<double>::min() / eps;
+    constexpr double eps = std::numeric_limits<double>::epsilon();
+    constexpr double fpmin = std::numeric_limits<double>::min() / eps;
 
     double qab = a + b;
     double qap = a + 1;

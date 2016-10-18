@@ -67,7 +67,7 @@ class AES128KeySeqGenerator
     void generate(
         std::array<std::array<std::uint32_t, 4>, Rp1> &rk, std::true_type)
     {
-        static constexpr std::uint32_t rcon = AESRCon::value[N % 256];
+        constexpr std::uint32_t rcon = AESRCon::value[N % 256];
 
         const std::uint32_t *const table = aes_table() + 1024;
         const std::uint32_t t = std::get<3>(tmp0_);
@@ -106,8 +106,7 @@ class AES192KeySeqGenerator
     void operator()(
         const key_type &key, std::array<std::array<std::uint32_t, 4>, Rp1> &rk)
     {
-        static constexpr std::size_t Rs1 =
-            Rp1 * 4 / 6 + ((Rp1 * 4) % 6 == 0 ? 0 : 1);
+        constexpr std::size_t Rs1 = Rp1 * 4 / 6 + ((Rp1 * 4) % 6 == 0 ? 0 : 1);
 
         std::array<std::array<std::uint32_t, 6>, Rs1> rs;
         tmp0_ = key;
@@ -129,7 +128,7 @@ class AES192KeySeqGenerator
     void generate(
         std::array<std::array<std::uint32_t, 6>, Rs1> &rk, std::true_type)
     {
-        static constexpr std::uint32_t rcon = AESRCon::value[N % 256];
+        constexpr std::uint32_t rcon = AESRCon::value[N % 256];
 
         const std::uint32_t *const table = aes_table() + 1024;
         const std::uint32_t t = std::get<5>(tmp0_);
@@ -205,7 +204,7 @@ class AES256KeySeqGenerator
     void generate_key(
         std::array<std::array<std::uint32_t, 4>, Rp1> &rk, std::true_type)
     {
-        static constexpr std::uint32_t rcon = AESRCon::value[(N / 2) % 256];
+        constexpr std::uint32_t rcon = AESRCon::value[(N / 2) % 256];
 
         const std::uint32_t *const table = aes_table() + 1024;
         const std::uint32_t t = std::get<3>(tmp1_);
@@ -282,8 +281,8 @@ class ARSKeySeqGenerator
     void generate(std::array<std::array<std::uint32_t, 4>, Rp1> &rk,
         std::true_type) const
     {
-        static constexpr std::uint64_t w0 = Constants::weyl::value[0] * N;
-        static constexpr std::uint64_t w1 = Constants::weyl::value[1] * N;
+        constexpr std::uint64_t w0 = Constants::weyl::value[0] * N;
+        constexpr std::uint64_t w1 = Constants::weyl::value[1] * N;
 
         std::uint64_t k0 = std::get<0>(key_) + w0;
         std::uint64_t k1 = std::get<1>(key_) + w1;

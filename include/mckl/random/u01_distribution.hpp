@@ -138,10 +138,10 @@ inline RealType u01_distribution_impl(const UIntType *, std::false_type)
 template <std::size_t N, typename RealType, typename UIntType>
 inline RealType u01_distribution_impl(const UIntType *u, std::true_type)
 {
-    static constexpr int W = std::numeric_limits<UIntType>::digits;
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = (M + W - 1) / W;
-    static constexpr int Q = 1 > P ? 1 : P;
+    constexpr int W = std::numeric_limits<UIntType>::digits;
+    constexpr int M = std::numeric_limits<RealType>::digits;
+    constexpr int P = (M + W - 1) / W;
+    constexpr int Q = 1 > P ? 1 : P;
 
     return static_cast<RealType>(u[N]) *
         U01Pow2Inv<RealType, (Q - N) * W>::value +
@@ -154,10 +154,10 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
 {
     using UIntType = U01UIntType<RNGType, RealType>;
 
-    static constexpr int W = std::numeric_limits<UIntType>::digits;
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = (M + W - 1) / W;
-    static constexpr int Q = 1 > P ? 1 : P;
+    constexpr int W = std::numeric_limits<UIntType>::digits;
+    constexpr int M = std::numeric_limits<RealType>::digits;
+    constexpr int P = (M + W - 1) / W;
+    constexpr int Q = 1 > P ? 1 : P;
 
     alignas(32) std::array<UIntType, K * Q> s;
     uniform_bits_distribution(rng, n * Q, s.data());
@@ -236,10 +236,10 @@ class U01Distribution
 
         UniformBitsDistribution<UIntType> ubits;
 
-        static constexpr int W = std::numeric_limits<UIntType>::digits;
-        static constexpr int M = std::numeric_limits<RealType>::digits;
-        static constexpr int P = (W + M - 1) / W;
-        static constexpr int Q = 1 > P ? 1 : P;
+        constexpr int W = std::numeric_limits<UIntType>::digits;
+        constexpr int M = std::numeric_limits<RealType>::digits;
+        constexpr int P = (W + M - 1) / W;
+        constexpr int Q = 1 > P ? 1 : P;
 
         return static_cast<RealType>(ubits(rng)) *
             internal::U01Pow2Inv<RealType, (Q - N) * W>::value +

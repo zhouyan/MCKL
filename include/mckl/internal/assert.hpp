@@ -103,7 +103,7 @@ inline void size_check(SizeType, const char *, std::false_type)
 template <typename IntType, typename SizeType>
 inline void size_check(SizeType n, const char *f, std::true_type)
 {
-    static constexpr std::uintmax_t nmax =
+    constexpr std::uintmax_t nmax =
         static_cast<std::uintmax_t>(std::numeric_limits<IntType>::max());
 
     std::string msg;
@@ -117,9 +117,9 @@ inline void size_check(SizeType n, const char *f, std::true_type)
 template <typename IntType, typename SizeType>
 inline void size_check(SizeType n, const char *f)
 {
-    static constexpr std::uintmax_t nmax =
+    constexpr std::uintmax_t nmax =
         static_cast<std::uintmax_t>(std::numeric_limits<IntType>::max());
-    static constexpr std::uintmax_t smax =
+    constexpr std::uintmax_t smax =
         static_cast<std::uintmax_t>(std::numeric_limits<SizeType>::max());
 
     size_check<IntType>(n, f, std::integral_constant<bool, (nmax < smax)>());

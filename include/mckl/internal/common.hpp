@@ -241,11 +241,11 @@ inline U swap_bytes(U, std::false_type)
 template <int Bytes, int N, typename U>
 inline U swap_bytes(U u, std::true_type)
 {
-    static constexpr int bits = sizeof(U) * CHAR_BIT;
-    static constexpr int p = Bytes * CHAR_BIT;
-    static constexpr int r = p * N;
-    static constexpr int l = bits - r - p;
-    static constexpr U mask = (~const_zero<U>()) >> (bits - p);
+    constexpr int bits = sizeof(U) * CHAR_BIT;
+    constexpr int p = Bytes * CHAR_BIT;
+    constexpr int r = p * N;
+    constexpr int l = bits - r - p;
+    constexpr U mask = (~const_zero<U>()) >> (bits - p);
 
     return ((u & mask) << l) +
         swap_bytes<Bytes, N + 1>(
@@ -290,8 +290,8 @@ template <typename U, typename T, std::size_t K>
 inline void union_le_array(
     std::array<T, K> &buf, std::false_type, std::true_type)
 {
-    static constexpr std::size_t m = sizeof(U) / sizeof(T);
-    static constexpr std::size_t l = K / m;
+    constexpr std::size_t m = sizeof(U) / sizeof(T);
+    constexpr std::size_t l = K / m;
 
     T *b = buf.data();
     for (std::size_t i = 0; i != l; ++i, b += m)

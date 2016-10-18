@@ -608,9 +608,9 @@ class ARSKeySeqGenerator
     template <std::size_t N, std::size_t Rp1>
     void generate(std::array<__m128i, Rp1> &rk, std::true_type) const
     {
-        static constexpr MCKL_INT64 w0 =
+        constexpr MCKL_INT64 w0 =
             static_cast<MCKL_INT64>(Constants::weyl::value[0] * N);
-        static constexpr MCKL_INT64 w1 =
+        constexpr MCKL_INT64 w1 =
             static_cast<MCKL_INT64>(Constants::weyl::value[1] * N);
 
         __m128i w = _mm_set_epi64x(w1, w0);
