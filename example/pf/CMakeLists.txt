@@ -57,8 +57,6 @@ MCKL_ADD_TEST(pf truth "OpenMP")
 
 ADD_CUSTOM_TARGET(pf_cv)
 ADD_CUSTOM_TARGET(pf_cv-check)
-ADD_DEPENDENCIES(pf pf_cv)
-ADD_DEPENDENCIES(pf-check pf_cv-check)
 FOREACH(Backend ${PF_BACKEND})
     FOREACH(Scheme ${PF_SCHEME})
         FOREACH(Layout ${PF_LAYOUT})
