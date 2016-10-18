@@ -35,6 +35,7 @@
 #include <mckl/internal/config.h>
 
 #include <cassert>
+#include <exception>
 #include <iostream>
 #include <limits>
 #include <stdexcept>

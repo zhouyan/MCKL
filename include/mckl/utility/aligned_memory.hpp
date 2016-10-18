@@ -34,8 +34,9 @@
 
 #include <mckl/internal/config.h>
 
-#include <array>
 #include <cstdlib>
+#include <memory>
+#include <new>
 #include <vector>
 
 #if MCKL_HAS_POSIX

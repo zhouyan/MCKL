@@ -476,8 +476,6 @@ class Particle
     }
 
     private:
-    static constexpr std::size_t M_ = internal::BufferSize<size_type>::value;
-
     size_type size_;
     state_type state_;
     weight_type weight_;
