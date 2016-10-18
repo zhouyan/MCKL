@@ -33,6 +33,10 @@
 
 int main(int argc, char **argv)
 {
+#if MCKL_CROSS_COMPILING
+    mckl::BackendSTD::instance().np(1);
+#endif
+
     std::size_t N = 1000;
     std::size_t n = 100;
     std::size_t c = 4;
