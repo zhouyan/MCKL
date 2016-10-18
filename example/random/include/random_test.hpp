@@ -37,6 +37,6 @@
 #include "random_common.hpp"
 #include "random_rng_u01.hpp"
 
-extern void random_test(std::size_t, std::size_t, const std::string &);
+void random_test(std::size_t, std::size_t, const std::string &);
 
 #endif // MCKL_EXAMPLE_RANDOM_TEST_HPP

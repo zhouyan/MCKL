@@ -32,13 +32,13 @@
 #ifndef MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
 #define MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
 
-extern void random_rng_load_seed(const std::string &);
-extern void random_rng_store_seed(const std::string &);
-extern double random_rng_std();
-extern double random_rng_u01();
-extern double random_rng_u01cc();
-extern double random_rng_u01co();
-extern double random_rng_u01oc();
-extern double random_rng_u01oo();
+void random_rng_load_seed(const std::string &);
+void random_rng_store_seed(const std::string &);
+double random_rng_std();
+double random_rng_u01();
+double random_rng_u01cc();
+double random_rng_u01co();
+double random_rng_u01oc();
+double random_rng_u01oo();
 
 #endif // MCKL_EXAMPLE_RANDOM_RNG_U01_HPP

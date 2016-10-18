@@ -32,6 +32,6 @@
 #ifndef MCKL_EXAMPLE_RANDOM_TESTU01_SMALLCRUSH_HPP
 #define MCKL_EXAMPLE_RANDOM_TESTU01_SMALLCRUSH_HPP
 
-extern void random_testu01_smallcrush(int, char **);
+void random_testu01_smallcrush(int, char **);
 
 #endif // MCKL_EXAMPLE_RANDOM_TESTU01_SMALLCRUSH_HPP

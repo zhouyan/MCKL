@@ -32,114 +32,15 @@
 #ifndef MCKL_EXAMPLE_PF_HPP
 #define MCKL_EXAMPLE_PF_HPP
 
-#include <mckl/mckl.hpp>
+#include <mckl/random/rng.hpp>
 
-template <typename>
-std::string pf_backend_name();
+double pf_log_likelihood(double, double, double, double);
 
-template <>
-std::string pf_backend_name<mckl::BackendSEQ>()
-{
-    return "BackendSEQ";
-}
+void pf_init_each(mckl::RNGFast &, double &, double &, double &, double &);
 
-template <>
-std::string pf_backend_name<mckl::BackendSTD>()
-{
-    return "BackendSTD";
-}
+void pf_move_each(mckl::RNGFast &, double &, double &, double &, double &);
 
-#if MCKL_HAS_OMP
-template <>
-std::string pf_backend_name<mckl::BackendOMP>()
-{
-    return "BackendOMP";
-}
-#endif
-
-#if MCKL_HAS_TBB
-template <>
-std::string pf_backend_name<mckl::BackendTBB>()
-{
-    return "BackendTBB";
-}
-#endif
-
-template <mckl::ResampleScheme>
-std::string pf_scheme_name();
-
-template <>
-std::string pf_scheme_name<mckl::Multinomial>()
-{
-    return "Multinomial";
-}
-
-template <>
-std::string pf_scheme_name<mckl::Residual>()
-{
-    return "Residual";
-}
-
-template <>
-std::string pf_scheme_name<mckl::ResidualStratified>()
-{
-    return "ResidualStratified";
-}
-
-template <>
-std::string pf_scheme_name<mckl::ResidualSystematic>()
-{
-    return "ResidualSystematic";
-}
-
-template <>
-std::string pf_scheme_name<mckl::Stratified>()
-{
-    return "Stratified";
-}
-
-template <>
-std::string pf_scheme_name<mckl::Systematic>()
-{
-    return "Systematic";
-}
-
-template <mckl::MatrixLayout>
-std::string pf_layout_name();
-
-template <>
-std::string pf_layout_name<mckl::RowMajor>()
-{
-    return "RowMajor";
-}
-
-template <>
-std::string pf_layout_name<mckl::ColMajor>()
-{
-    return "ColMajor";
-}
-
-template <typename>
-std::string pf_rng_set_name();
-
-template <>
-std::string pf_rng_set_name<mckl::RNGSetVector<>>()
-{
-    return "RNGSetVector";
-}
-
-#if MCKL_HAS_TBB
-template <>
-std::string pf_rng_set_name<mckl::RNGSetTBB<>>()
-{
-    return "RNGSetTBB";
-}
-
-template <>
-std::string pf_rng_set_name<mckl::RNGSetTBBKPI<>>()
-{
-    return "RNGSetTBBKPI";
-}
-#endif
+void pf_move_range(mckl::RNGFast &, std::size_t, double *, double *, double *,
+    double *, double *, double *);
 
 #endif // MCKL_EXAMPLE_PF_HPP

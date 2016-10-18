@@ -31,6 +31,8 @@
 
 PROJECT(MCKLExample-pf CXX)
 
+MCKL_ADD_EXAMPLE(pf)
+
 SET(PF_BACKEND BackendSEQ BackendSTD)
 IF(OPENMP_FOUND)
     SET(PF_BACKEND ${PF_BACKEND} BackendOMP)
@@ -49,11 +51,17 @@ IF(TBB_FOUND)
     SET(PF_RNGSET ${PF_RNGSET} RNGSetTBB RNGSetTBBKPI)
 ENDIF(TBB_FOUND)
 
-MCKL_ADD_EXAMPLE(pf)
-
 MCKL_ADD_TEST(pf core  "OpenMP")
 MCKL_ADD_TEST(pf smp   "OpenMP")
 MCKL_ADD_TEST(pf truth "OpenMP")
+
+MCKL_ADD_FILE(pf pf_core.R)
+MCKL_ADD_FILE(pf pf_cv.R)
+MCKL_ADD_FILE(pf pf_cv.data)
+MCKL_ADD_FILE(pf pf_cv.truth)
+
+ADD_LIBRARY(libpf ${PROJECT_SOURCE_DIR}/src/pf.cpp)
+SET_TARGET_PROPERTIES(libpf PROPERTIES OUTPUT_NAME pf)
 
 ADD_CUSTOM_TARGET(pf_cv)
 ADD_CUSTOM_TARGET(pf_cv-check)
@@ -69,17 +77,13 @@ FOREACH(Backend ${PF_BACKEND})
                 CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/pf_cv.cpp.in
                     ${PROJECT_BINARY_DIR}/src/pf_cv_${config}.cpp)
                 MCKL_ADD_TEST(pf cv_${config} "BIN" "OpenMP")
+                TARGET_LINK_LIBRARIES(pf_cv_${config} libpf)
                 ADD_DEPENDENCIES(pf_cv pf_cv_${config})
                 ADD_DEPENDENCIES(pf_cv-check pf_cv_${config}-check)
             ENDFOREACH(RNGSet ${PF_RNGSET})
         ENDFOREACH(Layout ${PF_LAYOUT})
     ENDFOREACH(Scheme ${PF_SCHEME})
 ENDFOREACH(Backend ${PF_BACKEND})
-
-MCKL_ADD_FILE(pf pf_core.R)
-MCKL_ADD_FILE(pf pf_cv.R)
-MCKL_ADD_FILE(pf pf_cv.data)
-MCKL_ADD_FILE(pf pf_cv.truth)
 
 ADD_CUSTOM_TARGET(pf_core-pdf
     DEPENDS pf-files pf_core-check

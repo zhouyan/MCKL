@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         mckl::@Backend@,
         mckl::@Scheme@,
         mckl::@Layout@,
-        mckl::@RNGSet@<>>(N);
+        mckl::@RNGSet@<mckl::RNGFast>>(N);
     // clang-format on
 
     return 0;

@@ -29,7 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/mckl.hpp>
+#include <mckl/core.hpp>
+#include <mckl/random/normal_distribution.hpp>
 
 using namespace mckl;
 
