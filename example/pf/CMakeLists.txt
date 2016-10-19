@@ -55,10 +55,10 @@ MCKL_ADD_TEST(pf core  "OpenMP")
 MCKL_ADD_TEST(pf smp   "OpenMP")
 MCKL_ADD_TEST(pf truth "OpenMP")
 
+MCKL_ADD_FILE(pf pf.data)
+MCKL_ADD_FILE(pf pf.truth)
 MCKL_ADD_FILE(pf pf_core.R)
 MCKL_ADD_FILE(pf pf_cv.R)
-MCKL_ADD_FILE(pf pf_cv.data)
-MCKL_ADD_FILE(pf pf_cv.truth)
 
 ADD_LIBRARY(libpf ${PROJECT_SOURCE_DIR}/src/pf.cpp)
 SET_TARGET_PROPERTIES(libpf PROPERTIES OUTPUT_NAME pf)

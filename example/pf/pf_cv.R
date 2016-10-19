@@ -64,7 +64,7 @@ plt <- plt + geom_bar(stat = "identity", position = "dodge")
 plt <- plt + facet_grid(ResampleScheme ~ Backend, scale = "free_y")
 print(plt)
 
-truth <- read.table("pf_cv.truth", header = FALSE)
+truth <- read.table("pf.truth", header = FALSE)
 n <- dim(truth)[1]
 
 lvl <- c("Estimates", "Truth")

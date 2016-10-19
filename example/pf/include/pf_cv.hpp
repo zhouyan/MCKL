@@ -188,7 +188,7 @@ class PFCV : public PFCVBase<Layout>
     {
         double x = 0;
         double y = 0;
-        std::ifstream data("pf_cv.data");
+        std::ifstream data("pf.data");
         while (data >> x >> y) {
             obs_x_.push_back(x);
             obs_y_.push_back(y);
@@ -315,7 +315,7 @@ inline double pf_cv_error(const mckl::Sampler<T> &sampler)
     if (tx.size() == 0) {
         double x = 0;
         double y = 0;
-        std::ifstream truth("pf_cv.truth");
+        std::ifstream truth("pf.truth");
         while (truth >> x >> y) {
             tx.push_back(x);
             ty.push_back(y);
