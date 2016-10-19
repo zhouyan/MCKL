@@ -42,11 +42,11 @@ double random_rng_u01cc();
 double random_rng_u01co();
 double random_rng_u01oc();
 double random_rng_u01oo();
-double random_rng_std_seq();
-double random_rng_u01_seq();
-double random_rng_u01cc_seq();
-double random_rng_u01co_seq();
-double random_rng_u01oc_seq();
-double random_rng_u01oo_seq();
+double random_rng_std_mt();
+double random_rng_u01_mt();
+double random_rng_u01cc_mt();
+double random_rng_u01co_mt();
+double random_rng_u01oc_mt();
+double random_rng_u01oo_mt();
 
 #endif // MCKL_EXAMPLE_RANDOM_RNG_U01_HPP
