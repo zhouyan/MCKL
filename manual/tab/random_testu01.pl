@@ -85,7 +85,7 @@ my $subdir;
 my %failure;
 my %suspect;
 
-my @subdirs = qw(parallel sqeuntial);
+my @subdirs = qw(parallel sequential);
 for (@subdirs) {
     $subdir = $_;
     %failure = ();
