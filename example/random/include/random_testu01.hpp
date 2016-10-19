@@ -60,6 +60,7 @@ inline void random_testu01(Battery battery, int argc, char **argv)
     bool U01OO = false;
     bool verbose = false;
     bool redirect = true;
+    bool seq = false;
     bool all = true;
     mckl::Vector<int> rep;
     while (argc > 0) {
@@ -86,6 +87,8 @@ inline void random_testu01(Battery battery, int argc, char **argv)
             verbose = true;
         } else if (arg.find("stdout") != std::string::npos) {
             redirect = false;
+        } else if (arg.find("SEQ") != std::string::npos) {
+            seq = true;
         } else {
             rep.push_back(std::atoi(arg.c_str()));
         }
@@ -126,18 +129,33 @@ inline void random_testu01(Battery battery, int argc, char **argv)
         ::swrite_Basic = FALSE;
 
     random_rng_load_seed(basename);
-    if (STD)
-        random_testu01("STD", random_rng_std, battery, rep);
-    if (U01)
-        random_testu01("U01", random_rng_u01, battery, rep);
-    if (U01CC)
-        random_testu01("U01CC", random_rng_u01cc, battery, rep);
-    if (U01CO)
-        random_testu01("U01CO", random_rng_u01co, battery, rep);
-    if (U01OC)
-        random_testu01("U01OC", random_rng_u01oc, battery, rep);
-    if (U01OO)
-        random_testu01("U01OO", random_rng_u01oo, battery, rep);
+    if (seq) {
+        if (STD)
+            random_testu01("STD", random_rng_std_seq, battery, rep);
+        if (U01)
+            random_testu01("U01", random_rng_u01_seq, battery, rep);
+        if (U01CC)
+            random_testu01("U01CC", random_rng_u01cc_seq, battery, rep);
+        if (U01CO)
+            random_testu01("U01CO", random_rng_u01co_seq, battery, rep);
+        if (U01OC)
+            random_testu01("U01OC", random_rng_u01oc_seq, battery, rep);
+        if (U01OO)
+            random_testu01("U01OO", random_rng_u01oo_seq, battery, rep);
+    } else {
+        if (STD)
+            random_testu01("STD", random_rng_std, battery, rep);
+        if (U01)
+            random_testu01("U01", random_rng_u01, battery, rep);
+        if (U01CC)
+            random_testu01("U01CC", random_rng_u01cc, battery, rep);
+        if (U01CO)
+            random_testu01("U01CO", random_rng_u01co, battery, rep);
+        if (U01OC)
+            random_testu01("U01OC", random_rng_u01oc, battery, rep);
+        if (U01OO)
+            random_testu01("U01OO", random_rng_u01oo, battery, rep);
+    }
     random_rng_store_seed(basename);
 
     if (redirect)

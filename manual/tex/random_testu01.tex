@@ -108,6 +108,15 @@ bit level randomness of the integers produced by the \rng. In particular,
 |std::ranlux24_base| and |std::ranlux48_base| are ill-suited to be used with
 any of the distributions in \mckl.
 
+Last but not least, the test method used here may uncover defects in \rng{}s
+when multiple instances are used concurrently, such as inter-stream
+correlations. On the other hand, it may also hide some defects of long streams
+from a particular \rng. For example, The linear and general feedback shift
+register generators (such as |std::mt19937|) are known to fail linear
+dependencies tests. However, as the stream fed into the batteries is actually
+mixture of multiple \rng{}s initialized with random seeds, these tests may or
+may not fail, depending on the seeds.
+
 \newpage
 
 \begin{table}

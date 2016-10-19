@@ -86,6 +86,24 @@ inline double random_rng_u01_impl()
     return result[index++];
 }
 
+template <typename RNGType, typename U01Type>
+inline double random_rng_u01_seq_impl()
+{
+    static const std::size_t N = mckl::internal::BufferSize<double>::value;
+
+    static std::size_t index = N;
+    static RNGType rng(mckl::Seed<RNGType>::instance().get());
+    static mckl::Vector<double> result(N);
+
+    if (index == N) {
+        U01Type dist;
+        mckl::rand(rng, dist, N, result.data());
+        index = 0;
+    }
+
+    return result[index++];
+}
+
 double random_rng_std()
 {
     // clang-format off
@@ -126,5 +144,52 @@ double random_rng_u01oo()
 {
     // clang-format off
     return random_rng_u01_impl<@RNGType@, mckl::U01OODistribution<double>>();
+    // clang-format on
+}
+
+double random_rng_std_seq()
+{
+    // clang-format off
+    return random_rng_u01_seq_impl<@RNGType@,
+        std::uniform_real_distribution<double>>();
+    // clang-format on
+}
+
+double random_rng_u01_seq()
+{
+    // clang-format off
+    return random_rng_u01_seq_impl<@RNGType@, mckl::U01Distribution<double>>();
+    // clang-format on
+}
+
+double random_rng_u01cc_seq()
+{
+    // clang-format off
+    return random_rng_u01_seq_impl<@RNGType@,
+        mckl::U01CCDistribution<double>>();
+    // clang-format on
+}
+
+double random_rng_u01co_seq()
+{
+    // clang-format off
+    return random_rng_u01_seq_impl<@RNGType@,
+        mckl::U01CODistribution<double>>();
+    // clang-format on
+}
+
+double random_rng_u01oc_seq()
+{
+    // clang-format off
+    return random_rng_u01_seq_impl<@RNGType@,
+        mckl::U01OCDistribution<double>>();
+    // clang-format on
+}
+
+double random_rng_u01oo_seq()
+{
+    // clang-format off
+    return random_rng_u01_seq_impl<@RNGType@,
+        mckl::U01OODistribution<double>>();
     // clang-format on
 }
