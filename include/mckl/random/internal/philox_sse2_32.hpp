@@ -77,37 +77,37 @@ class PhiloxGeneratorImplSSE2_32
         MCKL_FLATTEN_CALL Derived::permute_first(s);
 
         MCKL_FLATTEN_CALL kbox<0x0>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x0>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x0>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x1>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x1>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x1>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x2>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x2>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x2>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x3>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x3>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x3>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x4>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x4>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x4>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x5>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x5>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x5>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x6>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x6>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x6>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x7>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x7>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x7>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x8>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x8>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x8>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x9>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x9>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x9>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xA>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xA>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xA>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xB>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xB>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xB>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xC>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xC>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xC>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xD>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xD>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xD>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xE>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xE>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xE>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xF>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xF>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xF>(s, p, m);
 
         round<0x10>(
             s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
@@ -132,10 +132,41 @@ class PhiloxGeneratorImplSSE2_32
     static void round(std::array<__m128i, 4> &s, __m128i &p, const __m128i &w,
         const __m128i &m, std::true_type)
     {
-        MCKL_FLATTEN_CALL kbox<N>(p, w);
-        MCKL_FLATTEN_CALL spbox<N>(s, p, m);
-        round<N + 1>(
-            s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
+        MCKL_FLATTEN_CALL kbox<N + 0x0>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x0>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x1>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x1>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x2>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x2>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x3>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x3>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x4>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x4>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x5>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x5>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x6>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x6>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x7>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x7>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x8>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x8>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x9>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x9>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xA>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xA>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xB>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xB>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xC>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xC>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xD>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xD>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xE>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xE>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xF>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xF>(s, p, m);
+
+        round<N + 0x10>(
+            s, p, w, m, std::integral_constant<bool, N + 0x10 <= Rounds>());
     }
 
     template <std::size_t N>
@@ -152,21 +183,21 @@ class PhiloxGeneratorImplSSE2_32
     }
 
     template <std::size_t N>
-    static void spbox(
+    static void sbox(
         std::array<__m128i, 4> &s, const __m128i &p, const __m128i &m)
     {
-        spbox<N>(
+        sbox<N>(
             s, p, m, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void spbox(std::array<__m128i, 4> &, const __m128i &,
+    static void sbox(std::array<__m128i, 4> &, const __m128i &,
         const __m128i &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void spbox(std::array<__m128i, 4> &s, const __m128i &p,
+    static void sbox(std::array<__m128i, 4> &s, const __m128i &p,
         const __m128i &m, std::true_type)
     {
         constexpr int msk = static_cast<int>(0xFFFFFFFF);
@@ -271,37 +302,37 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
         std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x6C); // 1 2 3 0
 
         MCKL_FLATTEN_CALL kbox<0x0>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x0>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x0>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x1>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x1>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x1>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x2>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x2>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x2>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x3>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x3>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x3>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x4>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x4>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x4>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x5>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x5>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x5>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x6>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x6>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x6>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x7>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x7>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x7>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x8>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x8>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x8>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0x9>(p, w);
-        MCKL_FLATTEN_CALL spbox<0x9>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0x9>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xA>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xA>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xA>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xB>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xB>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xB>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xC>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xC>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xC>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xD>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xD>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xD>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xE>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xE>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xE>(s, p, m);
         MCKL_FLATTEN_CALL kbox<0xF>(p, w);
-        MCKL_FLATTEN_CALL spbox<0xF>(s, p, m);
+        MCKL_FLATTEN_CALL sbox<0xF>(s, p, m);
 
         round<0x10>(
             s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
@@ -322,10 +353,40 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
     static void round(std::array<__m128i, 1> &s, __m128i &p, const __m128i &w,
         const __m128i &m, std::true_type)
     {
-        MCKL_FLATTEN_CALL kbox<N>(p, w);
-        MCKL_FLATTEN_CALL spbox<N>(s, p, m);
-        round<N + 1>(
-            s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
+        MCKL_FLATTEN_CALL kbox<N + 0x0>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x0>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x1>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x1>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x2>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x2>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x3>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x3>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x4>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x4>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x5>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x5>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x6>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x6>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x7>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x7>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x8>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x8>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0x9>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0x9>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xA>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xA>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xB>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xB>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xC>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xC>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xD>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xD>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xE>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xE>(s, p, m);
+        MCKL_FLATTEN_CALL kbox<N + 0xF>(p, w);
+        MCKL_FLATTEN_CALL sbox<N + 0xF>(s, p, m);
+        round<N + 0x10>(
+            s, p, w, m, std::integral_constant<bool, N + 0x10 <= Rounds>());
     }
 
     template <std::size_t N>
@@ -342,21 +403,21 @@ class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
     }
 
     template <std::size_t N>
-    static void spbox(
+    static void sbox(
         std::array<__m128i, 1> &s, const __m128i &p, const __m128i &m)
     {
-        spbox<N>(
+        sbox<N>(
             s, p, m, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void spbox(std::array<__m128i, 1> &, const __m128i &,
+    static void sbox(std::array<__m128i, 1> &, const __m128i &,
         const __m128i &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void spbox(std::array<__m128i, 1> &s, const __m128i &p,
+    static void sbox(std::array<__m128i, 1> &s, const __m128i &p,
         const __m128i &m, std::true_type)
     {
         constexpr int msk = static_cast<int>(0xFFFFFFFF);

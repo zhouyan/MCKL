@@ -89,37 +89,37 @@ class PhiloxGeneratorImplAVX2_32
         Derived::permute_first(s);
 
         kbox<0x0>(p, w);
-        spbox<0x0>(s, p, m);
+        sbox<0x0>(s, p, m);
         kbox<0x1>(p, w);
-        spbox<0x1>(s, p, m);
+        sbox<0x1>(s, p, m);
         kbox<0x2>(p, w);
-        spbox<0x2>(s, p, m);
+        sbox<0x2>(s, p, m);
         kbox<0x3>(p, w);
-        spbox<0x3>(s, p, m);
+        sbox<0x3>(s, p, m);
         kbox<0x4>(p, w);
-        spbox<0x4>(s, p, m);
+        sbox<0x4>(s, p, m);
         kbox<0x5>(p, w);
-        spbox<0x5>(s, p, m);
+        sbox<0x5>(s, p, m);
         kbox<0x6>(p, w);
-        spbox<0x6>(s, p, m);
+        sbox<0x6>(s, p, m);
         kbox<0x7>(p, w);
-        spbox<0x7>(s, p, m);
+        sbox<0x7>(s, p, m);
         kbox<0x8>(p, w);
-        spbox<0x8>(s, p, m);
+        sbox<0x8>(s, p, m);
         kbox<0x9>(p, w);
-        spbox<0x9>(s, p, m);
+        sbox<0x9>(s, p, m);
         kbox<0xA>(p, w);
-        spbox<0xA>(s, p, m);
+        sbox<0xA>(s, p, m);
         kbox<0xB>(p, w);
-        spbox<0xB>(s, p, m);
+        sbox<0xB>(s, p, m);
         kbox<0xC>(p, w);
-        spbox<0xC>(s, p, m);
+        sbox<0xC>(s, p, m);
         kbox<0xD>(p, w);
-        spbox<0xD>(s, p, m);
+        sbox<0xD>(s, p, m);
         kbox<0xE>(p, w);
-        spbox<0xE>(s, p, m);
+        sbox<0xE>(s, p, m);
         kbox<0xF>(p, w);
-        spbox<0xF>(s, p, m);
+        sbox<0xF>(s, p, m);
 
         round<0x10>(
             s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
@@ -148,10 +148,41 @@ class PhiloxGeneratorImplAVX2_32
     static void round(std::array<__m256i, 8> &s, __m256i &p, const __m256i &w,
         const __m256i &m, std::true_type)
     {
-        kbox<N>(p, w);
-        spbox<N>(s, p, m);
-        round<N + 1>(
-            s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
+        kbox<N + 0x0>(p, w);
+        sbox<N + 0x0>(s, p, m);
+        kbox<N + 0x1>(p, w);
+        sbox<N + 0x1>(s, p, m);
+        kbox<N + 0x2>(p, w);
+        sbox<N + 0x2>(s, p, m);
+        kbox<N + 0x3>(p, w);
+        sbox<N + 0x3>(s, p, m);
+        kbox<N + 0x4>(p, w);
+        sbox<N + 0x4>(s, p, m);
+        kbox<N + 0x5>(p, w);
+        sbox<N + 0x5>(s, p, m);
+        kbox<N + 0x6>(p, w);
+        sbox<N + 0x6>(s, p, m);
+        kbox<N + 0x7>(p, w);
+        sbox<N + 0x7>(s, p, m);
+        kbox<N + 0x8>(p, w);
+        sbox<N + 0x8>(s, p, m);
+        kbox<N + 0x9>(p, w);
+        sbox<N + 0x9>(s, p, m);
+        kbox<N + 0xA>(p, w);
+        sbox<N + 0xA>(s, p, m);
+        kbox<N + 0xB>(p, w);
+        sbox<N + 0xB>(s, p, m);
+        kbox<N + 0xC>(p, w);
+        sbox<N + 0xC>(s, p, m);
+        kbox<N + 0xD>(p, w);
+        sbox<N + 0xD>(s, p, m);
+        kbox<N + 0xE>(p, w);
+        sbox<N + 0xE>(s, p, m);
+        kbox<N + 0xF>(p, w);
+        sbox<N + 0xF>(s, p, m);
+
+        round<N + 0x10>(
+            s, p, w, m, std::integral_constant<bool, N + 0x10 <= Rounds>());
     }
 
     template <std::size_t N>
@@ -168,21 +199,21 @@ class PhiloxGeneratorImplAVX2_32
     }
 
     template <std::size_t N>
-    static void spbox(
+    static void sbox(
         std::array<__m256i, 8> &s, const __m256i &p, const __m256i &m)
     {
-        spbox<N>(
+        sbox<N>(
             s, p, m, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
-    static void spbox(std::array<__m256i, 8> &, const __m256i &,
+    static void sbox(std::array<__m256i, 8> &, const __m256i &,
         const __m256i &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void spbox(std::array<__m256i, 8> &s, const __m256i &p,
+    static void sbox(std::array<__m256i, 8> &s, const __m256i &p,
         const __m256i &m, std::true_type)
     {
         constexpr int msk = static_cast<int>(0xFFFFFFFF);
