@@ -138,7 +138,7 @@ class ThreefryGenerator
         std::get<K + 3>(par_) = t0 ^ t1;
     }
 
-    void enc(const void *plain, void *cipher) const
+    void operator()(const void *plain, void *cipher) const
     {
         alignas(32) union {
             std::array<T, K> state;

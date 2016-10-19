@@ -323,7 +323,7 @@ class SeedGenerator
         buf.k = k;
         internal::union_le<seed_type>(buf.state);
         RNGType rng(0);
-        rng.generator().enc(buf.state.data(), buf.state.data());
+        rng.generator()(buf.state.data(), buf.state.data());
         internal::union_le<char>(buf.result);
 
         return buf.result;

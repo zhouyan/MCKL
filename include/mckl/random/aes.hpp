@@ -274,7 +274,7 @@ class AESGenerator
 
     void reset(const key_type &key) { key_seq_.set(key); }
 
-    void enc(const void *plain, void *cipher) const
+    void operator()(const void *plain, void *cipher) const
     {
         alignas(32) union {
             std::array<std::uint32_t, 4> state;

@@ -496,7 +496,7 @@ inline double random_rng_e(
         std::size_t K = rsize(rngs);
         watch.start();
         for (std::size_t j = 0; j != K; ++j) {
-            rng.generator().enc(ctr.data(), r[j].data());
+            rng.generator()(ctr.data(), r[j].data());
             ++ctr.front();
         }
         watch.stop();

@@ -106,7 +106,7 @@ class PhiloxGenerator
 
     void reset(const key_type &key) { key_ = key; }
 
-    void enc(const void *plain, void *cipher) const
+    void operator()(const void *plain, void *cipher) const
     {
         alignas(32) union {
             std::array<T, K> state;
