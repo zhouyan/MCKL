@@ -60,7 +60,7 @@ inline void random_testu01(Battery battery, int argc, char **argv)
     bool U01OO = false;
     bool verbose = false;
     bool redirect = true;
-    bool seq = false;
+    bool seq = true;
     bool all = true;
     mckl::Vector<int> rep;
     while (argc > 0) {
@@ -87,7 +87,7 @@ inline void random_testu01(Battery battery, int argc, char **argv)
             verbose = true;
         } else if (arg.find("stdout") != std::string::npos) {
             redirect = false;
-        } else if (arg.find("SEQ") != std::string::npos) {
+        } else if (arg.find("parallel") != std::string::npos) {
             seq = true;
         } else {
             rep.push_back(std::atoi(arg.c_str()));

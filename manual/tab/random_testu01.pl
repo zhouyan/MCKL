@@ -33,6 +33,7 @@
 
 use v5.16;
 use Getopt::Long;
+use Data::Dumper;
 
 my $failure = 1e-6;
 my $suspect = 1e-3;
@@ -80,16 +81,23 @@ MKL_SFMT19937 MKL_SFMT19937_64
 MKL_NONDETERM MKL_NONDETERM_64
 RDRAND16 RDRAND32 RDRAND64);
 
+my $subdir;
 my %failure;
 my %suspect;
 
-&filter;
-&check;
-&target;
-&recheck;
-&count;
-&table;
-&pdf;
+my @subdirs = qw(parallel sqeuntial);
+for (@subdirs) {
+    $subdir = $_;
+    %failure = ();
+    %suspect = ();
+    &filter;
+    &check;
+    &target;
+    &recheck;
+    &count;
+    &table;
+    &pdf;
+}
 
 sub filter {
     for my $b (@bat) {
@@ -126,7 +134,7 @@ sub target {
         }
         if (%target) {
             my @keys = sort keys %target;
-            open my $makefile, ">", "\Ltestu01/random_testu01_$b.make";
+            open my $makefile, ">", "\Ltestu01/$subdir/random_testu01_$b.make";
             print $makefile ".PHONY : all run";
             print $makefile " \\\n\t$_" for @keys;
             print $makefile "\n";
@@ -206,7 +214,9 @@ sub table {
                 $table .= " \\\\\n"
             }
         }
-        open my $texfile, ">", "\Lrandom_testu01_$b.tex";
+        my $suffix;
+        $suffix = "_p" if $subdir eq "parallel";
+        open my $texfile, ">", "\Lrandom_testu01_$b$suffix.tex";
         print $texfile $header;
         print $texfile $table;
         print $texfile $footer;
@@ -231,7 +241,7 @@ sub pdf {
 }
 
 sub filter_txt {
-    my $txt = "\Ltestu01/random_testu01_$_[0].txt";
+    my $txt = "\Ltestu01/$subdir/random_testu01_$_[0].txt";
     return unless -e $txt;
 
     open my $txtfile, "<", $txt;
@@ -264,7 +274,7 @@ sub filter_txt {
 }
 
 sub check_txt {
-    my $txt = "\Ltestu01/random_testu01_$_[0].txt";
+    my $txt = "\Ltestu01/$subdir/random_testu01_$_[0].txt";
     return unless -e $txt;
 
     shift;
