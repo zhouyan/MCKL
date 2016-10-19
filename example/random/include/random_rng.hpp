@@ -366,7 +366,7 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
     return {pass, c1, c2};
 }
 
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
 
 template <typename RNGType>
 inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
@@ -467,7 +467,7 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
     return {pass, c1, c2};
 }
 
-#endif // !MCKL_CROSS_COMPILING
+#endif // !MCKL_EXAMPLE_CROSS_COMPILING
 
 template <typename RNGType>
 inline double random_rng_e(const RNGType &, std::size_t, std::size_t)
@@ -518,7 +518,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     const int nwid = 20;
     const int swid = 8;
     const int twid = 7;
-#if MCKL_CROSS_COMPILING
+#if MCKL_EXAMPLE_CROSS_COMPILING
     const std::size_t lwid = nwid + swid * 2 + twid * 4 + 15;
 #else
     const std::size_t lwid = nwid + swid * 2 + twid * 9 + 15;
@@ -527,7 +527,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     bool pass_k = random_rng_k(RNGType());
     bool pass_d = random_rng_d<RNGType>(N, M);
     RandomRNGPerf perf_s(random_rng_s<RNGType>(N, M));
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
     RandomRNGPerf perf_p = random_rng_p<RNGType>(N, M);
 #endif
     double cpb = random_rng_e(RNGType(), N, M);
@@ -541,12 +541,12 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(swid) << std::right << "Align";
     std::cout << std::setw(twid) << std::right << "S";
     std::cout << std::setw(twid) << std::right << "B";
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
     std::cout << std::setw(twid) << std::right << "SP";
     std::cout << std::setw(twid) << std::right << "BP";
 #endif
     std::cout << std::setw(twid) << std::right << "S/B";
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
     std::cout << std::setw(twid) << std::right << "SP/BP";
     std::cout << std::setw(twid) << std::right << "S/SP";
     std::cout << std::setw(twid) << std::right << "B/BP";
@@ -562,12 +562,12 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(swid) << std::right << alignof(RNGType);
     std::cout << std::setw(twid) << std::right << perf_s.c1;
     std::cout << std::setw(twid) << std::right << perf_s.c2;
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
     std::cout << std::setw(twid) << std::right << perf_p.c1;
     std::cout << std::setw(twid) << std::right << perf_p.c2;
 #endif
     std::cout << std::setw(twid) << std::right << perf_s.c1 / perf_s.c2;
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
     std::cout << std::setw(twid) << std::right << perf_p.c1 / perf_p.c2;
     std::cout << std::setw(twid) << std::right << perf_s.c1 / perf_p.c1;
     std::cout << std::setw(twid) << std::right << perf_s.c2 / perf_p.c2;
@@ -581,7 +581,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     pass += pass_k ? "-" : "*";
     pass += pass_d ? "-" : "*";
     pass += perf_s.pass ? "-" : "*";
-#if MCKL_CROSS_COMPILING
+#if MCKL_EXAMPLE_CROSS_COMPILING
     pass += random_pass(pass_k && pass_d && perf_s.pass);
 #else
     pass += perf_p.pass ? "-" : "*";

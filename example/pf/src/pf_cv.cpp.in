@@ -33,7 +33,7 @@
 
 int main(int argc, char **argv)
 {
-#if MCKL_CROSS_COMPILING
+#if MCKL_EXAMPLE_CROSS_COMPILING
     mckl::BackendSTD::instance().np(1);
 #endif
 

@@ -31,6 +31,14 @@
 
 PROJECT(MCKLExample CXX)
 
+IF(CMAKE_CROSSCOMPILING)
+    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=1)
+ELSE(CMAKE_CROSSCOMPILING)
+    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=0)
+ENDIF(CMAKE_CROSSCOMPILING)
+
+ADD_DEFINITIONS(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
+
 ##############################################################################
 # Check examples
 ##############################################################################

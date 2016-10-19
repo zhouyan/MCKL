@@ -1738,7 +1738,7 @@ inline void random_distribution_perf_s(std::size_t N, std::size_t M,
     random_distribution_perf_s<DistributionType<std::uint64_t>>(N, M, perf);
 }
 
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
 
 template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
 inline void random_distribution_perf_p(std::size_t N, std::size_t M,
@@ -1969,7 +1969,7 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
     random_distribution_perf_p<DistributionType<std::uint64_t>>(N, M, perf);
 }
 
-#endif // !MCKL_CROSS_COMPILING
+#endif // !MCKL_EXAMPLE_CROSS_COMPILING
 
 template <template <typename> class DistributionType, typename ResultType>
 inline void random_distribution_perf(std::size_t N, std::size_t M)
@@ -1985,7 +1985,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     random_distribution_perf_s<DistributionType>(
         N, M, perf_s, std::is_floating_point<ResultType>());
 
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
     mckl::Vector<RandomDistributionPerf> perf_p;
     random_distribution_perf_p<DistributionType>(
         N, M, perf_p, std::is_floating_point<ResultType>());
@@ -2037,7 +2037,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     }
     std::cout << std::string(lwid, '-') << std::endl;
 
-#if !MCKL_CROSS_COMPILING
+#if !MCKL_EXAMPLE_CROSS_COMPILING
     for (std::size_t i = 0; i != perf_p.size(); ++i) {
         std::cout << std::setw(nwid) << std::left << perf_p[i].name;
         std::cout << std::setw(twid) << std::right << perf_p[i].c1;
