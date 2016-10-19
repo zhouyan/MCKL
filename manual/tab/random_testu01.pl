@@ -87,7 +87,7 @@ my %suspect;
 &check;
 &target;
 &recheck;
-&check_suspect;
+&count;
 &table;
 &pdf;
 
@@ -155,7 +155,7 @@ sub recheck {
     }
 }
 
-sub check_suspect {
+sub count {
     for my $b (keys %suspect) {
         for my $r (keys %{$suspect{$b}}) {
             for my $u (keys %{$suspect{$b}{$r}}) {

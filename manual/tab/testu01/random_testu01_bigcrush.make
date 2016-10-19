@@ -1,9 +1,13 @@
 .PHONY : all run \
 	random_testu01_bigcrush_aes128 \
+	random_testu01_bigcrush_aes128_64 \
 	random_testu01_bigcrush_aes192_64 \
 	random_testu01_bigcrush_ars \
 	random_testu01_bigcrush_ars_64 \
+	random_testu01_bigcrush_minstd_rand \
+	random_testu01_bigcrush_minstd_rand0 \
 	random_testu01_bigcrush_mkl_ars5 \
+	random_testu01_bigcrush_mkl_ars5_64 \
 	random_testu01_bigcrush_mkl_mcg59 \
 	random_testu01_bigcrush_mkl_mcg59_64 \
 	random_testu01_bigcrush_mkl_mt19937 \
@@ -11,9 +15,11 @@
 	random_testu01_bigcrush_mkl_mt2203 \
 	random_testu01_bigcrush_mkl_mt2203_64 \
 	random_testu01_bigcrush_mkl_philox4x32x10 \
+	random_testu01_bigcrush_mkl_philox4x32x10_64 \
 	random_testu01_bigcrush_mkl_sfmt19937 \
 	random_testu01_bigcrush_mkl_sfmt19937_64 \
 	random_testu01_bigcrush_mt19937 \
+	random_testu01_bigcrush_philox2x32_64 \
 	random_testu01_bigcrush_philox2x64 \
 	random_testu01_bigcrush_philox2x64_64 \
 	random_testu01_bigcrush_philox4x32 \
@@ -28,12 +34,14 @@
 	random_testu01_bigcrush_threefish256_64 \
 	random_testu01_bigcrush_threefish512 \
 	random_testu01_bigcrush_threefish512_64 \
+	random_testu01_bigcrush_threefry16x64 \
 	random_testu01_bigcrush_threefry16x64_64 \
 	random_testu01_bigcrush_threefry2x32 \
 	random_testu01_bigcrush_threefry2x32_64 \
 	random_testu01_bigcrush_threefry2x64 \
 	random_testu01_bigcrush_threefry2x64_64 \
 	random_testu01_bigcrush_threefry4x32 \
+	random_testu01_bigcrush_threefry4x32_64 \
 	random_testu01_bigcrush_threefry4x64 \
 	random_testu01_bigcrush_threefry4x64_64 \
 	random_testu01_bigcrush_threefry8x64
@@ -41,10 +49,14 @@ all :
 
 run : \
 	random_testu01_bigcrush_aes128 \
+	random_testu01_bigcrush_aes128_64 \
 	random_testu01_bigcrush_aes192_64 \
 	random_testu01_bigcrush_ars \
 	random_testu01_bigcrush_ars_64 \
+	random_testu01_bigcrush_minstd_rand \
+	random_testu01_bigcrush_minstd_rand0 \
 	random_testu01_bigcrush_mkl_ars5 \
+	random_testu01_bigcrush_mkl_ars5_64 \
 	random_testu01_bigcrush_mkl_mcg59 \
 	random_testu01_bigcrush_mkl_mcg59_64 \
 	random_testu01_bigcrush_mkl_mt19937 \
@@ -52,9 +64,11 @@ run : \
 	random_testu01_bigcrush_mkl_mt2203 \
 	random_testu01_bigcrush_mkl_mt2203_64 \
 	random_testu01_bigcrush_mkl_philox4x32x10 \
+	random_testu01_bigcrush_mkl_philox4x32x10_64 \
 	random_testu01_bigcrush_mkl_sfmt19937 \
 	random_testu01_bigcrush_mkl_sfmt19937_64 \
 	random_testu01_bigcrush_mt19937 \
+	random_testu01_bigcrush_philox2x32_64 \
 	random_testu01_bigcrush_philox2x64 \
 	random_testu01_bigcrush_philox2x64_64 \
 	random_testu01_bigcrush_philox4x32 \
@@ -69,12 +83,14 @@ run : \
 	random_testu01_bigcrush_threefish256_64 \
 	random_testu01_bigcrush_threefish512 \
 	random_testu01_bigcrush_threefish512_64 \
+	random_testu01_bigcrush_threefry16x64 \
 	random_testu01_bigcrush_threefry16x64_64 \
 	random_testu01_bigcrush_threefry2x32 \
 	random_testu01_bigcrush_threefry2x32_64 \
 	random_testu01_bigcrush_threefry2x64 \
 	random_testu01_bigcrush_threefry2x64_64 \
 	random_testu01_bigcrush_threefry4x32 \
+	random_testu01_bigcrush_threefry4x32_64 \
 	random_testu01_bigcrush_threefry4x64 \
 	random_testu01_bigcrush_threefry4x64_64 \
 	random_testu01_bigcrush_threefry8x64
@@ -84,6 +100,10 @@ random_testu01_bigcrush_aes128 :
 	./random_testu01_bigcrush_aes128 U01 78
 	./random_testu01_bigcrush_aes128 U01CC 11
 	./random_testu01_bigcrush_aes128 U01CO 44
+
+random_testu01_bigcrush_aes128_64 :
+	ninja -C ../.. random_testu01_bigcrush_aes128_64
+	./random_testu01_bigcrush_aes128_64 U01 78
 
 random_testu01_bigcrush_aes192_64 :
 	ninja -C ../.. random_testu01_bigcrush_aes192_64
@@ -98,11 +118,33 @@ random_testu01_bigcrush_ars_64 :
 	ninja -C ../.. random_testu01_bigcrush_ars_64
 	./random_testu01_bigcrush_ars_64 U01 12
 
+random_testu01_bigcrush_minstd_rand :
+	ninja -C ../.. random_testu01_bigcrush_minstd_rand
+	./random_testu01_bigcrush_minstd_rand STD 102 30 41 74
+	./random_testu01_bigcrush_minstd_rand U01 65
+	./random_testu01_bigcrush_minstd_rand U01CC 29 32 49
+	./random_testu01_bigcrush_minstd_rand U01OC 102 42 44 49 65
+	./random_testu01_bigcrush_minstd_rand U01OO 30 32 68 87 88 89
+
+random_testu01_bigcrush_minstd_rand0 :
+	ninja -C ../.. random_testu01_bigcrush_minstd_rand0
+	./random_testu01_bigcrush_minstd_rand0 STD 12 88 89
+	./random_testu01_bigcrush_minstd_rand0 U01 60 61 90 91
+	./random_testu01_bigcrush_minstd_rand0 U01CC 41 88 89
+	./random_testu01_bigcrush_minstd_rand0 U01CO 38
+	./random_testu01_bigcrush_minstd_rand0 U01OC 45
+	./random_testu01_bigcrush_minstd_rand0 U01OO 101 47
+
 random_testu01_bigcrush_mkl_ars5 :
 	ninja -C ../.. random_testu01_bigcrush_mkl_ars5
 	./random_testu01_bigcrush_mkl_ars5 STD 77
 	./random_testu01_bigcrush_mkl_ars5 U01CC 62
 	./random_testu01_bigcrush_mkl_ars5 U01CO 61
+
+random_testu01_bigcrush_mkl_ars5_64 :
+	ninja -C ../.. random_testu01_bigcrush_mkl_ars5_64
+	./random_testu01_bigcrush_mkl_ars5_64 STD 77
+	./random_testu01_bigcrush_mkl_ars5_64 U01CO 77
 
 random_testu01_bigcrush_mkl_mcg59 :
 	ninja -C ../.. random_testu01_bigcrush_mkl_mcg59
@@ -150,6 +192,11 @@ random_testu01_bigcrush_mkl_philox4x32x10 :
 	./random_testu01_bigcrush_mkl_philox4x32x10 STD 59
 	./random_testu01_bigcrush_mkl_philox4x32x10 U01OC 36
 
+random_testu01_bigcrush_mkl_philox4x32x10_64 :
+	ninja -C ../.. random_testu01_bigcrush_mkl_philox4x32x10_64
+	./random_testu01_bigcrush_mkl_philox4x32x10_64 STD 59
+	./random_testu01_bigcrush_mkl_philox4x32x10_64 U01CC 20
+
 random_testu01_bigcrush_mkl_sfmt19937 :
 	ninja -C ../.. random_testu01_bigcrush_mkl_sfmt19937
 	./random_testu01_bigcrush_mkl_sfmt19937 U01CO 81
@@ -163,6 +210,10 @@ random_testu01_bigcrush_mkl_sfmt19937_64 :
 random_testu01_bigcrush_mt19937 :
 	ninja -C ../.. random_testu01_bigcrush_mt19937
 	./random_testu01_bigcrush_mt19937 U01CC 52
+
+random_testu01_bigcrush_philox2x32_64 :
+	ninja -C ../.. random_testu01_bigcrush_philox2x32_64
+	./random_testu01_bigcrush_philox2x32_64 U01CO 17
 
 random_testu01_bigcrush_philox2x64 :
 	ninja -C ../.. random_testu01_bigcrush_philox2x64
@@ -240,6 +291,11 @@ random_testu01_bigcrush_threefish512_64 :
 	ninja -C ../.. random_testu01_bigcrush_threefish512_64
 	./random_testu01_bigcrush_threefish512_64 U01 74
 
+random_testu01_bigcrush_threefry16x64 :
+	ninja -C ../.. random_testu01_bigcrush_threefry16x64
+	./random_testu01_bigcrush_threefry16x64 STD 35
+	./random_testu01_bigcrush_threefry16x64 U01CC 23
+
 random_testu01_bigcrush_threefry16x64_64 :
 	ninja -C ../.. random_testu01_bigcrush_threefry16x64_64
 	./random_testu01_bigcrush_threefry16x64_64 STD 35
@@ -269,6 +325,10 @@ random_testu01_bigcrush_threefry2x64_64 :
 random_testu01_bigcrush_threefry4x32 :
 	ninja -C ../.. random_testu01_bigcrush_threefry4x32
 	./random_testu01_bigcrush_threefry4x32 U01OC 72
+
+random_testu01_bigcrush_threefry4x32_64 :
+	ninja -C ../.. random_testu01_bigcrush_threefry4x32_64
+	./random_testu01_bigcrush_threefry4x32_64 U01CO 97
 
 random_testu01_bigcrush_threefry4x64 :
 	ninja -C ../.. random_testu01_bigcrush_threefry4x64

@@ -1,0 +1,9 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  18
+ ----------------------------------------------
+ 30  CouponCollector, r = 0          5.8e-6
+ 30  CouponCollector, r = 0          4.2e-7
+ ----------------------------------------------
+ All other tests were passed
+
