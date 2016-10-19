@@ -271,13 +271,10 @@ FUNCTION(MCKL_ADD_EXAMPLE exname)
     INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
     ADD_CUSTOM_TARGET(${exname})
-    ADD_DEPENDENCIES(example ${exname})
-
     ADD_CUSTOM_TARGET(${exname}-check)
-    ADD_DEPENDENCIES(check ${exname}-check)
-
     ADD_CUSTOM_TARGET(${exname}-files)
     ADD_DEPENDENCIES(${exname} ${exname}-files)
+    ADD_DEPENDENCIES(example ${exname})
 ENDFUNCTION(MCKL_ADD_EXAMPLE)
 
 FUNCTION(MCKL_ADD_TEST exname testname)

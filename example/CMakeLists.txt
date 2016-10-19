@@ -31,14 +31,9 @@
 
 PROJECT(MCKLExample CXX)
 
-ADD_DEFINITIONS(${EXAMPLE_DEFINITIONS})
-
 ##############################################################################
 # Check examples
 ##############################################################################
-
-ADD_CUSTOM_TARGET(example-files)
-ADD_DEPENDENCIES(example example-files)
 
 SET(EXAMPLES ${EXAMPLES} "mckl")
 ADD_SUBDIRECTORY(mckl)
