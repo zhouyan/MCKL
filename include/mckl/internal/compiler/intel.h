@@ -84,7 +84,7 @@
 #endif
 #endif
 
-#ifdef __AVX2__
+#ifdef __AVX__
 #ifndef MCKL_HAS_AESNI
 #define MCKL_HAS_AESNI 1
 #endif
