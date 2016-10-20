@@ -66,11 +66,6 @@ static const double MCKL_RANDOMC_U01_53D = 1.0 / 9007199254740992.0;
 static const double MCKL_RANDOMC_U01_63D = 1.0 / 9223372036854775808.0;
 static const double MCKL_RANDOMC_U01_64D = 1.0 / 18446744073709551616.0;
 static const double MCKL_RANDOMC_U01_65D = 1.0 / 36893488147419103232.0;
-static const long double MCKL_RANDOMC_U01_32L = 1.0l / 4294967296.0l;
-static const long double MCKL_RANDOMC_U01_33L = 1.0l / 8589934592.0l;
-static const long double MCKL_RANDOMC_U01_63L = 1.0l / 9223372036854775808.0l;
-static const long double MCKL_RANDOMC_U01_64L = 1.0l / 18446744073709551616.0l;
-static const long double MCKL_RANDOMC_U01_65L = 1.0l / 36893488147419103232.0l;
 #endif // MCKL_OPENCL
 
 /// \brief Converting 32-bit unsigned to single precision uniform \f$(0, 1)\f$
@@ -104,24 +99,6 @@ static inline double mckl_u01_u64d(uint64_t u)
 }
 
 #endif // !defined(MCKL_OPENCL) || MCKL_HAS_OPENCL_DOUBLE
-
-#ifndef MCKL_OPENCL
-
-/// \brief Converting 32-bit unsigned to long double precision uniform
-/// \f$(0, 1)\f$
-static inline long double mckl_u01_u32l(uint32_t u)
-{
-    return u * MCKL_RANDOMC_U01_32L + MCKL_RANDOMC_U01_33L;
-}
-
-/// \brief Converting 64-bit unsigned to long double precision uniform
-/// \f$(0, 1)\f$
-static inline long double mckl_u01_u64l(uint64_t u)
-{
-    return u * MCKL_RANDOMC_U01_64L + MCKL_RANDOMC_U01_65L;
-}
-
-#endif // MCKL_OPENCL
 
 /// \brief Converting 32-bit unsigned to single precision uniform \f$[0,1]\f$
 /// \ingroup U01C
@@ -260,81 +237,5 @@ static inline double mckl_u01_oo_u64d(uint64_t u)
 }
 
 #endif // !defined(MCKL_OPENCL) || MCKL_HAS_OPENCL_DOUBLE
-
-#ifndef MCKL_OPENCL
-
-/// \brief Converting 32-bit unsigned to long double precision uniform
-/// \f$[0,1]\f$
-/// \ingroup U01C
-static inline long double mckl_u01_cc_u32l(uint32_t u)
-{
-#ifdef __cplusplus
-    return (static_cast<long double>(u & 1) + u) * MCKL_RANDOMC_U01_32L;
-#else
-    return (((long double) (u & 1)) + u) * MCKL_RANDOMC_U01_32L;
-#endif
-}
-
-/// \brief Converting 32-bit unsigned to long double precision uniform
-/// \f$[0,1)\f$
-/// \ingroup U01C
-static inline long double mckl_u01_co_u32l(uint32_t u)
-{
-    return u * MCKL_RANDOMC_U01_32L;
-}
-
-/// \brief Converting 32-bit unsigned to long double precision uniform
-/// \f$(0,1]\f$
-/// \ingroup U01C
-static inline long double mckl_u01_oc_u32l(uint32_t u)
-{
-    return u * MCKL_RANDOMC_U01_32L + MCKL_RANDOMC_U01_32L;
-}
-
-/// \brief Converting 32-bit unsigned to long double precision uniform
-/// \f$(0,1)\f$
-/// \ingroup U01C
-static inline long double mckl_u01_oo_u32l(uint32_t u)
-{
-    return u * MCKL_RANDOMC_U01_32L + MCKL_RANDOMC_U01_33L;
-}
-
-/// \brief Converting 64-bit unsigned to long double precision uniform
-/// \f$[0,1]\f$
-/// \ingroup U01C
-static inline long double mckl_u01_cc_u64l(uint64_t u)
-{
-#ifdef __cplusplus
-    return (static_cast<long double>(u & 1) + u) * MCKL_RANDOMC_U01_64L;
-#else
-    return (((long double) (u & 1)) + u) * MCKL_RANDOMC_U01_64L;
-#endif
-}
-
-/// \brief Converting 64-bit unsigned to long double precision uniform
-/// \f$[0,1)\f$
-/// \ingroup U01C
-static inline long double mckl_u01_co_u64l(uint64_t u)
-{
-    return u * MCKL_RANDOMC_U01_64L;
-}
-
-/// \brief Converting 64-bit unsigned to long double precision uniform
-/// \f$(0,1]\f$
-/// \ingroup U01C
-static inline long double mckl_u01_oc_u64l(uint64_t u)
-{
-    return u * MCKL_RANDOMC_U01_64L + MCKL_RANDOMC_U01_64L;
-}
-
-/// \brief Converting 64-bit unsigned to long double precision uniform
-/// \f$(0,1)\f$
-/// \ingroup U01C
-static inline long double mckl_u01_oo_u64l(uint64_t u)
-{
-    return (u >> 1) * MCKL_RANDOMC_U01_63L + MCKL_RANDOMC_U01_64L;
-}
-
-#endif // MCKL_OPENCL
 
 #endif // MCKL_RANDOMC_U01_H

@@ -54,42 +54,30 @@
     random_u01<std::uint32_t, double, mckl::Lower, mckl::Upper>(              \
         N, M, nwid, swid, twid);                                              \
     random_u01<std::uint64_t, double, mckl::Lower, mckl::Upper>(              \
-        N, M, nwid, swid, twid);                                              \
-    random_u01<std::uint32_t, long double, mckl::Lower, mckl::Upper>(         \
-        N, M, nwid, swid, twid);                                              \
-    random_u01<std::uint64_t, long double, mckl::Lower, mckl::Upper>(         \
         N, M, nwid, swid, twid);
 
 template <typename UIntType, typename RealType, typename, typename>
-inline RealType random_u01_c(UIntType u);
+inline RealType random_u01_c(UIntType);
 
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, cc, Closed, Closed, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, cc, Closed, Closed, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, cc, Closed, Closed, double)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, cc, Closed, Closed, double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, cc, Closed, Closed, long double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, cc, Closed, Closed, long double)
 
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, co, Closed, Open, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, co, Closed, Open, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, co, Closed, Open, double)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, co, Closed, Open, double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, co, Closed, Open, long double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, co, Closed, Open, long double)
 
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, oc, Open, Closed, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, oc, Open, Closed, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, oc, Open, Closed, double)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, oc, Open, Closed, double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, oc, Open, Closed, long double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, oc, Open, Closed, long double)
 
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, f, oo, Open, Open, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, oo, Open, Open, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, oo, Open, Open, double)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, oo, Open, Open, double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, l, oo, Open, Open, long double)
-MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, l, oo, Open, Open, long double)
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline std::string random_u01_function_name()
@@ -108,7 +96,7 @@ template <typename RealType>
 inline void random_u01_lb(RealType x, std::string &minimum, std::string &left)
 {
     std::stringstream ss;
-    if (mckl::internal::is_equal(x, static_cast<RealType>(0)))
+    if (mckl::internal::is_zero(x))
         ss << 0;
     else
         ss << "2^" << std::log2(x);
@@ -199,7 +187,7 @@ inline void random_u01(std::size_t N, std::size_t M)
     std::cout << std::setw(swid) << std::right << "Maximum";
     std::cout << std::setw(twid) << std::right << "Lower";
     std::cout << std::setw(twid) << std::right << "Upper";
-    std::cout << std::setw(twid) << std::right << "C API";
+    std::cout << std::setw(twid) << std::right << "C";
     std::cout << std::setw(twid) << std::right << "Batch";
     std::cout << std::endl;
     std::cout << std::string(lwid, '-') << std::endl;

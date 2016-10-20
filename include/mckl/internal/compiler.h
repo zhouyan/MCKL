@@ -199,96 +199,40 @@
 #define MCKL_USE_BMI2 MCKL_HAS_BMI2
 #endif
 
+#ifdef MCKL_MSVC
+#include <immintrin.h>
+#include <intrin.h>
+#else // MCKL_MSVC
+#if MCKL_HAS_SSE2
+#include <emmintrin.h>
+#endif
+#if MCKL_HAS_SSE3
+#include <pmmintrin.h>
+#endif
+#if MCKL_HAS_SSSE3
+#include <tmmintrin.h>
+#endif
+#if MCKL_HAS_SSE4_1
+#include <smmintrin.h>
+#endif
+#if MCKL_HAS_SSE4_2
+#include <nmmintrin.h>
+#endif
+#if MCKL_HAS_AVX || MCKL_HAS_AVX2 || MCKL_HAS_RDRAND || MCKL_HAS_BMI ||       \
+    MCKL_HAS_BMI2
+#include <immintrin.h>
+#endif
+#if MCKL_HAS_AESNI
+#include <wmmintrin.h>
+#endif
+#endif // MCKL_MSVC
+
 #ifndef MCKL_INT64
 #define MCKL_INT64 long long
 #endif
 
 #ifndef MCKL_HAS_INT128
 #define MCKL_HAS_INT128 0
-#endif
-
-#if MCKL_USE_SSE2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <emmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_SSE3
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <pmmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_SSSE3
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <tmmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_SSE4_1
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <smmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_SSE4_2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <nmmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_AVX
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <immintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_AVX2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <immintrin.h>
-#endif
-#endif
-
-#if MCKL_HAS_AESNI
-#ifdef MCKL_MSVC
-#include <immintrin.h>
-#else
-#include <wmmintrin.h>
-#endif
-#endif
-
-#if MCKL_HAS_RDRAND
-#include <immintrin.h>
-#endif
-
-#if MCKL_USE_BMI
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <immintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_BMI2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <immintrin.h>
-#endif
 #endif
 
 #ifndef MCKL_FLATTEN
