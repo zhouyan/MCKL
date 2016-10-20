@@ -73,7 +73,7 @@ namespace mckl
 namespace internal
 {
 
-#if MCKL_HAS_AESNI
+#if MCKL_USE_AESNI
 #include <mckl/random/internal/aes_aesni.hpp>
 #else
 #include <mckl/random/internal/aes_generic.hpp>

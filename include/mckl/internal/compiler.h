@@ -107,88 +107,92 @@
 #error The platform cannot be both little and big endian
 #endif
 
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 0
+#ifndef MCKL_HAS_SSE2
+#define MCKL_HAS_SSE2 0
 #endif
 
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 0
+#ifndef MCKL_HAS_SSE3
+#define MCKL_HAS_SSE3 0
+#endif
+
+#ifndef MCKL_HAS_SSSE3
+#define MCKL_HAS_SSSE3 0
+#endif
+
+#ifndef MCKL_HAS_SSE4_1
+#define MCKL_HAS_SSE4_1 0
+#endif
+
+#ifndef MCKL_HAS_SSE4_2
+#define MCKL_HAS_SSE4_2 0
+#endif
+
+#ifndef MCKL_HAS_AVX
+#define MCKL_HAS_AVX 0
 #endif
 
 #ifndef MCKL_HAS_AVX2
 #define MCKL_HAS_AVX2 0
 #endif
 
-#ifndef MCKL_USE_AVX2
-#define MCKL_USE_AVX2 MCKL_HAS_AVX2
+#ifndef MCKL_USE_AESNI
+#define MCKL_USE_AESNI 0
 #endif
 
-#ifndef MCKL_HAS_AVX
-#define MCKL_HAS_AVX MCKL_HAS_AVX2
-#endif
-
-#ifndef MCKL_USE_AVX
-#define MCKL_USE_AVX MCKL_HAS_AVX
-#endif
-
-#ifndef MCKL_HAS_SSE4_2
-#define MCKL_HAS_SSE4_2 MCKL_HAS_AVX
-#endif
-
-#ifndef MCKL_USE_SSE4_2
-#define MCKL_USE_SSE4_2 MCKL_HAS_SSE4_2
-#endif
-
-#ifndef MCKL_HAS_SSE4_1
-#define MCKL_HAS_SSE4_1 MCKL_HAS_SSE4_2
-#endif
-
-#ifndef MCKL_USE_SSE4_1
-#define MCKL_USE_SSE4_1 MCKL_HAS_SSE4_1
-#endif
-
-#ifndef MCKL_HAS_SSSE3
-#define MCKL_HAS_SSSE3 MCKL_HAS_SSE4_1
-#endif
-
-#ifndef MCKL_USE_SSSE3
-#define MCKL_USE_SSSE3 MCKL_HAS_SSSE3
-#endif
-
-#ifndef MCKL_HAS_SSE3
-#define MCKL_HAS_SSE3 MCKL_HAS_SSSE3
-#endif
-
-#ifndef MCKL_USE_SSE3
-#define MCKL_USE_SSE3 MCKL_HAS_SSE3
-#endif
-
-#ifndef MCKL_HAS_SSE2
-#define MCKL_HAS_SSE2 MCKL_HAS_SSE3
+#ifndef MCKL_USE_RDRAND
+#define MCKL_USE_RDRAND 0
 #endif
 
 #ifndef MCKL_USE_SSE2
 #define MCKL_USE_SSE2 MCKL_HAS_SSE2
 #endif
 
-#ifndef MCKL_HAS_INT128
-#define MCKL_HAS_INT128 0
+#ifndef MCKL_USE_SSE3
+#define MCKL_USE_SSE3 MCKL_HAS_SSE3
+#endif
+
+#ifndef MCKL_USE_SSSE3
+#define MCKL_USE_SSSE3 MCKL_HAS_SSSE3
+#endif
+
+#ifndef MCKL_USE_SSE4_1
+#define MCKL_USE_SSE4_1 MCKL_HAS_SSE4_1
+#endif
+
+#ifndef MCKL_USE_SSE4_2
+#define MCKL_USE_SSE4_2 MCKL_HAS_SSE4_2
+#endif
+
+#ifndef MCKL_USE_AVX
+#define MCKL_USE_AVX MCKL_HAS_AVX
+#endif
+
+#ifndef MCKL_USE_AVX2
+#define MCKL_USE_AVX2 MCKL_HAS_AVX2
+#endif
+
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI MCKL_HAS_AVX2
+#endif
+
+#ifndef MCKL_USE_AESNI
+#define MCKL_USE_AESNI MCKL_HAS_AESNI
+#endif
+
+#ifndef MCKL_HAS_RDRAND
+#define MCKL_HAS_RDRAND MKL_HAS_AVX2
+#endif
+
+#ifndef MCKL_USE_RDRAND
+#define MCKL_USE_RDRAND MCKL_HAS_RDRAND
 #endif
 
 #ifndef MCKL_INT64
 #define MCKL_INT64 long long
 #endif
 
-#if MCKL_HAS_AESNI
-#ifdef MCKL_MSVC
-#include <immintrin.h>
-#else
-#include <wmmintrin.h>
-#endif
-#endif
-
-#if MCKL_HAS_RDRAND
-#include <immintrin.h>
+#ifndef MCKL_HAS_INT128
+#define MCKL_HAS_INT128 0
 #endif
 
 #if MCKL_USE_SSE2
@@ -199,7 +203,6 @@
 #endif
 #endif
 
-/*
 #if MCKL_USE_SSE3
 #ifdef MCKL_MSVC
 #include <intrin.h>
@@ -239,7 +242,6 @@
 #include <immintrin.h>
 #endif
 #endif
-*/
 
 #if MCKL_USE_AVX2
 #ifdef MCKL_MSVC
@@ -247,6 +249,18 @@
 #else
 #include <immintrin.h>
 #endif
+#endif
+
+#if MCKL_HAS_AESNI
+#ifdef MCKL_MSVC
+#include <immintrin.h>
+#else
+#include <wmmintrin.h>
+#endif
+#endif
+
+#if MCKL_HAS_RDRAND
+#include <immintrin.h>
 #endif
 
 #ifndef MCKL_FLATTEN

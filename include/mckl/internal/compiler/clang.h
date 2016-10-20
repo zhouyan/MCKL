@@ -47,18 +47,6 @@
 #endif
 #endif
 
-#ifdef __AES__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __RDRND__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
-#endif
-#endif
-
 #ifdef __SSE2__
 #ifndef MCKL_HAS_SSE2
 #define MCKL_HAS_SSE2 1
@@ -101,6 +89,22 @@
 #endif
 #endif
 
+#ifdef __AES__
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
+#endif
+#endif
+
+#ifdef __RDRND__
+#ifndef MCKL_HAS_RDRAND
+#define MCKL_HAS_RDRAND 1
+#endif
+#endif
+
+#ifndef MCKL_INT64
+#define MCKL_INT64 long long
+#endif
+
 #ifdef __x86_64__
 #ifndef MCKL_HAS_INT128
 #define MCKL_HAS_INT128 1
@@ -108,10 +112,6 @@
 #ifndef MCKL_INT128
 #define MCKL_INT128 __int128
 #endif
-#endif
-
-#ifndef MCKL_INT64
-#define MCKL_INT64 long long
 #endif
 
 #ifndef MCKL_FLATTEN
