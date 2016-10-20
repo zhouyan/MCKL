@@ -61,8 +61,12 @@ class PhiloxHiLo<T, 64>
     public:
     static void eval(T a, T b, T &hi, T &lo)
     {
-#if MCKL_HAS_INT128
-
+#if MCKL_USE_BMI2
+        unsigned MCKL_INT64 h = 0;
+        lo = static_cast<T>(_mulx_u64(static_cast<unsigned MCKL_INT64>(a),
+            static_cast<unsigned MCKL_INT64>(b), &h));
+        hi = static_cast<T>(h);
+#elif MCKL_HAS_INT128
 #ifdef MCKL_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -77,7 +81,6 @@ class PhiloxHiLo<T, 64>
 #ifdef MCKL_GCC
 #pragma GCC diagnostic pop
 #endif
-
 #if MCKL_HAS_LITTLE_ENDIAN
         lo = std::get<0>(buf.result);
         hi = std::get<1>(buf.result);
@@ -85,17 +88,13 @@ class PhiloxHiLo<T, 64>
         lo = static_cast<T>(buf.prod);
         hi = static_cast<T>(buf.prod >> 64);
 #endif
-
 #elif defined(MCKL_MSVC)
-
         unsigned __int64 Multiplier = static_cast<unsigned __int64>(a);
         unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
         unsigned __int64 hi_tmp = 0;
         lo = static_cast<T>(_umul128(Multiplier, Multiplicand, &hi_tmp));
         hi = static_cast<T>(hi_tmp);
-
-#else  // MCKL_HAS_INT128
-
+#else
         const T lomask = (const_one<T>() << 32) - 1;
         const T ahi = a >> 32;
         const T alo = a & lomask;
@@ -104,12 +103,11 @@ class PhiloxHiLo<T, 64>
         const T ahbl = ahi * blo;
         const T albh = alo * bhi;
         const T ahbl_albh = ((ahbl & lomask) + (albh & lomask));
-
         lo = a * b;
         hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
         hi += ahbl_albh >> 32;
         hi += ((lo >> 32) < (ahbl_albh & lomask));
-#endif // MCKL_HAS_INT128
+#endif
     }
 }; // class PhiloxHiLo
 

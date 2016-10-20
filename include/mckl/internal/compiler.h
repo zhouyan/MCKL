@@ -135,12 +135,20 @@
 #define MCKL_HAS_AVX2 0
 #endif
 
-#ifndef MCKL_USE_AESNI
-#define MCKL_USE_AESNI 0
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 0
 #endif
 
-#ifndef MCKL_USE_RDRAND
-#define MCKL_USE_RDRAND 0
+#ifndef MCKL_HAS_RDRAND
+#define MCKL_HAS_RDRAND 0
+#endif
+
+#ifndef MCKL_HAS_BMI
+#define MCKL_HAS_BMI 0
+#endif
+
+#ifndef MCKL_HAS_BMI2
+#define MCKL_HAS_BMI2 0
 #endif
 
 #ifndef MCKL_USE_SSE2
@@ -179,12 +187,16 @@
 #define MCKL_USE_AESNI MCKL_HAS_AESNI
 #endif
 
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND MKL_HAS_AVX2
-#endif
-
 #ifndef MCKL_USE_RDRAND
 #define MCKL_USE_RDRAND MCKL_HAS_RDRAND
+#endif
+
+#ifndef MCKL_USE_BMI
+#define MCKL_USE_BMI MCKL_HAS_BMI
+#endif
+
+#ifndef MCKL_USE_BMI2
+#define MCKL_USE_BMI2 MCKL_HAS_BMI2
 #endif
 
 #ifndef MCKL_INT64
@@ -261,6 +273,22 @@
 
 #if MCKL_HAS_RDRAND
 #include <immintrin.h>
+#endif
+
+#if MCKL_USE_BMI
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <immintrin.h>
+#endif
+#endif
+
+#if MCKL_USE_BMI2
+#ifdef MCKL_MSVC
+#include <intrin.h>
+#else
+#include <immintrin.h>
+#endif
 #endif
 
 #ifndef MCKL_FLATTEN

@@ -96,6 +96,18 @@
 #endif
 #endif
 
+#ifdef __AVX2__
+#ifndef MCKL_HAS_BMI
+#define MCKL_HAS_BMI 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_BMI2
+#define MCKL_HAS_BMI2 1
+#endif
+#endif
+
 #ifndef MCKL_INT64
 #define MCKL_INT64 __int64
 #endif

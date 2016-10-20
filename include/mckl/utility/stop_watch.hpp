@@ -52,15 +52,15 @@ inline std::uint64_t rdtsc()
     unsigned lo = 0;
 #if MCKL_HAS_X86_64
     asm volatile(
-        "CPUID\n\t"
-        "RDTSC\n\t"
+        "cpuid\n\t"
+        "rdtsc\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
         : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
 #else  // MCKL_HAS_X64_64
     asm volatile(
-        "CPUID\n\t"
-        "RDTSC\n\t"
+        "cpuid\n\t"
+        "rdtsc\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
         : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");

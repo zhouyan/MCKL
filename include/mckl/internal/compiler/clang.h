@@ -101,6 +101,18 @@
 #endif
 #endif
 
+#ifdef __BMI__
+#ifndef MCKL_HAS_BMI
+#define MCKL_HAS_BMI 1
+#endif
+#endif
+
+#ifdef __BMI2__
+#ifndef MCKL_HAS_BMI2
+#define MCKL_HAS_BMI2 1
+#endif
+#endif
+
 #ifndef MCKL_INT64
 #define MCKL_INT64 long long
 #endif

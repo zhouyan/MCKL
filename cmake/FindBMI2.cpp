@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/compiler/msvc.h
+// MCKL/cmake/FindBMI2.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,87 +29,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMPILER_MSVC_H
-#define MCKL_INTERNAL_COMPILER_MSVC_H
+#include <cassert>
+#include <cstdint>
 
-#define MCKL_MSVC_VERSION _MSC_VER
-
-#ifndef MCKL_HAS_LITTLE_ENDIAN
-#define MCKL_HAS_LITTLE_ENDIAN 1
-#endif
-
-#ifndef MCKL_HAS_BIG_ENDIAN
-#define MCKL_HAS_BIG_ENDIAN 0
+#ifdef _MSC_VERSION
+#include <intrin.h>
+#else
+#include <immintrin.h>
 #endif
 
-#ifdef __SSE2__
-#ifndef MCKL_HAS_SSE2
-#define MCKL_HAS_SSE2 1
-#endif
-#endif
-
-#ifdef __SSE3__
-#ifndef MCKL_HAS_SSE3
-#define MCKL_HAS_SSE3 1
-#endif
+#if defined(_MSC_VERSION) || defined(__INTEL_COMPILER)
+    typedef unsigned __int64 u64;
+#else
+    typedef unsigned long long u64;
 #endif
 
-#ifdef __SSSE3__
-#ifndef MCKL_HAS_SSSE3
-#define MCKL_HAS_SSSE3 1
-#endif
-#endif
+int main()
+{
+    u64 a = 0x0123456789ABCDEF;
+    u64 b = 0xFEDCBA9876543210;
+    u64 c = 0;
+    u64 d = 0;
+    c = _mulx_u64(a, b, &d);
+    assert(c == 0x2236D88FE5618CF0);
+    assert(d == 0x0121FA00AD77D742);
 
-#ifdef __SSE4_1__
-#ifndef MCKL_HAS_SSE4_1
-#define MCKL_HAS_SSE4_1 1
-#endif
-#endif
-
-#ifdef __SSE4_2__
-#ifndef MCKL_HAS_SSE4_2
-#define MCKL_HAS_SSE4_2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AVX
-#define MCKL_HAS_AVX 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_AVX2
-#define MCKL_HAS_AVX2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI
-#define MCKL_HAS_BMI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI2
-#define MCKL_HAS_BMI2 1
-#endif
-#endif
-
-#ifndef MCKL_INT64
-#define MCKL_INT64 __int64
-#endif
-
-#endif // MCKL_INTERNAL_COMPILER_MSVC_H
+    return 0;
+}
