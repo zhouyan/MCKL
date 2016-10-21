@@ -34,10 +34,7 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
 class PhiloxGeneratorImplSSE2_32
 {
     public:
-    static constexpr bool batch()
-    {
-        return K != 0 && (K & (K - 1)) == 0 && 4 % K == 0;
-    }
+    static constexpr bool batch() { return K != 0 && 4 % K == 0; }
 
     static constexpr std::size_t blocks()
     {

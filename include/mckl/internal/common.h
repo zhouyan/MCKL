@@ -32,7 +32,6 @@
 #ifndef MCKL_INTERNAL_COMMON_H
 #define MCKL_INTERNAL_COMMON_H
 
-#include <mckl/internal/defines.h>
 #include <stddef.h>
 
 #endif // MCKL_INTERNAL_COMMON_H
