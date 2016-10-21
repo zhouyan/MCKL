@@ -39,9 +39,9 @@
 #endif
 
 #if defined(_MSC_VERSION) || defined(__INTEL_COMPILER)
-    typedef unsigned __int64 u64;
+typedef unsigned __int64 u64;
 #else
-    typedef unsigned long long u64;
+typedef unsigned long long u64;
 #endif
 
 int main()
