@@ -33,11 +33,8 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     typename Derived>
 class PhiloxGeneratorImplAVX2_32
 {
-    static_assert(K == 2 || K == 4 || K == 8,
-        "PhiloxGeneratorImplSSE2_32 only support K equal to 2, 4 or 8");
-
     public:
-    static constexpr bool batch() { return true; }
+    static constexpr bool batch() { return K != 0 && 8 % K == 0; }
 
     static constexpr std::size_t blocks() { return 64 / K; }
 
