@@ -296,7 +296,7 @@ class ARSConstantsWeyl
 } // namespace mckl::internal
 
 /// \brief Default ARS constants
-/// \ingroup AESNI
+/// \ingroup AES
 class ARSConstants
 {
     public:
