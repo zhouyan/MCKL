@@ -226,15 +226,15 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 {
 #if MCKL_HAS_X86_64
-    static constexpr std::size_t M_ = 8;
+    static constexpr std::size_t S_ = 8;
 #else
-    static constexpr std::size_t M_ = 4;
+    static constexpr std::size_t S_ = 4;
 #endif
 
     public:
     static constexpr bool batch() { return K != 0 && 4 % K == 0; }
 
-    static constexpr std::size_t blocks() { return M_ * 4 / K; }
+    static constexpr std::size_t blocks() { return S_ * 4 / K; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
@@ -247,8 +247,9 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     {
         constexpr std::size_t S = K * B / 4;
 
-        static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 16 && S >= 1,
-            "**PhiloxGeneratorImpl::eval** used with invalid block size");
+        static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 8,
+            "**PhiloxGeneratorImpl::eval** used with invalid block size (S = "
+            "K * B / 4)");
 
         constexpr std::size_t i0 = 0 % (K / 2);
         constexpr std::size_t i1 = 1 % (K / 2);

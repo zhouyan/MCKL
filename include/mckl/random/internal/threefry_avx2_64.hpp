@@ -32,15 +32,15 @@
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 {
-    static constexpr std::size_t L_ = 8;
+    static constexpr std::size_t R_ = 8;
 
-    static constexpr std::size_t M_ =
-        (K != 0 && (K & (K - 1)) == 0 && K <= 16 && K >= L_) ? K : L_;
+    static constexpr std::size_t S_ =
+        (K != 0 && (K & (K - 1)) == 0 && K <= 16 && K >= R_) ? K : R_;
 
     public:
-    static constexpr bool batch() { return K != 0 && M_ % K == 0; }
+    static constexpr bool batch() { return K != 0 && S_ % K == 0; }
 
-    static constexpr std::size_t blocks() { return M_ * 4 / K; }
+    static constexpr std::size_t blocks() { return S_ * 4 / K; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
@@ -55,11 +55,13 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
         constexpr std::size_t S = K * B / 4;
 
         static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 16 && S >= 4,
-            "**ThreefryGeneratorImpl::eval** used with invalid block size");
+            "**ThreefryGeneratorImpl::eval** used with invalid block size (S "
+            "= K * B / 4)");
 
-        std::array<__m128i, S> s;
+        std::array<__m256i, S> s;
 
-        transpose4x64_load(s, reinterpret_cast<const __m256i *>(state.data()));
+        transpose4x64_load_si256(
+            s, reinterpret_cast<const __m256i *>(state.data()));
 
         sbox<0x00>(s);
         pbox<0x00>(s);
@@ -160,7 +162,8 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
         round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
 
-        transpose4x32_store(s, reinterpret_cast<__m256i *>(state.data());
+        transpose4x64_store_si256(
+            s, reinterpret_cast<__m256i *>(state.data()));
     }
 
     private:
@@ -552,8 +555,8 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     {
     }
 
-    template <std::size_t N, std::size_t I>
-    static void permute(std::array<__m256i, 16> &s, std::true_type)
+    template <std::size_t N, std::size_t I, std::size_t S>
+    static void permute(std::array<__m256i, S> &s, std::true_type)
     {
         ThreefryPBox<__m256i, K, N, Constants>::eval(s.data() + I * K);
         permute<N, I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());

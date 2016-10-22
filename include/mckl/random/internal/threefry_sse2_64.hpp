@@ -33,18 +33,18 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 {
 #if MCKL_HAS_X86_64
-    static constexpr std::size_t L_ = 8;
+    static constexpr std::size_t R_ = 8;
 #else
-    static constexpr std::size_t L_ = 4;
+    static constexpr std::size_t R_ = 4;
 #endif
 
-    static constexpr std::size_t M_ =
-        (K != 0 && (K & (K - 1)) == 0 && K <= 16 && K >= L_) ? K : L_;
+    static constexpr std::size_t S_ =
+        (K != 0 && (K & (K - 1)) == 0 && K <= 16 && K >= R_) ? K : R_;
 
     public:
-    static constexpr bool batch() { return K != 0 && M_ % K == 0; }
+    static constexpr bool batch() { return K != 0 && S_ % K == 0; }
 
-    static constexpr std::size_t blocks() { return M_ * 2 / K; }
+    static constexpr std::size_t blocks() { return S_ * 2 / K; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
@@ -59,11 +59,12 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
         constexpr std::size_t S = K * B / 2;
 
         static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 16 && S >= 2,
-            "**ThreefryGeneratorImpl::eval** used with invalid block size");
+            "**ThreefryGeneratorImpl::eval** used with invalid block size (S "
+            "= K * B / 2)");
 
         std::array<__m128i, S> s;
 
-        MCKL_FLATTEN_CALL transpose2x64_load(
+        MCKL_FLATTEN_CALL transpose2x64_load_si128(
             s, reinterpret_cast<const __m128i *>(state.data()));
 
         MCKL_FLATTEN_CALL sbox<0x00>(s);
@@ -165,7 +166,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
         round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
 
-        MCKL_FLATTEN_CALL transpose2x64_store(
+        MCKL_FLATTEN_CALL transpose2x64_store_si128(
             s, reinterpret_cast<__m128i *>(state.data()));
     }
 

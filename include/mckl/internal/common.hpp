@@ -495,7 +495,8 @@ inline void transpose4x32_si128(std::array<__m128i, N> &s)
     std::get<i3>(s) = _mm_unpackhi_epi64(t0, t1);
 }
 
-inline void transpose4x32_load(std::array<__m128i, 4> &s, const __m128i *sptr)
+inline void transpose4x32_load_si128(
+    std::array<__m128i, 4> &s, const __m128i *sptr)
 {
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
@@ -504,7 +505,8 @@ inline void transpose4x32_load(std::array<__m128i, 4> &s, const __m128i *sptr)
     transpose4x32_si128<0, 1, 2, 3>(s);
 }
 
-inline void transpose4x32_load(std::array<__m128i, 8> &s, const __m128i *sptr)
+inline void transpose4x32_load_si128(
+    std::array<__m128i, 8> &s, const __m128i *sptr)
 {
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<4>(s) = _mm_load_si128(sptr++);
@@ -518,7 +520,8 @@ inline void transpose4x32_load(std::array<__m128i, 8> &s, const __m128i *sptr)
     transpose4x32_si128<4, 5, 6, 7>(s);
 }
 
-inline void transpose4x32_load(std::array<__m128i, 16> &s, const __m128i *sptr)
+inline void transpose4x32_load_si128(
+    std::array<__m128i, 16> &s, const __m128i *sptr)
 {
     std::get<0x0>(s) = _mm_load_si128(sptr++);
     std::get<0x4>(s) = _mm_load_si128(sptr++);
@@ -542,7 +545,7 @@ inline void transpose4x32_load(std::array<__m128i, 16> &s, const __m128i *sptr)
     transpose4x32_si128<0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose4x32_store(std::array<__m128i, 4> &s, __m128i *sptr)
+inline void transpose4x32_store_si128(std::array<__m128i, 4> &s, __m128i *sptr)
 {
     transpose4x32_si128<0, 1, 2, 3>(s);
     _mm_store_si128(sptr++, std::get<0>(s));
@@ -551,7 +554,7 @@ inline void transpose4x32_store(std::array<__m128i, 4> &s, __m128i *sptr)
     _mm_store_si128(sptr++, std::get<3>(s));
 }
 
-inline void transpose4x32_store(std::array<__m128i, 8> &s, __m128i *sptr)
+inline void transpose4x32_store_si128(std::array<__m128i, 8> &s, __m128i *sptr)
 {
     transpose4x32_si128<0, 1, 2, 3>(s);
     transpose4x32_si128<4, 5, 6, 7>(s);
@@ -565,7 +568,8 @@ inline void transpose4x32_store(std::array<__m128i, 8> &s, __m128i *sptr)
     _mm_store_si128(sptr++, std::get<7>(s));
 }
 
-inline void transpose4x32_store(std::array<__m128i, 16> &s, __m128i *sptr)
+inline void transpose4x32_store_si128(
+    std::array<__m128i, 16> &s, __m128i *sptr)
 {
     transpose4x32_si128<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x32_si128<0x4, 0x5, 0x6, 0x7>(s);
@@ -599,14 +603,16 @@ inline void transpose2x64_si128(std::array<__m128i, N> &s)
     std::get<i1>(s) = t0;
 }
 
-inline void transpose2x64_load(std::array<__m128i, 2> &s, const __m128i *sptr)
+inline void transpose2x64_load_si128(
+    std::array<__m128i, 2> &s, const __m128i *sptr)
 {
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
     transpose2x64_si128<0, 1>(s);
 }
 
-inline void transpose2x64_load(std::array<__m128i, 4> &s, const __m128i *sptr)
+inline void transpose2x64_load_si128(
+    std::array<__m128i, 4> &s, const __m128i *sptr)
 {
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<2>(s) = _mm_load_si128(sptr++);
@@ -616,7 +622,8 @@ inline void transpose2x64_load(std::array<__m128i, 4> &s, const __m128i *sptr)
     transpose2x64_si128<2, 3>(s);
 }
 
-inline void transpose2x64_load(std::array<__m128i, 8> &s, const __m128i *sptr)
+inline void transpose2x64_load_si128(
+    std::array<__m128i, 8> &s, const __m128i *sptr)
 {
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<2>(s) = _mm_load_si128(sptr++);
@@ -632,7 +639,8 @@ inline void transpose2x64_load(std::array<__m128i, 8> &s, const __m128i *sptr)
     transpose2x64_si128<6, 7>(s);
 }
 
-inline void transpose2x64_load(std::array<__m128i, 16> &s, const __m128i *sptr)
+inline void transpose2x64_load_si128(
+    std::array<__m128i, 16> &s, const __m128i *sptr)
 {
     std::get<0x0>(s) = _mm_load_si128(sptr++);
     std::get<0x2>(s) = _mm_load_si128(sptr++);
@@ -660,14 +668,14 @@ inline void transpose2x64_load(std::array<__m128i, 16> &s, const __m128i *sptr)
     transpose2x64_si128<0xE, 0xF>(s);
 }
 
-inline void transpose2x64_store(std::array<__m128i, 2> &s, __m128i *sptr)
+inline void transpose2x64_store_si128(std::array<__m128i, 2> &s, __m128i *sptr)
 {
     transpose2x64_si128<0, 1>(s);
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
 }
 
-inline void transpose2x64_store(std::array<__m128i, 4> &s, __m128i *sptr)
+inline void transpose2x64_store_si128(std::array<__m128i, 4> &s, __m128i *sptr)
 {
     transpose2x64_si128<0, 1>(s);
     transpose2x64_si128<2, 3>(s);
@@ -677,7 +685,7 @@ inline void transpose2x64_store(std::array<__m128i, 4> &s, __m128i *sptr)
     _mm_store_si128(sptr++, std::get<3>(s));
 }
 
-inline void transpose2x64_store(std::array<__m128i, 8> &s, __m128i *sptr)
+inline void transpose2x64_store_si128(std::array<__m128i, 8> &s, __m128i *sptr)
 {
     transpose2x64_si128<0, 1>(s);
     transpose2x64_si128<2, 3>(s);
@@ -693,7 +701,8 @@ inline void transpose2x64_store(std::array<__m128i, 8> &s, __m128i *sptr)
     _mm_store_si128(sptr++, std::get<7>(s));
 }
 
-inline void transpose2x64_store(std::array<__m128i, 16> &s, __m128i *sptr)
+inline void transpose2x64_store_si128(
+    std::array<__m128i, 16> &s, __m128i *sptr)
 {
     transpose2x64_si128<0x0, 0x1>(s);
     transpose2x64_si128<0x2, 0x3>(s);
@@ -758,7 +767,8 @@ inline void transpose8x32_si256(std::array<__m256i, N> &s)
     std::get<i7>(s) = _mm256_permute2x128_si256(v2, v3, 0x31);
 }
 
-inline void transpose8x32_load(std::array<__m256i, 8> &s, const __m256i *sptr)
+inline void transpose8x32_load_si256(
+    std::array<__m256i, 8> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
@@ -771,7 +781,8 @@ inline void transpose8x32_load(std::array<__m256i, 8> &s, const __m256i *sptr)
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-inline void transpose8x32_load(std::array<__m256i, 16> &s, const __m256i *sptr)
+inline void transpose8x32_load_si256(
+    std::array<__m256i, 16> &s, const __m256i *sptr)
 {
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
     std::get<0x8>(s) = _mm256_load_si256(sptr++);
@@ -793,7 +804,7 @@ inline void transpose8x32_load(std::array<__m256i, 16> &s, const __m256i *sptr)
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose8x32_store(std::array<__m256i, 8> &s, __m256i *sptr)
+inline void transpose8x32_store_si256(std::array<__m256i, 8> &s, __m256i *sptr)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
     _mm256_store_si256(sptr++, std::get<0>(s));
@@ -806,7 +817,8 @@ inline void transpose8x32_store(std::array<__m256i, 8> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
-inline void transpose8x32_store(std::array<__m256i, 16> &s, __m256i *sptr)
+inline void transpose8x32_store_si256(
+    std::array<__m256i, 16> &s, __m256i *sptr)
 {
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
@@ -843,7 +855,8 @@ inline void transpose4x64_si256(std::array<__m256i, N> &s)
     std::get<i3>(s) = _mm256_permute2x128_si256(t0, t1, 0x31);
 }
 
-inline void transpose4x64_load(std::array<__m256i, 4> &s, const __m256i *sptr)
+inline void transpose4x64_load_si256(
+    std::array<__m256i, 4> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
@@ -852,7 +865,8 @@ inline void transpose4x64_load(std::array<__m256i, 4> &s, const __m256i *sptr)
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-inline void transpose4x64_load(std::array<__m256i, 8> &s, const __m256i *sptr)
+inline void transpose4x64_load_si256(
+    std::array<__m256i, 8> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<4>(s) = _mm256_load_si256(sptr++);
@@ -866,7 +880,8 @@ inline void transpose4x64_load(std::array<__m256i, 8> &s, const __m256i *sptr)
     transpose4x64_si256<4, 5, 6, 7>(s);
 }
 
-inline void transpose4x64_load(std::array<__m256i, 16> &s, const __m256i *sptr)
+inline void transpose4x64_load_si256(
+    std::array<__m256i, 16> &s, const __m256i *sptr)
 {
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
     std::get<0x4>(s) = _mm256_load_si256(sptr++);
@@ -890,7 +905,7 @@ inline void transpose4x64_load(std::array<__m256i, 16> &s, const __m256i *sptr)
     transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose4x64_store(std::array<__m256i, 4> &s, __m256i *sptr)
+inline void transpose4x64_store_si256(std::array<__m256i, 4> &s, __m256i *sptr)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     _mm256_store_si256(sptr++, std::get<0>(s));
@@ -899,7 +914,7 @@ inline void transpose4x64_store(std::array<__m256i, 4> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<3>(s));
 }
 
-inline void transpose4x64_store(std::array<__m256i, 8> &s, __m256i *sptr)
+inline void transpose4x64_store_si256(std::array<__m256i, 8> &s, __m256i *sptr)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
@@ -913,7 +928,8 @@ inline void transpose4x64_store(std::array<__m256i, 8> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
-inline void transpose4x64_store(std::array<__m256i, 16> &s, __m256i *sptr)
+inline void transpose4x64_store_si256(
+    std::array<__m256i, 16> &s, __m256i *sptr)
 {
     transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);

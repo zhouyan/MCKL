@@ -622,12 +622,12 @@ class ARSKeySeqGenerator
 template <typename KeySeqType>
 class AESGeneratorImpl
 {
-    static constexpr std::size_t M_ = KeySeqType::rounds() < 8 ? 16 : 8;
+    static constexpr std::size_t S_ = KeySeqType::rounds() < 8 ? 16 : 8;
 
     public:
     static constexpr bool batch() { return true; }
 
-    static constexpr std::size_t blocks() { return M_; }
+    static constexpr std::size_t blocks() { return S_; }
 
     static void eval(std::array<std::uint32_t, 4> &state,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
@@ -662,7 +662,7 @@ class AESGeneratorImpl
     static void eval(std::array<std::array<std::uint32_t, 4>, B> &state,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
-        static_assert(B != 0 && (B & (B - 1)) == 0 && B <= 16 && B >= 1,
+        static_assert(B != 0 && (B & (B - 1)) == 0 && B <= 16,
             "**AESGeneratorImpl::eval** used with invalid block size");
 
         std::array<__m128i, B> s;
