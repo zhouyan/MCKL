@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/compiler/msvc.h
+// MCKL/include/mckl/internal/compiler/byte_order.h
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,87 +29,23 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMPILER_MSVC_H
-#define MCKL_INTERNAL_COMPILER_MSVC_H
-
-#define MCKL_MSVC_VERSION _MSC_VER
+#ifndef MCKL_INTERNAL_COMPILER_BYTE_ORDER_H
+#define MCKL_INTERNAL_COMPILER_BYTE_ORDER_H
 
 #ifndef MCKL_HAS_LITTLE_ENDIAN
+#if MCKL_HAS_X86 || MCKL_HAS_X86_64
 #define MCKL_HAS_LITTLE_ENDIAN 1
+#else
+#define MCKL_HAS_LITTLE_ENDIAN 0
+#endif
 #endif
 
 #ifndef MCKL_HAS_BIG_ENDIAN
 #define MCKL_HAS_BIG_ENDIAN 0
 #endif
 
-#ifdef __SSE2__
-#ifndef MCKL_HAS_SSE2
-#define MCKL_HAS_SSE2 1
-#endif
+#if MCKL_HAS_LITTLE_ENDIAN && MCKL_HAS_BIG_ENDIAN
+#error The platform cannot be both little and big endian
 #endif
 
-#ifdef __SSE3__
-#ifndef MCKL_HAS_SSE3
-#define MCKL_HAS_SSE3 1
-#endif
-#endif
-
-#ifdef __SSSE3__
-#ifndef MCKL_HAS_SSSE3
-#define MCKL_HAS_SSSE3 1
-#endif
-#endif
-
-#ifdef __SSE4_1__
-#ifndef MCKL_HAS_SSE4_1
-#define MCKL_HAS_SSE4_1 1
-#endif
-#endif
-
-#ifdef __SSE4_2__
-#ifndef MCKL_HAS_SSE4_2
-#define MCKL_HAS_SSE4_2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AVX
-#define MCKL_HAS_AVX 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_AVX2
-#define MCKL_HAS_AVX2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI
-#define MCKL_HAS_BMI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI2
-#define MCKL_HAS_BMI2 1
-#endif
-#endif
-
-#ifndef MCKL_INT64
-#define MCKL_INT64 __int64
-#endif
-
-#endif // MCKL_INTERNAL_COMPILER_MSVC_H
+#endif // MCKL_INTERNAL_COMPILER_BYTE_ORDER_H

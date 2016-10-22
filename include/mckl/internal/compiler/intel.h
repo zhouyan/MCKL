@@ -108,10 +108,6 @@
 #endif
 #endif
 
-#ifndef MCKL_HAS_RDTSCP
-#define MCKL_HAS_RDTSCP 1
-#endif
-
 #ifndef MCKL_INT64
 #define MCKL_INT64 __int64
 #endif

@@ -36,6 +36,8 @@
 # INT128_FOUND - TRUE if 128-bits integer type is found and works correctly
 # INT128_TYPE  - The type of the 128-bits integer
 
+UNSET(INT128_FOUND CACHE)
+UNSET(INT128_TEST CACHE)
 IF(DEFINED INT128_FOUND)
     RETURN()
 ENDIF(DEFINED INT128_FOUND)

@@ -44,65 +44,98 @@ namespace mckl
 namespace internal
 {
 
-#if MCKL_USE_RDTSCP
-
-inline std::uint64_t rdtsc()
-{
 #ifdef MCKL_MSVC
+
+inline std::uint64_t cycle_start()
+{
     return static_cast<std::uint64_t>(__rdtsc());
-#else // MCKL_MSVC
-    unsigned hi = 0;
-    unsigned lo = 0;
-#if MCKL_HAS_X86_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
-    return (static_cast<std::uint64_t>(hi) << 32) + lo;
-#endif // MCKL_MSVC
 }
 
-inline std::uint64_t rdtscp()
+inline std::uint64_t cycle_stop()
 {
-#ifdef MCKL_MSVC
-    unsigned aux;
-    return static_cast<std::uint64_t>(__rdtsc(&aux));
-#else // MCKL_MSVC
+    return static_cast<std::uint64_t>(__rdtsc());
+}
+
+#elif MCKL_USE_RDTSC
+
+inline std::uint64_t cycle_start()
+{
     unsigned hi = 0;
     unsigned lo = 0;
 #if MCKL_HAS_X86_64
     asm volatile(
+        "cpuid\n\t"
         "rdtsc\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
+#else // MCKL_HAS_X64_64
+    asm volatile(
+        "cpuid\n\t"
+        "rdtsc\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
+#endif // MCKL_HAS_X86_64
+    return (static_cast<std::uint64_t>(hi) << 32) + lo;
+}
+
+#if MCKL_USE_RDTSCP
+
+inline std::uint64_t cycle_stop()
+{
+    unsigned hi = 0;
+    unsigned lo = 0;
+#if MCKL_HAS_X86_64
+    asm volatile(
+        "rdtscp\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
         "cpuid\n\t"
         : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
 #else // MCKL_HAS_X64_64
     asm volatile(
-        "rdtsc\n\t"
+        "rdtscp\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
         "cpuid\n\t"
         : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
 #endif // MCKL_HAS_X86_64
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
-#endif // MCKL_MSVC
 }
 
 #else // MCKL_USE_RDTSCP
 
-inline std::uint64_t rdtsc() { return 0; }
-inline std::uint64_t rdtscp() { return 0; }
+inline std::uint64_t cycle_stop()
+{
+    unsigned hi = 0;
+    unsigned lo = 0;
+#if MCKL_HAS_X86_64
+    asm volatile(
+        "cpuid\n\t"
+        "rdtsc\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        "cpuid\n\t"
+        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
+#else // MCKL_HAS_X64_64
+    asm volatile(
+        "cpuid\n\t"
+        "rdtsc\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        "cpuid\n\t"
+        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
+#endif // MCKL_HAS_X86_64
+    return (static_cast<std::uint64_t>(hi) << 32) + lo;
+}
+
+#endif // MCKL_USE_RDTSCP
+
+#else // MCKL_USE_RDTSC
+
+inline std::uint64_t cycle_start() { return 0; }
+inline std::uint64_t cycle_stop() { return 0; }
 
 #endif // MCKL_USE_RDTSCP
 
@@ -156,7 +189,7 @@ class StopWatchClockAdapter
     /// of accumulated cycles. Otherwise, it will always returns zero.
     static constexpr bool has_cycles()
     {
-#if MCKL_USE_RDTSCP
+#if MCKL_USE_RDTSC || defined(MCKL_MSVC)
         return true;
 #else
         return false;
@@ -183,7 +216,7 @@ class StopWatchClockAdapter
 
         running_ = true;
         time_start_ = clock_type::now();
-        cycles_start_ = internal::rdtsc();
+        cycles_start_ = internal::cycle_start();
 
         return true;
     }
@@ -195,7 +228,7 @@ class StopWatchClockAdapter
     /// before.
     MCKL_FLATTEN bool stop()
     {
-        std::uint64_t c = internal::rdtscp();
+        std::uint64_t c = internal::cycle_stop();
         typename clock_type::time_point t = clock_type::now();
 
         if (!running_)

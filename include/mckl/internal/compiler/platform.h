@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/cmake/FindRDTSCP.cpp
+// MCKL/include/mckl/internal/compiler/platform.h
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,36 +29,27 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <cassert>
+#ifndef MCKL_INTERNAL_COMPILER_PLATFORM_H
+#define MCKL_INTERNAL_COMPILER_PLATFORM_H
 
-#ifdef _MSC_VER
-#include <intrin.h>
+#ifndef MCKL_HAS_X86_64
+#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||           \
+    defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
+#define MCKL_HAS_X86_64 1
 #else
-#include <immintrin.h>
+#define MCKL_HAS_X86_64 0
+#endif
 #endif
 
-inline unsigned long long rdtscp()
-{
-#ifdef _MSC_VER
-    return __rdtscp();
+#ifndef MCKL_HAS_X86
+#if MCKL_HAS_X86_64 || defined(i386) || defined(__i386) ||                    \
+    defined(__i386__) || defined(_M_IX86) || defined(__X86__) ||              \
+    defined(_X86_) || defined(__THW_INTEL__) || defined(__I86__) ||           \
+    defined(__INTEL__) || defined(__386)
+#define MCKL_HAS_X86 1
 #else
-    unsigned hi = 0;
-    unsigned lo = 0;
-    asm volatile(
-        "cpuid\\n\\t"
-        "rdtscp\\n\\t"
-        "mov %%edx, %0\\n\\t"
-        "mov %%eax, %1\\n\\t"
-        : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-    return (static_cast<unsigned long long>(hi) << 32) + lo;
+#define MCKL_HAS_X86 0
 #endif
-}
+#endif
 
-int main()
-{
-    unsigned long long start = rdtscp();
-    unsigned long long stop = rdtscp();
-    assert(start != stop);
-
-    return 0;
-}
+#endif // MCKL_INTERNAL_COMPILER_PLATFORM_H

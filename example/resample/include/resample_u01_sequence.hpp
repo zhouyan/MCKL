@@ -85,8 +85,6 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
         std::cout << std::setw(twid) << std::left << "float";
     if (std::is_same<RealType, double>::value)
         std::cout << std::setw(twid) << std::left << "double";
-    if (std::is_same<RealType, long double>::value)
-        std::cout << std::setw(twid) << std::left << "long double";
     std::cout << std::setw(twid) << std::left << name;
     std::cout << std::setw(twid) << std::right << c1;
     std::cout << std::setw(twid) << std::right << c2;
@@ -123,8 +121,6 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M)
     resample_u01_sequence<float>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
     resample_u01_sequence<double>(N, M, twid);
-    std::cout << std::string(lwid, '-') << std::endl;
-    resample_u01_sequence<long double>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
