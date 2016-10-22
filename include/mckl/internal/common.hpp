@@ -480,6 +480,108 @@ inline std::basic_istream<CharT, Traits> &istream(
 
 #if MCKL_HAS_SSE2
 
+inline void load_si128(std::array<__m128i, 1> &s, const __m128i *sptr)
+{
+    std::get<0>(s) = _mm_load_si128(sptr++);
+}
+
+inline void load_si128(std::array<__m128i, 2> &s, const __m128i *sptr)
+{
+    std::get<0>(s) = _mm_load_si128(sptr++);
+    std::get<1>(s) = _mm_load_si128(sptr++);
+}
+
+inline void load_si128(std::array<__m128i, 4> &s, const __m128i *sptr)
+{
+    std::get<0>(s) = _mm_load_si128(sptr++);
+    std::get<1>(s) = _mm_load_si128(sptr++);
+    std::get<2>(s) = _mm_load_si128(sptr++);
+    std::get<3>(s) = _mm_load_si128(sptr++);
+}
+
+inline void load_si128(std::array<__m128i, 8> &s, const __m128i *sptr)
+{
+    std::get<0>(s) = _mm_load_si128(sptr++);
+    std::get<1>(s) = _mm_load_si128(sptr++);
+    std::get<2>(s) = _mm_load_si128(sptr++);
+    std::get<3>(s) = _mm_load_si128(sptr++);
+    std::get<4>(s) = _mm_load_si128(sptr++);
+    std::get<5>(s) = _mm_load_si128(sptr++);
+    std::get<6>(s) = _mm_load_si128(sptr++);
+    std::get<7>(s) = _mm_load_si128(sptr++);
+}
+
+inline void load_si128(std::array<__m128i, 16> &s, const __m128i *sptr)
+{
+    std::get<0x0>(s) = _mm_load_si128(sptr++);
+    std::get<0x1>(s) = _mm_load_si128(sptr++);
+    std::get<0x2>(s) = _mm_load_si128(sptr++);
+    std::get<0x3>(s) = _mm_load_si128(sptr++);
+    std::get<0x4>(s) = _mm_load_si128(sptr++);
+    std::get<0x5>(s) = _mm_load_si128(sptr++);
+    std::get<0x6>(s) = _mm_load_si128(sptr++);
+    std::get<0x7>(s) = _mm_load_si128(sptr++);
+    std::get<0x8>(s) = _mm_load_si128(sptr++);
+    std::get<0x9>(s) = _mm_load_si128(sptr++);
+    std::get<0xA>(s) = _mm_load_si128(sptr++);
+    std::get<0xB>(s) = _mm_load_si128(sptr++);
+    std::get<0xC>(s) = _mm_load_si128(sptr++);
+    std::get<0xD>(s) = _mm_load_si128(sptr++);
+    std::get<0xE>(s) = _mm_load_si128(sptr++);
+    std::get<0xF>(s) = _mm_load_si128(sptr++);
+}
+
+inline void store_si128(const std::array<__m128i, 1> &s, __m128i *sptr)
+{
+    _mm_store_si128(sptr++, std::get<0>(s));
+}
+
+inline void store_si128(const std::array<__m128i, 2> &s, __m128i *sptr)
+{
+    _mm_store_si128(sptr++, std::get<0>(s));
+    _mm_store_si128(sptr++, std::get<1>(s));
+}
+
+inline void store_si128(const std::array<__m128i, 4> &s, __m128i *sptr)
+{
+    _mm_store_si128(sptr++, std::get<0>(s));
+    _mm_store_si128(sptr++, std::get<1>(s));
+    _mm_store_si128(sptr++, std::get<2>(s));
+    _mm_store_si128(sptr++, std::get<3>(s));
+}
+
+inline void store_si128(const std::array<__m128i, 8> &s, __m128i *sptr)
+{
+    _mm_store_si128(sptr++, std::get<0>(s));
+    _mm_store_si128(sptr++, std::get<1>(s));
+    _mm_store_si128(sptr++, std::get<2>(s));
+    _mm_store_si128(sptr++, std::get<3>(s));
+    _mm_store_si128(sptr++, std::get<4>(s));
+    _mm_store_si128(sptr++, std::get<5>(s));
+    _mm_store_si128(sptr++, std::get<6>(s));
+    _mm_store_si128(sptr++, std::get<7>(s));
+}
+
+inline void store_si128(const std::array<__m128i, 16> &s, __m128i *sptr)
+{
+    _mm_store_si128(sptr++, std::get<0x0>(s));
+    _mm_store_si128(sptr++, std::get<0x1>(s));
+    _mm_store_si128(sptr++, std::get<0x2>(s));
+    _mm_store_si128(sptr++, std::get<0x3>(s));
+    _mm_store_si128(sptr++, std::get<0x4>(s));
+    _mm_store_si128(sptr++, std::get<0x5>(s));
+    _mm_store_si128(sptr++, std::get<0x6>(s));
+    _mm_store_si128(sptr++, std::get<0x7>(s));
+    _mm_store_si128(sptr++, std::get<0x8>(s));
+    _mm_store_si128(sptr++, std::get<0x9>(s));
+    _mm_store_si128(sptr++, std::get<0xA>(s));
+    _mm_store_si128(sptr++, std::get<0xB>(s));
+    _mm_store_si128(sptr++, std::get<0xC>(s));
+    _mm_store_si128(sptr++, std::get<0xD>(s));
+    _mm_store_si128(sptr++, std::get<0xE>(s));
+    _mm_store_si128(sptr++, std::get<0xF>(s));
+}
+
 template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
     std::size_t N>
 inline void transpose4x32_si128(std::array<__m128i, N> &s)
@@ -733,6 +835,108 @@ inline void transpose2x64_store_si128(
 #endif // MCKL_HAS_SSE2
 
 #if MCKL_HAS_AVX2
+
+inline void load_si256(std::array<__m256i, 1> &s, const __m256i *sptr)
+{
+    std::get<0>(s) = _mm256_load_si256(sptr++);
+}
+
+inline void load_si256(std::array<__m256i, 2> &s, const __m256i *sptr)
+{
+    std::get<0>(s) = _mm256_load_si256(sptr++);
+    std::get<1>(s) = _mm256_load_si256(sptr++);
+}
+
+inline void load_si256(std::array<__m256i, 4> &s, const __m256i *sptr)
+{
+    std::get<0>(s) = _mm256_load_si256(sptr++);
+    std::get<1>(s) = _mm256_load_si256(sptr++);
+    std::get<2>(s) = _mm256_load_si256(sptr++);
+    std::get<3>(s) = _mm256_load_si256(sptr++);
+}
+
+inline void load_si256(std::array<__m256i, 8> &s, const __m256i *sptr)
+{
+    std::get<0>(s) = _mm256_load_si256(sptr++);
+    std::get<1>(s) = _mm256_load_si256(sptr++);
+    std::get<2>(s) = _mm256_load_si256(sptr++);
+    std::get<3>(s) = _mm256_load_si256(sptr++);
+    std::get<4>(s) = _mm256_load_si256(sptr++);
+    std::get<5>(s) = _mm256_load_si256(sptr++);
+    std::get<6>(s) = _mm256_load_si256(sptr++);
+    std::get<7>(s) = _mm256_load_si256(sptr++);
+}
+
+inline void load_si256(std::array<__m256i, 16> &s, const __m256i *sptr)
+{
+    std::get<0x0>(s) = _mm256_load_si256(sptr++);
+    std::get<0x1>(s) = _mm256_load_si256(sptr++);
+    std::get<0x2>(s) = _mm256_load_si256(sptr++);
+    std::get<0x3>(s) = _mm256_load_si256(sptr++);
+    std::get<0x4>(s) = _mm256_load_si256(sptr++);
+    std::get<0x5>(s) = _mm256_load_si256(sptr++);
+    std::get<0x6>(s) = _mm256_load_si256(sptr++);
+    std::get<0x7>(s) = _mm256_load_si256(sptr++);
+    std::get<0x8>(s) = _mm256_load_si256(sptr++);
+    std::get<0x9>(s) = _mm256_load_si256(sptr++);
+    std::get<0xA>(s) = _mm256_load_si256(sptr++);
+    std::get<0xB>(s) = _mm256_load_si256(sptr++);
+    std::get<0xC>(s) = _mm256_load_si256(sptr++);
+    std::get<0xD>(s) = _mm256_load_si256(sptr++);
+    std::get<0xE>(s) = _mm256_load_si256(sptr++);
+    std::get<0xF>(s) = _mm256_load_si256(sptr++);
+}
+
+inline void store_si256(const std::array<__m256i, 1> &s, __m256i *sptr)
+{
+    _mm256_store_si256(sptr++, std::get<0>(s));
+}
+
+inline void store_si256(const std::array<__m256i, 2> &s, __m256i *sptr)
+{
+    _mm256_store_si256(sptr++, std::get<0>(s));
+    _mm256_store_si256(sptr++, std::get<1>(s));
+}
+
+inline void store_si256(const std::array<__m256i, 4> &s, __m256i *sptr)
+{
+    _mm256_store_si256(sptr++, std::get<0>(s));
+    _mm256_store_si256(sptr++, std::get<1>(s));
+    _mm256_store_si256(sptr++, std::get<2>(s));
+    _mm256_store_si256(sptr++, std::get<3>(s));
+}
+
+inline void store_si256(const std::array<__m256i, 8> &s, __m256i *sptr)
+{
+    _mm256_store_si256(sptr++, std::get<0>(s));
+    _mm256_store_si256(sptr++, std::get<1>(s));
+    _mm256_store_si256(sptr++, std::get<2>(s));
+    _mm256_store_si256(sptr++, std::get<3>(s));
+    _mm256_store_si256(sptr++, std::get<4>(s));
+    _mm256_store_si256(sptr++, std::get<5>(s));
+    _mm256_store_si256(sptr++, std::get<6>(s));
+    _mm256_store_si256(sptr++, std::get<7>(s));
+}
+
+inline void store_si256(const std::array<__m256i, 16> &s, __m256i *sptr)
+{
+    _mm256_store_si256(sptr++, std::get<0x0>(s));
+    _mm256_store_si256(sptr++, std::get<0x1>(s));
+    _mm256_store_si256(sptr++, std::get<0x2>(s));
+    _mm256_store_si256(sptr++, std::get<0x3>(s));
+    _mm256_store_si256(sptr++, std::get<0x4>(s));
+    _mm256_store_si256(sptr++, std::get<0x5>(s));
+    _mm256_store_si256(sptr++, std::get<0x6>(s));
+    _mm256_store_si256(sptr++, std::get<0x7>(s));
+    _mm256_store_si256(sptr++, std::get<0x8>(s));
+    _mm256_store_si256(sptr++, std::get<0x9>(s));
+    _mm256_store_si256(sptr++, std::get<0xA>(s));
+    _mm256_store_si256(sptr++, std::get<0xB>(s));
+    _mm256_store_si256(sptr++, std::get<0xC>(s));
+    _mm256_store_si256(sptr++, std::get<0xD>(s));
+    _mm256_store_si256(sptr++, std::get<0xE>(s));
+    _mm256_store_si256(sptr++, std::get<0xF>(s));
+}
 
 template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
     std::size_t i4, std::size_t i5, std::size_t i6, std::size_t i7,

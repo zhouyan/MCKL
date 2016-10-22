@@ -273,7 +273,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 
         std::array<__m256i, S> s;
 
-        load(s, state);
+        load_si256(s, reinterpret_cast<const __m256i *>(state.data()));
 
         PhiloxGeneratorImplPermute32<K>::first(s);
 
@@ -315,7 +315,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 
         PhiloxGeneratorImplPermute32<K>::last(s);
 
-        store(s, state);
+        store_si256(s, reinterpret_cast<__m256i *>(state.data()));
     }
 
     private:
@@ -344,119 +344,10 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void round(std::array<__m256i, S> &s, __m256i &p, const __m256i &w,
         const __m256i &m, std::true_type)
     {
-        kbox<N + 0x0>(p, w);
-        sbox<N + 0x0>(s, p, m);
-        kbox<N + 0x1>(p, w);
-        sbox<N + 0x1>(s, p, m);
-        kbox<N + 0x2>(p, w);
-        sbox<N + 0x2>(s, p, m);
-        kbox<N + 0x3>(p, w);
-        sbox<N + 0x3>(s, p, m);
-        kbox<N + 0x4>(p, w);
-        sbox<N + 0x4>(s, p, m);
-        kbox<N + 0x5>(p, w);
-        sbox<N + 0x5>(s, p, m);
-        kbox<N + 0x6>(p, w);
-        sbox<N + 0x6>(s, p, m);
-        kbox<N + 0x7>(p, w);
-        sbox<N + 0x7>(s, p, m);
-        kbox<N + 0x8>(p, w);
-        sbox<N + 0x8>(s, p, m);
-        kbox<N + 0x9>(p, w);
-        sbox<N + 0x9>(s, p, m);
-        kbox<N + 0xA>(p, w);
-        sbox<N + 0xA>(s, p, m);
-        kbox<N + 0xB>(p, w);
-        sbox<N + 0xB>(s, p, m);
-        kbox<N + 0xC>(p, w);
-        sbox<N + 0xC>(s, p, m);
-        kbox<N + 0xD>(p, w);
-        sbox<N + 0xD>(s, p, m);
-        kbox<N + 0xE>(p, w);
-        sbox<N + 0xE>(s, p, m);
-        kbox<N + 0xF>(p, w);
-        sbox<N + 0xF>(s, p, m);
-
-        round<N + 0x10>(
-            s, p, w, m, std::integral_constant<bool, N + 0x10 <= Rounds>());
-    }
-
-    static void load(
-        std::array<__m256i, 1> &s, std::array<std::array<T, K>, 8 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        std::get<0>(s) = _mm256_load_si256(sptr++);
-    }
-
-    static void load(
-        std::array<__m256i, 2> &s, std::array<std::array<T, K>, 16 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        std::get<0>(s) = _mm256_load_si256(sptr++);
-        std::get<1>(s) = _mm256_load_si256(sptr++);
-    }
-
-    static void load(
-        std::array<__m256i, 4> &s, std::array<std::array<T, K>, 32 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        std::get<0>(s) = _mm256_load_si256(sptr++);
-        std::get<1>(s) = _mm256_load_si256(sptr++);
-        std::get<2>(s) = _mm256_load_si256(sptr++);
-        std::get<3>(s) = _mm256_load_si256(sptr++);
-    }
-
-    static void load(
-        std::array<__m256i, 8> &s, std::array<std::array<T, K>, 64 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        std::get<0>(s) = _mm256_load_si256(sptr++);
-        std::get<1>(s) = _mm256_load_si256(sptr++);
-        std::get<2>(s) = _mm256_load_si256(sptr++);
-        std::get<3>(s) = _mm256_load_si256(sptr++);
-        std::get<4>(s) = _mm256_load_si256(sptr++);
-        std::get<5>(s) = _mm256_load_si256(sptr++);
-        std::get<6>(s) = _mm256_load_si256(sptr++);
-        std::get<7>(s) = _mm256_load_si256(sptr++);
-    }
-
-    static void store(
-        std::array<__m256i, 1> &s, std::array<std::array<T, K>, 8 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        _mm256_store_si256(sptr++, std::get<0>(s));
-    }
-
-    static void store(
-        std::array<__m256i, 2> &s, std::array<std::array<T, K>, 16 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        _mm256_store_si256(sptr++, std::get<0>(s));
-        _mm256_store_si256(sptr++, std::get<1>(s));
-    }
-
-    static void store(
-        std::array<__m256i, 4> &s, std::array<std::array<T, K>, 32 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        _mm256_store_si256(sptr++, std::get<0>(s));
-        _mm256_store_si256(sptr++, std::get<1>(s));
-        _mm256_store_si256(sptr++, std::get<2>(s));
-        _mm256_store_si256(sptr++, std::get<3>(s));
-    }
-
-    static void store(
-        std::array<__m256i, 8> &s, std::array<std::array<T, K>, 64 / K> &state)
-    {
-        __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
-        _mm256_store_si256(sptr++, std::get<0>(s));
-        _mm256_store_si256(sptr++, std::get<1>(s));
-        _mm256_store_si256(sptr++, std::get<2>(s));
-        _mm256_store_si256(sptr++, std::get<3>(s));
-        _mm256_store_si256(sptr++, std::get<4>(s));
-        _mm256_store_si256(sptr++, std::get<5>(s));
-        _mm256_store_si256(sptr++, std::get<6>(s));
-        _mm256_store_si256(sptr++, std::get<7>(s));
+        kbox<N>(p, w);
+        sbox<N>(s, p, m);
+        round<N + 1>(
+            s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N>

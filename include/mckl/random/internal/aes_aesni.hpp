@@ -667,7 +667,7 @@ class AESGeneratorImpl
 
         std::array<__m128i, B> s;
 
-        load(s, state);
+        load_si128(s, reinterpret_cast<const __m128i *>(state.data()));
 
         encfirst(s, rk);
         enc<0x1>(s, rk);
@@ -688,7 +688,7 @@ class AESGeneratorImpl
         round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
         enclast(s, rk);
 
-        store(s, state);
+        store_si128(s, reinterpret_cast<__m128i *>(state.data()));
     }
 
     private:
@@ -720,128 +720,6 @@ class AESGeneratorImpl
     {
         enc<N>(s, rk);
         round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
-    }
-
-    static void load(std::array<__m128i, 1> &s,
-        std::array<std::array<std::uint32_t, 4>, 1> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-    }
-
-    static void load(std::array<__m128i, 2> &s,
-        std::array<std::array<std::uint32_t, 4>, 2> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-    }
-
-    static void load(std::array<__m128i, 4> &s,
-        std::array<std::array<std::uint32_t, 4>, 4> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-        std::get<2>(s) = _mm_load_si128(sptr++);
-        std::get<3>(s) = _mm_load_si128(sptr++);
-    }
-
-    static void load(std::array<__m128i, 8> &s,
-        std::array<std::array<std::uint32_t, 4>, 8> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-        std::get<2>(s) = _mm_load_si128(sptr++);
-        std::get<3>(s) = _mm_load_si128(sptr++);
-        std::get<4>(s) = _mm_load_si128(sptr++);
-        std::get<5>(s) = _mm_load_si128(sptr++);
-        std::get<6>(s) = _mm_load_si128(sptr++);
-        std::get<7>(s) = _mm_load_si128(sptr++);
-    }
-
-    static void load(std::array<__m128i, 16> &s,
-        std::array<std::array<std::uint32_t, 4>, 16> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0x0>(s) = _mm_load_si128(sptr++);
-        std::get<0x1>(s) = _mm_load_si128(sptr++);
-        std::get<0x2>(s) = _mm_load_si128(sptr++);
-        std::get<0x3>(s) = _mm_load_si128(sptr++);
-        std::get<0x4>(s) = _mm_load_si128(sptr++);
-        std::get<0x5>(s) = _mm_load_si128(sptr++);
-        std::get<0x6>(s) = _mm_load_si128(sptr++);
-        std::get<0x7>(s) = _mm_load_si128(sptr++);
-        std::get<0x8>(s) = _mm_load_si128(sptr++);
-        std::get<0x9>(s) = _mm_load_si128(sptr++);
-        std::get<0xA>(s) = _mm_load_si128(sptr++);
-        std::get<0xB>(s) = _mm_load_si128(sptr++);
-        std::get<0xC>(s) = _mm_load_si128(sptr++);
-        std::get<0xD>(s) = _mm_load_si128(sptr++);
-        std::get<0xE>(s) = _mm_load_si128(sptr++);
-        std::get<0xF>(s) = _mm_load_si128(sptr++);
-    }
-
-    static void store(std::array<__m128i, 1> &s,
-        std::array<std::array<std::uint32_t, 4>, 1> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-    }
-
-    static void store(std::array<__m128i, 2> &s,
-        std::array<std::array<std::uint32_t, 4>, 2> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-    }
-
-    static void store(std::array<__m128i, 4> &s,
-        std::array<std::array<std::uint32_t, 4>, 4> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-        _mm_store_si128(sptr++, std::get<2>(s));
-        _mm_store_si128(sptr++, std::get<3>(s));
-    }
-
-    static void store(std::array<__m128i, 8> &s,
-        std::array<std::array<std::uint32_t, 4>, 8> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-        _mm_store_si128(sptr++, std::get<2>(s));
-        _mm_store_si128(sptr++, std::get<3>(s));
-        _mm_store_si128(sptr++, std::get<4>(s));
-        _mm_store_si128(sptr++, std::get<5>(s));
-        _mm_store_si128(sptr++, std::get<6>(s));
-        _mm_store_si128(sptr++, std::get<7>(s));
-    }
-
-    static void store(std::array<__m128i, 16> &s,
-        std::array<std::array<std::uint32_t, 4>, 16> &state)
-    {
-        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0x0>(s));
-        _mm_store_si128(sptr++, std::get<0x1>(s));
-        _mm_store_si128(sptr++, std::get<0x2>(s));
-        _mm_store_si128(sptr++, std::get<0x3>(s));
-        _mm_store_si128(sptr++, std::get<0x4>(s));
-        _mm_store_si128(sptr++, std::get<0x5>(s));
-        _mm_store_si128(sptr++, std::get<0x6>(s));
-        _mm_store_si128(sptr++, std::get<0x7>(s));
-        _mm_store_si128(sptr++, std::get<0x8>(s));
-        _mm_store_si128(sptr++, std::get<0x9>(s));
-        _mm_store_si128(sptr++, std::get<0xA>(s));
-        _mm_store_si128(sptr++, std::get<0xB>(s));
-        _mm_store_si128(sptr++, std::get<0xC>(s));
-        _mm_store_si128(sptr++, std::get<0xD>(s));
-        _mm_store_si128(sptr++, std::get<0xE>(s));
-        _mm_store_si128(sptr++, std::get<0xF>(s));
     }
 
     static void encfirst(
