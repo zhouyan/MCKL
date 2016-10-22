@@ -1,0 +1,16 @@
+Geometric<int32_t>(0.5)             134.37       91.22       29.51       13.04 SVML       --Passed
+Geometric<uint32_t>(0.5)            134.45       91.30       30.75       32.07 SVML       --Passed
+Geometric<int64_t>(0.5)             134.76       86.44       31.59       32.25 SVML       --Passed
+Geometric<uint64_t>(0.5)            135.38       89.93       31.57       33.07 SVML       --Passed
+Geometric<int32_t>(0.5)              21.25       14.82        8.11        3.57 PVML       --Passed
+Geometric<uint32_t>(0.5)             21.25       14.79        8.43        8.53 PVML       --Passed
+Geometric<int64_t>(0.5)              21.30       14.85        8.41        8.66 PVML       --Passed
+Geometric<uint64_t>(0.5)             21.59       15.35        8.64        8.81 PVML       --Passed
+Geometric<int32_t>(0.5)             134.37       91.14       58.22       12.99 SCPP       --Passed
+Geometric<uint32_t>(0.5)            134.45       91.33       59.34       61.66 SCPP       --Passed
+Geometric<int64_t>(0.5)             134.67       88.70       58.92       61.32 SCPP       --Passed
+Geometric<uint64_t>(0.5)            135.18       90.09       60.65       62.17 SCPP       --Passed
+Geometric<int32_t>(0.5)              21.24       14.91       13.56        3.57 PCPP       --Passed
+Geometric<uint32_t>(0.5)             21.36       14.76       13.98       14.06 PCPP       --Passed
+Geometric<int64_t>(0.5)              21.31       14.99       13.76       14.73 PCPP       --Passed
+Geometric<uint64_t>(0.5)             21.52       15.31       14.05       14.09 PCPP       --Passed

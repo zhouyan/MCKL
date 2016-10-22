@@ -53,7 +53,6 @@ GetOptions(
     "pdf"      => \$pdf,
 );
 $build = 1 if $run;
-$write = 0 if $name;
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
@@ -133,7 +132,6 @@ sub run {
     return unless $run;
 
     for my $c (@compiler) {
-        my @result;
         my $d = $compiler{$c};
         next if (not -d $d);
         say $d;
@@ -145,6 +143,7 @@ sub run {
             my $cpb_bp = 0xFFFF;
             my $count = 0;
             my $pass = 1;
+            my @result;
             for (1..5) {
                 my @lines = grep { $_ =~ /Passed|Failed/ } split "\n", `$cmd`;
                 push @result, @lines;
@@ -168,10 +167,11 @@ sub run {
                 $line .= $pass ? "Passed" : "Failed";
                 say $line;
             }
-        }
-        if ($write) {
-            open my $txtfile, ">", "rng/random_rng_${c}_${simd}.txt";
-            say $txtfile $_ for @result;
+            if ($write) {
+                open my $txtfile, ">",
+                "\Lrandom_rng/random_rng_${r}_${c}_${simd}.txt";
+                say $txtfile $_ for @result;
+            }
         }
     }
 }
@@ -179,10 +179,10 @@ sub run {
 sub read {
     for my $c (@compiler) {
         for my $s (@simd) {
-            open my $txtfile, "<", "rng/random_rng_${c}_${s}.txt";
-            my @lines = <$txtfile>;
             for my $r (@rng) {
-                my @result = grep { /$r\s+/ } @lines;
+                open my $txtfile, "<",
+                "\Lrandom_rng/random_rng_${r}_${c}_${s}.txt";
+                my @result = <$txtfile>;
                 if (@result) {
                     $cpb_s{$c}{$s}{$r} = 0xFFFF unless $cpb_s{$c}{$s}{$r};
                     $cpb_b{$c}{$s}{$r} = 0xFFFF unless $cpb_b{$c}{$s}{$r};

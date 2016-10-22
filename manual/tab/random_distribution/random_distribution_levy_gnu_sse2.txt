@@ -1,0 +1,8 @@
+Levy<float>(0,1)                    117.01      117.89       28.71       26.17 SVML       --Passed
+Levy<double>(0,1)                   131.05      131.69       58.99       47.45 SVML       --Passed
+Levy<float>(0,1)                     20.40       20.38        7.52        6.64 PVML       --Passed
+Levy<double>(0,1)                    23.27       23.35       13.47       10.98 PVML       --Passed
+Levy<float>(0,1)                    117.72      118.59       72.02       26.16 SCPP       --Passed
+Levy<double>(0,1)                   128.42      127.52      107.09       47.46 SCPP       --Passed
+Levy<float>(0,1)                     20.22       20.47       15.96        6.69 PCPP       --Passed
+Levy<double>(0,1)                    23.59       23.24       21.83       11.10 PCPP       --Passed

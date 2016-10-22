@@ -55,7 +55,6 @@ GetOptions(
     "pdf"        => \$pdf,
 );
 $build = 1 if $run;
-$write = 0 if $name;
 
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
@@ -160,8 +159,8 @@ sub run {
         my $d = $compiler{$c};
         next if (not -d $d);
         say $d;
-        my @result;
         for my $r (@distribution) {
+            my @result;
             my $name = &distribution_name($r);
             my $cmd1 = "ninja -C $d";
             my $cmd2 = "ninja -C $d";
@@ -173,11 +172,11 @@ sub run {
             my @lines2 = grep { /Passed|Failed/ } split "\n", `$cmd2`;
             push @result, @lines2;
             say $_ for @lines2;
-        }
-        if ($write) {
-            open my $txtfile, ">",
-            "distribution/random_distribution_${c}_${simd}.txt";
-            say $txtfile $_ for @result;
+            if ($write) {
+                open my $txtfile, ">", "random_distribution/" .
+                "\Lrandom_distribution_${r}_${c}_${simd}.txt";
+                say $txtfile $_ for @result;
+            }
         }
     }
 
@@ -185,10 +184,10 @@ sub run {
 
 sub read {
     for my $s (@simd) {
-        open my $txtfile, "<",
-        "distribution/random_distribution_${compiler}_${s}.txt";
-        my @lines = <$txtfile>;
         for my $r (@distribution) {
+            open my $txtfile, "<", "random_distribution/" .
+            "\Lrandom_distribution_${r}_${compiler}_${s}.txt";
+            my @lines = <$txtfile>;
             my @result = grep { /$r<(double|int32_t)>/ } @lines;
             for (@result) {
                 my ($name, $cpe_s, $cpe_m, $cpe_b, $cpe_i, $lib) = (split);
@@ -288,14 +287,20 @@ sub table {
                     $table_p .= "\\\\\n";
                 }
             }
-            open my $texfile, ">", "\Lrandom_distribution_${k}_${s}.tex";
-            print $texfile $header;
-            print $texfile $table;
-            print $texfile $footer;
-            open my $texfile_p, ">", "\Lrandom_distribution_${k}_${s}_p.tex";
-            print $texfile_p $header;
-            print $texfile_p $table_p;
-            print $texfile_p $footer;
+            if ($table) {
+                open my $texfile, ">",
+                "\Lrandom_distribution_${k}_${s}.tex";
+                print $texfile $header;
+                print $texfile $table;
+                print $texfile $footer;
+            }
+            if ($table_p) {
+                open my $texfile_p, ">",
+                "\Lrandom_distribution_${k}_${s}_p.tex";
+                print $texfile_p $header;
+                print $texfile_p $table_p;
+                print $texfile_p $footer;
+            }
         }
     }
 }

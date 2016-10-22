@@ -134,7 +134,8 @@ sub target {
         }
         if (%target) {
             my @keys = sort keys %target;
-            open my $makefile, ">", "\Ltestu01/$subdir/random_testu01_$b.make";
+            open my $makefile, ">",
+            "\Lrandom_testu01/$subdir/random_testu01_$b.make";
             print $makefile ".PHONY : all run";
             print $makefile " \\\n\t$_" for @keys;
             print $makefile "\n";
@@ -241,7 +242,7 @@ sub pdf {
 }
 
 sub filter_txt {
-    my $txt = "\Ltestu01/$subdir/random_testu01_$_[0].txt";
+    my $txt = "\Lrandom_testu01/$subdir/random_testu01_$_[0].txt";
     return unless -e $txt;
 
     open my $txtfile, "<", $txt;
@@ -274,7 +275,7 @@ sub filter_txt {
 }
 
 sub check_txt {
-    my $txt = "\Ltestu01/$subdir/random_testu01_$_[0].txt";
+    my $txt = "\Lrandom_testu01/$subdir/random_testu01_$_[0].txt";
     return unless -e $txt;
 
     shift;

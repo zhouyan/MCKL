@@ -1,0 +1,8 @@
+Logistic<float>(0,1)                 74.01       73.83       17.98       18.87 SVML       --Passed
+Logistic<double>(0,1)                95.13       95.40       37.58       39.14 SVML       --Passed
+Logistic<float>(0,1)                 13.51       12.78        5.51        4.71 PVML       --Passed
+Logistic<double>(0,1)                17.33       16.36        9.84        9.47 PVML       --Passed
+Logistic<float>(0,1)                 75.63       75.60       37.72       38.54 SCPP       --Passed
+Logistic<double>(0,1)                95.23       95.14       59.13       60.76 SCPP       --Passed
+Logistic<float>(0,1)                 12.79       12.76        8.75        8.75 PCPP       --Passed
+Logistic<double>(0,1)                16.54       16.30       13.56       13.70 PCPP       --Passed

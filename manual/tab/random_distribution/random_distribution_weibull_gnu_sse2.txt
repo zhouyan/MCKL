@@ -1,0 +1,8 @@
+Weibull<float>(1,1)                 136.10       58.94       14.81       12.90 SVML       --Passed
+Weibull<double>(1,1)                214.19       73.42       27.31       20.62 SVML       --Passed
+Weibull<float>(1,1)                  22.50       10.90        4.17        3.50 PVML       --Passed
+Weibull<double>(1,1)                 35.14       13.80        8.41        5.39 PVML       --Passed
+Weibull<float>(1,1)                 135.95       62.58       34.59       12.92 SCPP       --Passed
+Weibull<double>(1,1)                213.79       81.15       49.96       20.65 SCPP       --Passed
+Weibull<float>(1,1)                  22.82       11.38        8.45        3.49 PCPP       --Passed
+Weibull<double>(1,1)                 34.37       13.71       11.76        5.38 PCPP       --Passed

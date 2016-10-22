@@ -1,0 +1,8 @@
+Exponential<float>(1)                59.97       59.21       14.28       12.50 SVML       --Passed
+Exponential<double>(1)              115.56       73.08       25.45       19.25 SVML       --Passed
+Exponential<float>(1)                10.70       10.74        3.73        3.39 PVML       --Passed
+Exponential<double>(1)               18.75       13.17        6.73        5.05 PVML       --Passed
+Exponential<float>(1)                59.99       59.15       34.29       12.46 SCPP       --Passed
+Exponential<double>(1)              115.68       72.82       48.26       19.28 SCPP       --Passed
+Exponential<float>(1)                10.77       10.70        7.80        3.29 PCPP       --Passed
+Exponential<double>(1)               18.71       13.11       11.07        4.99 PCPP       --Passed
