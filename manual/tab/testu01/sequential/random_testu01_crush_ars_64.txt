@@ -1,0 +1,16 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+ 73  LempelZiv                       0.9990
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+ 75  Fourier3, r = 20                0.9995
+ ----------------------------------------------
+ All other tests were passed
+

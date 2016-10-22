@@ -1,0 +1,24 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+ 13  BirthdaySpacings, t = 4         5.6e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+ 68  RandomWalk1 J (L = 1000)        0.9998
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+ 65  RandomWalk1 M (L = 90)          0.9995
+ ----------------------------------------------
+ All other tests were passed
+

@@ -59,7 +59,7 @@ void random_rng_store_seed(const std::string &basename)
 template <typename RNGType, typename U01Type>
 inline double random_rng_u01_impl()
 {
-    static const std::size_t N = mckl::internal::BufferSize<double>::value;
+    constexpr std::size_t N = 8192;
 
     static std::size_t index = N;
     static RNGType rng(mckl::Seed<RNGType>::instance().get());
@@ -108,7 +108,7 @@ double random_rng_u01oo()
 template <typename RNGType, typename U01Type>
 inline double random_rng_u01_mt_impl()
 {
-    constexpr std::size_t N = mckl::internal::BufferSize<double>::value;
+    constexpr std::size_t N = 1024;
     constexpr std::size_t M = 8;
 
     static std::size_t index = N * M;

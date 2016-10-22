@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+ 77  LongestHeadRun, r = 20          0.9998
+ ----------------------------------------------
+ All other tests were passed
+

@@ -1,0 +1,11 @@
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  8
+ ----------------------------------------------
+ 32  Gap, r = 27                     3.2e-6
+ 32  Gap, r = 27                     5.4e-5
+ 76  LongestHeadRun, r = 0           4.2e-4
+ 76  LongestHeadRun, r = 0           7.8e-7
+ ----------------------------------------------
+ All other tests were passed
+

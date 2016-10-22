@@ -1,0 +1,130 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8             eps
+ 10  CollisionOver, t = 20          1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7          eps
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 24  SimpPoker, d = 16                eps
+ 28  CouponCollector, d = 4           eps
+ 30  CouponCollector, d = 16          eps
+ 32  Gap, r = 27                    2.0e-10
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 10  CollisionOver, t = 20          1 -  1.2e-5
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7       2.1e-223
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 28  CouponCollector, d = 4         3.7e-15
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8             eps
+ 10  CollisionOver, t = 20          1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7          eps
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 24  SimpPoker, d = 16                eps
+ 26  SimpPoker, d = 64               1.4e-8
+ 28  CouponCollector, d = 4           eps
+ 30  CouponCollector, d = 16          eps
+ 32  Gap, r = 27                      eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8             eps
+ 10  CollisionOver, t = 20          1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7          eps
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 24  SimpPoker, d = 16                eps
+ 28  CouponCollector, d = 4           eps
+ 30  CouponCollector, d = 16          eps
+ 32  Gap, r = 27                      eps
+ 86  HammingIndep, L = 30            5.6e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8             eps
+ 10  CollisionOver, t = 20          1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7          eps
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 24  SimpPoker, d = 16                eps
+ 26  SimpPoker, d = 64                eps
+ 28  CouponCollector, d = 4           eps
+ 30  CouponCollector, d = 16          eps
+ 32  Gap, r = 27                      eps
+ 38  Permutation, r = 15             5.6e-9
+ 84  HammingCorr, L = 1200           8.2e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8             eps
+ 10  CollisionOver, t = 20          1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7          eps
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 24  SimpPoker, d = 16                eps
+ 28  CouponCollector, d = 4           eps
+ 30  CouponCollector, d = 16         3.4e-8
+ 32  Gap, r = 27                     3.2e-8
+ 46  SampleProd, t = 30              0.9994
+ 87  HammingIndep, L = 300           5.2e-4
+ ----------------------------------------------
+ All other tests were passed
+
