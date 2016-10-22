@@ -1,0 +1,8 @@
+Normal<float>(0,1)                   66.18       57.37        6.03        5.59 SVML       --Passed
+Normal<double>(0,1)                 107.17       62.77       13.84       10.60 SVML       --Passed
+Normal<float>(0,1)                   15.66       13.93        2.42        1.98 PVML       --Passed
+Normal<double>(0,1)                  26.54       16.18        4.22        3.09 PVML       --Passed
+Normal<float>(0,1)                   66.23       59.15        7.89        5.55 SCPP       --Passed
+Normal<double>(0,1)                 107.06       62.77       30.74       10.55 SCPP       --Passed
+Normal<float>(0,1)                   16.10       13.96        2.84        1.91 PCPP       --Passed
+Normal<double>(0,1)                  26.56       15.84        8.44        3.43 PCPP       --Passed

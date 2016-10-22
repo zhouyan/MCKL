@@ -1,0 +1,8 @@
+ExtremeValue<float>(0,1)             56.56       54.79        5.24        4.41 SVML       --Passed
+ExtremeValue<double>(0,1)           115.05       83.48       13.01       11.88 SVML       --Passed
+ExtremeValue<float>(0,1)             14.51       12.95        2.09        1.60 PVML       --Passed
+ExtremeValue<double>(0,1)            26.87       20.44        4.07        3.52 PVML       --Passed
+ExtremeValue<float>(0,1)             56.56       54.75       25.10        4.43 SCPP       --Passed
+ExtremeValue<double>(0,1)           115.24       83.26       42.79       11.88 SCPP       --Passed
+ExtremeValue<float>(0,1)             14.32       13.06        7.67        1.54 PCPP       --Passed
+ExtremeValue<double>(0,1)            27.60       14.85       12.04        3.32 PCPP       --Passed
