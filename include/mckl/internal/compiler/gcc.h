@@ -113,11 +113,17 @@
 #endif
 #endif
 
+#if MCKL_HAS_X86
+#ifndef MCKL_HAS_RDTSCP
+#define MCKL_HAS_RDTSCP 1
+#endif
+#endif
+
 #ifndef MCKL_INT64
 #define MCKL_INT64 long long
 #endif
 
-#ifdef __x86_64__
+#if MCKL_HAS_X86_64
 #ifndef MCKL_HAS_INT128
 #define MCKL_HAS_INT128 1
 #endif

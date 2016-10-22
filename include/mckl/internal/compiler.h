@@ -36,6 +36,26 @@
 #define __STDC_CONSTANT_MACROS
 #endif
 
+#ifndef MCKL_HAS_X86_64
+#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||           \
+    defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
+#define MCKL_HAS_X86_64 1
+#else
+#define MCKL_HAS_X86_64 0
+#endif
+#endif
+
+#ifndef MCKL_HAS_X86
+#if MCKL_HAS_X86_64 || defined(i386) || defined(__i386) ||                    \
+    defined(__i386__) || defined(_M_IX86) || defined(__X86__) ||              \
+    defined(_X86_) || defined(__THW_INTEL__) || defined(__I86__) ||           \
+    defined(__INTEL__) || defined(__386)
+#define MCKL_HAS_X86 1
+#else
+#define MCKL_HAS_X86 0
+#endif
+#endif
+
 #if defined(__OPENCL_VERSION__)
 #define MCKL_OPENCL
 #include <mckl/internal/compiler/opencl.h>
@@ -69,26 +89,6 @@
 
 #ifndef UINT64_C
 #error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
-#endif
-
-#ifndef MCKL_HAS_X86
-#if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
-    defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \
-    defined(__x86_64__) || defined(__amd64) || defined(__amd64__) ||          \
-    defined(_M_AMD64) || defined(_M_X64)
-#define MCKL_HAS_X86 1
-#else
-#define MCKL_HAS_X86 0
-#endif
-#endif
-
-#ifndef MCKL_HAS_X86_64
-#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||           \
-    defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
-#define MCKL_HAS_X86_64 1
-#else
-#define MCKL_HAS_X86_64 0
-#endif
 #endif
 
 #ifndef MCKL_HAS_LITTLE_ENDIAN
@@ -151,6 +151,10 @@
 #define MCKL_HAS_BMI2 0
 #endif
 
+#ifndef MCKL_HAS_RDTSCP
+#define MCKL_HAS_RDTSCP 0
+#endif
+
 #ifndef MCKL_USE_SSE2
 #define MCKL_USE_SSE2 MCKL_HAS_SSE2
 #endif
@@ -197,6 +201,10 @@
 
 #ifndef MCKL_USE_BMI2
 #define MCKL_USE_BMI2 MCKL_HAS_BMI2
+#endif
+
+#ifndef MCKL_USE_RDTSCP
+#define MCKL_USE_RDTSCP MCKL_HAS_RDTSCP
 #endif
 
 #ifdef MCKL_MSVC
