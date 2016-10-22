@@ -1,0 +1,16 @@
+UniformInt<int32_t>(-10,10)          66.89       30.58        4.18        3.31 SVML       --Passed
+UniformInt<uint32_t>(0,20)           66.57       30.59        5.96        5.65 SVML       --Passed
+UniformInt<int64_t>(-10,10)         109.90       35.42        5.94        5.61 SVML       --Passed
+UniformInt<uint64_t>(0,20)          110.46       36.32        6.99        6.70 SVML       --Passed
+UniformInt<int32_t>(-10,10)          16.44        7.73        1.90        1.27 PVML       --Passed
+UniformInt<uint32_t>(0,20)           13.64        7.28        2.26        2.04 PVML       --Passed
+UniformInt<int64_t>(-10,10)          29.24        9.18        2.14        1.95 PVML       --Passed
+UniformInt<uint64_t>(0,20)           28.95        9.54        2.66        2.27 PVML       --Passed
+UniformInt<int32_t>(-10,10)          66.86       30.58        4.38        3.31 SCPP       --Passed
+UniformInt<uint32_t>(0,20)           65.95       30.59        5.56        5.27 SCPP       --Passed
+UniformInt<int64_t>(-10,10)         108.00       35.42        5.51        5.19 SCPP       --Passed
+UniformInt<uint64_t>(0,20)          110.35       36.36        7.76        7.50 SCPP       --Passed
+UniformInt<int32_t>(-10,10)          16.48        7.41        1.86        1.22 PCPP       --Passed
+UniformInt<uint32_t>(0,20)           13.29        7.59        2.10        1.92 PCPP       --Passed
+UniformInt<int64_t>(-10,10)          29.20        9.15        2.17        1.86 PCPP       --Passed
+UniformInt<uint64_t>(0,20)           29.37        9.40        2.79        2.52 PCPP       --Passed
