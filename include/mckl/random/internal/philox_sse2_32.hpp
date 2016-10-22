@@ -29,15 +29,204 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
-    typename Derived>
-class PhiloxGeneratorImplSSE2_32
+template <std::size_t>
+class PhiloxGeneratorImplPermute32;
+
+template <>
+class PhiloxGeneratorImplPermute32<2>
 {
     public:
-    static constexpr bool batch()
+    template <std::size_t S>
+    static void first(std::array<__m128i, S> &)
     {
-        return K != 0 && (K & (K - 1)) == 0 && 4 % K == 0;
     }
+
+    static void round(std::array<__m128i, 1> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+    }
+
+    static void round(std::array<__m128i, 2> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+    }
+
+    static void round(std::array<__m128i, 4> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
+    }
+
+    static void round(std::array<__m128i, 8> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
+    }
+
+    static void last(std::array<__m128i, 1> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+    }
+
+    static void last(std::array<__m128i, 2> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+    }
+
+    static void last(std::array<__m128i, 4> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
+    }
+
+    static void last(std::array<__m128i, 8> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
+    }
+}; // class PhiloxGeneratorImplPermute32
+
+template <>
+class PhiloxGeneratorImplPermute32<4>
+{
+    public:
+    static void first(std::array<__m128i, 1> &s)
+    {
+        // 3 0 1 2
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
+    }
+
+    static void first(std::array<__m128i, 2> &s)
+    {
+        // 3 0 1 2
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
+    }
+
+    static void first(std::array<__m128i, 4> &s)
+    {
+        // 3 0 1 2
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xC6);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xC6);
+    }
+
+    static void first(std::array<__m128i, 8> &s)
+    {
+        // 3 0 1 2
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xC6);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xC6);
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xC6);
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xC6);
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xC6);
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xC6);
+    }
+
+    static void round(std::array<__m128i, 1> &s)
+    {
+        // 2 1 0 3
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
+    }
+
+    static void round(std::array<__m128i, 2> &s)
+    {
+        // 2 1 0 3
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
+    }
+
+    static void round(std::array<__m128i, 4> &s)
+    {
+        // 2 1 0 3
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0x93);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0x93);
+    }
+
+    static void round(std::array<__m128i, 8> &s)
+    {
+        // 2 1 0 3
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0x93);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0x93);
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0x93);
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0x93);
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0x93);
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0x93);
+    }
+
+    static void last(std::array<__m128i, 1> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+    }
+
+    static void last(std::array<__m128i, 2> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+    }
+
+    static void last(std::array<__m128i, 4> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
+    }
+
+    static void permute_last(std::array<__m128i, 8> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
+        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
+        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
+        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
+        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
+    }
+}; // class PhiloxGeneratorImplPermute32
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
+{
+    public:
+    static constexpr bool batch() { return K != 0 && 4 % K == 0; }
 
     static constexpr std::size_t blocks()
     {
@@ -77,7 +266,7 @@ class PhiloxGeneratorImplSSE2_32
 
         MCKL_FLATTEN_CALL load(s, state);
 
-        MCKL_FLATTEN_CALL Derived::permute_first(s);
+        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);
 
         MCKL_FLATTEN_CALL kbox<0x0>(p, w);
         MCKL_FLATTEN_CALL sbox<0x0>(s, p, m);
@@ -115,7 +304,7 @@ class PhiloxGeneratorImplSSE2_32
         round<0x10>(
             s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
 
-        MCKL_FLATTEN_CALL Derived::permute_last(s);
+        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);
 
         MCKL_FLATTEN_CALL store(s, state);
     }
@@ -422,204 +611,6 @@ class PhiloxGeneratorImplSSE2_32
     template <std::size_t S>
     static void permute(std::array<__m128i, S> &s, std::true_type)
     {
-        Derived::permute(s);
-    }
-}; // class PhiloxGeneratorImplSSE2_32
-
-template <typename T, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
-    : public PhiloxGeneratorImplSSE2_32<T, 2, Rounds, Constants,
-          PhiloxGeneratorImpl<T, 2, Rounds, Constants>>
-{
-    friend PhiloxGeneratorImplSSE2_32<T, 2, Rounds, Constants,
-        PhiloxGeneratorImpl<T, 2, Rounds, Constants>>;
-
-    template <std::size_t S>
-    static void permute_first(std::array<__m128i, S> &)
-    {
-    }
-
-    static void permute(std::array<__m128i, 1> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-    }
-
-    static void permute(std::array<__m128i, 2> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-    }
-
-    static void permute(std::array<__m128i, 4> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-    }
-
-    static void permute(std::array<__m128i, 8> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
-    }
-
-    static void permute_last(std::array<__m128i, 1> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-    }
-
-    static void permute_last(std::array<__m128i, 2> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-    }
-
-    static void permute_last(std::array<__m128i, 4> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-    }
-
-    static void permute_last(std::array<__m128i, 8> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
-    }
-}; // class PhiloxGeneratorImpl
-
-template <typename T, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl<T, 4, Rounds, Constants, 32>
-    : public PhiloxGeneratorImplSSE2_32<T, 4, Rounds, Constants,
-          PhiloxGeneratorImpl<T, 4, Rounds, Constants>>
-{
-    friend PhiloxGeneratorImplSSE2_32<T, 4, Rounds, Constants,
-        PhiloxGeneratorImpl<T, 4, Rounds, Constants>>;
-
-    static void permute_first(std::array<__m128i, 1> &s)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-    }
-
-    static void permute_first(std::array<__m128i, 2> &s)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
-    }
-
-    static void permute_first(std::array<__m128i, 4> &s)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xC6);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xC6);
-    }
-
-    static void permute_first(std::array<__m128i, 8> &s)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xC6);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xC6);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xC6);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xC6);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xC6);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xC6);
-    }
-
-    static void permute(std::array<__m128i, 1> &s)
-    {
-        // 2 1 0 3
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
-    }
-
-    static void permute(std::array<__m128i, 2> &s)
-    {
-        // 2 1 0 3
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
-    }
-
-    static void permute(std::array<__m128i, 4> &s)
-    {
-        // 2 1 0 3
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0x93);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0x93);
-    }
-
-    static void permute(std::array<__m128i, 8> &s)
-    {
-        // 2 1 0 3
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0x93);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0x93);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0x93);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0x93);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0x93);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0x93);
-    }
-
-    static void permute_last(std::array<__m128i, 1> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-    }
-
-    static void permute_last(std::array<__m128i, 2> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-    }
-
-    static void permute_last(std::array<__m128i, 4> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-    }
-
-    static void permute_last(std::array<__m128i, 8> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
+        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::round(s);
     }
 }; // class PhiloxGeneratorImpl
