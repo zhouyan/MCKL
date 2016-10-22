@@ -31,7 +31,7 @@
 
 #include <iostream>
 
-#ifdef _MSC_VERSION
+#ifdef _MSC_VER
 #include <immintrin.h>
 #else
 #include <wmmintrin.h>

@@ -32,13 +32,13 @@
 #include <cassert>
 #include <cstdint>
 
-#ifdef _MSC_VERSION
+#ifdef _MSC_VER
 #include <intrin.h>
 #else
 #include <immintrin.h>
 #endif
 
-#if defined(_MSC_VERSION) || defined(__INTEL_COMPILER)
+#if defined(_MSC_VER) || defined(__INTEL_COMPILER)
 typedef unsigned __int64 u64;
 #else
 typedef unsigned long long u64;

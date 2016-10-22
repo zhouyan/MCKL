@@ -44,10 +44,13 @@ namespace mckl
 namespace internal
 {
 
+#if MCKL_USE_RDTSCP
+
 inline std::uint64_t rdtsc()
 {
-#if MCKL_HAS_X86
-#if defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
+#ifdef MCKL_MSVC
+    return static_cast<std::uint64_t>(__rdtsc());
+#else // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
 #if MCKL_HAS_X86_64
@@ -57,7 +60,7 @@ inline std::uint64_t rdtsc()
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
         : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else  // MCKL_HAS_X64_64
+#else // MCKL_HAS_X64_64
     asm volatile(
         "cpuid\n\t"
         "rdtsc\n\t"
@@ -66,15 +69,42 @@ inline std::uint64_t rdtsc()
         : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
 #endif // MCKL_HAS_X86_64
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
-#elif defined(MCKL_MSVC)
-    return static_cast<std::uint64_t>(__rdtsc());
-#else  // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
-    return 0;
-#endif // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
-#else  // MCKL_HAS_X86
-    return 0;
-#endif // MCKL_HAS_X86
+#endif // MCKL_MSVC
 }
+
+inline std::uint64_t rdtscp()
+{
+#ifdef MCKL_MSVC
+    unsigned aux;
+    return static_cast<std::uint64_t>(__rdtsc(&aux));
+#else // MCKL_MSVC
+    unsigned hi = 0;
+    unsigned lo = 0;
+#if MCKL_HAS_X86_64
+    asm volatile(
+        "rdtsc\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        "cpuid\n\t"
+        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
+#else // MCKL_HAS_X64_64
+    asm volatile(
+        "rdtsc\n\t"
+        "mov %%edx, %0\n\t"
+        "mov %%eax, %1\n\t"
+        "cpuid\n\t"
+        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
+#endif // MCKL_HAS_X86_64
+    return (static_cast<std::uint64_t>(hi) << 32) + lo;
+#endif // MCKL_MSVC
+}
+
+#else // MCKL_USE_RDTSCP
+
+inline std::uint64_t rdtsc() { return 0; }
+inline std::uint64_t rdtscp() { return 0; }
+
+#endif // MCKL_USE_RDTSCP
 
 } // namespace mckl::internal
 
@@ -126,17 +156,11 @@ class StopWatchClockAdapter
     /// of accumulated cycles. Otherwise, it will always returns zero.
     static constexpr bool has_cycles()
     {
-#if MCKL_HAS_X86
-#if defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
+#if MCKL_USE_RDTSCP
         return true;
-#elif defined(MCKL_MSVC)
-        return true;
-#else  // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
+#else
         return false;
-#endif // defined(MCKL_CLANG) || defined(MCKL_GCC) || defined(MCKL_INTEL)
-#else  // MCKL_HAS_X86
-        return false;
-#endif // MCKL_HAS_X86
+#endif
     }
 
     /// \brief If the watch is running
@@ -152,7 +176,7 @@ class StopWatchClockAdapter
     /// be incremented next time `stop()` is called. The increment will be
     /// relative to the time point of this call. `false` if it is already
     /// started earlier.
-    bool start()
+    MCKL_FLATTEN bool start()
     {
         if (running_)
             return false;
@@ -169,15 +193,17 @@ class StopWatchClockAdapter
     /// \return `true` if it is stoped by this call, and the elapsed time has
     /// been incremented. `false` if it is already stopped or wasn't started
     /// before.
-    bool stop()
+    MCKL_FLATTEN bool stop()
     {
+        std::uint64_t c = internal::rdtscp();
+        typename clock_type::time_point t = clock_type::now();
+
         if (!running_)
             return false;
 
         running_ = false;
-        cycles_ += internal::rdtsc() - cycles_start_;
-        typename clock_type::time_point time_stop = clock_type::now();
-        time_ += time_stop - time_start_;
+        cycles_ += c - cycles_start_;
+        time_ += t - time_start_;
 
         return true;
     }

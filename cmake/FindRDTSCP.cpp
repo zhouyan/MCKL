@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/compiler/msvc.h
+// MCKL/cmake/FindRDTSCP.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,91 +29,36 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMPILER_MSVC_H
-#define MCKL_INTERNAL_COMPILER_MSVC_H
+#include <cassert>
 
-#define MCKL_MSVC_VERSION _MSC_VER
-
-#ifndef MCKL_HAS_LITTLE_ENDIAN
-#define MCKL_HAS_LITTLE_ENDIAN 1
-#endif
-
-#ifndef MCKL_HAS_BIG_ENDIAN
-#define MCKL_HAS_BIG_ENDIAN 0
+#ifdef _MSC_VER
+#include <intrin.h>
+#else
+#include <immintrin.h>
 #endif
 
-#ifdef __SSE2__
-#ifndef MCKL_HAS_SSE2
-#define MCKL_HAS_SSE2 1
+inline unsigned long long rdtscp()
+{
+#ifdef _MSC_VER
+    return __rdtscp();
+#else
+    unsigned hi = 0;
+    unsigned lo = 0;
+    asm volatile(
+        "cpuid\\n\\t"
+        "rdtscp\\n\\t"
+        "mov %%edx, %0\\n\\t"
+        "mov %%eax, %1\\n\\t"
+        : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
+    return (static_cast<unsigned long long>(hi) << 32) + lo;
 #endif
-#endif
+}
 
-#ifdef __SSE3__
-#ifndef MCKL_HAS_SSE3
-#define MCKL_HAS_SSE3 1
-#endif
-#endif
+int main()
+{
+    unsigned long long start = rdtscp();
+    unsigned long long stop = rdtscp();
+    assert(start != stop);
 
-#ifdef __SSSE3__
-#ifndef MCKL_HAS_SSSE3
-#define MCKL_HAS_SSSE3 1
-#endif
-#endif
-
-#ifdef __SSE4_1__
-#ifndef MCKL_HAS_SSE4_1
-#define MCKL_HAS_SSE4_1 1
-#endif
-#endif
-
-#ifdef __SSE4_2__
-#ifndef MCKL_HAS_SSE4_2
-#define MCKL_HAS_SSE4_2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AVX
-#define MCKL_HAS_AVX 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_AVX2
-#define MCKL_HAS_AVX2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI
-#define MCKL_HAS_BMI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI2
-#define MCKL_HAS_BMI2 1
-#endif
-#endif
-
-#ifndef MCKL_HAS_RDTSCP
-#define MCKL_HAS_RDTSCP 1
-#endif
-
-#ifndef MCKL_INT64
-#define MCKL_INT64 __int64
-#endif
-
-#endif // MCKL_INTERNAL_COMPILER_MSVC_H
+    return 0;
+}
