@@ -208,7 +208,7 @@ class PhiloxGeneratorImplPermute32<4>
         std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
     }
 
-    static void permute_last(std::array<__m128i, 8> &s)
+    static void last(std::array<__m128i, 8> &s)
     {
         // 2 3 0 1
         std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
@@ -225,17 +225,16 @@ class PhiloxGeneratorImplPermute32<4>
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 {
+#if MCKL_HAS_X86_64
+    static constexpr std::size_t M_ = 8;
+#else
+    static constexpr std::size_t M_ = 4;
+#endif
+
     public:
     static constexpr bool batch() { return K != 0 && 4 % K == 0; }
 
-    static constexpr std::size_t blocks()
-    {
-#if MCKL_HAS_X86_64
-        return 32 / K;
-#else
-        return 16 / K;
-#endif
-    }
+    static constexpr std::size_t blocks() { return M_ * 4 / K; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
@@ -246,6 +245,11 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void eval(std::array<std::array<T, K>, B> &state,
         const std::array<T, K / 2> &key)
     {
+        constexpr std::size_t S = K * B / 4;
+
+        static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 16 && S >= 1,
+            "**PhiloxGeneratorImpl::eval** used with invalid block size");
+
         constexpr std::size_t i0 = 0 % (K / 2);
         constexpr std::size_t i1 = 1 % (K / 2);
 
@@ -262,7 +266,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         const __m128i m = _mm_set_epi32(0, m1, 0, m0);
         __m128i p = _mm_set_epi32(p1, 0, p0, 0);
 
-        std::array<__m128i, K * B / 4> s;
+        std::array<__m128i, S> s;
 
         MCKL_FLATTEN_CALL load(s, state);
 
@@ -372,35 +376,35 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
             s, p, w, m, std::integral_constant<bool, N + 0x10 <= Rounds>());
     }
 
-    static void load(std::array<__m128i, 1> &s,
-        const std::array<std::array<T, K>, 4 / K> &state)
+    static void load(
+        std::array<__m128i, 1> &s, std::array<std::array<T, K>, 4 / K> &state)
     {
-        const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
+        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         std::get<0>(s) = _mm_load_si128(sptr++);
     }
 
-    static void load(std::array<__m128i, 2> &s,
-        const std::array<std::array<T, K>, 8 / K> &state)
+    static void load(
+        std::array<__m128i, 2> &s, std::array<std::array<T, K>, 8 / K> &state)
     {
-        const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
+        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         std::get<0>(s) = _mm_load_si128(sptr++);
         std::get<1>(s) = _mm_load_si128(sptr++);
     }
 
-    static void load(std::array<__m128i, 4> &s,
-        const std::array<std::array<T, K>, 16 / K> &state)
+    static void load(
+        std::array<__m128i, 4> &s, std::array<std::array<T, K>, 16 / K> &state)
     {
-        const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
+        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         std::get<0>(s) = _mm_load_si128(sptr++);
         std::get<1>(s) = _mm_load_si128(sptr++);
         std::get<2>(s) = _mm_load_si128(sptr++);
         std::get<3>(s) = _mm_load_si128(sptr++);
     }
 
-    static void load(std::array<__m128i, 8> &s,
-        const std::array<std::array<T, K>, 32 / K> &state)
+    static void load(
+        std::array<__m128i, 8> &s, std::array<std::array<T, K>, 32 / K> &state)
     {
-        const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
+        __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         std::get<0>(s) = _mm_load_si128(sptr++);
         std::get<1>(s) = _mm_load_si128(sptr++);
         std::get<2>(s) = _mm_load_si128(sptr++);
@@ -411,23 +415,23 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         std::get<7>(s) = _mm_load_si128(sptr++);
     }
 
-    static void store(const std::array<__m128i, 1> &s,
-        std::array<std::array<T, K>, 4 / K> &state)
+    static void store(
+        std::array<__m128i, 1> &s, std::array<std::array<T, K>, 4 / K> &state)
     {
         __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         _mm_store_si128(sptr++, std::get<0>(s));
     }
 
-    static void store(const std::array<__m128i, 2> &s,
-        std::array<std::array<T, K>, 8 / K> &state)
+    static void store(
+        std::array<__m128i, 2> &s, std::array<std::array<T, K>, 8 / K> &state)
     {
         __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         _mm_store_si128(sptr++, std::get<0>(s));
         _mm_store_si128(sptr++, std::get<1>(s));
     }
 
-    static void store(const std::array<__m128i, 4> &s,
-        std::array<std::array<T, K>, 16 / K> &state)
+    static void store(
+        std::array<__m128i, 4> &s, std::array<std::array<T, K>, 16 / K> &state)
     {
         __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         _mm_store_si128(sptr++, std::get<0>(s));
@@ -436,8 +440,8 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         _mm_store_si128(sptr++, std::get<3>(s));
     }
 
-    static void store(const std::array<__m128i, 8> &s,
-        std::array<std::array<T, K>, 32 / K> &state)
+    static void store(
+        std::array<__m128i, 8> &s, std::array<std::array<T, K>, 32 / K> &state)
     {
         __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
         _mm_store_si128(sptr++, std::get<0>(s));
@@ -594,7 +598,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         std::get<6>(s) = _mm_xor_si128(std::get<6>(s), m6);
         std::get<7>(s) = _mm_xor_si128(std::get<7>(s), m7);
 
-        MCKL_FLATTEN_CALL permute<N>(s);
+        permute<N>(s);
     }
 
     template <std::size_t N, std::size_t S>
@@ -611,6 +615,6 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     template <std::size_t S>
     static void permute(std::array<__m128i, S> &s, std::true_type)
     {
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::round(s);
+        PhiloxGeneratorImplPermute32<K>::round(s);
     }
 }; // class PhiloxGeneratorImpl

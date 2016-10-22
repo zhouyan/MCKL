@@ -36,11 +36,10 @@ use Getopt::Long;
 
 my $run = 0;
 my $build = 0;
-my $llvm = "../../build/llvm-release";
-my $gnu = "../../build/gnu-release";
-my $intel = "../../build/intel-release";
+my $llvm = "../../build/release-llvm";
+my $gnu = "../../build/release-gnu";
+my $intel = "../../build/release-intel";
 my $compiler = "llvm";
-my $make = "ninja";
 my $name;
 my $write = 0;
 my $pdf = 0;
@@ -51,7 +50,6 @@ GetOptions(
     "gnu=s"      => \$gnu,
     "intel=s"    => \$intel,
     "compiler=s" => \$compiler,
-    "make=s"     => \$make,
     "name=s"     => \$name,
     "write"      => \$write,
     "pdf"        => \$pdf,
@@ -144,11 +142,12 @@ sub build {
     }
     for my $c (@compiler) {
         my $d = $compiler{$c};
+        next if (not -d $d);
         say $d;
         if ($name) {
-            `$make -C $d @target 2>&1`;
+            `ninja -C $d @target 2>&1`;
         } else {
-            `$make -C $d random_distribution 2>&1`;
+            `ninja -C $d random_distribution 2>&1`;
         }
     }
 }
@@ -159,12 +158,13 @@ sub run {
     for my $c (@compiler) {
         my $result;
         my $d = $compiler{$c};
+        next if (not -d $d);
         say $d;
         my @result;
         for my $r (@distribution) {
             my $name = &distribution_name($r);
-            my $cmd1 = "$make -C $d";
-            my $cmd2 = "$make -C $d";
+            my $cmd1 = "ninja -C $d";
+            my $cmd2 = "ninja -C $d";
             $cmd1 .= " \Lrandom_distribution_${name}-check 2>&1";
             $cmd2 .= " \Lrandom_distribution_${name}_novml-check 2>&1";
             my @lines1 = grep { /Passed|Failed/ } split "\n", `$cmd1`;

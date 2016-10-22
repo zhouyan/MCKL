@@ -32,10 +32,19 @@
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 {
-    public:
-    static constexpr bool batch() { return K != 0 && 8 % K == 0; }
+#if MCKL_HAS_X86_64
+    static constexpr std::size_t L_ = 8;
+#else
+    static constexpr std::size_t L_ = 4;
+#endif
 
-    static constexpr std::size_t blocks() { return 16 / K; }
+    static constexpr std::size_t M_ =
+        (K != 0 && (K & (K - 1)) == 0 && K <= 16 && K >= L_) ? K : L_;
+
+    public:
+    static constexpr bool batch() { return K != 0 && M_ % K == 0; }
+
+    static constexpr std::size_t blocks() { return M_ * 2 / K; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
@@ -43,26 +52,19 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
             state, par);
     }
 
-    static void eval(std::array<std::array<T, K>, blocks()> &state,
+    template <std::size_t B>
+    static void eval(std::array<std::array<T, K>, B> &state,
         const std::array<T, K + 4> &par)
     {
-        std::array<__m128i, 8> s;
-        __m128i *sptr = nullptr;
+        constexpr std::size_t S = K * B / 2;
 
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<2>(s) = _mm_load_si128(sptr++);
-        std::get<4>(s) = _mm_load_si128(sptr++);
-        std::get<6>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-        std::get<3>(s) = _mm_load_si128(sptr++);
-        std::get<5>(s) = _mm_load_si128(sptr++);
-        std::get<7>(s) = _mm_load_si128(sptr++);
+        static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 16 && S >= 2,
+            "**ThreefryGeneratorImpl::eval** used with invalid block size");
 
-        MCKL_FLATTEN_CALL transpose2x64_si128<0, 1>(s);
-        MCKL_FLATTEN_CALL transpose2x64_si128<2, 3>(s);
-        MCKL_FLATTEN_CALL transpose2x64_si128<4, 5>(s);
-        MCKL_FLATTEN_CALL transpose2x64_si128<6, 7>(s);
+        std::array<__m128i, S> s;
+
+        MCKL_FLATTEN_CALL transpose2x64_load(
+            s, reinterpret_cast<const __m128i *>(state.data()));
 
         MCKL_FLATTEN_CALL sbox<0x00>(s);
         MCKL_FLATTEN_CALL pbox<0x00>(s);
@@ -163,33 +165,19 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
         round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
 
-        MCKL_FLATTEN_CALL transpose2x64_si128<0, 1>(s);
-        MCKL_FLATTEN_CALL transpose2x64_si128<2, 3>(s);
-        MCKL_FLATTEN_CALL transpose2x64_si128<4, 5>(s);
-        MCKL_FLATTEN_CALL transpose2x64_si128<6, 7>(s);
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<2>(s));
-        _mm_store_si128(sptr++, std::get<4>(s));
-        _mm_store_si128(sptr++, std::get<6>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-        _mm_store_si128(sptr++, std::get<3>(s));
-        _mm_store_si128(sptr++, std::get<5>(s));
-        _mm_store_si128(sptr++, std::get<7>(s));
+        MCKL_FLATTEN_CALL transpose2x64_store(
+            s, reinterpret_cast<__m128i *>(state.data()));
     }
 
     private:
-    static constexpr std::size_t M_ = 8 / K;
-
-    template <std::size_t>
-    static void round(std::array<__m128i, 8> &, const std::array<T, K + 4> &,
+    template <std::size_t, std::size_t S>
+    static void round(std::array<__m128i, S> &, const std::array<T, K + 4> &,
         std::false_type)
     {
     }
 
-    template <std::size_t N>
-    static void round(std::array<__m128i, 8> &s,
+    template <std::size_t N, std::size_t S>
+    static void round(std::array<__m128i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
         MCKL_FLATTEN_CALL sbox<N + 0x00>(s);
@@ -293,18 +281,42 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
             s, par, std::integral_constant<bool, N + 0x20 <= Rounds>());
     }
 
-    template <std::size_t N>
+    template <std::size_t N, std::size_t S>
     static void kbox(
-        std::array<__m128i, 8> &s, const std::array<T, K + 4> &par)
+        std::array<__m128i, S> &s, const std::array<T, K + 4> &par)
     {
         kbox<N>(s, par,
             std::integral_constant<bool, (N % 4 == 0 && N <= Rounds)>());
     }
 
-    template <std::size_t>
-    static void kbox(std::array<__m128i, 8> &, const std::array<T, K + 4> &,
+    template <std::size_t, std::size_t S>
+    static void kbox(std::array<__m128i, S> &, const std::array<T, K + 4> &,
         std::false_type)
     {
+    }
+
+    template <std::size_t N>
+    static void kbox(std::array<__m128i, 2> &s,
+        const std::array<T, K + 4> &par, std::true_type)
+    {
+        std::array<__m128i, K> k;
+        set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
+
+        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<0 % K>(k));
+        std::get<1>(s) = _mm_add_epi64(std::get<1>(s), std::get<1 % K>(k));
+    }
+
+    template <std::size_t N>
+    static void kbox(std::array<__m128i, 4> &s,
+        const std::array<T, K + 4> &par, std::true_type)
+    {
+        std::array<__m128i, K> k;
+        set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
+
+        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<0 % K>(k));
+        std::get<1>(s) = _mm_add_epi64(std::get<1>(s), std::get<1 % K>(k));
+        std::get<2>(s) = _mm_add_epi64(std::get<2>(s), std::get<2 % K>(k));
+        std::get<3>(s) = _mm_add_epi64(std::get<3>(s), std::get<3 % K>(k));
     }
 
     template <std::size_t N>
@@ -325,14 +337,96 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     }
 
     template <std::size_t N>
-    static void sbox(std::array<__m128i, 8> &s)
+    static void kbox(std::array<__m128i, 16> &s,
+        const std::array<T, K + 4> &par, std::true_type)
+    {
+        std::array<__m128i, K> k;
+        set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
+
+        std::get<0x0>(s) =
+            _mm_add_epi64(std::get<0x0>(s), std::get<0x0 % K>(k));
+        std::get<0x1>(s) =
+            _mm_add_epi64(std::get<0x1>(s), std::get<0x1 % K>(k));
+        std::get<0x2>(s) =
+            _mm_add_epi64(std::get<0x2>(s), std::get<0x2 % K>(k));
+        std::get<0x3>(s) =
+            _mm_add_epi64(std::get<0x3>(s), std::get<0x3 % K>(k));
+        std::get<0x4>(s) =
+            _mm_add_epi64(std::get<0x4>(s), std::get<0x4 % K>(k));
+        std::get<0x5>(s) =
+            _mm_add_epi64(std::get<0x5>(s), std::get<0x5 % K>(k));
+        std::get<0x6>(s) =
+            _mm_add_epi64(std::get<0x6>(s), std::get<0x6 % K>(k));
+        std::get<0x7>(s) =
+            _mm_add_epi64(std::get<0x7>(s), std::get<0x7 % K>(k));
+        std::get<0x8>(s) =
+            _mm_add_epi64(std::get<0x8>(s), std::get<0x8 % K>(k));
+        std::get<0x9>(s) =
+            _mm_add_epi64(std::get<0x9>(s), std::get<0x9 % K>(k));
+        std::get<0xA>(s) =
+            _mm_add_epi64(std::get<0xA>(s), std::get<0xA % K>(k));
+        std::get<0xB>(s) =
+            _mm_add_epi64(std::get<0xB>(s), std::get<0xB % K>(k));
+        std::get<0xC>(s) =
+            _mm_add_epi64(std::get<0xC>(s), std::get<0xC % K>(k));
+        std::get<0xD>(s) =
+            _mm_add_epi64(std::get<0xD>(s), std::get<0xD % K>(k));
+        std::get<0xE>(s) =
+            _mm_add_epi64(std::get<0xE>(s), std::get<0xE % K>(k));
+        std::get<0xF>(s) =
+            _mm_add_epi64(std::get<0xF>(s), std::get<0xF % K>(k));
+    }
+
+    template <std::size_t N, std::size_t S>
+    static void sbox(std::array<__m128i, S> &s)
     {
         sbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
-    template <std::size_t>
-    static void sbox(std::array<__m128i, 8> &, std::false_type)
+    template <std::size_t, std::size_t S>
+    static void sbox(std::array<__m128i, S> &, std::false_type)
     {
+    }
+
+    template <std::size_t N>
+    static void sbox(std::array<__m128i, 2> &s, std::true_type)
+    {
+        constexpr int L0 = Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
+        constexpr int R0 = 64 - L0;
+
+        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<1>(s));
+
+        __m128i l0 = _mm_slli_epi64(std::get<1>(s), L0);
+
+        __m128i r0 = _mm_srli_epi64(std::get<1>(s), R0);
+
+        std::get<1>(s) = _mm_or_si128(l0, r0);
+
+        std::get<1>(s) = _mm_xor_si128(std::get<0>(s), std::get<1>(s));
+    }
+
+    template <std::size_t N>
+    static void sbox(std::array<__m128i, 4> &s, std::true_type)
+    {
+        constexpr int L0 = Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
+        constexpr int L1 = Constants::rotate::value[1 % (K / 2)][(N - 1) % 8];
+        constexpr int R0 = 64 - L0;
+        constexpr int R1 = 64 - L1;
+
+        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<1>(s));
+        std::get<2>(s) = _mm_add_epi64(std::get<2>(s), std::get<3>(s));
+
+        __m128i l0 = _mm_slli_epi64(std::get<1>(s), L0);
+        __m128i l1 = _mm_slli_epi64(std::get<3>(s), L1);
+
+        __m128i r0 = _mm_srli_epi64(std::get<1>(s), R0);
+        __m128i r1 = _mm_srli_epi64(std::get<3>(s), R1);
+
+        std::get<1>(s) = _mm_or_si128(l0, r0);
+        std::get<3>(s) = _mm_or_si128(l1, r1);
+
+        std::get<1>(s) = _mm_xor_si128(std::get<0>(s), std::get<1>(s));
+        std::get<3>(s) = _mm_xor_si128(std::get<2>(s), std::get<3>(s));
     }
 
     template <std::size_t N>
@@ -374,20 +468,86 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     }
 
     template <std::size_t N>
-    static void pbox(std::array<__m128i, 8> &s)
+    static void sbox(std::array<__m128i, 16> &s, std::true_type)
+    {
+        constexpr int L0 = Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
+        constexpr int L1 = Constants::rotate::value[1 % (K / 2)][(N - 1) % 8];
+        constexpr int L2 = Constants::rotate::value[2 % (K / 2)][(N - 1) % 8];
+        constexpr int L3 = Constants::rotate::value[3 % (K / 2)][(N - 1) % 8];
+        constexpr int L4 = Constants::rotate::value[4 % (K / 2)][(N - 1) % 8];
+        constexpr int L5 = Constants::rotate::value[5 % (K / 2)][(N - 1) % 8];
+        constexpr int L6 = Constants::rotate::value[6 % (K / 2)][(N - 1) % 8];
+        constexpr int L7 = Constants::rotate::value[7 % (K / 2)][(N - 1) % 8];
+        constexpr int R0 = 64 - L0;
+        constexpr int R1 = 64 - L1;
+        constexpr int R2 = 64 - L2;
+        constexpr int R3 = 64 - L3;
+        constexpr int R4 = 64 - L4;
+        constexpr int R5 = 64 - L5;
+        constexpr int R6 = 64 - L6;
+        constexpr int R7 = 64 - L7;
+
+        std::get<0x0>(s) = _mm_add_epi64(std::get<0x0>(s), std::get<0x1>(s));
+        std::get<0x2>(s) = _mm_add_epi64(std::get<0x2>(s), std::get<0x3>(s));
+        std::get<0x4>(s) = _mm_add_epi64(std::get<0x4>(s), std::get<0x5>(s));
+        std::get<0x6>(s) = _mm_add_epi64(std::get<0x6>(s), std::get<0x7>(s));
+        std::get<0x8>(s) = _mm_add_epi64(std::get<0x8>(s), std::get<0x9>(s));
+        std::get<0xA>(s) = _mm_add_epi64(std::get<0xA>(s), std::get<0xB>(s));
+        std::get<0xC>(s) = _mm_add_epi64(std::get<0xC>(s), std::get<0xD>(s));
+        std::get<0xE>(s) = _mm_add_epi64(std::get<0xE>(s), std::get<0xF>(s));
+
+        __m128i l0 = _mm_slli_epi64(std::get<0x1>(s), L0);
+        __m128i l1 = _mm_slli_epi64(std::get<0x3>(s), L1);
+        __m128i l2 = _mm_slli_epi64(std::get<0x5>(s), L2);
+        __m128i l3 = _mm_slli_epi64(std::get<0x7>(s), L3);
+        __m128i l4 = _mm_slli_epi64(std::get<0x9>(s), L4);
+        __m128i l5 = _mm_slli_epi64(std::get<0xB>(s), L5);
+        __m128i l6 = _mm_slli_epi64(std::get<0xD>(s), L6);
+        __m128i l7 = _mm_slli_epi64(std::get<0xF>(s), L7);
+
+        __m128i r0 = _mm_srli_epi64(std::get<0x1>(s), R0);
+        __m128i r1 = _mm_srli_epi64(std::get<0x3>(s), R1);
+        __m128i r2 = _mm_srli_epi64(std::get<0x5>(s), R2);
+        __m128i r3 = _mm_srli_epi64(std::get<0x7>(s), R3);
+        __m128i r4 = _mm_srli_epi64(std::get<0x9>(s), R4);
+        __m128i r5 = _mm_srli_epi64(std::get<0xB>(s), R5);
+        __m128i r6 = _mm_srli_epi64(std::get<0xD>(s), R6);
+        __m128i r7 = _mm_srli_epi64(std::get<0xF>(s), R7);
+
+        std::get<0x1>(s) = _mm_or_si128(l0, r0);
+        std::get<0x3>(s) = _mm_or_si128(l1, r1);
+        std::get<0x5>(s) = _mm_or_si128(l2, r2);
+        std::get<0x7>(s) = _mm_or_si128(l3, r3);
+        std::get<0x9>(s) = _mm_or_si128(l4, r4);
+        std::get<0xB>(s) = _mm_or_si128(l5, r5);
+        std::get<0xD>(s) = _mm_or_si128(l6, r6);
+        std::get<0xF>(s) = _mm_or_si128(l7, r7);
+
+        std::get<0x1>(s) = _mm_xor_si128(std::get<0x0>(s), std::get<0x1>(s));
+        std::get<0x3>(s) = _mm_xor_si128(std::get<0x2>(s), std::get<0x3>(s));
+        std::get<0x5>(s) = _mm_xor_si128(std::get<0x4>(s), std::get<0x5>(s));
+        std::get<0x7>(s) = _mm_xor_si128(std::get<0x6>(s), std::get<0x7>(s));
+        std::get<0x9>(s) = _mm_xor_si128(std::get<0x8>(s), std::get<0x9>(s));
+        std::get<0xB>(s) = _mm_xor_si128(std::get<0xA>(s), std::get<0xB>(s));
+        std::get<0xD>(s) = _mm_xor_si128(std::get<0xC>(s), std::get<0xD>(s));
+        std::get<0xF>(s) = _mm_xor_si128(std::get<0xE>(s), std::get<0xF>(s));
+    }
+
+    template <std::size_t N, std::size_t S>
+    static void pbox(std::array<__m128i, S> &s)
     {
         pbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
-    template <std::size_t>
-    static void pbox(std::array<__m128i, 8> &, std::false_type)
+    template <std::size_t, std::size_t S>
+    static void pbox(std::array<__m128i, S> &, std::false_type)
     {
     }
 
-    template <std::size_t N>
-    static void pbox(std::array<__m128i, 8> &s, std::true_type)
+    template <std::size_t N, std::size_t S>
+    static void pbox(std::array<__m128i, S> &s, std::true_type)
     {
-        permute<N, 0>(s, std::integral_constant<bool, 0 < M_>());
+        permute<N, 0>(s, std::integral_constant<bool, 0 < S / K>());
     }
 
     template <std::size_t, std::size_t>
@@ -405,15 +565,15 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
         set_key<N, I + 1>(k, par, std::integral_constant<bool, I + 1 < K>());
     }
 
-    template <std::size_t, std::size_t>
-    static void permute(std::array<__m128i, 8> &, std::false_type)
+    template <std::size_t, std::size_t, std::size_t S>
+    static void permute(std::array<__m128i, S> &, std::false_type)
     {
     }
 
-    template <std::size_t N, std::size_t I>
-    static void permute(std::array<__m128i, 8> &s, std::true_type)
+    template <std::size_t N, std::size_t I, std::size_t S>
+    static void permute(std::array<__m128i, S> &s, std::true_type)
     {
         ThreefryPBox<__m128i, K, N, Constants>::eval(s.data() + I * K);
-        permute<N, I + 1>(s, std::integral_constant<bool, I + 1 < M_>());
+        permute<N, I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
 }; // class ThreefryGeneratorImpl

@@ -36,10 +36,9 @@ use Getopt::Long;
 
 my $run = 0;
 my $build = 0;
-my $llvm = "../../build/llvm-release";
-my $gnu = "../../build/gnu-release";
-my $intel = "../../build/intel-release";
-my $make = "ninja";
+my $llvm = "../../build/release-llvm";
+my $gnu = "../../build/release-gnu";
+my $intel = "../../build/release-intel";
 my $name;
 my $write = 0;
 my $pdf = 0;
@@ -49,7 +48,6 @@ GetOptions(
     "llvm=s"   => \$llvm,
     "gnu=s"    => \$gnu,
     "intel=s"  => \$intel,
-    "make=s"   => \$make,
     "name=s"   => \$name,
     "write"    => \$write,
     "pdf"      => \$pdf,
@@ -121,11 +119,12 @@ sub build {
     push @target, "\Lrandom_rng_$_" for @rng;
     for my $c (@compiler) {
         my $d = $compiler{$c};
+        next if (not -d $d);
         say $d;
         if ($name) {
-            `$make -C $d @target 2>&1`;
+            `ninja -C $d @target 2>&1`;
         } else {
-            `$make -C $d random_rng 2>&1`;
+            `ninja -C $d random_rng 2>&1`;
         }
     }
 }
@@ -136,9 +135,10 @@ sub run {
     for my $c (@compiler) {
         my @result;
         my $d = $compiler{$c};
+        next if (not -d $d);
         say $d;
         for my $r (@rng) {
-            my $cmd = "$make -C $d \Lrandom_rng_$r-check 2>&1";
+            my $cmd = "ninja -C $d \Lrandom_rng_$r-check 2>&1";
             my $cpb_s = 0xFFFF;
             my $cpb_b = 0xFFFF;
             my $cpb_sp = 0xFFFF;
@@ -160,7 +160,7 @@ sub run {
             }
             my $line;
             if ($count) {
-                $line .= sprintf("%-20s", $r);
+                $line .= sprintf("%-25s", $r);
                 $line .= &format($cpb_s);
                 $line .= &format($cpb_b);
                 $line .= &format($cpb_sp);
@@ -258,7 +258,7 @@ sub table {
                 }
                 my $name = $r;
                 $name =~ s/_/\\_/g;
-                $name = " " x 2 . sprintf("%-30s", "\\texttt{$name}");
+                $name = " " x 2 . sprintf("%-35s", "\\texttt{$name}");
                 if ($line_s and $line_b) {
                     $table .= $name . $line_s . $line_b . "\\\\\n";
                 }
