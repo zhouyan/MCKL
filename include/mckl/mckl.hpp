@@ -88,17 +88,9 @@
 /// \defgroup Random Random number generating
 /// \brief Random number generating engines and utilities
 
-/// \defgroup AESNI AES-NI
+/// \defgroup AES AES
 /// \ingroup Random
-/// \brief Random number generating using AES-NI
-
-/// \defgroup Distribution Distribution
-/// \ingroup Random
-/// \brief Distribution random variates
-
-/// \defgroup MKL Intel Math Kernel Library
-/// \ingroup Random
-/// \brief Random number generating using MKL
+/// \brief Random number generating using AES round function
 
 /// \defgroup Philox Philox
 /// \ingroup Random
@@ -108,9 +100,17 @@
 /// \ingroup Random
 /// \brief Random number generating using Random123 Threefry algorithm
 
+/// \defgroup MKL Intel Math Kernel Library
+/// \ingroup Random
+/// \brief Random number generating using MKL
+
 /// \defgroup RDRAND Intel DRNG
 /// \ingroup Random
 /// \brief Random number generating using Intel RDRAND instructions
+
+/// \defgroup Distribution Distribution
+/// \ingroup Random
+/// \brief Distribution random variates
 
 /// \defgroup U01 U01
 /// \ingroup Random

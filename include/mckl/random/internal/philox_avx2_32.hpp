@@ -40,7 +40,7 @@ class PhiloxGeneratorImplAVX2_32
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
-        eval(state, key, std::integral_constant<bool, K == 4>());
+        eval(state, key, std::integral_constant<bool, K == 8>());
     }
 
     template <std::size_t B>
@@ -134,14 +134,14 @@ class PhiloxGeneratorImplAVX2_32
         state = std::get<0>(s);
     }
 
-    template <std::size_t>
-    static void round(std::array<__m256i, 8> &, __m256i &, const __m256i &,
+    template <std::size_t, std::size_t S>
+    static void round(std::array<__m256i, S> &, __m256i &, const __m256i &,
         const __m256i &, std::false_type)
     {
     }
 
-    template <std::size_t N>
-    static void round(std::array<__m256i, 8> &s, __m256i &p, const __m256i &w,
+    template <std::size_t N, std::size_t S>
+    static void round(std::array<__m256i, S> &s, __m256i &p, const __m256i &w,
         const __m256i &m, std::true_type)
     {
         kbox<N + 0x0>(p, w);
@@ -413,7 +413,9 @@ class PhiloxGeneratorImplAVX2_32
     }
 
     template <std::size_t S>
-    static void permute(std::array<__m256i, S> &, std::false_type) {}
+    static void permute(std::array<__m256i, S> &, std::false_type)
+    {
+    }
 
     template <std::size_t S>
     static void permute(std::array<__m256i, S> &s, std::true_type)
@@ -431,7 +433,9 @@ class PhiloxGeneratorImpl<T, 2, Rounds, Constants, 32>
         PhiloxGeneratorImpl<T, 2, Rounds, Constants>>;
 
     template <std::size_t S>
-    static void permute_first(std::array<__m256i, S> &) {}
+    static void permute_first(std::array<__m256i, S> &)
+    {
+    }
 
     static void permute(std::array<__m256i, 1> &s)
     {

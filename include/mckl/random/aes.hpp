@@ -422,7 +422,7 @@ class AESGenerator
     }
 }; // class AESGenerator
 
-/// \brief RNG engine using AES-NI instructions
+/// \brief RNG engine using AES round function
 /// \ingroup AES
 template <typename ResultType, typename KeySeqType>
 using AESEngine = CounterEngine<ResultType, AESGenerator<KeySeqType>>;
