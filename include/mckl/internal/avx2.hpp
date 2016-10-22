@@ -48,18 +48,21 @@ namespace mckl
 namespace internal
 {
 
-inline void load_si256(std::array<__m256i, 1> &s, const __m256i *sptr)
+MCKL_FLATTEN inline void load_si256(
+    std::array<__m256i, 1> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
 }
 
-inline void load_si256(std::array<__m256i, 2> &s, const __m256i *sptr)
+MCKL_FLATTEN inline void load_si256(
+    std::array<__m256i, 2> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
 }
 
-inline void load_si256(std::array<__m256i, 4> &s, const __m256i *sptr)
+MCKL_FLATTEN inline void load_si256(
+    std::array<__m256i, 4> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
@@ -67,7 +70,8 @@ inline void load_si256(std::array<__m256i, 4> &s, const __m256i *sptr)
     std::get<3>(s) = _mm256_load_si256(sptr++);
 }
 
-inline void load_si256(std::array<__m256i, 8> &s, const __m256i *sptr)
+MCKL_FLATTEN inline void load_si256(
+    std::array<__m256i, 8> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
@@ -79,7 +83,8 @@ inline void load_si256(std::array<__m256i, 8> &s, const __m256i *sptr)
     std::get<7>(s) = _mm256_load_si256(sptr++);
 }
 
-inline void load_si256(std::array<__m256i, 16> &s, const __m256i *sptr)
+MCKL_FLATTEN inline void load_si256(
+    std::array<__m256i, 16> &s, const __m256i *sptr)
 {
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
     std::get<0x1>(s) = _mm256_load_si256(sptr++);
@@ -99,18 +104,21 @@ inline void load_si256(std::array<__m256i, 16> &s, const __m256i *sptr)
     std::get<0xF>(s) = _mm256_load_si256(sptr++);
 }
 
-inline void store_si256(const std::array<__m256i, 1> &s, __m256i *sptr)
+MCKL_FLATTEN inline void store_si256(
+    const std::array<__m256i, 1> &s, __m256i *sptr)
 {
     _mm256_store_si256(sptr++, std::get<0>(s));
 }
 
-inline void store_si256(const std::array<__m256i, 2> &s, __m256i *sptr)
+MCKL_FLATTEN inline void store_si256(
+    const std::array<__m256i, 2> &s, __m256i *sptr)
 {
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
 }
 
-inline void store_si256(const std::array<__m256i, 4> &s, __m256i *sptr)
+MCKL_FLATTEN inline void store_si256(
+    const std::array<__m256i, 4> &s, __m256i *sptr)
 {
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
@@ -118,7 +126,8 @@ inline void store_si256(const std::array<__m256i, 4> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<3>(s));
 }
 
-inline void store_si256(const std::array<__m256i, 8> &s, __m256i *sptr)
+MCKL_FLATTEN inline void store_si256(
+    const std::array<__m256i, 8> &s, __m256i *sptr)
 {
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
@@ -130,7 +139,8 @@ inline void store_si256(const std::array<__m256i, 8> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
-inline void store_si256(const std::array<__m256i, 16> &s, __m256i *sptr)
+MCKL_FLATTEN inline void store_si256(
+    const std::array<__m256i, 16> &s, __m256i *sptr)
 {
     _mm256_store_si256(sptr++, std::get<0x0>(s));
     _mm256_store_si256(sptr++, std::get<0x1>(s));
@@ -153,7 +163,7 @@ inline void store_si256(const std::array<__m256i, 16> &s, __m256i *sptr)
 template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
     std::size_t i4, std::size_t i5, std::size_t i6, std::size_t i7,
     std::size_t N>
-inline void transpose8x32_si256(std::array<__m256i, N> &s)
+MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
 {
     __m256i s0 = _mm256_unpacklo_epi32(std::get<i0>(s), std::get<i1>(s));
     __m256i s1 = _mm256_unpacklo_epi32(std::get<i2>(s), std::get<i3>(s));
@@ -183,7 +193,7 @@ inline void transpose8x32_si256(std::array<__m256i, N> &s)
     std::get<i7>(s) = _mm256_permute2x128_si256(v2, v3, 0x31);
 }
 
-inline void transpose8x32_load_si256(
+MCKL_FLATTEN inline void transpose8x32_load_si256(
     std::array<__m256i, 8> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
@@ -197,7 +207,7 @@ inline void transpose8x32_load_si256(
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-inline void transpose8x32_load_si256(
+MCKL_FLATTEN inline void transpose8x32_load_si256(
     std::array<__m256i, 16> &s, const __m256i *sptr)
 {
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
@@ -220,7 +230,8 @@ inline void transpose8x32_load_si256(
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose8x32_store_si256(std::array<__m256i, 8> &s, __m256i *sptr)
+MCKL_FLATTEN inline void transpose8x32_store_si256(
+    std::array<__m256i, 8> &s, __m256i *sptr)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
     _mm256_store_si256(sptr++, std::get<0>(s));
@@ -233,7 +244,7 @@ inline void transpose8x32_store_si256(std::array<__m256i, 8> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
-inline void transpose8x32_store_si256(
+MCKL_FLATTEN inline void transpose8x32_store_si256(
     std::array<__m256i, 16> &s, __m256i *sptr)
 {
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
@@ -258,7 +269,7 @@ inline void transpose8x32_store_si256(
 
 template <std::size_t i0, std::size_t i1, std::size_t i2, std::size_t i3,
     std::size_t N>
-inline void transpose4x64_si256(std::array<__m256i, N> &s)
+MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
 {
     __m256i s0 = _mm256_unpacklo_epi64(std::get<i0>(s), std::get<i1>(s));
     __m256i s1 = _mm256_unpacklo_epi64(std::get<i2>(s), std::get<i3>(s));
@@ -271,7 +282,7 @@ inline void transpose4x64_si256(std::array<__m256i, N> &s)
     std::get<i3>(s) = _mm256_permute2x128_si256(t0, t1, 0x31);
 }
 
-inline void transpose4x64_load_si256(
+MCKL_FLATTEN inline void transpose4x64_load_si256(
     std::array<__m256i, 4> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
@@ -281,7 +292,7 @@ inline void transpose4x64_load_si256(
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-inline void transpose4x64_load_si256(
+MCKL_FLATTEN inline void transpose4x64_load_si256(
     std::array<__m256i, 8> &s, const __m256i *sptr)
 {
     std::get<0>(s) = _mm256_load_si256(sptr++);
@@ -296,7 +307,7 @@ inline void transpose4x64_load_si256(
     transpose4x64_si256<4, 5, 6, 7>(s);
 }
 
-inline void transpose4x64_load_si256(
+MCKL_FLATTEN inline void transpose4x64_load_si256(
     std::array<__m256i, 16> &s, const __m256i *sptr)
 {
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
@@ -321,7 +332,8 @@ inline void transpose4x64_load_si256(
     transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose4x64_store_si256(std::array<__m256i, 4> &s, __m256i *sptr)
+MCKL_FLATTEN inline void transpose4x64_store_si256(
+    std::array<__m256i, 4> &s, __m256i *sptr)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     _mm256_store_si256(sptr++, std::get<0>(s));
@@ -330,7 +342,8 @@ inline void transpose4x64_store_si256(std::array<__m256i, 4> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<3>(s));
 }
 
-inline void transpose4x64_store_si256(std::array<__m256i, 8> &s, __m256i *sptr)
+MCKL_FLATTEN inline void transpose4x64_store_si256(
+    std::array<__m256i, 8> &s, __m256i *sptr)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
@@ -344,7 +357,7 @@ inline void transpose4x64_store_si256(std::array<__m256i, 8> &s, __m256i *sptr)
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
-inline void transpose4x64_store_si256(
+MCKL_FLATTEN inline void transpose4x64_store_si256(
     std::array<__m256i, 16> &s, __m256i *sptr)
 {
     transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);

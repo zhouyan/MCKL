@@ -637,6 +637,7 @@ class AESGeneratorImpl
         __m128i s = _mm_load_si128(sptr);
 
         encfirst(s, rk);
+
         enc<0x1>(s, rk);
         enc<0x2>(s, rk);
         enc<0x3>(s, rk);
@@ -652,7 +653,9 @@ class AESGeneratorImpl
         enc<0xD>(s, rk);
         enc<0xE>(s, rk);
         enc<0xF>(s, rk);
+
         round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
+
         enclast(s, rk);
 
         _mm_store_si128(sptr, s);
@@ -667,28 +670,33 @@ class AESGeneratorImpl
 
         std::array<__m128i, B> s;
 
-        load_si128(s, reinterpret_cast<const __m128i *>(state.data()));
+        MCKL_FLATTEN_CALL load_si128(
+            s, reinterpret_cast<const __m128i *>(state.data()));
 
-        encfirst(s, rk);
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
+        MCKL_FLATTEN_CALL encfirst(s, rk);
+
+        MCKL_FLATTEN_CALL enc<0x1>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x2>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x3>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x4>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x5>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x6>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x7>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x8>(s, rk);
+        MCKL_FLATTEN_CALL enc<0x9>(s, rk);
+        MCKL_FLATTEN_CALL enc<0xA>(s, rk);
+        MCKL_FLATTEN_CALL enc<0xB>(s, rk);
+        MCKL_FLATTEN_CALL enc<0xC>(s, rk);
+        MCKL_FLATTEN_CALL enc<0xD>(s, rk);
+        MCKL_FLATTEN_CALL enc<0xE>(s, rk);
+        MCKL_FLATTEN_CALL enc<0xF>(s, rk);
+
         round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast(s, rk);
 
-        store_si128(s, reinterpret_cast<__m128i *>(state.data()));
+        MCKL_FLATTEN_CALL enclast(s, rk);
+
+        MCKL_FLATTEN_CALL store_si128(
+            s, reinterpret_cast<__m128i *>(state.data()));
     }
 
     private:
@@ -718,7 +726,7 @@ class AESGeneratorImpl
     static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        enc<N>(s, rk);
+        MCKL_FLATTEN_CALL enc<N>(s, rk);
         round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
