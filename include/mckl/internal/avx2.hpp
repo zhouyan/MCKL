@@ -48,31 +48,39 @@ namespace mckl
 namespace internal
 {
 
+template <typename T>
 MCKL_FLATTEN inline void load_si256(
-    std::array<__m256i, 1> &s, const __m256i *sptr)
+    std::array<__m256i, 1> &s, const std::array<T, 32 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0>(s) = _mm256_load_si256(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si256(
-    std::array<__m256i, 2> &s, const __m256i *sptr)
+    std::array<__m256i, 2> &s, const std::array<T, 64 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si256(
-    std::array<__m256i, 4> &s, const __m256i *sptr)
+    std::array<__m256i, 4> &s, const std::array<T, 128 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
     std::get<2>(s) = _mm256_load_si256(sptr++);
     std::get<3>(s) = _mm256_load_si256(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si256(
-    std::array<__m256i, 8> &s, const __m256i *sptr)
+    std::array<__m256i, 8> &s, const std::array<T, 256 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
     std::get<2>(s) = _mm256_load_si256(sptr++);
@@ -83,9 +91,11 @@ MCKL_FLATTEN inline void load_si256(
     std::get<7>(s) = _mm256_load_si256(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si256(
-    std::array<__m256i, 16> &s, const __m256i *sptr)
+    std::array<__m256i, 16> &s, const std::array<T, 512 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
     std::get<0x1>(s) = _mm256_load_si256(sptr++);
     std::get<0x2>(s) = _mm256_load_si256(sptr++);
@@ -104,31 +114,39 @@ MCKL_FLATTEN inline void load_si256(
     std::get<0xF>(s) = _mm256_load_si256(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si256(
-    const std::array<__m256i, 1> &s, __m256i *sptr)
+    const std::array<__m256i, 1> &s, std::array<T, 32 / sizeof(T)> &state)
 {
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si256(
-    const std::array<__m256i, 2> &s, __m256i *sptr)
+    const std::array<__m256i, 2> &s, std::array<T, 64 / sizeof(T)> &state)
 {
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si256(
-    const std::array<__m256i, 4> &s, __m256i *sptr)
+    const std::array<__m256i, 4> &s, std::array<T, 128 / sizeof(T)> &state)
 {
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
     _mm256_store_si256(sptr++, std::get<2>(s));
     _mm256_store_si256(sptr++, std::get<3>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si256(
-    const std::array<__m256i, 8> &s, __m256i *sptr)
+    const std::array<__m256i, 8> &s, std::array<T, 256 / sizeof(T)> &state)
 {
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
     _mm256_store_si256(sptr++, std::get<2>(s));
@@ -139,9 +157,11 @@ MCKL_FLATTEN inline void store_si256(
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si256(
-    const std::array<__m256i, 16> &s, __m256i *sptr)
+    const std::array<__m256i, 16> &s, std::array<T, 512 / sizeof(T)> &state)
 {
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0x0>(s));
     _mm256_store_si256(sptr++, std::get<0x1>(s));
     _mm256_store_si256(sptr++, std::get<0x2>(s));
@@ -193,9 +213,11 @@ MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
     std::get<i7>(s) = _mm256_permute2x128_si256(v2, v3, 0x31);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose8x32_load_si256(
-    std::array<__m256i, 8> &s, const __m256i *sptr)
+    std::array<__m256i, 8> &s, const std::array<T, 256 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
     std::get<2>(s) = _mm256_load_si256(sptr++);
@@ -207,9 +229,11 @@ MCKL_FLATTEN inline void transpose8x32_load_si256(
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose8x32_load_si256(
-    std::array<__m256i, 16> &s, const __m256i *sptr)
+    std::array<__m256i, 16> &s, const std::array<T, 512 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
     std::get<0x8>(s) = _mm256_load_si256(sptr++);
     std::get<0x1>(s) = _mm256_load_si256(sptr++);
@@ -230,10 +254,12 @@ MCKL_FLATTEN inline void transpose8x32_load_si256(
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose8x32_store_si256(
-    std::array<__m256i, 8> &s, __m256i *sptr)
+    std::array<__m256i, 8> &s, std::array<T, 256 / sizeof(T)> &state)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
     _mm256_store_si256(sptr++, std::get<2>(s));
@@ -244,11 +270,13 @@ MCKL_FLATTEN inline void transpose8x32_store_si256(
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose8x32_store_si256(
-    std::array<__m256i, 16> &s, __m256i *sptr)
+    std::array<__m256i, 16> &s, std::array<T, 512 / sizeof(T)> &state)
 {
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0x0>(s));
     _mm256_store_si256(sptr++, std::get<0x8>(s));
     _mm256_store_si256(sptr++, std::get<0x1>(s));
@@ -282,9 +310,11 @@ MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
     std::get<i3>(s) = _mm256_permute2x128_si256(t0, t1, 0x31);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x64_load_si256(
-    std::array<__m256i, 4> &s, const __m256i *sptr)
+    std::array<__m256i, 4> &s, const std::array<T, 128 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
     std::get<2>(s) = _mm256_load_si256(sptr++);
@@ -292,9 +322,11 @@ MCKL_FLATTEN inline void transpose4x64_load_si256(
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x64_load_si256(
-    std::array<__m256i, 8> &s, const __m256i *sptr)
+    std::array<__m256i, 8> &s, const std::array<T, 256 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0>(s) = _mm256_load_si256(sptr++);
     std::get<4>(s) = _mm256_load_si256(sptr++);
     std::get<1>(s) = _mm256_load_si256(sptr++);
@@ -307,9 +339,11 @@ MCKL_FLATTEN inline void transpose4x64_load_si256(
     transpose4x64_si256<4, 5, 6, 7>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x64_load_si256(
-    std::array<__m256i, 16> &s, const __m256i *sptr)
+    std::array<__m256i, 16> &s, const std::array<T, 512 / sizeof(T)> &state)
 {
+    const __m256i *sptr = reinterpret_cast<const __m256i *>(state.data());
     std::get<0x0>(s) = _mm256_load_si256(sptr++);
     std::get<0x4>(s) = _mm256_load_si256(sptr++);
     std::get<0x8>(s) = _mm256_load_si256(sptr++);
@@ -332,21 +366,25 @@ MCKL_FLATTEN inline void transpose4x64_load_si256(
     transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x64_store_si256(
-    std::array<__m256i, 4> &s, __m256i *sptr)
+    std::array<__m256i, 4> &s, std::array<T, 128 / sizeof(T)> &state)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
     _mm256_store_si256(sptr++, std::get<2>(s));
     _mm256_store_si256(sptr++, std::get<3>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x64_store_si256(
-    std::array<__m256i, 8> &s, __m256i *sptr)
+    std::array<__m256i, 8> &s, std::array<T, 256 / sizeof(T)> &state)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0>(s));
     _mm256_store_si256(sptr++, std::get<4>(s));
     _mm256_store_si256(sptr++, std::get<1>(s));
@@ -357,13 +395,15 @@ MCKL_FLATTEN inline void transpose4x64_store_si256(
     _mm256_store_si256(sptr++, std::get<7>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x64_store_si256(
-    std::array<__m256i, 16> &s, __m256i *sptr)
+    std::array<__m256i, 16> &s, std::array<T, 512 / sizeof(T)> &state)
 {
     transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);
     transpose4x64_si256<0x8, 0x9, 0xA, 0xB>(s);
     transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
+    __m256i *sptr = reinterpret_cast<__m256i *>(state.data());
     _mm256_store_si256(sptr++, std::get<0x0>(s));
     _mm256_store_si256(sptr++, std::get<0x4>(s));
     _mm256_store_si256(sptr++, std::get<0x8>(s));

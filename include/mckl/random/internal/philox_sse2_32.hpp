@@ -269,8 +269,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 
         std::array<__m128i, S> s;
 
-        MCKL_FLATTEN_CALL load_si128(
-            s, reinterpret_cast<const __m128i *>(state.data()));
+        MCKL_FLATTEN_CALL load_si128(s, state);
 
         MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);
 
@@ -312,8 +311,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 
         MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);
 
-        MCKL_FLATTEN_CALL store_si128(
-            s, reinterpret_cast<__m128i *>(state.data()));
+        MCKL_FLATTEN_CALL store_si128(s, state);
     }
 
     private:

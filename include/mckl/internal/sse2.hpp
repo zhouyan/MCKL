@@ -48,31 +48,39 @@ namespace mckl
 namespace internal
 {
 
+template <typename T>
 MCKL_FLATTEN inline void load_si128(
-    std::array<__m128i, 1> &s, const __m128i *sptr)
+    std::array<__m128i, 1> &s, const std::array<T, 16 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si128(
-    std::array<__m128i, 2> &s, const __m128i *sptr)
+    std::array<__m128i, 2> &s, const std::array<T, 32 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si128(
-    std::array<__m128i, 4> &s, const __m128i *sptr)
+    std::array<__m128i, 4> &s, const std::array<T, 64 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
     std::get<2>(s) = _mm_load_si128(sptr++);
     std::get<3>(s) = _mm_load_si128(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si128(
-    std::array<__m128i, 8> &s, const __m128i *sptr)
+    std::array<__m128i, 8> &s, const std::array<T, 128 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
     std::get<2>(s) = _mm_load_si128(sptr++);
@@ -83,9 +91,11 @@ MCKL_FLATTEN inline void load_si128(
     std::get<7>(s) = _mm_load_si128(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void load_si128(
-    std::array<__m128i, 16> &s, const __m128i *sptr)
+    std::array<__m128i, 16> &s, const std::array<T, 256 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0x0>(s) = _mm_load_si128(sptr++);
     std::get<0x1>(s) = _mm_load_si128(sptr++);
     std::get<0x2>(s) = _mm_load_si128(sptr++);
@@ -104,31 +114,39 @@ MCKL_FLATTEN inline void load_si128(
     std::get<0xF>(s) = _mm_load_si128(sptr++);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si128(
-    const std::array<__m128i, 1> &s, __m128i *sptr)
+    const std::array<__m128i, 1> &s, std::array<T, 16 / sizeof(T)> &state)
 {
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si128(
-    const std::array<__m128i, 2> &s, __m128i *sptr)
+    const std::array<__m128i, 2> &s, std::array<T, 32 / sizeof(T)> &state)
 {
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si128(
-    const std::array<__m128i, 4> &s, __m128i *sptr)
+    const std::array<__m128i, 4> &s, std::array<T, 64 / sizeof(T)> &state)
 {
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
     _mm_store_si128(sptr++, std::get<2>(s));
     _mm_store_si128(sptr++, std::get<3>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si128(
-    const std::array<__m128i, 8> &s, __m128i *sptr)
+    const std::array<__m128i, 8> &s, std::array<T, 128 / sizeof(T)> &state)
 {
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
     _mm_store_si128(sptr++, std::get<2>(s));
@@ -139,9 +157,11 @@ MCKL_FLATTEN inline void store_si128(
     _mm_store_si128(sptr++, std::get<7>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void store_si128(
-    const std::array<__m128i, 16> &s, __m128i *sptr)
+    const std::array<__m128i, 16> &s, std::array<T, 256 / sizeof(T)> &state)
 {
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0x0>(s));
     _mm_store_si128(sptr++, std::get<0x1>(s));
     _mm_store_si128(sptr++, std::get<0x2>(s));
@@ -175,9 +195,11 @@ MCKL_FLATTEN inline void transpose4x32_si128(std::array<__m128i, N> &s)
     std::get<i3>(s) = _mm_unpackhi_epi64(t0, t1);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x32_load_si128(
-    std::array<__m128i, 4> &s, const __m128i *sptr)
+    std::array<__m128i, 4> &s, const std::array<T, 64 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
     std::get<2>(s) = _mm_load_si128(sptr++);
@@ -185,9 +207,11 @@ MCKL_FLATTEN inline void transpose4x32_load_si128(
     transpose4x32_si128<0, 1, 2, 3>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x32_load_si128(
-    std::array<__m128i, 8> &s, const __m128i *sptr)
+    std::array<__m128i, 8> &s, const std::array<T, 128 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<4>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
@@ -200,9 +224,11 @@ MCKL_FLATTEN inline void transpose4x32_load_si128(
     transpose4x32_si128<4, 5, 6, 7>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x32_load_si128(
-    std::array<__m128i, 16> &s, const __m128i *sptr)
+    std::array<__m128i, 16> &s, const std::array<T, 256 / sizeof(T)> &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0x0>(s) = _mm_load_si128(sptr++);
     std::get<0x4>(s) = _mm_load_si128(sptr++);
     std::get<0x8>(s) = _mm_load_si128(sptr++);
@@ -225,21 +251,25 @@ MCKL_FLATTEN inline void transpose4x32_load_si128(
     transpose4x32_si128<0xC, 0xD, 0xE, 0xF>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x32_store_si128(
-    std::array<__m128i, 4> &s, __m128i *sptr)
+    std::array<__m128i, 4> &s, std::array<T, 64 / sizeof(T)> &state)
 {
     transpose4x32_si128<0, 1, 2, 3>(s);
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
     _mm_store_si128(sptr++, std::get<2>(s));
     _mm_store_si128(sptr++, std::get<3>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x32_store_si128(
-    std::array<__m128i, 8> &s, __m128i *sptr)
+    std::array<__m128i, 8> &s, std::array<T, 128 / sizeof(T)> &state)
 {
     transpose4x32_si128<0, 1, 2, 3>(s);
     transpose4x32_si128<4, 5, 6, 7>(s);
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<4>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
@@ -250,13 +280,15 @@ MCKL_FLATTEN inline void transpose4x32_store_si128(
     _mm_store_si128(sptr++, std::get<7>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose4x32_store_si128(
-    std::array<__m128i, 16> &s, __m128i *sptr)
+    std::array<__m128i, 16> &s, std::array<T, 256 / sizeof(T)> &state)
 {
     transpose4x32_si128<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x32_si128<0x4, 0x5, 0x6, 0x7>(s);
     transpose4x32_si128<0x8, 0x9, 0xA, 0xB>(s);
     transpose4x32_si128<0xC, 0xD, 0xE, 0xF>(s);
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0x0>(s));
     _mm_store_si128(sptr++, std::get<0x4>(s));
     _mm_store_si128(sptr++, std::get<0x8>(s));
@@ -285,17 +317,21 @@ MCKL_FLATTEN inline void transpose2x64_si128(std::array<__m128i, N> &s)
     std::get<i1>(s) = t0;
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_load_si128(
-    std::array<__m128i, 2> &s, const __m128i *sptr)
+    std::array<__m128i, 2> &s, const __m128i &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
     transpose2x64_si128<0, 1>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_load_si128(
-    std::array<__m128i, 4> &s, const __m128i *sptr)
+    std::array<__m128i, 4> &s, const __m128i &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<2>(s) = _mm_load_si128(sptr++);
     std::get<1>(s) = _mm_load_si128(sptr++);
@@ -304,9 +340,11 @@ MCKL_FLATTEN inline void transpose2x64_load_si128(
     transpose2x64_si128<2, 3>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_load_si128(
-    std::array<__m128i, 8> &s, const __m128i *sptr)
+    std::array<__m128i, 8> &s, const __m128i &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0>(s) = _mm_load_si128(sptr++);
     std::get<2>(s) = _mm_load_si128(sptr++);
     std::get<4>(s) = _mm_load_si128(sptr++);
@@ -321,9 +359,11 @@ MCKL_FLATTEN inline void transpose2x64_load_si128(
     transpose2x64_si128<6, 7>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_load_si128(
-    std::array<__m128i, 16> &s, const __m128i *sptr)
+    std::array<__m128i, 16> &s, const __m128i &state)
 {
+    const __m128i *sptr = reinterpret_cast<const __m128i *>(state.data());
     std::get<0x0>(s) = _mm_load_si128(sptr++);
     std::get<0x2>(s) = _mm_load_si128(sptr++);
     std::get<0x4>(s) = _mm_load_si128(sptr++);
@@ -350,32 +390,38 @@ MCKL_FLATTEN inline void transpose2x64_load_si128(
     transpose2x64_si128<0xE, 0xF>(s);
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_store_si128(
-    std::array<__m128i, 2> &s, __m128i *sptr)
+    std::array<__m128i, 2> &s, __m128i &state)
 {
     transpose2x64_si128<0, 1>(s);
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_store_si128(
-    std::array<__m128i, 4> &s, __m128i *sptr)
+    std::array<__m128i, 4> &s, __m128i &state)
 {
     transpose2x64_si128<0, 1>(s);
     transpose2x64_si128<2, 3>(s);
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<2>(s));
     _mm_store_si128(sptr++, std::get<1>(s));
     _mm_store_si128(sptr++, std::get<3>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_store_si128(
-    std::array<__m128i, 8> &s, __m128i *sptr)
+    std::array<__m128i, 8> &s, __m128i &state)
 {
     transpose2x64_si128<0, 1>(s);
     transpose2x64_si128<2, 3>(s);
     transpose2x64_si128<4, 5>(s);
     transpose2x64_si128<6, 7>(s);
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0>(s));
     _mm_store_si128(sptr++, std::get<2>(s));
     _mm_store_si128(sptr++, std::get<4>(s));
@@ -386,8 +432,9 @@ MCKL_FLATTEN inline void transpose2x64_store_si128(
     _mm_store_si128(sptr++, std::get<7>(s));
 }
 
+template <typename T>
 MCKL_FLATTEN inline void transpose2x64_store_si128(
-    std::array<__m128i, 16> &s, __m128i *sptr)
+    std::array<__m128i, 16> &s, __m128i &state)
 {
     transpose2x64_si128<0x0, 0x1>(s);
     transpose2x64_si128<0x2, 0x3>(s);
@@ -397,6 +444,7 @@ MCKL_FLATTEN inline void transpose2x64_store_si128(
     transpose2x64_si128<0xA, 0xB>(s);
     transpose2x64_si128<0xC, 0xD>(s);
     transpose2x64_si128<0xE, 0xF>(s);
+    __m128i *sptr = reinterpret_cast<__m128i *>(state.data());
     _mm_store_si128(sptr++, std::get<0x0>(s));
     _mm_store_si128(sptr++, std::get<0x2>(s));
     _mm_store_si128(sptr++, std::get<0x4>(s));

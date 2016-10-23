@@ -273,51 +273,49 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 
         std::array<__m256i, S> s;
 
-        MCKL_FLATTEN_CALL load_si256(
-            s, reinterpret_cast<const __m256i *>(state.data()));
+        load_si256(s, state);
 
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);
+        PhiloxGeneratorImplPermute32<K>::first(s);
 
-        MCKL_FLATTEN_CALL kbox<0x0>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x0>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x1>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x1>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x2>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x2>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x3>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x3>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x4>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x4>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x5>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x5>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x6>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x6>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x7>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x7>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x8>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x8>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x9>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x9>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xA>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xA>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xB>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xB>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xC>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xC>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xD>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xD>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xE>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xE>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xF>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xF>(s, p, m);
+        kbox<0x0>(p, w);
+        sbox<0x0>(s, p, m);
+        kbox<0x1>(p, w);
+        sbox<0x1>(s, p, m);
+        kbox<0x2>(p, w);
+        sbox<0x2>(s, p, m);
+        kbox<0x3>(p, w);
+        sbox<0x3>(s, p, m);
+        kbox<0x4>(p, w);
+        sbox<0x4>(s, p, m);
+        kbox<0x5>(p, w);
+        sbox<0x5>(s, p, m);
+        kbox<0x6>(p, w);
+        sbox<0x6>(s, p, m);
+        kbox<0x7>(p, w);
+        sbox<0x7>(s, p, m);
+        kbox<0x8>(p, w);
+        sbox<0x8>(s, p, m);
+        kbox<0x9>(p, w);
+        sbox<0x9>(s, p, m);
+        kbox<0xA>(p, w);
+        sbox<0xA>(s, p, m);
+        kbox<0xB>(p, w);
+        sbox<0xB>(s, p, m);
+        kbox<0xC>(p, w);
+        sbox<0xC>(s, p, m);
+        kbox<0xD>(p, w);
+        sbox<0xD>(s, p, m);
+        kbox<0xE>(p, w);
+        sbox<0xE>(s, p, m);
+        kbox<0xF>(p, w);
+        sbox<0xF>(s, p, m);
 
         round<0x10>(
             s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
 
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);
+        PhiloxGeneratorImplPermute32<K>::last(s);
 
-        MCKL_FLATTEN_CALL store_si256(
-            s, reinterpret_cast<__m256i *>(state.data()));
+        store_si256(s, state);
     }
 
     private:
@@ -346,8 +344,8 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void round(std::array<__m256i, S> &s, __m256i &p, const __m256i &w,
         const __m256i &m, std::true_type)
     {
-        MCKL_FLATTEN_CALL kbox<N>(p, w);
-        MCKL_FLATTEN_CALL sbox<N>(s, p, m);
+        kbox<N>(p, w);
+        sbox<N>(s, p, m);
         round<N + 1>(
             s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
     }

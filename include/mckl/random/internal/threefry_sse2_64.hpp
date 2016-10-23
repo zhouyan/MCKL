@@ -64,8 +64,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
         std::array<__m128i, S> s;
 
-        MCKL_FLATTEN_CALL transpose2x64_load_si128(
-            s, reinterpret_cast<const __m128i *>(state.data()));
+        MCKL_FLATTEN_CALL transpose2x64_load_si128(s, state);
 
         MCKL_FLATTEN_CALL sbox<0x00>(s);
         MCKL_FLATTEN_CALL pbox<0x00>(s);
@@ -166,8 +165,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
         round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());
 
-        MCKL_FLATTEN_CALL transpose2x64_store_si128(
-            s, reinterpret_cast<__m128i *>(state.data()));
+        MCKL_FLATTEN_CALL transpose2x64_store_si128(s, state);
     }
 
     private:
