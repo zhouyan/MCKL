@@ -35,119 +35,135 @@
         constexpr std::size_t nstride = cstride / (sizeof(T) * K);            \
         constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
                                                                               \
-        union {                                                               \
+        alignas(32) union {                                                   \
             std::array<__m128i, S> s;                                         \
             std::array<Counter<T, K>, nstride> c;                             \
-        };                                                                    \
+        } buf;                                                                \
                                                                               \
-        MCKL_FLATTEN_CALL increment(ctr, c);                                  \
+        MCKL_FLATTEN_CALL increment(ctr, buf.c);                              \
                                                                               \
-        MCKL_FLATTEN_CALL transpose2x64_load_si128(s);                        \
+        MCKL_FLATTEN_CALL transpose2x64_load_si128(buf.s);                    \
                                                                               \
-        MCKL_FLATTEN_CALL sbox<0x00>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x00>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x00>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x01>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x01>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x01>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x02>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x02>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x02>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x03>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x03>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x03>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x04>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x04>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x04>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x05>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x05>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x05>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x06>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x06>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x06>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x07>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x07>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x07>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x08>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x08>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x08>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x09>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x09>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x09>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x0A>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x0A>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x0A>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x0B>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x0B>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x0B>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x0C>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x0C>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x0C>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x0D>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x0D>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x0D>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x0E>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x0E>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x0E>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x0F>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x0F>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x0F>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x10>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x10>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x10>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x11>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x11>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x11>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x12>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x12>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x12>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x13>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x13>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x13>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x14>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x14>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x14>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x15>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x15>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x15>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x16>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x16>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x16>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x17>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x17>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x17>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x18>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x18>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x18>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x19>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x19>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x19>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x1A>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x1A>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x1A>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x1B>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x1B>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x1B>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x1C>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x1C>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x1C>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x1D>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x1D>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x1D>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x1E>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x1E>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x1E>(s, par);                                 \
-        MCKL_FLATTEN_CALL sbox<0x1F>(s);                                      \
-        MCKL_FLATTEN_CALL pbox<0x1F>(s);                                      \
-        MCKL_FLATTEN_CALL kbox<0x1F>(s, par);                                 \
+        MCKL_FLATTEN_CALL sbox<0x00>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x00>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x00>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x01>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x01>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x01>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x02>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x02>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x02>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x03>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x03>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x03>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x04>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x04>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x04>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x05>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x05>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x05>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x06>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x06>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x06>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x07>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x07>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x07>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x08>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x08>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x08>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x09>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x09>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x09>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x0A>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x0A>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x0A>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x0B>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x0B>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x0B>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x0C>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x0C>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x0C>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x0D>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x0D>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x0D>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x0E>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x0E>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x0E>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x0F>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x0F>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x0F>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x10>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x10>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x10>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x11>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x11>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x11>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x12>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x12>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x12>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x13>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x13>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x13>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x14>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x14>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x14>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x15>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x15>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x15>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x16>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x16>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x16>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x17>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x17>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x17>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x18>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x18>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x18>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x19>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x19>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x19>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x1A>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x1A>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x1A>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x1B>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x1B>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x1B>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x1C>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x1C>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x1C>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x1D>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x1D>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x1D>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x1E>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x1E>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x1E>(buf.s, par);                             \
+        MCKL_FLATTEN_CALL sbox<0x1F>(buf.s);                                  \
+        MCKL_FLATTEN_CALL pbox<0x1F>(buf.s);                                  \
+        MCKL_FLATTEN_CALL kbox<0x1F>(buf.s, par);                             \
                                                                               \
-        round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());  \
+        round<0x20>(                                                          \
+            buf.s, par, std::integral_constant<bool, 0x20 <= Rounds>());      \
                                                                               \
-        MCKL_FLATTEN_CALL transpose2x64_store_si128(s);                       \
+        MCKL_FLATTEN_CALL transpose2x64_store_si128(buf.s);                   \
                                                                               \
-        std::memcpy(r, s.data(), cstride);                                    \
+        std::memcpy(r, buf.s.data(), cstride);                                \
         n -= nstride;                                                         \
         r += rstride;                                                         \
+    }
+
+#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_REMAINDER                       \
+    constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);        \
+                                                                              \
+    alignas(32) union {                                                       \
+        std::array<T, K> state;                                               \
+        Counter<T, K> ctr;                                                    \
+    } buf;                                                                    \
+                                                                              \
+    for (std::size_t i = 0; i != n; ++i, r += stride) {                       \
+        MCKL_FLATTEN_CALL increment(ctr);                                     \
+        buf.ctr = ctr;                                                        \
+        eval(buf.state, par);                                                 \
+        std::memcpy(r, buf.state.data(), sizeof(T) * K);                      \
     }
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
@@ -166,60 +182,42 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
         std::size_t n, ResultType *r)
     {
-        constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);
-
-        r = eval_batch(ctr, par, n, r);
-
-        alignas(32) union {
-            std::array<T, K> state;
-            Counter<T, K> ctr;
-        } buf;
-
-        for (std::size_t i = 0; i != n; ++i, r += stride) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.ctr = ctr;
-            eval(buf.state, par);
-            std::memcpy(r, buf.state.data(), sizeof(T) * K);
-        }
+        eval_dispatch(ctr, par, n, r);
     }
 
     private:
     template <typename ResultType>
-    static ResultType *eval_batch(Counter<T, 2> &ctr,
-        const std::array<T, 6> &par, std::size_t &n, ResultType *r)
+    static void eval_dispatch(Counter<T, 2> &ctr, const std::array<T, 6> &par,
+        std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(8)
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(4)
-
-        return r;
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_REMAINDER
     }
 
     template <typename ResultType>
-    static ResultType *eval_batch(Counter<T, 4> &ctr,
-        const std::array<T, 8> &par, std::size_t &n, ResultType *r)
+    static void eval_dispatch(Counter<T, 4> &ctr, const std::array<T, 8> &par,
+        std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(8)
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(4)
-
-        return r;
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_REMAINDER
     }
 
     template <typename ResultType>
-    static ResultType *eval_batch(Counter<T, 8> &ctr,
-        const std::array<T, 12> &par, std::size_t &n, ResultType *r)
+    static void eval_dispatch(Counter<T, 8> &ctr, const std::array<T, 12> &par,
+        std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(8)
-
-        return r;
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_REMAINDER
     }
 
     template <typename ResultType>
-    static ResultType *eval_batch(Counter<T, 16> &ctr,
-        const std::array<T, 20> &par, std::size_t &n, ResultType *r)
+    static void eval_dispatch(Counter<T, 16> &ctr,
+        const std::array<T, 20> &par, std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(16)
-
-        return r;
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_REMAINDER
     }
 
     template <std::size_t, std::size_t S>

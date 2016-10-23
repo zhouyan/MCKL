@@ -35,294 +35,210 @@
 #include <mckl/internal/config.h>
 #include <array>
 
-#define MCKL_LOAD_SI256_1(s, sptr)                                            \
-    std::get<0>(s) = _mm256_load_si256(sptr + 0);
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
 
-#define MCKL_LOAD_SI256_2(s, sptr)                                            \
-    std::get<0>(s) = _mm256_load_si256(sptr + 0);                             \
-    std::get<1>(s) = _mm256_load_si256(sptr + 1);
+namespace mckl
+{
 
-#define MCKL_LOAD_SI256_4(s, sptr)                                            \
-    std::get<0>(s) = _mm256_load_si256(sptr + 0);                             \
-    std::get<1>(s) = _mm256_load_si256(sptr + 1);                             \
-    std::get<2>(s) = _mm256_load_si256(sptr + 2);                             \
-    std::get<3>(s) = _mm256_load_si256(sptr + 3);
+namespace internal
+{
 
-#define MCKL_LOAD_SI256_8(s, sptr)                                            \
-    std::get<0>(s) = _mm256_load_si256(sptr + 0);                             \
-    std::get<1>(s) = _mm256_load_si256(sptr + 1);                             \
-    std::get<2>(s) = _mm256_load_si256(sptr + 2);                             \
-    std::get<3>(s) = _mm256_load_si256(sptr + 3);                             \
-    std::get<4>(s) = _mm256_load_si256(sptr + 4);                             \
-    std::get<5>(s) = _mm256_load_si256(sptr + 5);                             \
-    std::get<6>(s) = _mm256_load_si256(sptr + 6);                             \
-    std::get<7>(s) = _mm256_load_si256(sptr + 7);
+template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
+    std::size_t I4, std::size_t I5, std::size_t I6, std::size_t I7,
+    std::size_t N>
+MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
+{
+    __m256i t0 = _mm256_unpacklo_epi32(std::get<I0>(s), std::get<I1>(s));
+    __m256i t1 = _mm256_unpacklo_epi32(std::get<I2>(s), std::get<I3>(s));
+    __m256i t2 = _mm256_unpacklo_epi32(std::get<I4>(s), std::get<I5>(s));
+    __m256i t3 = _mm256_unpacklo_epi32(std::get<I6>(s), std::get<I7>(s));
+    __m256i t4 = _mm256_unpackhi_epi32(std::get<I0>(s), std::get<I1>(s));
+    __m256i t5 = _mm256_unpackhi_epi32(std::get<I2>(s), std::get<I3>(s));
+    __m256i t6 = _mm256_unpackhi_epi32(std::get<I4>(s), std::get<I5>(s));
+    __m256i t7 = _mm256_unpackhi_epi32(std::get<I6>(s), std::get<I7>(s));
+    __m256i t8 = _mm256_unpacklo_epi64(t0, t1);
+    __m256i t9 = _mm256_unpacklo_epi64(t2, t3);
+    __m256i tA = _mm256_unpacklo_epi64(t4, t5);
+    __m256i tB = _mm256_unpacklo_epi64(t6, t7);
+    __m256i tC = _mm256_unpackhi_epi64(t0, t1);
+    __m256i tD = _mm256_unpackhi_epi64(t2, t3);
+    __m256i tE = _mm256_unpackhi_epi64(t4, t5);
+    __m256i tF = _mm256_unpackhi_epi64(t6, t7);
+    std::get<I0>(s) = _mm256_permute2x128_si256(t8, t9, 0x20);
+    std::get<I1>(s) = _mm256_permute2x128_si256(tC, tD, 0x20);
+    std::get<I2>(s) = _mm256_permute2x128_si256(tA, tB, 0x20);
+    std::get<I3>(s) = _mm256_permute2x128_si256(tE, tF, 0x20);
+    std::get<I4>(s) = _mm256_permute2x128_si256(t8, t9, 0x31);
+    std::get<I5>(s) = _mm256_permute2x128_si256(tC, tD, 0x31);
+    std::get<I6>(s) = _mm256_permute2x128_si256(tA, tB, 0x31);
+    std::get<I7>(s) = _mm256_permute2x128_si256(tE, tF, 0x31);
+}
 
-#define MCKL_LOAD_SI256_16(s, sptr)                                           \
-    std::get<0x0>(s) = _mm256_load_si256(sptr + 0x0);                         \
-    std::get<0x1>(s) = _mm256_load_si256(sptr + 0x1);                         \
-    std::get<0x2>(s) = _mm256_load_si256(sptr + 0x2);                         \
-    std::get<0x3>(s) = _mm256_load_si256(sptr + 0x3);                         \
-    std::get<0x4>(s) = _mm256_load_si256(sptr + 0x4);                         \
-    std::get<0x5>(s) = _mm256_load_si256(sptr + 0x5);                         \
-    std::get<0x6>(s) = _mm256_load_si256(sptr + 0x6);                         \
-    std::get<0x7>(s) = _mm256_load_si256(sptr + 0x7);                         \
-    std::get<0x8>(s) = _mm256_load_si256(sptr + 0x8);                         \
-    std::get<0x9>(s) = _mm256_load_si256(sptr + 0x9);                         \
-    std::get<0xA>(s) = _mm256_load_si256(sptr + 0xA);                         \
-    std::get<0xB>(s) = _mm256_load_si256(sptr + 0xB);                         \
-    std::get<0xC>(s) = _mm256_load_si256(sptr + 0xC);                         \
-    std::get<0xD>(s) = _mm256_load_si256(sptr + 0xD);                         \
-    std::get<0xE>(s) = _mm256_load_si256(sptr + 0xE);                         \
-    std::get<0xF>(s) = _mm256_load_si256(sptr + 0xF);
+MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 8> &s)
+{
+    transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
+}
 
-#define MCKL_STORE_SI256_1(s, sptr)                                           \
-    _mm256_store_si256(sptr + 0, std::get<0>(s));
+MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
+{
+    transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
+}
 
-#define MCKL_STORE_SI256_2(s, sptr)                                           \
-    _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
-    _mm256_store_si256(sptr + 1, std::get<1>(s));
+MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
+{
+    __m256i t0 = std::get<0x1>(s);
+    std::get<0x1>(s) = std::get<0x2>(s);
+    std::get<0x2>(s) = std::get<0x4>(s);
+    std::get<0x4>(s) = std::get<0x8>(s);
+    std::get<0x8>(s) = t0;
 
-#define MCKL_STORE_SI256_4(s, sptr)                                           \
-    _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
-    _mm256_store_si256(sptr + 1, std::get<1>(s));                             \
-    _mm256_store_si256(sptr + 2, std::get<2>(s));                             \
-    _mm256_store_si256(sptr + 3, std::get<3>(s));
+    __m256i t1 = std::get<0x3>(s);
+    std::get<0x3>(s) = std::get<0x6>(s);
+    std::get<0x6>(s) = std::get<0xC>(s);
+    std::get<0xC>(s) = std::get<0x9>(s);
+    std::get<0x9>(s) = t1;
 
-#define MCKL_STORE_SI256_8(s, sptr)                                           \
-    _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
-    _mm256_store_si256(sptr + 1, std::get<1>(s));                             \
-    _mm256_store_si256(sptr + 2, std::get<2>(s));                             \
-    _mm256_store_si256(sptr + 3, std::get<3>(s));                             \
-    _mm256_store_si256(sptr + 4, std::get<4>(s));                             \
-    _mm256_store_si256(sptr + 5, std::get<5>(s));                             \
-    _mm256_store_si256(sptr + 6, std::get<6>(s));                             \
-    _mm256_store_si256(sptr + 7, std::get<7>(s));
+    __m256i t2 = std::get<0x7>(s);
+    std::get<0x7>(s) = std::get<0xE>(s);
+    std::get<0xE>(s) = std::get<0xD>(s);
+    std::get<0xD>(s) = std::get<0xB>(s);
+    std::get<0xB>(s) = t2;
 
-#define MCKL_STORE_SI256_16(s, sptr)                                          \
-    _mm256_store_si256(sptr + 0x0, std::get<0x0>(s));                         \
-    _mm256_store_si256(sptr + 0x1, std::get<0x1>(s));                         \
-    _mm256_store_si256(sptr + 0x2, std::get<0x2>(s));                         \
-    _mm256_store_si256(sptr + 0x3, std::get<0x3>(s));                         \
-    _mm256_store_si256(sptr + 0x4, std::get<0x4>(s));                         \
-    _mm256_store_si256(sptr + 0x5, std::get<0x5>(s));                         \
-    _mm256_store_si256(sptr + 0x6, std::get<0x6>(s));                         \
-    _mm256_store_si256(sptr + 0x7, std::get<0x7>(s));                         \
-    _mm256_store_si256(sptr + 0x8, std::get<0x8>(s));                         \
-    _mm256_store_si256(sptr + 0x9, std::get<0x9>(s));                         \
-    _mm256_store_si256(sptr + 0xA, std::get<0xA>(s));                         \
-    _mm256_store_si256(sptr + 0xB, std::get<0xB>(s));                         \
-    _mm256_store_si256(sptr + 0xC, std::get<0xC>(s));                         \
-    _mm256_store_si256(sptr + 0xD, std::get<0xD>(s));                         \
-    _mm256_store_si256(sptr + 0xE, std::get<0xE>(s));                         \
-    _mm256_store_si256(sptr + 0xF, std::get<0xF>(s));
+    __m256i t3 = std::get<0x5>(s);
+    std::get<0x5>(s) = std::get<0xA>(s);
+    std::get<0xA>(s) = t3;
 
-#define MCKL_TRANSPOSE8X32_SI256(s, t, I0, I1, I2, I3, I4, I5, I6, I7)        \
-    std::get<0x0>(t) =                                                        \
-        _mm256_unpacklo_epi32(std::get<I0>(s), std::get<I1>(s));              \
-    std::get<0x1>(t) =                                                        \
-        _mm256_unpacklo_epi32(std::get<I2>(s), std::get<I3>(s));              \
-    std::get<0x2>(t) =                                                        \
-        _mm256_unpacklo_epi32(std::get<I4>(s), std::get<I5>(s));              \
-    std::get<0x3>(t) =                                                        \
-        _mm256_unpacklo_epi32(std::get<I6>(s), std::get<I7>(s));              \
-    std::get<0x4>(t) =                                                        \
-        _mm256_unpackhi_epi32(std::get<I0>(s), std::get<I1>(s));              \
-    std::get<0x5>(t) =                                                        \
-        _mm256_unpackhi_epi32(std::get<I2>(s), std::get<I3>(s));              \
-    std::get<0x6>(t) =                                                        \
-        _mm256_unpackhi_epi32(std::get<I4>(s), std::get<I5>(s));              \
-    std::get<0x7>(t) =                                                        \
-        _mm256_unpackhi_epi32(std::get<I6>(s), std::get<I7>(s));              \
-    std::get<0x8>(t) =                                                        \
-        _mm256_unpacklo_epi64(std::get<0x0>(t), std::get<0x1>(t));            \
-    std::get<0x9>(t) =                                                        \
-        _mm256_unpacklo_epi64(std::get<0x2>(t), std::get<0x3>(t));            \
-    std::get<0xA>(t) =                                                        \
-        _mm256_unpacklo_epi64(std::get<0x4>(t), std::get<0x5>(t));            \
-    std::get<0xB>(t) =                                                        \
-        _mm256_unpacklo_epi64(std::get<0x6>(t), std::get<0x7>(t));            \
-    std::get<0xC>(t) =                                                        \
-        _mm256_unpackhi_epi64(std::get<0x0>(t), std::get<0x1>(t));            \
-    std::get<0xD>(t) =                                                        \
-        _mm256_unpackhi_epi64(std::get<0x2>(t), std::get<0x3>(t));            \
-    std::get<0xE>(t) =                                                        \
-        _mm256_unpackhi_epi64(std::get<0x4>(t), std::get<0x5>(t));            \
-    std::get<0xF>(t) =                                                        \
-        _mm256_unpackhi_epi64(std::get<0x6>(t), std::get<0x7>(t));            \
-    std::get<I0>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0x8>(t), std::get<0x9>(t), 0x20);  \
-    std::get<I1>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0xC>(t), std::get<0xD>(t), 0x20);  \
-    std::get<I2>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0xA>(t), std::get<0xB>(t), 0x20);  \
-    std::get<I3>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0xE>(t), std::get<0xF>(t), 0x20);  \
-    std::get<I4>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0x8>(t), std::get<0x9>(t), 0x31);  \
-    std::get<I5>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0xC>(t), std::get<0xD>(t), 0x31);  \
-    std::get<I6>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0xA>(t), std::get<0xB>(t), 0x31);  \
-    std::get<I7>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0xE>(t), std::get<0xF>(t), 0x31);
+    transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
+    transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
+}
 
-#define MCKL_TRANSPOSE8X32_LOAD_SI256_8(s, t, sptr)                           \
-    std::get<0>(s) = _mm256_load_si256(sptr + 0);                             \
-    std::get<1>(s) = _mm256_load_si256(sptr + 1);                             \
-    std::get<2>(s) = _mm256_load_si256(sptr + 2);                             \
-    std::get<3>(s) = _mm256_load_si256(sptr + 3);                             \
-    std::get<4>(s) = _mm256_load_si256(sptr + 4);                             \
-    std::get<5>(s) = _mm256_load_si256(sptr + 5);                             \
-    std::get<6>(s) = _mm256_load_si256(sptr + 6);                             \
-    std::get<7>(s) = _mm256_load_si256(sptr + 7);                             \
-    MCKL_TRANSPOSE8X32_SI256(s, t, 0, 1, 2, 3, 4, 5, 6, 7);
+MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
+{
+    transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
+    transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 
-#define MCKL_TRANSPOSE8X32_LOAD_SI256_16(s, t, sptr)                          \
-    std::get<0x0>(s) = _mm256_load_si256(sptr + 0x0);                         \
-    std::get<0x8>(s) = _mm256_load_si256(sptr + 0x1);                         \
-    std::get<0x1>(s) = _mm256_load_si256(sptr + 0x2);                         \
-    std::get<0x9>(s) = _mm256_load_si256(sptr + 0x3);                         \
-    std::get<0x2>(s) = _mm256_load_si256(sptr + 0x4);                         \
-    std::get<0xA>(s) = _mm256_load_si256(sptr + 0x5);                         \
-    std::get<0x3>(s) = _mm256_load_si256(sptr + 0x6);                         \
-    std::get<0xB>(s) = _mm256_load_si256(sptr + 0x7);                         \
-    std::get<0x4>(s) = _mm256_load_si256(sptr + 0x8);                         \
-    std::get<0xC>(s) = _mm256_load_si256(sptr + 0x9);                         \
-    std::get<0x5>(s) = _mm256_load_si256(sptr + 0xA);                         \
-    std::get<0xD>(s) = _mm256_load_si256(sptr + 0xB);                         \
-    std::get<0x6>(s) = _mm256_load_si256(sptr + 0xC);                         \
-    std::get<0xE>(s) = _mm256_load_si256(sptr + 0xD);                         \
-    std::get<0x7>(s) = _mm256_load_si256(sptr + 0xE);                         \
-    std::get<0xF>(s) = _mm256_load_si256(sptr + 0xF);                         \
-    MCKL_TRANSPOSE8X32_SI256(s, t, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7);   \
-    MCKL_TRANSPOSE8X32_SI256(s, t, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);
+    __m256i t0 = std::get<0x2>(s);
+    std::get<0x2>(s) = std::get<0x1>(s);
+    std::get<0x1>(s) = std::get<0x8>(s);
+    std::get<0x8>(s) = std::get<0x4>(s);
+    std::get<0x4>(s) = t0;
 
-#define MCKL_TRANSPOSE8X32_STORE_SI256_8(s, t, sptr)                          \
-    MCKL_TRANSPOSE8X32_SI256(s, t, 0, 1, 2, 3, 4, 5, 6, 7);                   \
-    _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
-    _mm256_store_si256(sptr + 1, std::get<1>(s));                             \
-    _mm256_store_si256(sptr + 2, std::get<2>(s));                             \
-    _mm256_store_si256(sptr + 3, std::get<3>(s));                             \
-    _mm256_store_si256(sptr + 4, std::get<4>(s));                             \
-    _mm256_store_si256(sptr + 5, std::get<5>(s));                             \
-    _mm256_store_si256(sptr + 6, std::get<6>(s));                             \
-    _mm256_store_si256(sptr + 7, std::get<7>(s));
+    __m256i t1 = std::get<0x6>(s);
+    std::get<0x6>(s) = std::get<0x3>(s);
+    std::get<0x3>(s) = std::get<0x9>(s);
+    std::get<0x9>(s) = std::get<0xC>(s);
+    std::get<0xC>(s) = t1;
 
-#define MCKL_TRANSPOSE8X32_STORE_SI256_16(s, t, sptr)                         \
-    MCKL_TRANSPOSE8X32_SI256(s, t, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7);   \
-    MCKL_TRANSPOSE8X32_SI256(s, t, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);   \
-    _mm256_store_si256(sptr + 0x0, std::get<0x0>(s));                         \
-    _mm256_store_si256(sptr + 0x1, std::get<0x8>(s));                         \
-    _mm256_store_si256(sptr + 0x2, std::get<0x1>(s));                         \
-    _mm256_store_si256(sptr + 0x3, std::get<0x9>(s));                         \
-    _mm256_store_si256(sptr + 0x4, std::get<0x2>(s));                         \
-    _mm256_store_si256(sptr + 0x5, std::get<0xA>(s));                         \
-    _mm256_store_si256(sptr + 0x6, std::get<0x3>(s));                         \
-    _mm256_store_si256(sptr + 0x7, std::get<0xB>(s));                         \
-    _mm256_store_si256(sptr + 0x8, std::get<0x4>(s));                         \
-    _mm256_store_si256(sptr + 0x9, std::get<0xC>(s));                         \
-    _mm256_store_si256(sptr + 0xA, std::get<0x5>(s));                         \
-    _mm256_store_si256(sptr + 0xB, std::get<0xD>(s));                         \
-    _mm256_store_si256(sptr + 0xC, std::get<0x6>(s));                         \
-    _mm256_store_si256(sptr + 0xD, std::get<0xE>(s));                         \
-    _mm256_store_si256(sptr + 0xE, std::get<0x7>(s));                         \
-    _mm256_store_si256(sptr + 0xF, std::get<0xF>(s));
+    __m256i t2 = std::get<0xE>(s);
+    std::get<0xE>(s) = std::get<0x7>(s);
+    std::get<0x7>(s) = std::get<0xB>(s);
+    std::get<0xB>(s) = std::get<0xD>(s);
+    std::get<0xD>(s) = t2;
 
-#define MCKL_TRANSPOSE4X64_SI256(s, t, I0, I1, I2, I3)                        \
-    std::get<0>(t) = _mm256_unpacklo_epi64(std::get<I0>(s), std::get<I1>(s)); \
-    std::get<1>(t) = _mm256_unpacklo_epi64(std::get<I2>(s), std::get<I3>(s)); \
-    std::get<2>(t) = _mm256_unpackhi_epi64(std::get<I0>(s), std::get<I1>(s)); \
-    std::get<3>(t) = _mm256_unpackhi_epi64(std::get<I2>(s), std::get<I3>(s)); \
-    std::get<I0>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0>(t), std::get<1>(t), 0x20);      \
-    std::get<I1>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<2>(t), std::get<3>(t), 0x20);      \
-    std::get<I2>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<0>(t), std::get<1>(t), 0x31);      \
-    std::get<I3>(s) =                                                         \
-        _mm256_permute2x128_si256(std::get<2>(t), std::get<3>(t), 0x31);
+    __m256i t3 = std::get<0x5>(s);
+    std::get<0x5>(s) = std::get<0xA>(s);
+    std::get<0xA>(s) = t3;
+}
 
-#define MCKL_TRANSPOSE4X64_LOAD_SI256_4(s, t, sptr)                           \
-    std::get<0>(s) = _mm256_load_si256(sptr + 0);                             \
-    std::get<1>(s) = _mm256_load_si256(sptr + 1);                             \
-    std::get<2>(s) = _mm256_load_si256(sptr + 2);                             \
-    std::get<3>(s) = _mm256_load_si256(sptr + 3);                             \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0, 1, 2, 3);
+template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
+    std::size_t N>
+MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
+{
+    __m256i t0 = _mm256_unpacklo_epi64(std::get<I0>(s), std::get<I1>(s));
+    __m256i t1 = _mm256_unpacklo_epi64(std::get<I2>(s), std::get<I3>(s));
+    __m256i t2 = _mm256_unpackhi_epi64(std::get<I0>(s), std::get<I1>(s));
+    __m256i t3 = _mm256_unpackhi_epi64(std::get<I2>(s), std::get<I3>(s));
+    std::get<I0>(s) = _mm256_permute2x128_si256(t0, t1, 0x20);
+    std::get<I1>(s) = _mm256_permute2x128_si256(t2, t3, 0x20);
+    std::get<I2>(s) = _mm256_permute2x128_si256(t0, t1, 0x31);
+    std::get<I3>(s) = _mm256_permute2x128_si256(t2, t3, 0x31);
+}
 
-#define MCKL_TRANSPOSE4X64_LOAD_SI256_8(s, t, sptr)                           \
-    std::get<0>(s) = _mm256_load_si256(sptr + 0);                             \
-    std::get<4>(s) = _mm256_load_si256(sptr + 1);                             \
-    std::get<1>(s) = _mm256_load_si256(sptr + 2);                             \
-    std::get<5>(s) = _mm256_load_si256(sptr + 3);                             \
-    std::get<2>(s) = _mm256_load_si256(sptr + 4);                             \
-    std::get<6>(s) = _mm256_load_si256(sptr + 5);                             \
-    std::get<3>(s) = _mm256_load_si256(sptr + 6);                             \
-    std::get<7>(s) = _mm256_load_si256(sptr + 7);                             \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0, 1, 2, 3);                               \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 4, 5, 6, 7);
+MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 4> &s)
+{
+    transpose4x64_si256<0, 1, 2, 3>(s);
+}
 
-#define MCKL_TRANSPOSE4X64_LOAD_SI256_16(s, t, sptr)                          \
-    std::get<0x0>(s) = _mm256_load_si256(sptr + 0x0);                         \
-    std::get<0x4>(s) = _mm256_load_si256(sptr + 0x1);                         \
-    std::get<0x8>(s) = _mm256_load_si256(sptr + 0x2);                         \
-    std::get<0xC>(s) = _mm256_load_si256(sptr + 0x3);                         \
-    std::get<0x1>(s) = _mm256_load_si256(sptr + 0x4);                         \
-    std::get<0x5>(s) = _mm256_load_si256(sptr + 0x5);                         \
-    std::get<0x9>(s) = _mm256_load_si256(sptr + 0x6);                         \
-    std::get<0xD>(s) = _mm256_load_si256(sptr + 0x7);                         \
-    std::get<0x2>(s) = _mm256_load_si256(sptr + 0x8);                         \
-    std::get<0x6>(s) = _mm256_load_si256(sptr + 0x9);                         \
-    std::get<0xA>(s) = _mm256_load_si256(sptr + 0xA);                         \
-    std::get<0xE>(s) = _mm256_load_si256(sptr + 0xB);                         \
-    std::get<0x3>(s) = _mm256_load_si256(sptr + 0xC);                         \
-    std::get<0x7>(s) = _mm256_load_si256(sptr + 0xD);                         \
-    std::get<0xB>(s) = _mm256_load_si256(sptr + 0xE);                         \
-    std::get<0xF>(s) = _mm256_load_si256(sptr + 0xF);                         \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0x0, 0x1, 0x2, 0x3);                       \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0x4, 0x5, 0x6, 0x7);                       \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0x8, 0x9, 0xA, 0xB);                       \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0xC, 0xD, 0xE, 0xF);
+MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
+{
+    transpose4x64_si256<0, 1, 2, 3>(s);
+}
 
-#define MCKL_TRANSPOSE4X64_STORE_SI256_4(s, t, sptr)                          \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0, 1, 2, 3);                               \
-    _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
-    _mm256_store_si256(sptr + 1, std::get<1>(s));                             \
-    _mm256_store_si256(sptr + 2, std::get<2>(s));                             \
-    _mm256_store_si256(sptr + 3, std::get<3>(s));
+MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
+{
+    __m256i t0 = std::get<1>(s);
+    std::get<1>(s) = std::get<2>(s);
+    std::get<2>(s) = std::get<4>(s);
+    std::get<4>(s) = t0;
 
-#define MCKL_TRANSPOSE4X64_STORE_SI256_8(s, t, sptr)                          \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0, 1, 2, 3);                               \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 4, 5, 6, 7);                               \
-    _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
-    _mm256_store_si256(sptr + 1, std::get<4>(s));                             \
-    _mm256_store_si256(sptr + 2, std::get<1>(s));                             \
-    _mm256_store_si256(sptr + 3, std::get<5>(s));                             \
-    _mm256_store_si256(sptr + 4, std::get<2>(s));                             \
-    _mm256_store_si256(sptr + 5, std::get<6>(s));                             \
-    _mm256_store_si256(sptr + 6, std::get<3>(s));                             \
-    _mm256_store_si256(sptr + 7, std::get<7>(s));
+    __m256i t1 = std::get<3>(s);
+    std::get<3>(s) = std::get<6>(s);
+    std::get<6>(s) = std::get<5>(s);
+    std::get<5>(s) = t1;
 
-#define MCKL_TRANSPOSE4X64_STORE_SI256_16(s, t, sptr)                         \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0x0, 0x1, 0x2, 0x3);                       \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0x4, 0x5, 0x6, 0x7);                       \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0x8, 0x9, 0xA, 0xB);                       \
-    MCKL_TRANSPOSE4X64_SI256(s, t, 0xC, 0xD, 0xE, 0xF);                       \
-    _mm256_store_si256(sptr + 0x0, std::get<0x0>(s));                         \
-    _mm256_store_si256(sptr + 0x1, std::get<0x4>(s));                         \
-    _mm256_store_si256(sptr + 0x2, std::get<0x8>(s));                         \
-    _mm256_store_si256(sptr + 0x3, std::get<0xC>(s));                         \
-    _mm256_store_si256(sptr + 0x4, std::get<0x1>(s));                         \
-    _mm256_store_si256(sptr + 0x5, std::get<0x5>(s));                         \
-    _mm256_store_si256(sptr + 0x6, std::get<0x9>(s));                         \
-    _mm256_store_si256(sptr + 0x7, std::get<0xD>(s));                         \
-    _mm256_store_si256(sptr + 0x8, std::get<0x2>(s));                         \
-    _mm256_store_si256(sptr + 0x9, std::get<0x6>(s));                         \
-    _mm256_store_si256(sptr + 0xA, std::get<0xA>(s));                         \
-    _mm256_store_si256(sptr + 0xB, std::get<0xE>(s));                         \
-    _mm256_store_si256(sptr + 0xC, std::get<0x3>(s));                         \
-    _mm256_store_si256(sptr + 0xD, std::get<0x7>(s));                         \
-    _mm256_store_si256(sptr + 0xE, std::get<0xB>(s));                         \
-    _mm256_store_si256(sptr + 0xF, std::get<0xF>(s));
+    transpose4x64_si256<0, 1, 2, 3>(s);
+    transpose4x64_si256<4, 5, 6, 7>(s);
+}
+
+MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
+{
+    transpose4x64_si256<0, 1, 2, 3>(s);
+    transpose4x64_si256<4, 5, 6, 7>(s);
+
+    __m256i t0 = std::get<2>(s);
+    std::get<2>(s) = std::get<1>(s);
+    std::get<1>(s) = std::get<4>(s);
+    std::get<4>(s) = t0;
+
+    __m256i t1 = std::get<6>(s);
+    std::get<6>(s) = std::get<3>(s);
+    std::get<3>(s) = std::get<5>(s);
+    std::get<5>(s) = t1;
+}
+
+MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
+{
+    std::swap(std::get<0x1>(s), std::get<0x4>(s));
+    std::swap(std::get<0x2>(s), std::get<0x8>(s));
+    std::swap(std::get<0x3>(s), std::get<0xC>(s));
+    std::swap(std::get<0x6>(s), std::get<0x9>(s));
+    std::swap(std::get<0x7>(s), std::get<0xD>(s));
+    std::swap(std::get<0xB>(s), std::get<0xE>(s));
+
+    transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
+    transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);
+    transpose4x64_si256<0x8, 0x9, 0xA, 0xB>(s);
+    transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
+}
+
+MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
+{
+    transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
+    transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);
+    transpose4x64_si256<0x8, 0x9, 0xA, 0xB>(s);
+    transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
+
+    std::swap(std::get<0x1>(s), std::get<0x4>(s));
+    std::swap(std::get<0x2>(s), std::get<0x8>(s));
+    std::swap(std::get<0x3>(s), std::get<0xC>(s));
+    std::swap(std::get<0x6>(s), std::get<0x9>(s));
+    std::swap(std::get<0x7>(s), std::get<0xD>(s));
+    std::swap(std::get<0xB>(s), std::get<0xE>(s));
+}
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif // MCKL_INTERNAL_AVX2_HPP

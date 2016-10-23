@@ -29,38 +29,61 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(S)                         \
-    static void eval(std::array<std::array<std::uint32_t, 4>, S> &state,      \
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)              \
-    {                                                                         \
-        std::array<__m128i, S> s;                                             \
-        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());      \
+#define MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(S)                               \
+    while (n >= S) {                                                          \
+        constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
+        constexpr std::size_t nstride = S;                                    \
+        constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
                                                                               \
-        MCKL_LOAD_SI128_##S(s, sptr);                                         \
+        alignas(32) union {                                                   \
+            std::array<__m128i, S> s;                                         \
+            std::array<Counter<std::uint32_t, 4>, nstride> c;                 \
+        } buf;                                                                \
                                                                               \
-        encfirst(s, rk);                                                      \
+        MCKL_FLATTEN_CALL increment(ctr, buf.c);                              \
                                                                               \
-        enc<0x1>(s, rk);                                                      \
-        enc<0x2>(s, rk);                                                      \
-        enc<0x3>(s, rk);                                                      \
-        enc<0x4>(s, rk);                                                      \
-        enc<0x5>(s, rk);                                                      \
-        enc<0x6>(s, rk);                                                      \
-        enc<0x7>(s, rk);                                                      \
-        enc<0x8>(s, rk);                                                      \
-        enc<0x9>(s, rk);                                                      \
-        enc<0xA>(s, rk);                                                      \
-        enc<0xB>(s, rk);                                                      \
-        enc<0xC>(s, rk);                                                      \
-        enc<0xD>(s, rk);                                                      \
-        enc<0xE>(s, rk);                                                      \
-        enc<0xF>(s, rk);                                                      \
+        MCKL_FLATTEN_CALL encfirst(buf.s, rk);                                \
                                                                               \
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());   \
+        MCKL_FLATTEN_CALL enc<0x1>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x2>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x3>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x4>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x5>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x6>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x7>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x8>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x9>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0xA>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0xB>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0xC>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0xD>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0xE>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0xF>(buf.s, rk);                                \
                                                                               \
-        enclast(s, rk);                                                       \
+        round<0x10>(                                                          \
+            buf.s, rk, std::integral_constant<bool, 0x10 < rounds_>());       \
                                                                               \
-        MCKL_STORE_SI128_##S(s, sptr);                                        \
+        MCKL_FLATTEN_CALL enclast(buf.s, rk);                                 \
+                                                                              \
+        std::memcpy(r, buf.s.data(), cstride);                                \
+        n -= nstride;                                                         \
+        r += rstride;                                                         \
+    }
+
+#define MCKL_RANDOM_INTERNAL_AES_AESNI_REMAINDER                              \
+    constexpr std::size_t stride =                                            \
+        sizeof(std::uint32_t) * 4 / sizeof(ResultType);                       \
+                                                                              \
+    alignas(32) union {                                                       \
+        std::array<std::uint32_t, 4> state;                                   \
+        Counter<std::uint32_t, 4> ctr;                                        \
+    } buf;                                                                    \
+                                                                              \
+    for (std::size_t i = 0; i != n; ++i, r += stride) {                       \
+        MCKL_FLATTEN_CALL increment(ctr);                                     \
+        buf.ctr = ctr;                                                        \
+        eval(buf.state, rk);                                                  \
+        std::memcpy(r, buf.state.data(), sizeof(std::uint32_t) * 4);          \
     }
 
 #define MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(N, rcon)                      \
@@ -695,19 +718,35 @@ class AESGeneratorImpl
         _mm_store_si128(sptr, s);
     }
 
-    static void eval(std::array<std::array<std::uint32_t, 4>, 1> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
+    template <typename ResultType>
+    static void eval(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        ResultType *r)
     {
-        eval(std::get<0>(state), rk);
+        eval_dispatch(
+            ctr, rk, n, r, std::integral_constant<bool, (rounds_ < 8)>());
     }
-
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(2)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(4)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(8)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(16)
 
     private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
+
+    template <typename ResultType>
+    static void eval_dispatch(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        ResultType *r, std::false_type)
+    {
+        MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(8)
+        MCKL_RANDOM_INTERNAL_AES_AESNI_REMAINDER
+    }
+
+    template <typename ResultType>
+    static void eval_dispatch(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        ResultType *r, std::true_type)
+    {
+        MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(16)
+        MCKL_RANDOM_INTERNAL_AES_AESNI_REMAINDER
+    }
 
     template <std::size_t>
     static void round(

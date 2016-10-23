@@ -390,35 +390,8 @@ class AESGenerator
     void generate(
         ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
     {
-        constexpr std::size_t stride = size() / sizeof(ResultType);
-        constexpr std::size_t blocks =
-            internal::AESGeneratorImpl<KeySeqType>::blocks();
-
-        alignas(32) union {
-            std::array<std::uint32_t, 4 * blocks> state;
-            std::array<std::array<std::uint32_t, 4>, blocks> state_block;
-            std::array<ctr_type, blocks> ctr_block;
-            std::array<ResultType, size() / sizeof(ResultType) * blocks>
-                result;
-        } buf;
-
         std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-
-        const std::size_t m = n / blocks;
-        const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, result += stride * blocks) {
-            MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-            internal::union_le<typename ctr_type::value_type>(buf.state);
-#endif
-            internal::AESGeneratorImpl<KeySeqType>::eval(buf.state_block, rk);
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-            internal::union_le<std::uint32_t>(buf.result);
-#endif
-            std::memcpy(result, buf.result.data(), size() * blocks);
-        }
-        for (std::size_t i = 0; i != l; ++i, result += stride)
-            generate(ctr, result, rk);
+        internal::AESGeneratorImpl<KeySeqType>::eval(ctr, rk, n, result);
     }
 }; // class AESGenerator
 
