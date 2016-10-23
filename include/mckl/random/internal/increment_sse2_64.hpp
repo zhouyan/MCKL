@@ -31,3 +31,4 @@
 
 #include <mckl/random/internal/increment_sse2_64_4.hpp>
 #include <mckl/random/internal/increment_sse2_64_8.hpp>
+#include <mckl/random/internal/increment_sse2_64_f.hpp>

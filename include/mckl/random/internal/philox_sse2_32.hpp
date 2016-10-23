@@ -29,75 +29,52 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(S)                    \
-    static void eval(std::array<std::array<T, K>, S * 4 / K> &state,          \
-        const std::array<T, K / 2> &key,                                      \
-        std::integral_constant<std::size_t, S> * = nullptr)                   \
-    {                                                                         \
-        constexpr std::size_t i0 = 0 % (K / 2);                               \
-        constexpr std::size_t i1 = 1 % (K / 2);                               \
+#define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_SBOX_CONSTANTS                    \
+    constexpr int mul0 =                                                      \
+        static_cast<int>(Constants::multiplier::value[0 % (K / 2)]);          \
+    constexpr int mul1 =                                                      \
+        static_cast<int>(Constants::multiplier::value[1 % (K / 2)]);          \
+    constexpr int msk = static_cast<int>(0xFFFFFFFF);                         \
                                                                               \
-        constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);      \
-        constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);      \
+    const __m128i k = std::get<N - 1>(rk);                                    \
+    const __m128i m = _mm_set_epi32(0, mul1, 0, mul0);                        \
+    const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
+
+#define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_BATCH(S)                          \
+    while (n >= nstride * S) {                                                \
+        union {                                                               \
+            std::array<__m128i, S> s;                                         \
+            std::array<Counter<T, K>, nstride * S> c;                         \
+        };                                                                    \
                                                                               \
-        constexpr int m0 =                                                    \
-            static_cast<int>(Constants::multiplier::value[i0]);               \
-        constexpr int m1 =                                                    \
-            static_cast<int>(Constants::multiplier::value[i1]);               \
-                                                                              \
-        const int p0 = static_cast<int>(std::get<i0>(key));                   \
-        const int p1 = static_cast<int>(std::get<i1>(key));                   \
-                                                                              \
-        const __m128i w = _mm_set_epi32(w1, 0, w0, 0);                        \
-        const __m128i m = _mm_set_epi32(0, m1, 0, m0);                        \
-        __m128i p = _mm_set_epi32(p1, 0, p0, 0);                              \
-                                                                              \
-        std::array<__m128i, S> s;                                             \
-        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());      \
-                                                                              \
-        MCKL_LOAD_SI128_##S(s, sptr);                                         \
+        MCKL_FLATTEN_CALL increment(ctr, c);                                  \
                                                                               \
         MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);          \
                                                                               \
-        MCKL_FLATTEN_CALL kbox<0x0>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x0>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x1>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x1>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x2>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x2>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x3>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x3>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x4>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x4>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x5>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x5>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x6>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x6>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x7>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x7>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x8>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x8>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0x9>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0x9>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0xA>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0xA>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0xB>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0xB>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0xC>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0xC>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0xD>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0xD>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0xE>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0xE>(s, p, m);                                 \
-        MCKL_FLATTEN_CALL kbox<0xF>(p, w);                                    \
-        MCKL_FLATTEN_CALL sbox<0xF>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL sbox<0x0>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x1>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x2>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x3>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x4>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x5>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x6>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x7>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x8>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x9>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xA>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xB>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xC>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xD>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xE>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xF>(s, rk);                                   \
                                                                               \
-        round<0x10>(                                                          \
-            s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());      \
+        round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());   \
                                                                               \
         MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);           \
                                                                               \
-        MCKL_STORE_SI128_##S(s, sptr);                                        \
+        std::memcpy(r, s.data(), sizeof(ResultType) * rstride * S);           \
+        n -= nstride * S;                                                     \
+        r += rstride * S;                                                     \
     }
 
 template <std::size_t>
@@ -110,19 +87,6 @@ class PhiloxGeneratorImplPermute32<2>
     template <std::size_t S>
     static void first(std::array<__m128i, S> &)
     {
-    }
-
-    static void round(std::array<__m128i, 1> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-    }
-
-    static void round(std::array<__m128i, 2> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
     }
 
     static void round(std::array<__m128i, 4> &s)
@@ -145,19 +109,6 @@ class PhiloxGeneratorImplPermute32<2>
         std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
         std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
         std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
-    }
-
-    static void last(std::array<__m128i, 1> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-    }
-
-    static void last(std::array<__m128i, 2> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
     }
 
     static void last(std::array<__m128i, 4> &s)
@@ -187,19 +138,6 @@ template <>
 class PhiloxGeneratorImplPermute32<4>
 {
     public:
-    static void first(std::array<__m128i, 1> &s)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-    }
-
-    static void first(std::array<__m128i, 2> &s)
-    {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
-    }
-
     static void first(std::array<__m128i, 4> &s)
     {
         // 3 0 1 2
@@ -222,19 +160,6 @@ class PhiloxGeneratorImplPermute32<4>
         std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xC6);
     }
 
-    static void round(std::array<__m128i, 1> &s)
-    {
-        // 2 1 0 3
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
-    }
-
-    static void round(std::array<__m128i, 2> &s)
-    {
-        // 2 1 0 3
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
-    }
-
     static void round(std::array<__m128i, 4> &s)
     {
         // 2 1 0 3
@@ -255,19 +180,6 @@ class PhiloxGeneratorImplPermute32<4>
         std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0x93);
         std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0x93);
         std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0x93);
-    }
-
-    static void last(std::array<__m128i, 1> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-    }
-
-    static void last(std::array<__m128i, 2> &s)
-    {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
     }
 
     static void last(std::array<__m128i, 4> &s)
@@ -296,145 +208,84 @@ class PhiloxGeneratorImplPermute32<4>
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 {
-#if MCKL_HAS_X86_64
-    static constexpr std::size_t S_ = 8;
-#else
-    static constexpr std::size_t S_ = 4;
-#endif
-
     public:
     static constexpr bool batch() { return K != 0 && 4 % K == 0; }
 
-    static constexpr std::size_t blocks() { return S_ * 4 / K; }
-
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
-    {
-        eval(state, key, std::integral_constant<bool, K == 4>());
-    }
-
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(1)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(2)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(4)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(8)
-
-    private:
-    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key,
-        std::false_type)
     {
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(state, key);
     }
 
-    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key,
-        std::true_type)
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
+        std::size_t n, ResultType *r)
     {
-        std::array<std::array<T, K>, 1> s;
-        std::get<0>(s) = state;
-        eval(s, key);
-        state = std::get<0>(s);
+        constexpr std::size_t nstride = sizeof(__m128i) / (sizeof(T) * K);
+        constexpr std::size_t rstride = sizeof(__m128i) / sizeof(ResultType);
+        constexpr std::size_t tstride = sizeof(T) * K / sizeof(ResultType);
+
+        std::array<__m128i, Rounds> rk;
+        MCKL_FLATTEN_CALL set_key(rk, key);
+
+        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_BATCH(8)
+        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_BATCH(4)
+
+        alignas(32) union {
+            std::array<T, K> state;
+            Counter<T, K> ctr;
+        } buf;
+
+        for (std::size_t i = 0; i != n; ++i, r += tstride) {
+            MCKL_FLATTEN_CALL increment(ctr);
+            buf.ctr = ctr;
+            eval(buf.state, key);
+            std::memcpy(r, buf.state.data(), sizeof(T) * K);
+        }
     }
 
+    private:
     template <std::size_t, std::size_t S>
-    static void round(std::array<__m128i, S> &, __m128i &, const __m128i &,
-        const __m128i &, std::false_type)
+    static void round(std::array<__m128i, S> &,
+        const std::array<__m128i, Rounds> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t S>
-    static void round(std::array<__m128i, S> &s, __m128i &p, const __m128i &w,
-        const __m128i &m, std::true_type)
+    static void round(std::array<__m128i, S> &s,
+        const std::array<__m128i, Rounds> &rk, std::true_type)
     {
-        MCKL_FLATTEN_CALL kbox<N>(p, w);
-        MCKL_FLATTEN_CALL sbox<N>(s, p, m);
-        round<N + 1>(
-            s, p, w, m, std::integral_constant<bool, N + 1 <= Rounds>());
-    }
-
-    template <std::size_t N>
-    static void kbox(__m128i &p, const __m128i &w)
-    {
-        kbox(p, w, std::integral_constant<bool, (N > 1 && N <= Rounds)>());
-    }
-
-    static void kbox(__m128i &, const __m128i &, std::false_type) {}
-
-    static void kbox(__m128i &p, const __m128i &w, std::true_type)
-    {
-        p = _mm_add_epi32(p, w);
+        MCKL_FLATTEN_CALL sbox<N>(s, rk);
+        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N, std::size_t S>
     static void sbox(
-        std::array<__m128i, S> &s, const __m128i &p, const __m128i &m)
+        std::array<__m128i, S> &s, const std::array<__m128i, Rounds> &rk)
     {
-        sbox<N>(
-            s, p, m, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
+        sbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t, std::size_t S>
-    static void sbox(std::array<__m128i, S> &, const __m128i &,
-        const __m128i &, std::false_type)
+    static void sbox(std::array<__m128i, S> &,
+        const std::array<__m128i, Rounds> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void sbox(std::array<__m128i, 1> &s, const __m128i &p,
-        const __m128i &m, std::true_type)
+    static void sbox(std::array<__m128i, 4> &s,
+        const std::array<__m128i, Rounds> &rk, std::true_type)
     {
-        constexpr int msk = static_cast<int>(0xFFFFFFFF);
-
-        const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
-
-        __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
-
-        __m128i x0 = _mm_xor_si128(std::get<0>(s), p);
-
-        std::get<0>(s) = _mm_and_si128(x0, mask);
-
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), m0);
-
-        MCKL_FLATTEN_CALL permute<N>(s);
-    }
-
-    template <std::size_t N>
-    static void sbox(std::array<__m128i, 2> &s, const __m128i &p,
-        const __m128i &m, std::true_type)
-    {
-        constexpr int msk = static_cast<int>(0xFFFFFFFF);
-
-        const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
-
-        __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
-        __m128i m1 = _mm_mul_epu32(std::get<1>(s), m);
-
-        __m128i x0 = _mm_xor_si128(std::get<0>(s), p);
-        __m128i x1 = _mm_xor_si128(std::get<1>(s), p);
-
-        std::get<0>(s) = _mm_and_si128(x0, mask);
-        std::get<1>(s) = _mm_and_si128(x1, mask);
-
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), m0);
-        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), m1);
-
-        MCKL_FLATTEN_CALL permute<N>(s);
-    }
-
-    template <std::size_t N>
-    static void sbox(std::array<__m128i, 4> &s, const __m128i &p,
-        const __m128i &m, std::true_type)
-    {
-        constexpr int msk = static_cast<int>(0xFFFFFFFF);
-
-        const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
+        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_SBOX_CONSTANTS
 
         __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
         __m128i m1 = _mm_mul_epu32(std::get<1>(s), m);
         __m128i m2 = _mm_mul_epu32(std::get<2>(s), m);
         __m128i m3 = _mm_mul_epu32(std::get<3>(s), m);
 
-        __m128i x0 = _mm_xor_si128(std::get<0>(s), p);
-        __m128i x1 = _mm_xor_si128(std::get<1>(s), p);
-        __m128i x2 = _mm_xor_si128(std::get<2>(s), p);
-        __m128i x3 = _mm_xor_si128(std::get<3>(s), p);
+        __m128i x0 = _mm_xor_si128(std::get<0>(s), k);
+        __m128i x1 = _mm_xor_si128(std::get<1>(s), k);
+        __m128i x2 = _mm_xor_si128(std::get<2>(s), k);
+        __m128i x3 = _mm_xor_si128(std::get<3>(s), k);
 
         std::get<0>(s) = _mm_and_si128(x0, mask);
         std::get<1>(s) = _mm_and_si128(x1, mask);
@@ -450,12 +301,10 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     }
 
     template <std::size_t N>
-    static void sbox(std::array<__m128i, 8> &s, const __m128i &p,
-        const __m128i &m, std::true_type)
+    static void sbox(std::array<__m128i, 8> &s,
+        const std::array<__m128i, Rounds> &rk, std::true_type)
     {
-        constexpr int msk = static_cast<int>(0xFFFFFFFF);
-
-        const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
+        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_SBOX_CONSTANTS
 
         __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
         __m128i m1 = _mm_mul_epu32(std::get<1>(s), m);
@@ -466,14 +315,14 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         __m128i m6 = _mm_mul_epu32(std::get<6>(s), m);
         __m128i m7 = _mm_mul_epu32(std::get<7>(s), m);
 
-        m0 = _mm_xor_si128(m0, p);
-        m1 = _mm_xor_si128(m1, p);
-        m2 = _mm_xor_si128(m2, p);
-        m3 = _mm_xor_si128(m3, p);
-        m4 = _mm_xor_si128(m4, p);
-        m5 = _mm_xor_si128(m5, p);
-        m6 = _mm_xor_si128(m6, p);
-        m7 = _mm_xor_si128(m7, p);
+        m0 = _mm_xor_si128(m0, k);
+        m1 = _mm_xor_si128(m1, k);
+        m2 = _mm_xor_si128(m2, k);
+        m3 = _mm_xor_si128(m3, k);
+        m4 = _mm_xor_si128(m4, k);
+        m5 = _mm_xor_si128(m5, k);
+        m6 = _mm_xor_si128(m6, k);
+        m7 = _mm_xor_si128(m7, k);
 
         std::get<0>(s) = _mm_and_si128(std::get<0>(s), mask);
         std::get<1>(s) = _mm_and_si128(std::get<1>(s), mask);
@@ -494,6 +343,35 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         std::get<7>(s) = _mm_xor_si128(std::get<7>(s), m7);
 
         permute<N>(s);
+    }
+
+    static void set_key(
+        std::array<__m128i, Rounds> &rk, const std::array<T, K / 2> &key)
+    {
+        const int k0 = static_cast<int>(std::get<0 % (K / 2)>(key));
+        const int k1 = static_cast<int>(std::get<1 % (K / 2)>(key));
+
+        set_key<0>(rk, _mm_set_epi32(k1, 0, k0, 0), std::true_type());
+    }
+
+    template <std::size_t>
+    static void set_key(
+        std::array<__m128i, Rounds> &, const __m128i &, std::false_type)
+    {
+    }
+
+    template <std::size_t N>
+    static void set_key(
+        std::array<__m128i, Rounds> &rk, const __m128i &k, std::true_type)
+    {
+        constexpr int w0 =
+            static_cast<int>(Constants::weyl::value[0 % (K / 2)] * N);
+        constexpr int w1 =
+            static_cast<int>(Constants::weyl::value[1 % (K / 2)] * N);
+
+        const __m128i w = _mm_set_epi32(w1, 0, w0, 0);
+        std::get<N>(rk) = _mm_add_epi32(k, w);
+        set_key<N + 1>(rk, k, std::integral_constant<bool, N + 1 < Rounds>());
     }
 
     template <std::size_t N, std::size_t S>
