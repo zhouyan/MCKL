@@ -29,16 +29,35 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_32_EVAL(S)                  \
-    static void eval(std::array<std::array<T, K>, S * 4 / K> &state,          \
-        const std::array<T, K + 4> &par,                                      \
-        std::integral_constant<std::size_t, S> * = nullptr)                   \
-    {                                                                         \
-        std::array<__m128i, S> s;                                             \
-        std::array<__m128i, 4> t;                                             \
-        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());      \
+#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_LOOP                            \
+    constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);        \
                                                                               \
-        MCKL_TRANSPOSE4X32_LOAD_SI128_##S(s, t, sptr);                        \
+    alignas(32) union {                                                       \
+        std::array<T, K> state;                                               \
+        Counter<T, K> ctr;                                                    \
+    } buf;                                                                    \
+                                                                              \
+    for (std::size_t i = 0; i != n; ++i, r += stride) {                       \
+        MCKL_FLATTEN_CALL increment(ctr);                                     \
+        buf.ctr = ctr;                                                        \
+        eval(buf.state, par);                                                 \
+        std::memcpy(r, buf.state.data(), sizeof(T) * K);                      \
+    }
+
+#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(S)                        \
+    while (n >= sizeof(__m128i) * S / (sizeof(T) * K)) {                      \
+        constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
+        constexpr std::size_t nstride = cstride / (sizeof(T) * K);            \
+        constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
+                                                                              \
+        union {                                                               \
+            std::array<__m128i, S> s;                                         \
+            std::array<Counter<T, K>, nstride> c;                             \
+        };                                                                    \
+                                                                              \
+        MCKL_FLATTEN_CALL increment(ctr, c);                                  \
+                                                                              \
+        MCKL_FLATTEN_CALL transpose4x32_load_si128(s);                        \
                                                                               \
         MCKL_FLATTEN_CALL sbox<0x00>(s);                                      \
         MCKL_FLATTEN_CALL pbox<0x00>(s);                                      \
@@ -139,25 +158,18 @@
                                                                               \
         round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());  \
                                                                               \
-        MCKL_TRANSPOSE4X32_STORE_SI128_##S(s, t, sptr);                       \
+        MCKL_FLATTEN_CALL transpose4x32_store_si128(s);                       \
+                                                                              \
+        std::memcpy(r, s.data(), cstride);                                    \
+        n -= nstride;                                                         \
+        r += rstride;                                                         \
     }
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
 {
-#if MCKL_HAS_X86_64
-    static constexpr std::size_t R_ = 8;
-#else
-    static constexpr std::size_t R_ = 4;
-#endif
-
-    static constexpr std::size_t S_ =
-        (K != 0 && (K & (K - 1)) == 0 && K <= 16 && K >= R_) ? K : R_;
-
     public:
-    static constexpr bool batch() { return K != 0 && S_ % K == 0; }
-
-    static constexpr std::size_t blocks() { return S_ * 4 / K; }
+    static constexpr bool batch() { return K != 0 && 16 % K == 0; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
@@ -165,11 +177,48 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
             state, par);
     }
 
-    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_32_EVAL(4)
-    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_32_EVAL(8)
-    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_32_EVAL(16)
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
+        std::size_t n, ResultType *r)
+    {
+        eval_dispatch(ctr, par, n, r);
+    }
 
     private:
+    template <typename ResultType>
+    static void eval_dispatch(Counter<T, 2> &ctr, const std::array<T, 6> &par,
+        std::size_t n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(8)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(4)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_LOOP
+    }
+
+    template <typename ResultType>
+    static void eval_dispatch(Counter<T, 4> &ctr, const std::array<T, 8> &par,
+        std::size_t n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(8)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(4)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_LOOP
+    }
+
+    template <typename ResultType>
+    static void eval_dispatch(Counter<T, 8> &ctr, const std::array<T, 12> &par,
+        std::size_t n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(8)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_LOOP
+    }
+
+    template <typename ResultType>
+    static void eval_dispatch(Counter<T, 16> &ctr,
+        const std::array<T, 20> &par, std::size_t n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(16)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_LOOP
+    }
+
     template <std::size_t, std::size_t S>
     static void round(std::array<__m128i, S> &, const std::array<T, K + 4> &,
         std::false_type)

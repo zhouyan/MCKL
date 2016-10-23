@@ -29,16 +29,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_EVAL(S)                  \
-    static void eval(std::array<std::array<T, K>, S * 2 / K> &state,          \
-        const std::array<T, K + 4> &par,                                      \
-        std::integral_constant<std::size_t, S> * = nullptr)                   \
-    {                                                                         \
-        std::array<__m128i, S> s;                                             \
-        std::array<__m128i, 2> t;                                             \
-        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());      \
+#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(S)                        \
+    while (n >= sizeof(__m128i) * S / (sizeof(T) * K)) {                      \
+        constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
+        constexpr std::size_t nstride = cstride / (sizeof(T) * K);            \
+        constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
                                                                               \
-        MCKL_TRANSPOSE2X64_LOAD_SI128_##S(s, t, sptr);                        \
+        union {                                                               \
+            std::array<__m128i, S> s;                                         \
+            std::array<Counter<T, K>, nstride> c;                             \
+        };                                                                    \
+                                                                              \
+        MCKL_FLATTEN_CALL increment(ctr, c);                                  \
+                                                                              \
+        MCKL_FLATTEN_CALL transpose2x64_load_si128(s);                        \
                                                                               \
         MCKL_FLATTEN_CALL sbox<0x00>(s);                                      \
         MCKL_FLATTEN_CALL pbox<0x00>(s);                                      \
@@ -139,25 +143,18 @@
                                                                               \
         round<0x20>(s, par, std::integral_constant<bool, 0x20 <= Rounds>());  \
                                                                               \
-        MCKL_TRANSPOSE2X64_STORE_SI128_##S(s, t, sptr);                       \
+        MCKL_FLATTEN_CALL transpose2x64_store_si128(s);                       \
+                                                                              \
+        std::memcpy(r, s.data(), cstride);                                    \
+        n -= nstride;                                                         \
+        r += rstride;                                                         \
     }
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 {
-#if MCKL_HAS_X86_64
-    static constexpr std::size_t R_ = 8;
-#else
-    static constexpr std::size_t R_ = 4;
-#endif
-
-    static constexpr std::size_t S_ =
-        (K != 0 && (K & (K - 1)) == 0 && K <= 16 && K >= R_) ? K : R_;
-
     public:
-    static constexpr bool batch() { return K != 0 && S_ % K == 0; }
-
-    static constexpr std::size_t blocks() { return S_ * 2 / K; }
+    static constexpr bool batch() { return K != 0 && 16 % K == 0; }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
@@ -165,12 +162,66 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
             state, par);
     }
 
-    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_EVAL(2)
-    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_EVAL(4)
-    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_EVAL(8)
-    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_EVAL(16)
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
+        std::size_t n, ResultType *r)
+    {
+        constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);
+
+        r = eval_batch(ctr, par, n, r);
+
+        alignas(32) union {
+            std::array<T, K> state;
+            Counter<T, K> ctr;
+        } buf;
+
+        for (std::size_t i = 0; i != n; ++i, r += stride) {
+            MCKL_FLATTEN_CALL increment(ctr);
+            buf.ctr = ctr;
+            eval(buf.state, par);
+            std::memcpy(r, buf.state.data(), sizeof(T) * K);
+        }
+    }
 
     private:
+    template <typename ResultType>
+    static ResultType *eval_batch(Counter<T, 2> &ctr,
+        const std::array<T, 6> &par, std::size_t &n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(8)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(4)
+
+        return r;
+    }
+
+    template <typename ResultType>
+    static ResultType *eval_batch(Counter<T, 4> &ctr,
+        const std::array<T, 8> &par, std::size_t &n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(8)
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(4)
+
+        return r;
+    }
+
+    template <typename ResultType>
+    static ResultType *eval_batch(Counter<T, 8> &ctr,
+        const std::array<T, 12> &par, std::size_t &n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(8)
+
+        return r;
+    }
+
+    template <typename ResultType>
+    static ResultType *eval_batch(Counter<T, 16> &ctr,
+        const std::array<T, 20> &par, std::size_t &n, ResultType *r)
+    {
+        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(16)
+
+        return r;
+    }
+
     template <std::size_t, std::size_t S>
     static void round(std::array<__m128i, S> &, const std::array<T, K + 4> &,
         std::false_type)
@@ -199,17 +250,6 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     static void kbox(std::array<__m128i, S> &, const std::array<T, K + 4> &,
         std::false_type)
     {
-    }
-
-    template <std::size_t N>
-    static void kbox(std::array<__m128i, 2> &s,
-        const std::array<T, K + 4> &par, std::true_type)
-    {
-        std::array<__m128i, K> k;
-        set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
-
-        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<0 % K>(k));
-        std::get<1>(s) = _mm_add_epi64(std::get<1>(s), std::get<1 % K>(k));
     }
 
     template <std::size_t N>
@@ -292,23 +332,6 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
     template <std::size_t, std::size_t S>
     static void sbox(std::array<__m128i, S> &, std::false_type)
     {
-    }
-
-    template <std::size_t N>
-    static void sbox(std::array<__m128i, 2> &s, std::true_type)
-    {
-        constexpr int L0 = Constants::rotate::value[0 % (K / 2)][(N - 1) % 8];
-        constexpr int R0 = 64 - L0;
-
-        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<1>(s));
-
-        __m128i l0 = _mm_slli_epi64(std::get<1>(s), L0);
-
-        __m128i r0 = _mm_srli_epi64(std::get<1>(s), R0);
-
-        std::get<1>(s) = _mm_or_si128(l0, r0);
-
-        std::get<1>(s) = _mm_xor_si128(std::get<0>(s), std::get<1>(s));
     }
 
     template <std::size_t N>

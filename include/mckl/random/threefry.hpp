@@ -245,34 +245,8 @@ class ThreefryGenerator
     void generate(
         ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
     {
-        constexpr std::size_t stride = size() / sizeof(ResultType);
-        constexpr std::size_t blocks =
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
-
-        alignas(32) union {
-            std::array<T, K * blocks> state;
-            std::array<std::array<T, K>, blocks> state_block;
-            std::array<ctr_type, blocks> ctr_block;
-            std::array<ResultType, size() / sizeof(ResultType) * blocks>
-                result;
-        } buf;
-
-        const std::size_t m = n / blocks;
-        const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, result += stride * blocks) {
-            MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-            internal::union_le<typename ctr_type::value_type>(buf.state);
-#endif
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-                buf.state_block, par_);
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-            internal::union_le<T>(buf.result);
-#endif
-            std::memcpy(result, buf.result.data(), size() * blocks);
-        }
-        for (std::size_t i = 0; i != l; ++i, result += stride)
-            operator()(ctr, result);
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+            ctr, par_, n, result);
     }
 }; // class ThreefryGenerator
 

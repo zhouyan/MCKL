@@ -41,10 +41,14 @@
     const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
 
 #define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_BATCH(S)                          \
-    while (n >= nstride * S) {                                                \
+    while (n >= sizeof(__m128i) * S / (sizeof(T) * K)) {                      \
+        constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
+        constexpr std::size_t nstride = cstride / (sizeof(T) * K);            \
+        constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
+                                                                              \
         union {                                                               \
             std::array<__m128i, S> s;                                         \
-            std::array<Counter<T, K>, nstride * S> c;                         \
+            std::array<Counter<T, K>, nstride> c;                             \
         };                                                                    \
                                                                               \
         MCKL_FLATTEN_CALL increment(ctr, c);                                  \
@@ -72,9 +76,9 @@
                                                                               \
         MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);           \
                                                                               \
-        std::memcpy(r, s.data(), sizeof(ResultType) * rstride * S);           \
-        n -= nstride * S;                                                     \
-        r += rstride * S;                                                     \
+        std::memcpy(r, s.data(), cstride);                                    \
+        n -= nstride;                                                         \
+        r += rstride;                                                         \
     }
 
 template <std::size_t>
@@ -220,9 +224,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, ResultType *r)
     {
-        constexpr std::size_t nstride = sizeof(__m128i) / (sizeof(T) * K);
-        constexpr std::size_t rstride = sizeof(__m128i) / sizeof(ResultType);
-        constexpr std::size_t tstride = sizeof(T) * K / sizeof(ResultType);
+        constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);
 
         std::array<__m128i, Rounds> rk;
         MCKL_FLATTEN_CALL set_key(rk, key);
@@ -235,7 +237,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
             Counter<T, K> ctr;
         } buf;
 
-        for (std::size_t i = 0; i != n; ++i, r += tstride) {
+        for (std::size_t i = 0; i != n; ++i, r += stride) {
             MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr = ctr;
             eval(buf.state, key);

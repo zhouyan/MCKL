@@ -214,8 +214,8 @@ class IncrementBlock<T, 8, 4, 64>
 
         __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
         __m128i c4 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-        __m128i cC = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
+        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
+        __m128i cC = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
 
         __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
         _mm_store_si128(cptr++, c0);
@@ -240,7 +240,7 @@ class IncrementBlock<T, 8, 4, 64>
 template <typename T>
 class IncrementBlock<T, 16, 2, 64>
 {
-    static constexpr std::size_t K_ = 8;
+    static constexpr std::size_t K_ = 16;
     static constexpr std::size_t blocks_ = 2;
 
     public:
@@ -278,7 +278,7 @@ class IncrementBlock<T, 16, 2, 64>
                 static_cast<MCKL_INT64>(std::get<0xE>(ctr)));
 
         __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
-        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
 
         __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
         _mm_store_si128(cptr++, c0);
