@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_32(S)                       \
+#define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_32_EVAL(S)                  \
     static void eval(std::array<std::array<T, K>, S * 8 / K> &state,          \
         const std::array<T, K + 4> &par,                                      \
         std::integral_constant<std::size_t, S> * = nullptr)                   \

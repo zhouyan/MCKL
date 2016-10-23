@@ -284,14 +284,14 @@
     MCKL_TRANSPOSE4X64_SI256(s, t, 0x8, 0x9, 0xA, 0xB);                       \
     MCKL_TRANSPOSE4X64_SI256(s, t, 0xC, 0xD, 0xE, 0xF);
 
-#define MCKL_TRANSPOSE4X64_SI256_4(s, t, sptr)                                \
+#define MCKL_TRANSPOSE4X64_STORE_SI256_4(s, t, sptr)                          \
     MCKL_TRANSPOSE4X64_SI256(s, t, 0, 1, 2, 3);                               \
-    _mm256_store_si256(sptr++, std::get<0>(s));                               \
-    _mm256_store_si256(sptr++, std::get<1>(s));                               \
-    _mm256_store_si256(sptr++, std::get<2>(s));                               \
-    _mm256_store_si256(sptr++, std::get<3>(s));
+    _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
+    _mm256_store_si256(sptr + 1, std::get<1>(s));                             \
+    _mm256_store_si256(sptr + 2, std::get<2>(s));                             \
+    _mm256_store_si256(sptr + 3, std::get<3>(s));
 
-#define MCKL_TRANSPOSE4X64_SI256_8(s, t, sptr)                                \
+#define MCKL_TRANSPOSE4X64_STORE_SI256_8(s, t, sptr)                          \
     MCKL_TRANSPOSE4X64_SI256(s, t, 0, 1, 2, 3);                               \
     MCKL_TRANSPOSE4X64_SI256(s, t, 4, 5, 6, 7);                               \
     _mm256_store_si256(sptr + 0, std::get<0>(s));                             \
@@ -303,7 +303,7 @@
     _mm256_store_si256(sptr + 6, std::get<3>(s));                             \
     _mm256_store_si256(sptr + 7, std::get<7>(s));
 
-#define MCKL_TRANSPOSE4X64_SI256_16(s, t, sptr)                               \
+#define MCKL_TRANSPOSE4X64_STORE_SI256_16(s, t, sptr)                         \
     MCKL_TRANSPOSE4X64_SI256(s, t, 0x0, 0x1, 0x2, 0x3);                       \
     MCKL_TRANSPOSE4X64_SI256(s, t, 0x4, 0x5, 0x6, 0x7);                       \
     MCKL_TRANSPOSE4X64_SI256(s, t, 0x8, 0x9, 0xA, 0xB);                       \

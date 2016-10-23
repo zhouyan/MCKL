@@ -65,7 +65,7 @@
         std::array<__m256i, S> s;                                             \
         __m256i *const sptr = reinterpret_cast<__m256i *>(state.data());      \
                                                                               \
-        MCKL_LOAD_SI256_##S(s, state);                                        \
+        MCKL_LOAD_SI256_##S(s, sptr);                                         \
                                                                               \
         PhiloxGeneratorImplPermute32<K>::first(s);                            \
                                                                               \
@@ -107,7 +107,7 @@
                                                                               \
         PhiloxGeneratorImplPermute32<K>::last(s);                             \
                                                                               \
-        MCKL_STORE_SI256_##S(s, state);                                       \
+        MCKL_STORE_SI256_##S(s, sptr);                                        \
     }
 
 template <std::size_t>
