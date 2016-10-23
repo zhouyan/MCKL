@@ -910,6 +910,8 @@ class MKLEngine
     }
 
     /// \brief Discard the result
+    ///
+    /// \return The number of results discarded
     std::size_t discard()
     {
         const std::size_t remain = M_ - index_;

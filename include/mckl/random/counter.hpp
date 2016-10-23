@@ -392,6 +392,8 @@ class CounterEngine
     }
 
     /// \brief Discard the result
+    ///
+    /// \return The number of results discarded
     std::size_t discard()
     {
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
@@ -432,9 +434,6 @@ class CounterEngine
         return std::numeric_limits<result_type>::max();
     }
 
-    /// \brief `eng1 == eng2` is a sufficent condition for subsequent call of
-    /// `operator()` output the same results. But it is not a necessary
-    /// condition.
     friend bool operator==(const CounterEngine<ResultType, Generator> &eng1,
         const CounterEngine<ResultType, Generator> &eng2)
     {
@@ -449,9 +448,6 @@ class CounterEngine
         return true;
     }
 
-    /// \brief `eng1 != eng2` is a necessary condition for subsequent call of
-    /// `operator()` output different results. But it is not a sufficient
-    /// condition.
     friend bool operator!=(const CounterEngine<ResultType, Generator> &eng1,
         const CounterEngine<ResultType, Generator> &eng2)
     {
