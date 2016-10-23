@@ -58,6 +58,8 @@
                                                                               \
         round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());   \
                                                                               \
+        enclast(s, rk);                                                       \
+                                                                              \
         MCKL_STORE_SI128_##S(s, sptr);                                        \
     }
 
