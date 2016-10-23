@@ -29,6 +29,38 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(S)                         \
+    static void eval(std::array<std::array<std::uint32_t, 4>, S> &state,      \
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)              \
+    {                                                                         \
+        std::array<__m128i, S> s;                                             \
+        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());      \
+                                                                              \
+        MCKL_LOAD_SI128_##S(s, sptr);                                         \
+                                                                              \
+        encfirst(s, rk);                                                      \
+                                                                              \
+        enc<0x1>(s, rk);                                                      \
+        enc<0x2>(s, rk);                                                      \
+        enc<0x3>(s, rk);                                                      \
+        enc<0x4>(s, rk);                                                      \
+        enc<0x5>(s, rk);                                                      \
+        enc<0x6>(s, rk);                                                      \
+        enc<0x7>(s, rk);                                                      \
+        enc<0x8>(s, rk);                                                      \
+        enc<0x9>(s, rk);                                                      \
+        enc<0xA>(s, rk);                                                      \
+        enc<0xB>(s, rk);                                                      \
+        enc<0xC>(s, rk);                                                      \
+        enc<0xD>(s, rk);                                                      \
+        enc<0xE>(s, rk);                                                      \
+        enc<0xF>(s, rk);                                                      \
+                                                                              \
+        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());   \
+                                                                              \
+        MCKL_STORE_SI128_##S(s, sptr);                                        \
+    }
+
 #define MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(N, rcon)                      \
     template <>                                                               \
     inline __m128i AESNIKeyGenAssist<N>(const __m128i &xmm)                   \
@@ -667,197 +699,10 @@ class AESGeneratorImpl
         eval(std::get<0>(state), rk);
     }
 
-    static void eval(std::array<std::array<std::uint32_t, 4>, 2> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        std::array<__m128i, 2> s;
-        __m128i *sptr = nullptr;
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-
-        encfirst(s, rk);
-
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
-
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-
-        enclast(s, rk);
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-    }
-
-    static void eval(std::array<std::array<std::uint32_t, 4>, 4> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        std::array<__m128i, 4> s;
-        __m128i *sptr = nullptr;
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-        std::get<2>(s) = _mm_load_si128(sptr++);
-        std::get<3>(s) = _mm_load_si128(sptr++);
-
-        encfirst(s, rk);
-
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
-
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-
-        enclast(s, rk);
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-        _mm_store_si128(sptr++, std::get<2>(s));
-        _mm_store_si128(sptr++, std::get<3>(s));
-    }
-
-    static void eval(std::array<std::array<std::uint32_t, 4>, 8> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        std::array<__m128i, 8> s;
-        __m128i *sptr = nullptr;
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-        std::get<2>(s) = _mm_load_si128(sptr++);
-        std::get<3>(s) = _mm_load_si128(sptr++);
-        std::get<4>(s) = _mm_load_si128(sptr++);
-        std::get<5>(s) = _mm_load_si128(sptr++);
-        std::get<6>(s) = _mm_load_si128(sptr++);
-        std::get<7>(s) = _mm_load_si128(sptr++);
-
-        encfirst(s, rk);
-
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
-
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-
-        enclast(s, rk);
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-        _mm_store_si128(sptr++, std::get<2>(s));
-        _mm_store_si128(sptr++, std::get<3>(s));
-        _mm_store_si128(sptr++, std::get<4>(s));
-        _mm_store_si128(sptr++, std::get<5>(s));
-        _mm_store_si128(sptr++, std::get<6>(s));
-        _mm_store_si128(sptr++, std::get<7>(s));
-    }
-
-    static void eval(std::array<std::array<std::uint32_t, 4>, 16> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        std::array<__m128i, 16> s;
-        __m128i *sptr = nullptr;
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0x0>(s) = _mm_load_si128(sptr++);
-        std::get<0x1>(s) = _mm_load_si128(sptr++);
-        std::get<0x2>(s) = _mm_load_si128(sptr++);
-        std::get<0x3>(s) = _mm_load_si128(sptr++);
-        std::get<0x4>(s) = _mm_load_si128(sptr++);
-        std::get<0x5>(s) = _mm_load_si128(sptr++);
-        std::get<0x6>(s) = _mm_load_si128(sptr++);
-        std::get<0x7>(s) = _mm_load_si128(sptr++);
-        std::get<0x8>(s) = _mm_load_si128(sptr++);
-        std::get<0x9>(s) = _mm_load_si128(sptr++);
-        std::get<0xA>(s) = _mm_load_si128(sptr++);
-        std::get<0xB>(s) = _mm_load_si128(sptr++);
-        std::get<0xC>(s) = _mm_load_si128(sptr++);
-        std::get<0xD>(s) = _mm_load_si128(sptr++);
-        std::get<0xE>(s) = _mm_load_si128(sptr++);
-        std::get<0xF>(s) = _mm_load_si128(sptr++);
-
-        encfirst(s, rk);
-
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
-
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-
-        enclast(s, rk);
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0x0>(s));
-        _mm_store_si128(sptr++, std::get<0x1>(s));
-        _mm_store_si128(sptr++, std::get<0x2>(s));
-        _mm_store_si128(sptr++, std::get<0x3>(s));
-        _mm_store_si128(sptr++, std::get<0x4>(s));
-        _mm_store_si128(sptr++, std::get<0x5>(s));
-        _mm_store_si128(sptr++, std::get<0x6>(s));
-        _mm_store_si128(sptr++, std::get<0x7>(s));
-        _mm_store_si128(sptr++, std::get<0x8>(s));
-        _mm_store_si128(sptr++, std::get<0x9>(s));
-        _mm_store_si128(sptr++, std::get<0xA>(s));
-        _mm_store_si128(sptr++, std::get<0xB>(s));
-        _mm_store_si128(sptr++, std::get<0xC>(s));
-        _mm_store_si128(sptr++, std::get<0xD>(s));
-        _mm_store_si128(sptr++, std::get<0xE>(s));
-        _mm_store_si128(sptr++, std::get<0xF>(s));
-    }
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(2)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(4)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(8)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_EVAL(16)
 
     private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();

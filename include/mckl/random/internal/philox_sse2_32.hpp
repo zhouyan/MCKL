@@ -29,6 +29,77 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(S)                    \
+    static void eval(std::array<std::array<T, K>, S * 4 / K> &state,          \
+        const std::array<T, K / 2> &key,                                      \
+        std::integral_constant<std::size_t, S> * = nullptr)                   \
+    {                                                                         \
+        constexpr std::size_t i0 = 0 % (K / 2);                               \
+        constexpr std::size_t i1 = 1 % (K / 2);                               \
+                                                                              \
+        constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);      \
+        constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);      \
+                                                                              \
+        constexpr int m0 =                                                    \
+            static_cast<int>(Constants::multiplier::value[i0]);               \
+        constexpr int m1 =                                                    \
+            static_cast<int>(Constants::multiplier::value[i1]);               \
+                                                                              \
+        const int p0 = static_cast<int>(std::get<i0>(key));                   \
+        const int p1 = static_cast<int>(std::get<i1>(key));                   \
+                                                                              \
+        const __m128i w = _mm_set_epi32(w1, 0, w0, 0);                        \
+        const __m128i m = _mm_set_epi32(0, m1, 0, m0);                        \
+        __m128i p = _mm_set_epi32(p1, 0, p0, 0);                              \
+                                                                              \
+        std::array<__m128i, S> s;                                             \
+        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());      \
+                                                                              \
+        MCKL_LOAD_SI128_##S(s, sptr);                                         \
+                                                                              \
+        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);          \
+                                                                              \
+        MCKL_FLATTEN_CALL kbox<0x0>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x0>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x1>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x1>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x2>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x2>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x3>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x3>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x4>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x4>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x5>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x5>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x6>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x6>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x7>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x7>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x8>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x8>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0x9>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0x9>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0xA>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0xA>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0xB>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0xB>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0xC>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0xC>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0xD>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0xD>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0xE>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0xE>(s, p, m);                                 \
+        MCKL_FLATTEN_CALL kbox<0xF>(p, w);                                    \
+        MCKL_FLATTEN_CALL sbox<0xF>(s, p, m);                                 \
+                                                                              \
+        round<0x10>(                                                          \
+            s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());      \
+                                                                              \
+        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);           \
+                                                                              \
+        MCKL_STORE_SI128_##S(s, sptr);                                        \
+    }
+
 template <std::size_t>
 class PhiloxGeneratorImplPermute32;
 
@@ -241,78 +312,10 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         eval(state, key, std::integral_constant<bool, K == 4>());
     }
 
-    template <std::size_t B>
-    static void eval(std::array<std::array<T, K>, B> &state,
-        const std::array<T, K / 2> &key)
-    {
-        constexpr std::size_t S = K * B / 4;
-
-        static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 8,
-            "**PhiloxGeneratorImpl::eval** used with invalid block size (S = "
-            "K * B / 4)");
-
-        constexpr std::size_t i0 = 0 % (K / 2);
-        constexpr std::size_t i1 = 1 % (K / 2);
-
-        constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);
-        constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);
-
-        constexpr int m0 = static_cast<int>(Constants::multiplier::value[i0]);
-        constexpr int m1 = static_cast<int>(Constants::multiplier::value[i1]);
-
-        const int p0 = static_cast<int>(std::get<i0>(key));
-        const int p1 = static_cast<int>(std::get<i1>(key));
-
-        const __m128i w = _mm_set_epi32(w1, 0, w0, 0);
-        const __m128i m = _mm_set_epi32(0, m1, 0, m0);
-        __m128i p = _mm_set_epi32(p1, 0, p0, 0);
-
-        std::array<__m128i, S> s;
-
-        MCKL_FLATTEN_CALL load_si128(s, state);
-
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);
-
-        MCKL_FLATTEN_CALL kbox<0x0>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x0>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x1>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x1>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x2>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x2>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x3>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x3>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x4>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x4>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x5>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x5>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x6>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x6>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x7>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x7>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x8>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x8>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0x9>(p, w);
-        MCKL_FLATTEN_CALL sbox<0x9>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xA>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xA>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xB>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xB>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xC>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xC>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xD>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xD>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xE>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xE>(s, p, m);
-        MCKL_FLATTEN_CALL kbox<0xF>(p, w);
-        MCKL_FLATTEN_CALL sbox<0xF>(s, p, m);
-
-        round<0x10>(
-            s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
-
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);
-
-        MCKL_FLATTEN_CALL store_si128(s, state);
-    }
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(1)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(2)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(4)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_EVAL(8)
 
     private:
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key,
@@ -443,7 +446,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         std::get<2>(s) = _mm_xor_si128(std::get<2>(s), m2);
         std::get<3>(s) = _mm_xor_si128(std::get<3>(s), m3);
 
-        MCKL_FLATTEN_CALL permute<N>(s);
+        permute<N>(s);
     }
 
     template <std::size_t N>

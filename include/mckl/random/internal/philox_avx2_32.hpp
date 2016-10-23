@@ -29,6 +29,87 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_EVAL(S)                    \
+    static void eval(std::array<std::array<T, K>, S * 8 / K> &state,          \
+        const std::array<T, K / 2> &key,                                      \
+        std::integral_constant<std::size_t, S> * = nullptr)                   \
+    {                                                                         \
+        constexpr std::size_t i0 = 0 % (K / 2);                               \
+        constexpr std::size_t i1 = 1 % (K / 2);                               \
+        constexpr std::size_t i2 = 2 % (K / 2);                               \
+        constexpr std::size_t i3 = 3 % (K / 2);                               \
+                                                                              \
+        constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);      \
+        constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);      \
+        constexpr int w2 = static_cast<int>(Constants::weyl::value[i2]);      \
+        constexpr int w3 = static_cast<int>(Constants::weyl::value[i3]);      \
+                                                                              \
+        constexpr int m0 =                                                    \
+            static_cast<int>(Constants::multiplier::value[i0]);               \
+        constexpr int m1 =                                                    \
+            static_cast<int>(Constants::multiplier::value[i1]);               \
+        constexpr int m2 =                                                    \
+            static_cast<int>(Constants::multiplier::value[i2]);               \
+        constexpr int m3 =                                                    \
+            static_cast<int>(Constants::multiplier::value[i3]);               \
+                                                                              \
+        const int p0 = static_cast<int>(std::get<i0>(key));                   \
+        const int p1 = static_cast<int>(std::get<i1>(key));                   \
+        const int p2 = static_cast<int>(std::get<i2>(key));                   \
+        const int p3 = static_cast<int>(std::get<i3>(key));                   \
+                                                                              \
+        const __m256i w = _mm256_set_epi32(w3, 0, w2, 0, w1, 0, w0, 0);       \
+        const __m256i m = _mm256_set_epi32(0, m3, 0, m2, 0, m1, 0, m0);       \
+        __m256i p = _mm256_set_epi32(p3, 0, p2, 0, p1, 0, p0, 0);             \
+                                                                              \
+        std::array<__m256i, S> s;                                             \
+        __m256i *const sptr = reinterpret_cast<__m256i *>(state.data());      \
+                                                                              \
+        MCKL_LOAD_SI256_##S(s, state);                                        \
+                                                                              \
+        PhiloxGeneratorImplPermute32<K>::first(s);                            \
+                                                                              \
+        kbox<0x0>(p, w);                                                      \
+        sbox<0x0>(s, p, m);                                                   \
+        kbox<0x1>(p, w);                                                      \
+        sbox<0x1>(s, p, m);                                                   \
+        kbox<0x2>(p, w);                                                      \
+        sbox<0x2>(s, p, m);                                                   \
+        kbox<0x3>(p, w);                                                      \
+        sbox<0x3>(s, p, m);                                                   \
+        kbox<0x4>(p, w);                                                      \
+        sbox<0x4>(s, p, m);                                                   \
+        kbox<0x5>(p, w);                                                      \
+        sbox<0x5>(s, p, m);                                                   \
+        kbox<0x6>(p, w);                                                      \
+        sbox<0x6>(s, p, m);                                                   \
+        kbox<0x7>(p, w);                                                      \
+        sbox<0x7>(s, p, m);                                                   \
+        kbox<0x8>(p, w);                                                      \
+        sbox<0x8>(s, p, m);                                                   \
+        kbox<0x9>(p, w);                                                      \
+        sbox<0x9>(s, p, m);                                                   \
+        kbox<0xA>(p, w);                                                      \
+        sbox<0xA>(s, p, m);                                                   \
+        kbox<0xB>(p, w);                                                      \
+        sbox<0xB>(s, p, m);                                                   \
+        kbox<0xC>(p, w);                                                      \
+        sbox<0xC>(s, p, m);                                                   \
+        kbox<0xD>(p, w);                                                      \
+        sbox<0xD>(s, p, m);                                                   \
+        kbox<0xE>(p, w);                                                      \
+        sbox<0xE>(s, p, m);                                                   \
+        kbox<0xF>(p, w);                                                      \
+        sbox<0xF>(s, p, m);                                                   \
+                                                                              \
+        round<0x10>(                                                          \
+            s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());      \
+                                                                              \
+        PhiloxGeneratorImplPermute32<K>::last(s);                             \
+                                                                              \
+        MCKL_STORE_SI256_##S(s, state);                                       \
+    }
+
 template <std::size_t>
 class PhiloxGeneratorImplPermute32;
 
@@ -237,86 +318,10 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         eval(state, key, std::integral_constant<bool, K == 8>());
     }
 
-    template <std::size_t B>
-    static void eval(std::array<std::array<T, K>, B> &state,
-        const std::array<T, K / 2> &key)
-    {
-        constexpr std::size_t S = K * B / 8;
-
-        static_assert(S != 0 && (S & (S - 1)) == 0 && S <= 8,
-            "**PhiloxGeneratorImpl::eval** used with invalid block size (S = "
-            "K * B / 8)");
-
-        constexpr std::size_t i0 = 0 % (K / 2);
-        constexpr std::size_t i1 = 1 % (K / 2);
-        constexpr std::size_t i2 = 2 % (K / 2);
-        constexpr std::size_t i3 = 3 % (K / 2);
-
-        constexpr int w0 = static_cast<int>(Constants::weyl::value[i0]);
-        constexpr int w1 = static_cast<int>(Constants::weyl::value[i1]);
-        constexpr int w2 = static_cast<int>(Constants::weyl::value[i2]);
-        constexpr int w3 = static_cast<int>(Constants::weyl::value[i3]);
-
-        constexpr int m0 = static_cast<int>(Constants::multiplier::value[i0]);
-        constexpr int m1 = static_cast<int>(Constants::multiplier::value[i1]);
-        constexpr int m2 = static_cast<int>(Constants::multiplier::value[i2]);
-        constexpr int m3 = static_cast<int>(Constants::multiplier::value[i3]);
-
-        const int p0 = static_cast<int>(std::get<i0>(key));
-        const int p1 = static_cast<int>(std::get<i1>(key));
-        const int p2 = static_cast<int>(std::get<i2>(key));
-        const int p3 = static_cast<int>(std::get<i3>(key));
-
-        const __m256i w = _mm256_set_epi32(w3, 0, w2, 0, w1, 0, w0, 0);
-        const __m256i m = _mm256_set_epi32(0, m3, 0, m2, 0, m1, 0, m0);
-        __m256i p = _mm256_set_epi32(p3, 0, p2, 0, p1, 0, p0, 0);
-
-        std::array<__m256i, S> s;
-
-        load_si256(s, state);
-
-        PhiloxGeneratorImplPermute32<K>::first(s);
-
-        kbox<0x0>(p, w);
-        sbox<0x0>(s, p, m);
-        kbox<0x1>(p, w);
-        sbox<0x1>(s, p, m);
-        kbox<0x2>(p, w);
-        sbox<0x2>(s, p, m);
-        kbox<0x3>(p, w);
-        sbox<0x3>(s, p, m);
-        kbox<0x4>(p, w);
-        sbox<0x4>(s, p, m);
-        kbox<0x5>(p, w);
-        sbox<0x5>(s, p, m);
-        kbox<0x6>(p, w);
-        sbox<0x6>(s, p, m);
-        kbox<0x7>(p, w);
-        sbox<0x7>(s, p, m);
-        kbox<0x8>(p, w);
-        sbox<0x8>(s, p, m);
-        kbox<0x9>(p, w);
-        sbox<0x9>(s, p, m);
-        kbox<0xA>(p, w);
-        sbox<0xA>(s, p, m);
-        kbox<0xB>(p, w);
-        sbox<0xB>(s, p, m);
-        kbox<0xC>(p, w);
-        sbox<0xC>(s, p, m);
-        kbox<0xD>(p, w);
-        sbox<0xD>(s, p, m);
-        kbox<0xE>(p, w);
-        sbox<0xE>(s, p, m);
-        kbox<0xF>(p, w);
-        sbox<0xF>(s, p, m);
-
-        round<0x10>(
-            s, p, w, m, std::integral_constant<bool, 0x10 <= Rounds>());
-
-        PhiloxGeneratorImplPermute32<K>::last(s);
-
-        store_si256(s, state);
-    }
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_EVAL(1)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_EVAL(2)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_EVAL(4)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_EVAL(8)
 
     private:
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key,
