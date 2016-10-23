@@ -34,6 +34,10 @@
 
 #include <mckl/internal/config.h>
 
+#ifndef UINT32_C
+#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
+#endif
+
 #ifdef MCKL_OPENCL
 #define MCKL_RANDOMC_U01_23F (1.0f / 8388608.0f)
 #define MCKL_RANDOMC_U01_24F (1.0f / 16777216.0f)

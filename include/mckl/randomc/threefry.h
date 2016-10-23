@@ -34,6 +34,10 @@
 
 #include <mckl/internal/config.h>
 
+#ifndef UINT32_C
+#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
+#endif
+
 /// \brief Threefry2x32 counter type
 /// \ingroup ThreefryC
 typedef struct {

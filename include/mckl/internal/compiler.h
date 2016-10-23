@@ -32,10 +32,6 @@
 #ifndef MCKL_INTERNAL_COMPILER_H
 #define MCKL_INTERNAL_COMPILER_H
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-
 #include <mckl/internal/compiler/platform.h>
 #if defined(__OPENCL_VERSION__)
 #define MCKL_OPENCL
@@ -68,10 +64,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #endif
-#endif
-
-#ifndef UINT64_C
-#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
 #endif
 
 #ifndef MCKL_FLATTEN
