@@ -512,10 +512,6 @@ user defined callback function. More specifically,
 \begin{verbatim}
 using eval_type = std::function<void(size_t, size_t, Particle<T> &, double *)>;
 \end{verbatim}
-For example,
-\begin{verbatim}
-void phi(size_t t, size_t d, Particle<T> &particle, double *r);
-\end{verbatim}
 When this function is called. The first argument passed to it is $t$, the
 iteration number. The second is $d$, the dimension. The third is a reference to
 the particle system at iteration $t$. And the last is a pointer to a vector for
@@ -709,9 +705,6 @@ step. An example is provided in the next section.
 This is an example used in~\cite{Johansen:2009wd}. Through this example, we
 show how to implement a simple particle filter. It shall walk one through the
 basic features of the library introduced above.
-
-\subsection{Model and algorithm}
-\label{sub:Model and algorithm}
 
 The state space model, known as the almost constant velocity model in the
 tracking literature, provides a simple scenario. The state vector,
