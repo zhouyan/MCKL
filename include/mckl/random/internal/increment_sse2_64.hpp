@@ -51,7 +51,7 @@ namespace internal
 {
 
 template <typename T, std::size_t K, std::size_t S>
-MCKL_FLATTEN void increment_si128(
+MCKL_FLATTEN inline void increment_si128(
     std::array<T, K> &ctr, std::array<__m128i, S> &s, std::false_type)
 {
     constexpr T blocks = (sizeof(__m128i) * S) / (sizeof(T) * K);
@@ -62,7 +62,7 @@ MCKL_FLATTEN void increment_si128(
 }
 
 template <typename T, std::size_t K, std::size_t S>
-MCKL_FLATTEN void increment_si128(
+MCKL_FLATTEN inline void increment_si128(
     std::array<T, K> &ctr, std::array<__m128i, S> &s, std::true_type)
 {
     constexpr T blocks = (sizeof(__m128i) * S) / (sizeof(T) * K);
@@ -76,7 +76,7 @@ MCKL_FLATTEN void increment_si128(
 }
 
 template <typename T, std::size_t K, std::size_t S>
-MCKL_FLATTEN void increment_si128(
+MCKL_FLATTEN inline void increment_si128(
     std::array<T, K> &ctr, std::array<__m128i, S> &s)
 {
     static_assert((sizeof(__m128i) * S) % (sizeof(T) * K) == 0,
