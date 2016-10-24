@@ -48,275 +48,196 @@ namespace internal
 {
 
 template <typename T>
-class IncrementBlock<T, 1, 32, 64>
+class IncrementBlockSI128<T, 1, 32, 64>
 {
     static constexpr std::size_t K_ = 1;
-    static constexpr std::size_t blocks_ = 32;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
-    {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
-    }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
+    MCKL_FLATTEN static void eval(
+        const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i a0 =
             _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0x02, 0x01));
-        __m128i c1 = _mm_add_epi64(a0, _mm_set_epi64x(0x04, 0x03));
-        __m128i c2 = _mm_add_epi64(a0, _mm_set_epi64x(0x06, 0x05));
-        __m128i c3 = _mm_add_epi64(a0, _mm_set_epi64x(0x08, 0x07));
-        __m128i c4 = _mm_add_epi64(a0, _mm_set_epi64x(0x0A, 0x09));
-        __m128i c5 = _mm_add_epi64(a0, _mm_set_epi64x(0x0C, 0x0B));
-        __m128i c6 = _mm_add_epi64(a0, _mm_set_epi64x(0x0E, 0x0D));
-        __m128i c7 = _mm_add_epi64(a0, _mm_set_epi64x(0x10, 0x0F));
-        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0x12, 0x11));
-        __m128i c9 = _mm_add_epi64(a0, _mm_set_epi64x(0x14, 0x13));
-        __m128i cA = _mm_add_epi64(a0, _mm_set_epi64x(0x16, 0x15));
-        __m128i cB = _mm_add_epi64(a0, _mm_set_epi64x(0x18, 0x17));
-        __m128i cC = _mm_add_epi64(a0, _mm_set_epi64x(0x1A, 0x19));
-        __m128i cD = _mm_add_epi64(a0, _mm_set_epi64x(0x1C, 0x1B));
-        __m128i cE = _mm_add_epi64(a0, _mm_set_epi64x(0x1E, 0x1D));
-        __m128i cF = _mm_add_epi64(a0, _mm_set_epi64x(0x20, 0x1F));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, c1);
-        _mm_store_si128(cptr++, c2);
-        _mm_store_si128(cptr++, c3);
-        _mm_store_si128(cptr++, c4);
-        _mm_store_si128(cptr++, c5);
-        _mm_store_si128(cptr++, c6);
-        _mm_store_si128(cptr++, c7);
-        _mm_store_si128(cptr++, c8);
-        _mm_store_si128(cptr++, c9);
-        _mm_store_si128(cptr++, cA);
-        _mm_store_si128(cptr++, cB);
-        _mm_store_si128(cptr++, cC);
-        _mm_store_si128(cptr++, cD);
-        _mm_store_si128(cptr++, cE);
-        _mm_store_si128(cptr++, cF);
+        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x02, 0x01));
+        std::get<0x1>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x04, 0x03));
+        std::get<0x2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x06, 0x05));
+        std::get<0x3>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x08, 0x07));
+        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x0A, 0x09));
+        std::get<0x5>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x0C, 0x0B));
+        std::get<0x6>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x0E, 0x0D));
+        std::get<0x7>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x10, 0x0F));
+        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x12, 0x11));
+        std::get<0x9>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x14, 0x13));
+        std::get<0xA>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x16, 0x15));
+        std::get<0xB>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x18, 0x17));
+        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x1A, 0x19));
+        std::get<0xD>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x1C, 0x1B));
+        std::get<0xE>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x1E, 0x1D));
+        std::get<0xF>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x20, 0x1F));
     }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
 
 template <typename T>
-class IncrementBlock<T, 2, 16, 64>
+class IncrementBlockSI128<T, 2, 16, 64>
 {
     static constexpr std::size_t K_ = 2;
-    static constexpr std::size_t blocks_ = 16;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
-    {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
-    }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
+    MCKL_FLATTEN static void eval(
+        const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x01));
-        __m128i c1 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x02));
-        __m128i c2 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x03));
-        __m128i c3 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x04));
-        __m128i c4 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x05));
-        __m128i c5 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x06));
-        __m128i c6 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x07));
-        __m128i c7 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x08));
-        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x09));
-        __m128i c9 = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0A));
-        __m128i cA = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0B));
-        __m128i cB = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0C));
-        __m128i cC = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0D));
-        __m128i cD = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0E));
-        __m128i cE = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0F));
-        __m128i cF = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x10));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, c1);
-        _mm_store_si128(cptr++, c2);
-        _mm_store_si128(cptr++, c3);
-        _mm_store_si128(cptr++, c4);
-        _mm_store_si128(cptr++, c5);
-        _mm_store_si128(cptr++, c6);
-        _mm_store_si128(cptr++, c7);
-        _mm_store_si128(cptr++, c8);
-        _mm_store_si128(cptr++, c9);
-        _mm_store_si128(cptr++, cA);
-        _mm_store_si128(cptr++, cB);
-        _mm_store_si128(cptr++, cC);
-        _mm_store_si128(cptr++, cD);
-        _mm_store_si128(cptr++, cE);
-        _mm_store_si128(cptr++, cF);
+        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x01));
+        std::get<0x1>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x02));
+        std::get<0x2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x03));
+        std::get<0x3>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x04));
+        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x05));
+        std::get<0x5>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x06));
+        std::get<0x6>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x07));
+        std::get<0x7>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x08));
+        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x09));
+        std::get<0x9>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0A));
+        std::get<0xA>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0B));
+        std::get<0xB>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0C));
+        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0D));
+        std::get<0xD>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0E));
+        std::get<0xE>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0F));
+        std::get<0xF>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x10));
     }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
 
 template <typename T>
-class IncrementBlock<T, 4, 8, 64>
+class IncrementBlockSI128<T, 4, 8, 64>
 {
     static constexpr std::size_t K_ = 4;
-    static constexpr std::size_t blocks_ = 8;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
-    {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
-    }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
+    MCKL_FLATTEN static void eval(
+        const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
-        __m128i a1 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
-            static_cast<MCKL_INT64>(std::get<2>(ctr)));
 
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
-        __m128i c2 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-        __m128i c4 = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
-        __m128i c6 = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
-        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 5));
-        __m128i cA = _mm_add_epi64(a0, _mm_set_epi64x(0, 6));
-        __m128i cC = _mm_add_epi64(a0, _mm_set_epi64x(0, 7));
-        __m128i cE = _mm_add_epi64(a0, _mm_set_epi64x(0, 8));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, c2);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, c4);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, c6);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, c8);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, cA);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, cC);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, cE);
-        _mm_store_si128(cptr++, a1);
+        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        std::get<0x1>(s) =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
+                static_cast<MCKL_INT64>(std::get<2>(ctr)));
+        std::get<0x2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
+        std::get<0x3>(s) = std::get<1>(s);
+        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
+        std::get<0x5>(s) = std::get<1>(s);
+        std::get<0x6>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
+        std::get<0x7>(s) = std::get<1>(s);
+        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 5));
+        std::get<0x9>(s) = std::get<1>(s);
+        std::get<0xA>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 6));
+        std::get<0xB>(s) = std::get<1>(s);
+        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 7));
+        std::get<0xD>(s) = std::get<1>(s);
+        std::get<0xE>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 8));
+        std::get<0xF>(s) = std::get<1>(s);
     }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
 
 template <typename T>
-class IncrementBlock<T, 8, 4, 64>
+class IncrementBlockSI128<T, 8, 4, 64>
 {
     static constexpr std::size_t K_ = 8;
-    static constexpr std::size_t blocks_ = 4;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
-    {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
-    }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
+    MCKL_FLATTEN static void eval(
+        const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
-        __m128i a1 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
-            static_cast<MCKL_INT64>(std::get<2>(ctr)));
-        __m128i a2 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<5>(ctr)),
-            static_cast<MCKL_INT64>(std::get<4>(ctr)));
-        __m128i a3 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<7>(ctr)),
-            static_cast<MCKL_INT64>(std::get<6>(ctr)));
 
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
-        __m128i c4 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
-        __m128i cC = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, a2);
-        _mm_store_si128(cptr++, a3);
-        _mm_store_si128(cptr++, c4);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, a2);
-        _mm_store_si128(cptr++, a3);
-        _mm_store_si128(cptr++, c8);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, a2);
-        _mm_store_si128(cptr++, a3);
-        _mm_store_si128(cptr++, cC);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, a2);
-        _mm_store_si128(cptr++, a3);
+        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        std::get<0x1>(s) =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
+                static_cast<MCKL_INT64>(std::get<2>(ctr)));
+        std::get<0x2>(s) =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<5>(ctr)),
+                static_cast<MCKL_INT64>(std::get<4>(ctr)));
+        std::get<0x3>(s) =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<7>(ctr)),
+                static_cast<MCKL_INT64>(std::get<6>(ctr)));
+        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
+        std::get<0x5>(s) = std::get<1>(s);
+        std::get<0x6>(s) = std::get<2>(s);
+        std::get<0x7>(s) = std::get<3>(s);
+        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
+        std::get<0x9>(s) = std::get<1>(s);
+        std::get<0xA>(s) = std::get<2>(s);
+        std::get<0xB>(s) = std::get<3>(s);
+        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
+        std::get<0xD>(s) = std::get<1>(s);
+        std::get<0xE>(s) = std::get<2>(s);
+        std::get<0xF>(s) = std::get<3>(s);
     }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
 
 template <typename T>
-class IncrementBlock<T, 16, 2, 64>
+class IncrementBlockSI128<T, 16, 2, 64>
 {
     static constexpr std::size_t K_ = 16;
-    static constexpr std::size_t blocks_ = 2;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
-    {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
-    }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
+    MCKL_FLATTEN static void eval(
+        const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i a0 =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0x0>(ctr)));
-        __m128i a1 =
+
+        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        std::get<0x1>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x3>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0x2>(ctr)));
-        __m128i a2 =
+        std::get<0x2>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x5>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0x4>(ctr)));
-        __m128i a3 =
+        std::get<0x3>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x7>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0x6>(ctr)));
-        __m128i a4 =
+        std::get<0x4>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x9>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0x8>(ctr)));
-        __m128i a5 =
+        std::get<0x5>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xB>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0xA>(ctr)));
-        __m128i a6 =
+        std::get<0x6>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xD>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0xC>(ctr)));
-        __m128i a7 =
+        std::get<0x7>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xF>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0xE>(ctr)));
-
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
-        __m128i c8 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, a2);
-        _mm_store_si128(cptr++, a3);
-        _mm_store_si128(cptr++, a4);
-        _mm_store_si128(cptr++, a5);
-        _mm_store_si128(cptr++, a6);
-        _mm_store_si128(cptr++, a7);
-        _mm_store_si128(cptr++, c8);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, a2);
-        _mm_store_si128(cptr++, a3);
-        _mm_store_si128(cptr++, a4);
-        _mm_store_si128(cptr++, a5);
-        _mm_store_si128(cptr++, a6);
-        _mm_store_si128(cptr++, a7);
+        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
+        std::get<0x9>(s) = std::get<1>(s);
+        std::get<0xA>(s) = std::get<2>(s);
+        std::get<0xB>(s) = std::get<3>(s);
+        std::get<0xC>(s) = std::get<4>(s);
+        std::get<0xD>(s) = std::get<5>(s);
+        std::get<0xE>(s) = std::get<6>(s);
+        std::get<0xF>(s) = std::get<7>(s);
     }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
+
+template <typename T>
+class IncrementBlockSI128<T, 32, 1, 64>
+{
+    static constexpr std::size_t K_ = 64;
+
+    public:
+    MCKL_FLATTEN static void eval(
+        const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
+    {
+        std::memcpy(s.data(), ctr.data(), 256);
+        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), _mm_set_epi64x(0, 1));
+    }
+}; // class IncrementBlockSI256
 
 } // namespace mckl::internal
 

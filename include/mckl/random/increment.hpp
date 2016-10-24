@@ -35,10 +35,12 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/increment_generic.hpp>
 
+#if MCKL_USE_SSE2
+#include <mckl/random/internal/increment_sse2_64.hpp>
+#endif
+
 #if MCKL_USE_AVX2
 #include <mckl/random/internal/increment_avx2_64.hpp>
-#elif MCKL_USE_SSE2
-#include <mckl/random/internal/increment_sse2_64.hpp>
 #endif
 
 namespace mckl

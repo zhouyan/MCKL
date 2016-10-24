@@ -912,6 +912,14 @@ inline IntType ftoi(RealType x)
     return ftoi<IntType>(x, std::integral_constant<bool, W <= M>());
 }
 
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
+class IncrementBlockSI128;
+
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
+class IncrementBlockSI256;
+
 } // namespace mckl::internal
 
 /// \brief Traits of RNG engines

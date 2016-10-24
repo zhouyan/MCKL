@@ -60,38 +60,34 @@
         constexpr std::size_t nstride = cstride / (sizeof(T) * K);            \
         constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
                                                                               \
-        alignas(32) union {                                                   \
-            std::array<__m128i, S> s;                                         \
-            std::array<Counter<T, K>, nstride> c;                             \
-        } buf;                                                                \
+        std::array<__m128i, S> s;                                             \
                                                                               \
-        MCKL_FLATTEN_CALL increment(ctr, buf.c);                              \
+        MCKL_FLATTEN_CALL increment_si128(ctr, s);                            \
                                                                               \
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(buf.s);      \
+        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);          \
                                                                               \
-        MCKL_FLATTEN_CALL sbox<0x0>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x1>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x2>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x3>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x4>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x5>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x6>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x7>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x8>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0x9>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0xA>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0xB>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0xC>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0xD>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0xE>(buf.s, rk);                               \
-        MCKL_FLATTEN_CALL sbox<0xF>(buf.s, rk);                               \
+        MCKL_FLATTEN_CALL sbox<0x0>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x1>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x2>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x3>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x4>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x5>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x6>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x7>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x8>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0x9>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xA>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xB>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xC>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xD>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xE>(s, rk);                                   \
+        MCKL_FLATTEN_CALL sbox<0xF>(s, rk);                                   \
                                                                               \
-        round<0x10>(                                                          \
-            buf.s, rk, std::integral_constant<bool, 0x10 <= Rounds>());       \
+        round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());   \
                                                                               \
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(buf.s);       \
+        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);           \
                                                                               \
-        std::memcpy(r, buf.s.data(), cstride);                                \
+        std::memcpy(r, s.data(), cstride);                                    \
         n -= nstride;                                                         \
         r += rstride;                                                         \
     }

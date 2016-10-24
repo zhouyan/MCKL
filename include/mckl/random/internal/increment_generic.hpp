@@ -142,33 +142,6 @@ MCKL_FLATTEN inline void increment_block_add_safe(
         ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
 }
 
-template <typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block(const std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block)
-{
-    increment_block_set<0>(
-        ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    increment_block_add<0>(
-        ctr_block, std::integral_constant<bool, 0 < Blocks>());
-}
-
-template <typename T, std::size_t K, std::size_t Blocks,
-    int = std::numeric_limits<T>::digits>
-class IncrementBlock
-{
-    public:
-    static constexpr bool aligned(void *) { return true; }
-
-    MCKL_FLATTEN static void eval(const std::array<T, K> &ctr,
-        std::array<std::array<T, K>, Blocks> &ctr_block)
-    {
-        increment_block_set<0>(
-            ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-        increment_block_add_safe<0>(
-            ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    }
-}; // class IncrementBlock
-
 } // namespace mckl::internal
 
 /// \brief Increment a counter by a given steps, and store each step in an
@@ -178,12 +151,17 @@ template <typename T, std::size_t K, std::size_t Blocks>
 MCKL_FLATTEN inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
-    const bool safe =
-        internal::IncrementBlock<T, K, Blocks>::aligned(ctr_block.data()) &&
-        ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks);
-    safe ? internal::IncrementBlock<T, K, Blocks>::eval(ctr, ctr_block) :
-           internal::increment_block(ctr, ctr_block);
-    ctr = ctr_block.back();
+    internal::increment_block_set<0>(
+        ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
+    if (ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks)) {
+        internal::increment_block_add_safe<0>(
+            ctr_block, std::integral_constant<bool, 0 < Blocks>());
+        ctr.front() += Blocks;
+    } else {
+        internal::increment_block_add<0>(
+            ctr_block, std::integral_constant<bool, 0 < Blocks>());
+        ctr = ctr_block.back();
+    }
 }
 
 } // namespace mckl

@@ -48,37 +48,33 @@
         constexpr std::size_t nstride = S;                                    \
         constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
                                                                               \
-        alignas(32) union {                                                   \
-            std::array<__m128i, S> s;                                         \
-            std::array<Counter<std::uint32_t, 4>, nstride> c;                 \
-        } buf;                                                                \
+        std::array<__m128i, S> s;                                             \
                                                                               \
-        MCKL_FLATTEN_CALL increment(ctr, buf.c);                              \
+        MCKL_FLATTEN_CALL increment_si128(ctr, s);                            \
                                                                               \
-        MCKL_FLATTEN_CALL encfirst(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL encfirst(s, rk);                                    \
                                                                               \
-        MCKL_FLATTEN_CALL enc<0x1>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x2>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x3>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x4>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x5>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x6>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x7>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x8>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0x9>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0xA>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0xB>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0xC>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0xD>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0xE>(buf.s, rk);                                \
-        MCKL_FLATTEN_CALL enc<0xF>(buf.s, rk);                                \
+        MCKL_FLATTEN_CALL enc<0x1>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x2>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x3>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x4>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x5>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x6>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x7>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x8>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0x9>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0xA>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0xB>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0xC>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0xD>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0xE>(s, rk);                                    \
+        MCKL_FLATTEN_CALL enc<0xF>(s, rk);                                    \
                                                                               \
-        round<0x10>(                                                          \
-            buf.s, rk, std::integral_constant<bool, 0x10 < rounds_>());       \
+        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());   \
                                                                               \
-        MCKL_FLATTEN_CALL enclast(buf.s, rk);                                 \
+        MCKL_FLATTEN_CALL enclast(s, rk);                                     \
                                                                               \
-        std::memcpy(r, buf.s.data(), cstride);                                \
+        std::memcpy(r, s.data(), cstride);                                    \
         n -= nstride;                                                         \
         r += rstride;                                                         \
     }
@@ -764,6 +760,7 @@ class AESGeneratorImpl
         ResultType *r, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(16)
+        MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(8)
         MCKL_RANDOM_INTERNAL_AES_AESNI_REMAINDER
     }
 
@@ -840,14 +837,6 @@ class AESGeneratorImpl
     }
 
     static void encfirst(
-        std::array<__m128i, 2> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        const __m128i k = std::get<0>(rk);
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), k);
-    }
-
-    static void encfirst(
         std::array<__m128i, 4> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
         const __m128i k = std::get<0>(rk);
@@ -907,15 +896,6 @@ class AESGeneratorImpl
     }
 
     template <std::size_t N>
-    static void enc(std::array<__m128i, 2> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
-        std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_aesenc_si128(std::get<1>(s), k);
-    }
-
-    template <std::size_t N>
     static void enc(std::array<__m128i, 4> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
@@ -962,14 +942,6 @@ class AESGeneratorImpl
         std::get<0xD>(s) = _mm_aesenc_si128(std::get<0xD>(s), k);
         std::get<0xE>(s) = _mm_aesenc_si128(std::get<0xE>(s), k);
         std::get<0xF>(s) = _mm_aesenc_si128(std::get<0xF>(s), k);
-    }
-
-    static void enclast(
-        std::array<__m128i, 2> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        const __m128i k = std::get<rounds_>(rk);
-        std::get<0>(s) = _mm_aesenclast_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_aesenclast_si128(std::get<1>(s), k);
     }
 
     static void enclast(
