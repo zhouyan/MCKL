@@ -270,7 +270,6 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         MCKL_FLATTEN_CALL set_key(rk, key);
 
         MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_BATCH(8)
-        MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_BATCH(4)
         MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_REMAINDER
     }
 
