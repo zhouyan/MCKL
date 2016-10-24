@@ -209,7 +209,6 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(8)
-        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(4)
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_REMAINDER
     }
 
@@ -218,7 +217,6 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(8)
-        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_BATCH(4)
         MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_REMAINDER
     }
 

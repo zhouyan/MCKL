@@ -216,7 +216,6 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
         std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_BATCH(8)
-        MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_BATCH(4)
         MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_REMAINDER
     }
 
@@ -225,7 +224,6 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
         std::size_t n, ResultType *r)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_BATCH(8)
-        MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_BATCH(4)
         MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_REMAINDER
     }
 
