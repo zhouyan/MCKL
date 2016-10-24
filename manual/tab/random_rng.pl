@@ -102,8 +102,6 @@ my @compiler = qw(llvm gnu intel);
 
 my %cpb_s;
 my %cpb_b;
-my %cpb_sp;
-my %cpb_bp;
 
 &build;
 &run;
@@ -139,22 +137,19 @@ sub run {
             my $cmd = "ninja -C $d \Lrandom_rng_$r-check 2>&1";
             my $cpb_s = 0xFFFF;
             my $cpb_b = 0xFFFF;
-            my $cpb_sp = 0xFFFF;
-            my $cpb_bp = 0xFFFF;
             my $count = 0;
             my $pass = 1;
             my @result;
             for (1..5) {
-                my @lines = grep { $_ =~ /Passed|Failed/ } split "\n", `$cmd`;
+                my @lines = `$cmd`;
+                @lines = grep { /Passed|Failed/ } @lines;
                 push @result, @lines;
                 for (@lines) {
                     $count++;
                     $pass = 0 if (/Failed/);
-                    my @cpb = (split)[3..6];
+                    my @cpb = (split)[3, 4];
                     $cpb_s  = $cpb[0] if $cpb[0] < $cpb_s;
                     $cpb_b  = $cpb[1] if $cpb[1] < $cpb_b;
-                    $cpb_sp = $cpb[2] if $cpb[2] < $cpb_sp;
-                    $cpb_bp = $cpb[3] if $cpb[3] < $cpb_bp;
                 }
             }
             my $line;
@@ -162,15 +157,13 @@ sub run {
                 $line .= sprintf("%-25s", $r);
                 $line .= &format($cpb_s);
                 $line .= &format($cpb_b);
-                $line .= &format($cpb_sp);
-                $line .= &format($cpb_bp);
                 $line .= $pass ? "Passed" : "Failed";
                 say $line;
             }
             if ($write) {
                 open my $txtfile, ">",
                 "\Lrandom_rng/random_rng_${r}_${c}_${simd}.txt";
-                say $txtfile $_ for @result;
+                print $txtfile $_ for @result;
             }
         }
     }
@@ -186,21 +179,13 @@ sub read {
                 if (@result) {
                     $cpb_s{$c}{$s}{$r} = 0xFFFF unless $cpb_s{$c}{$s}{$r};
                     $cpb_b{$c}{$s}{$r} = 0xFFFF unless $cpb_b{$c}{$s}{$r};
-                    $cpb_sp{$c}{$s}{$r} = 0xFFFF unless $cpb_sp{$c}{$s}{$r};
-                    $cpb_bp{$c}{$s}{$r} = 0xFFFF unless $cpb_bp{$c}{$s}{$r};
                     for (@result) {
-                        my @cpb = (split)[3..6];
+                        my @cpb = (split)[3, 4];
                         if ($cpb[0] < $cpb_s{$c}{$s}{$r}) {
                             $cpb_s{$c}{$s}{$r} = $cpb[0]
                         }
                         if ($cpb[1] < $cpb_b{$c}{$s}{$r}) {
                             $cpb_b{$c}{$s}{$r} = $cpb[1];
-                        }
-                        if ($cpb[2] < $cpb_sp{$c}{$s}{$r}) {
-                            $cpb_sp{$c}{$s}{$r} = $cpb[2];
-                        }
-                        if ($cpb[3] < $cpb_bp{$c}{$s}{$r}) {
-                            $cpb_bp{$c}{$s}{$r} = $cpb[3];
                         }
                     }
                 }
@@ -232,12 +217,9 @@ sub table {
     for my $k (@keys) {
         for my $s (@simd) {
             my $table;
-            my $table_p;
             for my $r (@{$rng{$k}}) {
                 my $line_s;
                 my $line_b;
-                my $line_sp;
-                my $line_bp;
                 for my $c (@compiler) {
                     if ($cpb_s{$c}{$s}{$r}) {
                         $line_s .= " & ";
@@ -247,14 +229,6 @@ sub table {
                         $line_b .= " & ";
                         $line_b .= &format($cpb_b{$c}{$s}{$r});
                     }
-                    if ($cpb_sp{$c}{$s}{$r}) {
-                        $line_sp .= " & ";
-                        $line_sp .= &format($cpb_sp{$c}{$s}{$r});
-                    }
-                    if ($cpb_bp{$c}{$s}{$r}) {
-                        $line_bp .= " & ";
-                        $line_bp .= &format($cpb_bp{$c}{$s}{$r});
-                    }
                 }
                 my $name = $r;
                 $name =~ s/_/\\_/g;
@@ -262,21 +236,12 @@ sub table {
                 if ($line_s and $line_b) {
                     $table .= $name . $line_s . $line_b . "\\\\\n";
                 }
-                if ($line_sp and $line_bp) {
-                    $table_p .= $name . $line_sp . $line_bp . "\\\\\n";
-                }
             }
             if ($table) {
                 open my $texfile, ">", "\Lrandom_rng_${k}_${s}.tex";
                 print $texfile $header;
                 print $texfile $table;
                 print $texfile $footer;
-            }
-            if ($table_p) {
-                open my $texfile_p, ">", "\Lrandom_rng_${k}_${s}_p.tex";
-                print $texfile_p $header;
-                print $texfile_p $table_p;
-                print $texfile_p $footer;
             }
         }
     }

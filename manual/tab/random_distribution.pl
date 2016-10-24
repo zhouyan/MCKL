@@ -118,11 +118,6 @@ my %cpe_m;
 my %cpe_b;
 my %cpe_v;
 my %cpe_i;
-my %cpe_sp;
-my %cpe_mp;
-my %cpe_bp;
-my %cpe_vp;
-my %cpe_ip;
 
 &build;
 &run;
@@ -166,16 +161,22 @@ sub run {
             my $cmd2 = "ninja -C $d";
             $cmd1 .= " \Lrandom_distribution_${name}-check 2>&1";
             $cmd2 .= " \Lrandom_distribution_${name}_novml-check 2>&1";
-            my @lines1 = grep { /Passed|Failed/ } split "\n", `$cmd1`;
+            my @lines1 = `$cmd1`;
+            my @lines2 = `$cmd2`;
+            @lines1 = grep { /Passed|Failed/ } @lines1;
+            @lines2 = grep { /Passed|Failed/ } @lines2;
             push @result, @lines1;
-            say $_ for @lines1;
-            my @lines2 = grep { /Passed|Failed/ } split "\n", `$cmd2`;
             push @result, @lines2;
-            say $_ for @lines2;
+            for (@lines1) {
+                print $_ if /<(double|int32_t)>/;
+            }
+            for (@lines2) {
+                print $_ if /<(double|int32_t)>/;
+            }
             if ($write) {
                 open my $txtfile, ">", "random_distribution/" .
                 "\Lrandom_distribution_${r}_${c}_${simd}.txt";
-                say $txtfile $_ for @result;
+                print $txtfile $_ for @result;
             }
         }
     }
@@ -197,34 +198,17 @@ sub read {
                 $cpe_b{$s}{$name} = 0xFFFF unless $cpe_b{$s}{$name};
                 $cpe_v{$s}{$name} = 0xFFFF unless $cpe_v{$s}{$name};
                 $cpe_i{$s}{$name} = 0xFFFF unless $cpe_i{$s}{$name};
-                $cpe_sp{$s}{$name} = 0xFFFF unless $cpe_sp{$s}{$name};
-                $cpe_mp{$s}{$name} = 0xFFFF unless $cpe_mp{$s}{$name};
-                $cpe_bp{$s}{$name} = 0xFFFF unless $cpe_bp{$s}{$name};
-                $cpe_vp{$s}{$name} = 0xFFFF unless $cpe_vp{$s}{$name};
-                $cpe_ip{$s}{$name} = 0xFFFF unless $cpe_ip{$s}{$name};
-                if ($lib eq "SCPP") {
+                if ($lib eq "C++") {
                     $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
                     $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
                     $cpe_b{$s}{$name} = $cpe_b if $cpe_b < $cpe_b{$s}{$name};
                     $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
                 }
-                if ($lib eq "PCPP") {
-                    $cpe_sp{$s}{$name} = $cpe_s if $cpe_s < $cpe_sp{$s}{$name};
-                    $cpe_mp{$s}{$name} = $cpe_m if $cpe_m < $cpe_mp{$s}{$name};
-                    $cpe_bp{$s}{$name} = $cpe_b if $cpe_b < $cpe_bp{$s}{$name};
-                    $cpe_ip{$s}{$name} = $cpe_i if $cpe_i < $cpe_ip{$s}{$name};
-                }
-                if ($lib eq "SVML") {
+                if ($lib eq "VML") {
                     $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
                     $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
                     $cpe_v{$s}{$name} = $cpe_b if $cpe_b < $cpe_v{$s}{$name};
                     $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
-                }
-                if ($lib eq "PVML") {
-                    $cpe_sp{$s}{$name} = $cpe_s if $cpe_s < $cpe_sp{$s}{$name};
-                    $cpe_mp{$s}{$name} = $cpe_m if $cpe_m < $cpe_mp{$s}{$name};
-                    $cpe_vp{$s}{$name} = $cpe_b if $cpe_b < $cpe_vp{$s}{$name};
-                    $cpe_ip{$s}{$name} = $cpe_i if $cpe_i < $cpe_ip{$s}{$name};
                 }
             }
         }
@@ -247,7 +231,6 @@ sub table {
     for my $k (@keys) {
         for my $s (@simd) {
             my $table;
-            my $table_p;
             for my $r (@{$distribution{$k}}) {
                 my @name = sort grep { /$r/ } keys %{$cpe_s{$s}};
                 for my $name (@name) {
@@ -268,23 +251,6 @@ sub table {
                         $table .= &format($cpe_i{$s}{$name});
                     }
                     $table .= "\\\\\n";
-                    $table_p .= " " x 2 . sprintf("%-40s", "\\texttt{$name}");
-                    $table_p .= " & ";
-                    if ($nostd{$r}) {
-                        $table_p .= &format("--");
-                    } else {
-                        $table_p .= &format($cpe_sp{$s}{$name});
-                    }
-                    $table_p .= " & " . &format($cpe_mp{$s}{$name});
-                    $table_p .= " & " . &format($cpe_bp{$s}{$name});
-                    $table_p .= " & " . &format($cpe_vp{$s}{$name});
-                    $table_p .= " & ";
-                    if ($nomkl{$r}) {
-                        $table_p .= &format("--");
-                    } else {
-                        $table_p .= &format($cpe_ip{$s}{$name});
-                    }
-                    $table_p .= "\\\\\n";
                 }
             }
             if ($table) {
@@ -293,13 +259,6 @@ sub table {
                 print $texfile $header;
                 print $texfile $table;
                 print $texfile $footer;
-            }
-            if ($table_p) {
-                open my $texfile_p, ">",
-                "\Lrandom_distribution_${k}_${s}_p.tex";
-                print $texfile_p $header;
-                print $texfile_p $table_p;
-                print $texfile_p $footer;
             }
         }
     }

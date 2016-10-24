@@ -315,7 +315,7 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
 }
 
 template <typename RNGType>
-inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
+inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 {
     mckl::UniformBitsDistribution<std::uint64_t> ubits;
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
@@ -366,171 +366,17 @@ inline RandomRNGPerf random_rng_s(std::size_t N, std::size_t M)
     return {pass, c1, c2};
 }
 
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-
-template <typename RNGType>
-inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
-{
-    bool pass = true;
-
-    std::size_t P = std::thread::hardware_concurrency();
-
-    mckl::Vector<RNGType> rs1(P);
-    mckl::Vector<RNGType> rs2(P);
-    for (unsigned i = 0; i != P; ++i) {
-        rs1[i].seed(i + 1);
-        rs2[i].seed(i + 1);
-    }
-
-    mckl::Vector<std::uint64_t> r1(N * P);
-    mckl::Vector<std::uint64_t> r2(N * P);
-    mckl::Vector<std::uint64_t> s1(M * P);
-    mckl::Vector<std::uint64_t> s2(M * P);
-    mckl::Vector<std::size_t> n1(M * P);
-    mckl::Vector<std::size_t> n2(M * P);
-
-    auto worker1 = [N, M, &rs1, &r1, &s1, &n1](std::size_t p) {
-        mckl::UniformBitsDistribution<std::uint64_t> ubits;
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
-        RNGType rng = std::move(rs1[p]);
-        std::uint64_t *const r = r1.data() + N * p;
-        for (std::size_t i = 0; i != M; ++i) {
-            std::size_t K = rsize(rng);
-            for (std::size_t j = 0; j != K; ++j)
-                r[j] = mckl::rand(rng, ubits);
-            std::uniform_int_distribution<std::size_t> ridx(0, K - 1);
-            std::size_t idx = ridx(rng);
-            s1[M * p + i] = r[idx];
-            n1[M * p + i] = K;
-        }
-        rs1[p] = std::move(rng);
-    };
-
-    auto worker2 = [N, M, &rs2, &r2, &s2, &n2](std::size_t p) {
-        mckl::UniformBitsDistribution<std::uint64_t> ubits;
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
-        RNGType rng = std::move(rs2[p]);
-        std::uint64_t *const r = r2.data() + N * p;
-        for (std::size_t i = 0; i != M; ++i) {
-            std::size_t K = rsize(rng);
-            mckl::rand(rng, ubits, K, r);
-            std::uniform_int_distribution<std::size_t> ridx(0, K - 1);
-            std::size_t idx = ridx(rng);
-            s2[M * p + i] = r[idx];
-            n2[M * p + i] = K;
-        }
-        rs2[p] = std::move(rng);
-    };
-
-    bool has_cycles = mckl::StopWatch::has_cycles();
-
-    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
-    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
-    for (std::size_t k = 0; k != 10; ++k) {
-        mckl::StopWatch watch1;
-        mckl::StopWatch watch2;
-
-        mckl::Vector<std::future<void>> task1;
-        task1.reserve(P);
-        watch1.start();
-        for (std::size_t p = 0; p != P; ++p)
-            task1.push_back(std::async(std::launch::async, worker1, p));
-        for (std::size_t p = 0; p != P; ++p)
-            task1[p].wait();
-        watch1.stop();
-
-        mckl::Vector<std::future<void>> task2;
-        task2.reserve(P);
-        watch2.start();
-        for (std::size_t p = 0; p != P; ++p)
-            task2.push_back(std::async(std::launch::async, worker2, p));
-        for (std::size_t p = 0; p != P; ++p)
-            task2[p].wait();
-        watch2.stop();
-
-        pass = pass && (s1 == s2 || rs1[0] != rs1[0]);
-        pass = pass && (n1 == n2 || rs1[0] != rs1[0]);
-
-        std::size_t bytes1 = sizeof(std::uint64_t) *
-            std::accumulate(n1.begin(), n1.end(), static_cast<std::size_t>(0));
-        std::size_t bytes2 = sizeof(std::uint64_t) *
-            std::accumulate(n2.begin(), n2.end(), static_cast<std::size_t>(0));
-        if (has_cycles) {
-            c1 = std::min(c1, 1.0 * watch1.cycles() / bytes1);
-            c2 = std::min(c2, 1.0 * watch2.cycles() / bytes2);
-        } else {
-            c1 = std::max(c1, bytes1 / watch1.seconds() * 1e-9);
-            c2 = std::max(c2, bytes2 / watch2.seconds() * 1e-9);
-        }
-    }
-
-    return {pass, c1, c2};
-}
-
-#endif // !MCKL_EXAMPLE_CROSS_COMPILING
-
-template <typename RNGType>
-inline double random_rng_e(const RNGType &, std::size_t, std::size_t)
-{
-    return 0;
-}
-
-template <typename ResultType, typename Generator>
-inline double random_rng_e(
-    const mckl::CounterEngine<ResultType, Generator> &rng, std::size_t N,
-    std::size_t M)
-{
-    using ctr_type =
-        typename mckl::CounterEngine<ResultType, Generator>::ctr_type;
-
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
-    auto rngs = rng;
-    ctr_type ctr = {{0}};
-    mckl::Vector<ctr_type> r(N);
-    mckl::StopWatch watch;
-
-    bool has_cycles = mckl::StopWatch::has_cycles();
-
-    double c = has_cycles ? std::numeric_limits<double>::max() : 0.0;
-    for (std::size_t i = 0; i != M; ++i) {
-        std::size_t K = rsize(rngs);
-        watch.start();
-        for (std::size_t j = 0; j != K; ++j) {
-            rng.generator()(ctr.data(), r[j].data());
-            ++ctr.front();
-        }
-        watch.stop();
-        std::uniform_int_distribution<std::size_t> ridx(0, K - 1);
-        std::size_t idx = ridx(rngs);
-        if (r[idx].front() == 0)
-            continue;
-        std::size_t bytes = K * sizeof(ctr_type);
-        c = has_cycles ? std::min(c, 1.0 * watch.cycles() / bytes) :
-                         std::max(c, bytes / watch.seconds() * 1e-9);
-    }
-
-    return c;
-}
-
 template <typename RNGType>
 inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
 {
     const int nwid = 20;
     const int swid = 8;
-    const int twid = 7;
-#if MCKL_EXAMPLE_CROSS_COMPILING
-    const std::size_t lwid = nwid + swid * 2 + twid * 4 + 15;
-#else
-    const std::size_t lwid = nwid + swid * 2 + twid * 9 + 15;
-#endif
+    const int twid = 15;
+    const std::size_t lwid = nwid + swid * 2 + twid * 3;
 
     bool pass_k = random_rng_k(RNGType());
     bool pass_d = random_rng_d<RNGType>(N, M);
-    RandomRNGPerf perf_s(random_rng_s<RNGType>(N, M));
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-    RandomRNGPerf perf_p = random_rng_p<RNGType>(N, M);
-#endif
-    double cpb = random_rng_e(RNGType(), N, M);
+    RandomRNGPerf perf(random_rng_p<RNGType>(N, M));
 
     std::cout << std::fixed << std::setprecision(2);
 
@@ -539,20 +385,14 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(nwid) << std::left << "RNG";
     std::cout << std::setw(swid) << std::right << "Size";
     std::cout << std::setw(swid) << std::right << "Align";
-    std::cout << std::setw(twid) << std::right << "S";
-    std::cout << std::setw(twid) << std::right << "B";
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-    std::cout << std::setw(twid) << std::right << "SP";
-    std::cout << std::setw(twid) << std::right << "BP";
-#endif
-    std::cout << std::setw(twid) << std::right << "S/B";
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-    std::cout << std::setw(twid) << std::right << "SP/BP";
-    std::cout << std::setw(twid) << std::right << "S/SP";
-    std::cout << std::setw(twid) << std::right << "B/BP";
-#endif
-    std::cout << std::setw(twid) << std::right << "E";
-    std::cout << std::setw(15) << std::right << "Deterministics";
+    if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(twid) << std::right << "cpB (S)";
+        std::cout << std::setw(twid) << std::right << "cpB (B)";
+    } else {
+        std::cout << std::setw(twid) << std::right << "GB/s (S)";
+        std::cout << std::setw(twid) << std::right << "GB/s (B)";
+    }
+    std::cout << std::setw(twid) << std::right << "Deterministics";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
@@ -560,34 +400,15 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     std::cout << std::setw(nwid) << std::left << name;
     std::cout << std::setw(swid) << std::right << sizeof(RNGType);
     std::cout << std::setw(swid) << std::right << alignof(RNGType);
-    std::cout << std::setw(twid) << std::right << perf_s.c1;
-    std::cout << std::setw(twid) << std::right << perf_s.c2;
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-    std::cout << std::setw(twid) << std::right << perf_p.c1;
-    std::cout << std::setw(twid) << std::right << perf_p.c2;
-#endif
-    std::cout << std::setw(twid) << std::right << perf_s.c1 / perf_s.c2;
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-    std::cout << std::setw(twid) << std::right << perf_p.c1 / perf_p.c2;
-    std::cout << std::setw(twid) << std::right << perf_s.c1 / perf_p.c1;
-    std::cout << std::setw(twid) << std::right << perf_s.c2 / perf_p.c2;
-#endif
-    if (cpb > 0)
-        std::cout << std::setw(twid) << std::right << cpb;
-    else
-        std::cout << std::setw(twid) << std::right << "---";
+    std::cout << std::setw(twid) << std::right << perf.c1;
+    std::cout << std::setw(twid) << std::right << perf.c2;
 
     std::string pass;
     pass += pass_k ? "-" : "*";
     pass += pass_d ? "-" : "*";
-    pass += perf_s.pass ? "-" : "*";
-#if MCKL_EXAMPLE_CROSS_COMPILING
-    pass += random_pass(pass_k && pass_d && perf_s.pass);
-#else
-    pass += perf_p.pass ? "-" : "*";
-    pass += random_pass(pass_k && pass_d && perf_s.pass && perf_p.pass);
-#endif
-    std::cout << std::setw(15) << std::right << pass;
+    pass += perf.pass ? "-" : "*";
+    pass += random_pass(pass_k && pass_d && perf.pass);
+    std::cout << std::setw(twid) << std::right << pass;
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;

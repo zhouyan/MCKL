@@ -1526,7 +1526,7 @@ struct RandomDistributionPerf {
 
 template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
 inline void random_distribution_perf_d(std::size_t N, std::size_t M,
-    const std::array<ParamType, ParamNum> &param, mckl::Vector<bool> &perf)
+    const std::array<ParamType, ParamNum> &param, mckl::Vector<bool> &pass_d)
 {
     using result_type = typename MCKLDistType::result_type;
 
@@ -1571,7 +1571,7 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
         mckl::rand(rng2, dist, K, r2.data());
         pass = pass && r1 == r2;
     }
-    perf.push_back(pass);
+    pass_d.push_back(pass);
 }
 
 template <typename MCKLDistType>
@@ -1603,7 +1603,7 @@ inline void random_distribution_perf_d(
 }
 
 template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
-inline void random_distribution_perf_s(std::size_t N, std::size_t M,
+inline void random_distribution_perf_p(std::size_t N, std::size_t M,
     const std::array<ParamType, ParamNum> &param,
     mckl::Vector<RandomDistributionPerf> &perf)
 {
@@ -1711,237 +1711,6 @@ inline void random_distribution_perf_s(std::size_t N, std::size_t M,
 }
 
 template <typename MCKLDistType>
-inline void random_distribution_perf_s(
-    std::size_t N, std::size_t M, mckl::Vector<RandomDistributionPerf> &perf)
-{
-    RandomDistributionTrait<MCKLDistType> trait;
-    auto params = trait.params();
-    for (const auto &param : params)
-        random_distribution_perf_s<MCKLDistType>(N, M, param, perf);
-}
-
-template <template <typename> class DistributionType>
-inline void random_distribution_perf_s(std::size_t N, std::size_t M,
-    mckl::Vector<RandomDistributionPerf> &perf, std::true_type)
-{
-    random_distribution_perf_s<DistributionType<float>>(N, M, perf);
-    random_distribution_perf_s<DistributionType<double>>(N, M, perf);
-}
-
-template <template <typename> class DistributionType>
-inline void random_distribution_perf_s(std::size_t N, std::size_t M,
-    mckl::Vector<RandomDistributionPerf> &perf, std::false_type)
-{
-    random_distribution_perf_s<DistributionType<std::int32_t>>(N, M, perf);
-    random_distribution_perf_s<DistributionType<std::uint32_t>>(N, M, perf);
-    random_distribution_perf_s<DistributionType<std::int64_t>>(N, M, perf);
-    random_distribution_perf_s<DistributionType<std::uint64_t>>(N, M, perf);
-}
-
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-
-template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
-inline void random_distribution_perf_p(std::size_t N, std::size_t M,
-    const std::array<ParamType, ParamNum> &param,
-    mckl::Vector<RandomDistributionPerf> &perf)
-{
-    using result_type = typename MCKLDistType::result_type;
-    using std_type = typename RandomDistributionTrait<MCKLDistType>::std_type;
-
-    std::size_t P = std::thread::hardware_concurrency();
-
-    mckl::Vector<MCKLRNGType> rs(P);
-    for (std::size_t i = 0; i != P; ++i)
-        rs[i].seed(static_cast<unsigned>(i + 1));
-
-#if MCKL_HAS_MKL
-    mckl::Vector<MKLRNGType> rs_mkl(P);
-    for (std::size_t i = 0; i != P; ++i)
-        rs_mkl[i].seed(static_cast<unsigned>(i + 1));
-#endif
-
-    mckl::Vector<MCKLDistType> dist_mckl(
-        P, random_distribution_init<MCKLDistType>(param));
-    mckl::Vector<std_type> dist_std(
-        P, random_distribution_init<std_type>(param));
-    bool pass = true;
-
-    mckl::Vector<result_type> r1(N * P);
-    mckl::Vector<result_type> r2(N * P);
-    mckl::Vector<result_type> r3(N * P);
-#if MCKL_HAS_MKL
-    mckl::Vector<result_type> r4(N * P);
-#endif
-
-    mckl::Vector<std::size_t> n1(M * P);
-    mckl::Vector<std::size_t> n2(M * P);
-    mckl::Vector<std::size_t> n3(M * P);
-#if MCKL_HAS_MKL
-    mckl::Vector<std::size_t> n4(M * P);
-#endif
-
-    auto worker1 = [N, M, &rs, &dist_std, &r1, &n1](std::size_t p) {
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
-        auto rng = std::move(rs[p]);
-        std_type dist = std::move(dist_std[p]);
-        result_type *const r = r1.data() + N * p;
-        for (std::size_t i = 0; i != M; ++i) {
-            std::size_t K = rsize(rng);
-            for (std::size_t j = 0; j != K; ++j)
-                r[j] = mckl::rand(rng, dist);
-            n1[M * p + i] = K;
-        }
-        rs[p] = std::move(rng);
-        dist_std[p] = std::move(dist);
-    };
-
-    auto worker2 = [N, M, &rs, &dist_mckl, &r2, &n2](std::size_t p) {
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
-        auto rng = std::move(rs[p]);
-        MCKLDistType dist = std::move(dist_mckl[p]);
-        result_type *const r = r2.data() + N * p;
-        for (std::size_t i = 0; i != M; ++i) {
-            std::size_t K = rsize(rng);
-            for (std::size_t j = 0; j != K; ++j)
-                r[j] = mckl::rand(rng, dist);
-            n2[M * p + i] = K;
-        }
-        rs[p] = std::move(rng);
-        dist_mckl[p] = std::move(dist);
-    };
-
-    auto worker3 = [N, M, &rs, &dist_mckl, &r3, &n3](std::size_t p) {
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
-        auto rng = std::move(rs[p]);
-        MCKLDistType dist = std::move(dist_mckl[p]);
-        result_type *const r = r3.data() + N * p;
-        for (std::size_t i = 0; i != M; ++i) {
-            std::size_t K = rsize(rng);
-            mckl::rand(rng, dist, K, r);
-            n3[M * p + i] = K;
-        }
-        rs[p] = std::move(rng);
-        dist_mckl[p] = std::move(dist);
-    };
-
-#if MCKL_HAS_MKL
-    auto worker4 = [N, M, &rs_mkl, &dist_mckl, &r4, &n4](std::size_t p) {
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
-        auto rng = std::move(rs_mkl[p]);
-        MCKLDistType dist = std::move(dist_mckl[p]);
-        result_type *const r = r4.data() + N * p;
-        for (std::size_t i = 0; i != M; ++i) {
-            std::size_t K = rsize(rng);
-            mckl::rand(rng, dist, K, r);
-            n4[M * p + i] = K;
-        }
-        rs_mkl[p] = std::move(rng);
-        dist_mckl[p] = std::move(dist);
-    };
-#endif
-
-    bool has_cycles = mckl::StopWatch::has_cycles();
-
-    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
-    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
-    double c3 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
-#if MCKL_HAS_MKL
-    double c4 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
-#endif
-    for (std::size_t k = 0; k != 10; ++k) {
-        mckl::StopWatch watch1;
-        mckl::StopWatch watch2;
-        mckl::StopWatch watch3;
-#if MCKL_HAS_MKL
-        mckl::StopWatch watch4;
-#endif
-
-        mckl::Vector<std::future<void>> task1;
-        task1.reserve(P);
-        watch1.start();
-        for (std::size_t p = 0; p != P; ++p)
-            task1.push_back(std::async(std::launch::async, worker1, p));
-        for (std::size_t p = 0; p != P; ++p)
-            task1[p].wait();
-        watch1.stop();
-
-        mckl::Vector<std::future<void>> task2;
-        task2.reserve(P);
-        watch2.start();
-        for (std::size_t p = 0; p != P; ++p)
-            task2.push_back(std::async(std::launch::async, worker2, p));
-        for (std::size_t p = 0; p != P; ++p)
-            task2[p].wait();
-        watch2.stop();
-
-        mckl::Vector<std::future<void>> task3;
-        task3.reserve(P);
-        watch3.start();
-        for (std::size_t p = 0; p != P; ++p)
-            task3.push_back(std::async(std::launch::async, worker3, p));
-        for (std::size_t p = 0; p != P; ++p)
-            task3[p].wait();
-        watch3.stop();
-
-#if MCKL_HAS_MKL
-        mckl::Vector<std::future<void>> task4;
-        task4.reserve(P);
-        watch4.start();
-        for (std::size_t p = 0; p != P; ++p)
-            task4.push_back(std::async(std::launch::async, worker4, p));
-        for (std::size_t p = 0; p != P; ++p)
-            task4[p].wait();
-        watch4.stop();
-#endif
-
-        pass = pass && r1 != r2;
-        pass = pass && r1 != r3;
-#if MCKL_HAS_MKL
-        pass = pass && r1 != r4;
-#endif
-
-        std::size_t num1 =
-            std::accumulate(n1.begin(), n1.end(), static_cast<std::size_t>(0));
-        std::size_t num2 =
-            std::accumulate(n2.begin(), n2.end(), static_cast<std::size_t>(0));
-        std::size_t num3 =
-            std::accumulate(n3.begin(), n3.end(), static_cast<std::size_t>(0));
-#if MCKL_HAS_MKL
-        std::size_t num4 =
-            std::accumulate(n4.begin(), n4.end(), static_cast<std::size_t>(0));
-#endif
-        if (has_cycles) {
-            c1 = std::min(c1, 1.0 * watch1.cycles() / num1);
-            c2 = std::min(c2, 1.0 * watch2.cycles() / num2);
-            c3 = std::min(c3, 1.0 * watch3.cycles() / num3);
-#if MCKL_HAS_MKL
-            c4 = std::min(c4, 1.0 * watch4.cycles() / num4);
-#endif
-        } else {
-            c1 = std::max(c1, num1 / watch1.seconds() * 1e-6);
-            c2 = std::max(c2, num2 / watch2.seconds() * 1e-6);
-            c3 = std::max(c3, num3 / watch3.seconds() * 1e-6);
-#if MCKL_HAS_MKL
-            c4 = std::max(c4, num4 / watch4.seconds() * 1e-6);
-#endif
-        }
-    }
-
-    RandomDistributionTrait<MCKLDistType> trait;
-    RandomDistributionPerf result;
-    result.name = trait.name(param);
-    result.pass = pass;
-    result.c1 = c1;
-    result.c2 = c2;
-    result.c3 = c3;
-#if MCKL_HAS_MKL
-    result.c4 = c4;
-#endif
-
-    perf.push_back(result);
-}
-
-template <typename MCKLDistType>
 inline void random_distribution_perf_p(
     std::size_t N, std::size_t M, mckl::Vector<RandomDistributionPerf> &perf)
 {
@@ -1969,94 +1738,73 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
     random_distribution_perf_p<DistributionType<std::uint64_t>>(N, M, perf);
 }
 
-#endif // !MCKL_EXAMPLE_CROSS_COMPILING
-
 template <template <typename> class DistributionType, typename ResultType>
 inline void random_distribution_perf(std::size_t N, std::size_t M)
 {
-    N = std::max(N, static_cast<std::size_t>(10000));
+    N = std::max(N, static_cast<std::size_t>(2000));
     M = std::max(M, static_cast<std::size_t>(10));
 
-    mckl::Vector<bool> perf_d;
+    mckl::Vector<bool> pass_d;
     random_distribution_perf_d<DistributionType>(
-        N, M, perf_d, std::is_floating_point<ResultType>());
+        N, M, pass_d, std::is_floating_point<ResultType>());
 
-    mckl::Vector<RandomDistributionPerf> perf_s;
-    random_distribution_perf_s<DistributionType>(
-        N, M, perf_s, std::is_floating_point<ResultType>());
-
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-    mckl::Vector<RandomDistributionPerf> perf_p;
+    mckl::Vector<RandomDistributionPerf> perf;
     random_distribution_perf_p<DistributionType>(
-        N, M, perf_p, std::is_floating_point<ResultType>());
-#endif
+        N, M, perf, std::is_floating_point<ResultType>());
 
     const int nwid = 30;
     const int twid = 12;
-    std::size_t lwid = nwid + twid * (3 + MCKL_HAS_MKL) + 20;
+#if MCKL_HAS_MKL
+    std::size_t lwid = nwid + twid * 4 + 20;
+#else
+    std::size_t lwid = nwid + twid * 3 + 20;
+#endif
 
     std::cout << std::fixed << std::setprecision(2);
 
     std::cout << std::string(lwid, '=') << std::endl;
 
-    std::cout << std::setw(nwid) << std::left << "Distribution";
+    if (mckl::StopWatch::has_cycles())
+        std::cout << std::setw(nwid) << std::left << "Distribution (cpE)";
+    else
+        std::cout << std::setw(nwid) << std::left << "Distribution (ME/s)";
     std::cout << std::setw(twid) << std::right << "STD";
     std::cout << std::setw(twid) << std::right << "MCKL";
     std::cout << std::setw(twid) << std::right << "Batch";
 #if MCKL_HAS_MKL
     std::cout << std::setw(twid) << std::right << "MKL";
 #endif
-    std::cout << std::setw(5) << std::right << "Mode";
+    std::cout << std::setw(5) << std::right << "vMath";
     std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
 
 #if MCKL_USE_MKL_VML
-    std::string mode = "VML";
+    std::string vmath = "VML";
 #else
-    std::string mode = "CPP";
+    std::string vmath = "C++";
 #endif
 
-    for (std::size_t i = 0; i != perf_s.size(); ++i) {
-        std::cout << std::setw(nwid) << std::left << perf_s[i].name;
-        std::cout << std::setw(twid) << std::right << perf_s[i].c1;
-        std::cout << std::setw(twid) << std::right << perf_s[i].c2;
-        std::cout << std::setw(twid) << std::right << perf_s[i].c3;
+    for (std::size_t i = 0; i != perf.size(); ++i) {
+        std::cout << std::setw(nwid) << std::left << perf[i].name;
+        std::cout << std::setw(twid) << std::right << perf[i].c1;
+        std::cout << std::setw(twid) << std::right << perf[i].c2;
+        std::cout << std::setw(twid) << std::right << perf[i].c3;
 #if MCKL_HAS_MKL
-        std::cout << std::setw(twid) << std::right << perf_s[i].c4;
+        std::cout << std::setw(twid) << std::right << perf[i].c4;
 #endif
-        std::cout << std::setw(5) << std::right << ("S" + mode);
+        std::cout << std::setw(5) << std::right << vmath;
 
         std::string pass;
-        pass += perf_d[i] ? "-" : "*";
-        pass += perf_s[i].pass ? "-" : "*";
-        pass += random_pass(perf_d[i] && perf_s[i].pass);
+        pass += pass_d[i] ? "-" : "*";
+        pass += perf[i].pass ? "-" : "*";
+        pass += random_pass(pass_d[i] && perf[i].pass);
         std::cout << std::setw(15) << std::right << pass;
         std::cout << std::endl;
     }
-    std::cout << std::string(lwid, '-') << std::endl;
 
-#if !MCKL_EXAMPLE_CROSS_COMPILING
-    for (std::size_t i = 0; i != perf_p.size(); ++i) {
-        std::cout << std::setw(nwid) << std::left << perf_p[i].name;
-        std::cout << std::setw(twid) << std::right << perf_p[i].c1;
-        std::cout << std::setw(twid) << std::right << perf_p[i].c2;
-        std::cout << std::setw(twid) << std::right << perf_p[i].c3;
-#if MCKL_HAS_MKL
-        std::cout << std::setw(twid) << std::right << perf_p[i].c4;
-#endif
-        std::cout << std::setw(5) << std::right << ("P" + mode);
-
-        std::string pass;
-        pass += perf_d[i] ? "-" : "*";
-        pass += perf_p[i].pass ? "-" : "*";
-        pass += random_pass(perf_d[i] && perf_p[i].pass);
-        std::cout << std::setw(15) << std::right << pass;
-        std::cout << std::endl;
-    }
     std::cout << std::string(lwid, '-') << std::endl;
-#endif
 }
 
 template <template <typename> class DistributionType, typename ResultType>
