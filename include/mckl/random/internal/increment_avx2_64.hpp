@@ -29,6 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_HPP
+#define MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_HPP
+
 #include <mckl/random/internal/increment_avx2_64_4.hpp>
 #include <mckl/random/internal/increment_avx2_64_8.hpp>
 #include <mckl/random/internal/increment_avx2_64_f.hpp>
+
+#endif // MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_HPP

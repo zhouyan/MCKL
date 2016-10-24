@@ -29,6 +29,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_HPP
+#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_generic.hpp>
+#include <mckl/random/increment.hpp>
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 #define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_BATCH(S)                        \
     while (n >= sizeof(__m128i) * S / (sizeof(T) * K)) {                      \
         constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
@@ -152,19 +166,27 @@
     }
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_REMAINDER                       \
-    constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);        \
+    {                                                                         \
+        constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);    \
                                                                               \
-    alignas(32) union {                                                       \
-        std::array<T, K> state;                                               \
-        Counter<T, K> ctr;                                                    \
-    } buf;                                                                    \
+        alignas(32) union {                                                   \
+            std::array<T, K> state;                                           \
+            Counter<T, K> ctr;                                                \
+        } buf;                                                                \
                                                                               \
-    for (std::size_t i = 0; i != n; ++i, r += stride) {                       \
-        MCKL_FLATTEN_CALL increment(ctr);                                     \
-        buf.ctr = ctr;                                                        \
-        eval(buf.state, par);                                                 \
-        std::memcpy(r, buf.state.data(), sizeof(T) * K);                      \
+        for (std::size_t i = 0; i != n; ++i, r += stride) {                   \
+            MCKL_FLATTEN_CALL increment(ctr);                                 \
+            buf.ctr = ctr;                                                    \
+            eval(buf.state, par);                                             \
+            std::memcpy(r, buf.state.data(), sizeof(T) * K);                  \
+        }                                                                     \
     }
+
+namespace mckl
+{
+
+namespace internal
+{
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
@@ -504,3 +526,15 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
         permute<N, I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
 }; // class ThreefryGeneratorImpl
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
+
+#endif // MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_HPP

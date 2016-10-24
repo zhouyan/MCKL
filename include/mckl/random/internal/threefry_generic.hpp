@@ -29,6 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_HPP
+#define MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_constants.hpp>
+
+namespace mckl
+{
+
+namespace internal
+{
+
 template <typename T, std::size_t K, std::size_t N, typename Constants>
 class ThreefryKBox
 {
@@ -338,4 +350,10 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
 class ThreefryGeneratorImpl
     : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
 {
-}; // class PhiloxGeneratorImpl
+}; // class ThreefryGeneratorImpl
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#endif // MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_HPP

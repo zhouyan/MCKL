@@ -29,6 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_AES_GENERIC_HPP
+#define MCKL_RANDOM_INTERNAL_AES_GENERIC_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/aes_constants.hpp>
+
+namespace mckl
+{
+
+namespace internal
+{
+
 class AES128KeySeqGenerator
 {
     public:
@@ -423,3 +435,9 @@ class AESGeneratorImpl
         s = t;
     }
 }; // class AESGeneratorImpl
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#endif // MCKL_RANDOM_INTERNAL_AES_GENERIC_HPP

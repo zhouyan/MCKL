@@ -29,6 +29,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_AES_AESNI_HPP
+#define MCKL_RANDOM_INTERNAL_AES_AESNI_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/increment.hpp>
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 #define MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(S)                               \
     while (n >= S) {                                                          \
         constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
@@ -92,6 +105,12 @@
     {                                                                         \
         return _mm_aeskeygenassist_si128(xmm, rcon);                          \
     }
+
+namespace mckl
+{
+
+namespace internal
+{
 
 template <std::size_t>
 inline __m128i AESNIKeyGenAssist(const __m128i &);
@@ -999,3 +1018,15 @@ class AESGeneratorImpl
         std::get<0xF>(s) = _mm_aesenclast_si128(std::get<0xF>(s), k);
     }
 }; // class AESGeneratorImpl
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
+
+#endif // MCKL_RANDOM_INTERNAL_AES_AESNI_HPP

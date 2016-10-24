@@ -29,6 +29,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_HPP
+#define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/philox_generic.hpp>
+#include <mckl/random/increment.hpp>
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 #define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_SBOX_CONSTANTS                    \
     constexpr int mul0 =                                                      \
         static_cast<int>(Constants::multiplier::value[0 % (K / 2)]);          \
@@ -85,6 +99,29 @@
         n -= nstride;                                                         \
         r += rstride;                                                         \
     }
+
+#define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_REMAINDER                         \
+    {                                                                         \
+        constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);    \
+                                                                              \
+        alignas(32) union {                                                   \
+            std::array<T, K> state;                                           \
+            Counter<T, K> ctr;                                                \
+        } buf;                                                                \
+                                                                              \
+        for (std::size_t i = 0; i != n; ++i, r += stride) {                   \
+            MCKL_FLATTEN_CALL increment(ctr);                                 \
+            buf.ctr = ctr;                                                    \
+            eval(buf.state, key);                                             \
+            std::memcpy(r, buf.state.data(), sizeof(T) * K);                  \
+        }                                                                     \
+    }
+
+namespace mckl
+{
+
+namespace internal
+{
 
 template <std::size_t>
 class PhiloxGeneratorImplPermute32;
@@ -233,25 +270,12 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, ResultType *r)
     {
-        constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);
-
         std::array<__m256i, Rounds> rk;
         MCKL_FLATTEN_CALL set_key(rk, key);
 
         MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_BATCH(8)
         MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_BATCH(4)
-
-        alignas(32) union {
-            std::array<T, K> state;
-            Counter<T, K> ctr;
-        } buf;
-
-        for (std::size_t i = 0; i != n; ++i, r += stride) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.ctr = ctr;
-            eval(buf.state, key);
-            std::memcpy(r, buf.state.data(), sizeof(T) * K);
-        }
+        MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_REMAINDER
     }
 
     private:
@@ -408,4 +432,16 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     {
         PhiloxGeneratorImplPermute32<K>::round(s);
     }
-}; // class PhiloxGeneratorImplAVX2_32
+}; // class PhiloxGeneratorImplAVX2
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
+
+#endif // MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_HPP

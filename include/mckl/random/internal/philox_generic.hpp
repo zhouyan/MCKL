@@ -29,6 +29,18 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_PHILOX_GENERIC_HPP
+#define MCKL_RANDOM_INTERNAL_PHILOX_GENERIC_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_constants.hpp>
+
+namespace mckl
+{
+
+namespace internal
+{
+
 template <typename T, int = std::numeric_limits<T>::digits>
 class PhiloxHiLo;
 
@@ -249,7 +261,8 @@ class PhiloxPBox
     static void eval(
         const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
     {
-        constexpr std::size_t P = Constants::permute::value[K - I - 1];
+        constexpr std::size_t P =
+            ThreefryConstants<T, K>::permute::value[K - I - 1];
         constexpr std::size_t J = K - P - 1;
 
         std::get<I>(tmp) = std::get<J>(state);
@@ -362,3 +375,9 @@ class PhiloxGeneratorImpl
     : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
 {
 }; // class PhiloxGeneratorImpl
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#endif // MCKL_RANDOM_INTERNAL_PHILOX_GENERIC_HPP

@@ -29,6 +29,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_4_HPP
+#define MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_4_HPP
+
+#include <mckl/random/internal/increment_generic.hpp>
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
+namespace mckl
+{
+
+namespace internal
+{
+
 template <typename T>
 class IncrementBlock<T, 1, 16, 64>
 {
@@ -41,7 +59,7 @@ class IncrementBlock<T, 1, 16, 64>
         return reinterpret_cast<std::uintptr_t>(ptr) % 32 == 0;
     }
 
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
+    MCKL_FLATTEN static void eval(const std::array<T, K_> &ctr,
         std::array<std::array<T, K_>, blocks_> &ctr_block)
     {
         __m256i a0 =
@@ -168,3 +186,15 @@ class IncrementBlock<T, 8, 2, 64>
         _mm256_store_si256(cptr++, a1);
     }
 }; // class IncrementBlock
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
+
+#endif // MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_4_HPP

@@ -29,6 +29,24 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_8_HPP
+#define MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_8_HPP
+
+#include <mckl/random/internal/increment_generic.hpp>
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
+namespace mckl
+{
+
+namespace internal
+{
+
 template <typename T>
 class IncrementBlock<T, 1, 16, 64>
 {
@@ -182,3 +200,15 @@ class IncrementBlock<T, 8, 2, 64>
         _mm_store_si128(cptr++, a3);
     }
 }; // class IncrementBlock
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
+
+#endif // MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_4_HPP

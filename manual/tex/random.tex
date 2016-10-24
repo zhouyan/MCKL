@@ -205,14 +205,13 @@ template <typename ResultType, typename T, size_t K,
 using PhiloxEngine =
     CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
 \end{verbatim}
-The template parameter |Constants| is a trait class that defines the
-Weyl's sequence constants, the multipliers, and the permutation. The only
-restriction on this trait class is the following expressions be valid,
+The template parameter |Constants| is a trait class that defines the Weyl's
+sequence constants and the multipliers. The only restriction on this trait
+class is the following expressions be valid,
 \begin{verbatim}
 // i is a compileting constant expression
-constexpr T w = Constants::weyl::value[i];         // i = 0, ..., K / 2 - 1
-constexpr T m = Constants::multiplier::value[i];   // i = 0, ..., K / 2 - 1
-constexpr size_t p = Constants::permute::value[i]; // i = 0, ..., K - 1
+constexpr T w = Constants::weyl::value[i];       // i = 0, ..., K / 2 - 1
+constexpr T m = Constants::multiplier::value[i]; // i = 0, ..., K / 2 - 1
 \end{verbatim}
 The member data |value| will not be \odr used. The defaults are taken
 from~\cite{Salmon:2011um}. Four engines are defined in \mckl,

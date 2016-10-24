@@ -35,6 +35,13 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_constants.hpp>
 #include <mckl/random/counter.hpp>
+#include <mckl/random/increment.hpp>
+
+#if MCKL_USE_AESNI
+#include <mckl/random/internal/aes_aesni.hpp>
+#else
+#include <mckl/random/internal/aes_generic.hpp>
+#endif
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -72,12 +79,6 @@ namespace mckl
 
 namespace internal
 {
-
-#if MCKL_USE_AESNI
-#include <mckl/random/internal/aes_aesni.hpp>
-#else
-#include <mckl/random/internal/aes_generic.hpp>
-#endif
 
 template <std::size_t Rounds, typename KeySeqGenerator>
 class AESKeySeqImpl
