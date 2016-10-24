@@ -120,31 +120,16 @@ compiler.}
   \file_if_exist:nT{tab/random_#1_#2_sse2.tex}{
     \begin{table}
       \input{tab/random_#1_#2_sse2}
-      \caption{Performance~of~#3~(Nehalem,~sequential)}
-      \label{tab:Performance~of~#4~(Nehalem,~sequential)}
-    \end{table}
-  }
-  \file_if_exist:nT{tab/random_#1_#2_sse2_p.tex}{
-    \begin{table}
-      \input{tab/random_#1_#2_sse2_p}
-      \caption{Performance~of~#3~(Nehalem,~parallel)}
-      \label{tab:Performance~of~#4~(Nehalem,~parallel)}
+      \caption{Performance~of~#3~(Nehalem)}
+      \label{tab:Performance~of~#4~(Nehalem)}
     \end{table}
   }
   \file_if_exist:nT{tab/random_#1_#2_avx2.tex}{
     \begin{table}
       \input{tab/random_#1_#2_avx2}
-      \caption{Performance~of~#3~(Haswell,~sequential)}
-      \label{tab:Performance~of~#4~(Haswell,~sequential)}
+      \caption{Performance~of~#3~(Haswell)}
+      \label{tab:Performance~of~#4~(Haswell)}
     \end{table}
   }
-  \file_if_exist:nT{tab/random_#1_#2_avx2_p.tex}{
-    \begin{table}
-      \input{tab/random_#1_#2_avx2_p}
-      \caption{Performance~of~#3~(Haswell,~parallel)}
-      \label{tab:Performance~of~#4~(Haswell,~parallel)}
-    \end{table}
-  }
-  \clearpage
 }
 \ExplSyntaxOff
