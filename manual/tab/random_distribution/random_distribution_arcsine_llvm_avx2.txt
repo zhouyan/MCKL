@@ -1,8 +1,4 @@
-Arcsine<float>(0,1)                  39.88       40.31        4.78        4.89 SVML       --Passed
-Arcsine<double>(0,1)                 47.15       47.28       10.11       10.27 SVML       --Passed
-Arcsine<float>(0,1)                  10.30       10.01        1.97        1.76 PVML       --Passed
-Arcsine<double>(0,1)                 11.65        8.79        3.43        3.22 PVML       --Passed
-Arcsine<float>(0,1)                  39.88       39.97       18.29       18.43 SCPP       --Passed
-Arcsine<double>(0,1)                 47.10       47.25       25.18       25.41 SCPP       --Passed
-Arcsine<float>(0,1)                  10.08       10.27        5.60        5.31 PCPP       --Passed
-Arcsine<double>(0,1)                 12.18       11.83        7.56        7.34 PCPP       --Passed
+Arcsine<float>(0,1)                  39.84       39.92        4.57        4.85  VML       --Passed
+Arcsine<double>(0,1)                 47.10       47.24        9.78       10.29  VML       --Passed
+Arcsine<float>(0,1)                  40.17       39.93       18.05       18.35  C++       --Passed
+Arcsine<double>(0,1)                 47.11       47.30       24.84       25.34  C++       --Passed

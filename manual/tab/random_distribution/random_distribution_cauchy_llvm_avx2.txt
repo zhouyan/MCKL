@@ -1,8 +1,4 @@
-Cauchy<float>(0,1)                   65.19       52.21        7.25        3.71 SVML       --Passed
-Cauchy<double>(0,1)                  88.73       60.27       14.06        8.02 SVML       --Passed
-Cauchy<float>(0,1)                   16.78       10.26        2.48        1.49 PVML       --Passed
-Cauchy<double>(0,1)                  21.22       14.54        4.30        2.53 PVML       --Passed
-Cauchy<float>(0,1)                   64.84       52.73       28.66        3.68 SCPP       --Passed
-Cauchy<double>(0,1)                  88.69       60.29       33.92        8.03 SCPP       --Passed
-Cauchy<float>(0,1)                   16.01       12.07        7.81        1.45 PCPP       --Passed
-Cauchy<double>(0,1)                  21.21       14.85        9.68        2.52 PCPP       --Passed
+Cauchy<float>(0,1)                   66.44       52.21        7.07        3.74  VML       --Passed
+Cauchy<double>(0,1)                  89.05       60.50       13.75        8.00  VML       --Passed
+Cauchy<float>(0,1)                   66.01       52.69       28.21        3.67  C++       --Passed
+Cauchy<double>(0,1)                  89.03       60.31       33.80        7.99  C++       --Passed

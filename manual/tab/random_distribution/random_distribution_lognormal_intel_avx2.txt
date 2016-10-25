@@ -1,8 +1,4 @@
-Lognormal<float>(0,1)                95.59       80.70        7.13        6.73 SVML       --Passed
-Lognormal<double>(0,1)              133.61       89.80       18.03       13.90 SVML       --Passed
-Lognormal<float>(0,1)                22.67       18.46        2.77        2.07 PVML       --Passed
-Lognormal<double>(0,1)               33.68       22.24        4.75        4.04 PVML       --Passed
-Lognormal<float>(0,1)                94.83       80.50        9.32        6.71 SCPP       --Passed
-Lognormal<double>(0,1)              134.26       89.60       35.41       13.66 SCPP       --Passed
-Lognormal<float>(0,1)                22.88       19.13        3.48        2.32 PCPP       --Passed
-Lognormal<double>(0,1)               33.51       21.14        9.78        3.94 PCPP       --Passed
+Lognormal<float>(0,1)                94.73       80.51        6.84        6.59  VML       --Passed
+Lognormal<double>(0,1)              133.64       92.93       17.67       13.57  VML       --Passed
+Lognormal<float>(0,1)                94.75       80.61        9.09        6.70  C++       --Passed
+Lognormal<double>(0,1)              133.68       89.58       37.83       13.84  C++       --Passed

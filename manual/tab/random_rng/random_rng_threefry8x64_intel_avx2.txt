@@ -1,5 +1,5 @@
-Threefry8x64             232       8   2.18   0.67   0.52   0.20   3.26   2.66   4.15   3.39   1.86     ----Passed
-Threefry8x64             232       8   2.18   0.67   0.57   0.19   3.25   2.94   3.84   3.47   1.86     ----Passed
-Threefry8x64             232       8   2.18   0.67   0.53   0.20   3.26   2.64   4.13   3.35   1.91     ----Passed
-Threefry8x64             232       8   2.18   0.67   0.52   0.21   3.26   2.46   4.22   3.19   1.95     ----Passed
-Threefry8x64             232       8   2.17   0.67   0.56   0.21   3.25   2.69   3.90   3.23   1.85     ----Passed
+Threefry8x64             232       8           2.18           0.66      ---Passed
+Threefry8x64             232       8           2.17           0.66      ---Passed
+Threefry8x64             232       8           2.18           0.66      ---Passed
+Threefry8x64             232       8           2.17           0.66      ---Passed
+Threefry8x64             232       8           2.17           0.66      ---Passed

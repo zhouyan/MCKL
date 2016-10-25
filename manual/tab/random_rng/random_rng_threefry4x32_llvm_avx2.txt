@@ -1,5 +1,5 @@
-Threefry4x32              72       8   6.50   0.70   1.53   0.20   9.23   7.63   4.24   3.50   3.96     ----Passed
-Threefry4x32              72       8   6.50   0.71   1.55   0.20   9.18   7.97   4.18   3.63   3.98     ----Passed
-Threefry4x32              72       8   6.53   0.71   1.40   0.16   9.24   8.56   4.67   4.33   3.98     ----Passed
-Threefry4x32              72       8   6.52   0.71   1.36   0.20   9.24   6.70   4.79   3.48   3.98     ----Passed
-Threefry4x32              72       8   6.54   0.71   1.37   0.18   9.26   7.79   4.77   4.01   3.96     ----Passed
+Threefry4x32              72       8           6.52           0.70      ---Passed
+Threefry4x32              72       8           6.50           0.70      ---Passed
+Threefry4x32              72       8           6.49           0.70      ---Passed
+Threefry4x32              72       8           6.50           0.70      ---Passed
+Threefry4x32              72       8           6.49           0.70      ---Passed

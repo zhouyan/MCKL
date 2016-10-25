@@ -1,8 +1,4 @@
-Pareto<float>(1,1)                   56.51       56.58        4.83        4.51 SVML       --Passed
-Pareto<double>(1,1)                  72.53       72.66       12.38       11.12 SVML       --Passed
-Pareto<float>(1,1)                   14.10       13.09        2.05        1.71 PVML       --Passed
-Pareto<double>(1,1)                  18.21       13.82        3.88        3.37 PVML       --Passed
-Pareto<float>(1,1)                   56.50       56.56       24.49       14.29 SCPP       --Passed
-Pareto<double>(1,1)                  71.61       71.74       39.20       23.31 SCPP       --Passed
-Pareto<float>(1,1)                   14.20       13.89        7.29        4.16 PCPP       --Passed
-Pareto<double>(1,1)                  17.60       13.65       11.22        6.29 PCPP       --Passed
+Pareto<float>(1,1)                   56.48       56.54        4.61        4.42  VML       --Passed
+Pareto<double>(1,1)                  72.63       72.64       11.98       11.09  VML       --Passed
+Pareto<float>(1,1)                   56.52       56.54       24.26       14.21  C++       --Passed
+Pareto<double>(1,1)                  71.53       71.75       38.11       22.51  C++       --Passed

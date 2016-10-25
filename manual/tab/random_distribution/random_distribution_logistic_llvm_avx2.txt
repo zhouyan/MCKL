@@ -1,8 +1,4 @@
-Logistic<float>(0,1)                 40.39       40.40        5.19        5.29 SVML       --Passed
-Logistic<double>(0,1)                54.87       54.99       13.71       13.93 SVML       --Passed
-Logistic<float>(0,1)                 10.46       10.19        2.14        1.95 PVML       --Passed
-Logistic<double>(0,1)                13.17       13.57        3.71        4.11 PVML       --Passed
-Logistic<float>(0,1)                 40.43       40.43       15.02       15.04 SCPP       --Passed
-Logistic<double>(0,1)                54.84       55.02       28.30       28.53 SCPP       --Passed
-Logistic<float>(0,1)                 10.39       10.36        4.72        4.36 PCPP       --Passed
-Logistic<double>(0,1)                14.37       13.03        7.75        7.92 PCPP       --Passed
+Logistic<float>(0,1)                 40.37       40.47        4.92        5.25  VML       --Passed
+Logistic<double>(0,1)                59.54       59.53       13.37       13.89  VML       --Passed
+Logistic<float>(0,1)                 40.40       40.43       14.72       15.04  C++       --Passed
+Logistic<double>(0,1)                54.82       54.97       27.99       28.49  C++       --Passed
