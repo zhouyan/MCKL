@@ -33,6 +33,10 @@
 #define MCKL_EXAMPLE_RANDOM_@RNG@_RNG 1
 // clang-format on
 
+#ifdef MCKL_HAS_AVX2
+#undef MCKL_HAS_AVX2
+#endif
+
 #include <@RNGHeader@>
 #include "random_rng.hpp"
 

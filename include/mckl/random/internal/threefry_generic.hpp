@@ -283,8 +283,7 @@ class ThreefryGeneratorGenericImpl
     static void round(std::array<T, K> &state, const std::array<T, K + 4> &par,
         std::true_type)
     {
-        sbox<N>(state);
-        pbox<N>(state);
+        rbox<N>(state);
         kbox<N>(state, par);
         round<N + 1>(
             state, par, std::integral_constant<bool, N + 1 <= Rounds>());
@@ -311,36 +310,20 @@ class ThreefryGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void sbox(std::array<T, K> &state)
+    static void rbox(std::array<T, K> &state)
     {
-        sbox<N>(state, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
+        rbox<N>(state, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t N>
-    static void sbox(std::array<T, K> &, std::false_type)
+    static void rbox(std::array<T, K> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void sbox(std::array<T, K> &state, std::true_type)
+    static void rbox(std::array<T, K> &state, std::true_type)
     {
         ThreefrySBox<T, K, N, Constants>::eval(state);
-    }
-
-    template <std::size_t N>
-    static void pbox(std::array<T, K> &state)
-    {
-        pbox<N>(state, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
-    }
-
-    template <std::size_t N>
-    static void pbox(std::array<T, K> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void pbox(std::array<T, K> &state, std::true_type)
-    {
         ThreefryPBox<T, K, N, Constants>::eval(state);
     }
 }; // class ThreefryGeneratorGenericImpl
