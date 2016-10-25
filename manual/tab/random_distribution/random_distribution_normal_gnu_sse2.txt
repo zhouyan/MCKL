@@ -1,8 +1,4 @@
-Normal<float>(0,1)                   90.38       88.73       21.98       18.70 SVML       --Passed
-Normal<double>(0,1)                 156.07      102.14       44.85       31.90 SVML       --Passed
-Normal<float>(0,1)                   15.77       14.46        6.03        5.09 PVML       --Passed
-Normal<double>(0,1)                  24.33       16.86       11.08        8.26 PVML       --Passed
-Normal<float>(0,1)                   90.36       88.46       64.61       18.60 SCPP       --Passed
-Normal<double>(0,1)                 156.96      103.74       92.00       31.84 SCPP       --Passed
-Normal<float>(0,1)                   16.05       14.58       14.37        5.23 PCPP       --Passed
-Normal<double>(0,1)                  24.38       16.83       18.67        8.18 PCPP       --Passed
+Normal<float>(0,1)                  100.81       94.63       21.61       18.50  VML       --Passed
+Normal<double>(0,1)                 176.50      109.12       44.33       31.79  VML       --Passed
+Normal<float>(0,1)                  100.44       93.89       64.48       18.58  C++       --Passed
+Normal<double>(0,1)                 176.50      110.22       91.91       31.74  C++       --Passed

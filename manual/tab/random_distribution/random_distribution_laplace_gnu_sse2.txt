@@ -1,8 +1,4 @@
-Laplace<float>(0,1)                  85.33       84.74       31.57       21.84 SVML       --Passed
-Laplace<double>(0,1)                101.84      100.98       45.36       31.91 SVML       --Passed
-Laplace<float>(0,1)                  14.21       14.22        6.98        5.78 PVML       --Passed
-Laplace<double>(0,1)                 16.44       16.70       10.45        8.16 PVML       --Passed
-Laplace<float>(0,1)                  88.26       88.81       53.45       22.78 SCPP       --Passed
-Laplace<double>(0,1)                106.11      105.04       69.97       33.26 SCPP       --Passed
-Laplace<float>(0,1)                  13.88       14.12       11.13        5.84 PCPP       --Passed
-Laplace<double>(0,1)                 16.53       16.63       14.64        8.22 PCPP       --Passed
+Laplace<float>(0,1)                  92.67       92.54       31.19       21.83  VML       --Passed
+Laplace<double>(0,1)                108.36      107.22       46.48       31.80  VML       --Passed
+Laplace<float>(0,1)                  92.82       92.75       51.03       21.87  C++       --Passed
+Laplace<double>(0,1)                108.41      107.09       67.41       31.83  C++       --Passed

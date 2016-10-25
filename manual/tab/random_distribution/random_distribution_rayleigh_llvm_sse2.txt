@@ -1,8 +1,4 @@
-Rayleigh<float>(1)                   66.13       66.46       17.63       14.95 SVML       --Passed
-Rayleigh<double>(1)                  88.38       88.36       39.09       29.42 SVML       --Passed
-Rayleigh<float>(1)                   12.35       12.39        4.45        3.91 PVML       --Passed
-Rayleigh<double>(1)                  16.49       16.35        9.41        7.36 PVML       --Passed
-Rayleigh<float>(1)                   67.15       66.51       50.80       14.97 SCPP       --Passed
-Rayleigh<double>(1)                  89.05       88.71       77.66       29.33 SCPP       --Passed
-Rayleigh<float>(1)                   12.18       12.57       10.81        4.13 PCPP       --Passed
-Rayleigh<double>(1)                  16.49       17.03       15.78        7.38 PCPP       --Passed
+Rayleigh<float>(1)                   81.56       59.85       15.99       14.91  VML       --Passed
+Rayleigh<double>(1)                 116.90       80.15       37.45       29.21  VML       --Passed
+Rayleigh<float>(1)                   81.69       60.19       49.13       14.89  C++       --Passed
+Rayleigh<double>(1)                 116.81       79.14       76.06       29.26  C++       --Passed

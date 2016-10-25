@@ -1,5 +1,5 @@
-Threefry4x64             136       8   4.47   1.90   1.01   0.53   2.35   1.91   4.42   3.59   4.08     ----Passed
-Threefry4x64             136       8   4.46   1.90   1.01   0.53   2.35   1.90   4.43   3.59   3.83     ----Passed
-Threefry4x64             136       8   4.47   1.90   1.00   0.53   2.35   1.88   4.45   3.57   3.95     ----Passed
-Threefry4x64             136       8   4.46   1.90   1.01   0.53   2.35   1.91   4.43   3.61   3.96     ----Passed
-Threefry4x64             136       8   4.47   1.90   1.01   0.53   2.35   1.90   4.43   3.59   3.98     ----Passed
+Threefry4x64             136       8           3.68           1.95      ---Passed
+Threefry4x64             136       8           3.68           1.95      ---Passed
+Threefry4x64             136       8           3.67           1.95      ---Passed
+Threefry4x64             136       8           3.68           1.95      ---Passed
+Threefry4x64             136       8           3.68           1.95      ---Passed
