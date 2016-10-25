@@ -236,9 +236,9 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
             static_cast<int>(Constants::multiplier::value[1 % (K / 2)]);
         constexpr int mask = static_cast<int>(0xFFFFFFFF);
 
-        const __m128i k = std::get<N - 1>(rk);
         const __m128i m = _mm_set_epi32(0, mul1, 0, mul0);
         const __m128i a = _mm_set_epi32(mask, 0, mask, 0);
+        const __m128i k = std::get<N - 1>(rk);
 
         __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
         __m128i m1 = _mm_mul_epu32(std::get<1>(s), m);
@@ -249,15 +249,6 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         __m128i m6 = _mm_mul_epu32(std::get<6>(s), m);
         __m128i m7 = _mm_mul_epu32(std::get<7>(s), m);
 
-        m0 = _mm_xor_si128(m0, k);
-        m1 = _mm_xor_si128(m1, k);
-        m2 = _mm_xor_si128(m2, k);
-        m3 = _mm_xor_si128(m3, k);
-        m4 = _mm_xor_si128(m4, k);
-        m5 = _mm_xor_si128(m5, k);
-        m6 = _mm_xor_si128(m6, k);
-        m7 = _mm_xor_si128(m7, k);
-
         std::get<0>(s) = _mm_and_si128(std::get<0>(s), a);
         std::get<1>(s) = _mm_and_si128(std::get<1>(s), a);
         std::get<2>(s) = _mm_and_si128(std::get<2>(s), a);
@@ -266,6 +257,15 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         std::get<5>(s) = _mm_and_si128(std::get<5>(s), a);
         std::get<6>(s) = _mm_and_si128(std::get<6>(s), a);
         std::get<7>(s) = _mm_and_si128(std::get<7>(s), a);
+
+        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), k);
+        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), k);
+        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), k);
+        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), k);
+        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), k);
+        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), k);
+        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), k);
+        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), k);
 
         std::get<0>(s) = _mm_xor_si128(std::get<0>(s), m0);
         std::get<1>(s) = _mm_xor_si128(std::get<1>(s), m1);
