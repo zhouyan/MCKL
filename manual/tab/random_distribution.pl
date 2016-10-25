@@ -168,10 +168,10 @@ sub run {
             push @result, @lines1;
             push @result, @lines2;
             for (@lines1) {
-                print $_ if /<(double|int32_t)>/;
+                print $_ if /<(double|int32_t)>.*VML/;
             }
             for (@lines2) {
-                print $_ if /<(double|int32_t)>/;
+                print $_ if /<(double|int32_t)>.*VML/;
             }
             if ($write) {
                 open my $txtfile, ">", "random_distribution/" .
