@@ -78,13 +78,14 @@ inline U swap_bytes(U u, std::true_type)
 {
     constexpr int bits = sizeof(U) * CHAR_BIT;
     constexpr int p = Bytes * CHAR_BIT;
+    constexpr int q = p < bits ? p : 0;
     constexpr int r = p * N;
     constexpr int l = bits - r - p;
     constexpr U mask = (~const_zero<U>()) >> (bits - p);
 
-    return ((u & mask) << l) +
+    return ((u & mask) << l) |
         swap_bytes<Bytes, N + 1>(
-            u >> p, std::integral_constant<bool, (r + p < bits)>());
+            u >> q, std::integral_constant<bool, (r + p < bits)>());
 }
 
 template <int Bytes, typename T>
@@ -95,8 +96,8 @@ inline T swap_bytes(T x)
 
     using U = typename std::make_unsigned<T>::type;
 
-    return static_cast<T>(swap_bytes<Bytes, 0>(
-        static_cast<U>(x), std::integral_constant < bool, Bytes<sizeof(U)>()));
+    return static_cast<T>(swap_bytes<Bytes, 0>(static_cast<U>(x),
+        std::integral_constant<bool, Bytes <= sizeof(U)>()));
 }
 
 #if MCKL_HAS_LITTLE_ENDIAN
