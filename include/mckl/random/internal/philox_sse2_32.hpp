@@ -43,72 +43,6 @@
 #endif
 #endif
 
-#define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_SBOX_CONSTANTS                    \
-    constexpr int mul0 =                                                      \
-        static_cast<int>(Constants::multiplier::value[0 % (K / 2)]);          \
-    constexpr int mul1 =                                                      \
-        static_cast<int>(Constants::multiplier::value[1 % (K / 2)]);          \
-    constexpr int msk = static_cast<int>(0xFFFFFFFF);                         \
-                                                                              \
-    const __m128i k = std::get<N - 1>(rk);                                    \
-    const __m128i m = _mm_set_epi32(0, mul1, 0, mul0);                        \
-    const __m128i mask = _mm_set_epi32(msk, 0, msk, 0);
-
-#define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_BATCH(S)                          \
-    while (n >= sizeof(__m128i) * S / (sizeof(T) * K)) {                      \
-        constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
-        constexpr std::size_t nstride = cstride / (sizeof(T) * K);            \
-        constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
-                                                                              \
-        std::array<__m128i, S> s;                                             \
-                                                                              \
-        MCKL_FLATTEN_CALL increment_si128(ctr, s);                            \
-                                                                              \
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);          \
-                                                                              \
-        MCKL_FLATTEN_CALL sbox<0x0>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x1>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x2>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x3>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x4>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x5>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x6>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x7>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x8>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0x9>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0xA>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0xB>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0xC>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0xD>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0xE>(s, rk);                                   \
-        MCKL_FLATTEN_CALL sbox<0xF>(s, rk);                                   \
-                                                                              \
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());   \
-                                                                              \
-        MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);           \
-                                                                              \
-        std::memcpy(r, s.data(), cstride);                                    \
-        n -= nstride;                                                         \
-        r += rstride;                                                         \
-    }
-
-#define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_REMAINDER                         \
-    {                                                                         \
-        constexpr std::size_t stride = sizeof(T) * K / sizeof(ResultType);    \
-                                                                              \
-        alignas(32) union {                                                   \
-            std::array<T, K> state;                                           \
-            Counter<T, K> ctr;                                                \
-        } buf;                                                                \
-                                                                              \
-        for (std::size_t i = 0; i != n; ++i, r += stride) {                   \
-            MCKL_FLATTEN_CALL increment(ctr);                                 \
-            buf.ctr = ctr;                                                    \
-            eval(buf.state, key);                                             \
-            std::memcpy(r, buf.state.data(), sizeof(T) * K);                  \
-        }                                                                     \
-    }
-
 namespace mckl
 {
 
@@ -258,11 +192,55 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, ResultType *r)
     {
+        constexpr std::size_t S = 8;
+        constexpr std::size_t cstride = sizeof(__m128i) * S;
+        constexpr std::size_t nstride = cstride / (sizeof(T) * K);
+        constexpr std::size_t rstride = cstride / sizeof(ResultType);
+
+        std::array<__m128i, S> s;
         std::array<__m128i, Rounds> rk;
         MCKL_FLATTEN_CALL set_key(rk, key);
+        while (n >= nstride) {
+            MCKL_FLATTEN_CALL increment_si128(ctr, s);
 
-        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_BATCH(8)
-        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_REMAINDER
+            MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);
+
+            MCKL_FLATTEN_CALL sbox<0x0>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x1>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x2>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x3>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x4>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x5>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x6>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x7>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x8>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0x9>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0xA>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0xB>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0xC>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0xD>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0xE>(s, rk);
+            MCKL_FLATTEN_CALL sbox<0xF>(s, rk);
+
+            round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
+
+            MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);
+
+            std::memcpy(r, s.data(), cstride);
+            n -= nstride;
+            r += rstride;
+        }
+
+        alignas(32) union {
+            std::array<std::array<T, K>, nstride> state;
+            std::array<Counter<T, K>, nstride> ctr;
+        } buf;
+        for (std::size_t i = 0; i != n; ++i) {
+            MCKL_FLATTEN_CALL increment(ctr);
+            buf.ctr[i] = ctr;
+            eval(buf.state[i], key);
+        }
+        std::memcpy(r, buf.state.data(), sizeof(T) * K * n);
     }
 
     private:
@@ -297,7 +275,15 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void sbox(std::array<__m128i, 4> &s,
         const std::array<__m128i, Rounds> &rk, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_SBOX_CONSTANTS
+        constexpr int mul0 =
+            static_cast<int>(Constants::multiplier::value[0 % (K / 2)]);
+        constexpr int mul1 =
+            static_cast<int>(Constants::multiplier::value[1 % (K / 2)]);
+        constexpr int mask = static_cast<int>(0xFFFFFFFF);
+
+        const __m128i k = std::get<N - 1>(rk);
+        const __m128i m = _mm_set_epi32(0, mul1, 0, mul0);
+        const __m128i a = _mm_set_epi32(mask, 0, mask, 0);
 
         __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
         __m128i m1 = _mm_mul_epu32(std::get<1>(s), m);
@@ -309,10 +295,10 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         __m128i x2 = _mm_xor_si128(std::get<2>(s), k);
         __m128i x3 = _mm_xor_si128(std::get<3>(s), k);
 
-        std::get<0>(s) = _mm_and_si128(x0, mask);
-        std::get<1>(s) = _mm_and_si128(x1, mask);
-        std::get<2>(s) = _mm_and_si128(x2, mask);
-        std::get<3>(s) = _mm_and_si128(x3, mask);
+        std::get<0>(s) = _mm_and_si128(x0, a);
+        std::get<1>(s) = _mm_and_si128(x1, a);
+        std::get<2>(s) = _mm_and_si128(x2, a);
+        std::get<3>(s) = _mm_and_si128(x3, a);
 
         std::get<0>(s) = _mm_xor_si128(std::get<0>(s), m0);
         std::get<1>(s) = _mm_xor_si128(std::get<1>(s), m1);
@@ -326,7 +312,15 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     static void sbox(std::array<__m128i, 8> &s,
         const std::array<__m128i, Rounds> &rk, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_SBOX_CONSTANTS
+        constexpr int mul0 =
+            static_cast<int>(Constants::multiplier::value[0 % (K / 2)]);
+        constexpr int mul1 =
+            static_cast<int>(Constants::multiplier::value[1 % (K / 2)]);
+        constexpr int mask = static_cast<int>(0xFFFFFFFF);
+
+        const __m128i k = std::get<N - 1>(rk);
+        const __m128i m = _mm_set_epi32(0, mul1, 0, mul0);
+        const __m128i a = _mm_set_epi32(mask, 0, mask, 0);
 
         __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
         __m128i m1 = _mm_mul_epu32(std::get<1>(s), m);
@@ -346,14 +340,14 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         m6 = _mm_xor_si128(m6, k);
         m7 = _mm_xor_si128(m7, k);
 
-        std::get<0>(s) = _mm_and_si128(std::get<0>(s), mask);
-        std::get<1>(s) = _mm_and_si128(std::get<1>(s), mask);
-        std::get<2>(s) = _mm_and_si128(std::get<2>(s), mask);
-        std::get<3>(s) = _mm_and_si128(std::get<3>(s), mask);
-        std::get<4>(s) = _mm_and_si128(std::get<4>(s), mask);
-        std::get<5>(s) = _mm_and_si128(std::get<5>(s), mask);
-        std::get<6>(s) = _mm_and_si128(std::get<6>(s), mask);
-        std::get<7>(s) = _mm_and_si128(std::get<7>(s), mask);
+        std::get<0>(s) = _mm_and_si128(std::get<0>(s), a);
+        std::get<1>(s) = _mm_and_si128(std::get<1>(s), a);
+        std::get<2>(s) = _mm_and_si128(std::get<2>(s), a);
+        std::get<3>(s) = _mm_and_si128(std::get<3>(s), a);
+        std::get<4>(s) = _mm_and_si128(std::get<4>(s), a);
+        std::get<5>(s) = _mm_and_si128(std::get<5>(s), a);
+        std::get<6>(s) = _mm_and_si128(std::get<6>(s), a);
+        std::get<7>(s) = _mm_and_si128(std::get<7>(s), a);
 
         std::get<0>(s) = _mm_xor_si128(std::get<0>(s), m0);
         std::get<1>(s) = _mm_xor_si128(std::get<1>(s), m1);

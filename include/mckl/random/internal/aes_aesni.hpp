@@ -42,59 +42,6 @@
 #endif
 #endif
 
-#define MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(S)                               \
-    while (n >= S) {                                                          \
-        constexpr std::size_t cstride = sizeof(__m128i) * S;                  \
-        constexpr std::size_t nstride = S;                                    \
-        constexpr std::size_t rstride = cstride / sizeof(ResultType);         \
-                                                                              \
-        std::array<__m128i, S> s;                                             \
-                                                                              \
-        MCKL_FLATTEN_CALL increment_si128(ctr, s);                            \
-                                                                              \
-        MCKL_FLATTEN_CALL encfirst(s, rk);                                    \
-                                                                              \
-        MCKL_FLATTEN_CALL enc<0x1>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x2>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x3>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x4>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x5>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x6>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x7>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x8>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0x9>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0xA>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0xB>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0xC>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0xD>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0xE>(s, rk);                                    \
-        MCKL_FLATTEN_CALL enc<0xF>(s, rk);                                    \
-                                                                              \
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());   \
-                                                                              \
-        MCKL_FLATTEN_CALL enclast(s, rk);                                     \
-                                                                              \
-        std::memcpy(r, s.data(), cstride);                                    \
-        n -= nstride;                                                         \
-        r += rstride;                                                         \
-    }
-
-#define MCKL_RANDOM_INTERNAL_AES_AESNI_REMAINDER                              \
-    constexpr std::size_t stride =                                            \
-        sizeof(std::uint32_t) * 4 / sizeof(ResultType);                       \
-                                                                              \
-    alignas(32) union {                                                       \
-        std::array<std::uint32_t, 4> state;                                   \
-        Counter<std::uint32_t, 4> ctr;                                        \
-    } buf;                                                                    \
-                                                                              \
-    for (std::size_t i = 0; i != n; ++i, r += stride) {                       \
-        MCKL_FLATTEN_CALL increment(ctr);                                     \
-        buf.ctr = ctr;                                                        \
-        eval(buf.state, rk);                                                  \
-        std::memcpy(r, buf.state.data(), sizeof(std::uint32_t) * 4);          \
-    }
-
 #define MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(N, rcon)                      \
     template <>                                                               \
     inline __m128i AESNIKeyGenAssist<N>(const __m128i &xmm)                   \
@@ -694,12 +641,8 @@ class ARSKeySeqGenerator
 template <typename KeySeqType>
 class AESGeneratorImpl
 {
-    static constexpr std::size_t S_ = KeySeqType::rounds() < 8 ? 16 : 8;
-
     public:
     static constexpr bool batch() { return true; }
-
-    static constexpr std::size_t blocks() { return S_; }
 
     static void eval(std::array<std::uint32_t, 4> &state,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
@@ -738,31 +681,56 @@ class AESGeneratorImpl
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
         ResultType *r)
     {
-        eval_dispatch(
-            ctr, rk, n, r, std::integral_constant<bool, (rounds_ < 8)>());
+        constexpr std::size_t S = rounds_ < 8 ? 16 : 8;
+        constexpr std::size_t cstride = sizeof(__m128i) * S;
+        constexpr std::size_t nstride = S;
+        constexpr std::size_t rstride = cstride / sizeof(ResultType);
+
+        std::array<__m128i, S> s;
+        while (n >= nstride) {
+            MCKL_FLATTEN_CALL increment_si128(ctr, s);
+
+            MCKL_FLATTEN_CALL encfirst(s, rk);
+
+            MCKL_FLATTEN_CALL enc<0x1>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x2>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x3>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x4>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x5>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x6>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x7>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x8>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x9>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xA>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xB>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xC>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xD>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xE>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xF>(s, rk);
+
+            round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
+
+            MCKL_FLATTEN_CALL enclast(s, rk);
+
+            std::memcpy(r, s.data(), cstride);
+            n -= nstride;
+            r += rstride;
+        }
+
+        alignas(32) union {
+            std::array<std::array<std::uint32_t, 4>, nstride> state;
+            std::array<Counter<std::uint32_t, 4>, nstride> ctr;
+        } buf;
+        for (std::size_t i = 0; i != n; ++i) {
+            MCKL_FLATTEN_CALL increment(ctr);
+            buf.ctr[i] = ctr;
+            eval(buf.state[i], rk);
+        }
+        std::memcpy(r, buf.state.data(), sizeof(std::uint32_t) * 4 * n);
     }
 
     private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
-
-    template <typename ResultType>
-    static void eval_dispatch(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        ResultType *r, std::false_type)
-    {
-        MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(8)
-        MCKL_RANDOM_INTERNAL_AES_AESNI_REMAINDER
-    }
-
-    template <typename ResultType>
-    static void eval_dispatch(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        ResultType *r, std::true_type)
-    {
-        MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(16)
-        MCKL_RANDOM_INTERNAL_AES_AESNI_BATCH(8)
-        MCKL_RANDOM_INTERNAL_AES_AESNI_REMAINDER
-    }
 
     template <std::size_t>
     static void round(
