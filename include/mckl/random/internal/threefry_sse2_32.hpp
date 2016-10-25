@@ -50,10 +50,13 @@ namespace internal
 {
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
+class ThreefryGeneratorSSE2Impl32
 {
     public:
-    static constexpr bool batch() { return K != 0 && 16 % K == 0; }
+    static constexpr bool batch()
+    {
+        return std::numeric_limits<T>::digits == 32 && K != 0 && 16 % K == 0;
+    }
 
     static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
     {
@@ -402,7 +405,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
         ThreefryPBox<__m128i, K, N, Constants>::eval(s.data() + I * K);
         permute<N, I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
-}; // class ThreefryGeneratorImpl
+}; // class ThreefryGeneratorSSE2Impl32
 
 } // namespace mckl::internal
 

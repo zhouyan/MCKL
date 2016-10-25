@@ -352,13 +352,6 @@ class PhiloxGeneratorGenericImpl
     }
 }; // class PhiloxGeneratorGenericImpl
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
-    int = std::numeric_limits<T>::digits>
-class PhiloxGeneratorImpl
-    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
-{
-}; // class PhiloxGeneratorImpl
-
 } // namespace mckl::internal
 
 } // namespace mckl

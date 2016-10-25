@@ -50,10 +50,10 @@ namespace internal
 {
 
 template <std::size_t>
-class PhiloxGeneratorImplPermute32;
+class PhiloxGeneratorSSE2Impl32Permute;
 
 template <>
-class PhiloxGeneratorImplPermute32<2>
+class PhiloxGeneratorSSE2Impl32Permute<2>
 {
     public:
     template <std::size_t S>
@@ -86,10 +86,10 @@ class PhiloxGeneratorImplPermute32<2>
         std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
         std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
     }
-}; // class PhiloxGeneratorImplPermute32
+}; // class PhiloxGeneratorSSE2Impl32Permute
 
 template <>
-class PhiloxGeneratorImplPermute32<4>
+class PhiloxGeneratorSSE2Impl32Permute<4>
 {
     public:
     static void first(std::array<__m128i, 8> &s)
@@ -130,13 +130,16 @@ class PhiloxGeneratorImplPermute32<4>
         std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
         std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
     }
-}; // class PhiloxGeneratorImplPermute32
+}; // class PhiloxGeneratorSSE2Impl32Permute
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
+class PhiloxGeneratorSSE2Impl32
 {
     public:
-    static constexpr bool batch() { return K != 0 && 4 % K == 0; }
+    static constexpr bool batch()
+    {
+        return std::numeric_limits<T>::digits == 32 && K != 0 && 4 % K == 0;
+    }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
     {
@@ -158,7 +161,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si128(ctr, s);
 
-            MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::first(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::first(s);
 
             MCKL_FLATTEN_CALL rbox<0x0>(s, rk);
             MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
@@ -179,7 +182,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 
             round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
 
-            MCKL_FLATTEN_CALL PhiloxGeneratorImplPermute32<K>::last(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::last(s);
 
             std::memcpy(r, s.data(), cstride);
             n -= nstride;
@@ -323,9 +326,9 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
     template <std::size_t S>
     static void permute(std::array<__m128i, S> &s, std::true_type)
     {
-        PhiloxGeneratorImplPermute32<K>::round(s);
+        PhiloxGeneratorSSE2Impl32Permute<K>::round(s);
     }
-}; // class PhiloxGeneratorImpl
+}; // class PhiloxGeneratorSSE2Impl32
 
 } // namespace mckl::internal
 

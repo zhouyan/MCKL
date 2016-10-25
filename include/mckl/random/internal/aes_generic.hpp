@@ -41,7 +41,7 @@ namespace mckl
 namespace internal
 {
 
-class AES128KeySeqGenerator
+class AES128KeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -96,9 +96,9 @@ class AES128KeySeqGenerator
         std::get<N>(rk) = tmp0_;
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
-}; // class AES128KeySeqGenerator
+}; // class AES128KeySeqGeneratorGenericImpl
 
-class AES192KeySeqGenerator
+class AES192KeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 6>;
@@ -159,9 +159,9 @@ class AES192KeySeqGenerator
         std::get<N>(rk) = tmp0_;
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rs1>());
     }
-}; // class AES192KeySeqGenerator
+}; // class AES192KeySeqGeneratorGenericImpl
 
-class AES256KeySeqGenerator
+class AES256KeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 8>;
@@ -250,10 +250,10 @@ class AES256KeySeqGenerator
 
         std::get<N>(rk) = tmp1_;
     }
-}; // class AES256KeySeqGenerator
+}; // class AES256KeySeqGeneratorGenericImpl
 
 template <typename Constants>
-class ARSKeySeqGenerator
+class ARSKeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -304,10 +304,10 @@ class ARSKeySeqGenerator
         std::get<3>(std::get<N>(rk)) = static_cast<std::uint32_t>(k1 >> 32);
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
-}; // class ARSKeySeqGenerator
+}; // class ARSKeySeqGeneratorGenericImpl
 
 template <typename KeySeqType>
-class AESGeneratorImpl
+class AESGeneratorGenericImpl
 {
     public:
     static constexpr bool batch() { return false; }
@@ -434,7 +434,7 @@ class AESGeneratorImpl
 
         s = t;
     }
-}; // class AESGeneratorImpl
+}; // class AESGeneratorGenericImpl
 
 } // namespace mckl::internal
 

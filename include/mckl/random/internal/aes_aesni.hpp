@@ -315,7 +315,7 @@ MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFD, 0xE8)
 MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFE, 0xCB)
 MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFF, 0x8D)
 
-class AES128KeySeqGenerator
+class AES128KeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -371,9 +371,9 @@ class AES128KeySeqGenerator
         xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
         xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
-}; // class AES128KeySeqGenerator
+}; // class AES128KeySeqGeneratorAESNIImpl
 
-class AES192KeySeqGenerator
+class AES192KeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 6>;
@@ -498,9 +498,9 @@ class AES192KeySeqGenerator
         char *dst = reinterpret_cast<char *>(rk.data());
         std::memcpy(dst + 24, rk_ptr + 24, Rp1 * 16 - 24);
     }
-}; // class AES192KeySeqGenerator
+}; // class AES192KeySeqGeneratorAESNIImpl
 
-class AES256KeySeqGenerator
+class AES256KeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 8>;
@@ -588,10 +588,10 @@ class AES256KeySeqGenerator
         xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
         xmm3_ = _mm_xor_si128(xmm3_, xmm2_);    // pxor   xmm1, xmm2
     }
-}; // class AES256KeySeqGenerator
+}; // class AES256KeySeqGeneratorAESNIImpl
 
 template <typename Constants>
-class ARSKeySeqGenerator
+class ARSKeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -636,10 +636,10 @@ class ARSKeySeqGenerator
         std::get<N>(rk) = _mm_add_epi64(key_, w);
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
-}; // class ARSKeySeqGenerator
+}; // class ARSKeySeqGeneratorAESNIImpl
 
 template <typename KeySeqType>
-class AESGeneratorImpl
+class AESGeneratorAESNIImpl
 {
     public:
     static constexpr bool batch() { return true; }
@@ -926,7 +926,7 @@ class AESGeneratorImpl
         std::get<0xE>(s) = _mm_aesenclast_si128(std::get<0xE>(s), k);
         std::get<0xF>(s) = _mm_aesenclast_si128(std::get<0xF>(s), k);
     }
-}; // class AESGeneratorImpl
+}; // class AESGeneratorAESNIImpl
 
 } // namespace mckl::internal
 

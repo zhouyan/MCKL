@@ -34,13 +34,13 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_constants.hpp>
+#include <mckl/random/internal/aes_generic.hpp>
 #include <mckl/random/counter.hpp>
 #include <mckl/random/increment.hpp>
 
-#if MCKL_USE_AESNI
+#if MCKL_HAS_AESNI
 #include <mckl/random/internal/aes_aesni.hpp>
 #else
-#include <mckl/random/internal/aes_generic.hpp>
 #endif
 
 #ifdef MCKL_GCC
@@ -79,6 +79,32 @@ namespace mckl
 
 namespace internal
 {
+
+#if MCKL_USE_AESNI
+
+using AES128KeySeqGenerator = AES128KeySeqGeneratorAESNIImpl;
+using AES192KeySeqGenerator = AES192KeySeqGeneratorAESNIImpl;
+using AES256KeySeqGenerator = AES256KeySeqGeneratorAESNIImpl;
+
+template <typename Constants>
+using ARSKeySeqGenerator = ARSKeySeqGeneratorAESNIImpl<Constants>;
+
+template <typename KeySeqType>
+using AESGeneratorImpl = AESGeneratorAESNIImpl<KeySeqType>;
+
+#else // MCKL_USE_AESNI
+
+using AES128KeySeqGenerator = AES128KeySeqGeneratorGenericImpl;
+using AES192KeySeqGenerator = AES192KeySeqGeneratorGenericImpl;
+using AES256KeySeqGenerator = AES256KeySeqGeneratorGenericImpl;
+
+template <typename Constants>
+using ARSKeySeqGenerator = ARSKeySeqGeneratorGenericImpl<Constants>;
+
+template <typename KeySeqType>
+using AESGeneratorImpl = AESGeneratorGenericImpl<KeySeqType>;
+
+#endif // MCKL_USE_AESNI
 
 template <std::size_t Rounds, typename KeySeqGenerator>
 class AESKeySeqImpl

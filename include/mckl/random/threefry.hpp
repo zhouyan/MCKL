@@ -38,12 +38,14 @@
 #include <mckl/random/counter.hpp>
 #include <mckl/random/increment.hpp>
 
-#if MCKL_USE_AVX2
-#include <mckl/random/internal/threefry_avx2_32.hpp>
-#include <mckl/random/internal/threefry_avx2_64.hpp>
-#elif MCKL_USE_SSE2
+#if MCKL_HAS_SSE2
 #include <mckl/random/internal/threefry_sse2_32.hpp>
 #include <mckl/random/internal/threefry_sse2_64.hpp>
+#endif
+
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/threefry_avx2_32.hpp>
+#include <mckl/random/internal/threefry_avx2_64.hpp>
 #endif
 
 /// \brief ThreefryGenerator default rounds
@@ -54,6 +56,48 @@
 
 namespace mckl
 {
+
+namespace internal
+{
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    int = std::numeric_limits<T>::digits>
+class ThreefryGeneratorImpl
+    : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+#if MCKL_USE_AVX2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public ThreefryGeneratorAVX2Impl32<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
+    : public ThreefryGeneratorAVX2Impl64<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+#elif MCKL_USE_SSE2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public ThreefryGeneratorSSE2Impl32<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
+    : public ThreefryGeneratorSSE2Impl64<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+#endif // MCKL_USE_AVX2
+
+} // namespace internal
 
 /// \brief Threefry RNG generator
 /// \ingroup Threefry

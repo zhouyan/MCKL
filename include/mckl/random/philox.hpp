@@ -38,10 +38,12 @@
 #include <mckl/random/counter.hpp>
 #include <mckl/random/increment.hpp>
 
-#if MCKL_USE_AVX2
-#include <mckl/random/internal/philox_avx2_32.hpp>
-#elif MCKL_USE_SSE2
+#if MCKL_HAS_SSE2
 #include <mckl/random/internal/philox_sse2_32.hpp>
+#endif
+
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/philox_avx2_32.hpp>
 #endif
 
 /// \brief PhiloxGenerator default rounds
@@ -52,6 +54,36 @@
 
 namespace mckl
 {
+
+namespace internal
+{
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    int = std::numeric_limits<T>::digits>
+class PhiloxGeneratorImpl
+    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorImpl
+
+#if MCKL_USE_AVX2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public PhiloxGeneratorAVX2Impl32<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorImpl
+
+#elif MCKL_USE_SSE2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public PhiloxGeneratorSSE2Impl32<T, K, Rounds, Constants>
+{
+}; // class PhiloxGeneratorImpl
+
+#endif // MCKL_USE_AVX2
+
+} // namespace internal
 
 /// \brief Philox RNG generator
 /// \ingroup Philox
