@@ -1,8 +1,4 @@
-Weibull<float>(1,1)                 363.53       57.90       13.91       12.96 SVML       --Passed
-Weibull<double>(1,1)                426.54       79.09       24.17       20.71 SVML       --Passed
-Weibull<float>(1,1)                  23.99       11.28        3.78        3.61 PVML       --Passed
-Weibull<double>(1,1)                 35.08       14.24        6.47        5.42 PVML       --Passed
-Weibull<float>(1,1)                 362.01       57.87       14.15       12.97 SCPP       --Passed
-Weibull<double>(1,1)                426.52       79.00       26.79       20.67 SCPP       --Passed
-Weibull<float>(1,1)                  24.39       11.38        4.77        3.59 PCPP       --Passed
-Weibull<double>(1,1)                 36.49       14.27        7.81        5.44 PCPP       --Passed
+Weibull<float>(1,1)                 373.12       72.85       13.80       12.99  VML       --Passed
+Weibull<double>(1,1)                450.89       97.22       24.45       20.64  VML       --Passed
+Weibull<float>(1,1)                 372.11       73.70       14.00       12.97  C++       --Passed
+Weibull<double>(1,1)                450.79       90.31       26.99       20.76  C++       --Passed

@@ -1,8 +1,4 @@
-UniformReal<float>(-0.5,0.5)         29.31       27.80        9.64        7.42 SVML       --Passed
-UniformReal<double>(-0.5,0.5)        59.87       29.16       12.13        8.57 SVML       --Passed
-UniformReal<float>(-0.5,0.5)          5.42        5.03        3.15        2.32 PVML       --Passed
-UniformReal<double>(-0.5,0.5)         9.79        5.02        3.62        2.60 PVML       --Passed
-UniformReal<float>(-0.5,0.5)         29.29       27.78        9.65        7.40 SCPP       --Passed
-UniformReal<double>(-0.5,0.5)        59.78       29.09       12.18        8.53 SCPP       --Passed
-UniformReal<float>(-0.5,0.5)          5.40        4.93        3.12        2.28 PCPP       --Passed
-UniformReal<double>(-0.5,0.5)         9.65        5.01        3.62        2.60 PCPP       --Passed
+UniformReal<float>(-0.5,0.5)         37.08       33.66        9.34        7.42  VML       --Passed
+UniformReal<double>(-0.5,0.5)        73.03       35.15       12.00        8.50  VML       --Passed
+UniformReal<float>(-0.5,0.5)         37.65       33.70        9.25        7.41  C++       --Passed
+UniformReal<double>(-0.5,0.5)        72.88       35.11       11.93        8.52  C++       --Passed
