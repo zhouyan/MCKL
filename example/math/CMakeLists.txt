@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/CMakeLists.txt
+#  MCKL/example/math/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,46 +29,8 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample CXX)
+PROJECT(MCKLExample-math CXX)
 
-IF(CMAKE_CROSSCOMPILING)
-    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=1)
-ELSE(CMAKE_CROSSCOMPILING)
-    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=0)
-ENDIF(CMAKE_CROSSCOMPILING)
+MCKL_ADD_EXAMPLE(math)
 
-ADD_DEFINITIONS(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
-
-##############################################################################
-# Check examples
-##############################################################################
-
-SET(EXAMPLES ${EXAMPLES} "mckl")
-ADD_SUBDIRECTORY(mckl)
-
-SET(EXAMPLES ${EXAMPLES} "gmm")
-ADD_SUBDIRECTORY(gmm)
-
-SET(EXAMPLES ${EXAMPLES} "math")
-ADD_SUBDIRECTORY(math)
-
-SET(EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY(pf)
-
-SET(EXAMPLES ${EXAMPLES} "random")
-ADD_SUBDIRECTORY(random)
-
-SET(EXAMPLES ${EXAMPLES} "resample")
-ADD_SUBDIRECTORY(resample)
-
-SET(EXAMPLES ${EXAMPLES} "utility")
-ADD_SUBDIRECTORY(utility)
-
-##############################################################################
-# Enable examples
-##############################################################################
-
-MESSAGE(STATUS "=================== Examples ==========================")
-FOREACH(example ${EXAMPLES})
-    MESSAGE(STATUS ${example})
-ENDFOREACH(example ${EXAMPLES})
+MCKL_ADD_TEST(math vmath)

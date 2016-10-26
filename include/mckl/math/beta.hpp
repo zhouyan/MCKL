@@ -176,7 +176,7 @@ inline double betaiinv(double a, double b, double y)
         double u = std::exp(b * lnb) / b;
         double w = t + u;
         x = y < t / w ? std::pow(a * w * y, 1 / a) :
-                        1 - pow(b * w * (1 - y), 1 / b);
+                        1 - std::pow(b * w * (1 - y), 1 / b);
     }
     double afac = -std::lgamma(a) - std::lgamma(b) + std::lgamma(a + b);
     for (int i = 0; i != 10; ++i) {
