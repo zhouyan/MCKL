@@ -201,7 +201,7 @@ class ThreefryGeneratorAVX2Impl64
         const std::array<T, K + 4> &par, std::true_type)
     {
         std::array<__m256i, K> k;
-        set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
+        set_key<N>(k, par);
 
         std::get<0>(s) = _mm256_add_epi64(std::get<0>(s), std::get<0 % K>(k));
         std::get<1>(s) = _mm256_add_epi64(std::get<1>(s), std::get<1 % K>(k));
@@ -218,7 +218,7 @@ class ThreefryGeneratorAVX2Impl64
         const std::array<T, K + 4> &par, std::true_type)
     {
         std::array<__m256i, K> k;
-        set_key<N, 0>(k, par, std::integral_constant<bool, 0 < K>());
+        set_key<N>(k, par);
 
         std::get<0x0>(s) =
             _mm256_add_epi64(std::get<0x0>(s), std::get<0x0 % K>(k));
@@ -389,19 +389,86 @@ class ThreefryGeneratorAVX2Impl64
         permute<N>(s);
     }
 
-    template <std::size_t, std::size_t>
-    static void set_key(std::array<__m256i, K> &, const std::array<T, K + 4> &,
-        std::false_type)
+    template <std::size_t N>
+    static void set_key(std::array<__m256i, 2> &k, const std::array<T, 6> &par)
     {
+        std::get<0>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 2, N, Constants>::template key<0>(par)));
+        std::get<1>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 2, N, Constants>::template key<1>(par)));
     }
 
-    template <std::size_t N, std::size_t I>
-    static void set_key(std::array<__m256i, K> &k,
-        const std::array<T, K + 4> &par, std::true_type)
+    template <std::size_t N>
+    static void set_key(std::array<__m256i, 4> &k, const std::array<T, 8> &par)
     {
-        std::get<I>(k) = _mm256_set1_epi64x(static_cast<MCKL_INT64>(
-            ThreefryKBox<T, K, N, Constants>::template key<I>(par)));
-        set_key<N, I + 1>(k, par, std::integral_constant<bool, I + 1 < K>());
+        std::get<0>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 4, N, Constants>::template key<0>(par)));
+        std::get<1>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 4, N, Constants>::template key<1>(par)));
+        std::get<2>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 4, N, Constants>::template key<2>(par)));
+        std::get<3>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 4, N, Constants>::template key<3>(par)));
+    }
+
+    template <std::size_t N>
+    static void set_key(
+        std::array<__m256i, 8> &k, const std::array<T, 12> &par)
+    {
+        std::get<0>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<0>(par)));
+        std::get<1>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<1>(par)));
+        std::get<2>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<2>(par)));
+        std::get<3>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<3>(par)));
+        std::get<4>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<4>(par)));
+        std::get<5>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<5>(par)));
+        std::get<6>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<6>(par)));
+        std::get<7>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 8, N, Constants>::template key<7>(par)));
+    }
+
+    template <std::size_t N>
+    static void set_key(
+        std::array<__m256i, 16> &k, const std::array<T, 20> &par)
+    {
+        std::get<0x0>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x0>(par)));
+        std::get<0x1>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x1>(par)));
+        std::get<0x2>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x2>(par)));
+        std::get<0x3>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x3>(par)));
+        std::get<0x4>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x4>(par)));
+        std::get<0x5>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x5>(par)));
+        std::get<0x6>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x6>(par)));
+        std::get<0x7>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x7>(par)));
+        std::get<0x8>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x8>(par)));
+        std::get<0x9>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0x9>(par)));
+        std::get<0xA>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0xA>(par)));
+        std::get<0xB>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0xB>(par)));
+        std::get<0xC>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0xC>(par)));
+        std::get<0xD>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0xD>(par)));
+        std::get<0xE>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0xE>(par)));
+        std::get<0xF>(k) = _mm256_set1_epi64x(static_cast<MKL_INT64>(
+            ThreefryKBox<T, 16, N, Constants>::template key<0xF>(par)));
     }
 
     template <std::size_t N, std::size_t S>
