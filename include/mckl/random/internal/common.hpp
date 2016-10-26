@@ -647,12 +647,7 @@
     void operator()(                                                          \
         RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
-        if (n < 100) {                                                        \
-            for (std::size_t i = 0; i != n; ++i)                              \
-                r[i] = operator()(rng, param);                                \
-        } else {                                                              \
-            ::mckl::internal::name##_distribution(rng, n, r, param);          \
-        }                                                                     \
+        ::mckl::internal::name##_distribution(rng, n, r, param);              \
     }                                                                         \
                                                                               \
     friend bool operator==(                                                   \
