@@ -219,7 +219,7 @@ struct RandomRNGPerf {
     bool pass;
     double c1;
     double c2;
-};
+}; // struct RandomRNGPerf
 
 template <typename RNGType>
 inline bool random_rng_d(std::size_t N, std::size_t M)
