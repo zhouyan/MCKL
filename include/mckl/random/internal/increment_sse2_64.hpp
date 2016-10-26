@@ -67,9 +67,9 @@ inline void increment_si128(
 {
     constexpr T blocks = (sizeof(__m128i) * S) / (sizeof(T) * K);
 
-    if (ctr.front() < std::numeric_limits<T>::max() - blocks) {
+    if (std::get<0>(ctr) < std::numeric_limits<T>::max() - blocks) {
         IncrementBlockSI128<T, K, blocks>::eval(ctr, s);
-        ctr.front() += blocks;
+        std::get<0>(ctr) += blocks;
     } else {
         increment_si128(ctr, s, std::false_type());
     }
