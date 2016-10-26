@@ -58,14 +58,6 @@ class PhiloxConstantsWeyl<T, 4, 32>
 }; // class PhiloxConstantsWeyl
 
 template <typename T>
-class PhiloxConstantsWeyl<T, 8, 32>
-{
-    public:
-    static constexpr T value[4] = {// FIXME
-        0x9E3779B9, 0xBB67AE85, 0xBF0A8B14, 0xB7E15162};
-}; // class PhiloxConstantsWeyl
-
-template <typename T>
 class PhiloxConstantsWeyl<T, 2, 64>
 {
     public:
@@ -94,14 +86,6 @@ class PhiloxConstantsMultiplier<T, 4, 32>
 {
     public:
     static constexpr T value[2] = {0xCD9E8D57, 0xD2511F53};
-}; // class PhiloxConstantsMultiplier
-
-template <typename T>
-class PhiloxConstantsMultiplier<T, 8, 32>
-{
-    public:
-    static constexpr T value[4] = {// FIXME
-        0xCD9E8D57, 0xD2511F53, 0xCD9E8D57, 0xD2511F53};
 }; // class PhiloxConstantsMultiplier
 
 template <typename T>

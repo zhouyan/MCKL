@@ -289,47 +289,17 @@ class PhiloxSBox<T, 4, N, Constants>
     public:
     static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
     {
-        constexpr T m0 = Constants::multiplier::value[0];
-        constexpr T m2 = Constants::multiplier::value[1];
+        constexpr T m2 = Constants::multiplier::value[0];
+        constexpr T m0 = Constants::multiplier::value[1];
 
         T x1 = std::get<1>(state);
         T x3 = std::get<3>(state);
         T hi0;
         T hi2;
-        std::get<1>(state) = PhiloxHiLo<T>::eval(std::get<2>(state), m0, hi0);
-        std::get<3>(state) = PhiloxHiLo<T>::eval(std::get<0>(state), m2, hi2);
-        std::get<0>(state) = std::get<0>(par) ^ x1 ^ hi0;
-        std::get<2>(state) = std::get<1>(par) ^ x3 ^ hi2;
-    }
-}; // class PhiloxSBox
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxSBox<T, 8, N, Constants>
-{
-    public:
-    static void eval(std::array<T, 8> &state, const std::array<T, 4> &par)
-    {
-        constexpr T m0 = Constants::multiplier::value[0];
-        constexpr T m2 = Constants::multiplier::value[1];
-        constexpr T m4 = Constants::multiplier::value[2];
-        constexpr T m6 = Constants::multiplier::value[3];
-
-        T x1 = std::get<1>(state);
-        T x3 = std::get<3>(state);
-        T x5 = std::get<5>(state);
-        T x7 = std::get<7>(state);
-        T hi0;
-        T hi2;
-        T hi4;
-        T hi6;
-        std::get<1>(state) = PhiloxHiLo<T>::eval(std::get<4>(state), m0, hi0);
-        std::get<3>(state) = PhiloxHiLo<T>::eval(std::get<2>(state), m2, hi2);
-        std::get<5>(state) = PhiloxHiLo<T>::eval(std::get<0>(state), m4, hi4);
-        std::get<7>(state) = PhiloxHiLo<T>::eval(std::get<6>(state), m6, hi6);
-        std::get<0>(state) = std::get<0>(par) ^ x7 ^ hi0;
-        std::get<2>(state) = std::get<1>(par) ^ x1 ^ hi2;
-        std::get<4>(state) = std::get<2>(par) ^ x3 ^ hi4;
-        std::get<6>(state) = std::get<3>(par) ^ x5 ^ hi6;
+        std::get<1>(state) = PhiloxHiLo<T>::eval(std::get<2>(state), m2, hi2);
+        std::get<3>(state) = PhiloxHiLo<T>::eval(std::get<0>(state), m0, hi0);
+        std::get<0>(state) = std::get<0>(par) ^ x1 ^ hi2;
+        std::get<2>(state) = std::get<1>(par) ^ x3 ^ hi0;
     }
 }; // class PhiloxSBox
 
@@ -376,13 +346,6 @@ class PhiloxPBox<T, 4, N, Constants>
 {
     public:
     static void eval(std::array<T, 4> &) {}
-}; // class PhiloxPBox
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxPBox<T, 8, N, Constants>
-{
-    public:
-    static void eval(std::array<T, 8> &) {}
 }; // class PhiloxPBox
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>

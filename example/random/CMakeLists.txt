@@ -98,7 +98,6 @@ SET(MCKL_RNG_PHILOX_NAMESPACE "mckl")
 SET(MCKL_RNG_PHILOX
     Philox2x32 Philox2x32_64
     Philox4x32 Philox4x32_64
-    Philox8x32 Philox8x32_64
     Philox2x64 Philox2x64_64
     Philox4x64 Philox4x64_64)
 
