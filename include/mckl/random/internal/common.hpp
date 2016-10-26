@@ -1294,8 +1294,17 @@ inline void student_t_distribution(
 template <typename RealType, typename RNGType>
 inline void u01_distribution(RNGType &, std::size_t, RealType *);
 
-template <typename, typename, typename RealType, typename RNGType>
-inline void u01_lr_distribution(RNGType &, std::size_t, RealType *);
+template <typename RealType, typename RNGType>
+inline void u01_cc_distribution(RNGType &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void u01_co_distribution(RNGType &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void u01_oc_distribution(RNGType &, std::size_t, RealType *);
+
+template <typename RealType, typename RNGType>
+inline void u01_oo_distribution(RNGType &, std::size_t, RealType *);
 
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &, std::size_t, UIntType *);
