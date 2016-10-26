@@ -189,7 +189,7 @@ class ThreefryGenerator
             std::array<ResultType, size() / sizeof(ResultType)> result;
         } buf;
 
-        MCKL_FLATTEN_CALL increment(ctr);
+        increment(ctr);
         buf.ctr = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         internal::union_le<typename ctr_type::value_type>(buf.state);

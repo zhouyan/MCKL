@@ -209,7 +209,7 @@ class StopWatchClockAdapter
     /// be incremented next time `stop()` is called. The increment will be
     /// relative to the time point of this call. `false` if it is already
     /// started earlier.
-    MCKL_FLATTEN bool start()
+    bool start()
     {
         if (running_)
             return false;
@@ -226,7 +226,7 @@ class StopWatchClockAdapter
     /// \return `true` if it is stoped by this call, and the elapsed time has
     /// been incremented. `false` if it is already stopped or wasn't started
     /// before.
-    MCKL_FLATTEN bool stop()
+    bool stop()
     {
         std::uint64_t c = internal::cycle_stop();
         typename clock_type::time_point t = clock_type::now();

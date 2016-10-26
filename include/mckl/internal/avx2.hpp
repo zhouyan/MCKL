@@ -51,7 +51,7 @@ namespace internal
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t I4, std::size_t I5, std::size_t I6, std::size_t I7,
     std::size_t N>
-MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
+inline void transpose8x32_si256(std::array<__m256i, N> &s)
 {
     __m256i t0 = _mm256_unpacklo_epi32(std::get<I0>(s), std::get<I1>(s));
     __m256i t1 = _mm256_unpacklo_epi32(std::get<I2>(s), std::get<I3>(s));
@@ -79,17 +79,17 @@ MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
     std::get<I7>(s) = _mm256_permute2x128_si256(tE, tF, 0x31);
 }
 
-MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 8> &s)
+inline void transpose8x32_load_si256(std::array<__m256i, 8> &s)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
+inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
+inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
 {
     __m256i t0 = std::get<0x1>(s);
     std::get<0x1>(s) = std::get<0x2>(s);
@@ -117,7 +117,7 @@ MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 }
 
-MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
+inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
 {
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
@@ -147,7 +147,7 @@ MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t N>
-MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
+inline void transpose4x64_si256(std::array<__m256i, N> &s)
 {
     __m256i t0 = _mm256_unpacklo_epi64(std::get<I0>(s), std::get<I1>(s));
     __m256i t1 = _mm256_unpacklo_epi64(std::get<I2>(s), std::get<I3>(s));
@@ -159,17 +159,17 @@ MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
     std::get<I3>(s) = _mm256_permute2x128_si256(t2, t3, 0x31);
 }
 
-MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 4> &s)
+inline void transpose4x64_load_si256(std::array<__m256i, 4> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
+inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
+inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
 {
     __m256i t0 = std::get<1>(s);
     std::get<1>(s) = std::get<2>(s);
@@ -185,7 +185,7 @@ MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
     transpose4x64_si256<4, 5, 6, 7>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
+inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
@@ -201,7 +201,7 @@ MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
     std::get<5>(s) = t1;
 }
 
-MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
+inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
 {
     std::swap(std::get<0x1>(s), std::get<0x4>(s));
     std::swap(std::get<0x2>(s), std::get<0x8>(s));
@@ -216,7 +216,7 @@ MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
     transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
+inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
 {
     transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);

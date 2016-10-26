@@ -53,8 +53,7 @@ class IncrementBlockSI256<T, 1, 16, 64>
     static constexpr std::size_t K_ = 1;
 
     public:
-    MCKL_FLATTEN static void eval(
-        const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
         __m256i a0 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
@@ -76,8 +75,7 @@ class IncrementBlockSI256<T, 2, 8, 64>
     static constexpr std::size_t K_ = 2;
 
     public:
-    MCKL_FLATTEN static void eval(
-        const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
         __m256i a0 =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
@@ -98,8 +96,7 @@ class IncrementBlockSI256<T, 4, 4, 64>
     static constexpr std::size_t K_ = 4;
 
     public:
-    MCKL_FLATTEN static void eval(
-        const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
         __m256i a0 =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
@@ -120,8 +117,7 @@ class IncrementBlockSI256<T, 8, 2, 64>
     static constexpr std::size_t K_ = 8;
 
     public:
-    MCKL_FLATTEN static void eval(
-        const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
         __m256i a0 =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
@@ -146,8 +142,7 @@ class IncrementBlockSI256<T, 16, 1, 64>
     static constexpr std::size_t K_ = 16;
 
     public:
-    MCKL_FLATTEN static void eval(
-        const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
         std::memcpy(s.data(), ctr.data(), 128);
         std::get<0>(s) =

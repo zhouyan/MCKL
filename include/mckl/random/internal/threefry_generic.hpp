@@ -173,10 +173,17 @@ class ThreefryPBox<T, 4, N, ThreefryConstants<U, 4>>
     public:
     static void eval(std::array<T, 4> &state)
     {
-        std::swap(std::get<1>(state), std::get<3>(state));
+        T s1 = std::get<1>(state);
+        std::get<1>(state) = std::get<3>(state);
+        std::get<3>(state) = s1;
     }
 
-    static void eval(T *state) { std::swap(state[1], state[3]); }
+    static void eval(T *state)
+    {
+        T s1 = state[1];
+        state[1] = state[3];
+        state[3] = s1;
+    }
 }; // class ThreefryPBox
 
 template <typename T, typename U, std::size_t N>
