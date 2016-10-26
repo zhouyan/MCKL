@@ -146,8 +146,9 @@ IF(RDRAND_FOUND)
 ENDIF(RDRAND_FOUND)
 
 SET(MCKL_DISTRIBUTION Arcsine Beta Cauchy ChiSquared Exponential ExtremeValue
-    FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto
-    Rayleigh Stable StudentT U01 UniformReal Weibull Geometric UniformInt)
+    FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto Rayleigh Stable
+    StudentT U01 U01CC U01CO U01OC U01OO UniformReal Weibull Geometric
+    UniformInt)
 
 ADD_CUSTOM_TARGET(librandom_rng_u01)
 ADD_CUSTOM_TARGET(librandom_rng_ubits)
@@ -181,11 +182,17 @@ ADD_CUSTOM_TARGET(random_distribution-check)
 FOREACH(Dist ${MCKL_DISTRIBUTION})
     SET(DistName ${Dist})
     SET(DistType ::mckl::${Dist}Distribution)
-    STRING(REGEX REPLACE "([A-Z])" "_\\1" Dist ${Dist})
-    STRING(REGEX REPLACE "^_" "" Dist ${Dist})
-    STRING(TOLOWER ${Dist} distname)
-    STRING(TOUPPER ${Dist} DISTNAME)
-    SET(DistHeader "mckl/random/${distname}_distribution.hpp")
+    IF(${DistName} MATCHES "U01")
+        STRING(TOLOWER ${Dist} distname)
+        STRING(TOUPPER ${Dist} DISTNAME)
+        SET(DistHeader "mckl/random/u01_distribution.hpp")
+    ELSE(${DistName} MATCHES "U01")
+        STRING(REGEX REPLACE "([A-Z])" "_\\1" Dist ${Dist})
+        STRING(REGEX REPLACE "^_" "" Dist ${Dist})
+        STRING(TOLOWER ${Dist} distname)
+        STRING(TOUPPER ${Dist} DISTNAME)
+        SET(DistHeader "mckl/random/${distname}_distribution.hpp")
+    ENDIF(${DistName} MATCHES "U01")
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_distribution.cpp.in
         ${PROJECT_BINARY_DIR}/src/random_distribution_${distname}.cpp)
     MCKL_ADD_TEST(random distribution_${distname} "BIN")

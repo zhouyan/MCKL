@@ -110,6 +110,22 @@
 #define MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION 0
 #endif
 
+#ifndef MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION 0
+#endif
+
 #ifndef MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
 #define MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION 0
 #endif
@@ -1037,6 +1053,130 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
 }; // class RandomDistributionTrait
 
 #endif // MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01CCDistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01CCDistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    std::string distname() const { return "U01CC"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01CODistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01CODistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    std::string distname() const { return "U01CO"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01OCDistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01OCDistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    std::string distname() const { return "U01OC"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01OODistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01OODistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    std::string distname() const { return "U01OO"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION
 
 #if MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
 
