@@ -132,13 +132,57 @@ class PhiloxGeneratorAVX2Impl32Permute<4>
     }
 }; // class PhiloxGeneratorAVX2Impl32Permute
 
+template <>
+class PhiloxGeneratorAVX2Impl32Permute<8>
+{
+    public:
+    static void first(std::array<__m256i, 8> &s)
+    {
+        const __m256i idx = _mm256_set_epi32(5, 6, 3, 0, 1, 2, 7, 4);
+        std::get<0>(s) = _mm256_permutevar8x32_epi32(std::get<0>(s), idx);
+        std::get<1>(s) = _mm256_permutevar8x32_epi32(std::get<1>(s), idx);
+        std::get<2>(s) = _mm256_permutevar8x32_epi32(std::get<2>(s), idx);
+        std::get<3>(s) = _mm256_permutevar8x32_epi32(std::get<3>(s), idx);
+        std::get<4>(s) = _mm256_permutevar8x32_epi32(std::get<4>(s), idx);
+        std::get<5>(s) = _mm256_permutevar8x32_epi32(std::get<5>(s), idx);
+        std::get<6>(s) = _mm256_permutevar8x32_epi32(std::get<6>(s), idx);
+        std::get<7>(s) = _mm256_permutevar8x32_epi32(std::get<7>(s), idx);
+    }
+
+    static void round(std::array<__m256i, 8> &s)
+    {
+        const __m256i idx = _mm256_set_epi32(4, 7, 2, 1, 0, 3, 6, 5);
+        std::get<0>(s) = _mm256_permutevar8x32_epi32(std::get<0>(s), idx);
+        std::get<1>(s) = _mm256_permutevar8x32_epi32(std::get<1>(s), idx);
+        std::get<2>(s) = _mm256_permutevar8x32_epi32(std::get<2>(s), idx);
+        std::get<3>(s) = _mm256_permutevar8x32_epi32(std::get<3>(s), idx);
+        std::get<4>(s) = _mm256_permutevar8x32_epi32(std::get<4>(s), idx);
+        std::get<5>(s) = _mm256_permutevar8x32_epi32(std::get<5>(s), idx);
+        std::get<6>(s) = _mm256_permutevar8x32_epi32(std::get<6>(s), idx);
+        std::get<7>(s) = _mm256_permutevar8x32_epi32(std::get<7>(s), idx);
+    }
+
+    static void last(std::array<__m256i, 8> &s)
+    {
+        // 2 3 0 1
+        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xB1);
+        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xB1);
+        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xB1);
+        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xB1);
+        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xB1);
+        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xB1);
+        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xB1);
+        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xB1);
+    }
+}; // class PhiloxGeneratorAVX2Impl32Permute
+
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorAVX2Impl32
 {
     public:
     static constexpr bool batch()
     {
-        return std::numeric_limits<T>::digits == 32 && K != 0 && 4 % K == 0;
+        return std::numeric_limits<T>::digits == 32 && K != 0 && 8 % K == 0;
     }
 
     static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)

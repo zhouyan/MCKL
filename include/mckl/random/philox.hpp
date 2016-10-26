@@ -251,6 +251,11 @@ using Philox2x32Engine = PhiloxEngine<ResultType, std::uint32_t, 2>;
 template <typename ResultType>
 using Philox4x32Engine = PhiloxEngine<ResultType, std::uint32_t, 4>;
 
+/// \brief Philox8x32 RNG engine
+/// \ingroup Philox
+template <typename ResultType>
+using Philox8x32Engine = PhiloxEngine<ResultType, std::uint32_t, 8>;
+
 /// \brief Philox2x64 RNG engine
 /// \ingroup Philox
 template <typename ResultType>
@@ -269,6 +274,10 @@ using Philox2x32 = Philox2x32Engine<std::uint32_t>;
 /// \ingroup Philox
 using Philox4x32 = Philox4x32Engine<std::uint32_t>;
 
+/// \brief Philox8x32 RNG engine with 32-bit integer output
+/// \ingroup Philox
+using Philox8x32 = Philox8x32Engine<std::uint32_t>;
+
 /// \brief Philox2x64 RNG engine with 32-bit integer output
 /// \ingroup Philox
 using Philox2x64 = Philox2x64Engine<std::uint32_t>;
@@ -284,6 +293,10 @@ using Philox2x32_64 = Philox2x32Engine<std::uint64_t>;
 /// \brief Philox4x32 RNG engine with 64-bit integer output
 /// \ingroup Philox
 using Philox4x32_64 = Philox4x32Engine<std::uint64_t>;
+
+/// \brief Philox8x32 RNG engine with 64-bit integer output
+/// \ingroup Philox
+using Philox8x32_64 = Philox8x32Engine<std::uint64_t>;
 
 /// \brief Philox2x64 RNG engine with 64-bit integer output
 /// \ingroup Philox
