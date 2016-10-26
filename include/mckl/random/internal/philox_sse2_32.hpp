@@ -287,9 +287,8 @@ class PhiloxGeneratorSSE2Impl32
     {
         const int k0 = static_cast<int>(std::get<0 % (K / 2)>(key));
         const int k1 = static_cast<int>(std::get<1 % (K / 2)>(key));
-        const __m128i k = _mm_set_epi32(k1, 0, k0, 0);
 
-        set_key<0>(rk, k, std::true_type());
+        set_key<0>(rk, _mm_set_epi32(k1, 0, k0, 0), std::true_type());
     }
 
     template <std::size_t>
@@ -306,9 +305,8 @@ class PhiloxGeneratorSSE2Impl32
             static_cast<int>(Constants::weyl::value[0 % (K / 2)] * N);
         constexpr int w1 =
             static_cast<int>(Constants::weyl::value[1 % (K / 2)] * N);
-        const __m128i w = _mm_set_epi32(w1, 0, w0, 0);
 
-        std::get<N>(rk) = _mm_add_epi32(k, w);
+        std::get<N>(rk) = _mm_add_epi32(k, _mm_set_epi32(w1, 0, w0, 0));
         set_key<N + 1>(rk, k, std::integral_constant<bool, N + 1 < Rounds>());
     }
 

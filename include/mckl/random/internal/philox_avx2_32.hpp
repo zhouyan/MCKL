@@ -293,9 +293,9 @@ class PhiloxGeneratorAVX2Impl32
         const int k1 = static_cast<int>(std::get<1 % (K / 2)>(key));
         const int k2 = static_cast<int>(std::get<2 % (K / 2)>(key));
         const int k3 = static_cast<int>(std::get<3 % (K / 2)>(key));
-        const __m256i k = _mm256_set_epi32(k3, 0, k2, 0, k1, 0, k0, 0);
 
-        set_key<0>(rk, k, std::true_type());
+        set_key<0>(rk, _mm256_set_epi32(k3, 0, k2, 0, k1, 0, k0, 0),
+            std::true_type());
     }
 
     template <std::size_t>
@@ -316,9 +316,9 @@ class PhiloxGeneratorAVX2Impl32
             static_cast<int>(Constants::weyl::value[2 % (K / 2)] * N);
         constexpr int w3 =
             static_cast<int>(Constants::weyl::value[3 % (K / 2)] * N);
-        const __m256i w = _mm256_set_epi32(w3, 0, w2, 0, w1, 0, w0, 0);
 
-        std::get<N>(rk) = _mm256_add_epi32(k, w);
+        std::get<N>(rk) =
+            _mm256_add_epi32(k, _mm256_set_epi32(w3, 0, w2, 0, w1, 0, w0, 0));
         set_key<N + 1>(rk, k, std::integral_constant<bool, N + 1 < Rounds>());
     }
 

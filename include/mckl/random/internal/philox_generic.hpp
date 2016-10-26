@@ -48,7 +48,7 @@ template <typename T>
 class PhiloxHiLo<T, 32>
 {
     public:
-    static void eval(T a, T b, T &hi, T &lo)
+    static T eval(T a, T b, T &hi)
     {
         union {
             std::uint64_t prod;
@@ -57,12 +57,19 @@ class PhiloxHiLo<T, 32>
 
         buf.prod =
             static_cast<std::uint64_t>(a) * static_cast<std::uint64_t>(b);
+
 #if MCKL_HAS_LITTLE_ENDIAN
-        lo = std::get<0>(buf.result);
         hi = std::get<1>(buf.result);
+
+        return std::get<0>(buf.result);
+#elif MCKL_HAS_BIG_ENDIAN
+        hi = std::get<0>(buf.result);
+
+        return std::get<1>(buf.result);
 #else
-        lo = static_cast<T>(buf.prod);
-        hi = static_cast<T>(buf.prod >> 32);
+        a = static_cast<T>(buf.prod >> 32);
+
+        return static_cast<T>(buf.prod);
 #endif
     }
 }; // class PhiloxHiLo
@@ -71,14 +78,54 @@ template <typename T>
 class PhiloxHiLo<T, 64>
 {
     public:
-    static void eval(T a, T b, T &hi, T &lo)
+    static T eval(T a, T b, T &hi)
     {
-#if MCKL_USE_BMI2
-        unsigned MCKL_INT64 h = 0;
-        lo = static_cast<T>(_mulx_u64(static_cast<unsigned MCKL_INT64>(a),
-            static_cast<unsigned MCKL_INT64>(b), &h));
-        hi = static_cast<T>(h);
+#if MCKL_USE_BMI2 && MCKL_HAS_X86_64
+        return eval_bmi2(a, b, hi);
 #elif MCKL_HAS_INT128
+        return eval_int128(a, b, hi);
+#elif defined(MCKL_MSVC)
+        return eval_msvc(a, b, hi);
+#else
+        return eval_generic(a, b, hi);
+#endif
+    }
+
+    private:
+    static T eval_generic(T a, T b, T &hi)
+    {
+        const T mask = (const_one<T>() << 32) - 1;
+        const T ahi = a >> 32;
+        const T alo = a & mask;
+        const T bhi = b >> 32;
+        const T blo = b & mask;
+        const T ahbl = ahi * blo;
+        const T albh = alo * bhi;
+        const T ahbl_albh = ((ahbl & mask) + (albh & mask));
+        const T lo = a * b;
+        hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
+        hi += ahbl_albh >> 32;
+        hi += ((lo >> 32) < (ahbl_albh & mask));
+
+        return lo;
+    }
+
+#if MCKL_USE_BMI2 && MCKL_HAS_X86_64
+    static T eval_bmi2(T a, T b, T &hi)
+    {
+        unsigned MCKL_INT64 h = 0;
+        unsigned MCKL_INT64 l =
+            static_cast<T>(_mulx_u64(static_cast<unsigned MCKL_INT64>(a),
+                static_cast<unsigned MCKL_INT64>(b), &h));
+        hi = static_cast<T>(h);
+
+        return l;
+    }
+#endif
+
+#if MCKL_HAS_INT128
+    static T eval_int128(T a, T b, T &hi)
+    {
 #ifdef MCKL_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -94,34 +141,49 @@ class PhiloxHiLo<T, 64>
 #pragma GCC diagnostic pop
 #endif
 #if MCKL_HAS_LITTLE_ENDIAN
-        lo = std::get<0>(buf.result);
         hi = std::get<1>(buf.result);
+
+        return std::get<0>(buf.result);
+#elif MCKL_HAS_BIG_ENDIAN
+        hi = std::get<0>(buf.result);
+
+        return std::get<1>(buf.result);
 #else
-        lo = static_cast<T>(buf.prod);
         hi = static_cast<T>(buf.prod >> 64);
-#endif
-#elif defined(MCKL_MSVC)
-        unsigned __int64 Multiplier = static_cast<unsigned __int64>(a);
-        unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
-        unsigned __int64 hi_tmp = 0;
-        lo = static_cast<T>(_umul128(Multiplier, Multiplicand, &hi_tmp));
-        hi = static_cast<T>(hi_tmp);
-#else
-        const T lomask = (const_one<T>() << 32) - 1;
-        const T ahi = a >> 32;
-        const T alo = a & lomask;
-        const T bhi = b >> 32;
-        const T blo = b & lomask;
-        const T ahbl = ahi * blo;
-        const T albh = alo * bhi;
-        const T ahbl_albh = ((ahbl & lomask) + (albh & lomask));
-        lo = a * b;
-        hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
-        hi += ahbl_albh >> 32;
-        hi += ((lo >> 32) < (ahbl_albh & lomask));
+
+        return static_cast<T>(buf.prod);
 #endif
     }
+#endif
+
+#ifdef MCKL_MSVC
+    static T eval_msvc(T a, T b, T &hi)
+    {
+        unsigned __int64 Multiplier = static_cast<unsigned __int64>(a);
+        unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
+        unsigned __int64 h = 0;
+        unsigned __int64 l = _umul128(Multiplier, Multiplicand, &h);
+        hi = static_cast<T>(h);
+
+        return static_cast<T>(l);
+    }
+#endif
 }; // class PhiloxHiLo
+
+#if MCKL_USE_BMI2 && MCKL_HAS_X86_64
+
+template <>
+class PhiloxHiLo<unsigned MCKL_INT64, 64>
+{
+    public:
+    static unsigned MKL_INT64 eval(
+        unsigned MKL_INT64 a, unsigned MKL_INT64 b, unsigned MKL_INT64 &hi)
+    {
+        return _mulx_u64(a, b, &hi);
+    }
+}; // class PhiloxHiLo
+
+#endif // MCKL_USE_BMI2 && MCKL_HAS_X86_64
 
 template <typename T, std::size_t K, std::size_t N, typename Constants>
 class PhiloxKBox
@@ -196,10 +258,12 @@ class PhiloxSBox
     {
         constexpr T m = Constants::multiplier::value[I / 2];
 
-        T x = std::get<I + 1>(state) ^ std::get<I / 2>(par);
-        PhiloxHiLo<T>::eval(
-            std::get<I>(state), m, std::get<I>(state), std::get<I + 1>(state));
-        std::get<I>(state) ^= x;
+        T x = std::get<I + 1>(state);
+        T hi;
+        std::get<I + 1>(state) =
+            PhiloxHiLo<T>::eval(std::get<I>(state), m, hi);
+        std::get<I>(state) = std::get<I / 2>(par) ^ x ^ hi;
+
         eval<I + 2>(state, par, std::integral_constant<bool, I + 3 < K>());
     }
 }; // class PhiloxSBox
@@ -212,10 +276,10 @@ class PhiloxSBox<T, 2, N, Constants>
     {
         constexpr T m0 = Constants::multiplier::value[0];
 
-        T x = std::get<1>(state) ^ std::get<0>(par);
-        PhiloxHiLo<T>::eval(
-            std::get<0>(state), m0, std::get<0>(state), std::get<1>(state));
-        std::get<0>(state) ^= x;
+        T x1 = std::get<1>(state);
+        T hi0;
+        std::get<1>(state) = PhiloxHiLo<T>::eval(std::get<0>(state), m0, hi0);
+        std::get<0>(state) = std::get<0>(par) ^ x1 ^ hi0;
     }
 }; // class PhiloxSBox
 
@@ -225,17 +289,17 @@ class PhiloxSBox<T, 4, N, Constants>
     public:
     static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
     {
-        constexpr T m0 = Constants::multiplier::value[0];
-        constexpr T m2 = Constants::multiplier::value[1];
+        constexpr T m2 = Constants::multiplier::value[0];
+        constexpr T m0 = Constants::multiplier::value[1];
 
-        T x0 = std::get<1>(state) ^ std::get<0>(par);
-        T x2 = std::get<3>(state) ^ std::get<1>(par);
-        T hi0 = 0;
-        T hi2 = 0;
-        PhiloxHiLo<T>::eval(std::get<2>(state), m0, hi0, std::get<1>(state));
-        PhiloxHiLo<T>::eval(std::get<0>(state), m2, hi2, std::get<3>(state));
-        std::get<0>(state) = hi0 ^ x0;
-        std::get<2>(state) = hi2 ^ x2;
+        T x1 = std::get<1>(state);
+        T x3 = std::get<3>(state);
+        T hi0;
+        T hi2;
+        std::get<1>(state) = PhiloxHiLo<T>::eval(std::get<2>(state), m2, hi2);
+        std::get<3>(state) = PhiloxHiLo<T>::eval(std::get<0>(state), m0, hi0);
+        std::get<0>(state) = std::get<0>(par) ^ x1 ^ hi2;
+        std::get<2>(state) = std::get<1>(par) ^ x3 ^ hi0;
     }
 }; // class PhiloxSBox
 
