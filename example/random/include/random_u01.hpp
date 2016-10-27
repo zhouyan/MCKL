@@ -180,7 +180,9 @@ inline void random_u01(
             r2.resize(K);
             r3.resize(K);
 
-            mckl::rand(rng, K, ru.data());
+            mckl::rand(rng, K - 2, ru.data() + 2);
+            ru[0] = std::numeric_limits<UIntType>::min();
+            ru[1] = std::numeric_limits<UIntType>::max();
 
             watch1.start();
             for (std::size_t j = 0; j != K; ++j)
@@ -218,7 +220,6 @@ inline void random_u01(
         std::numeric_limits<UIntType>::max());
 
     RandomU01Perf result;
-
     result.pass_b = pass_b;
     result.pass_c = pass_c;
     result.pass_l = random_u01_check_lb<Lower>(l);

@@ -204,21 +204,6 @@ class U01GenericImpl<UIntType, RealType, Open, Open, W>
     }
 }; // class U01GenericImpl
 
-// #if MCKL_HAS_LITTLE_ENDIAN
-//
-// template <typename UIntType>
-// class U01GenericImpl<UIntType, double, Closed, Open, 32>
-// {
-//     public:
-//     static double eval(UIntType, u)
-//     {
-//     }
-// }; // class U01GenericImpl
-//
-// #elif MCKL_HAS_BIG_ENDIAN
-//
-// #endif // MCKL_HAS_LITTLE_ENDIAN
-
 } // namespace mckl::internal
 
 } // namespace mckl;

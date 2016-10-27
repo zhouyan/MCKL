@@ -248,7 +248,7 @@ class ARSKeySeqImpl
     key_type key_;
 }; // class ARSKeySeqImpl
 
-} // namespace mck::/internal
+} // namespace mck::internal
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AES
@@ -330,6 +330,38 @@ class AESGenerator
         generate(ctr, n, result,
             std::integral_constant<bool,
                 internal::AESGeneratorImpl<KeySeqType>::batch()>());
+    }
+
+    void u01_cc_u32(ctr_type &ctr, std::size_t n, double *result) const
+    {
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
+        internal::AESGeneratorImpl<KeySeqType>::u01_cc_u32(ctr, rk, n, result);
+    }
+
+    void u01_co_u32(ctr_type &ctr, std::size_t n, double *result) const
+    {
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
+        internal::AESGeneratorImpl<KeySeqType>::u01_co_u32(ctr, rk, n, result);
+    }
+
+    void u01_oc_u32(ctr_type &ctr, std::size_t n, double *result) const
+    {
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
+        internal::AESGeneratorImpl<KeySeqType>::u01_oc_u32(ctr, rk, n, result);
+    }
+
+    void u01_oo_u32(ctr_type &ctr, std::size_t n, double *result) const
+    {
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
+        internal::AESGeneratorImpl<KeySeqType>::u01_oo_u32(ctr, rk, n, result);
+    }
+
+    void uniform_real_u32(
+        ctr_type &ctr, std::size_t n, double *result, double a, double b) const
+    {
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
+        internal::AESGeneratorImpl<KeySeqType>::uniform_real_u32(
+            ctr, rk, n, result, a, b);
     }
 
     friend bool operator==(const AESGenerator<KeySeqType> &gen1,
@@ -480,7 +512,52 @@ using AES256_64 = AES256Engine<std::uint64_t>;
 /// \ingroup AES
 using ARS_64 = ARSEngine<std::uint64_t>;
 
-} // namespace internal
+#if MCKL_USE_AESNI && MCKL_USE_AVX2 && !MCKL_U01_USE_64BITS_DOUBLE
+
+namespace internal
+{
+
+template <typename KeySeqType>
+inline void u01_cc_distribution(
+    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
+{
+    rng.u01_cc_u32(n, r);
+}
+
+template <typename KeySeqType>
+inline void u01_co_distribution(
+    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
+{
+    rng.u01_co_u32(n, r);
+}
+
+template <typename KeySeqType>
+inline void u01_oc_distribution(
+    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
+{
+    rng.u01_oc_u32(n, r);
+}
+
+template <typename KeySeqType>
+inline void u01_oo_distribution(
+    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
+{
+    rng.u01_oo_u32(n, r);
+}
+
+template <typename KeySeqType>
+inline void uniform_real_distribution(
+    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r,
+    double a, double b)
+{
+    rng.uniform_real_u32(n, r, a, b);
+}
+
+} // namespace mckl::internal
+
+#endif // MCKL_USE_AESNI && MCKL_USE_AVX2 && !MCKL_U01_USE_64BITS_DOUBLE
+
+} // namespace mckl
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000

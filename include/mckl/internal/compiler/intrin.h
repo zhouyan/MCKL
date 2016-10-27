@@ -76,6 +76,10 @@
 #define MCKL_HAS_BMI2 MCKL_HAS_AVX2
 #endif
 
+#ifndef MCKL_HAS_FMA
+#define MCKL_HAS_FMA MCKL_HAS_AVX2
+#endif
+
 #ifndef MCKL_HAS_RDTSC
 #define MCKL_HAS_RDTSC MCKL_HAS_X86
 #endif
@@ -132,6 +136,10 @@
 #define MCKL_USE_BMI2 MCKL_HAS_BMI2
 #endif
 
+#ifndef MCKL_USE_FMA
+#define MCKL_USE_FMA MCKL_HAS_FMA
+#endif
+
 #ifndef MCKL_USE_RDTSC
 #define MCKL_USE_RDTSC MCKL_HAS_RDTSC
 #endif
@@ -160,7 +168,7 @@
 #include <nmmintrin.h>
 #endif
 #if MCKL_HAS_AVX || MCKL_HAS_AVX2 || MCKL_HAS_RDRAND || MCKL_HAS_BMI ||       \
-    MCKL_HAS_BMI2
+    MCKL_HAS_BMI2 || MCKL_HAS_FMA
 #include <immintrin.h>
 #endif
 #if MCKL_HAS_AESNI

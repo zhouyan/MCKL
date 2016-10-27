@@ -35,6 +35,10 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/increment.hpp>
 
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/u01_avx2.hpp>
+#endif
+
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
@@ -729,8 +733,114 @@ class AESGeneratorAESNIImpl
         std::memcpy(r, buf.state.data(), sizeof(std::uint32_t) * 4 * n);
     }
 
+#if MCKL_HAS_AVX2
+
+    static void u01_cc_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        double *r)
+    {
+        eval_u01_u32<8, U01AVX2Impl<std::uint32_t, double, Closed, Closed>>(
+            ctr, rk, n, r);
+    }
+
+    static void u01_co_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        double *r)
+    {
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, double, Closed, Open>>(
+            ctr, rk, n, r);
+    }
+
+    static void u01_oc_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        double *r)
+    {
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, double, Open, Closed>>(
+            ctr, rk, n, r);
+    }
+
+    static void u01_oo_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        double *r)
+    {
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, double, Open, Open>>(
+            ctr, rk, n, r);
+    }
+
+    static void uniform_real_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        double *r, double a, double b)
+    {
+        eval_u01_u32<0, UniformRealAVX2Impl<std::uint32_t, double>>(
+            ctr, rk, n, r, a, b);
+    }
+
+#endif // MCKL_HAS_AVX2
+
     private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
+
+    template <std::size_t Blocks, typename Transform, typename... Args>
+    static void eval_u01_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        double *r, Args &&... args)
+    {
+        constexpr std::size_t S =
+            Blocks == 0 ? (rounds_ < 8 ? 16 : 8) : Blocks;
+        constexpr std::size_t cstride = sizeof(__m256d) * S;
+        constexpr std::size_t nstride = S;
+        constexpr std::size_t rstride = cstride / sizeof(double);
+
+        std::array<__m128i, S> s;
+        std::array<__m256d, S> t;
+        while (n >= nstride) {
+            increment_si128(ctr, s);
+
+            encfirst(s, rk);
+
+            enc<0x1>(s, rk);
+            enc<0x2>(s, rk);
+            enc<0x3>(s, rk);
+            enc<0x4>(s, rk);
+            enc<0x5>(s, rk);
+            enc<0x6>(s, rk);
+            enc<0x7>(s, rk);
+            enc<0x8>(s, rk);
+            enc<0x9>(s, rk);
+            enc<0xA>(s, rk);
+            enc<0xB>(s, rk);
+            enc<0xC>(s, rk);
+            enc<0xD>(s, rk);
+            enc<0xE>(s, rk);
+            enc<0xF>(s, rk);
+
+            round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
+
+            enclast(s, rk);
+
+            Transform::eval(s, t, std::forward<Args>(args)...);
+
+            std::memcpy(r, t.data(), cstride);
+            n -= nstride;
+            r += rstride;
+        }
+
+        alignas(32) union {
+            std::array<std::array<std::uint32_t, 4>, nstride> state;
+            std::array<Counter<std::uint32_t, 4>, nstride> ctr;
+            std::array<std::uint32_t, nstride * 4> u;
+        } buf;
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr);
+            buf.ctr[i] = ctr;
+            eval(buf.state[i], rk);
+        }
+
+        alignas(32) std::array<double, rstride> result;
+        for (std::size_t i = 0; i != n * 4; ++i)
+            result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
+        std::memcpy(r, result.data(), sizeof(double) * 4 * n);
+    }
 
     template <std::size_t>
     static void round(

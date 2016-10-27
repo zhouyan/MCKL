@@ -205,7 +205,7 @@ class RandomDistributionTraitBase
         const RandomDistributionTraitBase<ResultType, ParamNum> &) = default;
     virtual ~RandomDistributionTraitBase() {}
 
-    static const std::size_t param_num = ParamNum;
+    static constexpr bool invariant() { return false; }
 
     virtual std::string distname() const = 0;
 
@@ -1033,6 +1033,8 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
     using dist_type = mckl::U01Distribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
+    static constexpr bool invariant() { return true; }
+
     std::string distname() const { return "U01"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
@@ -1063,6 +1065,8 @@ class RandomDistributionTrait<mckl::U01CCDistribution<RealType>>
     public:
     using dist_type = mckl::U01CCDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
 
     std::string distname() const { return "U01CC"; }
 
@@ -1095,6 +1099,8 @@ class RandomDistributionTrait<mckl::U01CODistribution<RealType>>
     using dist_type = mckl::U01CODistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
+    static constexpr bool invariant() { return true; }
+
     std::string distname() const { return "U01CO"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
@@ -1125,6 +1131,8 @@ class RandomDistributionTrait<mckl::U01OCDistribution<RealType>>
     public:
     using dist_type = mckl::U01OCDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
 
     std::string distname() const { return "U01OC"; }
 
@@ -1157,6 +1165,8 @@ class RandomDistributionTrait<mckl::U01OODistribution<RealType>>
     using dist_type = mckl::U01OODistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
+    static constexpr bool invariant() { return true; }
+
     std::string distname() const { return "U01OO"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
@@ -1187,6 +1197,8 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     public:
     using dist_type = mckl::UniformRealDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
 
     std::string distname() const { return "UniformReal"; }
 
@@ -1671,9 +1683,9 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
     using result_type = typename MCKLDistType::result_type;
 
     RNG01<MCKLRNGType> rng01;
+    MCKLRNGType rng;
     MCKLRNGType rng1;
     MCKLRNGType rng2;
-    MCKLRNGType rng;
 
     std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
     MCKLDistType dist(random_distribution_init<MCKLDistType>(param));
@@ -1692,6 +1704,13 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
         for (std::size_t j = 0; j != K; ++j) {
             pass = pass && std::isfinite(r[j]);
             pass = pass && std::isfinite(dist(rng01));
+        }
+
+        if (RandomDistributionTrait<MCKLDistType>::invariant()) {
+            for (std::size_t j = 0; j != K; ++j)
+                r1[j] = dist(rng1);
+            mckl::rand(rng2, dist, K, r2.data());
+            pass = pass && r1 == r2;
         }
 
         std::stringstream ss1;

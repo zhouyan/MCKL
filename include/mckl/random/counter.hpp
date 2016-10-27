@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/increment.hpp>
+#include <mckl/random/u01_distribution.hpp>
 
 namespace mckl
 {
@@ -136,7 +137,7 @@ class CounterEngine
             index_ = 0;
         }
 
-        return result_[static_cast<std::size_t>(index_++)];
+        return result_[index_++];
     }
 
     void operator()(std::size_t n, result_type *r)
@@ -161,6 +162,158 @@ class CounterEngine
 
         generator_(ctr_, result_.data());
         std::memcpy(r, result_.data(), sizeof(result_type) * n);
+        index_ = static_cast<unsigned>(n);
+    }
+
+    void u01_cc_u32(std::size_t n, double *r)
+    {
+        static_assert(std::numeric_limits<ResultType>::digits == 32,
+            "**CounterEngine::u01_cc_u32** is used with ResultType not a "
+            "32-bit unsigned integer type");
+
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
+        if (n < remain) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = ::mckl::u01_cc<result_type, double>(result_[index_++]);
+            return;
+        }
+
+        for (std::size_t i = 0; i != remain; ++i)
+            r[i] = ::mckl::u01_cc<result_type, double>(result_[index_++]);
+        r += remain;
+        n -= remain;
+
+        const std::size_t m = n / M_;
+        generator_.u01_cc_u32(ctr_, m, r);
+        r += m * M_;
+        n -= m * M_;
+
+        generator_(ctr_, result_.data());
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = ::mckl::u01_cc<result_type, double>(result_[i]);
+        index_ = static_cast<unsigned>(n);
+    }
+
+    void u01_co_u32(std::size_t n, double *r)
+    {
+        static_assert(std::numeric_limits<ResultType>::digits == 32,
+            "**CounterEngine::u01_co_u32** is used with ResultType not a "
+            "32-bit unsigned integer type");
+
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
+        if (n < remain) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
+            return;
+        }
+
+        for (std::size_t i = 0; i != remain; ++i)
+            r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
+        r += remain;
+        n -= remain;
+
+        const std::size_t m = n / M_;
+        generator_.u01_co_u32(ctr_, m, r);
+        r += m * M_;
+        n -= m * M_;
+
+        generator_(ctr_, result_.data());
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = ::mckl::u01_co<result_type, double>(result_[i]);
+        index_ = static_cast<unsigned>(n);
+    }
+
+    void u01_oc_u32(std::size_t n, double *r)
+    {
+        static_assert(std::numeric_limits<ResultType>::digits == 32,
+            "**CounterEngine::u01_oc_u32** is used with ResultType not a "
+            "32-bit unsigned integer type");
+
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
+        if (n < remain) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = ::mckl::u01_oc<result_type, double>(result_[index_++]);
+            return;
+        }
+
+        for (std::size_t i = 0; i != remain; ++i)
+            r[i] = ::mckl::u01_oc<result_type, double>(result_[index_++]);
+        r += remain;
+        n -= remain;
+
+        const std::size_t m = n / M_;
+        generator_.u01_oc_u32(ctr_, m, r);
+        r += m * M_;
+        n -= m * M_;
+
+        generator_(ctr_, result_.data());
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = ::mckl::u01_oc<result_type, double>(result_[i]);
+        index_ = static_cast<unsigned>(n);
+    }
+
+    void u01_oo_u32(std::size_t n, double *r)
+    {
+        static_assert(std::numeric_limits<ResultType>::digits == 32,
+            "**CounterEngine::u01_oo_u32** is used with ResultType not a "
+            "32-bit unsigned integer type");
+
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
+        if (n < remain) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = ::mckl::u01_oo<result_type, double>(result_[index_++]);
+            return;
+        }
+
+        for (std::size_t i = 0; i != remain; ++i)
+            r[i] = ::mckl::u01_oo<result_type, double>(result_[index_++]);
+        r += remain;
+        n -= remain;
+
+        const std::size_t m = n / M_;
+        generator_.u01_oo_u32(ctr_, m, r);
+        r += m * M_;
+        n -= m * M_;
+
+        generator_(ctr_, result_.data());
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = ::mckl::u01_oo<result_type, double>(result_[i]);
+        index_ = static_cast<unsigned>(n);
+    }
+
+    void uniform_real_u32(std::size_t n, double *r, double a, double b)
+    {
+        static_assert(std::numeric_limits<ResultType>::digits == 32,
+            "**CounterEngine::uniform_real_u32** is used with ResultType not "
+            "a 32-bit unsigned integer type");
+
+        const double d = b - a;
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
+        if (n < remain) {
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
+            for (std::size_t i = 0; i != n; ++i)
+                r[i] = r[i] * d + a;
+            return;
+        }
+
+        for (std::size_t i = 0; i != remain; ++i)
+            r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
+        for (std::size_t i = 0; i != remain; ++i)
+            r[i] = r[i] * d + a;
+        r += remain;
+        n -= remain;
+
+        const std::size_t m = n / M_;
+        generator_.uniform_real_u32(ctr_, m, r, a, b);
+        r += m * M_;
+        n -= m * M_;
+
+        generator_(ctr_, result_.data());
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = ::mckl::u01_co<result_type, double>(result_[i]);
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = r[i] * d + a;
         index_ = static_cast<unsigned>(n);
     }
 

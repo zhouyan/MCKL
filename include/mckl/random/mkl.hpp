@@ -879,7 +879,7 @@ class MKLEngine
             index_ = 0;
         }
 
-        return result_[static_cast<std::size_t>(index_++)];
+        return result_[index_++];
     }
 
     void operator()(std::size_t n, result_type *r)

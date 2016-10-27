@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/compiler/intel.h
+// MCKL/cmake/FindFMA.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,102 +29,21 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMPILER_INTEL_H
-#define MCKL_INTERNAL_COMPILER_INTEL_H
+#include <cassert>
+#include <cstdint>
 
-#define MCKL_INTEL_VERSION __INTEL_COMPILER
-
-#ifndef MCKL_HAS_LITTLE_ENDIAN
-#define MCKL_HAS_LITTLE_ENDIAN 1
-#endif
-
-#ifndef MCKL_HAS_BIG_ENDIAN
-#define MCKL_HAS_BIG_ENDIAN 0
+#ifdef _MSC_VER
+#include <intrin.h>
+#else
+#include <immintrin.h>
 #endif
 
-#ifdef __SSE2__
-#ifndef MCKL_HAS_SSE2
-#define MCKL_HAS_SSE2 1
-#endif
-#endif
+int main()
+{
+    const __m256d ma = _mm256_set1_pd(1.0);
+    const __m256d mb = _mm256_set1_pd(0.1);
+    const __m256d mc = _mm256_set1_pd(1.1);
+    __m256d md = _mm256_fmadd_pd(ma, mb, mc);
 
-#ifdef __SSE3__
-#ifndef MCKL_HAS_SSE3
-#define MCKL_HAS_SSE3 1
-#endif
-#endif
-
-#ifdef __SSSE3__
-#ifndef MCKL_HAS_SSSE3
-#define MCKL_HAS_SSSE3 1
-#endif
-#endif
-
-#ifdef __SSE4_1__
-#ifndef MCKL_HAS_SSE4_1
-#define MCKL_HAS_SSE4_1 1
-#endif
-#endif
-
-#ifdef __SSE4_2__
-#ifndef MCKL_HAS_SSE4_2
-#define MCKL_HAS_SSE4_2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AVX
-#define MCKL_HAS_AVX 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_AVX2
-#define MCKL_HAS_AVX2 1
-#endif
-#endif
-
-#ifdef __AVX__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI
-#define MCKL_HAS_BMI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_BMI2
-#define MCKL_HAS_BMI2 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_FMA
-#define MCKL_HAS_FMA 1
-#endif
-#endif
-
-#ifndef MCKL_INT64
-#define MCKL_INT64 __int64
-#endif
-
-#if MCKL_HAS_X86_64
-#ifndef MCKL_HAS_INT128
-#define MCKL_HAS_INT128 1
-#endif
-#ifndef MCKL_INT128
-#define MCKL_INT128 __int128
-#endif
-#endif
-
-#endif // MCKL_INTERNAL_COMPILER_INTEL_H
+    return 0;
+}

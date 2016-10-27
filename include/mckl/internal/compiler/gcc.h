@@ -113,6 +113,12 @@
 #endif
 #endif
 
+#ifdef __FMA__
+#ifndef MCKL_HAS_FMA
+#define MCKL_HAS_FMA 1
+#endif
+#endif
+
 #ifndef MCKL_INT64
 #define MCKL_INT64 long long
 #endif
