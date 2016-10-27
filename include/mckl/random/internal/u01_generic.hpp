@@ -86,13 +86,13 @@ class U01Pow2Inv
 
 template <typename UIntType, typename, typename, typename,
     int = std::numeric_limits<UIntType>::digits>
-class U01Impl;
+class U01GenericImpl;
 
 template <typename UIntType, typename RealType, int W>
-class U01Impl<UIntType, RealType, Closed, Closed, W>
+class U01GenericImpl<UIntType, RealType, Closed, Closed, W>
 {
     public:
-    static RealType eval(UIntType u) noexcept
+    static RealType eval(UIntType u)
     {
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W - 1 < M ? W - 1 : M;
@@ -105,30 +105,30 @@ class U01Impl<UIntType, RealType, Closed, Closed, W>
             U01Pow2Inv<RealType, P + 1>::value;
     }
 
-    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
         for (std::size_t i = 0; i != n; ++i)
             r[i] = eval(u[i]);
     }
 
     private:
-    static RealType trans(UIntType u, std::true_type) noexcept
+    static RealType trans(UIntType u, std::true_type)
     {
         return static_cast<RealType>((u & 1) + u);
     }
 
-    static RealType trans(UIntType u, std::false_type) noexcept
+    static RealType trans(UIntType u, std::false_type)
     {
         return static_cast<RealType>(u & 1) + static_cast<RealType>(u);
     }
-}; // class U01Impl
+}; // class U01GenericImpl
 
 template <typename UIntType, typename RealType, int W>
-class U01Impl<UIntType, RealType, Closed, Open, W>
+class U01GenericImpl<UIntType, RealType, Closed, Open, W>
 {
 
     public:
-    static RealType eval(UIntType u) noexcept
+    static RealType eval(UIntType u)
     {
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W < M ? W : M;
@@ -137,19 +137,19 @@ class U01Impl<UIntType, RealType, Closed, Open, W>
         return static_cast<RealType>(u >> R) * U01Pow2Inv<RealType, P>::value;
     }
 
-    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
         for (std::size_t i = 0; i != n; ++i)
             r[i] = eval(u[i]);
     }
-}; // class U01Impl
+}; // class U01GenericImpl
 
 template <typename UIntType, typename RealType, int W>
-class U01Impl<UIntType, RealType, Open, Closed, W>
+class U01GenericImpl<UIntType, RealType, Open, Closed, W>
 {
 
     public:
-    static RealType eval(UIntType u) noexcept
+    static RealType eval(UIntType u)
     {
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W < M ? W : M;
@@ -159,18 +159,18 @@ class U01Impl<UIntType, RealType, Open, Closed, W>
             U01Pow2Inv<RealType, P>::value;
     }
 
-    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
         for (std::size_t i = 0; i != n; ++i)
             r[i] = eval(u[i]);
     }
-}; // class U01Impl
+}; // class U01GenericImpl
 
 template <typename UIntType, typename RealType, int W>
-class U01Impl<UIntType, RealType, Open, Open, W>
+class U01GenericImpl<UIntType, RealType, Open, Open, W>
 {
     public:
-    static RealType eval(UIntType u) noexcept
+    static RealType eval(UIntType u)
     {
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W + 1 < M ? W + 1 : M;
@@ -181,12 +181,27 @@ class U01Impl<UIntType, RealType, Open, Open, W>
             U01Pow2Inv<RealType, P>::value;
     }
 
-    static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
+    static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
         for (std::size_t i = 0; i != n; ++i)
             r[i] = eval(u[i]);
     }
-}; // class U01Impl
+}; // class U01GenericImpl
+
+// #if MCKL_HAS_LITTLE_ENDIAN
+//
+// template <typename UIntType>
+// class U01GenericImpl<UIntType, double, Closed, Open, 32>
+// {
+//     public:
+//     static double eval(UIntType, u)
+//     {
+//     }
+// }; // class U01GenericImpl
+//
+// #elif MCKL_HAS_BIG_ENDIAN
+//
+// #endif // MCKL_HAS_LITTLE_ENDIAN
 
 } // namespace mckl::internal
 

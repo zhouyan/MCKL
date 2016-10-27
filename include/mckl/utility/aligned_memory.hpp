@@ -177,7 +177,7 @@ class AlignmentTrait : public std::integral_constant<std::size_t,
 class AlignedMemorySTD
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         std::size_t bytes = (n > 0 ? n : 1) + alignment + sizeof(void *);
         if (bytes < n)
@@ -197,7 +197,7 @@ class AlignedMemorySTD
         return ptr;
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr) {
             std::free(*reinterpret_cast<void **>(
@@ -217,7 +217,7 @@ class AlignedMemorySTD
 class AlignedMemorySYS
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         void *ptr;
         if (posix_memalign(&ptr, alignment, n > 0 ? n : 1) != 0)
@@ -225,7 +225,7 @@ class AlignedMemorySYS
         return ptr;
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr)
             free(ptr);
@@ -237,12 +237,12 @@ class AlignedMemorySYS
 class AlignedMemorySYS
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         return _aligned_malloc(n > 0 ? n : 1, alignment);
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr)
             _aligned_free(ptr);
@@ -259,12 +259,12 @@ class AlignedMemorySYS
 class AlignedMemoryTBB
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         return scalable_aligned_malloc(n > 0 ? n : 1, alignment);
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr)
             scalable_aligned_free(ptr);
@@ -359,7 +359,7 @@ class Allocator : public std::allocator<T>
         return ptr;
     }
 
-    void deallocate(pointer ptr, size_type = 0) noexcept
+    void deallocate(pointer ptr, size_type = 0)
     {
         if (ptr != nullptr)
             Memory::aligned_free(ptr);

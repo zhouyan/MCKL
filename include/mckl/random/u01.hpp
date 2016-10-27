@@ -38,6 +38,14 @@
 namespace mckl
 {
 
+namespace internal
+{
+
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
+using U01Impl = U01GenericImpl<UIntType, RealType, Lower, Upper>;
+
+} // namespace mckl::inernal
+
 /// \brief Convert uniform unsigned integers to floating points within [0, 1]
 /// \ingroup U01
 ///
@@ -49,7 +57,7 @@ namespace mckl
 /// \f$[0,1]\f$ or one of its (half-)open interval variant. The exact output
 /// depend on the template parameter `Lower` and `Upper`.
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
-inline RealType u01(UIntType u) noexcept
+inline RealType u01(UIntType u)
 {
     static_assert(std::is_unsigned<UIntType>::value,
         "**u01** used with UIntType other than unsigned integer "
@@ -65,7 +73,7 @@ inline RealType u01(UIntType u) noexcept
 /// \brief Convert uniform unsigned integers to floating points within [0, 1]
 /// \ingroup U01
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
-inline void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
+inline void u01(std::size_t n, const UIntType *u, RealType *r)
 {
     static_assert(std::is_unsigned<UIntType>::value,
         "**u01** used with UIntType other than unsigned integer "
@@ -81,7 +89,7 @@ inline void u01(std::size_t n, const UIntType *u, RealType *r) noexcept
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline RealType u01_cc(UIntType u) noexcept
+inline RealType u01_cc(UIntType u)
 {
     return u01<UIntType, RealType, Closed, Closed>(u);
 }
@@ -89,7 +97,7 @@ inline RealType u01_cc(UIntType u) noexcept
 /// \brief Convert uniform unsigned integers to floating points on [0, 1)
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline RealType u01_co(UIntType u) noexcept
+inline RealType u01_co(UIntType u)
 {
     return u01<UIntType, RealType, Closed, Open>(u);
 }
@@ -97,7 +105,7 @@ inline RealType u01_co(UIntType u) noexcept
 /// \brief Convert uniform unsigned integers to floating points on (0, 1]
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline RealType u01_oc(UIntType u) noexcept
+inline RealType u01_oc(UIntType u)
 {
     return u01<UIntType, RealType, Open, Closed>(u);
 }
@@ -105,7 +113,7 @@ inline RealType u01_oc(UIntType u) noexcept
 /// \brief Convert uniform unsigned integers to floating points on (0, 1)
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline RealType u01_oo(UIntType u) noexcept
+inline RealType u01_oo(UIntType u)
 {
     return u01<UIntType, RealType, Open, Open>(u);
 }
@@ -113,7 +121,7 @@ inline RealType u01_oo(UIntType u) noexcept
 /// \brief Convert uniform unsigned integers to floating points on [0, 1]
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline void u01_cc(std::size_t n, const UIntType *u, RealType *r) noexcept
+inline void u01_cc(std::size_t n, const UIntType *u, RealType *r)
 {
     u01<UIntType, RealType, Closed, Closed>(n, u, r);
 }
@@ -121,7 +129,7 @@ inline void u01_cc(std::size_t n, const UIntType *u, RealType *r) noexcept
 /// \brief Convert uniform unsigned integers to floating points on [0, 1)
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline void u01_co(std::size_t n, const UIntType *u, RealType *r) noexcept
+inline void u01_co(std::size_t n, const UIntType *u, RealType *r)
 {
     u01<UIntType, RealType, Closed, Open>(n, u, r);
 }
@@ -129,7 +137,7 @@ inline void u01_co(std::size_t n, const UIntType *u, RealType *r) noexcept
 /// \brief Convert uniform unsigned integers to floating points on (0, 1]
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline void u01_oc(std::size_t n, const UIntType *u, RealType *r) noexcept
+inline void u01_oc(std::size_t n, const UIntType *u, RealType *r)
 {
     u01<UIntType, RealType, Open, Closed>(n, u, r);
 }
@@ -137,7 +145,7 @@ inline void u01_oc(std::size_t n, const UIntType *u, RealType *r) noexcept
 /// \brief Convert uniform unsigned integers to floating points on (0, 1)
 /// \ingroup U01
 template <typename UIntType, typename RealType>
-inline void u01_oo(std::size_t n, const UIntType *u, RealType *r) noexcept
+inline void u01_oo(std::size_t n, const UIntType *u, RealType *r)
 {
     u01<UIntType, RealType, Open, Open>(n, u, r);
 }

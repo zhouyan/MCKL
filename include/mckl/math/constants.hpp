@@ -38,22 +38,22 @@
 
 #define MCKL_DEFINE_MATH_CONSTANTS(name, val)                                 \
     template <typename T>                                                     \
-    inline constexpr T const_##name() noexcept                                \
+    inline constexpr T const_##name()                                         \
     {                                                                         \
         return static_cast<T>(val##l);                                        \
     }                                                                         \
     template <>                                                               \
-    inline constexpr float const_##name<float>() noexcept                     \
+    inline constexpr float const_##name<float>()                              \
     {                                                                         \
         return val##f;                                                        \
     }                                                                         \
     template <>                                                               \
-    inline constexpr double const_##name<double>() noexcept                   \
+    inline constexpr double const_##name<double>()                            \
     {                                                                         \
         return val;                                                           \
     }                                                                         \
     template <>                                                               \
-    inline constexpr long double const_##name<long double>() noexcept         \
+    inline constexpr long double const_##name<long double>()                  \
     {                                                                         \
         return val##l;                                                        \
     }
@@ -64,7 +64,7 @@ namespace mckl
 /// \brief Infinity
 /// \ingroup Constants
 template <typename T>
-inline constexpr T const_inf() noexcept
+inline constexpr T const_inf()
 {
     static_assert(std::is_floating_point<T>::value,
         "**const_inf** used with T other than floating point types");
@@ -75,7 +75,7 @@ inline constexpr T const_inf() noexcept
 /// \brief Quiet NaN
 /// \ingroup Constants
 template <typename T>
-inline constexpr T const_nan() noexcept
+inline constexpr T const_nan()
 {
     static_assert(std::is_floating_point<T>::value,
         "**const_nan** used with T other than floating point types");
@@ -86,7 +86,7 @@ inline constexpr T const_nan() noexcept
 /// \brief Zero
 /// \ingroup Constants
 template <typename T>
-inline constexpr T const_zero() noexcept
+inline constexpr T const_zero()
 {
     return 0;
 }
@@ -94,7 +94,7 @@ inline constexpr T const_zero() noexcept
 /// \brief One
 /// \ingroup Constants
 template <typename T>
-inline constexpr T const_one() noexcept
+inline constexpr T const_one()
 {
     return 1;
 }
