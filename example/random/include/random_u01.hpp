@@ -69,57 +69,75 @@ MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, oo, Open, Open, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, oo, Open, Open, double)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, oo, Open, Open, double)
 
+template <typename>
+inline std::string random_u01_typename();
+
+template <>
+inline std::string random_u01_typename<mckl::Closed>()
+{
+    return "C";
+}
+
+template <>
+inline std::string random_u01_typename<mckl::Open>()
+{
+    return "O";
+}
+
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline std::string random_u01_function()
 {
-    std::stringstream ss;
-    ss << "u01<uint";
-    ss << std::numeric_limits<UIntType>::digits << "_t, ";
-    ss << random_typename<RealType>() << ", ";
-    ss << random_typename<Lower>() << ", ";
-    ss << random_typename<Upper>() << ">";
+    return "U01" + random_u01_typename<Lower>() +
+        random_u01_typename<Upper>() + " (" +
+        std::to_string(std::numeric_limits<UIntType>::digits) + ", " +
+        random_typename<RealType>() + ")";
+}
 
-    return ss.str();
+template <typename Lower, typename RealType>
+inline bool random_u01_check_lb(RealType x)
+{
+    return std::is_same<Lower, mckl::Closed>::value ?
+        mckl::internal::is_zero(x) :
+        !mckl::internal::is_zero(x);
+}
+
+template <typename Upper, typename RealType>
+inline bool random_u01_check_ub(RealType x)
+{
+    return std::is_same<Upper, mckl::Closed>::value ?
+        mckl::internal::is_one(x) :
+        !mckl::internal::is_one(x);
 }
 
 template <typename RealType>
-inline void random_u01_lb(RealType x, std::string &minimum, std::string &lower)
+inline std::string random_u01_minimum(RealType x)
 {
     std::stringstream ss;
     if (mckl::internal::is_zero(x))
         ss << 0;
     else
         ss << "2^" << std::log2(x);
-    minimum = ss.str();
 
-    if (x < static_cast<RealType>(0))
-        lower = "< 0";
-    else if (x > static_cast<RealType>(0))
-        lower = "Open";
-    else
-        lower = "Closed";
+    return ss.str();
 }
 
 template <typename RealType>
-inline void random_u01_rb(RealType x, std::string &maximum, std::string &upper)
+inline std::string random_u01_maximum(RealType x)
 {
     std::stringstream ss;
     if (mckl::internal::is_equal(x, static_cast<RealType>(1)))
         ss << 1;
     else
         ss << "1 - 2^" << std::log2(static_cast<RealType>(1) - x);
-    maximum = ss.str();
-    if (x > static_cast<RealType>(1))
-        upper = "> 1";
-    else if (x < static_cast<RealType>(1))
-        upper = "Open";
-    else
-        upper = "Closed";
+
+    return ss.str();
 }
 
 struct RandomU01Perf {
     bool pass_b;
     bool pass_c;
+    bool pass_l;
+    bool pass_u;
     std::string function;
     std::string minimum;
     std::string maximum;
@@ -193,16 +211,21 @@ inline void random_u01(
         }
     }
 
+    RealType l = mckl::u01<UIntType, RealType, Lower, Upper>(
+        std::numeric_limits<UIntType>::min());
+
+    RealType u = mckl::u01<UIntType, RealType, Lower, Upper>(
+        std::numeric_limits<UIntType>::max());
+
     RandomU01Perf result;
+
     result.pass_b = pass_b;
     result.pass_c = pass_c;
+    result.pass_l = random_u01_check_lb<Lower>(l);
+    result.pass_u = random_u01_check_ub<Upper>(u);
     result.function = random_u01_function<UIntType, RealType, Lower, Upper>();
-    random_u01_lb(mckl::u01<UIntType, RealType, Lower, Upper>(
-                      std::numeric_limits<UIntType>::min()),
-        result.minimum, result.lower);
-    random_u01_rb(mckl::u01<UIntType, RealType, Lower, Upper>(
-                      std::numeric_limits<UIntType>::max()),
-        result.maximum, result.upper);
+    result.minimum = random_u01_minimum(l);
+    result.maximum = random_u01_maximum(u);
     result.c1 = c1;
     result.c2 = c2;
     result.c3 = c3;
@@ -222,15 +245,16 @@ inline void random_u01(
         std::cout << std::setw(nwid) << std::left << perf[i].function;
         std::cout << std::setw(swid) << std::right << perf[i].minimum;
         std::cout << std::setw(swid) << std::right << perf[i].maximum;
-        std::cout << std::setw(twid) << std::right << perf[i].lower;
-        std::cout << std::setw(twid) << std::right << perf[i].upper;
         std::cout << std::setw(twid) << std::right << perf[i].c1;
         std::cout << std::setw(twid) << std::right << perf[i].c2;
         std::cout << std::setw(twid) << std::right << perf[i].c3;
         std::string pass;
         pass += perf[i].pass_b ? "-" : "*";
         pass += perf[i].pass_c ? "-" : "*";
-        pass += random_pass(perf[i].pass_b && perf[i].pass_c);
+        pass += perf[i].pass_l ? "-" : "*";
+        pass += perf[i].pass_u ? "-" : "*";
+        pass += random_pass(perf[i].pass_b && perf[i].pass_c &&
+            perf[i].pass_l && perf[i].pass_u);
         std::cout << std::setw(15) << std::right << pass;
         std::cout << std::endl;
     }
@@ -238,10 +262,10 @@ inline void random_u01(
 
 inline void random_u01(std::size_t N, std::size_t M)
 {
-    const int nwid = 45;
-    const int swid = 15;
-    const int twid = 10;
-    const std::size_t lwid = nwid + swid * 2 + twid * 5 + 15;
+    const int nwid = 20;
+    const int swid = 10;
+    const int twid = 8;
+    const std::size_t lwid = nwid + swid * 2 + twid * 3 + 15;
 
     std::cout << std::fixed << std::setprecision(2);
 
@@ -250,8 +274,6 @@ inline void random_u01(std::size_t N, std::size_t M)
     std::cout << std::setw(nwid) << std::left << "Function";
     std::cout << std::setw(swid) << std::right << "Mininum";
     std::cout << std::setw(swid) << std::right << "Maximum";
-    std::cout << std::setw(twid) << std::right << "Lower";
-    std::cout << std::setw(twid) << std::right << "Upper";
     if (mckl::StopWatch::has_cycles()) {
         std::cout << std::setw(twid) << std::right << "cpE (S)";
         std::cout << std::setw(twid) << std::right << "cpE (B)";

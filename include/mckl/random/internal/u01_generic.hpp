@@ -84,6 +84,10 @@ class U01Pow2Inv
         static_cast<RealType>(U01Pow2InvL<P>::value);
 }; // class U01Pow2Inv
 
+template <int W, typename UIntType>
+using U01UIntLeastType = typename std::conditional<W <= 32, std::uint32_t,
+    typename std::conditional<W <= 64, std::uint64_t, UIntType>::type>::type;
+
 template <typename UIntType, typename, typename, typename,
     int = std::numeric_limits<UIntType>::digits>
 class U01GenericImpl;
@@ -100,7 +104,9 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed, W>
         constexpr int L = V < W ? 1 : 0;
         constexpr int R = V < W ? W - 1 - V : 0;
 
-        return trans((u << L) >> (R + L),
+        using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
+
+        return trans(static_cast<UIntLeastType>((u << L) >> (R + L)),
                    std::integral_constant<bool, (V < W)>()) *
             U01Pow2Inv<RealType, P + 1>::value;
     }
@@ -112,12 +118,14 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed, W>
     }
 
     private:
-    static RealType trans(UIntType u, std::true_type)
+    template <typename UIntLeastType>
+    static RealType trans(UIntLeastType u, std::true_type)
     {
         return static_cast<RealType>((u & 1) + u);
     }
 
-    static RealType trans(UIntType u, std::false_type)
+    template <typename UIntLeastType>
+    static RealType trans(UIntLeastType u, std::false_type)
     {
         return static_cast<RealType>(u & 1) + static_cast<RealType>(u);
     }
@@ -134,7 +142,10 @@ class U01GenericImpl<UIntType, RealType, Closed, Open, W>
         constexpr int P = W < M ? W : M;
         constexpr int R = W - P;
 
-        return static_cast<RealType>(u >> R) * U01Pow2Inv<RealType, P>::value;
+        using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
+
+        return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
+            U01Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
@@ -155,7 +166,10 @@ class U01GenericImpl<UIntType, RealType, Open, Closed, W>
         constexpr int P = W < M ? W : M;
         constexpr int R = W - P;
 
-        return static_cast<RealType>(u >> R) * U01Pow2Inv<RealType, P>::value +
+        using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
+
+        return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
+            U01Pow2Inv<RealType, P>::value +
             U01Pow2Inv<RealType, P>::value;
     }
 
@@ -176,7 +190,9 @@ class U01GenericImpl<UIntType, RealType, Open, Open, W>
         constexpr int P = W + 1 < M ? W + 1 : M;
         constexpr int R = W + 1 - P;
 
-        return static_cast<RealType>(u >> R) *
+        using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
+
+        return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
             U01Pow2Inv<RealType, P - 1>::value +
             U01Pow2Inv<RealType, P>::value;
     }
