@@ -162,20 +162,20 @@ inline void random_u01(
             r2.resize(K);
             r3.resize(K);
 
-            mckl::rand(rng, N, ru.data());
+            mckl::rand(rng, K, ru.data());
 
             watch1.start();
-            for (std::size_t j = 0; j != N; ++j)
+            for (std::size_t j = 0; j != K; ++j)
                 r1[j] = mckl::u01<UIntType, RealType, Lower, Upper>(ru[j]);
             watch1.stop();
 
             watch2.start();
             mckl::u01<UIntType, RealType, Lower, Upper>(
-                N, ru.data(), r2.data());
+                K, ru.data(), r2.data());
             watch2.stop();
 
             watch3.start();
-            for (std::size_t j = 0; j != N; ++j)
+            for (std::size_t j = 0; j != K; ++j)
                 r3[j] = random_u01_c<UIntType, RealType, Lower, Upper>(ru[j]);
             watch3.stop();
 

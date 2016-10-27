@@ -91,15 +91,15 @@ class U01Impl;
 template <typename UIntType, typename RealType, int W>
 class U01Impl<UIntType, RealType, Closed, Closed, W>
 {
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = W - 1 < M ? W - 1 : M;
-    static constexpr int V = P + 1;
-    static constexpr int L = V < W ? 1 : 0;
-    static constexpr int R = V < W ? W - 1 - V : 0;
-
     public:
     static RealType eval(UIntType u) noexcept
     {
+        constexpr int M = std::numeric_limits<RealType>::digits;
+        constexpr int P = W - 1 < M ? W - 1 : M;
+        constexpr int V = P + 1;
+        constexpr int L = V < W ? 1 : 0;
+        constexpr int R = V < W ? W - 1 - V : 0;
+
         return trans((u << L) >> (R + L),
                    std::integral_constant<bool, (V < W)>()) *
             U01Pow2Inv<RealType, P + 1>::value;
@@ -107,11 +107,8 @@ class U01Impl<UIntType, RealType, Closed, Closed, W>
 
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
     {
-        for (std::size_t i = 0; i != n; ++i) {
-            r[i] = trans((u[i] << L) >> (R + L),
-                std::integral_constant<bool, (V < W)>());
-        }
-        mul(n, U01Pow2Inv<RealType, P + 1>::value, r, r);
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = eval(u[i]);
     }
 
     private:
@@ -129,34 +126,35 @@ class U01Impl<UIntType, RealType, Closed, Closed, W>
 template <typename UIntType, typename RealType, int W>
 class U01Impl<UIntType, RealType, Closed, Open, W>
 {
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = W < M ? W : M;
-    static constexpr int R = W - P;
 
     public:
     static RealType eval(UIntType u) noexcept
     {
+        constexpr int M = std::numeric_limits<RealType>::digits;
+        constexpr int P = W < M ? W : M;
+        constexpr int R = W - P;
+
         return static_cast<RealType>(u >> R) * U01Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
     {
         for (std::size_t i = 0; i != n; ++i)
-            r[i] = static_cast<RealType>(u[i] >> R);
-        mul(n, U01Pow2Inv<RealType, P>::value, r, r);
+            r[i] = eval(u[i]);
     }
 }; // class U01Impl
 
 template <typename UIntType, typename RealType, int W>
 class U01Impl<UIntType, RealType, Open, Closed, W>
 {
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = W < M ? W : M;
-    static constexpr int R = W - P;
 
     public:
     static RealType eval(UIntType u) noexcept
     {
+        constexpr int M = std::numeric_limits<RealType>::digits;
+        constexpr int P = W < M ? W : M;
+        constexpr int R = W - P;
+
         return static_cast<RealType>(u >> R) * U01Pow2Inv<RealType, P>::value +
             U01Pow2Inv<RealType, P>::value;
     }
@@ -164,22 +162,20 @@ class U01Impl<UIntType, RealType, Open, Closed, W>
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
     {
         for (std::size_t i = 0; i != n; ++i)
-            r[i] = static_cast<RealType>(u[i] >> R);
-        fma(n, U01Pow2Inv<RealType, P>::value, r,
-            U01Pow2Inv<RealType, P>::value, r);
+            r[i] = eval(u[i]);
     }
 }; // class U01Impl
 
 template <typename UIntType, typename RealType, int W>
 class U01Impl<UIntType, RealType, Open, Open, W>
 {
-    static constexpr int M = std::numeric_limits<RealType>::digits;
-    static constexpr int P = W + 1 < M ? W + 1 : M;
-    static constexpr int R = W + 1 - P;
-
     public:
     static RealType eval(UIntType u) noexcept
     {
+        constexpr int M = std::numeric_limits<RealType>::digits;
+        constexpr int P = W + 1 < M ? W + 1 : M;
+        constexpr int R = W + 1 - P;
+
         return static_cast<RealType>(u >> R) *
             U01Pow2Inv<RealType, P - 1>::value +
             U01Pow2Inv<RealType, P>::value;
@@ -188,9 +184,7 @@ class U01Impl<UIntType, RealType, Open, Open, W>
     static void eval(std::size_t n, const UIntType *u, RealType *r) noexcept
     {
         for (std::size_t i = 0; i != n; ++i)
-            r[i] = static_cast<RealType>(u[i] >> R);
-        fma(n, U01Pow2Inv<RealType, P - 1>::value, r,
-            U01Pow2Inv<RealType, P>::value, r);
+            r[i] = eval(u[i]);
     }
 }; // class U01Impl
 
