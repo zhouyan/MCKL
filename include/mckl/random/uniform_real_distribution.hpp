@@ -83,7 +83,11 @@ class UniformRealDistribution
     {
         U01CODistribution<RealType> u01;
 
+#if MCKL_USE_FMA
+        return std::fma(u01(rng), param.b() - param.a(), param.a());
+#else
         return param.a() + (param.b() - param.a()) * u01(rng);
+#endif
     }
 }; // class UniformRealDistribution
 

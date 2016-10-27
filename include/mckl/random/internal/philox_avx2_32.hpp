@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
+#include <mckl/random/internal/u01_avx2.hpp>
 #include <mckl/random/increment.hpp>
 
 #ifdef MCKL_GCC
@@ -201,7 +202,107 @@ class PhiloxGeneratorAVX2Impl32
         std::memcpy(r, buf.state.data(), sizeof(T) * K * n);
     }
 
+    static void u01_cc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
+        std::size_t n, double *r)
+    {
+        eval_u01_u32<U01AVX2Impl<std::uint32_t, double, Closed, Closed>>(
+            ctr, key, n, r);
+    }
+
+    static void u01_co_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
+        std::size_t n, double *r)
+    {
+        eval_u01_u32<U01AVX2Impl<std::uint32_t, double, Closed, Open>>(
+            ctr, key, n, r);
+    }
+
+    static void u01_oc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
+        std::size_t n, double *r)
+    {
+        eval_u01_u32<U01AVX2Impl<std::uint32_t, double, Open, Closed>>(
+            ctr, key, n, r);
+    }
+
+    static void u01_oo_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
+        std::size_t n, double *r)
+    {
+        eval_u01_u32<U01AVX2Impl<std::uint32_t, double, Open, Open>>(
+            ctr, key, n, r);
+    }
+
+    static void uniform_real_u32(Counter<T, K> &ctr,
+        const std::array<T, K / 2> &key, std::size_t n, double *r, double a,
+        double b)
+    {
+        eval_u01_u32<UniformRealAVX2Impl<std::uint32_t, double>>(
+            ctr, key, n, r, a, b);
+    }
+
     private:
+    template <typename Transform, typename... Args>
+    static void eval_u01_u32(Counter<T, K> &ctr,
+        const std::array<T, K / 2> &key, std::size_t n, double *r,
+        Args &&... args)
+    {
+        constexpr std::size_t S = 8;
+        constexpr std::size_t cstride = sizeof(__m256d) * S * 2;
+        constexpr std::size_t nstride = cstride / (sizeof(T) * K) / 2;
+        constexpr std::size_t rstride = cstride / sizeof(double);
+
+        std::array<__m256i, S> s;
+        std::array<__m256d, S * 2> t;
+        std::array<__m256i, Rounds> rk;
+        set_key(rk, key);
+        while (n >= nstride) {
+            increment_si256(ctr, s);
+
+            PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
+
+            rbox<0x0>(s, rk);
+            rbox<0x1>(s, rk);
+            rbox<0x2>(s, rk);
+            rbox<0x3>(s, rk);
+            rbox<0x4>(s, rk);
+            rbox<0x5>(s, rk);
+            rbox<0x6>(s, rk);
+            rbox<0x7>(s, rk);
+            rbox<0x8>(s, rk);
+            rbox<0x9>(s, rk);
+            rbox<0xA>(s, rk);
+            rbox<0xB>(s, rk);
+            rbox<0xC>(s, rk);
+            rbox<0xD>(s, rk);
+            rbox<0xE>(s, rk);
+            rbox<0xF>(s, rk);
+
+            round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
+
+            PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
+
+            Transform::eval(s, t, std::forward<Args>(args)...);
+
+            std::memcpy(r, t.data(), cstride);
+            n -= nstride;
+            r += rstride;
+        }
+
+        alignas(32) union {
+            std::array<std::array<T, K>, nstride> state;
+            std::array<Counter<T, K>, nstride> ctr;
+            std::array<std::uint32_t, nstride * K> u;
+        } buf;
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr);
+            buf.ctr[i] = ctr;
+            eval(buf.state[i], key);
+        }
+
+        alignas(32) std::array<double, rstride> result;
+        for (std::size_t i = 0; i != n * K; ++i)
+            result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
+        std::memcpy(r, result.data(), sizeof(double) * K * n);
+    }
+
     template <std::size_t, std::size_t S>
     static void round(std::array<__m256i, S> &,
         const std::array<__m256i, Rounds> &, std::false_type)

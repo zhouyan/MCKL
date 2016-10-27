@@ -472,12 +472,12 @@ inline void fma_256d(
 template <std::size_t S>
 inline void fma_256d(std::array<__m256d, S> &s, double a, double b)
 {
-    if (is_one(a)) {
+    if (!(a < 1 || a > 1)) {
         add_256d(s, _mm256_set1_pd(b));
         return;
     }
 
-    if (is_zero(b)) {
+    if (!(b < 0 || b > 0)) {
         mul_256d(s, _mm256_set1_pd(a));
         return;
     }
@@ -526,22 +526,22 @@ inline void convert_u32_256d(
     std::get<7>(t) = _mm256_castsi256_pd(
         _mm256_srli_epi64(_mm256_castpd_si256(std::get<7>(t)), 32));
 
-    std::get<0>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<0>(t)), _mm256_castpd_si256(c));
-    std::get<1>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<1>(t)), _mm256_castpd_si256(c));
-    std::get<2>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<2>(t)), _mm256_castpd_si256(c));
-    std::get<3>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<3>(t)), _mm256_castpd_si256(c));
-    std::get<4>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<4>(t)), _mm256_castpd_si256(c));
-    std::get<5>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<5>(t)), _mm256_castpd_si256(c));
-    std::get<6>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<6>(t)), _mm256_castpd_si256(c));
-    std::get<7>(t) = _mm256_add_epi64(
-        _mm256_castpd_si256(std::get<7>(t)), _mm256_castpd_si256(c));
+    std::get<0>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0>(t)), _mm256_castpd_si256(c)));
+    std::get<1>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<1>(t)), _mm256_castpd_si256(c)));
+    std::get<2>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<2>(t)), _mm256_castpd_si256(c)));
+    std::get<3>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<3>(t)), _mm256_castpd_si256(c)));
+    std::get<4>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<4>(t)), _mm256_castpd_si256(c)));
+    std::get<5>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<5>(t)), _mm256_castpd_si256(c)));
+    std::get<6>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<6>(t)), _mm256_castpd_si256(c)));
+    std::get<7>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<7>(t)), _mm256_castpd_si256(c)));
 
     std::get<0>(t) = _mm256_sub_pd(std::get<0>(t), c);
     std::get<1>(t) = _mm256_sub_pd(std::get<1>(t), c);
@@ -625,6 +625,109 @@ inline void convert_u32_256d(
         _mm256_srli_epi64(_mm256_castpd_si256(std::get<0xE>(t)), 32));
     std::get<0xF>(t) = _mm256_castsi256_pd(
         _mm256_srli_epi64(_mm256_castpd_si256(std::get<0xF>(t)), 32));
+
+    std::get<0x0>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x0>(t)), _mm256_castpd_si256(c)));
+    std::get<0x1>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x1>(t)), _mm256_castpd_si256(c)));
+    std::get<0x2>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x2>(t)), _mm256_castpd_si256(c)));
+    std::get<0x3>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x3>(t)), _mm256_castpd_si256(c)));
+    std::get<0x4>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x4>(t)), _mm256_castpd_si256(c)));
+    std::get<0x5>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x5>(t)), _mm256_castpd_si256(c)));
+    std::get<0x6>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x6>(t)), _mm256_castpd_si256(c)));
+    std::get<0x7>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x7>(t)), _mm256_castpd_si256(c)));
+    std::get<0x8>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x8>(t)), _mm256_castpd_si256(c)));
+    std::get<0x9>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0x9>(t)), _mm256_castpd_si256(c)));
+    std::get<0xA>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0xA>(t)), _mm256_castpd_si256(c)));
+    std::get<0xB>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0xB>(t)), _mm256_castpd_si256(c)));
+    std::get<0xC>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0xC>(t)), _mm256_castpd_si256(c)));
+    std::get<0xD>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0xD>(t)), _mm256_castpd_si256(c)));
+    std::get<0xE>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0xE>(t)), _mm256_castpd_si256(c)));
+    std::get<0xF>(t) = _mm256_castsi256_pd(_mm256_add_epi64(
+        _mm256_castpd_si256(std::get<0xF>(t)), _mm256_castpd_si256(c)));
+
+    std::get<0x0>(t) = _mm256_sub_pd(std::get<0x0>(t), c);
+    std::get<0x1>(t) = _mm256_sub_pd(std::get<0x1>(t), c);
+    std::get<0x2>(t) = _mm256_sub_pd(std::get<0x2>(t), c);
+    std::get<0x3>(t) = _mm256_sub_pd(std::get<0x3>(t), c);
+    std::get<0x4>(t) = _mm256_sub_pd(std::get<0x4>(t), c);
+    std::get<0x5>(t) = _mm256_sub_pd(std::get<0x5>(t), c);
+    std::get<0x6>(t) = _mm256_sub_pd(std::get<0x6>(t), c);
+    std::get<0x7>(t) = _mm256_sub_pd(std::get<0x7>(t), c);
+    std::get<0x8>(t) = _mm256_sub_pd(std::get<0x8>(t), c);
+    std::get<0x9>(t) = _mm256_sub_pd(std::get<0x9>(t), c);
+    std::get<0xA>(t) = _mm256_sub_pd(std::get<0xA>(t), c);
+    std::get<0xB>(t) = _mm256_sub_pd(std::get<0xB>(t), c);
+    std::get<0xC>(t) = _mm256_sub_pd(std::get<0xC>(t), c);
+    std::get<0xD>(t) = _mm256_sub_pd(std::get<0xD>(t), c);
+    std::get<0xE>(t) = _mm256_sub_pd(std::get<0xE>(t), c);
+    std::get<0xF>(t) = _mm256_sub_pd(std::get<0xF>(t), c);
+}
+
+inline void convert_u32_256d(
+    const std::array<__m256i, 8> &s, std::array<__m256d, 16> &t)
+{
+    const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
+    const __m256d m = _mm256_castsi256_pd(
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF)));
+    const __m256d c = _mm256_castsi256_pd( // 2^52 + 2^51
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4338000000000000)));
+
+    std::get<0x0>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<0>(s), p));
+    std::get<0x2>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<1>(s), p));
+    std::get<0x4>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<2>(s), p));
+    std::get<0x6>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<3>(s), p));
+    std::get<0x8>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<4>(s), p));
+    std::get<0xA>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<5>(s), p));
+    std::get<0xC>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<6>(s), p));
+    std::get<0xE>(t) =
+        _mm256_castsi256_pd(_mm256_permutevar8x32_epi32(std::get<7>(s), p));
+
+    std::get<0x1>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0x0>(t)), 32));
+    std::get<0x3>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0x2>(t)), 32));
+    std::get<0x5>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0x4>(t)), 32));
+    std::get<0x7>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0x6>(t)), 32));
+    std::get<0x9>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0x8>(t)), 32));
+    std::get<0xB>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0xA>(t)), 32));
+    std::get<0xD>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0xC>(t)), 32));
+    std::get<0xF>(t) = _mm256_castsi256_pd(
+        _mm256_srli_epi64(_mm256_castpd_si256(std::get<0xE>(t)), 32));
+
+    std::get<0x0>(t) = _mm256_and_pd(std::get<0x0>(t), m);
+    std::get<0x2>(t) = _mm256_and_pd(std::get<0x2>(t), m);
+    std::get<0x4>(t) = _mm256_and_pd(std::get<0x4>(t), m);
+    std::get<0x6>(t) = _mm256_and_pd(std::get<0x6>(t), m);
+    std::get<0x8>(t) = _mm256_and_pd(std::get<0x8>(t), m);
+    std::get<0xA>(t) = _mm256_and_pd(std::get<0xA>(t), m);
+    std::get<0xC>(t) = _mm256_and_pd(std::get<0xC>(t), m);
+    std::get<0xE>(t) = _mm256_and_pd(std::get<0xE>(t), m);
 
     std::get<0x0>(t) = _mm256_add_epi64(
         _mm256_castpd_si256(std::get<0x0>(t)), _mm256_castpd_si256(c));

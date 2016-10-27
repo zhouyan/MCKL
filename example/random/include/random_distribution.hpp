@@ -153,7 +153,7 @@
 #include <mckl/random/normal_distribution.hpp>
 #endif
 
-#if MCKL_HAS_AESNI
+#if MCKL_HAS_AESNI && !defined(MCKL_EXAMPLE_RANDOM_NO_ARS)
 #include <mckl/random/aes.hpp>
 using MCKLRNGType = mckl::ARS;
 #else
@@ -163,7 +163,7 @@ using MCKLRNGType = mckl::Philox4x32;
 
 #if MCKL_HAS_MKL
 #include <mckl/random/mkl.hpp>
-#if MCKL_HAS_AESNI
+#if MCKL_HAS_AESNI && !defined(MCKL_EXAMPLE_RANDOM_NO_ARS)
 using MKLRNGType = mckl::MKL_ARS5;
 #else
 using MKLRNGType = mckl::MKL_PHILOX4X32X10;
@@ -1220,7 +1220,7 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        this->add_param(params, -0.5, 0.5);
+        this->add_param(params, -1.3, 1.3);
 
         return params;
     }
@@ -1670,15 +1670,43 @@ inline void random_distribution_pval(std::size_t N, std::size_t M)
 struct RandomDistributionPerf {
     std::string name;
     bool pass;
+    double e1;
+    double e2;
     double c1;
     double c2;
     double c3;
     double c4;
 }; // struct RandomDistributionPerf
 
+template <typename T>
+inline void random_distribution_perf_e(
+    std::size_t, T *, T *, T &, T &, std::false_type)
+{
+    std::make_pair(mckl::const_zero<T>(), mckl::const_zero<T>());
+}
+
+template <typename T>
+inline void random_distribution_perf_e(
+    std::size_t n, T *r1, T *r2, T &e1, T &e2, std::true_type)
+{
+    mckl::sub(n, r1, r2, r1);
+    mckl::div(n, r1, r2, r2);
+    T f1 = 0;
+    T f2 = 0;
+    for (std::size_t i = 0; i != n; ++i)
+        f1 = std::max(f1, r1[i]);
+    for (std::size_t i = 0; i != n; ++i)
+        f2 = std::max(f2, r2[i]);
+    f1 /= std::numeric_limits<T>::epsilon();
+    f2 /= std::numeric_limits<T>::epsilon();
+    e1 = std::max(e1, f1);
+    e2 = std::max(e2, f2);
+}
+
 template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
 inline void random_distribution_perf_d(std::size_t N, std::size_t M,
-    const std::array<ParamType, ParamNum> &param, mckl::Vector<bool> &pass_d)
+    const std::array<ParamType, ParamNum> &param,
+    mckl::Vector<RandomDistributionPerf> &perf)
 {
     using result_type = typename MCKLDistType::result_type;
 
@@ -1691,6 +1719,8 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
     MCKLDistType dist(random_distribution_init<MCKLDistType>(param));
     bool pass = true;
 
+    result_type e1 = 0;
+    result_type e2 = 0;
     mckl::Vector<result_type> r(N);
     mckl::Vector<result_type> r1(N);
     mckl::Vector<result_type> r2(N);
@@ -1706,11 +1736,15 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
             pass = pass && std::isfinite(dist(rng01));
         }
 
-        if (RandomDistributionTrait<MCKLDistType>::invariant()) {
+        constexpr bool invariant =
+            RandomDistributionTrait<MCKLDistType>::invariant();
+        if (invariant) {
             for (std::size_t j = 0; j != K; ++j)
                 r1[j] = dist(rng1);
             mckl::rand(rng2, dist, K, r2.data());
             pass = pass && r1 == r2;
+            random_distribution_perf_e(K, r1.data(), r2.data(), e1, e2,
+                std::integral_constant<bool, invariant>());
         }
 
         std::stringstream ss1;
@@ -1730,12 +1764,17 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
         mckl::rand(rng2, dist, K, r2.data());
         pass = pass && r1 == r2;
     }
-    pass_d.push_back(pass);
+
+    RandomDistributionPerf result;
+    result.pass = pass;
+    result.e1 = static_cast<double>(e1);
+    result.e2 = static_cast<double>(e2);
+    perf.push_back(result);
 }
 
 template <typename MCKLDistType>
 inline void random_distribution_perf_d(
-    std::size_t N, std::size_t M, mckl::Vector<bool> &perf)
+    std::size_t N, std::size_t M, mckl::Vector<RandomDistributionPerf> &perf)
 {
     RandomDistributionTrait<MCKLDistType> trait;
     auto params = trait.params();
@@ -1744,16 +1783,16 @@ inline void random_distribution_perf_d(
 }
 
 template <template <typename> class DistributionType>
-inline void random_distribution_perf_d(
-    std::size_t N, std::size_t M, mckl::Vector<bool> &perf, std::true_type)
+inline void random_distribution_perf_d(std::size_t N, std::size_t M,
+    mckl::Vector<RandomDistributionPerf> &perf, std::true_type)
 {
     random_distribution_perf_d<DistributionType<float>>(N, M, perf);
     random_distribution_perf_d<DistributionType<double>>(N, M, perf);
 }
 
 template <template <typename> class DistributionType>
-inline void random_distribution_perf_d(
-    std::size_t N, std::size_t M, mckl::Vector<bool> &perf, std::false_type)
+inline void random_distribution_perf_d(std::size_t N, std::size_t M,
+    mckl::Vector<RandomDistributionPerf> &perf, std::false_type)
 {
     random_distribution_perf_d<DistributionType<std::int32_t>>(N, M, perf);
     random_distribution_perf_d<DistributionType<std::uint32_t>>(N, M, perf);
@@ -1903,13 +1942,13 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     N = std::max(N, static_cast<std::size_t>(2000));
     M = std::max(M, static_cast<std::size_t>(10));
 
-    mckl::Vector<bool> pass_d;
+    mckl::Vector<RandomDistributionPerf> perf_d;
     random_distribution_perf_d<DistributionType>(
-        N, M, pass_d, std::is_floating_point<ResultType>());
+        N, M, perf_d, std::is_floating_point<ResultType>());
 
-    mckl::Vector<RandomDistributionPerf> perf;
+    mckl::Vector<RandomDistributionPerf> perf_p;
     random_distribution_perf_p<DistributionType>(
-        N, M, perf, std::is_floating_point<ResultType>());
+        N, M, perf_p, std::is_floating_point<ResultType>());
 
     const int nwid = 30;
     const int twid = 12;
@@ -1945,20 +1984,26 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     std::string vmath = "C++";
 #endif
 
-    for (std::size_t i = 0; i != perf.size(); ++i) {
-        std::cout << std::setw(nwid) << std::left << perf[i].name;
-        std::cout << std::setw(twid) << std::right << perf[i].c1;
-        std::cout << std::setw(twid) << std::right << perf[i].c2;
-        std::cout << std::setw(twid) << std::right << perf[i].c3;
+    for (std::size_t i = 0; i != perf_p.size(); ++i) {
+        std::cout << std::setw(nwid) << std::left << perf_p[i].name;
+        std::cout << std::setw(twid) << std::right << perf_p[i].c1;
+        std::cout << std::setw(twid) << std::right << perf_p[i].c2;
+        std::cout << std::setw(twid) << std::right << perf_p[i].c3;
 #if MCKL_HAS_MKL
-        std::cout << std::setw(twid) << std::right << perf[i].c4;
+        std::cout << std::setw(twid) << std::right << perf_p[i].c4;
 #endif
         std::cout << std::setw(10) << std::right << vmath;
 
+        std::stringstream ss;
+        ss << "(";
+        ss << std::min(perf_d[i].e1, perf_d[i].e2);
+        ss << ")";
+
         std::string pass;
-        pass += pass_d[i] ? "-" : "*";
-        pass += perf[i].pass ? "-" : "*";
-        pass += random_pass(pass_d[i] && perf[i].pass);
+        pass += ss.str();
+        pass += perf_d[i].pass ? "-" : "*";
+        pass += perf_p[i].pass ? "-" : "*";
+        pass += random_pass(perf_d[i].pass && perf_p[i].pass);
         std::cout << std::setw(15) << std::right << pass;
         std::cout << std::endl;
     }

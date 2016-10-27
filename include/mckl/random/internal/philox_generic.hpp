@@ -176,8 +176,8 @@ template <>
 class PhiloxHiLo<unsigned MCKL_INT64, 64>
 {
     public:
-    static unsigned MKL_INT64 eval(
-        unsigned MKL_INT64 a, unsigned MKL_INT64 b, unsigned MKL_INT64 &hi)
+    static unsigned MCKL_INT64 eval(
+        unsigned MCKL_INT64 a, unsigned MCKL_INT64 b, unsigned MCKL_INT64 &hi)
     {
         return _mulx_u64(a, b, &hi);
     }

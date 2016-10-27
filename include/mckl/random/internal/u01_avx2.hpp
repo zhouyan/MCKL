@@ -113,6 +113,31 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
         add_256d(t, q);
         mul_256d(t, p32);
     }
+
+    static void eval(
+        const std::array<__m256i, 8> &s, std::array<__m256d, 16> &t)
+    {
+        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
+        const __m256i mask = _mm256_set1_epi32(1);
+
+        std::array<__m256i, 8> p;
+        std::array<__m256d, 16> q;
+
+        std::get<0>(p) = _mm256_and_si256(std::get<0>(s), mask);
+        std::get<1>(p) = _mm256_and_si256(std::get<1>(s), mask);
+        std::get<2>(p) = _mm256_and_si256(std::get<2>(s), mask);
+        std::get<3>(p) = _mm256_and_si256(std::get<3>(s), mask);
+        std::get<4>(p) = _mm256_and_si256(std::get<4>(s), mask);
+        std::get<5>(p) = _mm256_and_si256(std::get<5>(s), mask);
+        std::get<6>(p) = _mm256_and_si256(std::get<6>(s), mask);
+        std::get<7>(p) = _mm256_and_si256(std::get<7>(s), mask);
+
+        convert_u32_256d(p, q);
+        convert_u32_256d(s, t);
+        add_256d(t, q);
+        mul_256d(t, p32);
+    }
 }; // class U01AVX2Impl
 
 template <typename UIntType>
@@ -134,6 +159,17 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
         convert_u32_256d(s, t);
         mul_256d(t, p32);
     }
+
+    template <std::size_t S>
+    static void eval(
+        const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
+    {
+        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
+
+        convert_u32_256d(s, t);
+        mul_256d(t, p32);
+    }
 }; // class U01AVX2Impl
 
 template <typename UIntType>
@@ -148,6 +184,17 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     template <std::size_t S>
     static void eval(
         const std::array<__m128i, S> &s, std::array<__m256d, S> &t)
+    {
+        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
+
+        convert_u32_256d(s, t);
+        fma_256d(t, p32, p32);
+    }
+
+    template <std::size_t S>
+    static void eval(
+        const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
@@ -178,6 +225,19 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
         convert_u32_256d(s, t);
         fma_256d(t, p32, p33);
     }
+
+    template <std::size_t S>
+    static void eval(
+        const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
+    {
+        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
+        const __m256d p33 = _mm256_castsi256_pd( // 2^{-33}
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DE0000000000000)));
+
+        convert_u32_256d(s, t);
+        fma_256d(t, p32, p33);
+    }
 }; // class U01AVX2Impl
 
 template <typename UIntType, typename RealType,
@@ -190,21 +250,31 @@ class UniformRealAVX2Impl<UIntType, double, 32>
     public:
     static double eval(UIntType u, double a, double b)
     {
+#if MCKL_USE_FMA
+        return std::fma(
+            U01GenericImpl<UIntType, double, Closed, Open>::eval(u), (b - a),
+            a);
+#else
         return U01GenericImpl<UIntType, double, Closed, Open>::eval(u) *
             (b - a) +
             a;
+#endif
     }
 
     template <std::size_t S>
     static void eval(const std::array<__m128i, S> &s,
         std::array<__m256d, S> &t, double a, double b)
     {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
+        U01AVX2Impl<UIntType, double, Closed, Open, 32>::eval(s, t);
+        fma_256d(t, b - a, a);
+    }
 
-        convert_u32_256d(s, t);
-        mul_256d(t, p32);
-        fma_256d(t, a, b);
+    template <std::size_t S>
+    static void eval(const std::array<__m256i, S> &s,
+        std::array<__m256d, S * 2> &t, double a, double b)
+    {
+        U01AVX2Impl<UIntType, double, Closed, Open, 32>::eval(s, t);
+        fma_256d(t, b - a, a);
     }
 }; // class UniformRealAVX2Impl
 

@@ -173,15 +173,15 @@ class CounterEngine
 
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
         if (n < remain) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = ::mckl::u01_cc<result_type, double>(result_[index_++]);
+            ::mckl::u01_cc(n, result_.data() + index_, r);
+            index_ += static_cast<unsigned>(n);
             return;
         }
 
-        for (std::size_t i = 0; i != remain; ++i)
-            r[i] = ::mckl::u01_cc<result_type, double>(result_[index_++]);
+        ::mckl::u01_cc(remain, result_.data() + index_, r);
         r += remain;
         n -= remain;
+        index_ = M_;
 
         const std::size_t m = n / M_;
         generator_.u01_cc_u32(ctr_, m, r);
@@ -189,8 +189,7 @@ class CounterEngine
         n -= m * M_;
 
         generator_(ctr_, result_.data());
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = ::mckl::u01_cc<result_type, double>(result_[i]);
+        ::mckl::u01_cc(n, result_.data(), r);
         index_ = static_cast<unsigned>(n);
     }
 
@@ -202,15 +201,15 @@ class CounterEngine
 
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
         if (n < remain) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
+            ::mckl::u01_co(n, result_.data() + index_, r);
+            index_ += static_cast<unsigned>(n);
             return;
         }
 
-        for (std::size_t i = 0; i != remain; ++i)
-            r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
+        ::mckl::u01_co(remain, result_.data() + index_, r);
         r += remain;
         n -= remain;
+        index_ = M_;
 
         const std::size_t m = n / M_;
         generator_.u01_co_u32(ctr_, m, r);
@@ -218,8 +217,7 @@ class CounterEngine
         n -= m * M_;
 
         generator_(ctr_, result_.data());
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = ::mckl::u01_co<result_type, double>(result_[i]);
+        ::mckl::u01_co(n, result_.data(), r);
         index_ = static_cast<unsigned>(n);
     }
 
@@ -231,15 +229,15 @@ class CounterEngine
 
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
         if (n < remain) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = ::mckl::u01_oc<result_type, double>(result_[index_++]);
+            ::mckl::u01_oc(n, result_.data() + index_, r);
+            index_ += static_cast<unsigned>(n);
             return;
         }
 
-        for (std::size_t i = 0; i != remain; ++i)
-            r[i] = ::mckl::u01_oc<result_type, double>(result_[index_++]);
+        ::mckl::u01_oc(remain, result_.data() + index_, r);
         r += remain;
         n -= remain;
+        index_ = M_;
 
         const std::size_t m = n / M_;
         generator_.u01_oc_u32(ctr_, m, r);
@@ -247,8 +245,7 @@ class CounterEngine
         n -= m * M_;
 
         generator_(ctr_, result_.data());
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = ::mckl::u01_oc<result_type, double>(result_[i]);
+        ::mckl::u01_oc(n, result_.data(), r);
         index_ = static_cast<unsigned>(n);
     }
 
@@ -260,15 +257,15 @@ class CounterEngine
 
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
         if (n < remain) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = ::mckl::u01_oo<result_type, double>(result_[index_++]);
+            ::mckl::u01_oo(n, result_.data() + index_, r);
+            index_ += static_cast<unsigned>(n);
             return;
         }
 
-        for (std::size_t i = 0; i != remain; ++i)
-            r[i] = ::mckl::u01_oo<result_type, double>(result_[index_++]);
+        ::mckl::u01_oo(remain, result_.data() + index_, r);
         r += remain;
         n -= remain;
+        index_ = M_;
 
         const std::size_t m = n / M_;
         generator_.u01_oo_u32(ctr_, m, r);
@@ -276,8 +273,7 @@ class CounterEngine
         n -= m * M_;
 
         generator_(ctr_, result_.data());
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = ::mckl::u01_oo<result_type, double>(result_[i]);
+        ::mckl::u01_oo(n, result_.data(), r);
         index_ = static_cast<unsigned>(n);
     }
 
@@ -287,22 +283,19 @@ class CounterEngine
             "**CounterEngine::uniform_real_u32** is used with ResultType not "
             "a 32-bit unsigned integer type");
 
-        const double d = b - a;
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
         if (n < remain) {
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
-            for (std::size_t i = 0; i != n; ++i)
-                r[i] = r[i] * d + a;
+            ::mckl::u01_co(n, result_.data() + index_, r);
+            fma(n, r, b - a, a, r);
+            index_ += static_cast<unsigned>(n);
             return;
         }
 
-        for (std::size_t i = 0; i != remain; ++i)
-            r[i] = ::mckl::u01_co<result_type, double>(result_[index_++]);
-        for (std::size_t i = 0; i != remain; ++i)
-            r[i] = r[i] * d + a;
+        ::mckl::u01_co(remain, result_.data() + index_, r);
+        fma(remain, r, b - a, a, r);
         r += remain;
         n -= remain;
+        index_ = M_;
 
         const std::size_t m = n / M_;
         generator_.uniform_real_u32(ctr_, m, r, a, b);
@@ -310,10 +303,8 @@ class CounterEngine
         n -= m * M_;
 
         generator_(ctr_, result_.data());
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = ::mckl::u01_co<result_type, double>(result_[i]);
-        for (std::size_t i = 0; i != n; ++i)
-            r[i] = r[i] * d + a;
+        ::mckl::u01_co(n, result_.data(), r);
+        fma(n, r, b - a, a, r);
         index_ = static_cast<unsigned>(n);
     }
 

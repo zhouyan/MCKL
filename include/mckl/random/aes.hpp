@@ -514,9 +514,6 @@ using ARS_64 = ARSEngine<std::uint64_t>;
 
 #if MCKL_USE_AESNI && MCKL_USE_AVX2 && !MCKL_U01_USE_64BITS_DOUBLE
 
-namespace internal
-{
-
 template <typename KeySeqType>
 inline void u01_cc_distribution(
     AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
@@ -556,8 +553,6 @@ inline void uniform_real_distribution(
 } // namespace mckl::internal
 
 #endif // MCKL_USE_AESNI && MCKL_USE_AVX2 && !MCKL_U01_USE_64BITS_DOUBLE
-
-} // namespace mckl
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
