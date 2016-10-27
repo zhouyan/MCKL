@@ -1895,9 +1895,9 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
     const int nwid = 30;
     const int twid = 12;
 #if MCKL_HAS_MKL
-    const std::size_t lwid = nwid + twid * 4 + 20;
+    const std::size_t lwid = nwid + twid * 4 + 25;
 #else
-    const std::size_t lwid = nwid + twid * 3 + 20;
+    const std::size_t lwid = nwid + twid * 3 + 25;
 #endif
 
     std::cout << std::fixed << std::setprecision(2);
@@ -1914,7 +1914,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
     std::cout << std::setw(twid) << std::right << "MKL";
 #endif
-    std::cout << std::setw(5) << std::right << "vMath";
+    std::cout << std::setw(10) << std::right << "vMath";
     std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
@@ -1934,7 +1934,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
         std::cout << std::setw(twid) << std::right << perf[i].c4;
 #endif
-        std::cout << std::setw(5) << std::right << vmath;
+        std::cout << std::setw(10) << std::right << vmath;
 
         std::string pass;
         pass += pass_d[i] ? "-" : "*";
