@@ -36,7 +36,7 @@ int main(int argc, char **argv)
     --argc;
     ++argv;
 
-    std::size_t N = 100000;
+    std::size_t N = 10000;
     if (argc > 0) {
         std::size_t n = static_cast<std::size_t>(std::atoi(*argv));
         if (n != 0) {
