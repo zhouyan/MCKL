@@ -35,10 +35,6 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/u01_generic.hpp>
 
-// #if MCKL_USE_AVX2
-// #include <mckl/random/internal/u01_avx2.hpp>
-// #endif
-
 namespace mckl
 {
 
