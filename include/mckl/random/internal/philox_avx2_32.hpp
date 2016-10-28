@@ -160,30 +160,30 @@ class PhiloxGeneratorAVX2Impl32
         std::array<__m256i, Rounds> rk;
         set_key(rk, key);
         while (n >= nstride) {
-            increment_si256(ctr, s);
+            MCKL_FLATTEN_CALL increment_si256(ctr, s);
 
-            PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
 
-            rbox<0x0>(s, rk);
-            rbox<0x1>(s, rk);
-            rbox<0x2>(s, rk);
-            rbox<0x3>(s, rk);
-            rbox<0x4>(s, rk);
-            rbox<0x5>(s, rk);
-            rbox<0x6>(s, rk);
-            rbox<0x7>(s, rk);
-            rbox<0x8>(s, rk);
-            rbox<0x9>(s, rk);
-            rbox<0xA>(s, rk);
-            rbox<0xB>(s, rk);
-            rbox<0xC>(s, rk);
-            rbox<0xD>(s, rk);
-            rbox<0xE>(s, rk);
-            rbox<0xF>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x0>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
 
             round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
 
-            PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
 
             std::memcpy(r, s.data(), cstride);
             n -= nstride;
@@ -195,7 +195,7 @@ class PhiloxGeneratorAVX2Impl32
             std::array<Counter<T, K>, nstride> ctr;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
+            MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], key);
         }
@@ -290,32 +290,33 @@ class PhiloxGeneratorAVX2Impl32
         std::array<__m256i, Rounds> rk;
         set_key(rk, key);
         while (n >= nstride) {
-            increment_si256(ctr, s);
+            MCKL_FLATTEN_CALL increment_si256(ctr, s);
 
-            PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
 
-            rbox<0x0>(s, rk);
-            rbox<0x1>(s, rk);
-            rbox<0x2>(s, rk);
-            rbox<0x3>(s, rk);
-            rbox<0x4>(s, rk);
-            rbox<0x5>(s, rk);
-            rbox<0x6>(s, rk);
-            rbox<0x7>(s, rk);
-            rbox<0x8>(s, rk);
-            rbox<0x9>(s, rk);
-            rbox<0xA>(s, rk);
-            rbox<0xB>(s, rk);
-            rbox<0xC>(s, rk);
-            rbox<0xD>(s, rk);
-            rbox<0xE>(s, rk);
-            rbox<0xF>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x0>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
 
             round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
 
-            PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
 
-            Transform::eval(s, t, std::forward<Args>(args)...);
+            MCKL_FLATTEN_CALL Transform::eval(
+                s, t, std::forward<Args>(args)...);
 
             std::memcpy(r, t.data(), cstride);
             n -= nstride;
@@ -328,7 +329,7 @@ class PhiloxGeneratorAVX2Impl32
             std::array<std::uint32_t, nstride * K> u;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
+            MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], key);
         }
@@ -354,32 +355,33 @@ class PhiloxGeneratorAVX2Impl32
         std::array<__m256i, Rounds> rk;
         set_key(rk, key);
         while (n >= nstride) {
-            increment_si256(ctr, s);
+            MCKL_FLATTEN_CALL increment_si256(ctr, s);
 
-            PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
 
-            rbox<0x0>(s, rk);
-            rbox<0x1>(s, rk);
-            rbox<0x2>(s, rk);
-            rbox<0x3>(s, rk);
-            rbox<0x4>(s, rk);
-            rbox<0x5>(s, rk);
-            rbox<0x6>(s, rk);
-            rbox<0x7>(s, rk);
-            rbox<0x8>(s, rk);
-            rbox<0x9>(s, rk);
-            rbox<0xA>(s, rk);
-            rbox<0xB>(s, rk);
-            rbox<0xC>(s, rk);
-            rbox<0xD>(s, rk);
-            rbox<0xE>(s, rk);
-            rbox<0xF>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x0>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
+            MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
 
             round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
 
-            PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
+            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
 
-            Transform::eval(s, t, std::forward<Args>(args)...);
+            MCKL_FLATTEN_CALL Transform::eval(
+                s, t, std::forward<Args>(args)...);
 
             std::memcpy(r, t.data(), cstride);
             n -= nstride;
@@ -392,7 +394,7 @@ class PhiloxGeneratorAVX2Impl32
             std::array<std::uint32_t, nstride * K> u;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
+            MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], key);
         }

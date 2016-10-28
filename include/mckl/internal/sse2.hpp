@@ -50,7 +50,7 @@ namespace internal
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t N>
-inline void transpose4x32_si128(std::array<__m128i, N> &s)
+MCKL_FLATTEN inline void transpose4x32_si128(std::array<__m128i, N> &s)
 {
     __m128i t0 = _mm_unpacklo_epi32(std::get<I0>(s), std::get<I1>(s));
     __m128i t1 = _mm_unpacklo_epi32(std::get<I2>(s), std::get<I3>(s));
@@ -62,17 +62,17 @@ inline void transpose4x32_si128(std::array<__m128i, N> &s)
     std::get<I3>(s) = _mm_unpackhi_epi64(t2, t3);
 }
 
-inline void transpose4x32_load_si128(std::array<__m128i, 4> &s)
+MCKL_FLATTEN inline void transpose4x32_load_si128(std::array<__m128i, 4> &s)
 {
     transpose4x32_si128<0, 1, 2, 3>(s);
 }
 
-inline void transpose4x32_store_si128(std::array<__m128i, 4> &s)
+MCKL_FLATTEN inline void transpose4x32_store_si128(std::array<__m128i, 4> &s)
 {
     transpose4x32_si128<0, 1, 2, 3>(s);
 }
 
-inline void transpose4x32_load_si128(std::array<__m128i, 8> &s)
+MCKL_FLATTEN inline void transpose4x32_load_si128(std::array<__m128i, 8> &s)
 {
     __m128i t0 = std::get<2>(s);
     std::get<2>(s) = std::get<1>(s);
@@ -88,7 +88,7 @@ inline void transpose4x32_load_si128(std::array<__m128i, 8> &s)
     transpose4x32_si128<4, 5, 6, 7>(s);
 }
 
-inline void transpose4x32_store_si128(std::array<__m128i, 8> &s)
+MCKL_FLATTEN inline void transpose4x32_store_si128(std::array<__m128i, 8> &s)
 {
     transpose4x32_si128<0, 1, 2, 3>(s);
     transpose4x32_si128<4, 5, 6, 7>(s);
@@ -104,7 +104,7 @@ inline void transpose4x32_store_si128(std::array<__m128i, 8> &s)
     std::get<5>(s) = t1;
 }
 
-inline void transpose4x32_load_si128(std::array<__m128i, 16> &s)
+MCKL_FLATTEN inline void transpose4x32_load_si128(std::array<__m128i, 16> &s)
 {
     __m128i s1 = std::get<0x1>(s);
     __m128i s2 = std::get<0x2>(s);
@@ -131,7 +131,7 @@ inline void transpose4x32_load_si128(std::array<__m128i, 16> &s)
     transpose4x32_si128<0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose4x32_store_si128(std::array<__m128i, 16> &s)
+MCKL_FLATTEN inline void transpose4x32_store_si128(std::array<__m128i, 16> &s)
 {
     transpose4x32_si128<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x32_si128<0x4, 0x5, 0x6, 0x7>(s);
@@ -159,7 +159,7 @@ inline void transpose4x32_store_si128(std::array<__m128i, 16> &s)
 }
 
 template <std::size_t I0, std::size_t I1, std::size_t N>
-inline void transpose2x64_si128(std::array<__m128i, N> &s)
+MCKL_FLATTEN inline void transpose2x64_si128(std::array<__m128i, N> &s)
 {
     __m128i t0 = _mm_unpacklo_epi64(std::get<I0>(s), std::get<I1>(s));
     __m128i t1 = _mm_unpackhi_epi64(std::get<I0>(s), std::get<I1>(s));
@@ -167,17 +167,17 @@ inline void transpose2x64_si128(std::array<__m128i, N> &s)
     std::get<I1>(s) = t1;
 }
 
-inline void transpose2x64_load_si128(std::array<__m128i, 2> &s)
+MCKL_FLATTEN inline void transpose2x64_load_si128(std::array<__m128i, 2> &s)
 {
     transpose2x64_si128<0, 1>(s);
 }
 
-inline void transpose2x64_store_si128(std::array<__m128i, 2> &s)
+MCKL_FLATTEN inline void transpose2x64_store_si128(std::array<__m128i, 2> &s)
 {
     transpose2x64_si128<0, 1>(s);
 }
 
-inline void transpose2x64_load_si128(std::array<__m128i, 4> &s)
+MCKL_FLATTEN inline void transpose2x64_load_si128(std::array<__m128i, 4> &s)
 {
     __m128i s1 = std::get<1>(s);
     std::get<1>(s) = std::get<2>(s);
@@ -187,7 +187,7 @@ inline void transpose2x64_load_si128(std::array<__m128i, 4> &s)
     transpose2x64_si128<2, 3>(s);
 }
 
-inline void transpose2x64_store_si128(std::array<__m128i, 4> &s)
+MCKL_FLATTEN inline void transpose2x64_store_si128(std::array<__m128i, 4> &s)
 {
     transpose2x64_si128<0, 1>(s);
     transpose2x64_si128<2, 3>(s);
@@ -197,7 +197,7 @@ inline void transpose2x64_store_si128(std::array<__m128i, 4> &s)
     std::get<2>(s) = s1;
 }
 
-inline void transpose2x64_load_si128(std::array<__m128i, 8> &s)
+MCKL_FLATTEN inline void transpose2x64_load_si128(std::array<__m128i, 8> &s)
 {
     __m128i t0 = std::get<2>(s);
     std::get<2>(s) = std::get<1>(s);
@@ -215,7 +215,7 @@ inline void transpose2x64_load_si128(std::array<__m128i, 8> &s)
     transpose2x64_si128<6, 7>(s);
 }
 
-inline void transpose2x64_store_si128(std::array<__m128i, 8> &s)
+MCKL_FLATTEN inline void transpose2x64_store_si128(std::array<__m128i, 8> &s)
 {
     transpose2x64_si128<0, 1>(s);
     transpose2x64_si128<2, 3>(s);
@@ -233,7 +233,7 @@ inline void transpose2x64_store_si128(std::array<__m128i, 8> &s)
     std::get<5>(s) = t1;
 }
 
-inline void transpose2x64_load_si128(std::array<__m128i, 16> &s)
+MCKL_FLATTEN inline void transpose2x64_load_si128(std::array<__m128i, 16> &s)
 {
     __m128i t0 = std::get<0x2>(s);
     std::get<0x2>(s) = std::get<0x1>(s);
@@ -267,7 +267,7 @@ inline void transpose2x64_load_si128(std::array<__m128i, 16> &s)
     transpose2x64_si128<0xE, 0xF>(s);
 }
 
-inline void transpose2x64_store_si128(std::array<__m128i, 16> &s)
+MCKL_FLATTEN inline void transpose2x64_store_si128(std::array<__m128i, 16> &s)
 {
     transpose2x64_si128<0x0, 0x1>(s);
     transpose2x64_si128<0x2, 0x3>(s);

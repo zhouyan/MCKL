@@ -66,4 +66,12 @@
 #endif
 #endif
 
+#ifndef MCKL_FLATTEN
+#define MCKL_FLATTEN
+#endif
+
+#ifndef MCKL_FLATTEN_CALL
+#define MCKL_FLATTEN_CALL
+#endif
+
 #endif // MCKL_INTERNAL_COMPILER_HPP

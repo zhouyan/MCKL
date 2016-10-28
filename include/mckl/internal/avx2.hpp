@@ -51,7 +51,7 @@ namespace internal
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t I4, std::size_t I5, std::size_t I6, std::size_t I7,
     std::size_t N>
-inline void transpose8x32_si256(std::array<__m256i, N> &s)
+MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
 {
     __m256i t0 = _mm256_unpacklo_epi32(std::get<I0>(s), std::get<I1>(s));
     __m256i t1 = _mm256_unpacklo_epi32(std::get<I2>(s), std::get<I3>(s));
@@ -79,17 +79,17 @@ inline void transpose8x32_si256(std::array<__m256i, N> &s)
     std::get<I7>(s) = _mm256_permute2x128_si256(tE, tF, 0x31);
 }
 
-inline void transpose8x32_load_si256(std::array<__m256i, 8> &s)
+MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 8> &s)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
+MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
+MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
 {
     __m256i t0 = std::get<0x1>(s);
     std::get<0x1>(s) = std::get<0x2>(s);
@@ -117,7 +117,7 @@ inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
+MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
 {
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
@@ -147,7 +147,7 @@ inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t N>
-inline void transpose4x64_si256(std::array<__m256i, N> &s)
+MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
 {
     __m256i t0 = _mm256_unpacklo_epi64(std::get<I0>(s), std::get<I1>(s));
     __m256i t1 = _mm256_unpacklo_epi64(std::get<I2>(s), std::get<I3>(s));
@@ -159,17 +159,17 @@ inline void transpose4x64_si256(std::array<__m256i, N> &s)
     std::get<I3>(s) = _mm256_permute2x128_si256(t2, t3, 0x31);
 }
 
-inline void transpose4x64_load_si256(std::array<__m256i, 4> &s)
+MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 4> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
+MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
+MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
 {
     __m256i t0 = std::get<1>(s);
     std::get<1>(s) = std::get<2>(s);
@@ -185,7 +185,7 @@ inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
     transpose4x64_si256<4, 5, 6, 7>(s);
 }
 
-inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
+MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
@@ -201,7 +201,7 @@ inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
     std::get<5>(s) = t1;
 }
 
-inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
+MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
 {
     __m256i s1 = std::get<0x1>(s);
     __m256i s2 = std::get<0x2>(s);
@@ -228,7 +228,7 @@ inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
     transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
 }
 
-inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
+MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
 {
     transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);
@@ -255,7 +255,7 @@ inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
     std::get<0xE>(s) = sB;
 }
 
-inline void add_ps256(std::array<__m256, 4> &s, const __m256 &a)
+MCKL_FLATTEN inline void add_ps256(std::array<__m256, 4> &s, const __m256 &a)
 {
     std::get<0>(s) = _mm256_add_ps(std::get<0>(s), a);
     std::get<1>(s) = _mm256_add_ps(std::get<1>(s), a);
@@ -263,7 +263,8 @@ inline void add_ps256(std::array<__m256, 4> &s, const __m256 &a)
     std::get<3>(s) = _mm256_add_ps(std::get<3>(s), a);
 }
 
-inline void add_ps256(std::array<__m256, 4> &s, const std::array<__m256, 4> &a)
+MCKL_FLATTEN inline void add_ps256(
+    std::array<__m256, 4> &s, const std::array<__m256, 4> &a)
 {
     std::get<0>(s) = _mm256_add_ps(std::get<0>(s), std::get<0>(a));
     std::get<1>(s) = _mm256_add_ps(std::get<1>(s), std::get<1>(a));
@@ -271,7 +272,7 @@ inline void add_ps256(std::array<__m256, 4> &s, const std::array<__m256, 4> &a)
     std::get<3>(s) = _mm256_add_ps(std::get<3>(s), std::get<3>(a));
 }
 
-inline void add_ps256(std::array<__m256, 8> &s, const __m256 &a)
+MCKL_FLATTEN inline void add_ps256(std::array<__m256, 8> &s, const __m256 &a)
 {
     std::get<0>(s) = _mm256_add_ps(std::get<0>(s), a);
     std::get<1>(s) = _mm256_add_ps(std::get<1>(s), a);
@@ -283,7 +284,8 @@ inline void add_ps256(std::array<__m256, 8> &s, const __m256 &a)
     std::get<7>(s) = _mm256_add_ps(std::get<7>(s), a);
 }
 
-inline void add_ps256(std::array<__m256, 8> &s, const std::array<__m256, 8> &a)
+MCKL_FLATTEN inline void add_ps256(
+    std::array<__m256, 8> &s, const std::array<__m256, 8> &a)
 {
     std::get<0>(s) = _mm256_add_ps(std::get<0>(s), std::get<0>(a));
     std::get<1>(s) = _mm256_add_ps(std::get<1>(s), std::get<1>(a));
@@ -295,7 +297,7 @@ inline void add_ps256(std::array<__m256, 8> &s, const std::array<__m256, 8> &a)
     std::get<7>(s) = _mm256_add_ps(std::get<7>(s), std::get<7>(a));
 }
 
-inline void mul_ps256(std::array<__m256, 4> &s, const __m256 &a)
+MCKL_FLATTEN inline void mul_ps256(std::array<__m256, 4> &s, const __m256 &a)
 {
     std::get<0>(s) = _mm256_mul_ps(std::get<0>(s), a);
     std::get<1>(s) = _mm256_mul_ps(std::get<1>(s), a);
@@ -303,7 +305,8 @@ inline void mul_ps256(std::array<__m256, 4> &s, const __m256 &a)
     std::get<3>(s) = _mm256_mul_ps(std::get<3>(s), a);
 }
 
-inline void mul_ps256(std::array<__m256, 4> &s, const std::array<__m256, 4> &a)
+MCKL_FLATTEN inline void mul_ps256(
+    std::array<__m256, 4> &s, const std::array<__m256, 4> &a)
 {
     std::get<0>(s) = _mm256_mul_ps(std::get<0>(s), std::get<0>(a));
     std::get<1>(s) = _mm256_mul_ps(std::get<1>(s), std::get<1>(a));
@@ -311,7 +314,7 @@ inline void mul_ps256(std::array<__m256, 4> &s, const std::array<__m256, 4> &a)
     std::get<3>(s) = _mm256_mul_ps(std::get<3>(s), std::get<3>(a));
 }
 
-inline void mul_ps256(std::array<__m256, 8> &s, const __m256 &a)
+MCKL_FLATTEN inline void mul_ps256(std::array<__m256, 8> &s, const __m256 &a)
 {
     std::get<0>(s) = _mm256_mul_ps(std::get<0>(s), a);
     std::get<1>(s) = _mm256_mul_ps(std::get<1>(s), a);
@@ -323,7 +326,8 @@ inline void mul_ps256(std::array<__m256, 8> &s, const __m256 &a)
     std::get<7>(s) = _mm256_mul_ps(std::get<7>(s), a);
 }
 
-inline void mul_ps256(std::array<__m256, 8> &s, const std::array<__m256, 8> &a)
+MCKL_FLATTEN inline void mul_ps256(
+    std::array<__m256, 8> &s, const std::array<__m256, 8> &a)
 {
     std::get<0>(s) = _mm256_mul_ps(std::get<0>(s), std::get<0>(a));
     std::get<1>(s) = _mm256_mul_ps(std::get<1>(s), std::get<1>(a));
@@ -337,7 +341,7 @@ inline void mul_ps256(std::array<__m256, 8> &s, const std::array<__m256, 8> &a)
 
 #if MCKL_USE_FMA
 
-inline void fma_ps256(
+MCKL_FLATTEN inline void fma_ps256(
     std::array<__m256, 4> &s, const __m256 &a, const __m256 &b)
 {
     std::get<0>(s) = _mm256_fmadd_ps(std::get<0>(s), a, b);
@@ -346,8 +350,8 @@ inline void fma_ps256(
     std::get<3>(s) = _mm256_fmadd_ps(std::get<3>(s), a, b);
 }
 
-inline void fma_ps256(std::array<__m256, 4> &s, const std::array<__m256, 4> &a,
-    const std::array<__m256, 4> &b)
+MCKL_FLATTEN inline void fma_ps256(std::array<__m256, 4> &s,
+    const std::array<__m256, 4> &a, const std::array<__m256, 4> &b)
 {
     std::get<0>(s) =
         _mm256_fmadd_ps(std::get<0>(s), std::get<0>(a), std::get<0>(b));
@@ -359,7 +363,7 @@ inline void fma_ps256(std::array<__m256, 4> &s, const std::array<__m256, 4> &a,
         _mm256_fmadd_ps(std::get<3>(s), std::get<3>(a), std::get<3>(b));
 }
 
-inline void fma_ps256(
+MCKL_FLATTEN inline void fma_ps256(
     std::array<__m256, 8> &s, const __m256 &a, const __m256 &b)
 {
     std::get<0>(s) = _mm256_fmadd_ps(std::get<0>(s), a, b);
@@ -372,8 +376,8 @@ inline void fma_ps256(
     std::get<7>(s) = _mm256_fmadd_ps(std::get<7>(s), a, b);
 }
 
-inline void fma_ps256(std::array<__m256, 8> &s, const std::array<__m256, 8> &a,
-    const std::array<__m256, 8> &b)
+MCKL_FLATTEN inline void fma_ps256(std::array<__m256, 8> &s,
+    const std::array<__m256, 8> &a, const std::array<__m256, 8> &b)
 {
     std::get<0>(s) =
         _mm256_fmadd_ps(std::get<0>(s), std::get<0>(a), std::get<0>(b));
@@ -396,7 +400,7 @@ inline void fma_ps256(std::array<__m256, 8> &s, const std::array<__m256, 8> &a,
 #else // MCKL_USE_FMA
 
 template <std::size_t S>
-inline void fma_ps256(
+MCKL_FLATTEN inline void fma_ps256(
     std::array<__m256, S> &s, const __m256 &a, const __m256 &b)
 {
     mul_ps256(s, a);
@@ -406,7 +410,7 @@ inline void fma_ps256(
 #endif // MCKL_USE_FMA
 
 template <std::size_t S>
-inline void fma_ps256(std::array<__m256, S> &s, float a, float b)
+MCKL_FLATTEN inline void fma_ps256(std::array<__m256, S> &s, float a, float b)
 {
     if (!(a < 1 || a > 1)) {
         add_ps256(s, _mm256_set1_ps(b));
@@ -422,7 +426,7 @@ inline void fma_ps256(std::array<__m256, S> &s, float a, float b)
 }
 
 template <int R>
-inline void convert_u32_ps256(
+MCKL_FLATTEN inline void convert_u32_ps256(
     const std::array<__m128i, 8> &s, std::array<__m256, 4> &t)
 {
     std::get<0>(t) = _mm256_castsi256_ps(_mm256_insertf128_si256(
@@ -450,7 +454,7 @@ inline void convert_u32_ps256(
 }
 
 template <int R>
-inline void convert_u32_ps256(
+MCKL_FLATTEN inline void convert_u32_ps256(
     const std::array<__m128i, 16> &s, std::array<__m256, 8> &t)
 {
     std::get<0>(t) = _mm256_castsi256_ps(_mm256_insertf128_si256(
@@ -498,7 +502,7 @@ inline void convert_u32_ps256(
 }
 
 template <int R>
-inline void convert_u32_ps256(
+MCKL_FLATTEN inline void convert_u32_ps256(
     const std::array<__m256i, 4> &s, std::array<__m256, 4> &t)
 {
     std::get<0>(t) = _mm256_castsi256_ps(_mm256_srli_epi32(std::get<0>(s), R));
@@ -513,7 +517,7 @@ inline void convert_u32_ps256(
 }
 
 template <int R>
-inline void convert_u32_ps256(
+MCKL_FLATTEN inline void convert_u32_ps256(
     const std::array<__m256i, 8> &s, std::array<__m256, 8> &t)
 {
     std::get<0>(t) = _mm256_castsi256_ps(_mm256_srli_epi32(std::get<0>(s), R));
@@ -535,7 +539,7 @@ inline void convert_u32_ps256(
     std::get<7>(t) = _mm256_cvtepi32_ps(_mm256_castps_si256(std::get<7>(t)));
 }
 
-inline void add_pd256(std::array<__m256d, 8> &s, const __m256d &a)
+MCKL_FLATTEN inline void add_pd256(std::array<__m256d, 8> &s, const __m256d &a)
 {
     std::get<0>(s) = _mm256_add_pd(std::get<0>(s), a);
     std::get<1>(s) = _mm256_add_pd(std::get<1>(s), a);
@@ -547,7 +551,7 @@ inline void add_pd256(std::array<__m256d, 8> &s, const __m256d &a)
     std::get<7>(s) = _mm256_add_pd(std::get<7>(s), a);
 }
 
-inline void add_pd256(
+MCKL_FLATTEN inline void add_pd256(
     std::array<__m256d, 8> &s, const std::array<__m256d, 8> &a)
 {
     std::get<0>(s) = _mm256_add_pd(std::get<0>(s), std::get<0>(a));
@@ -560,7 +564,8 @@ inline void add_pd256(
     std::get<7>(s) = _mm256_add_pd(std::get<7>(s), std::get<7>(a));
 }
 
-inline void add_pd256(std::array<__m256d, 16> &s, const __m256d &a)
+MCKL_FLATTEN inline void add_pd256(
+    std::array<__m256d, 16> &s, const __m256d &a)
 {
     std::get<0x0>(s) = _mm256_add_pd(std::get<0x0>(s), a);
     std::get<0x1>(s) = _mm256_add_pd(std::get<0x1>(s), a);
@@ -580,7 +585,7 @@ inline void add_pd256(std::array<__m256d, 16> &s, const __m256d &a)
     std::get<0xF>(s) = _mm256_add_pd(std::get<0xF>(s), a);
 }
 
-inline void add_pd256(
+MCKL_FLATTEN inline void add_pd256(
     std::array<__m256d, 16> &s, const std::array<__m256d, 16> &a)
 {
     std::get<0x0>(s) = _mm256_add_pd(std::get<0x0>(s), std::get<0x0>(a));
@@ -601,7 +606,7 @@ inline void add_pd256(
     std::get<0xF>(s) = _mm256_add_pd(std::get<0xF>(s), std::get<0xF>(a));
 }
 
-inline void mul_pd256(std::array<__m256d, 8> &s, const __m256d &a)
+MCKL_FLATTEN inline void mul_pd256(std::array<__m256d, 8> &s, const __m256d &a)
 {
     std::get<0>(s) = _mm256_mul_pd(std::get<0>(s), a);
     std::get<1>(s) = _mm256_mul_pd(std::get<1>(s), a);
@@ -613,7 +618,7 @@ inline void mul_pd256(std::array<__m256d, 8> &s, const __m256d &a)
     std::get<7>(s) = _mm256_mul_pd(std::get<7>(s), a);
 }
 
-inline void mul_pd256(
+MCKL_FLATTEN inline void mul_pd256(
     std::array<__m256d, 8> &s, const std::array<__m256d, 8> &a)
 {
     std::get<0>(s) = _mm256_mul_pd(std::get<0>(s), std::get<0>(a));
@@ -626,7 +631,8 @@ inline void mul_pd256(
     std::get<7>(s) = _mm256_mul_pd(std::get<7>(s), std::get<7>(a));
 }
 
-inline void mul_pd256(std::array<__m256d, 16> &s, const __m256d &a)
+MCKL_FLATTEN inline void mul_pd256(
+    std::array<__m256d, 16> &s, const __m256d &a)
 {
     std::get<0x0>(s) = _mm256_mul_pd(std::get<0x0>(s), a);
     std::get<0x1>(s) = _mm256_mul_pd(std::get<0x1>(s), a);
@@ -646,7 +652,7 @@ inline void mul_pd256(std::array<__m256d, 16> &s, const __m256d &a)
     std::get<0xF>(s) = _mm256_mul_pd(std::get<0xF>(s), a);
 }
 
-inline void mul_pd256(
+MCKL_FLATTEN inline void mul_pd256(
     std::array<__m256d, 16> &s, const std::array<__m256d, 16> &a)
 {
     std::get<0x0>(s) = _mm256_mul_pd(std::get<0x0>(s), std::get<0x0>(a));
@@ -669,7 +675,7 @@ inline void mul_pd256(
 
 #if MCKL_USE_FMA
 
-inline void fma_pd256(
+MCKL_FLATTEN inline void fma_pd256(
     std::array<__m256d, 8> &s, const __m256d &a, const __m256d &b)
 {
     std::get<0>(s) = _mm256_fmadd_pd(std::get<0>(s), a, b);
@@ -682,7 +688,7 @@ inline void fma_pd256(
     std::get<7>(s) = _mm256_fmadd_pd(std::get<7>(s), a, b);
 }
 
-inline void fma_pd256(std::array<__m256d, 8> &s,
+MCKL_FLATTEN inline void fma_pd256(std::array<__m256d, 8> &s,
     const std::array<__m256d, 8> &a, const std::array<__m256d, 8> &b)
 {
     std::get<0>(s) =
@@ -703,7 +709,7 @@ inline void fma_pd256(std::array<__m256d, 8> &s,
         _mm256_fmadd_pd(std::get<7>(s), std::get<7>(a), std::get<7>(b));
 }
 
-inline void fma_pd256(
+MCKL_FLATTEN inline void fma_pd256(
     std::array<__m256d, 16> &s, const __m256d &a, const __m256d &b)
 {
     std::get<0x0>(s) = _mm256_fmadd_pd(std::get<0x0>(s), a, b);
@@ -724,7 +730,7 @@ inline void fma_pd256(
     std::get<0xF>(s) = _mm256_fmadd_pd(std::get<0xF>(s), a, b);
 }
 
-inline void fma_pd256(std::array<__m256d, 16> &s,
+MCKL_FLATTEN inline void fma_pd256(std::array<__m256d, 16> &s,
     const std::array<__m256d, 16> &a, const std::array<__m256d, 16> &b)
 {
     std::get<0x0>(s) =
@@ -764,7 +770,7 @@ inline void fma_pd256(std::array<__m256d, 16> &s,
 #else // MCKL_USE_FMA
 
 template <std::size_t S>
-inline void fma_pd256(
+MCKL_FLATTEN inline void fma_pd256(
     std::array<__m256d, S> &s, const __m256d &a, const __m256d &b)
 {
     mul_pd256(s, a);
@@ -774,7 +780,8 @@ inline void fma_pd256(
 #endif // MCKL_USE_FMA
 
 template <std::size_t S>
-inline void fma_pd256(std::array<__m256d, S> &s, double a, double b)
+MCKL_FLATTEN inline void fma_pd256(
+    std::array<__m256d, S> &s, double a, double b)
 {
     if (!(a < 1 || a > 1)) {
         add_pd256(s, _mm256_set1_pd(b));
@@ -789,7 +796,7 @@ inline void fma_pd256(std::array<__m256d, S> &s, double a, double b)
     fma_pd256(s, _mm256_set1_pd(a), _mm256_set1_pd(b));
 }
 
-inline void convert_u32_pd256(
+MCKL_FLATTEN inline void convert_u32_pd256(
     const std::array<__m128i, 8> &s, std::array<__m256d, 8> &t)
 {
     const __m256i p = _mm256_set_epi32(3, 7, 2, 6, 1, 5, 0, 4);
@@ -857,7 +864,7 @@ inline void convert_u32_pd256(
     std::get<7>(t) = _mm256_sub_pd(std::get<7>(t), c);
 }
 
-inline void convert_u32_pd256(
+MCKL_FLATTEN inline void convert_u32_pd256(
     const std::array<__m128i, 16> &s, std::array<__m256d, 16> &t)
 {
     const __m256i p = _mm256_set_epi32(0x3, 0x7, 0x2, 0x6, 0x1, 0x5, 0x0, 0x4);
@@ -981,7 +988,7 @@ inline void convert_u32_pd256(
     std::get<0xF>(t) = _mm256_sub_pd(std::get<0xF>(t), c);
 }
 
-inline void convert_u32_pd256(
+MCKL_FLATTEN inline void convert_u32_pd256(
     const std::array<__m256i, 8> &s, std::array<__m256d, 16> &t)
 {
     const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);

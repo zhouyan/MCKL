@@ -76,7 +76,8 @@ inline void increment_si256(
 }
 
 template <typename T, std::size_t K, std::size_t S>
-inline void increment_si256(std::array<T, K> &ctr, std::array<__m256i, S> &s)
+MCKL_FLATTEN inline void increment_si256(
+    std::array<T, K> &ctr, std::array<__m256i, S> &s)
 {
     static_assert((sizeof(__m256i) * S) % (sizeof(T) * K) == 0,
         "**increment_si256** invalid blocks size");

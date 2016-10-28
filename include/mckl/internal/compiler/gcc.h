@@ -132,4 +132,8 @@
 #endif
 #endif
 
+#ifndef MCKL_FLATTEN
+#define MCKL_FLATTEN __attribute__((always_inline, flatten))
+#endif
+
 #endif // MCKL_INTERNAL_COMPILER_GCC_H

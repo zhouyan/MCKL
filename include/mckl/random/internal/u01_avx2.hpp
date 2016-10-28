@@ -67,7 +67,8 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
         return U01GenericImpl<UIntType, float, Closed, Closed>::eval(u);
     }
 
-    static void eval(const std::array<__m128i, 8> &s, std::array<__m256, 4> &t)
+    MCKL_FLATTEN static void eval(
+        const std::array<__m128i, 8> &s, std::array<__m256, 4> &t)
     {
         const __m256 p25 = _mm256_castsi256_ps( // 2^{-25}
             _mm256_set1_epi32(static_cast<int>(0x33000000)));
@@ -113,7 +114,7 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
         mul_ps256(t, p25);
     }
 
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, 16> &s, std::array<__m256, 8> &t)
     {
         const __m256 p25 = _mm256_castsi256_ps( // 2^{-25}
@@ -188,7 +189,8 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
         mul_ps256(t, p25);
     }
 
-    static void eval(const std::array<__m256i, 8> &s, std::array<__m256, 8> &t)
+    MCKL_FLATTEN static void eval(
+        const std::array<__m256i, 8> &s, std::array<__m256, 8> &t)
     {
         const __m256 p25 = _mm256_castsi256_ps( // 2^{-25}
             _mm256_set1_epi32(static_cast<int>(0x33000000)));
@@ -256,7 +258,7 @@ class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, S> &s, std::array<__m256, S / 2> &t)
     {
         const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
@@ -267,7 +269,8 @@ class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t)
+    MCKL_FLATTEN static void eval(
+        const std::array<__m256i, S> &s, std::array<__m256, S> &t)
     {
         const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
             _mm256_set1_epi32(static_cast<int>(0x33800000)));
@@ -287,7 +290,7 @@ class U01AVX2Impl<UIntType, float, Open, Closed, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, S> &s, std::array<__m256, S / 2> &t)
     {
         const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
@@ -298,7 +301,8 @@ class U01AVX2Impl<UIntType, float, Open, Closed, 32>
     }
 
     template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t)
+    MCKL_FLATTEN static void eval(
+        const std::array<__m256i, S> &s, std::array<__m256, S> &t)
     {
         const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
             _mm256_set1_epi32(static_cast<int>(0x33800000)));
@@ -318,7 +322,7 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, S> &s, std::array<__m256, S / 2> &t)
     {
         const __m256 p23 = _mm256_castsi256_ps( // 2^{-23}
@@ -331,7 +335,8 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t)
+    MCKL_FLATTEN static void eval(
+        const std::array<__m256i, S> &s, std::array<__m256, S> &t)
     {
         const __m256 p23 = _mm256_castsi256_ps( // 2^{-23}
             _mm256_set1_epi32(static_cast<int>(0x34000000)));
@@ -360,7 +365,7 @@ class UniformRealAVX2Impl<UIntType, float, 32>
     }
 
     template <std::size_t S>
-    static void eval(const std::array<__m128i, S> &s,
+    MCKL_FLATTEN static void eval(const std::array<__m128i, S> &s,
         std::array<__m256, S / 2> &t, float a, float b)
     {
         U01AVX2Impl<UIntType, float, Closed, Open, 32>::eval(s, t);
@@ -368,8 +373,8 @@ class UniformRealAVX2Impl<UIntType, float, 32>
     }
 
     template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t,
-        float a, float b)
+    MCKL_FLATTEN static void eval(const std::array<__m256i, S> &s,
+        std::array<__m256, S> &t, float a, float b)
     {
         U01AVX2Impl<UIntType, float, Closed, Open, 32>::eval(s, t);
         fma_ps256(t, b - a, a);
@@ -385,7 +390,7 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
         return U01GenericImpl<UIntType, double, Closed, Closed>::eval(u);
     }
 
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, 8> &s, std::array<__m256d, 8> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -410,7 +415,7 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
         mul_pd256(t, p32);
     }
 
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, 16> &s, std::array<__m256d, 16> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -443,7 +448,7 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
         mul_pd256(t, p32);
     }
 
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m256i, 8> &s, std::array<__m256d, 16> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -479,7 +484,7 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, S> &s, std::array<__m256d, S> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -490,7 +495,7 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -511,7 +516,7 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, S> &s, std::array<__m256d, S> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -522,7 +527,7 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -543,7 +548,7 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m128i, S> &s, std::array<__m256d, S> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -556,7 +561,7 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
     }
 
     template <std::size_t S>
-    static void eval(
+    MCKL_FLATTEN static void eval(
         const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
     {
         const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
@@ -587,7 +592,7 @@ class UniformRealAVX2Impl<UIntType, double, 32>
     }
 
     template <std::size_t S>
-    static void eval(const std::array<__m128i, S> &s,
+    MCKL_FLATTEN static void eval(const std::array<__m128i, S> &s,
         std::array<__m256d, S> &t, double a, double b)
     {
         U01AVX2Impl<UIntType, double, Closed, Open, 32>::eval(s, t);
@@ -595,7 +600,7 @@ class UniformRealAVX2Impl<UIntType, double, 32>
     }
 
     template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s,
+    MCKL_FLATTEN static void eval(const std::array<__m256i, S> &s,
         std::array<__m256d, S * 2> &t, double a, double b)
     {
         U01AVX2Impl<UIntType, double, Closed, Open, 32>::eval(s, t);

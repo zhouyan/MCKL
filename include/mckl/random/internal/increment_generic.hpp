@@ -343,7 +343,7 @@ class IncrementBlock<T, K, 16>
 /// \brief Increment a counter by one
 /// \ingroup Random
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr)
+MCKL_FLATTEN inline void increment(std::array<T, K> &ctr)
 {
     internal::Increment<T, K>::eval(ctr);
 }
@@ -352,7 +352,7 @@ inline void increment(std::array<T, K> &ctr)
 /// array of counters
 /// \ingroup Random
 template <typename T, std::size_t K, std::size_t Blocks>
-inline void increment(
+MCKL_FLATTEN inline void increment(
     std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
 {
     internal::IncrementBlock<T, K, Blocks>::eval(ctr, ctr_block);
