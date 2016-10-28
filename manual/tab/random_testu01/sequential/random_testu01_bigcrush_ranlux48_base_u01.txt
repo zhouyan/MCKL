@@ -1,0 +1,21 @@
+========= Summary results of BigCrush =========
+ Generator:        U01
+ Number of statistics:  24
+ ----------------------------------------------
+ 25  ClosePairs NP, t = 16          9.8e-10
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16       6.4e-232
+ 25  ClosePairs mNP2, t = 16        4.3e-75
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16        1.3e-9
+ 25  ClosePairs NP, t = 16          1.8e-11
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16       3.4e-225
+ 25  ClosePairs mNP2, t = 16        7.2e-68
+ 25  ClosePairs NJumps, t = 16        eps
+ 48  MaxOft AD, t = 24               4.6e-5
+ 48  MaxOft AD, t = 24               1.3e-4
+ 59  WeightDistrib, r = 0            2.5e-4
+ ----------------------------------------------
+ All other tests were passed
+

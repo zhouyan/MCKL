@@ -1,0 +1,13 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  18
+ ----------------------------------------------
+ 39  Run, r = 15                    1 -  8.3e-5
+ 39  Run, r = 15                     0.9998
+ 62  WeightDistrib, r = 0            7.8e-8
+ 62  WeightDistrib, r = 0           8.0e-10
+ 63  WeightDistrib, r = 10          2.2e-16
+ 63  WeightDistrib, r = 10          3.1e-15
+ ----------------------------------------------
+ All other tests were passed
+
