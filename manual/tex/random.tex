@@ -520,8 +520,9 @@ is used multiple times. For example,
 \begin{verbatim}
 void eval_each(size_t, ParticleIndex<T> idx)
 {
-    auto &rng = idx.rng();
+    auto rng = std::move(idx.rng());
     // Use rng
+    idx.rng() = std::move(rng);
 }
 \end{verbatim}
 
@@ -609,8 +610,8 @@ and the output random real numbers as~$X$.
   \label{tab:Intermediate integer types of uniform distribution}
 \end{table}
 
-The type |U01Distribution| is aliased to |U01CanonicalDistribution| if
-|MCKL_U01_USE_FIXED_POINT| configuration macro is set to true. Otherwise it is
+The type |U01Distribution| is aliased to |U01CanonicalDistribution| if the
+configuration macro |MCKL_U01_USE_FIXED_POINT| is set to true. Otherwise it is
 aliased to |U01CODistribution|.
 
 \subsection{Canonical form}
