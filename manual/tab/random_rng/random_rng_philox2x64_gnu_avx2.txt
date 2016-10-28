@@ -1,5 +1,5 @@
-Philox2x64                48       8           1.56           1.07      ---Passed
-Philox2x64                48       8           1.58           1.08      ---Passed
-Philox2x64                48       8           1.56           1.07      ---Passed
-Philox2x64                48       8           1.56           1.07      ---Passed
-Philox2x64                48       8           1.56           1.07      ---Passed
+Philox2x64                48       8           1.56           1.09      ---Passed
+Philox2x64                48       8           1.57           1.09      ---Passed
+Philox2x64                48       8           1.56           1.09      ---Passed
+Philox2x64                48       8           1.56           1.09      ---Passed
+Philox2x64                48       8           1.56           1.09      ---Passed

@@ -1,5 +1,5 @@
-Threefish512             232       8           4.77           2.08      ---Passed
-Threefish512             232       8           4.76           2.08      ---Passed
-Threefish512             232       8           4.78           2.08      ---Passed
-Threefish512             232       8           4.77           2.08      ---Passed
-Threefish512             232       8           4.77           2.09      ---Passed
+Threefish512             232       8           3.97           2.01      ---Passed
+Threefish512             232       8           3.95           2.01      ---Passed
+Threefish512             232       8           3.99           2.03      ---Passed
+Threefish512             232       8           3.95           1.99      ---Passed
+Threefish512             232       8           3.95           2.00      ---Passed

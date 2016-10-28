@@ -1,5 +1,5 @@
-Philox2x32_64             24       8           2.55           0.46      ---Passed
-Philox2x32_64             24       8           2.55           0.46      ---Passed
-Philox2x32_64             24       8           2.55           0.46      ---Passed
-Philox2x32_64             24       8           2.55           0.46      ---Passed
-Philox2x32_64             24       8           2.55           0.46      ---Passed
+Philox2x32_64             24       8           2.60           0.43      ---Passed
+Philox2x32_64             24       8           2.63           0.43      ---Passed
+Philox2x32_64             24       8           2.62           0.43      ---Passed
+Philox2x32_64             24       8           2.63           0.43      ---Passed
+Philox2x32_64             24       8           2.62           0.43      ---Passed

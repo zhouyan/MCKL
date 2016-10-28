@@ -1,5 +1,5 @@
+ARS_64                    56       8           2.71           0.29      ---Passed
 ARS_64                    56       8           2.71           0.28      ---Passed
-ARS_64                    56       8           2.71           0.28      ---Passed
-ARS_64                    56       8           2.71           0.28      ---Passed
+ARS_64                    56       8           2.73           0.28      ---Passed
 ARS_64                    56       8           2.71           0.28      ---Passed
 ARS_64                    56       8           2.71           0.28      ---Passed

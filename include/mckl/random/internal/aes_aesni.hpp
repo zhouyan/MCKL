@@ -692,29 +692,29 @@ class AESGeneratorAESNIImpl
 
         std::array<__m128i, S> s;
         while (n >= nstride) {
-            increment_si128(ctr, s);
+            MCKL_FLATTEN_CALL increment_si128(ctr, s);
 
-            encfirst(s, rk);
+            MCKL_FLATTEN_CALL encfirst(s, rk);
 
-            enc<0x1>(s, rk);
-            enc<0x2>(s, rk);
-            enc<0x3>(s, rk);
-            enc<0x4>(s, rk);
-            enc<0x5>(s, rk);
-            enc<0x6>(s, rk);
-            enc<0x7>(s, rk);
-            enc<0x8>(s, rk);
-            enc<0x9>(s, rk);
-            enc<0xA>(s, rk);
-            enc<0xB>(s, rk);
-            enc<0xC>(s, rk);
-            enc<0xD>(s, rk);
-            enc<0xE>(s, rk);
-            enc<0xF>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x1>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x2>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x3>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x4>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x5>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x6>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x7>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x8>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x9>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xA>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xB>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xC>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xD>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xE>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xF>(s, rk);
 
             round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
 
-            enclast(s, rk);
+            MCKL_FLATTEN_CALL enclast(s, rk);
 
             std::memcpy(r, s.data(), cstride);
             n -= nstride;
@@ -726,7 +726,7 @@ class AESGeneratorAESNIImpl
             std::array<Counter<std::uint32_t, 4>, nstride> ctr;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
+            MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], rk);
         }
@@ -836,31 +836,32 @@ class AESGeneratorAESNIImpl
         std::array<__m128i, S> s;
         std::array<__m256, S / 2> t;
         while (n >= nstride) {
-            increment_si128(ctr, s);
+            MCKL_FLATTEN_CALL increment_si128(ctr, s);
 
-            encfirst(s, rk);
+            MCKL_FLATTEN_CALL encfirst(s, rk);
 
-            enc<0x1>(s, rk);
-            enc<0x2>(s, rk);
-            enc<0x3>(s, rk);
-            enc<0x4>(s, rk);
-            enc<0x5>(s, rk);
-            enc<0x6>(s, rk);
-            enc<0x7>(s, rk);
-            enc<0x8>(s, rk);
-            enc<0x9>(s, rk);
-            enc<0xA>(s, rk);
-            enc<0xB>(s, rk);
-            enc<0xC>(s, rk);
-            enc<0xD>(s, rk);
-            enc<0xE>(s, rk);
-            enc<0xF>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x1>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x2>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x3>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x4>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x5>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x6>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x7>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x8>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x9>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xA>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xB>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xC>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xD>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xE>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xF>(s, rk);
 
             round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
 
-            enclast(s, rk);
+            MCKL_FLATTEN_CALL enclast(s, rk);
 
-            Transform::eval(s, t, std::forward<Args>(args)...);
+            MCKL_FLATTEN_CALL Transform::eval(
+                s, t, std::forward<Args>(args)...);
 
             std::memcpy(r, t.data(), cstride);
             n -= nstride;
@@ -873,12 +874,13 @@ class AESGeneratorAESNIImpl
             std::array<std::uint32_t, nstride * 4> u;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
+            MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], rk);
         }
 
         alignas(32) std::array<float, rstride> result;
+        MCKL_FLATTEN_CALL
         for (std::size_t i = 0; i != n * 4; ++i)
             result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
         std::memcpy(r, result.data(), sizeof(float) * 4 * n);
@@ -898,31 +900,32 @@ class AESGeneratorAESNIImpl
         std::array<__m128i, S> s;
         std::array<__m256d, S> t;
         while (n >= nstride) {
-            increment_si128(ctr, s);
+            MCKL_FLATTEN_CALL increment_si128(ctr, s);
 
-            encfirst(s, rk);
+            MCKL_FLATTEN_CALL encfirst(s, rk);
 
-            enc<0x1>(s, rk);
-            enc<0x2>(s, rk);
-            enc<0x3>(s, rk);
-            enc<0x4>(s, rk);
-            enc<0x5>(s, rk);
-            enc<0x6>(s, rk);
-            enc<0x7>(s, rk);
-            enc<0x8>(s, rk);
-            enc<0x9>(s, rk);
-            enc<0xA>(s, rk);
-            enc<0xB>(s, rk);
-            enc<0xC>(s, rk);
-            enc<0xD>(s, rk);
-            enc<0xE>(s, rk);
-            enc<0xF>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x1>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x2>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x3>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x4>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x5>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x6>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x7>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x8>(s, rk);
+            MCKL_FLATTEN_CALL enc<0x9>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xA>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xB>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xC>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xD>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xE>(s, rk);
+            MCKL_FLATTEN_CALL enc<0xF>(s, rk);
 
             round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
 
-            enclast(s, rk);
+            MCKL_FLATTEN_CALL enclast(s, rk);
 
-            Transform::eval(s, t, std::forward<Args>(args)...);
+            MCKL_FLATTEN_CALL Transform::eval(
+                s, t, std::forward<Args>(args)...);
 
             std::memcpy(r, t.data(), cstride);
             n -= nstride;
@@ -935,12 +938,13 @@ class AESGeneratorAESNIImpl
             std::array<std::uint32_t, nstride * 4> u;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
+            MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], rk);
         }
 
         alignas(32) std::array<double, rstride> result;
+        MCKL_FLATTEN_CALL
         for (std::size_t i = 0; i != n * 4; ++i)
             result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
         std::memcpy(r, result.data(), sizeof(double) * 4 * n);
@@ -1016,7 +1020,7 @@ class AESGeneratorAESNIImpl
     static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        enc<N>(s, rk);
+        MCKL_FLATTEN_CALL enc<N>(s, rk);
         round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
     }
 
