@@ -1,4 +1,4 @@
-Exponential<float>(1)                36.70       33.27        3.44        2.83  VML       --Passed
-Exponential<double>(1)               71.03       42.44        7.84        6.39  VML       --Passed
-Exponential<float>(1)                36.52       33.23       12.05        2.88  C++       --Passed
-Exponential<double>(1)               71.07       42.43       21.34        6.40  C++       --Passed
+Exponential<float>(1)                38.07       32.57        3.42        2.93       VML    (0)--Passed
+Exponential<double>(1)               71.72       42.28        7.73        6.36       VML    (0)--Passed
+Exponential<float>(1)                36.78       32.57       13.50        2.86       C++    (0)--Passed
+Exponential<double>(1)               71.75       42.28       21.46        6.37       C++    (0)--Passed

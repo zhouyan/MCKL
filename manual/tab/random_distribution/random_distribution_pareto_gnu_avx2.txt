@@ -1,4 +1,4 @@
-Pareto<float>(1,1)                   55.00       55.31        4.80        4.54  VML       --Passed
-Pareto<double>(1,1)                  70.39       71.66       12.34       11.27  VML       --Passed
-Pareto<float>(1,1)                   55.03       55.34       21.61       12.84  C++       --Passed
-Pareto<double>(1,1)                  71.24       71.23       37.05       21.93  C++       --Passed
+Pareto<float>(1,1)                   54.92       54.85        4.70        4.57       VML    (0)--Passed
+Pareto<double>(1,1)                  70.58       70.45       12.28       11.38       VML    (0)--Passed
+Pareto<float>(1,1)                   54.91       54.84       23.66       14.17       C++    (0)--Passed
+Pareto<double>(1,1)                  70.61       70.48       38.76       24.17       C++    (0)--Passed

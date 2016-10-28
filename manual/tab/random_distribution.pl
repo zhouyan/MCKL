@@ -174,12 +174,6 @@ sub run {
             push @result, @lines1;
             push @result, @lines2;
             for (@lines1) {
-                print $_ if /<(float|int32_t)>.*VML/;
-            }
-            for (@lines2) {
-                print $_ if /<(float|int32_t)>.*VML/;
-            }
-            for (@lines1) {
                 print $_ if /<(double|int64_t)>.*VML/;
             }
             for (@lines2) {
@@ -201,7 +195,7 @@ sub read {
             open my $txtfile, "<", "random_distribution/" .
             "\Lrandom_distribution_${r}_${compiler}_${s}.txt";
             my @lines = <$txtfile>;
-            my @result = grep { /$r<(double|int32_t)>/ } @lines;
+            my @result = grep { /$r<(double|int64_t)>/ } @lines;
             for (@result) {
                 my ($name, $cpe_s, $cpe_m, $cpe_b, $cpe_i, $lib) = (split);
                 $name =~ s/(.*)<.*>(.*)/$1$2/;

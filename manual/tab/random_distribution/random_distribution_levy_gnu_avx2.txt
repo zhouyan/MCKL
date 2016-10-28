@@ -1,4 +1,4 @@
-Levy<float>(0,1)                    105.09      104.47        9.18        9.49       VML    (0)--Passed
-Levy<double>(0,1)                   100.65      100.67       22.26       19.34       VML    (0)--Passed
-Levy<float>(0,1)                    104.78      104.49       32.69        9.24       C++    (0)--Passed
-Levy<double>(0,1)                    99.99       99.95       49.75       19.10       C++    (0)--Passed
+Levy<float>(0,1)                    104.88      104.50        9.18        9.39       VML    (0)--Passed
+Levy<double>(0,1)                   100.57      100.58       22.11       19.23       VML    (0)--Passed
+Levy<float>(0,1)                    104.77      104.53       32.70        9.25       C++    (0)--Passed
+Levy<double>(0,1)                   101.25      101.27       49.86       19.35       C++    (0)--Passed
