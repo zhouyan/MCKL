@@ -1,5 +1,5 @@
-Threefish1024_64         424       8          14.74          11.14      ---Passed
-Threefish1024_64         424       8          14.74          11.06      ---Passed
-Threefish1024_64         424       8          14.74          10.93      ---Passed
-Threefish1024_64         424       8          14.74          11.32      ---Passed
-Threefish1024_64         424       8          14.72          11.17      ---Passed
+Threefish1024_64         424       8          13.96           9.74      ---Passed
+Threefish1024_64         424       8          13.96          10.47      ---Passed
+Threefish1024_64         424       8          14.06           9.79      ---Passed
+Threefish1024_64         424       8          13.91           9.91      ---Passed
+Threefish1024_64         424       8          13.95          10.14      ---Passed

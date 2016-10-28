@@ -1,5 +1,5 @@
-Threefry2x64              88       8           7.49           2.01      ---Passed
-Threefry2x64              88       8           7.49           2.01      ---Passed
-Threefry2x64              88       8           7.50           2.01      ---Passed
-Threefry2x64              88       8           7.49           2.01      ---Passed
-Threefry2x64              88       8           7.50           2.01      ---Passed
+Threefry2x64              88       8           7.42           1.94      ---Passed
+Threefry2x64              88       8           7.43           1.93      ---Passed
+Threefry2x64              88       8           7.42           1.93      ---Passed
+Threefry2x64              88       8           7.43           1.94      ---Passed
+Threefry2x64              88       8           7.43           1.94      ---Passed

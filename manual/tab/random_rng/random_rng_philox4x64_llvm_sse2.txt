@@ -1,5 +1,5 @@
-Philox4x64                88       8           4.43           3.71      ---Passed
-Philox4x64                88       8           4.43           3.71      ---Passed
-Philox4x64                88       8           4.43           3.70      ---Passed
-Philox4x64                88       8           4.43           3.70      ---Passed
-Philox4x64                88       8           4.43           3.70      ---Passed
+Philox4x64                88       8           7.21           5.81      ---Passed
+Philox4x64                88       8           7.21           5.71      ---Passed
+Philox4x64                88       8           7.22           5.70      ---Passed
+Philox4x64                88       8           7.32           5.69      ---Passed
+Philox4x64                88       8           7.21           5.71      ---Passed
