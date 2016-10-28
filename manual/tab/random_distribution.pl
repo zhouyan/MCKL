@@ -134,14 +134,16 @@ sub build {
         push @target, "\Lrandom_distribution_${name}";
         push @target, "\Lrandom_distribution_${name}_novml";
     }
-    for my $c (@compiler) {
-        my $d = $compiler{$c};
-        next if (not -d $d);
-        say $d;
-        if ($name) {
-            `ninja -C $d @target 2>&1`;
-        } else {
-            `ninja -C $d random_distribution 2>&1`;
+    if (@target) {
+        for my $c (@compiler) {
+            my $d = $compiler{$c};
+            next if (not -d $d);
+            say $d;
+            if ($name) {
+                `ninja -C $d @target 2>&1`;
+            } else {
+                `ninja -C $d random_distribution 2>&1`;
+            }
         }
     }
 }
@@ -168,10 +170,10 @@ sub run {
             push @result, @lines1;
             push @result, @lines2;
             for (@lines1) {
-                print $_ if /<(double|int32_t)>.*VML/;
+                print $_ if /<(double|float|int32_t)>.*VML/;
             }
             for (@lines2) {
-                print $_ if /<(double|int32_t)>.*VML/;
+                print $_ if /<(double|float|int32_t)>.*VML/;
             }
             if ($write) {
                 open my $txtfile, ">", "random_distribution/" .

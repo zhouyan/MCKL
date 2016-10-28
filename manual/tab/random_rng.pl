@@ -114,14 +114,16 @@ sub build {
 
     my @target;
     push @target, "\Lrandom_rng_$_" for @rng;
-    for my $c (@compiler) {
-        my $d = $compiler{$c};
-        next if (not -d $d);
-        say $d;
-        if ($name) {
-            `ninja -C $d @target 2>&1`;
-        } else {
-            `ninja -C $d random_rng 2>&1`;
+    if (@target) {
+        for my $c (@compiler) {
+            my $d = $compiler{$c};
+            next if (not -d $d);
+            say $d;
+            if ($name) {
+                `ninja -C $d @target 2>&1`;
+            } else {
+                `ninja -C $d random_rng 2>&1`;
+            }
         }
     }
 }
