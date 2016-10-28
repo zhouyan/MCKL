@@ -35,6 +35,13 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/u01_generic.hpp>
 
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
 namespace mckl
 {
 
@@ -69,10 +76,14 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
         std::array<__m256i, 4> u;
         std::array<__m256i, 4> v;
 
-        std::get<0>(u) = _mm256_set_m128i(std::get<1>(s), std::get<0>(s));
-        std::get<1>(u) = _mm256_set_m128i(std::get<3>(s), std::get<2>(s));
-        std::get<2>(u) = _mm256_set_m128i(std::get<5>(s), std::get<4>(s));
-        std::get<3>(u) = _mm256_set_m128i(std::get<7>(s), std::get<6>(s));
+        std::get<0>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x0>(s)), std::get<0x1>(s), 1);
+        std::get<1>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x2>(s)), std::get<0x3>(s), 1);
+        std::get<2>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x4>(s)), std::get<0x5>(s), 1);
+        std::get<3>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x6>(s)), std::get<0x7>(s), 1);
 
         std::get<0>(u) = _mm256_slli_epi32(std::get<0>(u), 1);
         std::get<1>(u) = _mm256_slli_epi32(std::get<1>(u), 1);
@@ -112,14 +123,22 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
         std::array<__m256i, 8> u;
         std::array<__m256i, 8> v;
 
-        std::get<0>(u) = _mm256_set_m128i(std::get<0x1>(s), std::get<0x0>(s));
-        std::get<1>(u) = _mm256_set_m128i(std::get<0x3>(s), std::get<0x2>(s));
-        std::get<2>(u) = _mm256_set_m128i(std::get<0x5>(s), std::get<0x4>(s));
-        std::get<3>(u) = _mm256_set_m128i(std::get<0x7>(s), std::get<0x6>(s));
-        std::get<4>(u) = _mm256_set_m128i(std::get<0x9>(s), std::get<0x8>(s));
-        std::get<5>(u) = _mm256_set_m128i(std::get<0xB>(s), std::get<0xA>(s));
-        std::get<6>(u) = _mm256_set_m128i(std::get<0xD>(s), std::get<0xC>(s));
-        std::get<7>(u) = _mm256_set_m128i(std::get<0xF>(s), std::get<0xE>(s));
+        std::get<0>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x0>(s)), std::get<0x1>(s), 1);
+        std::get<1>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x2>(s)), std::get<0x3>(s), 1);
+        std::get<2>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x4>(s)), std::get<0x5>(s), 1);
+        std::get<3>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x6>(s)), std::get<0x7>(s), 1);
+        std::get<4>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0x8>(s)), std::get<0x9>(s), 1);
+        std::get<5>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0xA>(s)), std::get<0xB>(s), 1);
+        std::get<6>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0xC>(s)), std::get<0xD>(s), 1);
+        std::get<7>(u) = _mm256_insertf128_si256(
+            _mm256_castsi128_si256(std::get<0xE>(s)), std::get<0xF>(s), 1);
 
         std::get<0>(u) = _mm256_slli_epi32(std::get<0>(u), 1);
         std::get<1>(u) = _mm256_slli_epi32(std::get<1>(u), 1);
@@ -587,5 +606,11 @@ class UniformRealAVX2Impl<UIntType, double, 32>
 } // namespace mckl::internal
 
 } // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
 
 #endif // MCKL_RANDOM_INTERNAL_U01_AVX2_HPP
