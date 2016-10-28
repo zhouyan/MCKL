@@ -367,7 +367,8 @@ inline void math_vmath(std::size_t N, std::size_t M)
         std::cout << std::setw(twid) << std::right << perf[i].c2;
         std::cout << std::setw(twid) << std::right << perf[i].c3;
         std::cout << std::setw(twid) << std::right << perf[i].c4;
-        std::cout << std::defaultfloat << std::setprecision(2);
+        std::cout.unsetf(std::ios_base::floatfield);
+        std::cout << std::setprecision(2);
         std::cout << std::setw(ewid) << std::right << perf[i].e1;
         std::cout << std::setw(ewid) << std::right << perf[i].e2;
         std::cout << std::setw(ewid) << std::right << perf[i].e3;

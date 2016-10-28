@@ -620,11 +620,11 @@ inline void uniform_real_distribution(
     rng.uniform_real_u32(n, r, a, b);
 }
 
-} // namespace mckl::internal
-
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 
 #endif // MCKL_USE_AESNI && MCKL_USE_AVX2
+
+} // namespace mckl
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
