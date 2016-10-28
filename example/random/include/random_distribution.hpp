@@ -106,8 +106,8 @@
 #define MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION 0
 #endif
 
-#ifndef MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION
-#define MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION 0
+#ifndef MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION 0
 #endif
 
 #ifndef MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
@@ -1023,19 +1023,19 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
 
 #endif // MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION
 
-#if MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION
+#if MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION
 
 template <typename RealType>
-class RandomDistributionTrait<mckl::U01Distribution<RealType>>
+class RandomDistributionTrait<mckl::U01CanonicalDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
 {
     public:
-    using dist_type = mckl::U01Distribution<RealType>;
+    using dist_type = mckl::U01CanonicalDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
     static constexpr bool invariant() { return true; }
 
-    std::string distname() const { return "U01"; }
+    std::string distname() const { return "U01Canonical"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -1054,7 +1054,7 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
     }
 }; // class RandomDistributionTrait
 
-#endif // MCKL_EXAMPLE_RANDOM_U01_DISTRIBUTION
+#endif // MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION
 
 #if MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
 

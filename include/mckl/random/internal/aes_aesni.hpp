@@ -735,83 +735,48 @@ class AESGeneratorAESNIImpl
 
 #if MCKL_HAS_AVX2
 
+    template <typename RealType>
     static void u01_cc_u32(Counter<std::uint32_t, 4> &ctr,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        float *r)
+        RealType *r)
     {
-        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Closed, Closed>>(
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, RealType, Closed, Closed>>(
             ctr, rk, n, r);
     }
 
+    template <typename RealType>
     static void u01_co_u32(Counter<std::uint32_t, 4> &ctr,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        float *r)
+        RealType *r)
     {
-        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Closed, Open>>(
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, RealType, Closed, Open>>(
             ctr, rk, n, r);
     }
 
+    template <typename RealType>
     static void u01_oc_u32(Counter<std::uint32_t, 4> &ctr,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        float *r)
+        RealType *r)
     {
-        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Open, Closed>>(
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, RealType, Open, Closed>>(
             ctr, rk, n, r);
     }
 
+    template <typename RealType>
     static void u01_oo_u32(Counter<std::uint32_t, 4> &ctr,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        float *r)
+        RealType *r)
     {
-        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Open, Open>>(
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, RealType, Open, Open>>(
             ctr, rk, n, r);
     }
 
+    template <typename RealType>
     static void uniform_real_u32(Counter<std::uint32_t, 4> &ctr,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        float *r, float a, float b)
+        RealType *r, RealType a, RealType b)
     {
-        eval_u01_u32<0, UniformRealAVX2Impl<std::uint32_t, float>>(
-            ctr, rk, n, r, a, b);
-    }
-
-    static void u01_cc_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        double *r)
-    {
-        eval_u01_u32<8, U01AVX2Impl<std::uint32_t, double, Closed, Closed>>(
-            ctr, rk, n, r);
-    }
-
-    static void u01_co_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        double *r)
-    {
-        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, double, Closed, Open>>(
-            ctr, rk, n, r);
-    }
-
-    static void u01_oc_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        double *r)
-    {
-        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, double, Open, Closed>>(
-            ctr, rk, n, r);
-    }
-
-    static void u01_oo_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        double *r)
-    {
-        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, double, Open, Open>>(
-            ctr, rk, n, r);
-    }
-
-    static void uniform_real_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        double *r, double a, double b)
-    {
-        eval_u01_u32<0, UniformRealAVX2Impl<std::uint32_t, double>>(
+        eval_u01_u32<0, UniformRealAVX2Impl<std::uint32_t, RealType>>(
             ctr, rk, n, r, a, b);
     }
 

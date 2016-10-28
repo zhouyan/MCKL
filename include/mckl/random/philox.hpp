@@ -166,63 +166,37 @@ class PhiloxGenerator
                                              Rounds, Constants>::batch()>());
     }
 
-    void u01_cc_u32(ctr_type &ctr, std::size_t n, float *result) const
+    template <typename RealType>
+    void u01_cc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
     {
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_cc_u32(
             ctr, key_, n, result);
     }
 
-    void u01_co_u32(ctr_type &ctr, std::size_t n, float *result) const
+    template <typename RealType>
+    void u01_co_u32(ctr_type &ctr, std::size_t n, RealType *result) const
     {
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_co_u32(
             ctr, key_, n, result);
     }
 
-    void u01_oc_u32(ctr_type &ctr, std::size_t n, float *result) const
+    template <typename RealType>
+    void u01_oc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
     {
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oc_u32(
             ctr, key_, n, result);
     }
 
-    void u01_oo_u32(ctr_type &ctr, std::size_t n, float *result) const
+    template <typename RealType>
+    void u01_oo_u32(ctr_type &ctr, std::size_t n, RealType *result) const
     {
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oo_u32(
             ctr, key_, n, result);
     }
 
-    void uniform_real_u32(
-        ctr_type &ctr, std::size_t n, float *result, float a, float b) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds,
-            Constants>::uniform_real_u32(ctr, key_, n, result, a, b);
-    }
-
-    void u01_cc_u32(ctr_type &ctr, std::size_t n, double *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_cc_u32(
-            ctr, key_, n, result);
-    }
-
-    void u01_co_u32(ctr_type &ctr, std::size_t n, double *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_co_u32(
-            ctr, key_, n, result);
-    }
-
-    void u01_oc_u32(ctr_type &ctr, std::size_t n, double *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oc_u32(
-            ctr, key_, n, result);
-    }
-
-    void u01_oo_u32(ctr_type &ctr, std::size_t n, double *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oo_u32(
-            ctr, key_, n, result);
-    }
-
-    void uniform_real_u32(
-        ctr_type &ctr, std::size_t n, double *result, double a, double b) const
+    template <typename RealType>
+    void uniform_real_u32(ctr_type &ctr, std::size_t n, RealType *result,
+        RealType a, RealType b) const
     {
         internal::PhiloxGeneratorImpl<T, K, Rounds,
             Constants>::uniform_real_u32(ctr, key_, n, result, a, b);

@@ -609,23 +609,26 @@ and the output random real numbers as~$X$.
   \label{tab:Intermediate integer types of uniform distribution}
 \end{table}
 
-\subsection{Standard form}
-\label{sub:Standard form}
+The type |U01Distribution| is aliased to |U01CanonicalDistribution| if
+|MCKL_U01_USE_FIXED_POINT| configuration macro is set to true. Otherwise it is
+aliased to |U01CODistribution|.
+
+\subsection{Canonical form}
+\label{sub:Canonical form}
 
 The class template,
 \begin{verbatim}
 template <typename RealType = double>
-class U01Distribution;
+class U01CanonicalDistribution;
 \end{verbatim}
-implements the uniform distribution on $[0, 1)$. If |MCKL_U01_USE_FIXED_POINT|
-  is true, which is the default, then it is a type alias to |U01CODistribution|
-  (section~\ref{sub:Closed-open interval}). Otherwise, it is implemented
-  through the mapping,
+implements the uniform distribution on $[0, 1)$. Otherwise, it is implemented
+through the mapping,
 \begin{equation*}
   P = \Floor{(W + M - 1) / W},\qquad
   K = \max\{1, P\},\qquad
   X = \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{equation*}
+This is equivalent to the standard library |std::generate_canonical|.
 
 \subsection{Closed-closed interval}
 \label{sub:Closed-closed interval}

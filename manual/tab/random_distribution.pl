@@ -56,7 +56,7 @@ GetOptions(
 );
 $build = 1 if $run;
 
-my @u01 = qw(U01 U01CC U01CO U01OC U01OO);
+my @u01 = qw(U01Canonical U01CC U01CO U01OC U01OO);
 
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
@@ -113,7 +113,7 @@ my %nostd;
 my %nomkl;
 my @nostd = qw(U01CC U01OC U01OO Arcsine Beta Laplace Levy Logistic Pareto
 Rayleigh Stable);
-my @nomkl = qw(U01CC U01OC U01OO Arcsine Pareto Stable);
+my @nomkl = qw(U01Canonical U01CC U01OC U01OO Arcsine Pareto Stable);
 $nostd{$_} = 1 for @nostd;
 $nomkl{$_} = 1 for @nomkl;
 
@@ -289,7 +289,9 @@ sub pdf {
 
 sub distribution_name {
     my $name = shift;
-    if ($name =~ /U01(..)/) {
+    if ($name eq "U01Canonical") {
+        $name = "U01_Canonical";
+    } elsif ($name =~ /U01(..)/) {
         $name =~ s/U01(..)/U01_$1/;
     } else {
         $name =~ s/([A-Z])/_$1/g;

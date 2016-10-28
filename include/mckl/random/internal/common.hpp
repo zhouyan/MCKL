@@ -1049,7 +1049,7 @@ template <typename = double>
 class StudentTDistribution;
 
 template <typename = double>
-class U01Distribution;
+class U01CanonicalDistribution;
 
 template <typename = double>
 class U01CCDistribution;
