@@ -737,6 +737,46 @@ class AESGeneratorAESNIImpl
 
     static void u01_cc_u32(Counter<std::uint32_t, 4> &ctr,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        float *r)
+    {
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Closed, Closed>>(
+            ctr, rk, n, r);
+    }
+
+    static void u01_co_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        float *r)
+    {
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Closed, Open>>(
+            ctr, rk, n, r);
+    }
+
+    static void u01_oc_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        float *r)
+    {
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Open, Closed>>(
+            ctr, rk, n, r);
+    }
+
+    static void u01_oo_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        float *r)
+    {
+        eval_u01_u32<0, U01AVX2Impl<std::uint32_t, float, Open, Open>>(
+            ctr, rk, n, r);
+    }
+
+    static void uniform_real_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        float *r, float a, float b)
+    {
+        eval_u01_u32<0, UniformRealAVX2Impl<std::uint32_t, float>>(
+            ctr, rk, n, r, a, b);
+    }
+
+    static void u01_cc_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
         double *r)
     {
         eval_u01_u32<8, U01AVX2Impl<std::uint32_t, double, Closed, Closed>>(
@@ -779,6 +819,70 @@ class AESGeneratorAESNIImpl
 
     private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
+
+#if MCKL_HAS_AVX2
+
+    template <std::size_t Blocks, typename Transform, typename... Args>
+    static void eval_u01_u32(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        float *r, Args &&... args)
+    {
+        constexpr std::size_t S =
+            Blocks == 0 ? (rounds_ < 8 ? 16 : 8) : Blocks;
+        constexpr std::size_t cstride = sizeof(__m256) * S / 2;
+        constexpr std::size_t nstride = S;
+        constexpr std::size_t rstride = cstride / sizeof(float);
+
+        std::array<__m128i, S> s;
+        std::array<__m256, S / 2> t;
+        while (n >= nstride) {
+            increment_si128(ctr, s);
+
+            encfirst(s, rk);
+
+            enc<0x1>(s, rk);
+            enc<0x2>(s, rk);
+            enc<0x3>(s, rk);
+            enc<0x4>(s, rk);
+            enc<0x5>(s, rk);
+            enc<0x6>(s, rk);
+            enc<0x7>(s, rk);
+            enc<0x8>(s, rk);
+            enc<0x9>(s, rk);
+            enc<0xA>(s, rk);
+            enc<0xB>(s, rk);
+            enc<0xC>(s, rk);
+            enc<0xD>(s, rk);
+            enc<0xE>(s, rk);
+            enc<0xF>(s, rk);
+
+            round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
+
+            enclast(s, rk);
+
+            Transform::eval(s, t, std::forward<Args>(args)...);
+
+            std::memcpy(r, t.data(), cstride);
+            n -= nstride;
+            r += rstride;
+        }
+
+        alignas(32) union {
+            std::array<std::array<std::uint32_t, 4>, nstride> state;
+            std::array<Counter<std::uint32_t, 4>, nstride> ctr;
+            std::array<std::uint32_t, nstride * 4> u;
+        } buf;
+        for (std::size_t i = 0; i != n; ++i) {
+            increment(ctr);
+            buf.ctr[i] = ctr;
+            eval(buf.state[i], rk);
+        }
+
+        alignas(32) std::array<float, rstride> result;
+        for (std::size_t i = 0; i != n * 4; ++i)
+            result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
+        std::memcpy(r, result.data(), sizeof(float) * 4 * n);
+    }
 
     template <std::size_t Blocks, typename Transform, typename... Args>
     static void eval_u01_u32(Counter<std::uint32_t, 4> &ctr,
@@ -841,6 +945,8 @@ class AESGeneratorAESNIImpl
             result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
         std::memcpy(r, result.data(), sizeof(double) * 4 * n);
     }
+
+#endif // MCKL_HAS_AVX2
 
     template <std::size_t>
     static void round(

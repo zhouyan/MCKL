@@ -166,6 +166,37 @@ class PhiloxGenerator
                                              Rounds, Constants>::batch()>());
     }
 
+    void u01_cc_u32(ctr_type &ctr, std::size_t n, float *result) const
+    {
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_cc_u32(
+            ctr, key_, n, result);
+    }
+
+    void u01_co_u32(ctr_type &ctr, std::size_t n, float *result) const
+    {
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_co_u32(
+            ctr, key_, n, result);
+    }
+
+    void u01_oc_u32(ctr_type &ctr, std::size_t n, float *result) const
+    {
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oc_u32(
+            ctr, key_, n, result);
+    }
+
+    void u01_oo_u32(ctr_type &ctr, std::size_t n, float *result) const
+    {
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oo_u32(
+            ctr, key_, n, result);
+    }
+
+    void uniform_real_u32(
+        ctr_type &ctr, std::size_t n, float *result, float a, float b) const
+    {
+        internal::PhiloxGeneratorImpl<T, K, Rounds,
+            Constants>::uniform_real_u32(ctr, key_, n, result, a, b);
+    }
+
     void u01_cc_u32(ctr_type &ctr, std::size_t n, double *result) const
     {
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_cc_u32(
@@ -324,7 +355,49 @@ using Philox2x64_64 = Philox2x64Engine<std::uint64_t>;
 /// \ingroup Philox
 using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
-#if MCKL_USE_AVX2 && !MCKL_U01_USE_64BITS_DOUBLE
+#if MCKL_USE_AVX2
+
+template <std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_cc_distribution(
+    PhiloxEngine<std::uint32_t, std::uint32_t, K, Rounds, Constants> &rng,
+    std::size_t n, float *r)
+{
+    rng.u01_cc_u32(n, r);
+}
+
+template <std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_co_distribution(
+    PhiloxEngine<std::uint32_t, std::uint32_t, K, Rounds, Constants> &rng,
+    std::size_t n, float *r)
+{
+    rng.u01_co_u32(n, r);
+}
+
+template <std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_oc_distribution(
+    PhiloxEngine<std::uint32_t, std::uint32_t, K, Rounds, Constants> &rng,
+    std::size_t n, float *r)
+{
+    rng.u01_oc_u32(n, r);
+}
+
+template <std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_oo_distribution(
+    PhiloxEngine<std::uint32_t, std::uint32_t, K, Rounds, Constants> &rng,
+    std::size_t n, float *r)
+{
+    rng.u01_oo_u32(n, r);
+}
+
+template <std::size_t K, std::size_t Rounds, typename Constants>
+inline void uniform_real_distribution(
+    PhiloxEngine<std::uint32_t, std::uint32_t, K, Rounds, Constants> &rng,
+    std::size_t n, float *r, float a, float b)
+{
+    rng.uniform_real_u32(n, r, a, b);
+}
+
+#if !MCKL_U01_USE_64BITS_DOUBLE
 
 template <std::size_t K, std::size_t Rounds, typename Constants>
 inline void u01_cc_distribution(
@@ -366,7 +439,9 @@ inline void uniform_real_distribution(
     rng.uniform_real_u32(n, r, a, b);
 }
 
-#endif // MCKL_USE_AVX2 && !MCKL_U01_USE_64BITS_DOUBLE
+#endif // !MCKL_U01_USE_64BITS_DOUBLE
+
+#endif // MCKL_USE_AVX2
 
 } // namespace mckl
 
