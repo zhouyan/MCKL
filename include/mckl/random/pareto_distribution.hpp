@@ -56,10 +56,10 @@ inline void pareto_distribution_impl(
     mul(n, b, r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Pareto, pareto, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Pareto, pareto, RealType, RealType, a, RealType, b)
 
 /// \brief Pareto distribution
 /// \ingroup Distribution

@@ -60,6 +60,8 @@ inline void uniform_bits_distribution_impl(
     rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
 }
 
+} // namespace mckl::internal
+
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
 {
@@ -81,7 +83,7 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
         // Alignment requirement
         ualign >= talign && ualign % talign == 0;
 
-    uniform_bits_distribution_impl(
+    internal::uniform_bits_distribution_impl(
         rng, n, r, std::integral_constant<bool, direct>());
 }
 
@@ -91,8 +93,6 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r,
 {
     uniform_bits_distribution(rng, n, r);
 }
-
-} // namespace mckl::internal
 
 /// \brief Uniform bits distribution
 /// \ingroup Distribution

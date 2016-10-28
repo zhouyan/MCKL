@@ -170,9 +170,9 @@ inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
 
 template <std::size_t K, typename RealType, typename RNGType>
 inline void stable_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, RealType a, RealType b,
-    const StableDistributionConstant<RealType> &constant)
+    RealType alpha, RealType beta, RealType a, RealType b)
 {
+    const StableDistributionConstant<RealType> constant(alpha, beta, a, b);
     switch (constant.algorithm()) {
         case StableDistributionAlgorithm1:
             stable_distribution_impl_1<K>(
@@ -186,28 +186,10 @@ inline void stable_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     fma(n, r, b, a, r);
 }
 
-template <typename RealType, typename RNGType>
-inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
-    RealType alpha, RealType beta, RealType a, RealType b)
-{
-    const StableDistributionConstant<RealType> constant(alpha, beta, a, b);
-    const std::size_t k = BufferSize<RealType>::value;
-    const std::size_t m = n / k;
-    const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
-        stable_distribution_impl<k>(rng, k, r, alpha, beta, a, b, constant);
-    stable_distribution_impl<k>(rng, l, r, alpha, beta, a, b, constant);
-}
-
-template <typename RealType, typename RNGType>
-inline void stable_distribution(RNGType &rng, std::size_t n, RealType *r,
-    const typename StableDistribution<RealType>::param_type &param)
-{
-    stable_distribution(
-        rng, n, r, param.alpha(), param.beta(), param.a(), param.b());
-}
-
 } // namepsace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_4(Stable, stable, RealType, RealType,
+    alpha, RealType, beta, RealType, a, RealType, b)
 
 /// \brief Stable distribution
 /// \ingroup Distribution

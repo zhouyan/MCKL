@@ -567,6 +567,13 @@ class CounterEngine
 }; // class CounterEngine
 
 template <typename ResultType, typename Generator>
+class SeedType<CounterEngine<ResultType, Generator>>
+{
+    public:
+    using type = typename Generator::key_type;
+}; // class SeedType
+
+template <typename ResultType, typename Generator>
 inline void rand(
     CounterEngine<ResultType, Generator> &rng, std::size_t n, ResultType *r)
 {

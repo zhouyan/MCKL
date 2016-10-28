@@ -83,7 +83,7 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 
 #endif // MCKL_USE_AVX2
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Philox RNG generator
 /// \ingroup Philox

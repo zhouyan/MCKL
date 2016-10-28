@@ -59,10 +59,10 @@ inline void fisher_f_distribution_impl(
     div(n, s.data(), r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    FisherF, fisher_f, RealType, RealType, m, RealType, n)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    FisherF, fisher_f, RealType, RealType, m, RealType, n)
 
 /// \brief Fisher-F distribution
 /// \ingroup Distribution

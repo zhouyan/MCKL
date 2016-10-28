@@ -56,6 +56,8 @@ GetOptions(
 );
 $build = 1 if $run;
 
+my @u01 = qw(U01 U01CC U01CO U01OC U01OO);
+
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
 
@@ -76,6 +78,7 @@ my @studentt = qw(StudentT);
 my @int = qw(Geometric UniformInt);
 
 my %distribution = (
+    u01        => [@u01],
     inverse    => [@inverse],
     beta       => [@beta],
     chisquared => [@chisquared],
@@ -87,7 +90,7 @@ my %distribution = (
     int        => [@int],
 );
 
-my @keys = qw(inverse beta chisquared gamma fisherf normal stable studentt
+my @keys = qw(u01 inverse beta chisquared gamma fisherf normal stable studentt
 int);
 
 my @distribution;
@@ -108,8 +111,9 @@ my @compiler = qw(llvm gnu intel);
 
 my %nostd;
 my %nomkl;
-my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh Stable);
-my @nomkl = qw(Arcsine Pareto Stable);
+my @nostd = qw(U01CC U01OC U01OO Arcsine Beta Laplace Levy Logistic Pareto
+Rayleigh Stable);
+my @nomkl = qw(U01CC U01OC U01OO Arcsine Pareto Stable);
 $nostd{$_} = 1 for @nostd;
 $nomkl{$_} = 1 for @nomkl;
 
@@ -170,10 +174,16 @@ sub run {
             push @result, @lines1;
             push @result, @lines2;
             for (@lines1) {
-                print $_ if /<(double|float|int32_t)>.*VML/;
+                print $_ if /<(float|int32_t)>.*VML/;
             }
             for (@lines2) {
-                print $_ if /<(double|float|int32_t)>.*VML/;
+                print $_ if /<(float|int32_t)>.*VML/;
+            }
+            for (@lines1) {
+                print $_ if /<(double|int64_t)>.*VML/;
+            }
+            for (@lines2) {
+                print $_ if /<(double|int64_t)>.*VML/;
             }
             if ($write) {
                 open my $txtfile, ">", "random_distribution/" .
@@ -234,7 +244,7 @@ sub table {
         for my $s (@simd) {
             my $table;
             for my $r (@{$distribution{$k}}) {
-                my @name = sort grep { /$r/ } keys %{$cpe_s{$s}};
+                my @name = sort grep { /^$r(\(|$)/ } keys %{$cpe_s{$s}};
                 for my $name (@name) {
                     $table .= " " x 2 . sprintf("%-40s", "\\texttt{$name}");
                     $table .= " & ";
@@ -285,8 +295,12 @@ sub pdf {
 
 sub distribution_name {
     my $name = shift;
-    $name =~ s/([A-Z])/_$1/g;
-    $name =~ s/^_//g;
+    if ($name =~ /U01(..)/) {
+        $name =~ s/U01(..)/U01_$1/;
+    } else {
+        $name =~ s/([A-Z])/_$1/g;
+        $name =~ s/^_//g;
+    }
     $name
 }
 

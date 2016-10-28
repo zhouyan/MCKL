@@ -90,7 +90,7 @@ inline void increment_si256(std::array<T, K> &ctr, std::array<__m256i, S> &s)
 
 } // namespace mckl::internal
 
-} // namespace internal
+} // namespace mckl
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000

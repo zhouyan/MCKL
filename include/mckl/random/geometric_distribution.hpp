@@ -59,9 +59,10 @@ inline void geometric_distribution_impl(
         r[i] = ftoi<IntType>(s[i]);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Geometric, geometric, InType, double, p)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    Geometric, geometric, InType, double, p)
 
 /// \brief Geometric distribution
 /// \ingroup Distribution

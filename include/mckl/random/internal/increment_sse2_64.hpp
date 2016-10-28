@@ -91,7 +91,7 @@ MCKL_FLATTEN inline void increment_si128(
 
 } // namespace mckl::internal
 
-} // namespace internal
+} // namespace mckl
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000

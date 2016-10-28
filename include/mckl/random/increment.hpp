@@ -92,7 +92,7 @@ class CounterImpl<T, K, true, true, true, true>
         std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
 }; // class CounterImpl
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief A counter type with the same width as `std::array<T, K>` but with
 /// possibly fewer elements

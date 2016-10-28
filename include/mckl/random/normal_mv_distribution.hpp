@@ -59,12 +59,14 @@ inline void normal_mv_distribution_mulchol(
         static_cast<MCKL_BLAS_INT>(dim), r, static_cast<MCKL_BLAS_INT>(dim));
 }
 
+} // namespace mckl::internal
+
 template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, RealType mean, RealType chol)
 {
-    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(rng, n * dim, r, mean, chol);
 }
@@ -73,8 +75,8 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, RealType mean, const RealType *chol)
 {
-    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(
         rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
@@ -82,7 +84,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     for (std::size_t i = 0; i != dim; ++i)
         for (std::size_t j = 0; j <= i; ++j)
             cholf[i * dim + j] = *chol++;
-    normal_mv_distribution_mulchol(n, r, dim, cholf.data());
+    internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
     if (!is_zero(mean))
         add(n * dim, mean, r, r);
 }
@@ -91,8 +93,8 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, RealType chol)
 {
-    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(rng, n * dim, r, const_zero<RealType>(), chol);
     for (std::size_t i = 0; i != n; ++i, r += dim)
@@ -103,8 +105,8 @@ template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *mean, const RealType *chol)
 {
-    size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
-    size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(n, "normal_mv_distribution");
+    internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(
         rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
@@ -112,12 +114,10 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     for (std::size_t i = 0; i != dim; ++i)
         for (std::size_t j = 0; j <= i; ++j)
             cholf[i * dim + j] = *chol++;
-    normal_mv_distribution_mulchol(n, r, dim, cholf.data());
+    internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
     for (std::size_t i = 0; i != n; ++i, r += dim)
         add(dim, mean, r, r);
 }
-
-} // namespace mckl::internal
 
 /// \brief Multivariate Normal distribution
 /// \ingroup Distribution
@@ -490,16 +490,16 @@ class NormalMVDistribution
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
         if (param.is_scalar_mean_ && param.is_scalar_chol_) {
-            internal::normal_mv_distribution(
+            normal_mv_distribution(
                 rng, n, r, param.dim(), param.mean()[0], param.chol()[0]);
         } else if (param.is_scalar_mean_ && !param.is_scalar_chol_) {
-            internal::normal_mv_distribution(
+            normal_mv_distribution(
                 rng, n, r, param.dim(), param.mean()[0], param.chol());
         } else if (!param.is_scalar_mean_ && param.is_scalar_chol_) {
-            internal::normal_mv_distribution(
+            normal_mv_distribution(
                 rng, n, r, param.dim(), param.mean(), param.chol()[0]);
         } else if (!param.is_scalar_mean_ && !param.is_scalar_chol_) {
-            internal::normal_mv_distribution(
+            normal_mv_distribution(
                 rng, n, r, param.dim(), param.mean(), param.chol());
         }
     }

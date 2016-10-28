@@ -125,10 +125,10 @@ inline void uniform_int_distribution_impl(
         uniform_int_distribution_impl<K>(rng, n, r, a, b, std::false_type());
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    UniformInt, uniform_int, IntType, IntType, a, IntType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    UniformInt, uniform_int, IntType, IntType, a, IntType, b)
 
 /// \brief Uniform integer distribution
 /// \ingroup Distribution

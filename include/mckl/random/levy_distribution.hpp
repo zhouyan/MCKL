@@ -63,10 +63,10 @@ inline void levy_distribution_impl(
             r[i] = dist(rng);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Levy, levy, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Levy, levy, RealType, RealType, a, RealType, b)
 
 /// \brief Levy distribution
 /// \ingroup Distribution

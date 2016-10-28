@@ -97,7 +97,7 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 
 #endif // MCKL_USE_AVX2
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Threefry RNG generator
 /// \ingroup Threefry

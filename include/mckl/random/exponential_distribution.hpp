@@ -56,10 +56,10 @@ inline void exponential_distribution_impl(
     mul(n, -1 / lambda, r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(
-    Exponential, exponential, RealType, RealType, lambda)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    Exponential, exponential, RealType, RealType, lambda)
 
 /// \brief Exponential distribution
 /// \ingroup Distribution

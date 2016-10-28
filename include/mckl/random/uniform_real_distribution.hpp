@@ -55,10 +55,10 @@ inline void uniform_real_distribution_impl(
     fma(n, r, b - a, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    UniformReal, uniform_real, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    UniformReal, uniform_real, RealType, RealType, a, RealType, b)
 
 /// \brief Uniform real distribution
 /// \ingroup Distribution

@@ -47,6 +47,8 @@ inline bool chi_squared_distribution_check_param(RealType n)
     return n > 0;
 }
 
+} // namespace mckl::internal
+
 template <typename RealType, typename RNGType>
 inline void chi_squared_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
@@ -60,8 +62,6 @@ inline void chi_squared_distribution(RNGType &rng, std::size_t n, RealType *r,
 {
     chi_squared_distribution(rng, n, r, param.n());
 }
-
-} // namespace mckl::internal
 
 /// \brief The \f$\chi^2\f$ distribution
 /// \ingroup Distribution
