@@ -1939,9 +1939,6 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
 template <template <typename> class DistributionType, typename ResultType>
 inline void random_distribution_perf(std::size_t N, std::size_t M)
 {
-    N = std::max(N, static_cast<std::size_t>(2000));
-    M = std::max(M, static_cast<std::size_t>(10));
-
     mckl::Vector<RandomDistributionPerf> perf_d;
     random_distribution_perf_d<DistributionType>(
         N, M, perf_d, std::is_floating_point<ResultType>());

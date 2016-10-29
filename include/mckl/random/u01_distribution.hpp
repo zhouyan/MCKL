@@ -36,6 +36,10 @@
 #include <mckl/random/u01.hpp>
 #include <mckl/random/uniform_bits_distribution.hpp>
 
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/u01_avx2.hpp>
+#endif
+
 /// \brief Default U01 distribution using fixed point conversion
 /// \ingroup Config
 #ifndef MCKL_U01_USE_FIXED_POINT
@@ -115,14 +119,14 @@ using U01UIntType =
 #endif // MCKL_U01_USE_64BITS_DOUBLE
 
 template <std::size_t, typename RealType, typename UIntType>
-inline RealType u01_canonical_distribution_impl(
+inline RealType u01_canonical_distribution_impl_trans(
     const UIntType *, std::false_type)
 {
     return 0;
 }
 
 template <std::size_t N, typename RealType, typename UIntType>
-inline RealType u01_canonical_distribution_impl(
+inline RealType u01_canonical_distribution_impl_trans(
     const UIntType *u, std::true_type)
 {
     constexpr int W = std::numeric_limits<UIntType>::digits;
@@ -132,9 +136,35 @@ inline RealType u01_canonical_distribution_impl(
 
     return static_cast<RealType>(u[N]) *
         U01Pow2Inv<RealType, (Q - N) * W>::value +
-        u01_canonical_distribution_impl<N + 1, RealType>(
+        u01_canonical_distribution_impl_trans<N + 1, RealType>(
             u, std::integral_constant<bool, N + 1 < Q>());
 }
+
+template <typename UIntType, typename RealType, int W>
+inline void u01_canonical_distribution_impl_trans(std::size_t n,
+    const UIntType *u, RealType *r, std::integral_constant<int, W>)
+{
+    constexpr int M = std::numeric_limits<RealType>::digits;
+    constexpr int P = (M + W - 1) / W;
+    constexpr int Q = 1 > P ? 1 : P;
+
+    for (std::size_t i = 0; i != n; ++i, u += Q) {
+        r[i] = u01_canonical_distribution_impl_trans<0, RealType>(
+            u, std::true_type());
+    }
+}
+
+#if MCKL_USE_AVX2
+
+template <typename UIntType>
+inline void u01_canonical_distribution_impl_trans(std::size_t n,
+    const UIntType *u, double *r, std::integral_constant<int, 32>)
+{
+    u01_canonical_distribution_avx2_impl_trans(
+        n, u, r, std::integral_constant<int, 32>());
+}
+
+#endif // MCKL_USE_AVX2
 
 template <std::size_t K, typename RealType, typename RNGType>
 inline void u01_canonical_distribution_impl(
@@ -150,10 +180,8 @@ inline void u01_canonical_distribution_impl(
     alignas(32) std::array<UIntType, K * Q> s;
     uniform_bits_distribution(rng, n * Q, s.data());
     const UIntType *u = s.data();
-    for (std::size_t i = 0; i != n; ++i, u += Q) {
-        r[i] =
-            u01_canonical_distribution_impl<0, RealType>(u, std::true_type());
-    }
+    u01_canonical_distribution_impl_trans(
+        n, u, r, std::integral_constant<int, W>());
 }
 
 MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_cc)

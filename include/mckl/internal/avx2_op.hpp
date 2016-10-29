@@ -220,6 +220,35 @@ MCKL_FLATTEN inline void mul_ps(std::array<__m256i, 8> &s, const __m256i &a)
         _mm256_castsi256_ps(std::get<7>(s)), _mm256_castsi256_ps(a)));
 }
 
+MCKL_FLATTEN inline void add_pd(
+    std::array<__m256i, 8> &s, const std::array<__m256i, 8> &a)
+{
+    std::get<0>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<0>(s)),
+            _mm256_castsi256_pd(std::get<0>(a))));
+    std::get<1>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<1>(s)),
+            _mm256_castsi256_pd(std::get<1>(a))));
+    std::get<2>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<2>(s)),
+            _mm256_castsi256_pd(std::get<2>(a))));
+    std::get<3>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<3>(s)),
+            _mm256_castsi256_pd(std::get<3>(a))));
+    std::get<4>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<4>(s)),
+            _mm256_castsi256_pd(std::get<4>(a))));
+    std::get<5>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<5>(s)),
+            _mm256_castsi256_pd(std::get<5>(a))));
+    std::get<6>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<6>(s)),
+            _mm256_castsi256_pd(std::get<6>(a))));
+    std::get<7>(s) =
+        _mm256_castpd_si256(_mm256_add_pd(_mm256_castsi256_pd(std::get<7>(s)),
+            _mm256_castsi256_pd(std::get<7>(a))));
+}
+
 MCKL_FLATTEN inline void sub_pd(std::array<__m256i, 8> &s, const __m256i &a)
 {
     std::get<0>(s) = _mm256_castpd_si256(_mm256_sub_pd(

@@ -210,10 +210,10 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        const __m256i c52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
         const __m256i c32 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
@@ -233,10 +233,10 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        const __m256i c52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
         const __m256i c32 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
@@ -261,12 +261,12 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        const __m256i c52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
         const __m256i c32 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
         const __m256i c33 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DE0000000000000));
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
@@ -403,6 +403,61 @@ class UniformRealAVX2Transform
         return r;
     }
 }; // class UniformRealAVX2Transform
+
+template <typename UIntType>
+inline void u01_canonical_distribution_avx2_impl_trans(std::size_t n,
+    const UIntType *u, double *r, std::integral_constant<int, 32>)
+{
+    constexpr std::size_t S = 8;
+    constexpr std::size_t cstride = sizeof(__m256i) * S;
+    constexpr std::size_t nstride = cstride / sizeof(double);
+    constexpr std::size_t ustride = cstride / sizeof(UIntType);
+    constexpr std::size_t rstride = cstride / sizeof(double);
+    const __m256i c32 =
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+    const __m256i c64 =
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3BF0000000000000));
+    const __m256i c52 =
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+    const __m256i m = _mm256_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::array<__m256i, S> s;
+    std::array<__m256i, S> t;
+    while (n >= nstride) {
+        std::memcpy(s.data(), u, cstride);
+        std::get<0>(t) = _mm256_srli_epi64(std::get<0>(s), 32);
+        std::get<1>(t) = _mm256_srli_epi64(std::get<1>(s), 32);
+        std::get<2>(t) = _mm256_srli_epi64(std::get<2>(s), 32);
+        std::get<3>(t) = _mm256_srli_epi64(std::get<3>(s), 32);
+        std::get<4>(t) = _mm256_srli_epi64(std::get<4>(s), 32);
+        std::get<5>(t) = _mm256_srli_epi64(std::get<5>(s), 32);
+        std::get<6>(t) = _mm256_srli_epi64(std::get<6>(s), 32);
+        std::get<7>(t) = _mm256_srli_epi64(std::get<7>(s), 32);
+        std::get<0>(s) = _mm256_and_si256(std::get<0>(s), m);
+        std::get<1>(s) = _mm256_and_si256(std::get<1>(s), m);
+        std::get<2>(s) = _mm256_and_si256(std::get<2>(s), m);
+        std::get<3>(s) = _mm256_and_si256(std::get<3>(s), m);
+        std::get<4>(s) = _mm256_and_si256(std::get<4>(s), m);
+        std::get<5>(s) = _mm256_and_si256(std::get<5>(s), m);
+        std::get<6>(s) = _mm256_and_si256(std::get<6>(s), m);
+        std::get<7>(s) = _mm256_and_si256(std::get<7>(s), m);
+        add_epi64(s, c52);
+        add_epi64(t, c52);
+        sub_pd(s, c52);
+        sub_pd(t, c52);
+        mul_pd(s, c64);
+        mul_pd(t, c32);
+        add_pd(s, t);
+        std::memcpy(r, s.data(), cstride);
+        n -= nstride;
+        u += ustride;
+        r += rstride;
+    }
+    for (std::size_t i = 0; i != n; ++i, u += 2, ++r) {
+        *r = u[0] * U01Pow2Inv<double, 64>::value +
+            u[1] * U01Pow2Inv<double, 32>::value;
+    }
+}
 
 } // namespace mckl::internal
 
