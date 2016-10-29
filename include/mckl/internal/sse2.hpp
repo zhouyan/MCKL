@@ -33,6 +33,7 @@
 #define MCKL_INTERNAL_SSE2_HPP
 
 #include <mckl/internal/config.h>
+#include <mckl/internal/sse2_op.hpp>
 #include <array>
 
 #ifdef MCKL_GCC

@@ -50,199 +50,37 @@ namespace internal
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper,
     int = std::numeric_limits<UIntType>::digits>
-class U01AVX2Impl : public U01GenericImpl<UIntType, RealType, Lower, Upper>
-{
-}; // U01AVX2Impl
-
-template <typename UIntType, typename RealType,
-    int = std::numeric_limits<UIntType>::digits>
-class UniformRealAVX2Impl;
+class U01AVX2Impl;
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
 {
     public:
-    static float eval(UIntType u)
+    template <std::size_t S>
+    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
-        return U01GenericImpl<UIntType, float, Closed, Closed>::eval(u);
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
+
+        return eval(t, r);
     }
 
-    static void eval(const std::array<__m128i, 8> &s, std::array<__m256, 4> &t)
+    template <std::size_t S>
+    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256 p25 = _mm256_castsi256_ps( // 2^{-25}
-            _mm256_set1_epi32(static_cast<int>(0x33000000)));
+        const __m256i c25 = _mm256_set1_epi32(static_cast<int>(0x33000000));
         const __m256i mask = _mm256_set1_epi32(1);
 
-        std::array<__m256i, 4> u;
-        std::array<__m256i, 4> v;
+        std::array<__m256i, S> t;
+        slli_epi32<1>(s);
+        srli_epi32<7>(s);
+        and_si256(s, mask, t);
+        add_epi32(s, t);
+        cvtepi32_ps(s);
+        mul_ps(s, c25);
+        std::memcpy(r, s.data(), sizeof(s));
 
-        std::get<0>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x0>(s)), std::get<0x1>(s), 1);
-        std::get<1>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x2>(s)), std::get<0x3>(s), 1);
-        std::get<2>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x4>(s)), std::get<0x5>(s), 1);
-        std::get<3>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x6>(s)), std::get<0x7>(s), 1);
-
-        std::get<0>(u) = _mm256_slli_epi32(std::get<0>(u), 1);
-        std::get<1>(u) = _mm256_slli_epi32(std::get<1>(u), 1);
-        std::get<2>(u) = _mm256_slli_epi32(std::get<2>(u), 1);
-        std::get<3>(u) = _mm256_slli_epi32(std::get<3>(u), 1);
-
-        std::get<0>(u) = _mm256_srli_epi32(std::get<0>(u), 7);
-        std::get<1>(u) = _mm256_srli_epi32(std::get<1>(u), 7);
-        std::get<2>(u) = _mm256_srli_epi32(std::get<2>(u), 7);
-        std::get<3>(u) = _mm256_srli_epi32(std::get<3>(u), 7);
-
-        std::get<0>(v) = _mm256_and_si256(std::get<0>(u), mask);
-        std::get<1>(v) = _mm256_and_si256(std::get<1>(u), mask);
-        std::get<2>(v) = _mm256_and_si256(std::get<2>(u), mask);
-        std::get<3>(v) = _mm256_and_si256(std::get<3>(u), mask);
-
-        std::get<0>(u) = _mm256_add_epi32(std::get<0>(u), std::get<0>(v));
-        std::get<1>(u) = _mm256_add_epi32(std::get<1>(u), std::get<1>(v));
-        std::get<2>(u) = _mm256_add_epi32(std::get<2>(u), std::get<2>(v));
-        std::get<3>(u) = _mm256_add_epi32(std::get<3>(u), std::get<3>(v));
-
-        std::get<0>(t) = _mm256_cvtepi32_ps(std::get<0>(u));
-        std::get<1>(t) = _mm256_cvtepi32_ps(std::get<1>(u));
-        std::get<2>(t) = _mm256_cvtepi32_ps(std::get<2>(u));
-        std::get<3>(t) = _mm256_cvtepi32_ps(std::get<3>(u));
-
-        mul_ps256(t, p25);
-    }
-
-    static void eval(
-        const std::array<__m128i, 16> &s, std::array<__m256, 8> &t)
-    {
-        const __m256 p25 = _mm256_castsi256_ps( // 2^{-25}
-            _mm256_set1_epi32(static_cast<int>(0x33000000)));
-        const __m256i mask = _mm256_set1_epi32(1);
-
-        std::array<__m256i, 8> u;
-        std::array<__m256i, 8> v;
-
-        std::get<0>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x0>(s)), std::get<0x1>(s), 1);
-        std::get<1>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x2>(s)), std::get<0x3>(s), 1);
-        std::get<2>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x4>(s)), std::get<0x5>(s), 1);
-        std::get<3>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x6>(s)), std::get<0x7>(s), 1);
-        std::get<4>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0x8>(s)), std::get<0x9>(s), 1);
-        std::get<5>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0xA>(s)), std::get<0xB>(s), 1);
-        std::get<6>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0xC>(s)), std::get<0xD>(s), 1);
-        std::get<7>(u) = _mm256_insertf128_si256(
-            _mm256_castsi128_si256(std::get<0xE>(s)), std::get<0xF>(s), 1);
-
-        std::get<0>(u) = _mm256_slli_epi32(std::get<0>(u), 1);
-        std::get<1>(u) = _mm256_slli_epi32(std::get<1>(u), 1);
-        std::get<2>(u) = _mm256_slli_epi32(std::get<2>(u), 1);
-        std::get<3>(u) = _mm256_slli_epi32(std::get<3>(u), 1);
-        std::get<4>(u) = _mm256_slli_epi32(std::get<4>(u), 1);
-        std::get<5>(u) = _mm256_slli_epi32(std::get<5>(u), 1);
-        std::get<6>(u) = _mm256_slli_epi32(std::get<6>(u), 1);
-        std::get<7>(u) = _mm256_slli_epi32(std::get<7>(u), 1);
-
-        std::get<0>(u) = _mm256_srli_epi32(std::get<0>(u), 7);
-        std::get<1>(u) = _mm256_srli_epi32(std::get<1>(u), 7);
-        std::get<2>(u) = _mm256_srli_epi32(std::get<2>(u), 7);
-        std::get<3>(u) = _mm256_srli_epi32(std::get<3>(u), 7);
-        std::get<4>(u) = _mm256_srli_epi32(std::get<4>(u), 7);
-        std::get<5>(u) = _mm256_srli_epi32(std::get<5>(u), 7);
-        std::get<6>(u) = _mm256_srli_epi32(std::get<6>(u), 7);
-        std::get<7>(u) = _mm256_srli_epi32(std::get<7>(u), 7);
-
-        std::get<0>(v) = _mm256_and_si256(std::get<0>(u), mask);
-        std::get<1>(v) = _mm256_and_si256(std::get<1>(u), mask);
-        std::get<2>(v) = _mm256_and_si256(std::get<2>(u), mask);
-        std::get<3>(v) = _mm256_and_si256(std::get<3>(u), mask);
-        std::get<4>(v) = _mm256_and_si256(std::get<4>(u), mask);
-        std::get<5>(v) = _mm256_and_si256(std::get<5>(u), mask);
-        std::get<6>(v) = _mm256_and_si256(std::get<6>(u), mask);
-        std::get<7>(v) = _mm256_and_si256(std::get<7>(u), mask);
-
-        std::get<0>(u) = _mm256_add_epi32(std::get<0>(u), std::get<0>(v));
-        std::get<1>(u) = _mm256_add_epi32(std::get<1>(u), std::get<1>(v));
-        std::get<2>(u) = _mm256_add_epi32(std::get<2>(u), std::get<2>(v));
-        std::get<3>(u) = _mm256_add_epi32(std::get<3>(u), std::get<3>(v));
-        std::get<4>(u) = _mm256_add_epi32(std::get<4>(u), std::get<4>(v));
-        std::get<5>(u) = _mm256_add_epi32(std::get<5>(u), std::get<5>(v));
-        std::get<6>(u) = _mm256_add_epi32(std::get<6>(u), std::get<6>(v));
-        std::get<7>(u) = _mm256_add_epi32(std::get<7>(u), std::get<7>(v));
-
-        std::get<0>(t) = _mm256_cvtepi32_ps(std::get<0>(u));
-        std::get<1>(t) = _mm256_cvtepi32_ps(std::get<1>(u));
-        std::get<2>(t) = _mm256_cvtepi32_ps(std::get<2>(u));
-        std::get<3>(t) = _mm256_cvtepi32_ps(std::get<3>(u));
-        std::get<4>(t) = _mm256_cvtepi32_ps(std::get<4>(u));
-        std::get<5>(t) = _mm256_cvtepi32_ps(std::get<5>(u));
-        std::get<6>(t) = _mm256_cvtepi32_ps(std::get<6>(u));
-        std::get<7>(t) = _mm256_cvtepi32_ps(std::get<7>(u));
-
-        mul_ps256(t, p25);
-    }
-
-    static void eval(const std::array<__m256i, 8> &s, std::array<__m256, 8> &t)
-    {
-        const __m256 p25 = _mm256_castsi256_ps( // 2^{-25}
-            _mm256_set1_epi32(static_cast<int>(0x33000000)));
-        const __m256i mask = _mm256_set1_epi32(1);
-
-        std::array<__m256i, 8> u;
-        std::array<__m256i, 8> v;
-
-        std::get<0>(u) = _mm256_slli_epi32(std::get<0>(s), 1);
-        std::get<1>(u) = _mm256_slli_epi32(std::get<1>(s), 1);
-        std::get<2>(u) = _mm256_slli_epi32(std::get<2>(s), 1);
-        std::get<3>(u) = _mm256_slli_epi32(std::get<3>(s), 1);
-        std::get<4>(u) = _mm256_slli_epi32(std::get<4>(s), 1);
-        std::get<5>(u) = _mm256_slli_epi32(std::get<5>(s), 1);
-        std::get<6>(u) = _mm256_slli_epi32(std::get<6>(s), 1);
-        std::get<7>(u) = _mm256_slli_epi32(std::get<7>(s), 1);
-
-        std::get<0>(u) = _mm256_srli_epi32(std::get<0>(u), 7);
-        std::get<1>(u) = _mm256_srli_epi32(std::get<1>(u), 7);
-        std::get<2>(u) = _mm256_srli_epi32(std::get<2>(u), 7);
-        std::get<3>(u) = _mm256_srli_epi32(std::get<3>(u), 7);
-        std::get<4>(u) = _mm256_srli_epi32(std::get<4>(u), 7);
-        std::get<5>(u) = _mm256_srli_epi32(std::get<5>(u), 7);
-        std::get<6>(u) = _mm256_srli_epi32(std::get<6>(u), 7);
-        std::get<7>(u) = _mm256_srli_epi32(std::get<7>(u), 7);
-
-        std::get<0>(v) = _mm256_and_si256(std::get<0>(u), mask);
-        std::get<1>(v) = _mm256_and_si256(std::get<1>(u), mask);
-        std::get<2>(v) = _mm256_and_si256(std::get<2>(u), mask);
-        std::get<3>(v) = _mm256_and_si256(std::get<3>(u), mask);
-        std::get<4>(v) = _mm256_and_si256(std::get<4>(u), mask);
-        std::get<5>(v) = _mm256_and_si256(std::get<5>(u), mask);
-        std::get<6>(v) = _mm256_and_si256(std::get<6>(u), mask);
-        std::get<7>(v) = _mm256_and_si256(std::get<7>(u), mask);
-
-        std::get<0>(u) = _mm256_add_epi32(std::get<0>(u), std::get<0>(v));
-        std::get<1>(u) = _mm256_add_epi32(std::get<1>(u), std::get<1>(v));
-        std::get<2>(u) = _mm256_add_epi32(std::get<2>(u), std::get<2>(v));
-        std::get<3>(u) = _mm256_add_epi32(std::get<3>(u), std::get<3>(v));
-        std::get<4>(u) = _mm256_add_epi32(std::get<4>(u), std::get<4>(v));
-        std::get<5>(u) = _mm256_add_epi32(std::get<5>(u), std::get<5>(v));
-        std::get<6>(u) = _mm256_add_epi32(std::get<6>(u), std::get<6>(v));
-        std::get<7>(u) = _mm256_add_epi32(std::get<7>(u), std::get<7>(v));
-
-        std::get<0>(t) = _mm256_cvtepi32_ps(std::get<0>(u));
-        std::get<1>(t) = _mm256_cvtepi32_ps(std::get<1>(u));
-        std::get<2>(t) = _mm256_cvtepi32_ps(std::get<2>(u));
-        std::get<3>(t) = _mm256_cvtepi32_ps(std::get<3>(u));
-        std::get<4>(t) = _mm256_cvtepi32_ps(std::get<4>(u));
-        std::get<5>(t) = _mm256_cvtepi32_ps(std::get<5>(u));
-        std::get<6>(t) = _mm256_cvtepi32_ps(std::get<6>(u));
-        std::get<7>(t) = _mm256_cvtepi32_ps(std::get<7>(u));
-
-        mul_ps256(t, p25);
+        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
 
@@ -250,30 +88,26 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Open, 32>
 {
     public:
-    static float eval(UIntType u)
+    template <std::size_t S>
+    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
-        return U01GenericImpl<UIntType, float, Closed, Open>::eval(u);
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
+
+        return eval(t, r);
     }
 
     template <std::size_t S>
-    static void eval(
-        const std::array<__m128i, S> &s, std::array<__m256, S / 2> &t)
+    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
-            _mm256_set1_epi32(static_cast<int>(0x33800000)));
+        const __m256i c24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
 
-        convert_u32_ps256<8>(s, t);
-        mul_ps256(t, p24);
-    }
+        srli_epi32<8>(s);
+        cvtepi32_ps(s);
+        mul_ps(s, c24);
+        std::memcpy(r, s.data(), sizeof(s));
 
-    template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t)
-    {
-        const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
-            _mm256_set1_epi32(static_cast<int>(0x33800000)));
-
-        convert_u32_ps256<8>(s, t);
-        mul_ps256(t, p24);
+        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
 
@@ -281,30 +115,31 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Closed, 32>
 {
     public:
-    static float eval(UIntType u)
+    template <std::size_t S>
+    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
-        return U01GenericImpl<UIntType, float, Open, Closed>::eval(u);
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
+
+        return eval(t, r);
     }
 
     template <std::size_t S>
-    static void eval(
-        const std::array<__m128i, S> &s, std::array<__m256, S / 2> &t)
+    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
-            _mm256_set1_epi32(static_cast<int>(0x33800000)));
+        const __m256i c24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
 
-        convert_u32_ps256<8>(s, t);
-        fma_ps256(t, p24, p24);
-    }
+        srli_epi32<8>(s);
+        cvtepi32_ps(s);
+#if MCKL_USE_FMA
+        fmadd_ps(s, c24, c24);
+#else
+        mul_ps(s, c24);
+        add_ps(s, c24);
+#endif
+        std::memcpy(r, s.data(), sizeof(s));
 
-    template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t)
-    {
-        const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
-            _mm256_set1_epi32(static_cast<int>(0x33800000)));
-
-        convert_u32_ps256<8>(s, t);
-        fma_ps256(t, p24, p24);
+        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
 
@@ -312,160 +147,59 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Open, 32>
 {
     public:
-    static float eval(UIntType u)
+    template <std::size_t S>
+    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
-        return U01GenericImpl<UIntType, float, Open, Open>::eval(u);
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
+
+        return eval(t, r);
     }
 
     template <std::size_t S>
-    static void eval(
-        const std::array<__m128i, S> &s, std::array<__m256, S / 2> &t)
+    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256 p23 = _mm256_castsi256_ps( // 2^{-23}
-            _mm256_set1_epi32(static_cast<int>(0x34000000)));
-        const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
-            _mm256_set1_epi32(static_cast<int>(0x33800000)));
+        const __m256i c23 = _mm256_set1_epi32(static_cast<int>(0x34000000));
+        const __m256i c24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
 
-        convert_u32_ps256<9>(s, t);
-        fma_ps256(t, p23, p24);
-    }
+        srli_epi32<9>(s);
+        cvtepi32_ps(s);
+#if MCKL_USE_FMA
+        fmadd_ps(s, c23, c24);
+#else
+        mul_ps(s, c24);
+        add_ps(s, c24);
+#endif
+        std::memcpy(r, s.data(), sizeof(s));
 
-    template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t)
-    {
-        const __m256 p23 = _mm256_castsi256_ps( // 2^{-23}
-            _mm256_set1_epi32(static_cast<int>(0x34000000)));
-        const __m256 p24 = _mm256_castsi256_ps( // 2^{-24}
-            _mm256_set1_epi32(static_cast<int>(0x33800000)));
-
-        convert_u32_ps256<9>(s, t);
-        fma_ps256(t, p23, p24);
+        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
-
-template <typename UIntType>
-class UniformRealAVX2Impl<UIntType, float, 32>
-{
-    public:
-    static float eval(UIntType u, float a, float b)
-    {
-#if MCKL_USE_FMA
-        return std::fma(U01GenericImpl<UIntType, float, Closed, Open>::eval(u),
-            (b - a), a);
-#else
-        return U01GenericImpl<UIntType, float, Closed, Open>::eval(u) *
-            (b - a) +
-            a;
-#endif
-    }
-
-    template <std::size_t S>
-    static void eval(const std::array<__m128i, S> &s,
-        std::array<__m256, S / 2> &t, float a, float b)
-    {
-        U01AVX2Impl<UIntType, float, Closed, Open, 32>::eval(s, t);
-        fma_ps256(t, b - a, a);
-    }
-
-    template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s, std::array<__m256, S> &t,
-        float a, float b)
-    {
-        U01AVX2Impl<UIntType, float, Closed, Open, 32>::eval(s, t);
-        fma_ps256(t, b - a, a);
-    }
-}; // class UniformRealAVX2Impl
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
 {
     public:
-    static double eval(UIntType u)
+    template <typename T, std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        return U01GenericImpl<UIntType, double, Closed, Closed>::eval(u);
-    }
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+        const __m256i c32 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+        const __m256i mask = _mm256_set1_epi64x(1);
 
-    static void eval(
-        const std::array<__m128i, 8> &s, std::array<__m256d, 8> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
-        const __m128i mask = _mm_set1_epi32(1);
+        std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
+        std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> u;
+        cvtepu32_epi64(s, t);
+        and_si256(t, mask, u);
+        add_epi64(t, u);
+        add_epi64(t, c52);
+        sub_pd(t, c52);
+        mul_pd(t, c32);
+        std::memcpy(r, t.data(), sizeof(t));
 
-        std::array<__m128i, 8> p;
-        std::array<__m256d, 8> q;
-
-        std::get<0>(p) = _mm_and_si128(std::get<0>(s), mask);
-        std::get<1>(p) = _mm_and_si128(std::get<1>(s), mask);
-        std::get<2>(p) = _mm_and_si128(std::get<2>(s), mask);
-        std::get<3>(p) = _mm_and_si128(std::get<3>(s), mask);
-        std::get<4>(p) = _mm_and_si128(std::get<4>(s), mask);
-        std::get<5>(p) = _mm_and_si128(std::get<5>(s), mask);
-        std::get<6>(p) = _mm_and_si128(std::get<6>(s), mask);
-        std::get<7>(p) = _mm_and_si128(std::get<7>(s), mask);
-
-        convert_u32_pd256(p, q);
-        convert_u32_pd256(s, t);
-        add_pd256(t, q);
-        mul_pd256(t, p32);
-    }
-
-    static void eval(
-        const std::array<__m128i, 16> &s, std::array<__m256d, 16> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
-        const __m128i mask = _mm_set1_epi32(1);
-
-        std::array<__m128i, 16> p;
-        std::array<__m256d, 16> q;
-
-        std::get<0x0>(p) = _mm_and_si128(std::get<0x0>(s), mask);
-        std::get<0x1>(p) = _mm_and_si128(std::get<0x1>(s), mask);
-        std::get<0x2>(p) = _mm_and_si128(std::get<0x2>(s), mask);
-        std::get<0x3>(p) = _mm_and_si128(std::get<0x3>(s), mask);
-        std::get<0x4>(p) = _mm_and_si128(std::get<0x4>(s), mask);
-        std::get<0x5>(p) = _mm_and_si128(std::get<0x5>(s), mask);
-        std::get<0x6>(p) = _mm_and_si128(std::get<0x6>(s), mask);
-        std::get<0x7>(p) = _mm_and_si128(std::get<0x7>(s), mask);
-        std::get<0x8>(p) = _mm_and_si128(std::get<0x8>(s), mask);
-        std::get<0x9>(p) = _mm_and_si128(std::get<0x9>(s), mask);
-        std::get<0xA>(p) = _mm_and_si128(std::get<0xA>(s), mask);
-        std::get<0xB>(p) = _mm_and_si128(std::get<0xB>(s), mask);
-        std::get<0xC>(p) = _mm_and_si128(std::get<0xC>(s), mask);
-        std::get<0xD>(p) = _mm_and_si128(std::get<0xD>(s), mask);
-        std::get<0xE>(p) = _mm_and_si128(std::get<0xE>(s), mask);
-        std::get<0xF>(p) = _mm_and_si128(std::get<0xF>(s), mask);
-
-        convert_u32_pd256(p, q);
-        convert_u32_pd256(s, t);
-        add_pd256(t, q);
-        mul_pd256(t, p32);
-    }
-
-    static void eval(
-        const std::array<__m256i, 8> &s, std::array<__m256d, 16> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
-        const __m256i mask = _mm256_set1_epi32(1);
-
-        std::array<__m256i, 8> p;
-        std::array<__m256d, 16> q;
-
-        std::get<0>(p) = _mm256_and_si256(std::get<0>(s), mask);
-        std::get<1>(p) = _mm256_and_si256(std::get<1>(s), mask);
-        std::get<2>(p) = _mm256_and_si256(std::get<2>(s), mask);
-        std::get<3>(p) = _mm256_and_si256(std::get<3>(s), mask);
-        std::get<4>(p) = _mm256_and_si256(std::get<4>(s), mask);
-        std::get<5>(p) = _mm256_and_si256(std::get<5>(s), mask);
-        std::get<6>(p) = _mm256_and_si256(std::get<6>(s), mask);
-        std::get<7>(p) = _mm256_and_si256(std::get<7>(s), mask);
-
-        convert_u32_pd256(p, q);
-        convert_u32_pd256(s, t);
-        add_pd256(t, q);
-        mul_pd256(t, p32);
+        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -473,31 +207,22 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Open, 32>
 {
     public:
-    static double eval(UIntType u)
+    template <typename T, std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        return U01GenericImpl<UIntType, double, Closed, Open>::eval(u);
-    }
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+        const __m256i c32 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
 
-    template <std::size_t S>
-    static void eval(
-        const std::array<__m128i, S> &s, std::array<__m256d, S> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
+        std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
+        cvtepu32_epi64(s, t);
+        add_epi64(t, c52);
+        sub_pd(t, c52);
+        mul_pd(t, c32);
+        std::memcpy(r, t.data(), sizeof(t));
 
-        convert_u32_pd256(s, t);
-        mul_pd256(t, p32);
-    }
-
-    template <std::size_t S>
-    static void eval(
-        const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
-
-        convert_u32_pd256(s, t);
-        mul_pd256(t, p32);
+        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -505,31 +230,27 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Closed, 32>
 {
     public:
-    static double eval(UIntType u)
+    template <typename T, std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        return U01GenericImpl<UIntType, double, Open, Closed>::eval(u);
-    }
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+        const __m256i c32 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
 
-    template <std::size_t S>
-    static void eval(
-        const std::array<__m128i, S> &s, std::array<__m256d, S> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
+        std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
+        cvtepu32_epi64(s, t);
+        add_epi64(t, c52);
+        sub_pd(t, c52);
+#if MCKL_USE_FMA
+        fmadd_pd(t, c32, c32);
+#else
+        mul_pd(t, c32);
+        add_pd(t, c32);
+#endif
+        std::memcpy(r, t.data(), sizeof(t));
 
-        convert_u32_pd256(s, t);
-        fma_pd256(t, p32, p32);
-    }
-
-    template <std::size_t S>
-    static void eval(
-        const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
-
-        convert_u32_pd256(s, t);
-        fma_pd256(t, p32, p32);
+        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -537,71 +258,151 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Open, 32>
 {
     public:
-    static double eval(UIntType u)
+    template <typename T, std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        return U01GenericImpl<UIntType, double, Open, Open>::eval(u);
-    }
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+        const __m256i c32 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+        const __m256i c33 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DE0000000000000));
 
-    template <std::size_t S>
-    static void eval(
-        const std::array<__m128i, S> &s, std::array<__m256d, S> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
-        const __m256d p33 = _mm256_castsi256_pd( // 2^{-33}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DE0000000000000)));
+        std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
+        cvtepu32_epi64(s, t);
+        add_epi64(t, c52);
+        sub_pd(t, c52);
+#if MCKL_USE_FMA
+        fmadd_pd(t, c32, c33);
+#else
+        mul_pd(t, c32);
+        add_pd(t, c33);
+#endif
+        std::memcpy(r, t.data(), sizeof(t));
 
-        convert_u32_pd256(s, t);
-        fma_pd256(t, p32, p33);
-    }
-
-    template <std::size_t S>
-    static void eval(
-        const std::array<__m256i, S> &s, std::array<__m256d, S * 2> &t)
-    {
-        const __m256d p32 = _mm256_castsi256_pd( // 2^{-32}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000)));
-        const __m256d p33 = _mm256_castsi256_pd( // 2^{-33}
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DE0000000000000)));
-
-        convert_u32_pd256(s, t);
-        fma_pd256(t, p32, p33);
+        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
+
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
+class U01AVX2Transform
+{
+    public:
+    using uint_type = UIntType;
+
+    template <typename T, std::size_t S>
+    MCKL_FLATTEN static RealType *eval(std::array<T, S> &s, RealType *r)
+    {
+        return U01AVX2Impl<UIntType, RealType, Lower, Upper>::eval(s, r);
+    }
+
+    MCKL_FLATTEN static RealType *eval(
+        std::size_t n, const UIntType *u, RealType *r)
+    {
+        for (std::size_t i = 0; i != n; ++i, ++u, ++r)
+            *r = U01GenericImpl<UIntType, RealType, Lower, Upper>::eval(*u);
+
+        return r;
+    }
+}; // class U01AVX2Transform
+
+template <typename UIntType, typename RealType,
+    int = std::numeric_limits<UIntType>::digits>
+class UniformRealAVX2Impl;
+
+template <typename UIntType>
+class UniformRealAVX2Impl<UIntType, float, 32>
+{
+    public:
+    template <std::size_t S>
+    MCKL_FLATTEN static float *eval(
+        std::array<__m128i, S> &s, float *r, float a, float b)
+    {
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
+
+        return eval(t, r, a, b);
+    }
+
+    template <std::size_t S>
+    MCKL_FLATTEN static float *eval(
+        std::array<__m256i, S> &s, float *r, float a, float b)
+    {
+        const float d = (b - a) * U01Pow2Inv<float, 24>::value;
+
+        srli_epi32<8>(s);
+        cvtepi32_ps(s);
+#if MCKL_USE_FMA
+        fmadd_ps(s, _mm256_castps_si256(_mm256_set1_ps(d)),
+            _mm256_castps_si256(_mm256_set1_ps(a)));
+#else  // MCKL_USE_FMA
+        mul_ps(s, _mm256_castps_si256(_mm256_set1_ps(d)));
+        add_ps(s, _mm256_castps_si256(_mm256_set1_ps(a)));
+#endif // MCKL_USE_FMA
+        std::memcpy(r, s.data(), sizeof(s));
+
+        return r + sizeof(s) / sizeof(float);
+    }
+}; // class UniformRealAVX2Impl
 
 template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, double, 32>
 {
     public:
-    static double eval(UIntType u, double a, double b)
+    template <typename T, std::size_t S>
+    MCKL_FLATTEN static double *eval(
+        std::array<T, S> &s, double *r, double a, double b)
     {
+        const __m256i c52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+        const double d = (b - a) * U01Pow2Inv<double, 32>::value;
+
+        std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
+        cvtepu32_epi64(s, t);
+        add_epi64(t, c52);
+        sub_pd(t, c52);
 #if MCKL_USE_FMA
-        return std::fma(
-            U01GenericImpl<UIntType, double, Closed, Open>::eval(u), (b - a),
-            a);
-#else
-        return U01GenericImpl<UIntType, double, Closed, Open>::eval(u) *
-            (b - a) +
-            a;
-#endif
-    }
+        fmadd_pd(t, _mm256_castpd_si256(_mm256_set1_pd(d)),
+            _mm256_castpd_si256(_mm256_set1_pd(a)));
+#else  // MCKL_USE_FMA
+        mul_pd(t, _mm256_castpd_si256(_mm256_set1_pd(d)));
+        add_ps(t, _mm256_castpd_si256(_mm256_set1_pd(a)));
+#endif // MCKL_USE_FMA
+        std::memcpy(r, t.data(), sizeof(t));
 
-    template <std::size_t S>
-    static void eval(const std::array<__m128i, S> &s,
-        std::array<__m256d, S> &t, double a, double b)
-    {
-        U01AVX2Impl<UIntType, double, Closed, Open, 32>::eval(s, t);
-        fma_pd256(t, b - a, a);
-    }
-
-    template <std::size_t S>
-    static void eval(const std::array<__m256i, S> &s,
-        std::array<__m256d, S * 2> &t, double a, double b)
-    {
-        U01AVX2Impl<UIntType, double, Closed, Open, 32>::eval(s, t);
-        fma_pd256(t, b - a, a);
+        return r + sizeof(t) / sizeof(double);
     }
 }; // class UniformRealAVX2Impl
+
+template <typename UIntType, typename RealType>
+class UniformRealAVX2Transform
+{
+    public:
+    using uint_type = UIntType;
+
+    template <typename T, std::size_t S>
+    MCKL_FLATTEN static RealType *eval(
+        std::array<T, S> &s, RealType *r, RealType a, RealType b)
+    {
+        return UniformRealAVX2Impl<UIntType, RealType>::eval(s, r, a, b);
+    }
+
+    MCKL_FLATTEN static RealType *eval(
+        std::size_t n, const UIntType *u, RealType *r, RealType a, RealType b)
+    {
+        const RealType d = b - a;
+        for (std::size_t i = 0; i != n; ++i, ++u, ++r) {
+            *r = U01GenericImpl<UIntType, RealType, Closed, Open>::eval(*u);
+#if MCKL_USE_FMA
+            *r = std::fma(*r, d, a);
+#else
+            *r = *r * d + a;
+#endif
+        }
+
+        return r;
+    }
+}; // class UniformRealAVX2Transform
 
 } // namespace mckl::internal
 

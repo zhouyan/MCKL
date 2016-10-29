@@ -62,30 +62,16 @@ class PhiloxGeneratorAVX2Impl32Permute<2>
     {
     }
 
-    static void round(std::array<__m256i, 8> &s)
+    template <std::size_t S>
+    static void round(std::array<__m256i, S> &s)
     {
-        // 2 3 0 1
-        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xB1);
+        shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
 
-    static void last(std::array<__m256i, 8> &s)
+    template <std::size_t S>
+    static void last(std::array<__m256i, S> &s)
     {
-        // 2 3 0 1
-        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xB1);
+        shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
 }; // class PhiloxGeneratorAVX2Impl32Permute
 
@@ -93,43 +79,22 @@ template <>
 class PhiloxGeneratorAVX2Impl32Permute<4>
 {
     public:
-    static void first(std::array<__m256i, 8> &s)
+    template <std::size_t S>
+    static void first(std::array<__m256i, S> &s)
     {
-        // 3 0 1 2
-        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xC6);
-        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xC6);
-        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xC6);
-        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xC6);
-        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xC6);
-        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xC6);
-        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xC6);
+        shuffle_epi32<0xC6>(s); // 3 0 1 2
     }
 
-    static void round(std::array<__m256i, 8> &s)
+    template <std::size_t S>
+    static void round(std::array<__m256i, S> &s)
     {
-        // 2 1 0 3
-        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0x93);
-        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0x93);
-        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0x93);
-        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0x93);
-        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0x93);
-        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0x93);
-        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0x93);
-        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0x93);
+        shuffle_epi32<0x93>(s); // 2 1 0 3
     }
 
-    static void last(std::array<__m256i, 8> &s)
+    template <std::size_t S>
+    static void last(std::array<__m256i, S> &s)
     {
-        // 2 3 0 1
-        std::get<0>(s) = _mm256_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm256_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm256_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm256_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm256_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm256_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm256_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm256_shuffle_epi32(std::get<7>(s), 0xB1);
+        shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
 }; // class PhiloxGeneratorAVX2Impl32Permute
 
@@ -151,62 +116,14 @@ class PhiloxGeneratorAVX2Impl32
     static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, ResultType *r)
     {
-        constexpr std::size_t S = 8;
-        constexpr std::size_t cstride = sizeof(__m256i) * S;
-        constexpr std::size_t nstride = cstride / (sizeof(T) * K);
-        constexpr std::size_t rstride = cstride / sizeof(ResultType);
-
-        std::array<__m256i, S> s;
-        std::array<__m256i, Rounds> rk;
-        set_key(rk, key);
-        while (n >= nstride) {
-            MCKL_FLATTEN_CALL increment_si256(ctr, s);
-
-            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
-
-            MCKL_FLATTEN_CALL rbox<0x0>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
-
-            round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
-
-            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
-
-            std::memcpy(r, s.data(), cstride);
-            n -= nstride;
-            r += rstride;
-        }
-
-        alignas(32) union {
-            std::array<std::array<T, K>, nstride> state;
-            std::array<Counter<T, K>, nstride> ctr;
-        } buf;
-        for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.ctr[i] = ctr;
-            eval(buf.state[i], key);
-        }
-        std::memcpy(r, buf.state.data(), sizeof(T) * K * n);
+        eval<transform>(ctr, key, n, r);
     }
 
     template <typename RealType>
     static void u01_cc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval_u01_u32<U01AVX2Impl<std::uint32_t, RealType, Closed, Closed>>(
+        eval<U01AVX2Transform<std::uint32_t, RealType, Closed, Closed>>(
             ctr, key, n, r);
     }
 
@@ -214,7 +131,7 @@ class PhiloxGeneratorAVX2Impl32
     static void u01_co_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval_u01_u32<U01AVX2Impl<std::uint32_t, RealType, Closed, Open>>(
+        eval<U01AVX2Transform<std::uint32_t, RealType, Closed, Open>>(
             ctr, key, n, r);
     }
 
@@ -222,7 +139,7 @@ class PhiloxGeneratorAVX2Impl32
     static void u01_oc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval_u01_u32<U01AVX2Impl<std::uint32_t, RealType, Open, Closed>>(
+        eval<U01AVX2Transform<std::uint32_t, RealType, Open, Closed>>(
             ctr, key, n, r);
     }
 
@@ -230,7 +147,7 @@ class PhiloxGeneratorAVX2Impl32
     static void u01_oo_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval_u01_u32<U01AVX2Impl<std::uint32_t, RealType, Open, Open>>(
+        eval<U01AVX2Transform<std::uint32_t, RealType, Open, Open>>(
             ctr, key, n, r);
     }
 
@@ -239,23 +156,46 @@ class PhiloxGeneratorAVX2Impl32
         const std::array<T, K / 2> &key, std::size_t n, RealType *r,
         RealType a, RealType b)
     {
-        eval_u01_u32<UniformRealAVX2Impl<std::uint32_t, RealType>>(
+        eval<UniformRealAVX2Transform<std::uint32_t, RealType>>(
             ctr, key, n, r, a, b);
     }
 
     private:
-    template <typename Transform, typename... Args>
-    static void eval_u01_u32(Counter<T, K> &ctr,
-        const std::array<T, K / 2> &key, std::size_t n, float *r,
-        Args &&... args)
+    class transform
     {
+        public:
+        using uint_type = T;
+
+        template <std::size_t S, typename ResultType>
+        MCKL_FLATTEN static ResultType *eval(
+            const std::array<__m256i, S> &s, ResultType *r)
+        {
+            std::memcpy(r, s.data(), sizeof(s));
+
+            return r + sizeof(s) / sizeof(ResultType);
+        }
+
+        template <typename ResultType>
+        MCKL_FLATTEN static ResultType *eval(
+            std::size_t n, const uint_type *s, ResultType *r)
+        {
+            std::memcpy(r, s, sizeof(uint_type) * n);
+
+            return r + sizeof(uint_type) * n / sizeof(ResultType);
+        }
+    }; // class transform
+
+    template <typename Transform, typename ResultType, typename... Args>
+    static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
+        std::size_t n, ResultType *r, Args &&... args)
+    {
+        using uint_type = typename Transform::uint_type;
+
         constexpr std::size_t S = 8;
-        constexpr std::size_t cstride = sizeof(__m256) * S;
-        constexpr std::size_t nstride = cstride / (sizeof(T) * K);
-        constexpr std::size_t rstride = cstride / sizeof(float);
+        constexpr std::size_t nstride = sizeof(__m256i) * S / (sizeof(T) * K);
+        constexpr std::size_t ustride = sizeof(__m256i) / sizeof(uint_type);
 
         std::array<__m256i, S> s;
-        std::array<__m256, S> t;
         std::array<__m256i, Rounds> rk;
         set_key(rk, key);
         while (n >= nstride) {
@@ -284,96 +224,23 @@ class PhiloxGeneratorAVX2Impl32
 
             MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
 
-            MCKL_FLATTEN_CALL Transform::eval(
-                s, t, std::forward<Args>(args)...);
-
-            std::memcpy(r, t.data(), cstride);
+            MCKL_FLATTEN_CALL r =
+                Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
-            r += rstride;
         }
 
         alignas(32) union {
             std::array<std::array<T, K>, nstride> state;
             std::array<Counter<T, K>, nstride> ctr;
-            std::array<std::uint32_t, nstride * K> u;
+            std::array<uint_type, nstride * ustride> u;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], key);
         }
-
-        alignas(32) std::array<float, rstride> result;
-        MCKL_FLATTEN_CALL
-        for (std::size_t i = 0; i != n * K; ++i)
-            result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
-        std::memcpy(r, result.data(), sizeof(float) * K * n);
-    }
-
-    template <typename Transform, typename... Args>
-    static void eval_u01_u32(Counter<T, K> &ctr,
-        const std::array<T, K / 2> &key, std::size_t n, double *r,
-        Args &&... args)
-    {
-        constexpr std::size_t S = 8;
-        constexpr std::size_t cstride = sizeof(__m256d) * S * 2;
-        constexpr std::size_t nstride = cstride / (sizeof(T) * K) / 2;
-        constexpr std::size_t rstride = cstride / sizeof(double);
-
-        std::array<__m256i, S> s;
-        std::array<__m256d, S * 2> t;
-        std::array<__m256i, Rounds> rk;
-        set_key(rk, key);
-        while (n >= nstride) {
-            MCKL_FLATTEN_CALL increment_si256(ctr, s);
-
-            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
-
-            MCKL_FLATTEN_CALL rbox<0x0>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
-
-            round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
-
-            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
-
-            MCKL_FLATTEN_CALL Transform::eval(
-                s, t, std::forward<Args>(args)...);
-
-            std::memcpy(r, t.data(), cstride);
-            n -= nstride;
-            r += rstride;
-        }
-
-        alignas(32) union {
-            std::array<std::array<T, K>, nstride> state;
-            std::array<Counter<T, K>, nstride> ctr;
-            std::array<std::uint32_t, nstride * K> u;
-        } buf;
-        for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.ctr[i] = ctr;
-            eval(buf.state[i], key);
-        }
-
-        alignas(32) std::array<double, rstride> result;
-        MCKL_FLATTEN_CALL
-        for (std::size_t i = 0; i != n * K; ++i)
-            result[i] = Transform::eval(buf.u[i], std::forward<Args>(args)...);
-        std::memcpy(r, result.data(), sizeof(double) * K * n);
+        MCKL_FLATTEN_CALL Transform::eval(
+            n * ustride, buf.u.data(), r, std::forward<Args>(args)...);
     }
 
     template <std::size_t, std::size_t S>
@@ -403,8 +270,8 @@ class PhiloxGeneratorAVX2Impl32
     {
     }
 
-    template <std::size_t N>
-    static void rbox(std::array<__m256i, 8> &s,
+    template <std::size_t N, std::size_t S>
+    static void rbox(std::array<__m256i, S> &s,
         const std::array<__m256i, Rounds> &rk, std::true_type)
     {
         constexpr int mul0 =
@@ -421,42 +288,11 @@ class PhiloxGeneratorAVX2Impl32
         const __m256i a = _mm256_set_epi32(mask, 0, mask, 0, mask, 0, mask, 0);
         const __m256i k = std::get<N - 1>(rk);
 
-        __m256i m0 = _mm256_mul_epu32(std::get<0>(s), m);
-        __m256i m1 = _mm256_mul_epu32(std::get<1>(s), m);
-        __m256i m2 = _mm256_mul_epu32(std::get<2>(s), m);
-        __m256i m3 = _mm256_mul_epu32(std::get<3>(s), m);
-        __m256i m4 = _mm256_mul_epu32(std::get<4>(s), m);
-        __m256i m5 = _mm256_mul_epu32(std::get<5>(s), m);
-        __m256i m6 = _mm256_mul_epu32(std::get<6>(s), m);
-        __m256i m7 = _mm256_mul_epu32(std::get<7>(s), m);
-
-        std::get<0>(s) = _mm256_and_si256(std::get<0>(s), a);
-        std::get<1>(s) = _mm256_and_si256(std::get<1>(s), a);
-        std::get<2>(s) = _mm256_and_si256(std::get<2>(s), a);
-        std::get<3>(s) = _mm256_and_si256(std::get<3>(s), a);
-        std::get<4>(s) = _mm256_and_si256(std::get<4>(s), a);
-        std::get<5>(s) = _mm256_and_si256(std::get<5>(s), a);
-        std::get<6>(s) = _mm256_and_si256(std::get<6>(s), a);
-        std::get<7>(s) = _mm256_and_si256(std::get<7>(s), a);
-
-        std::get<0>(s) = _mm256_xor_si256(std::get<0>(s), k);
-        std::get<1>(s) = _mm256_xor_si256(std::get<1>(s), k);
-        std::get<2>(s) = _mm256_xor_si256(std::get<2>(s), k);
-        std::get<3>(s) = _mm256_xor_si256(std::get<3>(s), k);
-        std::get<4>(s) = _mm256_xor_si256(std::get<4>(s), k);
-        std::get<5>(s) = _mm256_xor_si256(std::get<5>(s), k);
-        std::get<6>(s) = _mm256_xor_si256(std::get<6>(s), k);
-        std::get<7>(s) = _mm256_xor_si256(std::get<7>(s), k);
-
-        std::get<0>(s) = _mm256_xor_si256(std::get<0>(s), m0);
-        std::get<1>(s) = _mm256_xor_si256(std::get<1>(s), m1);
-        std::get<2>(s) = _mm256_xor_si256(std::get<2>(s), m2);
-        std::get<3>(s) = _mm256_xor_si256(std::get<3>(s), m3);
-        std::get<4>(s) = _mm256_xor_si256(std::get<4>(s), m4);
-        std::get<5>(s) = _mm256_xor_si256(std::get<5>(s), m5);
-        std::get<6>(s) = _mm256_xor_si256(std::get<6>(s), m6);
-        std::get<7>(s) = _mm256_xor_si256(std::get<7>(s), m7);
-
+        std::array<__m256i, S> t;
+        mul_epu32(s, m, t);
+        and_si256(s, a);
+        xor_si256(s, k);
+        xor_si256(s, t);
         permute<N>(s);
     }
 

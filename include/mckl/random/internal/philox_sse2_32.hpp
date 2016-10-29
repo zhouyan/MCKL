@@ -61,30 +61,16 @@ class PhiloxGeneratorSSE2Impl32Permute<2>
     {
     }
 
-    static void round(std::array<__m128i, 8> &s)
+    template <std::size_t S>
+    static void round(std::array<__m128i, S> &s)
     {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
+        shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
 
-    static void last(std::array<__m128i, 8> &s)
+    template <std::size_t S>
+    static void last(std::array<__m128i, S> &s)
     {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
+        shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
 }; // class PhiloxGeneratorSSE2Impl32Permute
 
@@ -92,43 +78,22 @@ template <>
 class PhiloxGeneratorSSE2Impl32Permute<4>
 {
     public:
-    static void first(std::array<__m128i, 8> &s)
+    template <std::size_t S>
+    static void first(std::array<__m128i, S> &s)
     {
-        // 3 0 1 2
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xC6);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xC6);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xC6);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xC6);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xC6);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xC6);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xC6);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xC6);
+        shuffle_epi32<0xC6>(s); // 3 0 1 2
     }
 
-    static void round(std::array<__m128i, 8> &s)
+    template <std::size_t S>
+    static void round(std::array<__m128i, S> &s)
     {
-        // 2 1 0 3
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0x93);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0x93);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0x93);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0x93);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0x93);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0x93);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0x93);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0x93);
+        shuffle_epi32<0x93>(s); // 2 1 0 3
     }
 
-    static void last(std::array<__m128i, 8> &s)
+    template <std::size_t S>
+    static void last(std::array<__m128i, S> &s)
     {
-        // 2 3 0 1
-        std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), 0xB1);
-        std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), 0xB1);
-        std::get<2>(s) = _mm_shuffle_epi32(std::get<2>(s), 0xB1);
-        std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), 0xB1);
-        std::get<4>(s) = _mm_shuffle_epi32(std::get<4>(s), 0xB1);
-        std::get<5>(s) = _mm_shuffle_epi32(std::get<5>(s), 0xB1);
-        std::get<6>(s) = _mm_shuffle_epi32(std::get<6>(s), 0xB1);
-        std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), 0xB1);
+        shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
 }; // class PhiloxGeneratorSSE2Impl32Permute
 
@@ -229,8 +194,8 @@ class PhiloxGeneratorSSE2Impl32
     {
     }
 
-    template <std::size_t N>
-    static void rbox(std::array<__m128i, 8> &s,
+    template <std::size_t N, std::size_t S>
+    static void rbox(std::array<__m128i, S> &s,
         const std::array<__m128i, Rounds> &rk, std::true_type)
     {
         constexpr int mul0 =
@@ -243,42 +208,11 @@ class PhiloxGeneratorSSE2Impl32
         const __m128i a = _mm_set_epi32(mask, 0, mask, 0);
         const __m128i k = std::get<N - 1>(rk);
 
-        __m128i m0 = _mm_mul_epu32(std::get<0>(s), m);
-        __m128i m1 = _mm_mul_epu32(std::get<1>(s), m);
-        __m128i m2 = _mm_mul_epu32(std::get<2>(s), m);
-        __m128i m3 = _mm_mul_epu32(std::get<3>(s), m);
-        __m128i m4 = _mm_mul_epu32(std::get<4>(s), m);
-        __m128i m5 = _mm_mul_epu32(std::get<5>(s), m);
-        __m128i m6 = _mm_mul_epu32(std::get<6>(s), m);
-        __m128i m7 = _mm_mul_epu32(std::get<7>(s), m);
-
-        std::get<0>(s) = _mm_and_si128(std::get<0>(s), a);
-        std::get<1>(s) = _mm_and_si128(std::get<1>(s), a);
-        std::get<2>(s) = _mm_and_si128(std::get<2>(s), a);
-        std::get<3>(s) = _mm_and_si128(std::get<3>(s), a);
-        std::get<4>(s) = _mm_and_si128(std::get<4>(s), a);
-        std::get<5>(s) = _mm_and_si128(std::get<5>(s), a);
-        std::get<6>(s) = _mm_and_si128(std::get<6>(s), a);
-        std::get<7>(s) = _mm_and_si128(std::get<7>(s), a);
-
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), k);
-        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), k);
-        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), k);
-        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), k);
-        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), k);
-        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), k);
-        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), k);
-
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), m0);
-        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), m1);
-        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), m2);
-        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), m3);
-        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), m4);
-        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), m5);
-        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), m6);
-        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), m7);
-
+        std::array<__m128i, S> t;
+        mul_epu32(s, m, t);
+        and_si128(s, a);
+        xor_si128(s, k);
+        xor_si128(s, t);
         permute<N>(s);
     }
 

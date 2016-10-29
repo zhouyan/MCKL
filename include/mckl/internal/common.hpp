@@ -52,6 +52,14 @@
 #include <mckl/internal/avx2.hpp>
 #endif
 
+#if MCKL_HAS_AESNI
+#include <mckl/internal/aesni.hpp>
+#endif
+
+#if MCKL_HAS_FMA
+#include <mckl/internal/fma.hpp>
+#endif
+
 #include <mckl/math.hpp>
 #include <mckl/utility/aligned_memory.hpp>
 
