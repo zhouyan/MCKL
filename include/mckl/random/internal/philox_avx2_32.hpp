@@ -193,7 +193,7 @@ class PhiloxGeneratorAVX2Impl32
 
         constexpr std::size_t S = 8;
         constexpr std::size_t nstride = sizeof(__m256i) * S / (sizeof(T) * K);
-        constexpr std::size_t ustride = sizeof(__m256i) / sizeof(uint_type);
+        constexpr std::size_t ustride = sizeof(T) * K / sizeof(uint_type);
 
         std::array<__m256i, S> s;
         std::array<__m256i, Rounds> rk;
