@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define MCKL_U01_USE_FIXED_POINT 0
+
+#define MCKL_U01_USE_64BITS_DOUBLE 0
+
 #include "random_u01.hpp"
 
 int main(int argc, char **argv)

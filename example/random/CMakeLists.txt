@@ -235,6 +235,13 @@ MCKL_ADD_TEST(random seed)
 MCKL_ADD_TEST(random skein)
 MCKL_ADD_TEST(random threefish)
 MCKL_ADD_TEST(random u01)
+IF (AESNI_FOUND)
+    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_u01.cpp
+        ${PROJECT_BINARY_DIR}/src/random_u01_noars.cpp)
+    MCKL_ADD_TEST(random u01_noars "BIN")
+    SET_TARGET_PROPERTIES(random_u01_noars
+        PROPERTIES COMPILE_FLAGS "-DMCKL_EXAMPLE_RANDOM_NO_ARS")
+ENDIF (AESNI_FOUND)
 IF(MKL_FOUND)
     MCKL_ADD_TEST(random mkl_brng)
 ENDIF(MKL_FOUND)
