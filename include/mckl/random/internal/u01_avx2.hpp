@@ -50,12 +50,46 @@ namespace internal
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper,
     int = std::numeric_limits<UIntType>::digits>
-class U01AVX2Impl;
+class U01AVX2Impl : public U01GenericImpl<UIntType, RealType, Lower, Upper>
+{
+}; // U01AVX2Impl
+
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
+class U01AVX2ImplBase
+{
+    public:
+    using uint_type = UIntType;
+
+    static RealType eval(UIntType u)
+    {
+        return U01GenericImpl<UIntType, RealType, Lower, Upper>::eval(u);
+    }
+
+    static void eval(std::size_t n, const UIntType *u, RealType *r)
+    {
+        constexpr std::size_t S = 8;
+        constexpr std::size_t cstride = sizeof(__m256i) * S;
+        constexpr std::size_t nstride = cstride / sizeof(UIntType);
+
+        std::array<__m256i, S> s;
+        while (n >= nstride) {
+            std::memcpy(s.data(), u, cstride);
+            r = U01AVX2Impl<UIntType, RealType, Lower, Upper>::eval(s, r);
+            n -= nstride;
+            u += nstride;
+        }
+        for (std::size_t i = 0; i != n; ++i)
+            r[i] = eval(u[i]);
+    }
+}; // class U01AVX2ImplBase
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
+    : public U01AVX2ImplBase<UIntType, float, Closed, Closed>
 {
     public:
+    using U01AVX2ImplBase<UIntType, float, Closed, Closed>::eval;
+
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
@@ -86,8 +120,11 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Open, 32>
+    : public U01AVX2ImplBase<UIntType, float, Closed, Open>
 {
     public:
+    using U01AVX2ImplBase<UIntType, float, Closed, Open>::eval;
+
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
@@ -113,8 +150,11 @@ class U01AVX2Impl<UIntType, float, Closed, Open, 32>
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Closed, 32>
+    : public U01AVX2ImplBase<UIntType, float, Open, Closed>
 {
     public:
+    using U01AVX2ImplBase<UIntType, float, Open, Closed>::eval;
+
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
@@ -145,8 +185,11 @@ class U01AVX2Impl<UIntType, float, Open, Closed, 32>
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Open, 32>
+    : public U01AVX2ImplBase<UIntType, float, Open, Open>
 {
     public:
+    using U01AVX2ImplBase<UIntType, float, Open, Open>::eval;
+
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
     {
@@ -178,8 +221,11 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
+    : public U01AVX2ImplBase<UIntType, double, Closed, Closed>
 {
     public:
+    using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
+
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
@@ -205,8 +251,11 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Open, 32>
+    : public U01AVX2ImplBase<UIntType, double, Closed, Open>
 {
     public:
+    using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
+
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
@@ -228,8 +277,11 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Closed, 32>
+    : public U01AVX2ImplBase<UIntType, double, Open, Closed>
 {
     public:
+    using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
+
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
@@ -256,8 +308,11 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
 
 template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Open, 32>
+    : public U01AVX2ImplBase<UIntType, double, Open, Open>
 {
     public:
+    using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
+
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
@@ -283,28 +338,6 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
         return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
-
-template <typename UIntType, typename RealType, typename Lower, typename Upper>
-class U01AVX2Transform
-{
-    public:
-    using uint_type = UIntType;
-
-    template <typename T, std::size_t S>
-    MCKL_FLATTEN static RealType *eval(std::array<T, S> &s, RealType *r)
-    {
-        return U01AVX2Impl<UIntType, RealType, Lower, Upper>::eval(s, r);
-    }
-
-    MCKL_FLATTEN static RealType *eval(
-        std::size_t n, const UIntType *u, RealType *r)
-    {
-        for (std::size_t i = 0; i != n; ++i, ++u, ++r)
-            *r = U01GenericImpl<UIntType, RealType, Lower, Upper>::eval(*u);
-
-        return r;
-    }
-}; // class U01AVX2Transform
 
 template <typename UIntType, typename RealType,
     int = std::numeric_limits<UIntType>::digits>

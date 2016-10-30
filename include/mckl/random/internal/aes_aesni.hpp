@@ -695,7 +695,7 @@ class AESGeneratorAESNIImpl
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
         RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Closed, Closed>>(
+        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Closed>>(
             ctr, rk, n, r);
     }
 
@@ -704,7 +704,7 @@ class AESGeneratorAESNIImpl
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
         RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Closed, Open>>(
+        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Open>>(
             ctr, rk, n, r);
     }
 
@@ -713,7 +713,7 @@ class AESGeneratorAESNIImpl
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
         RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Open, Closed>>(
+        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Closed>>(
             ctr, rk, n, r);
     }
 
@@ -722,8 +722,7 @@ class AESGeneratorAESNIImpl
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
         RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Open, Open>>(
-            ctr, rk, n, r);
+        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Open>>(ctr, rk, n, r);
     }
 
     template <typename RealType>

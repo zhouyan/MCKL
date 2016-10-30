@@ -123,7 +123,7 @@ class PhiloxGeneratorAVX2Impl32
     static void u01_cc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Closed, Closed>>(
+        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Closed>>(
             ctr, key, n, r);
     }
 
@@ -131,7 +131,7 @@ class PhiloxGeneratorAVX2Impl32
     static void u01_co_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Closed, Open>>(
+        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Open>>(
             ctr, key, n, r);
     }
 
@@ -139,7 +139,7 @@ class PhiloxGeneratorAVX2Impl32
     static void u01_oc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Open, Closed>>(
+        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Closed>>(
             ctr, key, n, r);
     }
 
@@ -147,8 +147,7 @@ class PhiloxGeneratorAVX2Impl32
     static void u01_oo_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
         std::size_t n, RealType *r)
     {
-        eval<U01AVX2Transform<std::uint32_t, RealType, Open, Open>>(
-            ctr, key, n, r);
+        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Open>>(ctr, key, n, r);
     }
 
     template <typename RealType>
