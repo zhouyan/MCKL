@@ -129,20 +129,20 @@ template <typename>
 std::string pf_cv_rng_set_name();
 
 template <>
-std::string pf_cv_rng_set_name<mckl::RNGSetVector<mckl::RNGFast>>()
+std::string pf_cv_rng_set_name<mckl::RNGSetVector<mckl::RNG>>()
 {
     return "RNGSetVector";
 }
 
 #if MCKL_HAS_TBB
 template <>
-std::string pf_cv_rng_set_name<mckl::RNGSetTBB<mckl::RNGFast>>()
+std::string pf_cv_rng_set_name<mckl::RNGSetTBB<mckl::RNG>>()
 {
     return "RNGSetTBB";
 }
 
 template <>
-std::string pf_cv_rng_set_name<mckl::RNGSetTBBKPI<mckl::RNGFast>>()
+std::string pf_cv_rng_set_name<mckl::RNGSetTBBKPI<mckl::RNG>>()
 {
     return "RNGSetTBBKPI";
 }

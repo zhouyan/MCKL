@@ -36,11 +36,11 @@
 
 double pf_log_likelihood(double, double, double, double);
 
-void pf_init_each(mckl::RNGFast &, double &, double &, double &, double &);
+void pf_init_each(mckl::RNG &, double &, double &, double &, double &);
 
-void pf_move_each(mckl::RNGFast &, double &, double &, double &, double &);
+void pf_move_each(mckl::RNG &, double &, double &, double &, double &);
 
-void pf_move_range(mckl::RNGFast &, std::size_t, double *, double *, double *,
+void pf_move_range(mckl::RNG &, std::size_t, double *, double *, double *,
     double *, double *, double *);
 
 #endif // MCKL_EXAMPLE_PF_HPP

@@ -46,8 +46,8 @@ double pf_log_likelihood(double x, double y, double obs_x, double obs_y)
     return -0.5 * (nu + 1) * (llh_x + llh_y);
 }
 
-void pf_init_each(mckl::RNGFast &rng, double &pos_x, double &pos_y,
-    double &vel_x, double &vel_y)
+void pf_init_each(
+    mckl::RNG &rng, double &pos_x, double &pos_y, double &vel_x, double &vel_y)
 {
     const double sd_pos0 = 2;
     const double sd_vel0 = 1;
@@ -60,8 +60,8 @@ void pf_init_each(mckl::RNGFast &rng, double &pos_x, double &pos_y,
     vel_y = normal_vel(rng);
 }
 
-void pf_move_each(mckl::RNGFast &rng, double &pos_x, double &pos_y,
-    double &vel_x, double &vel_y)
+void pf_move_each(
+    mckl::RNG &rng, double &pos_x, double &pos_y, double &vel_x, double &vel_y)
 {
     const double sd_pos = std::sqrt(0.02);
     const double sd_vel = std::sqrt(0.001);
@@ -75,8 +75,8 @@ void pf_move_each(mckl::RNGFast &rng, double &pos_x, double &pos_y,
     vel_y += normal_vel(rng);
 }
 
-void pf_move_range(mckl::RNGFast &rng, std::size_t n, double *pos_x,
-    double *pos_y, double *vel_x, double *vel_y, double *w, double *v)
+void pf_move_range(mckl::RNG &rng, std::size_t n, double *pos_x, double *pos_y,
+    double *vel_x, double *vel_y, double *w, double *v)
 {
     const double sd_pos = std::sqrt(0.02);
     const double sd_vel = std::sqrt(0.001);
