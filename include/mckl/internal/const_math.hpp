@@ -136,6 +136,49 @@ class Pow
     static constexpr UIntType value = static_cast<UIntType>(PowL<B, N>::value);
 }; // class Pow
 
+template <int P,
+    int Q = (std::numeric_limits<unsigned long long>::digits <
+                        std::numeric_limits<long double>::digits ?
+                    std::numeric_limits<unsigned long long>::digits :
+                    std::numeric_limits<long double>::digits) -
+        1,
+    bool = (Q < P)>
+class Pow2L
+{
+    public:
+    static constexpr long double value =
+        static_cast<long double>(1ULL << Q) * Pow2L<P - Q>::value;
+}; // class Pow2L
+
+template <int P, int Q>
+class Pow2L<P, Q, false>
+{
+    public:
+    static constexpr long double value = static_cast<long double>(1ULL << P);
+}; // class Pow2L
+
+template <int P>
+class Pow2InvL
+{
+    public:
+    static constexpr long double value = 1.0L / Pow2L<P>::value;
+}; // class Pow2InvL
+
+template <typename RealType, int P>
+class Pow2
+{
+    public:
+    static constexpr RealType value = static_cast<RealType>(Pow2L<P>::value);
+}; // class Pow2
+
+template <typename RealType, int P>
+class Pow2Inv
+{
+    public:
+    static constexpr RealType value =
+        static_cast<RealType>(Pow2InvL<P>::value);
+}; // class Pow2Inv
+
 template <typename UIntType, unsigned N>
 class Factorial
 {

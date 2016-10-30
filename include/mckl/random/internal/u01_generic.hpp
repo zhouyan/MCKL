@@ -40,50 +40,6 @@ namespace mckl
 namespace internal
 {
 
-template <int P,
-    int Q = (std::numeric_limits<unsigned long long>::digits <
-                        std::numeric_limits<long double>::digits ?
-                    std::numeric_limits<unsigned long long>::digits :
-                    std::numeric_limits<long double>::digits) -
-        1,
-    bool = (Q < P)>
-class U01Pow2L
-{
-    public:
-    static constexpr long double value =
-        static_cast<long double>(1ULL << Q) * U01Pow2L<P - Q>::value;
-}; // class U01Pow2L
-
-template <int P, int Q>
-class U01Pow2L<P, Q, false>
-{
-    public:
-    static constexpr long double value = static_cast<long double>(1ULL << P);
-}; // class U01Pow2L
-
-template <int P>
-class U01Pow2InvL
-{
-    public:
-    static constexpr long double value = 1.0L / U01Pow2L<P>::value;
-}; // class U01Pow2InvL
-
-template <typename RealType, int P>
-class U01Pow2
-{
-    public:
-    static constexpr RealType value =
-        static_cast<RealType>(U01Pow2L<P>::value);
-}; // class U01Pow2
-
-template <typename RealType, int P>
-class U01Pow2Inv
-{
-    public:
-    static constexpr RealType value =
-        static_cast<RealType>(U01Pow2InvL<P>::value);
-}; // class U01Pow2Inv
-
 template <int W, typename UIntType>
 using U01UIntLeastType = typename std::conditional<W <= 32, std::uint32_t,
     typename std::conditional<W <= 64, std::uint64_t, UIntType>::type>::type;
@@ -108,7 +64,7 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed, W>
 
         return trans(static_cast<UIntLeastType>((u << L) >> (R + L)),
                    std::integral_constant<bool, (V < W)>()) *
-            U01Pow2Inv<RealType, P + 1>::value;
+            Pow2Inv<RealType, P + 1>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
@@ -145,7 +101,7 @@ class U01GenericImpl<UIntType, RealType, Closed, Open, W>
         using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
 
         return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
-            U01Pow2Inv<RealType, P>::value;
+            Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
@@ -169,8 +125,8 @@ class U01GenericImpl<UIntType, RealType, Open, Closed, W>
         using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
 
         return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
-            U01Pow2Inv<RealType, P>::value +
-            U01Pow2Inv<RealType, P>::value;
+            Pow2Inv<RealType, P>::value +
+            Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
@@ -193,8 +149,8 @@ class U01GenericImpl<UIntType, RealType, Open, Open, W>
         using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
 
         return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
-            U01Pow2Inv<RealType, P - 1>::value +
-            U01Pow2Inv<RealType, P>::value;
+            Pow2Inv<RealType, P - 1>::value +
+            Pow2Inv<RealType, P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)

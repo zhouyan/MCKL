@@ -328,7 +328,7 @@ class UniformRealAVX2Impl<UIntType, float, 32>
     MCKL_FLATTEN static float *eval(
         std::array<__m256i, S> &s, float *r, float a, float b)
     {
-        const float d = (b - a) * U01Pow2Inv<float, 24>::value;
+        const float d = (b - a) * Pow2Inv<float, 24>::value;
 
         srli_epi32<8>(s);
         cvtepi32_ps(s);
@@ -355,7 +355,7 @@ class UniformRealAVX2Impl<UIntType, double, 32>
     {
         const __m256i c52 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
-        const double d = (b - a) * U01Pow2Inv<double, 32>::value;
+        const double d = (b - a) * Pow2Inv<double, 32>::value;
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
@@ -454,8 +454,8 @@ inline void u01_canonical_distribution_avx2_impl_trans(std::size_t n,
         r += rstride;
     }
     for (std::size_t i = 0; i != n; ++i, u += 2, ++r) {
-        *r = u[0] * U01Pow2Inv<double, 64>::value +
-            u[1] * U01Pow2Inv<double, 32>::value;
+        *r = u[0] * Pow2Inv<double, 64>::value +
+            u[1] * Pow2Inv<double, 32>::value;
     }
 }
 
