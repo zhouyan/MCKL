@@ -151,7 +151,6 @@ SET(MCKL_DISTRIBUTION Arcsine Beta Cauchy ChiSquared Exponential ExtremeValue
     UniformInt)
 
 ADD_CUSTOM_TARGET(librandom_rng_u01)
-ADD_CUSTOM_TARGET(librandom_rng_ubits)
 FOREACH(RNG ${MCKL_RNG})
     STRING(TOLOWER ${RNG} rng)
     SET(RNGHeader ${MCKL_RNG_${RNG}_HEADER})
@@ -162,18 +161,11 @@ FOREACH(RNG ${MCKL_RNG})
         STRING(TOUPPER ${RNGName} RNGNAME)
         CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng_u01.cpp.in
             ${PROJECT_BINARY_DIR}/src/random_rng_u01_${rngname}.cpp)
-        CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_rng_ubits.cpp.in
-            ${PROJECT_BINARY_DIR}/src/random_rng_ubits_${rngname}.cpp)
         ADD_LIBRARY(librandom_rng_u01_${rngname}
             ${PROJECT_BINARY_DIR}/src/random_rng_u01_${rngname}.cpp)
-        ADD_LIBRARY(librandom_rng_ubits_${rngname}
-            ${PROJECT_BINARY_DIR}/src/random_rng_ubits_${rngname}.cpp)
         SET_TARGET_PROPERTIES(librandom_rng_u01_${rngname}
             PROPERTIES OUTPUT_NAME random_rng_u01_${rngname})
-        SET_TARGET_PROPERTIES(librandom_rng_ubits_${rngname}
-            PROPERTIES OUTPUT_NAME random_rng_ubits_${rngname})
         ADD_DEPENDENCIES(librandom_rng_u01 librandom_rng_u01_${rngname})
-        ADD_DEPENDENCIES(librandom_rng_ubits librandom_rng_ubits_${rngname})
     ENDFOREACH(alg ${MCKL_RNG_${RNG}})
 ENDFOREACH(RNG ${MCKL_RNG})
 
