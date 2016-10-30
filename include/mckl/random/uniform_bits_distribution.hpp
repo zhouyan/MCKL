@@ -42,22 +42,38 @@ namespace internal
 
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution_impl(
-    RNGType &rng, std::size_t n, UIntType *r, std::false_type)
+    RNGType &rng, std::size_t n, UIntType *r, std::false_type, std::false_type)
 {
     UniformBitsDistribution<UIntType> ubits;
     for (std::size_t i = 0; i != n; ++i)
         r[i] = ubits(rng);
 }
 
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution_impl(
-    RNGType &rng, std::size_t n, UIntType *r, std::true_type)
+template <typename UIntType, typename RNGType, bool DownCast>
+inline void uniform_bits_distribution_impl(RNGType &rng, std::size_t n,
+    UIntType *r, std::true_type, std::integral_constant<bool, DownCast>)
 {
     constexpr int rbits = RNGTraits<RNGType>::bits;
     constexpr int ubits = std::numeric_limits<UIntType>::digits;
     constexpr std::size_t rate = ubits / rbits;
     const std::size_t m = n * rate;
     rand(rng, m, reinterpret_cast<typename RNGType::result_type *>(r));
+}
+
+template <typename UIntType, typename RNGType>
+inline void uniform_bits_distribution_impl(
+    RNGType &rng, std::size_t n, UIntType *r, std::false_type, std::true_type)
+{
+    const std::size_t k = BufferSize<UIntType>::value;
+    alignas(32) std::array<typename RNGType::result_type, k> s;
+    while (n >= k) {
+        rand(rng, k, s.data());
+        std::copy_n(s.data(), k, r);
+        n -= k;
+        r += k;
+    }
+    rand(rng, n, s.data());
+    std::copy_n(s.data(), n, r);
 }
 
 } // namespace mckl::internal
@@ -72,9 +88,7 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
     constexpr std::size_t ualign = alignof(UIntType);
     constexpr std::size_t talign = alignof(UIntType);
     constexpr bool direct =
-        // Zero min, no need to shift to right
-        RNGType::min() == 0 &&
-        // Full range, no need to discard high bits
+        // Full range, range is [0, 2^W - 1]
         RNGTraits<RNGType>::is_full_range &&
         // All ouptut of rng() are random bits
         rbits == tbits &&
@@ -82,9 +96,15 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)
         ubits >= tbits && ubits % tbits == 0 &&
         // Alignment requirement
         ualign >= talign && ualign % talign == 0;
+    constexpr bool downcast =
+        // Full range, range is [0, 2^W - 1]
+        RNGTraits<RNGType>::is_full_range &&
+        // down cast
+        ubits <= rbits;
 
-    internal::uniform_bits_distribution_impl(
-        rng, n, r, std::integral_constant<bool, direct>());
+    internal::uniform_bits_distribution_impl(rng, n, r,
+        std::integral_constant<bool, direct>(),
+        std::integral_constant<bool, downcast>());
 }
 
 template <typename UIntType, typename RNGType>
