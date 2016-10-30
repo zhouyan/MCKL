@@ -145,13 +145,15 @@ sub run {
             for (1..5) {
                 my @lines = `$cmd`;
                 @lines = grep { /Passed|Failed/ } @lines;
-                push @result, @lines;
                 for (@lines) {
                     $count++;
-                    $pass = 0 if (/Failed/);
-                    my @cpb = (split)[3, 4];
-                    $cpb_s  = $cpb[0] if $cpb[0] < $cpb_s;
-                    $cpb_b  = $cpb[1] if $cpb[1] < $cpb_b;
+                    $pass = 0 if /Failed/;
+                    unless (/U01/) {
+                        push @result, $_;
+                        my @cpb = (split)[3, 4];
+                        $cpb_s  = $cpb[0] if $cpb[0] < $cpb_s;
+                        $cpb_b  = $cpb[1] if $cpb[1] < $cpb_b;
+                    }
                 }
             }
             my $line;
