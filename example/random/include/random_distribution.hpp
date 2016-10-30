@@ -153,7 +153,7 @@
 #include <mckl/random/normal_distribution.hpp>
 #endif
 
-#if MCKL_HAS_AESNI && !defined(MCKL_EXAMPLE_RANDOM_NO_ARS)
+#if MCKL_HAS_AESNI
 #include <mckl/random/aes.hpp>
 using MCKLRNGType = mckl::ARS;
 #else
@@ -163,7 +163,7 @@ using MCKLRNGType = mckl::Philox4x32;
 
 #if MCKL_HAS_MKL
 #include <mckl/random/mkl.hpp>
-#if MCKL_HAS_AESNI && !defined(MCKL_EXAMPLE_RANDOM_NO_ARS)
+#if MCKL_HAS_AESNI
 using MKLRNGType = mckl::MKL_ARS5;
 #else
 using MKLRNGType = mckl::MKL_PHILOX4X32X10;

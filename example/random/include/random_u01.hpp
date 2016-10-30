@@ -68,7 +68,7 @@ MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, f, oo, Open, Open, float)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(32, d, oo, Open, Open, double)
 MCKL_EXAMPLE_DEFINE_RANDOMC_U01_TEST(64, d, oo, Open, Open, double)
 
-#if MCKL_HAS_AESNI && !defined(MCKL_EXAMPLE_RANDOM_NO_ARS)
+#if MCKL_HAS_AESNI
 #include <mckl/random/aes.hpp>
 using MCKLRNG32Type = mckl::ARS;
 using MCKLRNG64Type = mckl::ARS_64;
