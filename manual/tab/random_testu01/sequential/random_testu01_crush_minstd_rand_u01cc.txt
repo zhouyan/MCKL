@@ -1,0 +1,10 @@
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  4
+ ----------------------------------------------
+ 39  CollisionPermut, r = 0         1 -  2.1e-7
+ 39  CollisionPermut, r = 0          0.9997
+ 78  PeriodsInStrings, r = 0         0.9992
+ ----------------------------------------------
+ All other tests were passed
+

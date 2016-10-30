@@ -1,0 +1,9 @@
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  2
+ ----------------------------------------------
+ 24  SimpPoker, d = 16                eps
+ 24  SimpPoker, d = 16                eps
+ ----------------------------------------------
+ All other tests were passed
+

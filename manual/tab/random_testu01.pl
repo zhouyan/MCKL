@@ -102,9 +102,9 @@ for (@subdirs) {
 sub filter {
     for my $b (@bat) {
         for my $r (@rng) {
-            &filter_txt("${b}_${r}");
+            &filter_txt("${b}_${r}", 0);
             for my $u (@u01) {
-                &filter_txt("${b}_${r}_${u}");
+                &filter_txt("${b}_${r}_${u}", 1);
             }
         }
     }
@@ -243,6 +243,7 @@ sub pdf {
 
 sub filter_txt {
     my $txt = "\Lrandom_testu01/$subdir/random_testu01_$_[0].txt";
+    my $recheck = $_[1];
     return unless -e $txt;
 
     open my $txtfile, "<", $txt;
@@ -251,9 +252,18 @@ sub filter_txt {
     my $lines;
     $lines .= $_ for @lines;
     my @lines;
-    while ($lines =~ s/(==+.*?tests were passed)//s) {
-        if ($1 =~ /(.*All other tests were passed.*)/s) {
-            push @lines, (split "\n", $1);
+    if ($recheck) {
+        if ($lines =~ /---/s) {
+            push @lines, (split "\n", $lines);
+            if ($lines !~ /All other tests were passed/) {
+                push @lines, " All other tests were passed";
+            }
+        }
+    } else {
+        while ($lines =~ s/(==+.*?tests were passed)//s) {
+            if ($1 =~ /(.*All other tests were passed.*)/s) {
+                push @lines, (split "\n", $1);
+            }
         }
     }
     if (@lines) {
