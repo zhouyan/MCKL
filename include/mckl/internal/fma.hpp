@@ -49,6 +49,23 @@ namespace internal
 {
 
 MCKL_FLATTEN inline void fmadd_ps(
+    std::array<__m256i, 4> &s, const __m256i &a, const __m256i &b)
+{
+    std::get<0>(s) = _mm256_castps_si256(
+        _mm256_fmadd_ps(_mm256_castsi256_ps(std::get<0>(s)),
+            _mm256_castsi256_ps(a), _mm256_castsi256_ps(b)));
+    std::get<1>(s) = _mm256_castps_si256(
+        _mm256_fmadd_ps(_mm256_castsi256_ps(std::get<1>(s)),
+            _mm256_castsi256_ps(a), _mm256_castsi256_ps(b)));
+    std::get<2>(s) = _mm256_castps_si256(
+        _mm256_fmadd_ps(_mm256_castsi256_ps(std::get<2>(s)),
+            _mm256_castsi256_ps(a), _mm256_castsi256_ps(b)));
+    std::get<3>(s) = _mm256_castps_si256(
+        _mm256_fmadd_ps(_mm256_castsi256_ps(std::get<3>(s)),
+            _mm256_castsi256_ps(a), _mm256_castsi256_ps(b)));
+}
+
+MCKL_FLATTEN inline void fmadd_ps(
     std::array<__m256i, 8> &s, const __m256i &a, const __m256i &b)
 {
     std::get<0>(s) = _mm256_castps_si256(

@@ -49,6 +49,62 @@ namespace internal
 {
 
 template <int imm8>
+MCKL_FLATTEN inline void slli_epi32(std::array<__m256i, 4> &s)
+{
+    std::get<0>(s) = _mm256_slli_epi32(std::get<0>(s), imm8);
+    std::get<1>(s) = _mm256_slli_epi32(std::get<1>(s), imm8);
+    std::get<2>(s) = _mm256_slli_epi32(std::get<2>(s), imm8);
+    std::get<3>(s) = _mm256_slli_epi32(std::get<3>(s), imm8);
+}
+
+template <int imm8>
+MCKL_FLATTEN inline void srli_epi32(std::array<__m256i, 4> &s)
+{
+    std::get<0>(s) = _mm256_srli_epi32(std::get<0>(s), imm8);
+    std::get<1>(s) = _mm256_srli_epi32(std::get<1>(s), imm8);
+    std::get<2>(s) = _mm256_srli_epi32(std::get<2>(s), imm8);
+    std::get<3>(s) = _mm256_srli_epi32(std::get<3>(s), imm8);
+}
+
+MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 4> &s)
+{
+    std::get<0>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0>(s)));
+    std::get<1>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<1>(s)));
+    std::get<2>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<2>(s)));
+    std::get<3>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<3>(s)));
+}
+
+MCKL_FLATTEN inline void and_si256(const std::array<__m256i, 4> &s,
+    const __m256i &a, std::array<__m256i, 4> &t)
+{
+    std::get<0>(t) = _mm256_and_si256(std::get<0>(s), a);
+    std::get<1>(t) = _mm256_and_si256(std::get<1>(s), a);
+    std::get<2>(t) = _mm256_and_si256(std::get<2>(s), a);
+    std::get<3>(t) = _mm256_and_si256(std::get<3>(s), a);
+}
+
+MCKL_FLATTEN inline void add_epi32(
+    std::array<__m256i, 4> &s, const std::array<__m256i, 4> &a)
+{
+    std::get<0>(s) = _mm256_add_epi32(std::get<0>(s), std::get<0>(a));
+    std::get<1>(s) = _mm256_add_epi32(std::get<1>(s), std::get<1>(a));
+    std::get<2>(s) = _mm256_add_epi32(std::get<2>(s), std::get<2>(a));
+    std::get<3>(s) = _mm256_add_epi32(std::get<3>(s), std::get<3>(a));
+}
+
+MCKL_FLATTEN inline void mul_ps(std::array<__m256i, 4> &s, const __m256i &a)
+{
+    std::get<0>(s) = _mm256_castps_si256(_mm256_mul_ps(
+        _mm256_castsi256_ps(std::get<0>(s)), _mm256_castsi256_ps(a)));
+    std::get<1>(s) = _mm256_castps_si256(_mm256_mul_ps(
+        _mm256_castsi256_ps(std::get<1>(s)), _mm256_castsi256_ps(a)));
+    std::get<2>(s) = _mm256_castps_si256(_mm256_mul_ps(
+        _mm256_castsi256_ps(std::get<2>(s)), _mm256_castsi256_ps(a)));
+    std::get<3>(s) = _mm256_castps_si256(_mm256_mul_ps(
+        _mm256_castsi256_ps(std::get<3>(s)), _mm256_castsi256_ps(a)));
+}
+
+template <int imm8>
 MCKL_FLATTEN inline void slli_epi32(std::array<__m256i, 8> &s)
 {
     std::get<0>(s) = _mm256_slli_epi32(std::get<0>(s), imm8);
