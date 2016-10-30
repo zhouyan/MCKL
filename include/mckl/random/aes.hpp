@@ -271,14 +271,8 @@ using AES256KeySeq =
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AES
 ///
-/// \tparam Rounds Number of rounds of AES encryption
-/// \tparam Constants A trait class that defines algorithm constants, see
-/// ARSConstants
-///
-/// \details
-/// This generator implement the ARS algorithm in
-/// [Random123](http://www.deshawresearch.com/resources_random123.html),
-/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
+/// \tparam Rounds The number of rounds
+/// \tparam Constants A trait class that defines algorithm constants
 template <std::size_t Rounds = MCKL_ARS_ROUNDS,
     typename Constants = ARSConstants>
 using ARSKeySeq = internal::ARSKeySeqImpl<Rounds, Constants>;

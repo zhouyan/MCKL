@@ -88,16 +88,10 @@ class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
 /// \brief Philox RNG generator
 /// \ingroup Philox
 ///
-/// \tparam T State type, must be 32- or 64-bit unsigned integers
-/// \tparam K State vector length, must be 2 or 4 (for 32- or 64-bit states)
-/// \tparam Rounds Number of SP rounds
-/// \tparam Constants A trait class that defines algorithm constants, see
-/// PhiloxConstants
-///
-/// \details
-/// This generator implement the Philox algorithm in
-/// [Random123](http://www.deshawresearch.com/resources_random123.html),
-/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
+/// \tparam T State vector value type
+/// \tparam K State vector length
+/// \tparam Rounds The number of rounds
+/// \tparam Constants A trait class that defines algorithm constants
 template <typename T, std::size_t K, std::size_t Rounds = MCKL_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>
 class PhiloxGenerator

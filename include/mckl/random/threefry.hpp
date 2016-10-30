@@ -102,17 +102,10 @@ class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
 /// \brief Threefry RNG generator
 /// \ingroup Threefry
 ///
-/// \tparam T State type, must be 32- or 64-bit unsigned integers
-/// \tparam K State vector length, must be 2 or 4 (for 32- or 64-bit states) or
-/// 8 or 16 (64-bit state)
-/// \tparam Rounds Number of SP rounds
-/// \tparam Constants A trait class that defines algorithm constants, see
-/// ThreefryConstants
-///
-/// \details
-/// This generator implement the Threefry algorithm in
-/// [Random123](http://www.deshawresearch.com/resources_random123.html),
-/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
+/// \tparam T State vector value type
+/// \tparam K State vector length
+/// \tparam Rounds The number of rounds
+/// \tparam Constants A trait class that defines algorithm constants
 template <typename T, std::size_t K, std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
 class ThreefryGenerator
