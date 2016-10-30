@@ -6,6 +6,7 @@
 	random_testu01_bigcrush_aes256 \
 	random_testu01_bigcrush_ars \
 	random_testu01_bigcrush_ars_64 \
+	random_testu01_bigcrush_knuth_b \
 	random_testu01_bigcrush_minstd_rand \
 	random_testu01_bigcrush_minstd_rand0 \
 	random_testu01_bigcrush_mkl_ars5 \
@@ -58,6 +59,7 @@ run : \
 	random_testu01_bigcrush_aes256 \
 	random_testu01_bigcrush_ars \
 	random_testu01_bigcrush_ars_64 \
+	random_testu01_bigcrush_knuth_b \
 	random_testu01_bigcrush_minstd_rand \
 	random_testu01_bigcrush_minstd_rand0 \
 	random_testu01_bigcrush_mkl_ars5 \
@@ -142,6 +144,15 @@ random_testu01_bigcrush_ars :
 random_testu01_bigcrush_ars_64 :
 	ninja -C ../.. random_testu01_bigcrush_ars_64
 	./random_testu01_bigcrush_ars_64 U01OC 17
+
+random_testu01_bigcrush_knuth_b :
+	ninja -C ../.. random_testu01_bigcrush_knuth_b
+	./random_testu01_bigcrush_knuth_b STD 88 89
+	./random_testu01_bigcrush_knuth_b U01 78 89
+	./random_testu01_bigcrush_knuth_b U01CC 47
+	./random_testu01_bigcrush_knuth_b U01CO 89
+	./random_testu01_bigcrush_knuth_b U01OC 89
+	./random_testu01_bigcrush_knuth_b U01OO 89
 
 random_testu01_bigcrush_minstd_rand :
 	ninja -C ../.. random_testu01_bigcrush_minstd_rand
