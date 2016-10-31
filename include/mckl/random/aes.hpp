@@ -43,6 +43,26 @@
 #else
 #endif
 
+#define MCKL_DEFINE_RANDOM_AES_U01(lr, bits)                                  \
+    template <typename RealType>                                              \
+    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *result)   \
+        const                                                                 \
+    {                                                                         \
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());                  \
+        internal::AESGeneratorImpl<KeySeqType>::u01_##lr##_u##bits(           \
+            ctr, rk, n, result);                                              \
+    }
+
+#define MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(lr, rbits, ftype)             \
+    template <typename ResultType, typename KeySeqType>                       \
+    inline void u01_##lr##_distribution(                                      \
+        AESEngine<ResultType, KeySeqType> &rng, std::size_t n, ftype *r,      \
+        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
+            rbits>::type * = nullptr)                                         \
+    {                                                                         \
+        rng.u01_##lr##_u##rbits(n, r);                                        \
+    }
+
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
@@ -326,33 +346,10 @@ class AESGenerator
                 internal::AESGeneratorImpl<KeySeqType>::batch()>());
     }
 
-    template <typename RealType>
-    void u01_cc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        internal::AESGeneratorImpl<KeySeqType>::u01_cc_u32(ctr, rk, n, result);
-    }
-
-    template <typename RealType>
-    void u01_co_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        internal::AESGeneratorImpl<KeySeqType>::u01_co_u32(ctr, rk, n, result);
-    }
-
-    template <typename RealType>
-    void u01_oc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        internal::AESGeneratorImpl<KeySeqType>::u01_oc_u32(ctr, rk, n, result);
-    }
-
-    template <typename RealType>
-    void u01_oo_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        internal::AESGeneratorImpl<KeySeqType>::u01_oo_u32(ctr, rk, n, result);
-    }
+    MCKL_DEFINE_RANDOM_AES_U01(cc, 32)
+    MCKL_DEFINE_RANDOM_AES_U01(co, 32)
+    MCKL_DEFINE_RANDOM_AES_U01(oc, 32)
+    MCKL_DEFINE_RANDOM_AES_U01(oo, 32)
 
     template <typename RealType>
     void uniform_real_u32(ctr_type &ctr, std::size_t n, RealType *result,
@@ -513,33 +510,10 @@ using ARS_64 = ARSEngine<std::uint64_t>;
 
 #if MCKL_USE_AESNI && MCKL_USE_AVX2
 
-template <typename KeySeqType>
-inline void u01_cc_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, float *r)
-{
-    rng.u01_cc_u32(n, r);
-}
-
-template <typename KeySeqType>
-inline void u01_co_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, float *r)
-{
-    rng.u01_co_u32(n, r);
-}
-
-template <typename KeySeqType>
-inline void u01_oc_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, float *r)
-{
-    rng.u01_oc_u32(n, r);
-}
-
-template <typename KeySeqType>
-inline void u01_oo_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, float *r)
-{
-    rng.u01_oo_u32(n, r);
-}
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 32, float)
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 32, float)
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 32, float)
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 32, float)
 
 template <typename KeySeqType>
 inline void uniform_real_distribution(
@@ -551,33 +525,10 @@ inline void uniform_real_distribution(
 
 #if !MCKL_U01_USE_64BITS_DOUBLE
 
-template <typename KeySeqType>
-inline void u01_cc_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
-{
-    rng.u01_cc_u32(n, r);
-}
-
-template <typename KeySeqType>
-inline void u01_co_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
-{
-    rng.u01_co_u32(n, r);
-}
-
-template <typename KeySeqType>
-inline void u01_oc_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
-{
-    rng.u01_oc_u32(n, r);
-}
-
-template <typename KeySeqType>
-inline void u01_oo_distribution(
-    AESEngine<std::uint32_t, KeySeqType> &rng, std::size_t n, double *r)
-{
-    rng.u01_oo_u32(n, r);
-}
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 32, double)
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 32, double)
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 32, double)
+MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 32, double)
 
 template <typename KeySeqType>
 inline void uniform_real_distribution(

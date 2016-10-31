@@ -52,6 +52,28 @@
 #define MCKL_PHILOX_ROUNDS 10
 #endif
 
+#define MCKL_DEFINE_RANDOM_PHILOX_U01(lr, bits)                               \
+    template <typename RealType>                                              \
+    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *result)   \
+        const                                                                 \
+    {                                                                         \
+        internal::PhiloxGeneratorImpl<T, K, Rounds,                           \
+            Constants>::u01_##lr##_u##bits(ctr, key_, n, result);             \
+    }
+
+#define MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(lr, rbits, tbits, ftype)   \
+    template <typename ResultType, typename T, std::size_t K,                 \
+        std::size_t Rounds, typename Constants>                               \
+    inline void u01_##lr##_distribution(                                      \
+        PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng,               \
+        std::size_t n, ftype *r,                                              \
+        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
+                rbits &&                                                      \
+            std::numeric_limits<T>::digits == tbits>::type * = nullptr)       \
+    {                                                                         \
+        rng.u01_##lr##_u##rbits(n, r);                                        \
+    }
+
 namespace mckl
 {
 
@@ -160,33 +182,10 @@ class PhiloxGenerator
                                              Rounds, Constants>::batch()>());
     }
 
-    template <typename RealType>
-    void u01_cc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_cc_u32(
-            ctr, key_, n, result);
-    }
-
-    template <typename RealType>
-    void u01_co_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_co_u32(
-            ctr, key_, n, result);
-    }
-
-    template <typename RealType>
-    void u01_oc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oc_u32(
-            ctr, key_, n, result);
-    }
-
-    template <typename RealType>
-    void u01_oo_u32(ctr_type &ctr, std::size_t n, RealType *result) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::u01_oo_u32(
-            ctr, key_, n, result);
-    }
+    MCKL_DEFINE_RANDOM_PHILOX_U01(cc, 32)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(co, 32)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oc, 32)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oo, 32)
 
     template <typename RealType>
     void uniform_real_u32(ctr_type &ctr, std::size_t n, RealType *result,
@@ -325,104 +324,36 @@ using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
 #if MCKL_USE_AVX2
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_cc_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_cc_u32(n, r);
-}
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, float)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, float)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, float)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, float)
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_co_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_co_u32(n, r);
-}
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_oc_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_oc_u32(n, r);
-}
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_oo_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_oo_u32(n, r);
-}
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
+    typename Constants>
 inline void uniform_real_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
     float *r, float a, float b,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
+    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
+        std::numeric_limits<T>::digits == 32>::type * = nullptr)
 {
     rng.uniform_real_u32(n, r, a, b);
 }
 
 #if !MCKL_U01_USE_64BITS_DOUBLE
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_cc_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    double *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_cc_u32(n, r);
-}
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, double)
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_co_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    double *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_co_u32(n, r);
-}
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_oc_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    double *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_oc_u32(n, r);
-}
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
-inline void u01_oo_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    double *r,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
-{
-    rng.u01_oo_u32(n, r);
-}
-
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
+    typename Constants>
 inline void uniform_real_distribution(
-    PhiloxEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
     double *r, double a, double b,
-    typename std::enable_if<std::numeric_limits<T>::digits == 32>::type * =
-        nullptr)
+    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
+        std::numeric_limits<T>::digits == 32>::type * = nullptr)
 {
     rng.uniform_real_u32(n, r, a, b);
 }

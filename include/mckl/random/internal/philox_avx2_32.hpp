@@ -38,6 +38,16 @@
 #include <mckl/random/internal/u01_avx2.hpp>
 #include <mckl/random/increment.hpp>
 
+#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(                       \
+    lr, bits, Lower, Upper)                                                   \
+    template <typename RealType>                                              \
+    static void u01_##lr##_u##bits(Counter<T, K> &ctr,                        \
+        const std::array<T, K / 2> &key, std::size_t n, RealType *r)          \
+    {                                                                         \
+        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
+            ctr, key, n, r);                                                  \
+    }
+
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
@@ -120,36 +130,10 @@ class PhiloxGeneratorAVX2Impl32
         eval<transform>(ctr, key, n, r);
     }
 
-    template <typename RealType>
-    static void u01_cc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
-        std::size_t n, RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Closed>>(
-            ctr, key, n, r);
-    }
-
-    template <typename RealType>
-    static void u01_co_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
-        std::size_t n, RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Open>>(
-            ctr, key, n, r);
-    }
-
-    template <typename RealType>
-    static void u01_oc_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
-        std::size_t n, RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Closed>>(
-            ctr, key, n, r);
-    }
-
-    template <typename RealType>
-    static void u01_oo_u32(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
-        std::size_t n, RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Open>>(ctr, key, n, r);
-    }
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(cc, 32, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(co, 32, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oc, 32, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oo, 32, Open, Open)
 
     template <typename RealType>
     static void uniform_real_u32(Counter<T, K> &ctr,

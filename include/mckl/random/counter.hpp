@@ -36,6 +36,37 @@
 #include <mckl/random/increment.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
+#define MCKL_DEFINE_RANDOM_COUNTER_U01(lr, bits)                              \
+    template <typename RealType>                                              \
+    void u01_##lr##_u##bits(std::size_t n, RealType *r)                       \
+    {                                                                         \
+        static_assert(std::numeric_limits<ResultType>::digits == bits,        \
+            "**CounterEngine::u01_" #lr "_u" #bits                            \
+            "** is used with ResultType not a " #bits                         \
+            "-bit unsigned integer type");                                    \
+                                                                              \
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);     \
+        if (n < remain) {                                                     \
+            ::mckl::u01_##lr(n, result_.data() + index_, r);                  \
+            index_ += static_cast<unsigned>(n);                               \
+            return;                                                           \
+        }                                                                     \
+                                                                              \
+        ::mckl::u01_##lr(remain, result_.data() + index_, r);                 \
+        r += remain;                                                          \
+        n -= remain;                                                          \
+        index_ = M_;                                                          \
+                                                                              \
+        const std::size_t m = n / M_;                                         \
+        generator_.u01_##lr##_u##bits(ctr_, m, r);                            \
+        r += m * M_;                                                          \
+        n -= m * M_;                                                          \
+                                                                              \
+        generator_(ctr_, result_.data());                                     \
+        ::mckl::u01_##lr(n, result_.data(), r);                               \
+        index_ = static_cast<unsigned>(n);                                    \
+    }
+
 namespace mckl
 {
 
@@ -165,121 +196,10 @@ class CounterEngine
         index_ = static_cast<unsigned>(n);
     }
 
-    template <typename RealType>
-    void u01_cc_u32(std::size_t n, RealType *r)
-    {
-        static_assert(std::numeric_limits<ResultType>::digits == 32,
-            "**CounterEngine::u01_cc_u32** is used with ResultType not a "
-            "32-bit unsigned integer type");
-
-        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
-        if (n < remain) {
-            ::mckl::u01_cc(n, result_.data() + index_, r);
-            index_ += static_cast<unsigned>(n);
-            return;
-        }
-
-        ::mckl::u01_cc(remain, result_.data() + index_, r);
-        r += remain;
-        n -= remain;
-        index_ = M_;
-
-        const std::size_t m = n / M_;
-        generator_.u01_cc_u32(ctr_, m, r);
-        r += m * M_;
-        n -= m * M_;
-
-        generator_(ctr_, result_.data());
-        ::mckl::u01_cc(n, result_.data(), r);
-        index_ = static_cast<unsigned>(n);
-    }
-
-    template <typename RealType>
-    void u01_co_u32(std::size_t n, RealType *r)
-    {
-        static_assert(std::numeric_limits<ResultType>::digits == 32,
-            "**CounterEngine::u01_co_u32** is used with ResultType not a "
-            "32-bit unsigned integer type");
-
-        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
-        if (n < remain) {
-            ::mckl::u01_co(n, result_.data() + index_, r);
-            index_ += static_cast<unsigned>(n);
-            return;
-        }
-
-        ::mckl::u01_co(remain, result_.data() + index_, r);
-        r += remain;
-        n -= remain;
-        index_ = M_;
-
-        const std::size_t m = n / M_;
-        generator_.u01_co_u32(ctr_, m, r);
-        r += m * M_;
-        n -= m * M_;
-
-        generator_(ctr_, result_.data());
-        ::mckl::u01_co(n, result_.data(), r);
-        index_ = static_cast<unsigned>(n);
-    }
-
-    template <typename RealType>
-    void u01_oc_u32(std::size_t n, RealType *r)
-    {
-        static_assert(std::numeric_limits<ResultType>::digits == 32,
-            "**CounterEngine::u01_oc_u32** is used with ResultType not a "
-            "32-bit unsigned integer type");
-
-        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
-        if (n < remain) {
-            ::mckl::u01_oc(n, result_.data() + index_, r);
-            index_ += static_cast<unsigned>(n);
-            return;
-        }
-
-        ::mckl::u01_oc(remain, result_.data() + index_, r);
-        r += remain;
-        n -= remain;
-        index_ = M_;
-
-        const std::size_t m = n / M_;
-        generator_.u01_oc_u32(ctr_, m, r);
-        r += m * M_;
-        n -= m * M_;
-
-        generator_(ctr_, result_.data());
-        ::mckl::u01_oc(n, result_.data(), r);
-        index_ = static_cast<unsigned>(n);
-    }
-
-    template <typename RealType>
-    void u01_oo_u32(std::size_t n, RealType *r)
-    {
-        static_assert(std::numeric_limits<ResultType>::digits == 32,
-            "**CounterEngine::u01_oo_u32** is used with ResultType not a "
-            "32-bit unsigned integer type");
-
-        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
-        if (n < remain) {
-            ::mckl::u01_oo(n, result_.data() + index_, r);
-            index_ += static_cast<unsigned>(n);
-            return;
-        }
-
-        ::mckl::u01_oo(remain, result_.data() + index_, r);
-        r += remain;
-        n -= remain;
-        index_ = M_;
-
-        const std::size_t m = n / M_;
-        generator_.u01_oo_u32(ctr_, m, r);
-        r += m * M_;
-        n -= m * M_;
-
-        generator_(ctr_, result_.data());
-        ::mckl::u01_oo(n, result_.data(), r);
-        index_ = static_cast<unsigned>(n);
-    }
+    MCKL_DEFINE_RANDOM_COUNTER_U01(cc, 32)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(co, 32)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oc, 32)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oo, 32)
 
     template <typename RealType>
     void uniform_real_u32(std::size_t n, RealType *r, RealType a, RealType b)

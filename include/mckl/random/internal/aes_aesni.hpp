@@ -40,6 +40,17 @@
 #include <mckl/random/internal/u01_avx2.hpp>
 #endif
 
+#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(                       \
+    lr, bits, Lower, Upper)                                                   \
+    template <typename RealType>                                              \
+    static void u01_##lr##_u##bits(Counter<std::uint32_t, 4> &ctr,            \
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk,              \
+        std::size_t n, RealType *r)                                           \
+    {                                                                         \
+        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
+            ctr, rk, n, r);                                                   \
+    }
+
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
@@ -402,41 +413,10 @@ class AESGeneratorAESNIImpl
     }
 
 #if MCKL_HAS_AVX2
-
-    template <typename RealType>
-    static void u01_cc_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Closed>>(
-            ctr, rk, n, r);
-    }
-
-    template <typename RealType>
-    static void u01_co_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Open>>(
-            ctr, rk, n, r);
-    }
-
-    template <typename RealType>
-    static void u01_oc_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Closed>>(
-            ctr, rk, n, r);
-    }
-
-    template <typename RealType>
-    static void u01_oo_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        RealType *r)
-    {
-        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Open>>(ctr, rk, n, r);
-    }
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(cc, 32, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(co, 32, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oc, 32, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oo, 32, Open, Open)
 
     template <typename RealType>
     static void uniform_real_u32(Counter<std::uint32_t, 4> &ctr,
