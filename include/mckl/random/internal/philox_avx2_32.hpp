@@ -58,18 +58,18 @@ class PhiloxGeneratorAVX2Impl32Permute<2>
 {
     public:
     template <std::size_t S>
-    static void first(std::array<__m256i, S> &)
+    MCKL_FLATTEN static void first(std::array<__m256i, S> &)
     {
     }
 
     template <std::size_t S>
-    static void round(std::array<__m256i, S> &s)
+    MCKL_FLATTEN static void round(std::array<__m256i, S> &s)
     {
         shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
 
     template <std::size_t S>
-    static void last(std::array<__m256i, S> &s)
+    MCKL_FLATTEN static void last(std::array<__m256i, S> &s)
     {
         shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
@@ -80,19 +80,19 @@ class PhiloxGeneratorAVX2Impl32Permute<4>
 {
     public:
     template <std::size_t S>
-    static void first(std::array<__m256i, S> &s)
+    MCKL_FLATTEN static void first(std::array<__m256i, S> &s)
     {
         shuffle_epi32<0xC6>(s); // 3 0 1 2
     }
 
     template <std::size_t S>
-    static void round(std::array<__m256i, S> &s)
+    MCKL_FLATTEN static void round(std::array<__m256i, S> &s)
     {
         shuffle_epi32<0x93>(s); // 2 1 0 3
     }
 
     template <std::size_t S>
-    static void last(std::array<__m256i, S> &s)
+    MCKL_FLATTEN static void last(std::array<__m256i, S> &s)
     {
         shuffle_epi32<0xB1>(s); // 2 3 0 1
     }
@@ -257,7 +257,7 @@ class PhiloxGeneratorAVX2Impl32
     }
 
     template <std::size_t N, std::size_t S>
-    static void rbox(
+    MCKL_FLATTEN static void rbox(
         std::array<__m256i, S> &s, const std::array<__m256i, Rounds> &rk)
     {
         rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N <= Rounds)>());

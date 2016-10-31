@@ -32,16 +32,16 @@
 \chapter{Random number generating}
 \label{chap:Random number generating}
 
-\mckl has an \rng system for implementing Monte Carlo algorithms. Similar to
-the standard library header |<random>|, there are mainly two parts of this
-system. The first is a set of \rng engines that generate random integers. The
-other is a set of distribution generators. The former are documented in
-sections~\ref{sec:Counter-based RNG} to~\ref{sec:Non-deterministic RNG}, and
-the later in sections~\ref{sec:Uniform bits distribution}
-to~\ref{sec:Multivariate distribution}. \mckl also provides facilities for
-vectorized random number generating (section~\ref{sec:Vectorized random number
-generating}), generating distinctive (randomized) seeds within a program
-(section~\ref{sec:Seeding RNG}), and using multiple \rng{}s in parallel
+\mckl has random number generating classes and functions for implementing Monte
+Carlo algorithms. Similar to the standard library header |<random>|, there are
+mainly two parts of this system. The first is a set of \rng engines that
+generate random integers. The other is a set of distribution generators. The
+former are documented in sections~\ref{sec:Counter-based RNG}
+to~\ref{sec:Non-deterministic RNG}, and the later in sections~\ref{sec:Uniform
+bits distribution} to~\ref{sec:Multivariate distribution}. \mckl also provides
+facilities for vectorized random number generating (section~\ref{sec:Vectorized
+random number generating}), generating distinctive (randomized) seeds within a
+program (section~\ref{sec:Seeding RNG}), and using multiple \rng{}s in parallel
 programs (section~\ref{sec:Multiple RNG streams}). Last, in
 section~\ref{sec:Randomness tests}, a few randomness tests are discussed.
 

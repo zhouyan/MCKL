@@ -55,25 +55,24 @@ class IncrementBlockSI128<T, 1, 32, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
-        __m128i a0 =
-            _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
+        __m128i c = _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x02, 0x01));
-        std::get<0x1>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x04, 0x03));
-        std::get<0x2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x06, 0x05));
-        std::get<0x3>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x08, 0x07));
-        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x0A, 0x09));
-        std::get<0x5>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x0C, 0x0B));
-        std::get<0x6>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x0E, 0x0D));
-        std::get<0x7>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x10, 0x0F));
-        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x12, 0x11));
-        std::get<0x9>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x14, 0x13));
-        std::get<0xA>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x16, 0x15));
-        std::get<0xB>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x18, 0x17));
-        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x1A, 0x19));
-        std::get<0xD>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x1C, 0x1B));
-        std::get<0xE>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x1E, 0x1D));
-        std::get<0xF>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0x20, 0x1F));
+        std::get<0x0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x02, 0x01));
+        std::get<0x1>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x04, 0x03));
+        std::get<0x2>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x06, 0x05));
+        std::get<0x3>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x08, 0x07));
+        std::get<0x4>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x0A, 0x09));
+        std::get<0x5>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x0C, 0x0B));
+        std::get<0x6>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x0E, 0x0D));
+        std::get<0x7>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x10, 0x0F));
+        std::get<0x8>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x12, 0x11));
+        std::get<0x9>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x14, 0x13));
+        std::get<0xA>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x16, 0x15));
+        std::get<0xB>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x18, 0x17));
+        std::get<0xC>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x1A, 0x19));
+        std::get<0xD>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x1C, 0x1B));
+        std::get<0xE>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x1E, 0x1D));
+        std::get<0xF>(s) = _mm_add_epi64(c, _mm_set_epi64x(0x20, 0x1F));
     }
 }; // class IncrementBlockSI128
 
@@ -85,25 +84,25 @@ class IncrementBlockSI128<T, 2, 16, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
-        __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x01));
-        std::get<0x1>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x02));
-        std::get<0x2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x03));
-        std::get<0x3>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x04));
-        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x05));
-        std::get<0x5>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x06));
-        std::get<0x6>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x07));
-        std::get<0x7>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x08));
-        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x09));
-        std::get<0x9>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0A));
-        std::get<0xA>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0B));
-        std::get<0xB>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0C));
-        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0D));
-        std::get<0xD>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0E));
-        std::get<0xE>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x0F));
-        std::get<0xF>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 0x10));
+        std::get<0x0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x01));
+        std::get<0x1>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x02));
+        std::get<0x2>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x03));
+        std::get<0x3>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x04));
+        std::get<0x4>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x05));
+        std::get<0x5>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x06));
+        std::get<0x6>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x07));
+        std::get<0x7>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x08));
+        std::get<0x8>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x09));
+        std::get<0x9>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x0A));
+        std::get<0xA>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x0B));
+        std::get<0xB>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x0C));
+        std::get<0xC>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x0D));
+        std::get<0xD>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x0E));
+        std::get<0xE>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x0F));
+        std::get<0xF>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 0x10));
     }
 }; // class IncrementBlockSI128
 
@@ -115,26 +114,26 @@ class IncrementBlockSI128<T, 4, 8, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
-        __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        std::get<0x0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 1));
         std::get<0x1>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
                 static_cast<MCKL_INT64>(std::get<2>(ctr)));
-        std::get<0x2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
+        std::get<0x2>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 2));
         std::get<0x3>(s) = std::get<1>(s);
-        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
+        std::get<0x4>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 3));
         std::get<0x5>(s) = std::get<1>(s);
-        std::get<0x6>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
+        std::get<0x6>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 4));
         std::get<0x7>(s) = std::get<1>(s);
-        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 5));
+        std::get<0x8>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 5));
         std::get<0x9>(s) = std::get<1>(s);
-        std::get<0xA>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 6));
+        std::get<0xA>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 6));
         std::get<0xB>(s) = std::get<1>(s);
-        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 7));
+        std::get<0xC>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 7));
         std::get<0xD>(s) = std::get<1>(s);
-        std::get<0xE>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 8));
+        std::get<0xE>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 8));
         std::get<0xF>(s) = std::get<1>(s);
     }
 }; // class IncrementBlockSI128
@@ -147,10 +146,10 @@ class IncrementBlockSI128<T, 8, 4, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
-        __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        std::get<0x0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 1));
         std::get<0x1>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
                 static_cast<MCKL_INT64>(std::get<2>(ctr)));
@@ -160,15 +159,15 @@ class IncrementBlockSI128<T, 8, 4, 64>
         std::get<0x3>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<7>(ctr)),
                 static_cast<MCKL_INT64>(std::get<6>(ctr)));
-        std::get<0x4>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
+        std::get<0x4>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 2));
         std::get<0x5>(s) = std::get<1>(s);
         std::get<0x6>(s) = std::get<2>(s);
         std::get<0x7>(s) = std::get<3>(s);
-        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
+        std::get<0x8>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 3));
         std::get<0x9>(s) = std::get<1>(s);
         std::get<0xA>(s) = std::get<2>(s);
         std::get<0xB>(s) = std::get<3>(s);
-        std::get<0xC>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
+        std::get<0xC>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 4));
         std::get<0xD>(s) = std::get<1>(s);
         std::get<0xE>(s) = std::get<2>(s);
         std::get<0xF>(s) = std::get<3>(s);
@@ -183,11 +182,10 @@ class IncrementBlockSI128<T, 16, 2, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
-        __m128i a0 =
-            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x1>(ctr)),
-                static_cast<MCKL_INT64>(std::get<0x0>(ctr)));
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x1>(ctr)),
+            static_cast<MCKL_INT64>(std::get<0x0>(ctr)));
 
-        std::get<0x0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        std::get<0x0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 1));
         std::get<0x1>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x3>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0x2>(ctr)));
@@ -209,7 +207,7 @@ class IncrementBlockSI128<T, 16, 2, 64>
         std::get<0x7>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xF>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0xE>(ctr)));
-        std::get<0x8>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
+        std::get<0x8>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 2));
         std::get<0x9>(s) = std::get<1>(s);
         std::get<0xA>(s) = std::get<2>(s);
         std::get<0xB>(s) = std::get<3>(s);

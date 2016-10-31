@@ -252,13 +252,13 @@ class ThreefryGeneratorAVX2Impl64
     static void round(std::array<__m256i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
-        rbox<N>(s);
-        kbox<N>(s, par);
+        MCKL_FLATTEN_CALL rbox<N>(s);
+        MCKL_FLATTEN_CALL kbox<N>(s, par);
         round<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N, std::size_t S>
-    static void kbox(
+    MCKL_FLATTEN static void kbox(
         std::array<__m256i, S> &s, const std::array<T, K + 4> &par)
     {
         kbox<N>(s, par,
@@ -330,7 +330,7 @@ class ThreefryGeneratorAVX2Impl64
     }
 
     template <std::size_t N, std::size_t S>
-    static void rbox(std::array<__m256i, S> &s)
+    MCKL_FLATTEN static void rbox(std::array<__m256i, S> &s)
     {
         rbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }

@@ -55,13 +55,12 @@ class IncrementBlockSI128<T, 1, 8, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 4> &s)
     {
-        __m128i a0 =
-            _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
+        __m128i c = _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(2, 1));
-        std::get<1>(s) = _mm_add_epi64(a0, _mm_set_epi64x(4, 3));
-        std::get<2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(6, 5));
-        std::get<3>(s) = _mm_add_epi64(a0, _mm_set_epi64x(8, 7));
+        std::get<0>(s) = _mm_add_epi64(c, _mm_set_epi64x(2, 1));
+        std::get<1>(s) = _mm_add_epi64(c, _mm_set_epi64x(4, 3));
+        std::get<2>(s) = _mm_add_epi64(c, _mm_set_epi64x(6, 5));
+        std::get<3>(s) = _mm_add_epi64(c, _mm_set_epi64x(8, 7));
     }
 }; // class IncrementBlockSI128
 
@@ -73,13 +72,13 @@ class IncrementBlockSI128<T, 2, 4, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 4> &s)
     {
-        __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
-        std::get<1>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-        std::get<2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
-        std::get<3>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
+        std::get<0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 1));
+        std::get<1>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 2));
+        std::get<2>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 3));
+        std::get<3>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 4));
     }
 }; // class IncrementBlockSI128
 
@@ -91,14 +90,14 @@ class IncrementBlockSI128<T, 4, 2, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 4> &s)
     {
-        __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
+        std::get<0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 1));
         std::get<1>(s) =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
                 static_cast<MCKL_INT64>(std::get<2>(ctr)));
-        std::get<2>(s) = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
+        std::get<2>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 2));
         std::get<3>(s) = std::get<1>(s);
     }
 }; // class IncrementBlockSI128

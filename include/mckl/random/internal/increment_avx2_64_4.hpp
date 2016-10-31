@@ -55,17 +55,17 @@ class IncrementBlockSI256<T, 1, 16, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
-        __m256i a0 =
+        __m256i c =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
         std::get<0>(s) =
-            _mm256_add_epi64(a0, _mm256_set_epi64x(0x04, 0x03, 0x02, 0x01));
+            _mm256_add_epi64(c, _mm256_set_epi64x(0x04, 0x03, 0x02, 0x01));
         std::get<1>(s) =
-            _mm256_add_epi64(a0, _mm256_set_epi64x(0x08, 0x07, 0x06, 0x05));
+            _mm256_add_epi64(c, _mm256_set_epi64x(0x08, 0x07, 0x06, 0x05));
         std::get<2>(s) =
-            _mm256_add_epi64(a0, _mm256_set_epi64x(0x0C, 0x0B, 0x0A, 0x09));
+            _mm256_add_epi64(c, _mm256_set_epi64x(0x0C, 0x0B, 0x0A, 0x09));
         std::get<3>(s) =
-            _mm256_add_epi64(a0, _mm256_set_epi64x(0x10, 0x0F, 0x0E, 0x0D));
+            _mm256_add_epi64(c, _mm256_set_epi64x(0x10, 0x0F, 0x0E, 0x0D));
     }
 }; // class IncrementBlockSI256
 
@@ -77,16 +77,16 @@ class IncrementBlockSI256<T, 2, 8, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
-        __m256i a0 =
+        __m256i c =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)),
                 static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 2, 0, 1));
-        std::get<1>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 4, 0, 3));
-        std::get<2>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 6, 0, 5));
-        std::get<3>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 8, 0, 7));
+        std::get<0>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 2, 0, 1));
+        std::get<1>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 4, 0, 3));
+        std::get<2>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 6, 0, 5));
+        std::get<3>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 8, 0, 7));
     }
 }; // class IncrementBlockSI256
 
@@ -98,16 +98,16 @@ class IncrementBlockSI256<T, 4, 4, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
-        __m256i a0 =
+        __m256i c =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
                 static_cast<MCKL_INT64>(std::get<2>(ctr)),
                 static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 1));
-        std::get<1>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 2));
-        std::get<2>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 3));
-        std::get<3>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 4));
+        std::get<0>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 0, 0, 1));
+        std::get<1>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 0, 0, 2));
+        std::get<2>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 0, 0, 3));
+        std::get<3>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 0, 0, 4));
     }
 }; // class IncrementBlockSI256
 
@@ -119,19 +119,19 @@ class IncrementBlockSI256<T, 8, 2, 64>
     public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 4> &s)
     {
-        __m256i a0 =
+        __m256i c =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
                 static_cast<MCKL_INT64>(std::get<2>(ctr)),
                 static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        std::get<0>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 1));
+        std::get<0>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 0, 0, 1));
         std::get<1>(s) =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<7>(ctr)),
                 static_cast<MCKL_INT64>(std::get<6>(ctr)),
                 static_cast<MCKL_INT64>(std::get<5>(ctr)),
                 static_cast<MCKL_INT64>(std::get<4>(ctr)));
-        std::get<2>(s) = _mm256_add_epi64(a0, _mm256_set_epi64x(0, 0, 0, 2));
+        std::get<2>(s) = _mm256_add_epi64(c, _mm256_set_epi64x(0, 0, 0, 2));
         std::get<3>(s) = std::get<1>(s);
     }
 }; // class IncrementBlockSI256
