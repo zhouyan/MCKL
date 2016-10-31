@@ -68,10 +68,83 @@ class ThreefryGeneratorAVX2Impl32
     static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
         std::size_t n, ResultType *r)
     {
+        eval<transform>(ctr, par, n, r);
+    }
+
+    template <typename RealType>
+    static void u01_cc_u32(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
+        std::size_t n, RealType *r)
+    {
+        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Closed>>(
+            ctr, par, n, r);
+    }
+
+    template <typename RealType>
+    static void u01_co_u32(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
+        std::size_t n, RealType *r)
+    {
+        eval<U01AVX2Impl<std::uint32_t, RealType, Closed, Open>>(
+            ctr, par, n, r);
+    }
+
+    template <typename RealType>
+    static void u01_oc_u32(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
+        std::size_t n, RealType *r)
+    {
+        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Closed>>(
+            ctr, par, n, r);
+    }
+
+    template <typename RealType>
+    static void u01_oo_u32(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
+        std::size_t n, RealType *r)
+    {
+        eval<U01AVX2Impl<std::uint32_t, RealType, Open, Open>>(ctr, par, n, r);
+    }
+
+    template <typename RealType>
+    static void uniform_real_u32(Counter<T, K> &ctr,
+        const std::array<T, K + 4> &par, std::size_t n, RealType *r,
+        RealType a, RealType b)
+    {
+        eval<UniformRealAVX2Transform<std::uint32_t, RealType>>(
+            ctr, par, n, r, a, b);
+    }
+
+    private:
+    class transform
+    {
+        public:
+        using uint_type = T;
+
+        template <std::size_t S, typename ResultType>
+        MCKL_FLATTEN static ResultType *eval(
+            const std::array<__m256i, S> &s, ResultType *r)
+        {
+            std::memcpy(r, s.data(), sizeof(s));
+
+            return r + sizeof(s) / sizeof(ResultType);
+        }
+
+        template <typename ResultType>
+        MCKL_FLATTEN static ResultType *eval(
+            std::size_t n, const uint_type *s, ResultType *r)
+        {
+            std::memcpy(r, s, sizeof(uint_type) * n);
+
+            return r + sizeof(uint_type) * n / sizeof(ResultType);
+        }
+    }; // class transform
+
+    template <typename Transform, typename ResultType, typename... Args>
+    static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
+        std::size_t n, ResultType *r, Args &&... args)
+    {
+        using uint_type = typename Transform::uint_type;
+
         constexpr std::size_t S = K <= 8 ? 8 : K;
-        constexpr std::size_t cstride = sizeof(__m256i) * S;
-        constexpr std::size_t nstride = cstride / (sizeof(T) * K);
-        constexpr std::size_t rstride = cstride / sizeof(ResultType);
+        constexpr std::size_t nstride = sizeof(__m256i) * S / (sizeof(T) * K);
+        constexpr std::size_t ustride = sizeof(T) * K / sizeof(uint_type);
 
         std::array<__m256i, S> s;
         while (n >= nstride) {
@@ -149,24 +222,25 @@ class ThreefryGeneratorAVX2Impl32
 
             MCKL_FLATTEN_CALL transpose8x32_store_si256(s);
 
-            std::memcpy(r, s.data(), cstride);
+            MCKL_FLATTEN_CALL r =
+                Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
-            r += rstride;
         }
 
         alignas(32) union {
             std::array<std::array<T, K>, nstride> state;
             std::array<Counter<T, K>, nstride> ctr;
+            std::array<uint_type, nstride * ustride> u;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_FLATTEN_CALL increment(ctr);
             buf.ctr[i] = ctr;
             eval(buf.state[i], par);
         }
-        std::memcpy(r, buf.state.data(), sizeof(T) * K * n);
+        MCKL_FLATTEN_CALL Transform::eval(
+            n * ustride, buf.u.data(), r, std::forward<Args>(args)...);
     }
 
-    private:
     template <std::size_t, std::size_t S>
     static void round(std::array<__m256i, S> &, const std::array<T, K + 4> &,
         std::false_type)

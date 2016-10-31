@@ -203,6 +203,42 @@ class ThreefryGenerator
                                              Rounds, Constants>::batch()>());
     }
 
+    template <typename RealType>
+    void u01_cc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
+    {
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::u01_cc_u32(
+            ctr, par_, n, result);
+    }
+
+    template <typename RealType>
+    void u01_co_u32(ctr_type &ctr, std::size_t n, RealType *result) const
+    {
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::u01_co_u32(
+            ctr, par_, n, result);
+    }
+
+    template <typename RealType>
+    void u01_oc_u32(ctr_type &ctr, std::size_t n, RealType *result) const
+    {
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::u01_oc_u32(
+            ctr, par_, n, result);
+    }
+
+    template <typename RealType>
+    void u01_oo_u32(ctr_type &ctr, std::size_t n, RealType *result) const
+    {
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::u01_oo_u32(
+            ctr, par_, n, result);
+    }
+
+    template <typename RealType>
+    void uniform_real_u32(ctr_type &ctr, std::size_t n, RealType *result,
+        RealType a, RealType b) const
+    {
+        internal::ThreefryGeneratorImpl<T, K, Rounds,
+            Constants>::uniform_real_u32(ctr, par_, n, result, a, b);
+    }
+
     friend bool operator==(
         const ThreefryGenerator<T, K, Rounds, Constants> &gen1,
         const ThreefryGenerator<T, K, Rounds, Constants> &gen2)
@@ -391,6 +427,96 @@ using Threefish512_64 = Threefish512Engine<std::uint64_t>;
 /// \brief Threefish-1024 RNG engine with 64-bit integer output
 /// \ingroup Threefry
 using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
+
+#if MCKL_USE_AVX2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_cc_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_cc_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_co_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_co_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_oc_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_oc_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_oo_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_oo_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void uniform_real_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    float *r, float a, float b,
+    typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.uniform_real_u32(n, r, a, b);
+}
+
+#if !MCKL_U01_USE_64BITS_DOUBLE
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_cc_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    double *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_cc_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_co_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    double *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_co_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_oc_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    double *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_oc_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void u01_oo_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    double *r, typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.u01_oo_u32(n, r);
+}
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+inline void uniform_real_distribution(
+    ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
+    double *r, double a, double b,
+    typename std::enable_if<K <= 8>::type * = nullptr)
+{
+    rng.uniform_real_u32(n, r, a, b);
+}
+
+#endif // !MCKL_U01_USE_64BITS_DOUBLE
+
+#endif // MCKL_USE_AVX2
 
 } // namespace mckl
 
