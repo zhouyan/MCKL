@@ -87,6 +87,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
     : public U01AVX2ImplBase<UIntType, float, Closed, Closed>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, float, Closed, Closed>::eval;
 
@@ -122,6 +126,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     : public U01AVX2ImplBase<UIntType, float, Closed, Open>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, float, Closed, Open>::eval;
 
@@ -152,6 +160,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Closed, 32>
     : public U01AVX2ImplBase<UIntType, float, Open, Closed>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, float, Open, Closed>::eval;
 
@@ -187,6 +199,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Open, 32>
     : public U01AVX2ImplBase<UIntType, float, Open, Open>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, float, Open, Open>::eval;
 
@@ -223,6 +239,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
     : public U01AVX2ImplBase<UIntType, double, Closed, Closed>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
 
@@ -253,6 +273,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     : public U01AVX2ImplBase<UIntType, double, Closed, Open>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
 
@@ -279,6 +303,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     : public U01AVX2ImplBase<UIntType, double, Open, Closed>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
 
@@ -310,6 +338,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Open, 32>
     : public U01AVX2ImplBase<UIntType, double, Open, Open>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
+
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
 
@@ -346,6 +378,10 @@ class UniformRealAVX2Impl;
 template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, float, 32>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**UniformRealAVX2Impl** used with unsigned integer type with "
+        "incorrect width");
+
     public:
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(
@@ -381,6 +417,10 @@ class UniformRealAVX2Impl<UIntType, float, 32>
 template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, double, 32>
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**UniformRealAVX2Impl** used with unsigned integer type with "
+        "incorrect width");
+
     public:
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(
@@ -441,6 +481,10 @@ template <typename UIntType>
 inline void u01_canonical_distribution_avx2_impl_trans(std::size_t n,
     const UIntType *u, double *r, std::integral_constant<int, 32>)
 {
+    static_assert(std::numeric_limits<UIntType>::digits == 32,
+        "**u01_canonical_distribution_avx2_impl_trans** used with unsigned "
+        "integer type with incorrect width");
+
     constexpr std::size_t S = 8;
     constexpr std::size_t cstride = sizeof(__m256i) * S;
     constexpr std::size_t nstride = cstride / sizeof(double);

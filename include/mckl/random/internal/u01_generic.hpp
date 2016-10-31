@@ -44,16 +44,16 @@ template <int W, typename UIntType>
 using U01UIntLeastType = typename std::conditional<W <= 32, std::uint32_t,
     typename std::conditional<W <= 64, std::uint64_t, UIntType>::type>::type;
 
-template <typename UIntType, typename, typename, typename,
-    int = std::numeric_limits<UIntType>::digits>
+template <typename UIntType, typename, typename, typename>
 class U01GenericImpl;
 
-template <typename UIntType, typename RealType, int W>
-class U01GenericImpl<UIntType, RealType, Closed, Closed, W>
+template <typename UIntType, typename RealType>
+class U01GenericImpl<UIntType, RealType, Closed, Closed>
 {
     public:
     static RealType eval(UIntType u)
     {
+        constexpr int W = std::numeric_limits<UIntType>::digits;
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W - 1 < M ? W - 1 : M;
         constexpr int V = P + 1;
@@ -87,13 +87,14 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed, W>
     }
 }; // class U01GenericImpl
 
-template <typename UIntType, typename RealType, int W>
-class U01GenericImpl<UIntType, RealType, Closed, Open, W>
+template <typename UIntType, typename RealType>
+class U01GenericImpl<UIntType, RealType, Closed, Open>
 {
 
     public:
     static RealType eval(UIntType u)
     {
+        constexpr int W = std::numeric_limits<UIntType>::digits;
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W < M ? W : M;
         constexpr int R = W - P;
@@ -111,13 +112,13 @@ class U01GenericImpl<UIntType, RealType, Closed, Open, W>
     }
 }; // class U01GenericImpl
 
-template <typename UIntType, typename RealType, int W>
-class U01GenericImpl<UIntType, RealType, Open, Closed, W>
+template <typename UIntType, typename RealType>
+class U01GenericImpl<UIntType, RealType, Open, Closed>
 {
-
     public:
     static RealType eval(UIntType u)
     {
+        constexpr int W = std::numeric_limits<UIntType>::digits;
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W < M ? W : M;
         constexpr int R = W - P;
@@ -136,12 +137,13 @@ class U01GenericImpl<UIntType, RealType, Open, Closed, W>
     }
 }; // class U01GenericImpl
 
-template <typename UIntType, typename RealType, int W>
-class U01GenericImpl<UIntType, RealType, Open, Open, W>
+template <typename UIntType, typename RealType>
+class U01GenericImpl<UIntType, RealType, Open, Open>
 {
     public:
     static RealType eval(UIntType u)
     {
+        constexpr int W = std::numeric_limits<UIntType>::digits;
         constexpr int M = std::numeric_limits<RealType>::digits;
         constexpr int P = W + 1 < M ? W + 1 : M;
         constexpr int R = W + 1 - P;

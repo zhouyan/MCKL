@@ -144,6 +144,10 @@ template <typename UIntType, typename RealType, int W>
 inline void u01_canonical_distribution_impl_trans(std::size_t n,
     const UIntType *u, RealType *r, std::integral_constant<int, W>)
 {
+    static_assert(std::numeric_limits<UIntType>::digits == W,
+        "**u01_canonical_distribution_avx2_impl_trans** used with unsigned "
+        "integer type with incorrect width");
+
     constexpr int M = std::numeric_limits<RealType>::digits;
     constexpr int P = (M + W - 1) / W;
     constexpr int Q = 1 > P ? 1 : P;
