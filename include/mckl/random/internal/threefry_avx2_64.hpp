@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
+#include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/internal/u01_avx2.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -149,80 +150,10 @@ class ThreefryGeneratorAVX2Impl64
 
         std::array<__m256i, S> s;
         while (n >= nstride) {
-            increment_si256(ctr, s);
-
-            transpose4x64_load_si256(s);
-
-            rbox<0x00>(s);
-            kbox<0x00>(s, par);
-            rbox<0x01>(s);
-            kbox<0x01>(s, par);
-            rbox<0x02>(s);
-            kbox<0x02>(s, par);
-            rbox<0x03>(s);
-            kbox<0x03>(s, par);
-            rbox<0x04>(s);
-            kbox<0x04>(s, par);
-            rbox<0x05>(s);
-            kbox<0x05>(s, par);
-            rbox<0x06>(s);
-            kbox<0x06>(s, par);
-            rbox<0x07>(s);
-            kbox<0x07>(s, par);
-            rbox<0x08>(s);
-            kbox<0x08>(s, par);
-            rbox<0x09>(s);
-            kbox<0x09>(s, par);
-            rbox<0x0A>(s);
-            kbox<0x0A>(s, par);
-            rbox<0x0B>(s);
-            kbox<0x0B>(s, par);
-            rbox<0x0C>(s);
-            kbox<0x0C>(s, par);
-            rbox<0x0D>(s);
-            kbox<0x0D>(s, par);
-            rbox<0x0E>(s);
-            kbox<0x0E>(s, par);
-            rbox<0x0F>(s);
-            kbox<0x0F>(s, par);
-            rbox<0x10>(s);
-            kbox<0x10>(s, par);
-            rbox<0x11>(s);
-            kbox<0x11>(s, par);
-            rbox<0x12>(s);
-            kbox<0x12>(s, par);
-            rbox<0x13>(s);
-            kbox<0x13>(s, par);
-            rbox<0x14>(s);
-            kbox<0x14>(s, par);
-            rbox<0x15>(s);
-            kbox<0x15>(s, par);
-            rbox<0x16>(s);
-            kbox<0x16>(s, par);
-            rbox<0x17>(s);
-            kbox<0x17>(s, par);
-            rbox<0x18>(s);
-            kbox<0x18>(s, par);
-            rbox<0x19>(s);
-            kbox<0x19>(s, par);
-            rbox<0x1A>(s);
-            kbox<0x1A>(s, par);
-            rbox<0x1B>(s);
-            kbox<0x1B>(s, par);
-            rbox<0x1C>(s);
-            kbox<0x1C>(s, par);
-            rbox<0x1D>(s);
-            kbox<0x1D>(s, par);
-            rbox<0x1E>(s);
-            kbox<0x1E>(s, par);
-            rbox<0x1F>(s);
-            kbox<0x1F>(s, par);
-
-            round<0x20>(
-                s, par, std::integral_constant<bool, 0x20 <= Rounds>());
-
-            transpose4x64_store_si256(s);
-
+            MCKL_FLATTEN_CALL increment_si256(ctr, s);
+            MCKL_FLATTEN_CALL transpose4x64_load_si256(s);
+            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0);
+            MCKL_FLATTEN_CALL transpose4x64_store_si256(s);
             MCKL_FLATTEN_CALL r =
                 Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
@@ -252,9 +183,7 @@ class ThreefryGeneratorAVX2Impl64
     static void round(std::array<__m256i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
-        MCKL_FLATTEN_CALL rbox<N>(s);
-        MCKL_FLATTEN_CALL kbox<N>(s, par);
-        round<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N);
     }
 
     template <std::size_t N, std::size_t S>

@@ -33,6 +33,7 @@
 #define MCKL_RANDOM_INTERNAL_AES_AESNI_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/aes_unroll.hpp>
 #include <mckl/random/increment.hpp>
 
 #if MCKL_HAS_AVX2
@@ -652,31 +653,10 @@ class AESGeneratorAESNIImpl
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
         __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());
-
         __m128i s = _mm_load_si128(sptr);
-
         s = _mm_xor_si128(s, std::get<0>(rk));
-
-        MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
-        MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
-
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-
+        MCKL_RANDOM_INTERNAL_AES_UNROLL(0);
         s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
-
         _mm_store_si128(sptr, s);
     }
 
@@ -777,29 +757,9 @@ class AESGeneratorAESNIImpl
         std::array<__m128i, S> s;
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si128(ctr, s);
-
             MCKL_FLATTEN_CALL xor_si128(s, std::get<0>(rk));
-
-            MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
-
-            round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-
+            MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(0);
             MCKL_FLATTEN_CALL aesenclast_si128(s, std::get<rounds_>(rk));
-
             MCKL_FLATTEN_CALL r =
                 Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
@@ -829,8 +789,7 @@ class AESGeneratorAESNIImpl
     static void round(
         __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        rbox<N>(s, rk);
-        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
+        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N);
     }
 
     template <std::size_t, std::size_t S>
@@ -843,8 +802,7 @@ class AESGeneratorAESNIImpl
     static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        MCKL_FLATTEN_CALL rbox<N>(s, rk);
-        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
+        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N);
     }
 
     template <std::size_t N>

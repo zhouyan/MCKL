@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
+#include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/internal/u01_avx2.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -150,79 +151,9 @@ class ThreefryGeneratorAVX2Impl32
         std::array<__m256i, S> s;
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si256(ctr, s);
-
             MCKL_FLATTEN_CALL transpose8x32_load_si256(s);
-
-            MCKL_FLATTEN_CALL rbox<0x00>(s);
-            MCKL_FLATTEN_CALL kbox<0x00>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x01>(s);
-            MCKL_FLATTEN_CALL kbox<0x01>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x02>(s);
-            MCKL_FLATTEN_CALL kbox<0x02>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x03>(s);
-            MCKL_FLATTEN_CALL kbox<0x03>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x04>(s);
-            MCKL_FLATTEN_CALL kbox<0x04>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x05>(s);
-            MCKL_FLATTEN_CALL kbox<0x05>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x06>(s);
-            MCKL_FLATTEN_CALL kbox<0x06>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x07>(s);
-            MCKL_FLATTEN_CALL kbox<0x07>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x08>(s);
-            MCKL_FLATTEN_CALL kbox<0x08>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x09>(s);
-            MCKL_FLATTEN_CALL kbox<0x09>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x0A>(s);
-            MCKL_FLATTEN_CALL kbox<0x0A>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x0B>(s);
-            MCKL_FLATTEN_CALL kbox<0x0B>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x0C>(s);
-            MCKL_FLATTEN_CALL kbox<0x0C>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x0D>(s);
-            MCKL_FLATTEN_CALL kbox<0x0D>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x0E>(s);
-            MCKL_FLATTEN_CALL kbox<0x0E>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x0F>(s);
-            MCKL_FLATTEN_CALL kbox<0x0F>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x10>(s);
-            MCKL_FLATTEN_CALL kbox<0x10>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x11>(s);
-            MCKL_FLATTEN_CALL kbox<0x11>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x12>(s);
-            MCKL_FLATTEN_CALL kbox<0x12>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x13>(s);
-            MCKL_FLATTEN_CALL kbox<0x13>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x14>(s);
-            MCKL_FLATTEN_CALL kbox<0x14>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x15>(s);
-            MCKL_FLATTEN_CALL kbox<0x15>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x16>(s);
-            MCKL_FLATTEN_CALL kbox<0x16>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x17>(s);
-            MCKL_FLATTEN_CALL kbox<0x17>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x18>(s);
-            MCKL_FLATTEN_CALL kbox<0x18>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x19>(s);
-            MCKL_FLATTEN_CALL kbox<0x19>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x1A>(s);
-            MCKL_FLATTEN_CALL kbox<0x1A>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x1B>(s);
-            MCKL_FLATTEN_CALL kbox<0x1B>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x1C>(s);
-            MCKL_FLATTEN_CALL kbox<0x1C>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x1D>(s);
-            MCKL_FLATTEN_CALL kbox<0x1D>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x1E>(s);
-            MCKL_FLATTEN_CALL kbox<0x1E>(s, par);
-            MCKL_FLATTEN_CALL rbox<0x1F>(s);
-            MCKL_FLATTEN_CALL kbox<0x1F>(s, par);
-
-            round<0x20>(
-                s, par, std::integral_constant<bool, 0x20 <= Rounds>());
-
+            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0);
             MCKL_FLATTEN_CALL transpose8x32_store_si256(s);
-
             MCKL_FLATTEN_CALL r =
                 Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
@@ -252,9 +183,7 @@ class ThreefryGeneratorAVX2Impl32
     static void round(std::array<__m256i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
-        MCKL_FLATTEN_CALL rbox<N>(s);
-        MCKL_FLATTEN_CALL kbox<N>(s, par);
-        round<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N);
     }
 
     template <std::size_t N, std::size_t S>

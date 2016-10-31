@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
+#include <mckl/random/internal/philox_unroll.hpp>
 #include <mckl/random/internal/u01_avx2.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -199,30 +200,9 @@ class PhiloxGeneratorAVX2Impl32
         set_key(rk, key);
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si256(ctr, s);
-
             MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
-
-            MCKL_FLATTEN_CALL rbox<0x0>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x1>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x2>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x3>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x4>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x5>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x6>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x7>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x8>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0x9>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xA>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xB>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xC>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xD>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xE>(s, rk);
-            MCKL_FLATTEN_CALL rbox<0xF>(s, rk);
-
-            round<0x10>(s, rk, std::integral_constant<bool, 0x10 <= Rounds>());
-
+            MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0);
             MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
-
             MCKL_FLATTEN_CALL r =
                 Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
@@ -252,8 +232,7 @@ class PhiloxGeneratorAVX2Impl32
     static void round(std::array<__m256i, S> &s,
         const std::array<__m256i, Rounds> &rk, std::true_type)
     {
-        MCKL_FLATTEN_CALL rbox<N>(s, rk);
-        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N);
     }
 
     template <std::size_t N, std::size_t S>
