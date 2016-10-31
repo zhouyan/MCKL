@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
+#include <mckl/random/internal/u01_avx2.hpp>
 #include <mckl/random/increment.hpp>
 
 #ifdef MCKL_GCC

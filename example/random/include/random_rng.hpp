@@ -394,24 +394,8 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     bool pass_k = random_rng_k(RNGType());
     bool pass_d = random_rng_d<RNGType>(N, M);
 
-    using ubits = mckl::UniformBitsDistribution<std::uint64_t>;
-    using f01cc = mckl::U01CCDistribution<float>;
-    using f01co = mckl::U01CODistribution<float>;
-    using f01oc = mckl::U01OCDistribution<float>;
-    using f01oo = mckl::U01OODistribution<float>;
-    using d01cc = mckl::U01CCDistribution<double>;
-    using d01co = mckl::U01CODistribution<double>;
-    using d01oc = mckl::U01OCDistribution<double>;
-    using d01oo = mckl::U01OODistribution<double>;
+    using ubits = mckl::UniformBitsDistribution<typename RNGType::result_type>;
     RandomRNGPerf perf_ubits(random_rng_p<RNGType, ubits>(N, M));
-    RandomRNGPerf perf_f01cc(random_rng_p<RNGType, f01cc>(N, M));
-    RandomRNGPerf perf_f01co(random_rng_p<RNGType, f01co>(N, M));
-    RandomRNGPerf perf_f01oc(random_rng_p<RNGType, f01oc>(N, M));
-    RandomRNGPerf perf_f01oo(random_rng_p<RNGType, f01oo>(N, M));
-    RandomRNGPerf perf_d01cc(random_rng_p<RNGType, d01cc>(N, M));
-    RandomRNGPerf perf_d01co(random_rng_p<RNGType, d01co>(N, M));
-    RandomRNGPerf perf_d01oc(random_rng_p<RNGType, d01oc>(N, M));
-    RandomRNGPerf perf_d01oo(random_rng_p<RNGType, d01oo>(N, M));
 
     std::cout << std::fixed << std::setprecision(2);
 
@@ -443,77 +427,6 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     pass += perf_ubits.pass ? "-" : "*";
     pass += random_pass(pass_k && pass_d && perf_ubits.pass);
     std::cout << std::setw(twid) << std::right << pass;
-    std::cout << std::endl;
-
-    std::cout << std::string(lwid, '-') << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left << "Distribution";
-    if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(twid) << std::right << "cpE (S)";
-        std::cout << std::setw(twid) << std::right << "cpE (B)";
-    } else {
-        std::cout << std::setw(twid) << std::right << "ME/s (S)";
-        std::cout << std::setw(twid) << std::right << "ME/s (B)";
-    }
-    std::cout << std::setw(twid) << std::right << "Deterministics";
-    std::cout << std::endl;
-
-    std::cout << std::string(lwid, '-') << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01CCDistribution<float>";
-    std::cout << std::setw(twid) << std::right << perf_f01cc.c1;
-    std::cout << std::setw(twid) << std::right << perf_f01cc.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_f01cc.pass);
-    std::cout << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01CODistribution<float>";
-    std::cout << std::setw(twid) << std::right << perf_f01co.c1;
-    std::cout << std::setw(twid) << std::right << perf_f01co.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_f01co.pass);
-    std::cout << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01OCDistribution<float>";
-    std::cout << std::setw(twid) << std::right << perf_f01oc.c1;
-    std::cout << std::setw(twid) << std::right << perf_f01oc.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_f01oc.pass);
-    std::cout << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01OODistribution<float>";
-    std::cout << std::setw(twid) << std::right << perf_f01oo.c1;
-    std::cout << std::setw(twid) << std::right << perf_f01oo.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_f01oo.pass);
-    std::cout << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01CCDistribution<double>";
-    std::cout << std::setw(twid) << std::right << perf_d01cc.c1;
-    std::cout << std::setw(twid) << std::right << perf_d01cc.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_d01cc.pass);
-    std::cout << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01CODistribution<double>";
-    std::cout << std::setw(twid) << std::right << perf_d01co.c1;
-    std::cout << std::setw(twid) << std::right << perf_d01co.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_d01co.pass);
-    std::cout << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01OCDistribution<double>";
-    std::cout << std::setw(twid) << std::right << perf_d01oc.c1;
-    std::cout << std::setw(twid) << std::right << perf_d01oc.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_d01oc.pass);
-    std::cout << std::endl;
-
-    std::cout << std::setw(nwid + swid * 2) << std::left
-              << "U01OODistribution<double>";
-    std::cout << std::setw(twid) << std::right << perf_d01oo.c1;
-    std::cout << std::setw(twid) << std::right << perf_d01oo.c2;
-    std::cout << std::setw(twid) << std::right << random_pass(perf_d01oo.pass);
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
