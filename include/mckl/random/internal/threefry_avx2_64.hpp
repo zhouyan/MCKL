@@ -88,14 +88,10 @@ class ThreefryGeneratorAVX2Impl64
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oc, 32, Open, Closed)
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oo, 32, Open, Open)
 
-    template <typename RealType>
-    static void uniform_real_u32(Counter<T, K> &ctr,
-        const std::array<T, K + 4> &par, std::size_t n, RealType *r,
-        RealType a, RealType b)
-    {
-        eval<UniformRealAVX2Transform<std::uint32_t, RealType>>(
-            ctr, par, n, r, a, b);
-    }
+    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(cc, 64, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(co, 64, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oc, 64, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oo, 64, Open, Open)
 
     private:
     class transform

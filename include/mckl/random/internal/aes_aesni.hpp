@@ -413,19 +413,16 @@ class AESGeneratorAESNIImpl
     }
 
 #if MCKL_HAS_AVX2
+
     MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(cc, 32, Closed, Closed)
     MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(co, 32, Closed, Open)
     MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oc, 32, Open, Closed)
     MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oo, 32, Open, Open)
 
-    template <typename RealType>
-    static void uniform_real_u32(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        RealType *r, RealType a, RealType b)
-    {
-        eval<UniformRealAVX2Transform<std::uint32_t, RealType>>(
-            ctr, rk, n, r, a, b);
-    }
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(cc, 64, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(co, 64, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oc, 64, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oo, 64, Open, Open)
 
 #endif // MCKL_HAS_AVX2
 

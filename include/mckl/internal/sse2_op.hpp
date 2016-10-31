@@ -67,6 +67,24 @@ MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 4> &s)
 }
 
 template <int imm8>
+MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 4> &s)
+{
+    std::get<0>(s) = _mm_slli_epi64(std::get<0>(s), imm8);
+    std::get<1>(s) = _mm_slli_epi64(std::get<1>(s), imm8);
+    std::get<2>(s) = _mm_slli_epi64(std::get<2>(s), imm8);
+    std::get<3>(s) = _mm_slli_epi64(std::get<3>(s), imm8);
+}
+
+template <int imm8>
+MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 4> &s)
+{
+    std::get<0>(s) = _mm_srli_epi64(std::get<0>(s), imm8);
+    std::get<1>(s) = _mm_srli_epi64(std::get<1>(s), imm8);
+    std::get<2>(s) = _mm_srli_epi64(std::get<2>(s), imm8);
+    std::get<3>(s) = _mm_srli_epi64(std::get<3>(s), imm8);
+}
+
+template <int imm8>
 MCKL_FLATTEN inline void shuffle_epi32(std::array<__m128i, 4> &s)
 {
     std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), imm8);
@@ -193,6 +211,19 @@ MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 4> &s, const __m128i &a)
         _mm_mul_pd(_mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(a)));
 }
 
+MCKL_FLATTEN inline void mul_pd(
+    std::array<__m128i, 4> &s, const std::array<__m128i, 4> &a)
+{
+    std::get<0>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(std::get<0>(a))));
+    std::get<1>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<1>(s)), _mm_castsi128_pd(std::get<1>(a))));
+    std::get<2>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<2>(s)), _mm_castsi128_pd(std::get<2>(a))));
+    std::get<3>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(std::get<3>(a))));
+}
+
 template <int imm8>
 MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 8> &s)
 {
@@ -217,6 +248,32 @@ MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 8> &s)
     std::get<5>(s) = _mm_srli_epi32(std::get<5>(s), imm8);
     std::get<6>(s) = _mm_srli_epi32(std::get<6>(s), imm8);
     std::get<7>(s) = _mm_srli_epi32(std::get<7>(s), imm8);
+}
+
+template <int imm8>
+MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 8> &s)
+{
+    std::get<0>(s) = _mm_slli_epi64(std::get<0>(s), imm8);
+    std::get<1>(s) = _mm_slli_epi64(std::get<1>(s), imm8);
+    std::get<2>(s) = _mm_slli_epi64(std::get<2>(s), imm8);
+    std::get<3>(s) = _mm_slli_epi64(std::get<3>(s), imm8);
+    std::get<4>(s) = _mm_slli_epi64(std::get<4>(s), imm8);
+    std::get<5>(s) = _mm_slli_epi64(std::get<5>(s), imm8);
+    std::get<6>(s) = _mm_slli_epi64(std::get<6>(s), imm8);
+    std::get<7>(s) = _mm_slli_epi64(std::get<7>(s), imm8);
+}
+
+template <int imm8>
+MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 8> &s)
+{
+    std::get<0>(s) = _mm_srli_epi64(std::get<0>(s), imm8);
+    std::get<1>(s) = _mm_srli_epi64(std::get<1>(s), imm8);
+    std::get<2>(s) = _mm_srli_epi64(std::get<2>(s), imm8);
+    std::get<3>(s) = _mm_srli_epi64(std::get<3>(s), imm8);
+    std::get<4>(s) = _mm_srli_epi64(std::get<4>(s), imm8);
+    std::get<5>(s) = _mm_srli_epi64(std::get<5>(s), imm8);
+    std::get<6>(s) = _mm_srli_epi64(std::get<6>(s), imm8);
+    std::get<7>(s) = _mm_srli_epi64(std::get<7>(s), imm8);
 }
 
 template <int imm8>
@@ -414,6 +471,27 @@ MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 8> &s, const __m128i &a)
         _mm_mul_pd(_mm_castsi128_pd(std::get<7>(s)), _mm_castsi128_pd(a)));
 }
 
+MCKL_FLATTEN inline void mul_pd(
+    std::array<__m128i, 8> &s, const std::array<__m128i, 8> &a)
+{
+    std::get<0>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(std::get<0>(a))));
+    std::get<1>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<1>(s)), _mm_castsi128_pd(std::get<1>(a))));
+    std::get<2>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<2>(s)), _mm_castsi128_pd(std::get<2>(a))));
+    std::get<3>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(std::get<3>(a))));
+    std::get<4>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<4>(s)), _mm_castsi128_pd(std::get<4>(a))));
+    std::get<5>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<5>(s)), _mm_castsi128_pd(std::get<5>(a))));
+    std::get<6>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<6>(s)), _mm_castsi128_pd(std::get<6>(a))));
+    std::get<7>(s) = _mm_castpd_si128(_mm_mul_pd(
+        _mm_castsi128_pd(std::get<7>(s)), _mm_castsi128_pd(std::get<7>(a))));
+}
+
 template <int imm8>
 MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 16> &s)
 {
@@ -454,6 +532,48 @@ MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 16> &s)
     std::get<0xD>(s) = _mm_srli_epi32(std::get<0xD>(s), imm8);
     std::get<0xE>(s) = _mm_srli_epi32(std::get<0xE>(s), imm8);
     std::get<0xF>(s) = _mm_srli_epi32(std::get<0xF>(s), imm8);
+}
+
+template <int imm8>
+MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 16> &s)
+{
+    std::get<0x0>(s) = _mm_slli_epi64(std::get<0x0>(s), imm8);
+    std::get<0x1>(s) = _mm_slli_epi64(std::get<0x1>(s), imm8);
+    std::get<0x2>(s) = _mm_slli_epi64(std::get<0x2>(s), imm8);
+    std::get<0x3>(s) = _mm_slli_epi64(std::get<0x3>(s), imm8);
+    std::get<0x4>(s) = _mm_slli_epi64(std::get<0x4>(s), imm8);
+    std::get<0x5>(s) = _mm_slli_epi64(std::get<0x5>(s), imm8);
+    std::get<0x6>(s) = _mm_slli_epi64(std::get<0x6>(s), imm8);
+    std::get<0x7>(s) = _mm_slli_epi64(std::get<0x7>(s), imm8);
+    std::get<0x8>(s) = _mm_slli_epi64(std::get<0x8>(s), imm8);
+    std::get<0x9>(s) = _mm_slli_epi64(std::get<0x9>(s), imm8);
+    std::get<0xA>(s) = _mm_slli_epi64(std::get<0xA>(s), imm8);
+    std::get<0xB>(s) = _mm_slli_epi64(std::get<0xB>(s), imm8);
+    std::get<0xC>(s) = _mm_slli_epi64(std::get<0xC>(s), imm8);
+    std::get<0xD>(s) = _mm_slli_epi64(std::get<0xD>(s), imm8);
+    std::get<0xE>(s) = _mm_slli_epi64(std::get<0xE>(s), imm8);
+    std::get<0xF>(s) = _mm_slli_epi64(std::get<0xF>(s), imm8);
+}
+
+template <int imm8>
+MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 16> &s)
+{
+    std::get<0x0>(s) = _mm_srli_epi64(std::get<0x0>(s), imm8);
+    std::get<0x1>(s) = _mm_srli_epi64(std::get<0x1>(s), imm8);
+    std::get<0x2>(s) = _mm_srli_epi64(std::get<0x2>(s), imm8);
+    std::get<0x3>(s) = _mm_srli_epi64(std::get<0x3>(s), imm8);
+    std::get<0x4>(s) = _mm_srli_epi64(std::get<0x4>(s), imm8);
+    std::get<0x5>(s) = _mm_srli_epi64(std::get<0x5>(s), imm8);
+    std::get<0x6>(s) = _mm_srli_epi64(std::get<0x6>(s), imm8);
+    std::get<0x7>(s) = _mm_srli_epi64(std::get<0x7>(s), imm8);
+    std::get<0x8>(s) = _mm_srli_epi64(std::get<0x8>(s), imm8);
+    std::get<0x9>(s) = _mm_srli_epi64(std::get<0x9>(s), imm8);
+    std::get<0xA>(s) = _mm_srli_epi64(std::get<0xA>(s), imm8);
+    std::get<0xB>(s) = _mm_srli_epi64(std::get<0xB>(s), imm8);
+    std::get<0xC>(s) = _mm_srli_epi64(std::get<0xC>(s), imm8);
+    std::get<0xD>(s) = _mm_srli_epi64(std::get<0xD>(s), imm8);
+    std::get<0xE>(s) = _mm_srli_epi64(std::get<0xE>(s), imm8);
+    std::get<0xF>(s) = _mm_srli_epi64(std::get<0xF>(s), imm8);
 }
 
 template <int imm8>
@@ -804,6 +924,59 @@ MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 16> &s, const __m128i &a)
         _mm_mul_pd(_mm_castsi128_pd(std::get<0xE>(s)), _mm_castsi128_pd(a)));
     std::get<0xF>(s) = _mm_castpd_si128(
         _mm_mul_pd(_mm_castsi128_pd(std::get<0xF>(s)), _mm_castsi128_pd(a)));
+}
+
+MCKL_FLATTEN inline void mul_pd(
+    std::array<__m128i, 16> &s, const std::array<__m128i, 16> &a)
+{
+    std::get<0x0>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x0>(s)),
+            _mm_castsi128_pd(std::get<0x0>(a))));
+    std::get<0x1>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x1>(s)),
+            _mm_castsi128_pd(std::get<0x1>(a))));
+    std::get<0x2>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x2>(s)),
+            _mm_castsi128_pd(std::get<0x2>(a))));
+    std::get<0x3>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x3>(s)),
+            _mm_castsi128_pd(std::get<0x3>(a))));
+    std::get<0x4>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x4>(s)),
+            _mm_castsi128_pd(std::get<0x4>(a))));
+    std::get<0x5>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x5>(s)),
+            _mm_castsi128_pd(std::get<0x5>(a))));
+    std::get<0x6>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x6>(s)),
+            _mm_castsi128_pd(std::get<0x6>(a))));
+    std::get<0x7>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x7>(s)),
+            _mm_castsi128_pd(std::get<0x7>(a))));
+    std::get<0x8>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x8>(s)),
+            _mm_castsi128_pd(std::get<0x8>(a))));
+    std::get<0x9>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0x9>(s)),
+            _mm_castsi128_pd(std::get<0x9>(a))));
+    std::get<0xA>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0xA>(s)),
+            _mm_castsi128_pd(std::get<0xA>(a))));
+    std::get<0xB>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0xB>(s)),
+            _mm_castsi128_pd(std::get<0xB>(a))));
+    std::get<0xC>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0xC>(s)),
+            _mm_castsi128_pd(std::get<0xC>(a))));
+    std::get<0xD>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0xD>(s)),
+            _mm_castsi128_pd(std::get<0xD>(a))));
+    std::get<0xE>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0xE>(s)),
+            _mm_castsi128_pd(std::get<0xE>(a))));
+    std::get<0xF>(s) =
+        _mm_castpd_si128(_mm_mul_pd(_mm_castsi128_pd(std::get<0xF>(s)),
+            _mm_castsi128_pd(std::get<0xF>(a))));
 }
 
 } // namespace mckl::internal

@@ -36,10 +36,6 @@
 #include <mckl/random/u01.hpp>
 #include <mckl/random/uniform_bits_distribution.hpp>
 
-#if MCKL_HAS_AVX2
-#include <mckl/random/internal/u01_avx2.hpp>
-#endif
-
 /// \brief Default U01 distribution using fixed point conversion
 /// \ingroup Config
 #ifndef MCKL_U01_USE_FIXED_POINT
@@ -157,18 +153,6 @@ inline void u01_canonical_distribution_impl_trans(std::size_t n,
             u, std::true_type());
     }
 }
-
-#if MCKL_USE_AVX2
-
-template <typename UIntType>
-inline void u01_canonical_distribution_impl_trans(std::size_t n,
-    const UIntType *u, double *r, std::integral_constant<int, 32>)
-{
-    u01_canonical_distribution_avx2_impl_trans(
-        n, u, r, std::integral_constant<int, 32>());
-}
-
-#endif // MCKL_USE_AVX2
 
 template <std::size_t K, typename RealType, typename RNGType>
 inline void u01_canonical_distribution_impl(

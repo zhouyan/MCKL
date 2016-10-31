@@ -82,6 +82,23 @@ MCKL_FLATTEN inline void fmadd_pd(
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(b)));
 }
 
+MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 4> &s, const __m256i &a,
+    const std::array<__m256i, 4> &b)
+{
+    std::get<0>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0>(b))));
+    std::get<1>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<1>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<1>(b))));
+    std::get<2>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<2>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<2>(b))));
+    std::get<3>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<3>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<3>(b))));
+}
+
 MCKL_FLATTEN inline void fmadd_ps(
     std::array<__m256i, 8> &s, const __m256i &a, const __m256i &b)
 {
@@ -138,6 +155,35 @@ MCKL_FLATTEN inline void fmadd_pd(
     std::get<7>(s) = _mm256_castpd_si256(
         _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<7>(s)),
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(b)));
+}
+
+MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 8> &s, const __m256i &a,
+    const std::array<__m256i, 8> &b)
+{
+    std::get<0>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0>(b))));
+    std::get<1>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<1>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<1>(b))));
+    std::get<2>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<2>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<2>(b))));
+    std::get<3>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<3>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<3>(b))));
+    std::get<4>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<4>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<4>(b))));
+    std::get<5>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<5>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<5>(b))));
+    std::get<6>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<6>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<6>(b))));
+    std::get<7>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<7>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<7>(b))));
 }
 
 MCKL_FLATTEN inline void fmadd_ps(
@@ -244,6 +290,59 @@ MCKL_FLATTEN inline void fmadd_pd(
     std::get<0xF>(s) = _mm256_castpd_si256(
         _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0xF>(s)),
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(b)));
+}
+
+MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 16> &s, const __m256i &a,
+    const std::array<__m256i, 16> &b)
+{
+    std::get<0x0>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x0>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x0>(b))));
+    std::get<0x1>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x1>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x1>(b))));
+    std::get<0x2>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x2>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x2>(b))));
+    std::get<0x3>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x3>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x3>(b))));
+    std::get<0x4>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x4>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x4>(b))));
+    std::get<0x5>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x5>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x5>(b))));
+    std::get<0x6>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x6>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x6>(b))));
+    std::get<0x7>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x7>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x7>(b))));
+    std::get<0x8>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x8>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x8>(b))));
+    std::get<0x9>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0x9>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0x9>(b))));
+    std::get<0xA>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0xA>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0xA>(b))));
+    std::get<0xB>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0xB>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0xB>(b))));
+    std::get<0xC>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0xC>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0xC>(b))));
+    std::get<0xD>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0xD>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0xD>(b))));
+    std::get<0xE>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0xE>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0xE>(b))));
+    std::get<0xF>(s) = _mm256_castpd_si256(
+        _mm256_fmadd_pd(_mm256_castsi256_pd(std::get<0xF>(s)),
+            _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0xF>(b))));
 }
 
 } // namespace mckl::internal

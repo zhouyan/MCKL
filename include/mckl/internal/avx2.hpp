@@ -36,6 +36,10 @@
 #include <mckl/internal/avx2_op.hpp>
 #include <array>
 
+#if MCKL_HAS_FMA
+#include <mckl/internal/fma.hpp>
+#endif
+
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
@@ -252,6 +256,31 @@ MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 16> &s)
         _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xE>(s)));
     std::get<0xF>(s) =
         _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xF>(s)));
+}
+
+template <std::size_t S>
+MCKL_FLATTEN inline void cvtepi64_pd(std::array<__m256i, S> &s)
+{
+    const __m256i m32 =
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x41F0000000000000));
+    const __m256i m52 =
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+    const __m256i mask =
+        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::array<__m256i, S> t;
+    and_si256(s, mask, t);
+    srli_epi64<32>(s);
+    add_epi64(s, m52);
+    add_epi64(t, m52);
+    sub_pd(s, m52);
+    sub_pd(t, m52);
+#if MCKL_USE_FMA
+    fmadd_pd(s, m32, t);
+#else
+    mul_pd(s, m32);
+    add_pd(s, t);
+#endif
 }
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,

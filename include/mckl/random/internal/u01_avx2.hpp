@@ -106,7 +106,7 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i c25 = _mm256_set1_epi32(static_cast<int>(0x33000000));
+        const __m256i d25 = _mm256_set1_epi32(static_cast<int>(0x33000000));
         const __m256i mask = _mm256_set1_epi32(1);
 
         std::array<__m256i, S> t;
@@ -115,7 +115,7 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
         and_si256(s, mask, t);
         add_epi32(s, t);
         cvtepi32_ps(s);
-        mul_ps(s, c25);
+        mul_ps(s, d25);
         std::memcpy(r, s.data(), sizeof(s));
 
         return r + sizeof(s) / sizeof(float);
@@ -145,11 +145,11 @@ class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i c24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
+        const __m256i d24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
 
         srli_epi32<8>(s);
         cvtepi32_ps(s);
-        mul_ps(s, c24);
+        mul_ps(s, d24);
         std::memcpy(r, s.data(), sizeof(s));
 
         return r + sizeof(s) / sizeof(float);
@@ -179,15 +179,15 @@ class U01AVX2Impl<UIntType, float, Open, Closed, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i c24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
+        const __m256i d24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
 
         srli_epi32<8>(s);
         cvtepi32_ps(s);
 #if MCKL_USE_FMA
-        fmadd_ps(s, c24, c24);
+        fmadd_ps(s, d24, d24);
 #else
-        mul_ps(s, c24);
-        add_ps(s, c24);
+        mul_ps(s, d24);
+        add_ps(s, d24);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
 
@@ -218,16 +218,16 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i c23 = _mm256_set1_epi32(static_cast<int>(0x34000000));
-        const __m256i c24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
+        const __m256i d23 = _mm256_set1_epi32(static_cast<int>(0x34000000));
+        const __m256i d24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
 
         srli_epi32<9>(s);
         cvtepi32_ps(s);
 #if MCKL_USE_FMA
-        fmadd_ps(s, c23, c24);
+        fmadd_ps(s, d23, d24);
 #else
-        mul_ps(s, c24);
-        add_ps(s, c24);
+        mul_ps(s, d24);
+        add_ps(s, d24);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
 
@@ -249,10 +249,10 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        const __m256i c52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
-        const __m256i c32 =
+        const __m256i d32 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+        const __m256i m52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
         const __m256i mask = _mm256_set1_epi64x(1);
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
@@ -260,9 +260,9 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
         cvtepu32_epi64(s, t);
         and_si256(t, mask, u);
         add_epi64(t, u);
-        add_epi64(t, c52);
-        sub_pd(t, c52);
-        mul_pd(t, c32);
+        add_epi64(t, m52);
+        sub_pd(t, m52);
+        mul_pd(t, d32);
         std::memcpy(r, t.data(), sizeof(t));
 
         return r + sizeof(t) / sizeof(double);
@@ -283,16 +283,16 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        const __m256i c32 =
+        const __m256i d32 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
-        const __m256i c52 =
+        const __m256i m52 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
-        add_epi64(t, c52);
-        sub_pd(t, c52);
-        mul_pd(t, c32);
+        add_epi64(t, m52);
+        sub_pd(t, m52);
+        mul_pd(t, d32);
         std::memcpy(r, t.data(), sizeof(t));
 
         return r + sizeof(t) / sizeof(double);
@@ -313,20 +313,20 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        const __m256i c32 =
+        const __m256i d32 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
-        const __m256i c52 =
+        const __m256i m52 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
-        add_epi64(t, c52);
-        sub_pd(t, c52);
+        add_epi64(t, m52);
+        sub_pd(t, m52);
 #if MCKL_USE_FMA
-        fmadd_pd(t, c32, c32);
+        fmadd_pd(t, d32, d32);
 #else
-        mul_pd(t, c32);
-        add_pd(t, c32);
+        mul_pd(t, d32);
+        add_pd(t, d32);
 #endif
         std::memcpy(r, t.data(), sizeof(t));
 
@@ -348,22 +348,22 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
     template <typename T, std::size_t S>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
-        const __m256i c32 =
+        const __m256i d32 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
-        const __m256i c33 =
+        const __m256i d33 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DE0000000000000));
-        const __m256i c52 =
+        const __m256i m52 =
             _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
-        add_epi64(t, c52);
-        sub_pd(t, c52);
+        add_epi64(t, m52);
+        sub_pd(t, m52);
 #if MCKL_USE_FMA
-        fmadd_pd(t, c32, c33);
+        fmadd_pd(t, d32, d33);
 #else
-        mul_pd(t, c32);
-        add_pd(t, c33);
+        mul_pd(t, d32);
+        add_pd(t, d33);
 #endif
         std::memcpy(r, t.data(), sizeof(t));
 
@@ -371,170 +371,162 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
     }
 }; // class U01AVX2Impl
 
-template <typename UIntType, typename RealType,
-    int = std::numeric_limits<UIntType>::digits>
-class UniformRealAVX2Impl;
-
 template <typename UIntType>
-class UniformRealAVX2Impl<UIntType, float, 32>
+class U01AVX2Impl<UIntType, double, Closed, Closed, 64>
+    : public U01AVX2ImplBase<UIntType, double, Closed, Closed>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**UniformRealAVX2Impl** used with unsigned integer type with "
-        "incorrect width");
+    static_assert(std::numeric_limits<UIntType>::digits == 64,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
 
     public:
+    using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
+
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(
-        std::array<__m128i, S> &s, float *r, float a, float b)
+    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
 
-        return eval(t, r, a, b);
+        return eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(
-        std::array<__m256i, S> &s, float *r, float a, float b)
+    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
     {
-        const float d = (b - a) * Pow2Inv<float, 24>::value;
+        const __m256i d54 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3C90000000000000));
+        const __m256i mask = _mm256_set1_epi64x(1);
 
-        srli_epi32<8>(s);
-        cvtepi32_ps(s);
-#if MCKL_USE_FMA
-        fmadd_ps(s, _mm256_castps_si256(_mm256_set1_ps(d)),
-            _mm256_castps_si256(_mm256_set1_ps(a)));
-#else  // MCKL_USE_FMA
-        mul_ps(s, _mm256_castps_si256(_mm256_set1_ps(d)));
-        add_ps(s, _mm256_castps_si256(_mm256_set1_ps(a)));
-#endif // MCKL_USE_FMA
+        std::array<__m256i, S> t;
+        slli_epi64<1>(s);
+        srli_epi64<10>(s);
+        and_si256(s, mask, t);
+        add_epi64(s, t);
+        cvtepi64_pd(s);
+        mul_pd(s, d54);
         std::memcpy(r, s.data(), sizeof(s));
 
-        return r + sizeof(s) / sizeof(float);
+        return r + sizeof(s) / sizeof(double);
     }
-}; // class UniformRealAVX2Impl
+}; // class U01AVX2Impl
 
 template <typename UIntType>
-class UniformRealAVX2Impl<UIntType, double, 32>
+class U01AVX2Impl<UIntType, double, Closed, Open, 64>
+    : public U01AVX2ImplBase<UIntType, double, Closed, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**UniformRealAVX2Impl** used with unsigned integer type with "
-        "incorrect width");
+    static_assert(std::numeric_limits<UIntType>::digits == 64,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
 
     public:
-    template <typename T, std::size_t S>
-    MCKL_FLATTEN static double *eval(
-        std::array<T, S> &s, double *r, double a, double b)
+    using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
+
+    template <std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
     {
-        const __m256i c52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
-        const double d = (b - a) * Pow2Inv<double, 32>::value;
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
 
-        std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
-        cvtepu32_epi64(s, t);
-        add_epi64(t, c52);
-        sub_pd(t, c52);
-#if MCKL_USE_FMA
-        fmadd_pd(t, _mm256_castpd_si256(_mm256_set1_pd(d)),
-            _mm256_castpd_si256(_mm256_set1_pd(a)));
-#else  // MCKL_USE_FMA
-        mul_pd(t, _mm256_castpd_si256(_mm256_set1_pd(d)));
-        add_ps(t, _mm256_castpd_si256(_mm256_set1_pd(a)));
-#endif // MCKL_USE_FMA
-        std::memcpy(r, t.data(), sizeof(t));
-
-        return r + sizeof(t) / sizeof(double);
+        return eval(t, r);
     }
-}; // class UniformRealAVX2Impl
 
-template <typename UIntType, typename RealType>
-class UniformRealAVX2Transform
+    template <std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
+    {
+        const __m256i d53 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CA0000000000000));
+
+        srli_epi64<11>(s);
+        cvtepi64_pd(s);
+        mul_pd(s, d53);
+        std::memcpy(r, s.data(), sizeof(s));
+
+        return r + sizeof(s) / sizeof(double);
+    }
+}; // class U01AVX2Impl
+
+template <typename UIntType>
+class U01AVX2Impl<UIntType, double, Open, Closed, 64>
+    : public U01AVX2ImplBase<UIntType, double, Open, Closed>
 {
-    public:
-    using uint_type = UIntType;
+    static_assert(std::numeric_limits<UIntType>::digits == 64,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
 
-    template <typename T, std::size_t S>
-    MCKL_FLATTEN static RealType *eval(
-        std::array<T, S> &s, RealType *r, RealType a, RealType b)
+    public:
+    using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
+
+    template <std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
     {
-        return UniformRealAVX2Impl<UIntType, RealType>::eval(s, r, a, b);
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
+
+        return eval(t, r);
     }
 
-    MCKL_FLATTEN static RealType *eval(
-        std::size_t n, const UIntType *u, RealType *r, RealType a, RealType b)
+    template <std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
     {
-        const RealType d = b - a;
-        for (std::size_t i = 0; i != n; ++i, ++u, ++r) {
-            *r = U01GenericImpl<UIntType, RealType, Closed, Open>::eval(*u);
+        const __m256i d53 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CA0000000000000));
+
+        srli_epi64<11>(s);
+        cvtepi64_pd(s);
 #if MCKL_USE_FMA
-            *r = std::fma(*r, d, a);
+        fmadd_pd(s, d53, d53);
 #else
-            *r = *r * d + a;
+        mul_pd(s, d53);
+        add_pd(s, d53);
 #endif
-        }
+        std::memcpy(r, s.data(), sizeof(s));
 
-        return r;
+        return r + sizeof(s) / sizeof(double);
     }
-}; // class UniformRealAVX2Transform
+}; // class U01AVX2Impl
 
 template <typename UIntType>
-inline void u01_canonical_distribution_avx2_impl_trans(std::size_t n,
-    const UIntType *u, double *r, std::integral_constant<int, 32>)
+class U01AVX2Impl<UIntType, double, Open, Open, 64>
+    : public U01AVX2ImplBase<UIntType, double, Open, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**u01_canonical_distribution_avx2_impl_trans** used with unsigned "
-        "integer type with incorrect width");
+    static_assert(std::numeric_limits<UIntType>::digits == 64,
+        "**U01AVX2Impl** used with unsigned integer type with incorrect "
+        "width");
 
-    constexpr std::size_t S = 8;
-    constexpr std::size_t cstride = sizeof(__m256i) * S;
-    constexpr std::size_t nstride = cstride / sizeof(double);
-    constexpr std::size_t ustride = cstride / sizeof(UIntType);
-    constexpr std::size_t rstride = cstride / sizeof(double);
-    const __m256i c32 =
-        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
-    const __m256i c64 =
-        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3BF0000000000000));
-    const __m256i c52 =
-        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
-    const __m256i m = _mm256_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+    public:
+    using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
 
-    std::array<__m256i, S> s;
-    std::array<__m256i, S> t;
-    while (n >= nstride) {
-        std::memcpy(s.data(), u, cstride);
-        std::get<0>(t) = _mm256_srli_epi64(std::get<0>(s), 32);
-        std::get<1>(t) = _mm256_srli_epi64(std::get<1>(s), 32);
-        std::get<2>(t) = _mm256_srli_epi64(std::get<2>(s), 32);
-        std::get<3>(t) = _mm256_srli_epi64(std::get<3>(s), 32);
-        std::get<4>(t) = _mm256_srli_epi64(std::get<4>(s), 32);
-        std::get<5>(t) = _mm256_srli_epi64(std::get<5>(s), 32);
-        std::get<6>(t) = _mm256_srli_epi64(std::get<6>(s), 32);
-        std::get<7>(t) = _mm256_srli_epi64(std::get<7>(s), 32);
-        std::get<0>(s) = _mm256_and_si256(std::get<0>(s), m);
-        std::get<1>(s) = _mm256_and_si256(std::get<1>(s), m);
-        std::get<2>(s) = _mm256_and_si256(std::get<2>(s), m);
-        std::get<3>(s) = _mm256_and_si256(std::get<3>(s), m);
-        std::get<4>(s) = _mm256_and_si256(std::get<4>(s), m);
-        std::get<5>(s) = _mm256_and_si256(std::get<5>(s), m);
-        std::get<6>(s) = _mm256_and_si256(std::get<6>(s), m);
-        std::get<7>(s) = _mm256_and_si256(std::get<7>(s), m);
-        add_epi64(s, c52);
-        add_epi64(t, c52);
-        sub_pd(s, c52);
-        sub_pd(t, c52);
-        mul_pd(s, c64);
-        mul_pd(t, c32);
-        add_pd(s, t);
-        std::memcpy(r, s.data(), cstride);
-        n -= nstride;
-        u += ustride;
-        r += rstride;
+    template <std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
+    {
+        std::array<__m256i, S / 2> t;
+        set_m128i(s, t);
+
+        return eval(t, r);
     }
-    for (std::size_t i = 0; i != n; ++i, u += 2, ++r) {
-        *r = u[0] * Pow2Inv<double, 64>::value +
-            u[1] * Pow2Inv<double, 32>::value;
+
+    template <std::size_t S>
+    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
+    {
+        const __m256i d52 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CB0000000000000));
+        const __m256i d53 =
+            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CA0000000000000));
+
+        srli_epi64<12>(s);
+        cvtepi64_pd(s);
+#if MCKL_USE_FMA
+        fmadd_pd(s, d52, d53);
+#else
+        mul_pd(s, d53);
+        add_pd(s, d53);
+#endif
+        std::memcpy(r, s.data(), sizeof(s));
+
+        return r + sizeof(s) / sizeof(double);
     }
-}
+}; // class U01AVX2Impl
 
 } // namespace mckl::internal
 

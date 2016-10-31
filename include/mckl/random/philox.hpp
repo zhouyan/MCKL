@@ -187,13 +187,10 @@ class PhiloxGenerator
     MCKL_DEFINE_RANDOM_PHILOX_U01(oc, 32)
     MCKL_DEFINE_RANDOM_PHILOX_U01(oo, 32)
 
-    template <typename RealType>
-    void uniform_real_u32(ctr_type &ctr, std::size_t n, RealType *result,
-        RealType a, RealType b) const
-    {
-        internal::PhiloxGeneratorImpl<T, K, Rounds,
-            Constants>::uniform_real_u32(ctr, key_, n, result, a, b);
-    }
+    MCKL_DEFINE_RANDOM_PHILOX_U01(cc, 64)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(co, 64)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oc, 64)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oo, 64)
 
     friend bool operator==(
         const PhiloxGenerator<T, K, Rounds, Constants> &gen1,
@@ -329,16 +326,10 @@ MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, float)
 MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, float)
 MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, float)
 
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
-    typename Constants>
-inline void uniform_real_distribution(
-    PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r, float a, float b,
-    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
-        std::numeric_limits<T>::digits == 32>::type * = nullptr)
-{
-    rng.uniform_real_u32(n, r, a, b);
-}
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 64, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 64, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 64, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 64, 32, double)
 
 #if !MCKL_U01_USE_64BITS_DOUBLE
 
@@ -346,17 +337,6 @@ MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, double)
 MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, double)
 MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, double)
 MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, double)
-
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
-    typename Constants>
-inline void uniform_real_distribution(
-    PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
-    double *r, double a, double b,
-    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
-        std::numeric_limits<T>::digits == 32>::type * = nullptr)
-{
-    rng.uniform_real_u32(n, r, a, b);
-}
 
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 

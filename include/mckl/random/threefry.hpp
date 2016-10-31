@@ -232,13 +232,10 @@ class ThreefryGenerator
     MCKL_DEFINE_RANDOM_THREEFRY_U01(oc, 32)
     MCKL_DEFINE_RANDOM_THREEFRY_U01(oo, 32)
 
-    template <typename RealType>
-    void uniform_real_u32(ctr_type &ctr, std::size_t n, RealType *result,
-        RealType a, RealType b) const
-    {
-        internal::ThreefryGeneratorImpl<T, K, Rounds,
-            Constants>::uniform_real_u32(ctr, par_, n, result, a, b);
-    }
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(cc, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(co, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(oc, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(oo, 64)
 
     friend bool operator==(
         const ThreefryGenerator<T, K, Rounds, Constants> &gen1,
@@ -441,27 +438,15 @@ MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 16, float)
 
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
-    typename Constants>
-inline void uniform_real_distribution(
-    ThreefryEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r, float a, float b,
-    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
-        std::numeric_limits<T>::digits == 32 && K <= 16>::type * = nullptr)
-{
-    rng.uniform_real_u32(n, r, a, b);
-}
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 32, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 32, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 32, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 32, 16, double)
 
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
-    typename Constants>
-inline void uniform_real_distribution(
-    ThreefryEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r, float a, float b,
-    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
-        std::numeric_limits<T>::digits == 64 && K <= 16>::type * = nullptr)
-{
-    rng.uniform_real_u32(n, r, a, b);
-}
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 64, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 64, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 64, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 64, 16, double)
 
 #if !MCKL_U01_USE_64BITS_DOUBLE
 
@@ -474,28 +459,6 @@ MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 8, double)
-
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
-    typename Constants>
-inline void uniform_real_distribution(
-    ThreefryEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
-    double *r, double a, double b,
-    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
-        std::numeric_limits<T>::digits == 32 && K <= 8>::type * = nullptr)
-{
-    rng.uniform_real_u32(n, r, a, b);
-}
-
-template <typename ResultType, typename T, std::size_t K, std::size_t Rounds,
-    typename Constants>
-inline void uniform_real_distribution(
-    ThreefryEngine<ResultType, T, K, Rounds, Constants> &rng, std::size_t n,
-    double *r, double a, double b,
-    typename std::enable_if<std::numeric_limits<ResultType>::digits == 32 &&
-        std::numeric_limits<T>::digits == 64 && K <= 8>::type * = nullptr)
-{
-    rng.uniform_real_u32(n, r, a, b);
-}
 
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 

@@ -201,37 +201,10 @@ class CounterEngine
     MCKL_DEFINE_RANDOM_COUNTER_U01(oc, 32)
     MCKL_DEFINE_RANDOM_COUNTER_U01(oo, 32)
 
-    template <typename RealType>
-    void uniform_real_u32(std::size_t n, RealType *r, RealType a, RealType b)
-    {
-        static_assert(std::numeric_limits<ResultType>::digits == 32,
-            "**CounterEngine::uniform_real_u32** is used with ResultType not "
-            "a 32-bit unsigned integer type");
-
-        const std::size_t remain = static_cast<std::size_t>(M_ - index_);
-        if (n < remain) {
-            ::mckl::u01_co(n, result_.data() + index_, r);
-            fma(n, r, b - a, a, r);
-            index_ += static_cast<unsigned>(n);
-            return;
-        }
-
-        ::mckl::u01_co(remain, result_.data() + index_, r);
-        fma(remain, r, b - a, a, r);
-        r += remain;
-        n -= remain;
-        index_ = M_;
-
-        const std::size_t m = n / M_;
-        generator_.uniform_real_u32(ctr_, m, r, a, b);
-        r += m * M_;
-        n -= m * M_;
-
-        generator_(ctr_, result_.data());
-        ::mckl::u01_co(n, result_.data(), r);
-        fma(n, r, b - a, a, r);
-        index_ = static_cast<unsigned>(n);
-    }
+    MCKL_DEFINE_RANDOM_COUNTER_U01(cc, 64)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(co, 64)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oc, 64)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oo, 64)
 
     /// \brief Discard the result
     ///
