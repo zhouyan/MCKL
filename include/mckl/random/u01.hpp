@@ -35,14 +35,23 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/u01_generic.hpp>
 
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/u01_avx2.hpp>
+#endif
+
 namespace mckl
 {
 
 namespace internal
 {
 
+#if MCKL_USE_AVX2
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
+using U01Impl = U01AVX2Impl<UIntType, RealType, Lower, Upper>;
+#else
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 using U01Impl = U01GenericImpl<UIntType, RealType, Lower, Upper>;
+#endif
 
 } // namespace mckl::inernal
 
