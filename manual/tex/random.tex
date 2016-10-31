@@ -36,14 +36,14 @@
 the standard library header |<random>|, there are mainly two parts of this
 system. The first is a set of \rng engines that generate random integers. The
 other is a set of distribution generators. The former are documented in
-sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL RNG}, and the later in
-sections~\ref{sec:Uniform bits distribution} to~\ref{sec:Multivariate
-distribution}. \mckl also provides facilities for vectorized random number
-generating (section~\ref{sec:Vectorized random number generating}), generating
-distinctive seeds within a program (section~\ref{sec:Seeding counter-based
-RNG}), and using multiple \rng{}s in parallel programs
-(section~\ref{sec:Multiple RNG streams}). Last, in section~\ref{sec:Randomness
-tests}, a few randomness tests are discussed.
+sections~\ref{sec:Counter-based RNG} to~\ref{sec:Non-deterministic RNG}, and
+the later in sections~\ref{sec:Uniform bits distribution}
+to~\ref{sec:Multivariate distribution}. \mckl also provides facilities for
+vectorized random number generating (section~\ref{sec:Vectorized random number
+generating}), generating distinctive (randomized) seeds within a program
+(section~\ref{sec:Seeding RNG}), and using multiple \rng{}s in parallel
+programs (section~\ref{sec:Multiple RNG streams}). Last, in
+section~\ref{sec:Randomness tests}, a few randomness tests are discussed.
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
@@ -398,8 +398,8 @@ A value of zero, the default, means the number of trials is unlimited. If it is
 a positive number, and if after the specified number of trials no random
 integer is returned by \rdrand instructions, zero is returned.
 
-\section{Seeding counter-based \texorpdfstring{\rng}{RNG}}
-\label{sec:Seeding counter-based RNG}
+\section{Seeding \texorpdfstring{\rng}{RNG}}
+\label{sec:Seeding RNG}
 
 The singleton class template |Seed| can be used to generate distinctive seeds
 sequentially. Each \rng class has its own seeding class. For example,
