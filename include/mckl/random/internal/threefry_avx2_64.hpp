@@ -36,6 +36,7 @@
 #include <mckl/random/internal/threefry_generic.hpp>
 #include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/internal/u01_avx2.hpp>
+#include <mckl/random/internal/uniform_real_avx2.hpp>
 #include <mckl/random/increment.hpp>
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(                     \
@@ -46,6 +47,16 @@
     {                                                                         \
         eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
             ctr, par, n, r);                                                  \
+    }
+
+#define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_UNIFORM_REAL(bits)       \
+    template <typename RealType>                                              \
+    static void uniform_real_u##bits(Counter<T, K> &ctr,                      \
+        const std::array<T, K + 4> &par, std::size_t n, RealType *r,          \
+        RealType a, RealType b)                                               \
+    {                                                                         \
+        eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>>(             \
+            ctr, par, n, r, a, b);                                            \
     }
 
 #ifdef MCKL_GCC
@@ -87,11 +98,13 @@ class ThreefryGeneratorAVX2Impl64
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(co, 32, Closed, Open)
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oc, 32, Open, Closed)
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oo, 32, Open, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_UNIFORM_REAL(32)
 
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(cc, 64, Closed, Closed)
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(co, 64, Closed, Open)
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oc, 64, Open, Closed)
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_U01(oo, 64, Open, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_64_UNIFORM_REAL(64)
 
     private:
     class transform

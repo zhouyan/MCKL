@@ -78,6 +78,30 @@
         rng.u01_##lr##_u##rbits(n, r);                                        \
     }
 
+#define MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL(bits)                        \
+    template <typename RealType>                                              \
+    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *result, \
+        RealType a, RealType b) const                                         \
+    {                                                                         \
+        internal::ThreefryGeneratorImpl<T, K, Rounds,                         \
+            Constants>::uniform_real_u##bits(ctr, par_, n, result, a, b);     \
+    }
+
+#define MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(                \
+    rbits, tbits, kmax, ftype)                                                \
+    template <typename ResultType, typename T, std::size_t K,                 \
+        std::size_t Rounds, typename Constants>                               \
+    inline void uniform_real_distribution(                                    \
+        ThreefryEngine<ResultType, T, K, Rounds, Constants> &rng,             \
+        std::size_t n, ftype *r, ftype a, ftype b,                            \
+        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
+                rbits &&                                                      \
+            std::numeric_limits<T>::digits == tbits && K <= kmax>::type * =   \
+            nullptr)                                                          \
+    {                                                                         \
+        rng.uniform_real_u##rbits(n, r, a, b);                                \
+    }
+
 namespace mckl
 {
 
@@ -231,11 +255,13 @@ class ThreefryGenerator
     MCKL_DEFINE_RANDOM_THREEFRY_U01(co, 32)
     MCKL_DEFINE_RANDOM_THREEFRY_U01(oc, 32)
     MCKL_DEFINE_RANDOM_THREEFRY_U01(oo, 32)
+    MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL(32)
 
     MCKL_DEFINE_RANDOM_THREEFRY_U01(cc, 64)
     MCKL_DEFINE_RANDOM_THREEFRY_U01(co, 64)
     MCKL_DEFINE_RANDOM_THREEFRY_U01(oc, 64)
     MCKL_DEFINE_RANDOM_THREEFRY_U01(oo, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL(64)
 
     friend bool operator==(
         const ThreefryGenerator<T, K, Rounds, Constants> &gen1,
@@ -432,21 +458,25 @@ MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 16, float)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 16, float)
 
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 16, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 16, float)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 16, float)
 
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 32, 16, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 32, 16, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 32, 16, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 32, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 32, 16, double)
 
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 64, 16, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 64, 16, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 64, 16, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 64, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 64, 16, double)
 
 #if !MCKL_U01_USE_64BITS_DOUBLE
 
@@ -454,11 +484,13 @@ MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 8, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 8, double)
 
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 8, double)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 8, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 8, double)
 
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 
