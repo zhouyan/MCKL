@@ -433,7 +433,7 @@ using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 inline void u01_cc_distribution(
     ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+    float *r, typename std::enable_if<K <= 16>::type * = nullptr)
 {
     rng.u01_cc_u32(n, r);
 }
@@ -441,7 +441,7 @@ inline void u01_cc_distribution(
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 inline void u01_co_distribution(
     ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+    float *r, typename std::enable_if<K <= 16>::type * = nullptr)
 {
     rng.u01_co_u32(n, r);
 }
@@ -449,7 +449,7 @@ inline void u01_co_distribution(
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 inline void u01_oc_distribution(
     ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+    float *r, typename std::enable_if<K <= 16>::type * = nullptr)
 {
     rng.u01_oc_u32(n, r);
 }
@@ -457,7 +457,7 @@ inline void u01_oc_distribution(
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 inline void u01_oo_distribution(
     ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
-    float *r, typename std::enable_if<K <= 8>::type * = nullptr)
+    float *r, typename std::enable_if<K <= 16>::type * = nullptr)
 {
     rng.u01_oo_u32(n, r);
 }
@@ -466,7 +466,7 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 inline void uniform_real_distribution(
     ThreefryEngine<std::uint32_t, T, K, Rounds, Constants> &rng, std::size_t n,
     float *r, float a, float b,
-    typename std::enable_if<K <= 8>::type * = nullptr)
+    typename std::enable_if<K <= 16>::type * = nullptr)
 {
     rng.uniform_real_u32(n, r, a, b);
 }

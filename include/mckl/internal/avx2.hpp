@@ -84,6 +84,15 @@ MCKL_FLATTEN inline void set_m128i(
 }
 
 MCKL_FLATTEN inline void cvtepu32_epi64(
+    const std::array<__m128i, 4> &s, std::array<__m256i, 4> &t)
+{
+    std::get<0>(t) = _mm256_cvtepu32_epi64(std::get<0>(s));
+    std::get<1>(t) = _mm256_cvtepu32_epi64(std::get<1>(s));
+    std::get<2>(t) = _mm256_cvtepu32_epi64(std::get<2>(s));
+    std::get<3>(t) = _mm256_cvtepu32_epi64(std::get<3>(s));
+}
+
+MCKL_FLATTEN inline void cvtepu32_epi64(
     const std::array<__m128i, 8> &s, std::array<__m256i, 8> &t)
 {
     std::get<0>(t) = _mm256_cvtepu32_epi64(std::get<0>(s));
@@ -118,6 +127,44 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
 }
 
 MCKL_FLATTEN inline void cvtepu32_epi64(
+    const std::array<__m256i, 2> &s, std::array<__m256i, 4> &t)
+{
+    const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
+    const __m256i m = _mm256_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::get<0>(t) = _mm256_permutevar8x32_epi32(std::get<0>(s), p);
+    std::get<2>(t) = _mm256_permutevar8x32_epi32(std::get<1>(s), p);
+
+    std::get<1>(t) = _mm256_srli_epi64(std::get<0>(t), 32);
+    std::get<3>(t) = _mm256_srli_epi64(std::get<2>(t), 32);
+
+    std::get<0>(t) = _mm256_and_si256(std::get<0>(t), m);
+    std::get<2>(t) = _mm256_and_si256(std::get<2>(t), m);
+}
+
+MCKL_FLATTEN inline void cvtepu32_epi64(
+    const std::array<__m256i, 4> &s, std::array<__m256i, 8> &t)
+{
+    const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
+    const __m256i m = _mm256_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::get<0>(t) = _mm256_permutevar8x32_epi32(std::get<0>(s), p);
+    std::get<2>(t) = _mm256_permutevar8x32_epi32(std::get<1>(s), p);
+    std::get<4>(t) = _mm256_permutevar8x32_epi32(std::get<2>(s), p);
+    std::get<6>(t) = _mm256_permutevar8x32_epi32(std::get<3>(s), p);
+
+    std::get<1>(t) = _mm256_srli_epi64(std::get<0>(t), 32);
+    std::get<3>(t) = _mm256_srli_epi64(std::get<2>(t), 32);
+    std::get<5>(t) = _mm256_srli_epi64(std::get<4>(t), 32);
+    std::get<7>(t) = _mm256_srli_epi64(std::get<6>(t), 32);
+
+    std::get<0>(t) = _mm256_and_si256(std::get<0>(t), m);
+    std::get<2>(t) = _mm256_and_si256(std::get<2>(t), m);
+    std::get<4>(t) = _mm256_and_si256(std::get<4>(t), m);
+    std::get<6>(t) = _mm256_and_si256(std::get<6>(t), m);
+}
+
+MCKL_FLATTEN inline void cvtepu32_epi64(
     const std::array<__m256i, 8> &s, std::array<__m256i, 16> &t)
 {
     const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
@@ -149,6 +196,62 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
     std::get<0xA>(t) = _mm256_and_si256(std::get<0xA>(t), m);
     std::get<0xC>(t) = _mm256_and_si256(std::get<0xC>(t), m);
     std::get<0xE>(t) = _mm256_and_si256(std::get<0xE>(t), m);
+}
+
+MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 4> &s)
+{
+    std::get<0>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0>(s)));
+    std::get<1>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<1>(s)));
+    std::get<2>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<2>(s)));
+    std::get<3>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<3>(s)));
+}
+
+MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 8> &s)
+{
+    std::get<0>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0>(s)));
+    std::get<1>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<1>(s)));
+    std::get<2>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<2>(s)));
+    std::get<3>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<3>(s)));
+    std::get<4>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<4>(s)));
+    std::get<5>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<5>(s)));
+    std::get<6>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<6>(s)));
+    std::get<7>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<7>(s)));
+}
+
+MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 16> &s)
+{
+    std::get<0x0>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x0>(s)));
+    std::get<0x1>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x1>(s)));
+    std::get<0x2>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x2>(s)));
+    std::get<0x3>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x3>(s)));
+    std::get<0x4>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x4>(s)));
+    std::get<0x5>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x5>(s)));
+    std::get<0x6>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x6>(s)));
+    std::get<0x7>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x7>(s)));
+    std::get<0x8>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x8>(s)));
+    std::get<0x9>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x9>(s)));
+    std::get<0xA>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xA>(s)));
+    std::get<0xB>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xB>(s)));
+    std::get<0xC>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xC>(s)));
+    std::get<0xD>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xD>(s)));
+    std::get<0xE>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xE>(s)));
+    std::get<0xF>(s) =
+        _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0xF>(s)));
 }
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
