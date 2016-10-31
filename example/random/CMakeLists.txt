@@ -114,6 +114,23 @@ SET(MCKL_RNG_THREEFRY
     Threefish512  Threefish512_64
     Threefish1024 Threefish1024_64)
 
+IF(Random123_FOUND)
+    SET(MCKL_RNG_R123_HEADER "random_r123.hpp")
+    SET(MCKL_RNG_R123_NAMESPACE "mckl")
+    SET(MCKL_RNG_R123
+        R123_Philox2x32
+        R123_Philox4x32
+        R123_Philox2x64
+        R123_Philox4x64
+        R123_Threefry2x32
+        R123_Threefry4x32
+        R123_Threefry2x64
+        R123_Threefry4x64)
+    IF(AESNI_FOUND)
+        SET(MCKL_RNG_R123 ${MCKL_RNG_R123} R123_AESNI4x32 R123_ARS4x32)
+    ENDIF(AESNI_FOUND)
+ENDIF(Random123_FOUND)
+
 IF(MKL_FOUND)
     SET(MCKL_RNG_MKL_HEADER "mckl/random/mkl.hpp")
     SET(MCKL_RNG_MKL_NAMESPACE "mckl")
@@ -138,6 +155,9 @@ IF(RDRAND_FOUND)
 ENDIF(RDRAND_FOUND)
 
 SET(MCKL_RNG STD AES PHILOX THREEFRY)
+IF(Random123_FOUND)
+    SET(MCKL_RNG ${MCKL_RNG} R123)
+ENDIF(Random123_FOUND)
 IF(MKL_FOUND)
     SET(MCKL_RNG ${MCKL_RNG} MKL)
 ENDIF(MKL_FOUND)

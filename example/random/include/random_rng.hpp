@@ -48,6 +48,10 @@
 #define MCKL_EXAMPLE_RANDOM_THREEFRY_RNG 0
 #endif
 
+#ifndef MCKL_EXAMPLE_RANDOM_R123_RNG
+#define MCKL_EXAMPLE_RANDOM_R123_RNG 0
+#endif
+
 #ifndef MCKL_EXAMPLE_RANDOM_MKL_RNG
 #define MCKL_EXAMPLE_RANDOM_MKL_RNG 0
 #endif
@@ -60,8 +64,8 @@
 #include <mckl/random/uniform_bits_distribution.hpp>
 #include "random_common.hpp"
 
-#if MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_MKL_RNG ||             \
-    MCKL_EXAMPLE_RANDOM_RDRAND_RNG
+#if MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_R123_RNG ||            \
+    MCKL_EXAMPLE_RANDOM_MKL_RNG || MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
 template <typename RNGType>
 inline bool random_rng_k(const RNGType &)
@@ -69,8 +73,8 @@ inline bool random_rng_k(const RNGType &)
     return true;
 }
 
-#else // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_MKL_RNG ||
-// MCKL_EXAMPLE_RANDOM_RDRAND_RNG
+#else // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_R123_RNG ||
+      // MCKL_EXAMPLE_RANDOM_MKL_RNG || MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
 template <typename RNGType>
 inline bool random_rng_k(const RNGType &, const std::string &filename)

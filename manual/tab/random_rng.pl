@@ -67,6 +67,10 @@ Threefry8x64 Threefry16x64 Threefish256 Threefish512 Threefish1024
 Threefry2x32_64 Threefry4x32_64 Threefry2x64_64 Threefry4x64_64 Threefry8x64_64
 Threefry16x64_64 Threefish256_64 Threefish512_64 Threefish1024_64);
 
+my @r123 = qw(R123_Philox2x32 R123_Philox4x32 R123_Philox2x64 R123_Philox4x64
+R123_Threefry2x32 R123_Threefry4x32 R123_Threefry2x64 R123_Threefry4x64
+R123_AESNI4x32 R123_ARS4x32);
+
 my @mkl = qw(MKL_ARS5 MKL_PHILOX4X32X10 MKL_MCG59 MKL_MT19937 MKL_MT2203
 MKL_SFMT19937 MKL_NONDETERM MKL_ARS5_64 MKL_PHILOX4X32X10_64 MKL_MCG59_64
 MKL_MT19937_64 MKL_MT2203_64 MKL_SFMT19937_64 MKL_NONDETERM_64);
@@ -78,11 +82,12 @@ my %rng = (
     aes      => [@aes],
     philox   => [@philox],
     threefry => [@threefry],
+    r123     => [@r123],
     mkl      => [@mkl],
     rdrand   => [@rdrand],
 );
 
-my @keys = qw(std aes philox threefry mkl rdrand);
+my @keys = qw(std aes philox threefry r123 mkl rdrand);
 
 my @rng;
 for my $k (@keys) {
@@ -235,6 +240,7 @@ sub table {
                     }
                 }
                 my $name = $r;
+                $name =~ s/R123_//g;
                 $name =~ s/_/\\_/g;
                 $name = " " x 2 . sprintf("%-35s", "\\texttt{$name}");
                 if ($line_s and $line_b) {

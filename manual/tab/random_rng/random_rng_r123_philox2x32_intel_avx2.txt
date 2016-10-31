@@ -1,0 +1,5 @@
+R123_Philox2x32           40       8          10.06          10.14      ---Passed
+R123_Philox2x32           40       8          10.06          10.14      ---Passed
+R123_Philox2x32           40       8           9.71           9.79      ---Passed
+R123_Philox2x32           40       8           9.56           9.66      ---Passed
+R123_Philox2x32           40       8           9.42           9.50      ---Passed
