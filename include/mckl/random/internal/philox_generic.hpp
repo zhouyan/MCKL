@@ -105,7 +105,7 @@ class PhiloxHiLo<T, 64>
         const T lo = a * b;
         hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
         hi += ahbl_albh >> 32;
-        hi += ((lo >> 32) < (ahbl_albh & mask));
+        hi += (lo >> 32) < (ahbl_albh & mask) ? 1 : 0;
 
         return lo;
     }

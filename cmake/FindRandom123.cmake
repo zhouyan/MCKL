@@ -42,8 +42,6 @@
 #
 # Random123_INC_PATH - The path CMake shall try to find headers first
 
-UNSET(Random123_FOUND CACHE)
-UNSET(Random123_INCLUDE_DIR CACHE)
 IF(DEFINED Random123_FOUND)
     RETURN()
 ENDIF(DEFINED Random123_FOUND)
