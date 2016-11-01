@@ -106,7 +106,8 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i d25 = _mm256_set1_epi32(static_cast<int>(0x33000000));
+        const __m256i d25 =
+            _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -25>::value));
         const __m256i mask = _mm256_set1_epi32(1);
 
         std::array<__m256i, S> t;
@@ -145,7 +146,8 @@ class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i d24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
+        const __m256i d24 =
+            _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -24>::value));
 
         srli_epi32<8>(s);
         cvtepi32_ps(s);
@@ -179,7 +181,8 @@ class U01AVX2Impl<UIntType, float, Open, Closed, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i d24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
+        const __m256i d24 =
+            _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -24>::value));
 
         srli_epi32<8>(s);
         cvtepi32_ps(s);
@@ -218,8 +221,10 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
     template <std::size_t S>
     MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
     {
-        const __m256i d23 = _mm256_set1_epi32(static_cast<int>(0x34000000));
-        const __m256i d24 = _mm256_set1_epi32(static_cast<int>(0x33800000));
+        const __m256i d23 =
+            _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -23>::value));
+        const __m256i d24 =
+            _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -24>::value));
 
         srli_epi32<9>(s);
         cvtepi32_ps(s);
@@ -250,9 +255,9 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
         const __m256i m52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, 52>::value));
         const __m256i mask = _mm256_set1_epi64x(1);
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
@@ -284,9 +289,9 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
         const __m256i m52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, 52>::value));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
@@ -314,9 +319,9 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
         const __m256i m52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, 52>::value));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
@@ -349,11 +354,11 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
     MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DF0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
         const __m256i d33 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3DE0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -33>::value));
         const __m256i m52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, 52>::value));
 
         std::array<__m256i, S * sizeof(T) * 2 / sizeof(__m256i)> t;
         cvtepu32_epi64(s, t);
@@ -395,7 +400,7 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 64>
     MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d54 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3C90000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -54>::value));
         const __m256i mask = _mm256_set1_epi64x(1);
 
         std::array<__m256i, S> t;
@@ -435,7 +440,7 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 64>
     MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d53 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CA0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -53>::value));
 
         srli_epi64<11>(s);
         cvtepi64_pd(s);
@@ -470,7 +475,7 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 64>
     MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d53 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CA0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -53>::value));
 
         srli_epi64<11>(s);
         cvtepi64_pd(s);
@@ -510,9 +515,9 @@ class U01AVX2Impl<UIntType, double, Open, Open, 64>
     MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d52 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CB0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -52>::value));
         const __m256i d53 =
-            _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x3CA0000000000000));
+            _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -53>::value));
 
         srli_epi64<12>(s);
         cvtepi64_pd(s);

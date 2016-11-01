@@ -157,27 +157,23 @@ class Pow2L<P, Q, false>
     static constexpr long double value = static_cast<long double>(1ULL << P);
 }; // class Pow2L
 
-template <int P>
-class Pow2InvL
-{
-    public:
-    static constexpr long double value = 1.0L / Pow2L<P>::value;
-}; // class Pow2InvL
-
-template <typename RealType, int P>
-class Pow2
+template <typename RealType, int P, bool = P >= 0>
+class Pow2Impl
 {
     public:
     static constexpr RealType value = static_cast<RealType>(Pow2L<P>::value);
 }; // class Pow2
 
 template <typename RealType, int P>
-class Pow2Inv
+class Pow2Impl<RealType, P, false>
 {
     public:
     static constexpr RealType value =
-        static_cast<RealType>(Pow2InvL<P>::value);
-}; // class Pow2Inv
+        static_cast<RealType>(1.0L / Pow2L<-P>::value);
+}; // class Pow2
+
+template <typename RealType, int P>
+using Pow2 = Pow2Impl<RealType, P>;
 
 template <typename UIntType, unsigned N>
 class Factorial

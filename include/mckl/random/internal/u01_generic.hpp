@@ -64,7 +64,7 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed>
 
         return trans(static_cast<UIntLeastType>((u << L) >> (R + L)),
                    std::integral_constant<bool, (V < W)>()) *
-            Pow2Inv<RealType, P + 1>::value;
+            Pow2<RealType, -(P + 1)>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
@@ -102,7 +102,7 @@ class U01GenericImpl<UIntType, RealType, Closed, Open>
         using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
 
         return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
-            Pow2Inv<RealType, P>::value;
+            Pow2<RealType, -P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
@@ -126,8 +126,8 @@ class U01GenericImpl<UIntType, RealType, Open, Closed>
         using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
 
         return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
-            Pow2Inv<RealType, P>::value +
-            Pow2Inv<RealType, P>::value;
+            Pow2<RealType, -P>::value +
+            Pow2<RealType, -P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
@@ -151,8 +151,8 @@ class U01GenericImpl<UIntType, RealType, Open, Open>
         using UIntLeastType = U01UIntLeastType<W - R, UIntType>;
 
         return static_cast<RealType>(static_cast<UIntLeastType>(u >> R)) *
-            Pow2Inv<RealType, P - 1>::value +
-            Pow2Inv<RealType, P>::value;
+            Pow2<RealType, -(P - 1)>::value +
+            Pow2<RealType, -P>::value;
     }
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
