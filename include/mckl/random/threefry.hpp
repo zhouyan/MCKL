@@ -64,7 +64,7 @@
     }
 
 #define MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(                         \
-    lr, rbits, tbits, kmax, ftype)                                            \
+    lr, rbits, tbits, kmax, rmax, ftype)                                      \
     template <typename ResultType, typename T, std::size_t K,                 \
         std::size_t Rounds, typename Constants>                               \
     inline void u01_##lr##_distribution(                                      \
@@ -72,8 +72,8 @@
         std::size_t n, ftype *r,                                              \
         typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
                 rbits &&                                                      \
-            std::numeric_limits<T>::digits == tbits && K <= kmax>::type * =   \
-            nullptr)                                                          \
+            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
+            Rounds <= rmax>::type * = nullptr)                                \
     {                                                                         \
         rng.u01_##lr##_u##rbits(n, r);                                        \
     }
@@ -88,7 +88,7 @@
     }
 
 #define MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(                \
-    rbits, tbits, kmax, ftype)                                                \
+    rbits, tbits, kmax, rmax, ftype)                                          \
     template <typename ResultType, typename T, std::size_t K,                 \
         std::size_t Rounds, typename Constants>                               \
     inline void uniform_real_distribution(                                    \
@@ -96,8 +96,8 @@
         std::size_t n, ftype *r, ftype a, ftype b,                            \
         typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
                 rbits &&                                                      \
-            std::numeric_limits<T>::digits == tbits && K <= kmax>::type * =   \
-            nullptr)                                                          \
+            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
+            Rounds <= rmax>::type * = nullptr)                                \
     {                                                                         \
         rng.uniform_real_u##rbits(n, r, a, b);                                \
     }
@@ -454,43 +454,43 @@ using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
 
 #if MCKL_USE_AVX2
 
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 16, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 16, 32, float)
 
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 16, float)
-MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 16, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 16, 32, float)
 
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 32, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 32, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 32, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 32, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 32, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 32, 16, 32, double)
 
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 64, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 64, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 64, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 64, 16, double)
-MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 64, 16, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 64, 16, 32, double)
 
 #if !MCKL_U01_USE_64BITS_DOUBLE
 
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 8, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 8, 32, double)
 
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 8, double)
-MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 8, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 8, 32, double)
 
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 
