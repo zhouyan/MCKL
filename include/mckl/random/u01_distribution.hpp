@@ -131,7 +131,7 @@ inline RealType u01_canonical_distribution_impl_trans(
     constexpr int Q = 1 > P ? 1 : P;
 
     return static_cast<RealType>(u[N]) *
-        Pow2<RealType, -((Q - N) * W)>::value +
+        Pow2<RealType, -static_cast<int>((Q - N) * W)>::value +
         u01_canonical_distribution_impl_trans<N + 1, RealType>(
             u, std::integral_constant<bool, N + 1 < Q>());
 }
@@ -226,7 +226,7 @@ class U01CanonicalDistribution
         constexpr int Q = 1 > P ? 1 : P;
 
         return static_cast<RealType>(ubits(rng)) *
-            internal::Pow2<RealType, -((Q - N) * W)>::value +
+            internal::Pow2<RealType, -static_cast<int>((Q - N) * W)>::value +
             generate<N + 1>(rng, std::integral_constant<bool, N + 1 < Q>());
     }
 }; // class U01CanonicalDistribution

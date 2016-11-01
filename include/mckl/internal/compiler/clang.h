@@ -32,6 +32,10 @@
 #ifndef MCKL_INTERNAL_COMPILER_CLANG_H
 #define MCKL_INTERNAL_COMPILER_CLANG_H
 
+#if MCKL_HAS_X86
+#include <x86intrin.h>
+#endif
+
 #define MCKL_CLANG_VERSION                                                    \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 

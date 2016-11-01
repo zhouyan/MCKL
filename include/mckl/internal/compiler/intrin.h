@@ -148,34 +148,6 @@
 #define MCKL_USE_RDTSCP MCKL_HAS_RDTSCP
 #endif
 
-#ifdef MCKL_MSVC
-#include <immintrin.h>
-#include <intrin.h>
-#else // MCKL_MSVC
-#if MCKL_HAS_SSE2
-#include <emmintrin.h>
-#endif
-#if MCKL_HAS_SSE3
-#include <pmmintrin.h>
-#endif
-#if MCKL_HAS_SSSE3
-#include <tmmintrin.h>
-#endif
-#if MCKL_HAS_SSE4_1
-#include <smmintrin.h>
-#endif
-#if MCKL_HAS_SSE4_2
-#include <nmmintrin.h>
-#endif
-#if MCKL_HAS_AVX || MCKL_HAS_AVX2 || MCKL_HAS_RDRAND || MCKL_HAS_BMI ||       \
-    MCKL_HAS_BMI2 || MCKL_HAS_FMA
-#include <immintrin.h>
-#endif
-#if MCKL_HAS_AESNI
-#include <wmmintrin.h>
-#endif
-#endif // MCKL_MSVC
-
 #ifndef MCKL_INT64
 #define MCKL_INT64 long long
 #endif

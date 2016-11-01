@@ -32,6 +32,10 @@
 #ifndef MCKL_INTERNAL_COMPILER_GCC_H
 #define MCKL_INTERNAL_COMPILER_GCC_H
 
+#if MCKL_HAS_X86
+#include <x86intrin.h>
+#endif
+
 #define MCKL_GCC_VERSION                                                      \
     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 
