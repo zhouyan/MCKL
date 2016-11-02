@@ -1,5 +1,5 @@
-R123_ARS4x32              80       8           1.08           1.05      ---Passed
-R123_ARS4x32              80       8           1.08           1.05      ---Passed
-R123_ARS4x32              80       8           1.08           1.05      ---Passed
-R123_ARS4x32              80       8           1.08           1.05      ---Passed
-R123_ARS4x32              80       8           1.12           1.09      ---Passed
+R123_ARS4x32              80       8           0.83           0.81      ---Passed
+R123_ARS4x32              80       8           0.83           0.81      ---Passed
+R123_ARS4x32              80       8           0.82           0.81      ---Passed
+R123_ARS4x32              80       8           0.82           0.81      ---Passed
+R123_ARS4x32              80       8           0.82           0.81      ---Passed

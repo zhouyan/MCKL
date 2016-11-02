@@ -1,4 +1,4 @@
-Lognormal<float>(0,1)               118.78      125.77       25.32       22.92  VML       --Passed
-Lognormal<double>(0,1)              181.88      152.74       53.91       39.79  VML       --Passed
-Lognormal<float>(0,1)               118.93      120.42       81.08       23.00  C++       --Passed
-Lognormal<double>(0,1)              181.65      150.35      119.34       39.81  C++       --Passed
+Lognormal<float>(0,1)               134.85      133.77       25.33       23.09       VML    (0)--Passed
+Lognormal<double>(0,1)              217.63      170.94       53.32       39.68       VML    (0)--Passed
+Lognormal<float>(0,1)               134.90      140.34       82.32       23.03       C++    (0)--Passed
+Lognormal<double>(0,1)              217.43      169.81      121.99       39.99       C++    (0)--Passed

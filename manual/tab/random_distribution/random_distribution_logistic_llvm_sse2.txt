@@ -1,4 +1,4 @@
-Logistic<float>(0,1)                 82.86       68.58       15.99       18.78  VML       --Passed
-Logistic<double>(0,1)               110.47       88.35       34.16       37.64  VML       --Passed
-Logistic<float>(0,1)                 82.78       68.58       36.01       38.78  C++       --Passed
-Logistic<double>(0,1)               110.50       88.22       56.79       60.11  C++       --Passed
+Logistic<float>(0,1)                 92.92       90.78       16.09       18.72       VML    (0)--Passed
+Logistic<double>(0,1)               111.89      111.08       34.07       37.59       VML    (0)--Passed
+Logistic<float>(0,1)                 90.88       91.67       36.25       38.71       C++    (0)--Passed
+Logistic<double>(0,1)               111.99      111.72       57.08       60.48       C++    (0)--Passed

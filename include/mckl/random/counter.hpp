@@ -362,7 +362,7 @@ template <typename ResultType, typename Generator>
 class SeedType<CounterEngine<ResultType, Generator>>
 {
     public:
-    using type = typename Generator::key_type;
+    using type = typename CounterEngine<ResultType, Generator>::key_type;
 }; // class SeedType
 
 template <typename ResultType, typename Generator>

@@ -169,7 +169,7 @@ sub run {
                 $line .= $pass ? "Passed" : "Failed";
                 say $line;
             }
-            if ($write) {
+            if ($write and $count) {
                 open my $txtfile, ">",
                 "\Lrandom_rng/random_rng_${r}_${c}_${simd}.txt";
                 print $txtfile $_ for @result;

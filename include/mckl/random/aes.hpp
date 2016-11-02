@@ -293,20 +293,26 @@ class ARSKeySeqImpl
 /// \brief AES128Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES128_ROUNDS>
-using AES128KeySeq =
-    internal::AESKeySeqImpl<Rounds, internal::AES128KeySeqGenerator>;
+class AES128KeySeq
+    : public internal::AESKeySeqImpl<Rounds, internal::AES128KeySeqGenerator>
+{
+}; // class AES128KeySeq
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES192_ROUNDS>
-using AES192KeySeq =
-    internal::AESKeySeqImpl<Rounds, internal::AES192KeySeqGenerator>;
+class AES192KeySeq
+    : public internal::AESKeySeqImpl<Rounds, internal::AES192KeySeqGenerator>
+{
+}; // class AES192KeySeq
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES256_ROUNDS>
-using AES256KeySeq =
-    internal::AESKeySeqImpl<Rounds, internal::AES256KeySeqGenerator>;
+class AES256KeySeq
+    : public internal::AESKeySeqImpl<Rounds, internal::AES256KeySeqGenerator>
+{
+}; // class AES256KeySeq
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AES
@@ -315,7 +321,9 @@ using AES256KeySeq =
 /// \tparam Constants A trait class that defines algorithm constants
 template <std::size_t Rounds = MCKL_ARS_ROUNDS,
     typename Constants = ARSConstants>
-using ARSKeySeq = internal::ARSKeySeqImpl<Rounds, Constants>;
+class ARSKeySeq : public internal::ARSKeySeqImpl<Rounds, Constants>
+{
+}; // class ARSKeySeq
 
 /// \brief RNG generator using AES round functions
 /// \ingroup AES

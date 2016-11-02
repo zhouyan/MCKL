@@ -1,5 +1,5 @@
-MKL_MT19937             1040       8           1.98           0.67      ---Passed
-MKL_MT19937             1040       8           1.98           0.67      ---Passed
-MKL_MT19937             1040       8           2.01           0.67      ---Passed
-MKL_MT19937             1040       8           1.98           0.67      ---Passed
-MKL_MT19937             1040       8           1.98           0.67      ---Passed
+MKL_MT19937             1040       8           2.77           0.70      ---Passed
+MKL_MT19937             1040       8           2.76           0.70      ---Passed
+MKL_MT19937             1040       8           2.77           0.70      ---Passed
+MKL_MT19937             1040       8           2.76           0.70      ---Passed
+MKL_MT19937             1040       8           2.76           0.70      ---Passed

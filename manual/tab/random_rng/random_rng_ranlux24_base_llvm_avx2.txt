@@ -1,5 +1,5 @@
-ranlux24_base            112       8           6.32           6.36      ---Passed
-ranlux24_base            112       8           6.33           6.33      ---Passed
-ranlux24_base            112       8           6.33           6.40      ---Passed
-ranlux24_base            112       8           6.29           6.36      ---Passed
-ranlux24_base            112       8           6.30           6.35      ---Passed
+ranlux24_base            112       8           8.53           8.74      ---Passed
+ranlux24_base            112       8           8.60           8.76      ---Passed
+ranlux24_base            112       8           9.15           9.36      ---Passed
+ranlux24_base            112       8           8.70           8.95      ---Passed
+ranlux24_base            112       8           8.65           8.79      ---Passed

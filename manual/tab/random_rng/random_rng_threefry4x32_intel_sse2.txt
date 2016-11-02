@@ -1,5 +1,5 @@
-Threefry4x32              72       8           7.42           1.76      ---Passed
-Threefry4x32              72       8           7.42           1.76      ---Passed
-Threefry4x32              72       8           7.42           1.76      ---Passed
-Threefry4x32              72       8           7.42           1.76      ---Passed
-Threefry4x32              72       8           7.42           1.77      ---Passed
+Threefry4x32              72       8           8.37           1.79      ---Passed
+Threefry4x32              72       8           8.36           1.79      ---Passed
+Threefry4x32              72       8           8.38           1.79      ---Passed
+Threefry4x32              72       8           8.37           1.79      ---Passed
+Threefry4x32              72       8           8.36           1.79      ---Passed

@@ -1,4 +1,4 @@
-Rayleigh<float>(1)                   51.59       51.63        4.37        3.54       VML    (0)--Passed
-Rayleigh<double>(1)                  54.44       54.48       11.19       10.14       VML    (0)--Passed
-Rayleigh<float>(1)                   51.50       51.49        4.93        3.60       C++    (0)--Passed
-Rayleigh<double>(1)                  54.54       54.43       10.96       10.13       C++    (0)--Passed
+Rayleigh<float>(1)                   51.44       51.51        4.35        3.52       VML    (0)--Passed
+Rayleigh<double>(1)                  54.40       54.55       11.15        9.77       VML    (0)--Passed
+Rayleigh<float>(1)                   51.54       51.63        4.89        3.64       C++    (0)--Passed
+Rayleigh<double>(1)                  54.58       54.57       11.06        9.74       C++    (0)--Passed
