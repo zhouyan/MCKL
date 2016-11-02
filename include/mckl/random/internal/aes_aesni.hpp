@@ -535,7 +535,8 @@ class AESGeneratorAESNIImpl
     }
 
     template <std::size_t N>
-    static void rbox(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
+    MCKL_FLATTEN static void rbox(
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
         rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
@@ -554,7 +555,7 @@ class AESGeneratorAESNIImpl
     }
 
     template <std::size_t N, std::size_t S>
-    static void rbox(
+    MCKL_FLATTEN static void rbox(
         std::array<__m128i, S> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
         rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
