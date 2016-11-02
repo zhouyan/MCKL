@@ -210,9 +210,10 @@ class AESKeySeqImpl
 
         std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
         istream(is, ks);
-        if (is)
+        if (is) {
             std::memcpy(seq.rk_.data(), ks.data(),
                 sizeof(std::uint64_t) * 2 * (rounds() + 1));
+        }
 
         return is;
     }
