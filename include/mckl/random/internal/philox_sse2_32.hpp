@@ -107,9 +107,9 @@ class PhiloxGeneratorSSE2Impl32
         return std::numeric_limits<T>::digits == 32 && K != 0 && 4 % K == 0;
     }
 
-    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
+    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &key)
     {
-        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(state, key);
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(s, key);
     }
 
     template <typename ResultType>
@@ -123,7 +123,7 @@ class PhiloxGeneratorSSE2Impl32
 
         std::array<__m128i, S> s;
         std::array<__m128i, Rounds> rk;
-        set_key(rk, key);
+        MCKL_FLATTEN_CALL set_key(rk, key);
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si128(ctr, s);
             MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::first(s);
@@ -135,15 +135,15 @@ class PhiloxGeneratorSSE2Impl32
         }
 
         alignas(32) union {
-            std::array<std::array<T, K>, nstride> state;
-            std::array<Counter<T, K>, nstride> ctr;
+            std::array<std::array<T, K>, nstride> s;
+            std::array<Counter<T, K>, nstride> c;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_FLATTEN_CALL increment(ctr);
-            buf.ctr[i] = ctr;
-            eval(buf.state[i], key);
+            buf.c[i] = ctr;
+            eval(buf.s[i], key);
         }
-        std::memcpy(r, buf.state.data(), sizeof(T) * K * n);
+        std::memcpy(r, buf.s.data(), sizeof(T) * K * n);
     }
 
     private:
@@ -195,7 +195,7 @@ class PhiloxGeneratorSSE2Impl32
         permute<N>(s);
     }
 
-    static void set_key(
+    MCKL_FLATTEN static void set_key(
         std::array<__m128i, Rounds> &rk, const std::array<T, K / 2> &key)
     {
         const int k0 = static_cast<int>(std::get<0 % (K / 2)>(key));

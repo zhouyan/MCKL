@@ -45,12 +45,11 @@
 
 #define MCKL_DEFINE_RANDOM_AES_U01(lr, bits)                                  \
     template <typename RealType>                                              \
-    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *result)   \
-        const                                                                 \
+    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *r) const  \
     {                                                                         \
         std::array<rk_type, rounds_ + 1> rk(key_seq_.get());                  \
         internal::AESGeneratorImpl<KeySeqType>::u01_##lr##_u##bits(           \
-            ctr, rk, n, result);                                              \
+            ctr, rk, n, r);                                                   \
     }
 
 #define MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(lr, rbits, ftype)             \
@@ -65,12 +64,12 @@
 
 #define MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL(bits)                             \
     template <typename RealType>                                              \
-    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *result, \
+    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *r,      \
         RealType a, RealType b) const                                         \
     {                                                                         \
         std::array<rk_type, rounds_ + 1> rk(key_seq_.get());                  \
         internal::AESGeneratorImpl<KeySeqType>::uniform_real_u##bits(         \
-            ctr, rk, n, result, a, b);                                        \
+            ctr, rk, n, r, a, b);                                             \
     }
 
 #define MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(rbits, ftype)        \
@@ -339,32 +338,32 @@ class AESGenerator
     void operator()(const void *plain, void *cipher) const
     {
         alignas(32) union {
-            std::array<std::uint32_t, 4> state;
-            std::array<char, size()> result;
+            std::array<std::uint32_t, 4> s;
+            std::array<char, size()> r;
         } buf;
 
         std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
 
-        std::memcpy(buf.state.data(), plain, size());
-        internal::union_le<char>(buf.state);
-        internal::AESGeneratorImpl<KeySeqType>::eval(buf.state, rk);
-        internal::union_le<std::uint32_t>(buf.result);
-        std::memcpy(cipher, buf.state.data(), size());
+        std::memcpy(buf.s.data(), plain, size());
+        internal::union_le<char>(buf.s);
+        internal::AESGeneratorImpl<KeySeqType>::eval(buf.s, rk);
+        internal::union_le<std::uint32_t>(buf.r);
+        std::memcpy(cipher, buf.s.data(), size());
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, ResultType *result) const
+    void operator()(ctr_type &ctr, ResultType *r) const
     {
         std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        generate(ctr, result, rk);
+        generate(ctr, r, rk);
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, std::size_t n, ResultType *result) const
+    void operator()(ctr_type &ctr, std::size_t n, ResultType *r) const
     {
-        generate(ctr, n, result,
-            std::integral_constant<bool,
-                internal::AESGeneratorImpl<KeySeqType>::batch()>());
+        generate(
+            ctr, n, r, std::integral_constant<bool,
+                           internal::AESGeneratorImpl<KeySeqType>::batch()>());
     }
 
     MCKL_DEFINE_RANDOM_AES_U01(cc, 32)
@@ -428,44 +427,44 @@ class AESGenerator
     KeySeqType key_seq_;
 
     template <typename ResultType>
-    void generate(ctr_type &ctr, ResultType *result,
+    void generate(ctr_type &ctr, ResultType *r,
         const std::array<rk_type, rounds_ + 1> &rk) const
     {
         alignas(32) union {
-            std::array<std::uint32_t, 4> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
+            std::array<std::uint32_t, 4> s;
+            ctr_type c;
+            std::array<ResultType, size() / sizeof(ResultType)> r;
         } buf;
 
         MCKL_FLATTEN_CALL increment(ctr);
-        buf.ctr = ctr;
+        buf.c = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-        internal::union_le<typename ctr_type::value_type>(buf.state);
+        internal::union_le<typename ctr_type::value_type>(buf.s);
 #endif
-        internal::AESGeneratorImpl<KeySeqType>::eval(buf.state, rk);
+        internal::AESGeneratorImpl<KeySeqType>::eval(buf.s, rk);
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-        internal::union_le<std::uint32_t>(buf.result);
+        internal::union_le<std::uint32_t>(buf.r);
 #endif
-        std::memcpy(result, buf.result.data(), size());
-    }
-
-    template <typename ResultType>
-    void generate(ctr_type &ctr, std::size_t n, ResultType *result,
-        std::false_type) const
-    {
-        constexpr std::size_t stride = size() / sizeof(ResultType);
-
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        for (std::size_t i = 0; i != n; ++i, result += stride)
-            generate(ctr, result, rk);
+        std::memcpy(r, buf.r.data(), size());
     }
 
     template <typename ResultType>
     void generate(
-        ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
+        ctr_type &ctr, std::size_t n, ResultType *r, std::false_type) const
+    {
+        constexpr std::size_t stride = size() / sizeof(ResultType);
+
+        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
+        for (std::size_t i = 0; i != n; ++i, r += stride)
+            generate(ctr, r, rk);
+    }
+
+    template <typename ResultType>
+    void generate(
+        ctr_type &ctr, std::size_t n, ResultType *r, std::true_type) const
     {
         std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        internal::AESGeneratorImpl<KeySeqType>::eval(ctr, rk, n, result);
+        internal::AESGeneratorImpl<KeySeqType>::eval(ctr, rk, n, r);
     }
 }; // class AESGenerator
 

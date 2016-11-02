@@ -59,10 +59,9 @@ class ThreefryGeneratorSSE2Impl64
         return std::numeric_limits<T>::digits == 64 && K != 0 && 16 % K == 0;
     }
 
-    static void eval(std::array<T, K> &state, const std::array<T, K + 4> &par)
+    static void eval(std::array<T, K> &s, const std::array<T, K + 4> &par)
     {
-        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
-            state, par);
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(s, par);
     }
 
     template <typename ResultType>
@@ -86,15 +85,15 @@ class ThreefryGeneratorSSE2Impl64
         }
 
         alignas(32) union {
-            std::array<std::array<T, K>, nstride> state;
-            std::array<Counter<T, K>, nstride> ctr;
+            std::array<std::array<T, K>, nstride> s;
+            std::array<Counter<T, K>, nstride> c;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_FLATTEN_CALL increment(ctr);
-            buf.ctr[i] = ctr;
-            eval(buf.state[i], par);
+            buf.c[i] = ctr;
+            eval(buf.s[i], par);
         }
-        std::memcpy(r, buf.state.data(), sizeof(T) * K * n);
+        std::memcpy(r, buf.s.data(), sizeof(T) * K * n);
     }
 
     private:
@@ -231,7 +230,7 @@ class ThreefryGeneratorSSE2Impl64
         std::get<5>(s) = _mm_xor_si128(std::get<4>(s), std::get<5>(s));
         std::get<7>(s) = _mm_xor_si128(std::get<6>(s), std::get<7>(s));
 
-        permute<N>(s);
+        permute(s);
     }
 
     template <std::size_t N>
@@ -299,7 +298,7 @@ class ThreefryGeneratorSSE2Impl64
         std::get<0xD>(s) = _mm_xor_si128(std::get<0xC>(s), std::get<0xD>(s));
         std::get<0xF>(s) = _mm_xor_si128(std::get<0xE>(s), std::get<0xF>(s));
 
-        permute<N>(s);
+        permute(s);
     }
 
     template <std::size_t N>
@@ -384,22 +383,22 @@ class ThreefryGeneratorSSE2Impl64
             ThreefryKBox<T, 16, N, Constants>::template key<0xF>(par)));
     }
 
-    template <std::size_t N, std::size_t S>
+    template <std::size_t S>
     static void permute(std::array<__m128i, S> &s)
     {
-        permute<N, 0>(s, std::integral_constant<bool, 0 < S / K>());
+        permute<0>(s, std::integral_constant<bool, 0 < S / K>());
     }
 
-    template <std::size_t, std::size_t, std::size_t S>
+    template <std::size_t, std::size_t S>
     static void permute(std::array<__m128i, S> &, std::false_type)
     {
     }
 
-    template <std::size_t N, std::size_t I, std::size_t S>
+    template <std::size_t I, std::size_t S>
     static void permute(std::array<__m128i, S> &s, std::true_type)
     {
-        ThreefryPBox<__m128i, K, N, Constants>::eval(s.data() + I * K);
-        permute<N, I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
+        ThreefryPBox<__m128i, K, Constants>::eval(s.data() + I * K);
+        permute<I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
 }; // class ThreefryGeneratorSSE2Impl64
 

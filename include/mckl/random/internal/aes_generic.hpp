@@ -312,28 +312,13 @@ class AESGeneratorGenericImpl
     public:
     static constexpr bool batch() { return false; }
 
-    static void eval(std::array<std::uint32_t, 4> &state,
+    static void eval(std::array<std::uint32_t, 4> &s,
         const std::array<std::array<std::uint32_t, 4>,
             KeySeqType::rounds() + 1> &rk)
     {
-        encfirst(state, rk);
-        enc<0x1>(state, rk);
-        enc<0x2>(state, rk);
-        enc<0x3>(state, rk);
-        enc<0x4>(state, rk);
-        enc<0x5>(state, rk);
-        enc<0x6>(state, rk);
-        enc<0x7>(state, rk);
-        enc<0x8>(state, rk);
-        enc<0x9>(state, rk);
-        enc<0xA>(state, rk);
-        enc<0xB>(state, rk);
-        enc<0xC>(state, rk);
-        enc<0xD>(state, rk);
-        enc<0xE>(state, rk);
-        enc<0xF>(state, rk);
-        round<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast(state, rk);
+        encfirst(s, rk);
+        round<1>(s, rk, std::integral_constant<bool, 1 < rounds_>());
+        enclast(s, rk);
     }
 
     private:

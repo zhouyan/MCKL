@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_constants.hpp>
+#include <mckl/random/increment.hpp>
 
 namespace mckl
 {
@@ -48,28 +49,27 @@ template <typename T>
 class PhiloxHiLo<T, 32>
 {
     public:
-    static T eval(T a, T b, T &hi)
+    static T eval(T a, T b, T &h)
     {
         union {
-            std::uint64_t prod;
-            std::array<T, 2> result;
+            std::uint64_t p;
+            std::array<T, 2> r;
         } buf;
 
-        buf.prod =
-            static_cast<std::uint64_t>(a) * static_cast<std::uint64_t>(b);
+        buf.p = static_cast<std::uint64_t>(a) * static_cast<std::uint64_t>(b);
 
 #if MCKL_HAS_LITTLE_ENDIAN
-        hi = std::get<1>(buf.result);
+        h = std::get<1>(buf.r);
 
-        return std::get<0>(buf.result);
+        return std::get<0>(buf.r);
 #elif MCKL_HAS_BIG_ENDIAN
-        hi = std::get<0>(buf.result);
+        h = std::get<0>(buf.r);
 
-        return std::get<1>(buf.result);
+        return std::get<1>(buf.r);
 #else
-        a = static_cast<T>(buf.prod >> 32);
+        h = static_cast<T>(buf.p >> 32);
 
-        return static_cast<T>(buf.prod);
+        return static_cast<T>(buf.p);
 #endif
     }
 }; // class PhiloxHiLo
@@ -78,92 +78,91 @@ template <typename T>
 class PhiloxHiLo<T, 64>
 {
     public:
-    static T eval(T a, T b, T &hi)
+    static T eval(T a, T b, T &h)
     {
 #if MCKL_USE_BMI2 && MCKL_HAS_X86_64
-        return eval_bmi2(a, b, hi);
+        return eval_bmi2(a, b, h);
 #elif MCKL_HAS_INT128
-        return eval_int128(a, b, hi);
+        return eval_int128(a, b, h);
 #elif defined(MCKL_MSVC)
-        return eval_msvc(a, b, hi);
+        return eval_msvc(a, b, h);
 #else
-        return eval_generic(a, b, hi);
+        return eval_generic(a, b, h);
 #endif
     }
 
     private:
-    static T eval_generic(T a, T b, T &hi)
+    static T eval_generic(T a, T b, T &h)
     {
         const T mask = (const_one<T>() << 32) - 1;
-        const T ahi = a >> 32;
-        const T alo = a & mask;
-        const T bhi = b >> 32;
-        const T blo = b & mask;
-        const T ahbl = ahi * blo;
-        const T albh = alo * bhi;
+        const T ah = a >> 32;
+        const T al = a & mask;
+        const T bh = b >> 32;
+        const T bl = b & mask;
+        const T ahbl = ah * bl;
+        const T albh = al * bh;
         const T ahbl_albh = ((ahbl & mask) + (albh & mask));
-        const T lo = a * b;
-        hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
-        hi += ahbl_albh >> 32;
-        hi += (lo >> 32) < (ahbl_albh & mask) ? 1 : 0;
+        const T l = a * b;
+        h = ah * bh + (ahbl >> 32) + (albh >> 32);
+        h += ahbl_albh >> 32;
+        h += (l >> 32) < (ahbl_albh & mask) ? 1 : 0;
 
-        return lo;
+        return l;
     }
 
 #if MCKL_USE_BMI2 && MCKL_HAS_X86_64
-    static T eval_bmi2(T a, T b, T &hi)
+    static T eval_bmi2(T a, T b, T &h)
     {
-        unsigned MCKL_INT64 h = 0;
+        unsigned MCKL_INT64 t = 0;
         unsigned MCKL_INT64 l =
             static_cast<T>(_mulx_u64(static_cast<unsigned MCKL_INT64>(a),
-                static_cast<unsigned MCKL_INT64>(b), &h));
-        hi = static_cast<T>(h);
+                static_cast<unsigned MCKL_INT64>(b), &t));
+        h = static_cast<T>(t);
 
         return l;
     }
 #endif
 
 #if MCKL_HAS_INT128
-    static T eval_int128(T a, T b, T &hi)
+    static T eval_int128(T a, T b, T &h)
     {
 #ifdef MCKL_GCC
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
         union {
-            unsigned MCKL_INT128 prod;
-            std::array<T, 2> result;
+            unsigned MCKL_INT128 p;
+            std::array<T, 2> r;
         } buf;
 
-        buf.prod = static_cast<unsigned MCKL_INT128>(a) *
+        buf.p = static_cast<unsigned MCKL_INT128>(a) *
             static_cast<unsigned MCKL_INT128>(b);
 #ifdef MCKL_GCC
 #pragma GCC diagnostic pop
 #endif
 #if MCKL_HAS_LITTLE_ENDIAN
-        hi = std::get<1>(buf.result);
+        h = std::get<1>(buf.r);
 
-        return std::get<0>(buf.result);
+        return std::get<0>(buf.r);
 #elif MCKL_HAS_BIG_ENDIAN
-        hi = std::get<0>(buf.result);
+        h = std::get<0>(buf.r);
 
-        return std::get<1>(buf.result);
+        return std::get<1>(buf.r);
 #else
-        hi = static_cast<T>(buf.prod >> 64);
+        h = static_cast<T>(buf.p >> 64);
 
-        return static_cast<T>(buf.prod);
+        return static_cast<T>(buf.p);
 #endif
     }
 #endif
 
 #ifdef MCKL_MSVC
-    static T eval_msvc(T a, T b, T &hi)
+    static T eval_msvc(T a, T b, T &h)
     {
-        unsigned __int64 Multiplier = static_cast<unsigned __int64>(a);
-        unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
-        unsigned __int64 h = 0;
-        unsigned __int64 l = _umul128(Multiplier, Multiplicand, &h);
-        hi = static_cast<T>(h);
+        unsigned __int64 t = 0;
+        unsigned __int64 l = _umul128(static_cast<unsigned __int64>(a),
+            static_cast<unsigned __int64>(b), &t);
+        h = static_cast<T>(h);
 
         return static_cast<T>(l);
     }
@@ -177,176 +176,103 @@ class PhiloxHiLo<unsigned MCKL_INT64, 64>
 {
     public:
     static unsigned MCKL_INT64 eval(
-        unsigned MCKL_INT64 a, unsigned MCKL_INT64 b, unsigned MCKL_INT64 &hi)
+        unsigned MCKL_INT64 a, unsigned MCKL_INT64 b, unsigned MCKL_INT64 &h)
     {
-        return _mulx_u64(a, b, &hi);
+        return _mulx_u64(a, b, &h);
     }
 }; // class PhiloxHiLo
 
 #endif // MCKL_USE_BMI2 && MCKL_HAS_X86_64
 
 template <typename T, std::size_t K, std::size_t N, typename Constants>
-class PhiloxKBox
+class PhiloxRBox
 {
     public:
-    static void eval(std::array<T, K / 2> &par)
+    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &key)
     {
-        eval<0>(par, std::integral_constant<bool, 0 < K / 2>());
+        std::array<T, K> t;
+        pbox<0>(s, t, std::integral_constant<bool, 0 < K>());
+        sbox<0>(s, t, key, std::integral_constant<bool, 0 < K / 2>());
     }
 
     private:
     template <std::size_t>
-    static void eval(std::array<T, K / 2> &, std::false_type)
+    static void sbox(std::array<T, K> &, const std::array<T, K> &,
+        const std::array<T, K / 2> &, std::false_type)
     {
     }
 
     template <std::size_t I>
-    static void eval(std::array<T, K / 2> &par, std::true_type)
+    static void sbox(std::array<T, K> &s, const std::array<T, K> &t,
+        const std::array<T, K / 2> &key, std::true_type)
     {
-        constexpr T w = Constants::weyl::value[I];
+        constexpr std::size_t I0 = I * 2;
+        constexpr std::size_t I1 = I * 2 + 1;
+        constexpr T w = Constants::weyl::value[I] * static_cast<T>(N - 1);
+        constexpr T m = Constants::multiplier::value[I];
 
-        std::get<I>(par) += w;
-        eval<I + 1>(par, std::integral_constant<bool, I + 1 < K / 2>());
-    }
-}; // class PhiloxKBox
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxKBox<T, 2, N, Constants>
-{
-    public:
-    static void eval(std::array<T, 1> &par)
-    {
-        constexpr T w0 = Constants::weyl::value[0];
-
-        std::get<0>(par) += w0;
-    }
-}; // class PhiloxKBox
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxKBox<T, 4, N, Constants>
-{
-    public:
-    static void eval(std::array<T, 2> &par)
-    {
-        constexpr T w0 = Constants::weyl::value[0];
-        constexpr T w1 = Constants::weyl::value[1];
-
-        std::get<0>(par) += w0;
-        std::get<1>(par) += w1;
-    }
-}; // class PhiloxKBox
-
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class PhiloxSBox
-{
-    public:
-    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &par)
-    {
-        eval<0>(state, par, std::integral_constant<bool, 1 < K>());
+        T h;
+        std::get<I1>(s) = PhiloxHiLo<T>::eval(std::get<I0>(t), m, h);
+        std::get<I0>(s) = (std::get<I>(key) + w) ^ (std::get<I1>(t) ^ h);
+        sbox<I + 1>(s, t, key, std::integral_constant<bool, I + 1 < K / 2>());
     }
 
-    private:
     template <std::size_t>
-    static void eval(
-        std::array<T, K> &, const std::array<T, K / 2> &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &par,
-        std::true_type)
-    {
-        constexpr T m = Constants::multiplier::value[I / 2];
-
-        T x = std::get<I + 1>(state);
-        T hi;
-        std::get<I + 1>(state) =
-            PhiloxHiLo<T>::eval(std::get<I>(state), m, hi);
-        std::get<I>(state) = std::get<I / 2>(par) ^ x ^ hi;
-
-        eval<I + 2>(state, par, std::integral_constant<bool, I + 3 < K>());
-    }
-}; // class PhiloxSBox
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxSBox<T, 2, N, Constants>
-{
-    public:
-    static void eval(std::array<T, 2> &state, const std::array<T, 1> &par)
-    {
-        constexpr T m0 = Constants::multiplier::value[0];
-
-        T x1 = std::get<1>(state);
-        T hi0;
-        std::get<1>(state) = PhiloxHiLo<T>::eval(std::get<0>(state), m0, hi0);
-        std::get<0>(state) = std::get<0>(par) ^ x1 ^ hi0;
-    }
-}; // class PhiloxSBox
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxSBox<T, 4, N, Constants>
-{
-    public:
-    static void eval(std::array<T, 4> &state, const std::array<T, 2> &par)
-    {
-        constexpr T m2 = Constants::multiplier::value[0];
-        constexpr T m0 = Constants::multiplier::value[1];
-
-        T x1 = std::get<1>(state);
-        T x3 = std::get<3>(state);
-        T hi0;
-        T hi2;
-        std::get<1>(state) = PhiloxHiLo<T>::eval(std::get<2>(state), m2, hi2);
-        std::get<3>(state) = PhiloxHiLo<T>::eval(std::get<0>(state), m0, hi0);
-        std::get<0>(state) = std::get<0>(par) ^ x1 ^ hi2;
-        std::get<2>(state) = std::get<1>(par) ^ x3 ^ hi0;
-    }
-}; // class PhiloxSBox
-
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class PhiloxPBox
-{
-    public:
-    static void eval(std::array<T, K> &state)
-    {
-        std::array<T, K> tmp;
-        eval<0>(state, tmp, std::integral_constant<bool, 0 < K>());
-        state = tmp;
-    }
-
-    private:
-    template <std::size_t>
-    static void eval(
+    static void pbox(
         const std::array<T, K> &, std::array<T, K> &, std::false_type)
     {
     }
 
     template <std::size_t I>
-    static void eval(
-        const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
+    static void pbox(
+        const std::array<T, K> &s, std::array<T, K> &t, std::true_type)
     {
         constexpr std::size_t P =
             ThreefryConstants<T, K>::permute::value[K - I - 1];
         constexpr std::size_t J = K - P - 1;
 
-        std::get<I>(tmp) = std::get<J>(state);
-        eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
+        std::get<I>(t) = std::get<J>(s);
+        pbox<I + 1>(s, t, std::integral_constant<bool, I + 1 < K>());
     }
-}; // class PhiloxPBox
+}; // class PhiloxRBox
 
 template <typename T, std::size_t N, typename Constants>
-class PhiloxPBox<T, 2, N, Constants>
+class PhiloxRBox<T, 2, N, Constants>
 {
     public:
-    static void eval(std::array<T, 2> &) {}
-}; // class PhiloxPBox
+    static void eval(std::array<T, 2> &s, const std::array<T, 1> &key)
+    {
+        constexpr T w0 = Constants::weyl::value[0] * static_cast<T>(N - 1);
+        constexpr T m0 = Constants::multiplier::value[0];
+
+        T s1 = std::get<1>(s);
+        T h0;
+        std::get<1>(s) = PhiloxHiLo<T>::eval(std::get<0>(s), m0, h0);
+        std::get<0>(s) = (std::get<0>(key) + w0) ^ (s1 ^ h0);
+    }
+}; // class PhiloxRBox
 
 template <typename T, std::size_t N, typename Constants>
-class PhiloxPBox<T, 4, N, Constants>
+class PhiloxRBox<T, 4, N, Constants>
 {
     public:
-    static void eval(std::array<T, 4> &) {}
-}; // class PhiloxPBox
+    static void eval(std::array<T, 4> &s, const std::array<T, 2> &key)
+    {
+        constexpr T w0 = Constants::weyl::value[0] * static_cast<T>(N - 1);
+        constexpr T w1 = Constants::weyl::value[1] * static_cast<T>(N - 1);
+        constexpr T m2 = Constants::multiplier::value[0];
+        constexpr T m0 = Constants::multiplier::value[1];
+
+        T s1 = std::get<1>(s);
+        T s3 = std::get<3>(s);
+        T h2;
+        T h0;
+        std::get<1>(s) = PhiloxHiLo<T>::eval(std::get<2>(s), m2, h2);
+        std::get<3>(s) = PhiloxHiLo<T>::eval(std::get<0>(s), m0, h0);
+        std::get<0>(s) = (std::get<0>(key) + w0) ^ (s1 ^ h2);
+        std::get<2>(s) = (std::get<1>(key) + w1) ^ (s3 ^ h0);
+    }
+}; // class PhiloxRBox
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorGenericImpl
@@ -354,65 +280,44 @@ class PhiloxGeneratorGenericImpl
     public:
     static constexpr bool batch() { return false; }
 
-    static void eval(std::array<T, K> &state, const std::array<T, K / 2> &key)
+    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &key)
     {
-        std::array<T, K / 2> par = key;
-        round<0>(state, par, std::integral_constant<bool, 0 <= Rounds>());
+        round<0>(s, key, std::integral_constant<bool, 0 <= Rounds>());
     }
 
     private:
     template <std::size_t>
     static void round(
-        std::array<T, K> &, std::array<T, K / 2> &, std::false_type)
+        std::array<T, K> &, const std::array<T, K / 2> &, std::false_type)
     {
     }
 
     template <std::size_t N>
     static void round(
-        std::array<T, K> &state, std::array<T, K / 2> &par, std::true_type)
+        std::array<T, K> &s, const std::array<T, K / 2> &key, std::true_type)
     {
-        kbox<N>(par);
-        rbox<N>(state, par);
-        round<N + 1>(
-            state, par, std::integral_constant<bool, N + 1 <= Rounds>());
+        rbox<N>(s, key);
+        round<N + 1>(s, key, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N>
-    static void kbox(std::array<T, K / 2> &par)
+    static void rbox(std::array<T, K> &s, const std::array<T, K / 2> &key)
     {
-        kbox<N>(par, std::integral_constant<bool, (N > 1 && N <= Rounds)>());
+        rbox<N>(
+            s, key, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
-    template <std::size_t N>
-    static void kbox(std::array<T, K / 2> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void kbox(std::array<T, K / 2> &par, std::true_type)
-    {
-        PhiloxKBox<T, K, N, Constants>::eval(par);
-    }
-
-    template <std::size_t N>
-    static void rbox(std::array<T, K> &state, const std::array<T, K / 2> &par)
-    {
-        rbox<N>(state, par,
-            std::integral_constant<bool, (N > 0 && N <= Rounds)>());
-    }
-
-    template <std::size_t N>
+    template <std::size_t>
     static void rbox(
         std::array<T, K> &, const std::array<T, K / 2> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void rbox(std::array<T, K> &state, const std::array<T, K / 2> &par,
-        std::true_type)
+    static void rbox(
+        std::array<T, K> &s, const std::array<T, K / 2> &key, std::true_type)
     {
-        PhiloxPBox<T, K, N, Constants>::eval(state);
-        PhiloxSBox<T, K, N, Constants>::eval(state, par);
+        PhiloxRBox<T, K, N, Constants>::eval(s, key);
     }
 }; // class PhiloxGeneratorGenericImpl
 

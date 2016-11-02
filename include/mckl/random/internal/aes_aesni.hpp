@@ -404,15 +404,13 @@ class AESGeneratorAESNIImpl
     public:
     static constexpr bool batch() { return true; }
 
-    static void eval(std::array<std::uint32_t, 4> &state,
+    static void eval(std::array<std::uint32_t, 4> &s,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
-        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());
-        __m128i s = _mm_load_si128(sptr);
-        s = _mm_xor_si128(s, std::get<0>(rk));
-        MCKL_RANDOM_INTERNAL_AES_UNROLL(0);
-        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
-        _mm_store_si128(sptr, s);
+        __m128i *const sptr = reinterpret_cast<__m128i *>(s.data());
+        __m128i t = _mm_load_si128(sptr);
+        eval(t, rk);
+        _mm_store_si128(sptr, t);
     }
 
     template <typename ResultType>
@@ -466,6 +464,14 @@ class AESGeneratorAESNIImpl
         }
     }; // class transform
 
+    static void eval(
+        __m128i &s, const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
+    {
+        s = _mm_xor_si128(s, std::get<0>(rk));
+        MCKL_RANDOM_INTERNAL_AES_UNROLL(0);
+        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
+    }
+
     template <typename Transform, typename ResultType, typename... Args>
     static void eval(Counter<std::uint32_t, 4> &ctr,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
@@ -489,14 +495,14 @@ class AESGeneratorAESNIImpl
         }
 
         alignas(32) union {
-            std::array<std::array<std::uint32_t, 4>, nstride> state;
-            std::array<Counter<std::uint32_t, 4>, nstride> ctr;
+            std::array<std::array<std::uint32_t, 4>, nstride> s;
+            std::array<Counter<std::uint32_t, 4>, nstride> c;
             std::array<uint_type, nstride * ustride> u;
         } buf;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_FLATTEN_CALL increment(ctr);
-            buf.ctr[i] = ctr;
-            eval(buf.state[i], rk);
+            buf.c[i] = ctr;
+            eval(buf.s[i], rk);
         }
         MCKL_FLATTEN_CALL Transform::eval(
             n * ustride, buf.u.data(), r, std::forward<Args>(args)...);

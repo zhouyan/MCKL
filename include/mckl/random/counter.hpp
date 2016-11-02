@@ -119,10 +119,10 @@ namespace mckl
 /// void reset(const key_type &key);     // reset generator key
 ///
 /// // Increment counter once and generate one result block
-/// void operator()(ctr_type &ctr, result_type *result);
+/// void operator()(ctr_type &ctr, result_type *r);
 ///
 /// // Increment counter n times and generate n result blocks
-/// void operator()(ctr_type &ctr, std::size_t n, result_type *result);
+/// void operator()(ctr_type &ctr, std::size_t n, result_type *r);
 /// ~~~
 /// - Restrictions: `size() % sizeof(ResultType) == 0`
 template <typename ResultType, typename Generator>
