@@ -81,11 +81,9 @@ inline void gmm_ps_run(
 inline void gmm_ps_run(
     std::size_t N, std::size_t n, std::size_t c, std::size_t power, int twid)
 {
+    gmm_ps_run<mckl::BackendOMP>(N, n, c, power, twid);
     gmm_ps_run<mckl::BackendSEQ>(N, n, c, power, twid);
     gmm_ps_run<mckl::BackendSTD>(N, n, c, power, twid);
-#if MCKL_HAS_OMP
-    gmm_ps_run<mckl::BackendOMP>(N, n, c, power, twid);
-#endif
 #if MCKL_HAS_TBB
     gmm_ps_run<mckl::BackendTBB>(N, n, c, power, twid);
 #endif

@@ -38,6 +38,12 @@ template <typename>
 std::string gmm_backend_name();
 
 template <>
+std::string gmm_backend_name<mckl::BackendOMP>()
+{
+    return "BackendOMP";
+}
+
+template <>
 std::string gmm_backend_name<mckl::BackendSEQ>()
 {
     return "BackendSEQ";
@@ -49,21 +55,11 @@ std::string gmm_backend_name<mckl::BackendSTD>()
     return "BackendSTD";
 }
 
-#if MCKL_HAS_OMP
-template <>
-std::string gmm_backend_name<mckl::BackendOMP>()
-{
-    return "BackendOMP";
-}
-#endif
-
-#if MCKL_HAS_TBB
 template <>
 std::string gmm_backend_name<mckl::BackendTBB>()
 {
     return "BackendTBB";
 }
-#endif
 
 class GMMState
 {

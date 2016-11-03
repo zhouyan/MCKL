@@ -33,6 +33,7 @@
 #define MCKL_SMP_BACKEND_OMP_HPP
 
 #include <mckl/smp/backend_base.hpp>
+
 #if MCKL_HAS_OMP
 #include <omp.h>
 #endif

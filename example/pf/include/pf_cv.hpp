@@ -44,6 +44,12 @@ template <typename>
 std::string pf_cv_backend_name();
 
 template <>
+std::string pf_cv_backend_name<mckl::BackendOMP>()
+{
+    return "BackendOMP";
+}
+
+template <>
 std::string pf_cv_backend_name<mckl::BackendSEQ>()
 {
     return "BackendSEQ";
@@ -55,21 +61,11 @@ std::string pf_cv_backend_name<mckl::BackendSTD>()
     return "BackendSTD";
 }
 
-#if MCKL_HAS_OMP
-template <>
-std::string pf_cv_backend_name<mckl::BackendOMP>()
-{
-    return "BackendOMP";
-}
-#endif
-
-#if MCKL_HAS_TBB
 template <>
 std::string pf_cv_backend_name<mckl::BackendTBB>()
 {
     return "BackendTBB";
 }
-#endif
 
 template <mckl::ResampleScheme>
 std::string pf_cv_scheme_name();
