@@ -33,7 +33,6 @@
 
 use v5.16;
 use Getopt::Long;
-use Data::Dumper;
 
 my $failure = 1e-6;
 my $suspect = 1e-3;
@@ -128,6 +127,7 @@ sub target {
                 my @keys = sort keys %{$suspect{$b}{$r}{$u}};
                 my $bin = "\Lrandom_testu01_${b}_${r}";
                 $target{$bin} .= "\t./$bin $u";
+                $target{$bin} .= " parallel" if $subdir eq "parallel";
                 $target{$bin} .= " $_" for @keys;
                 $target{$bin} .= "\n";
             }
