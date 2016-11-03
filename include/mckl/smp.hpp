@@ -34,11 +34,9 @@
 
 #include <mckl/internal/config.h>
 #include <mckl/smp/backend_base.hpp>
+#include <mckl/smp/backend_omp.hpp>
 #include <mckl/smp/backend_seq.hpp>
 #include <mckl/smp/backend_std.hpp>
-#if MCKL_HAS_OMP
-#include <mckl/smp/backend_omp.hpp>
-#endif
 #if MCKL_HAS_TBB
 #include <mckl/smp/backend_tbb.hpp>
 #endif
