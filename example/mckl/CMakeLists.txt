@@ -168,7 +168,7 @@ MCKL_ADD_TEST_HEADER(mckl/resample/u01_sequence TRUE)
 
 MCKL_ADD_TEST_HEADER(mckl/smp TRUE "OpenMP")
 MCKL_ADD_TEST_HEADER(mckl/smp/backend_base TRUE)
-MCKL_ADD_TEST_HEADER(mckl/smp/backend_omp  ${OPENMP_FOUND} "OpenMP")
+MCKL_ADD_TEST_HEADER(mckl/smp/backend_omp  TRUE "OpenMP")
 MCKL_ADD_TEST_HEADER(mckl/smp/backend_seq  TRUE)
 MCKL_ADD_TEST_HEADER(mckl/smp/backend_tbb  ${TBB_FOUND})
 

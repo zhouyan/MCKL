@@ -33,7 +33,9 @@
 #define MCKL_SMP_BACKEND_OMP_HPP
 
 #include <mckl/smp/backend_base.hpp>
+#if MCKL_HAS_OMP
 #include <omp.h>
+#endif
 
 namespace mckl
 {
@@ -82,7 +84,9 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
 
         this->eval_first(iter, particle);
         Particle<T> *pptr = &particle;
+#if MCKL_HAS_OMP
 #pragma omp parallel default(none) firstprivate(pptr, iter)
+#endif
         {
             size_type first = 0;
             size_type last = 0;
@@ -123,7 +127,9 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
 
         this->eval_first(iter, particle);
         Particle<T> *pptr = &particle;
+#if MCKL_HAS_OMP
 #pragma omp parallel default(none) firstprivate(pptr, iter, dim, r)
+#endif
         {
             size_type first = 0;
             size_type last = 0;
