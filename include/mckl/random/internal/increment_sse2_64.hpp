@@ -29,5 +29,74 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_HPP
+#define MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_HPP
+
+#include <mckl/random/internal/increment_generic.hpp>
 #include <mckl/random/internal/increment_sse2_64_4.hpp>
 #include <mckl/random/internal/increment_sse2_64_8.hpp>
+#include <mckl/random/internal/increment_sse2_64_f.hpp>
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
+namespace mckl
+{
+
+namespace internal
+{
+
+template <typename T, std::size_t K, std::size_t S>
+inline void increment_si128(
+    std::array<T, K> &ctr, std::array<__m128i, S> &s, std::false_type)
+{
+    constexpr T blocks = (sizeof(__m128i) * S) / (sizeof(T) * K);
+
+    alignas(32) std::array<std::array<T, K>, blocks> ctr_block;
+    increment(ctr, ctr_block);
+    std::memcpy(s.data(), ctr_block.data(), sizeof(__m128i) * S);
+}
+
+template <typename T, std::size_t K, std::size_t S>
+inline void increment_si128(
+    std::array<T, K> &ctr, std::array<__m128i, S> &s, std::true_type)
+{
+    constexpr T blocks = (sizeof(__m128i) * S) / (sizeof(T) * K);
+
+    if (std::get<0>(ctr) < std::numeric_limits<T>::max() - blocks) {
+        IncrementBlockSI128<T, K, blocks>::eval(ctr, s);
+        std::get<0>(ctr) += blocks;
+    } else {
+        increment_si128(ctr, s, std::false_type());
+    }
+}
+
+template <typename T, std::size_t K, std::size_t S>
+MCKL_FLATTEN inline void increment_si128(
+    std::array<T, K> &ctr, std::array<__m128i, S> &s)
+{
+    static_assert((sizeof(__m128i) * S) % (sizeof(T) * K) == 0,
+        "**increment_si128** invalid blocks size");
+
+    constexpr bool direct = S == 4 || S == 8 || S == 16;
+    constexpr bool bits = std::numeric_limits<T>::digits == 64;
+
+    internal::increment_si128(
+        ctr, s, std::integral_constant<bool, (direct && bits)>());
+}
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
+
+#endif // MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_HPP

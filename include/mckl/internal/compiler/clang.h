@@ -32,6 +32,10 @@
 #ifndef MCKL_INTERNAL_COMPILER_CLANG_H
 #define MCKL_INTERNAL_COMPILER_CLANG_H
 
+#if MCKL_HAS_X86
+#include <x86intrin.h>
+#endif
+
 #define MCKL_CLANG_VERSION                                                    \
     (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 
@@ -44,18 +48,6 @@
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #ifndef MCKL_HAS_BIG_ENDIAN
 #define MCKL_HAS_BIG_ENDIAN 1
-#endif
-#endif
-
-#ifdef __AES__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __RDRND__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
 #endif
 #endif
 
@@ -101,7 +93,41 @@
 #endif
 #endif
 
-#ifdef __x86_64__
+#ifdef __AES__
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
+#endif
+#endif
+
+#ifdef __RDRND__
+#ifndef MCKL_HAS_RDRAND
+#define MCKL_HAS_RDRAND 1
+#endif
+#endif
+
+#ifdef __BMI__
+#ifndef MCKL_HAS_BMI
+#define MCKL_HAS_BMI 1
+#endif
+#endif
+
+#ifdef __BMI2__
+#ifndef MCKL_HAS_BMI2
+#define MCKL_HAS_BMI2 1
+#endif
+#endif
+
+#ifdef __FMA__
+#ifndef MCKL_HAS_FMA
+#define MCKL_HAS_FMA 1
+#endif
+#endif
+
+#ifndef MCKL_INT64
+#define MCKL_INT64 long long
+#endif
+
+#if MCKL_HAS_X86_64
 #ifndef MCKL_HAS_INT128
 #define MCKL_HAS_INT128 1
 #endif
@@ -110,12 +136,8 @@
 #endif
 #endif
 
-#ifndef MCKL_INT64
-#define MCKL_INT64 long long
-#endif
-
 #ifndef MCKL_FLATTEN
-#define MCKL_FLATTEN __attribute__((flatten, always_inline))
+#define MCKL_FLATTEN __attribute__((always_inline, flatten))
 #endif
 
 #endif // MCKL_INTERNAL_COMPILER_CLANG_H

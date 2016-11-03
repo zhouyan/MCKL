@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  6
+ ----------------------------------------------
+ 12  CollisionOver, t = 21           4.4e-6
+ ----------------------------------------------
+ All other tests were passed
+

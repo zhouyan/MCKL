@@ -1,0 +1,42 @@
+========= Summary results of SmallCrush =========
+ Generator:        U01CC
+ Number of statistics:  15
+ ----------------------------------------------
+  3  Gap                            1.2e-10
+  4  SimpPoker                        eps
+  5  CouponCollector                 3.4e-4
+  7  WeightDistrib                    eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of SmallCrush =========
+ Generator:        U01CO
+ Number of statistics:  15
+ ----------------------------------------------
+  3  Gap                             1.6e-6
+  4  SimpPoker                        eps
+  5  CouponCollector                 6.9e-6
+  7  WeightDistrib                   1.3e-8
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of SmallCrush =========
+ Generator:        U01OC
+ Number of statistics:  15
+ ----------------------------------------------
+  3  Gap                            3.6e-13
+  4  SimpPoker                        eps
+  7  WeightDistrib                    eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of SmallCrush =========
+ Generator:        U01OO
+ Number of statistics:  15
+ ----------------------------------------------
+  3  Gap                             3.7e-5
+  4  SimpPoker                        eps
+  7  WeightDistrib                  1.6e-15
+ ----------------------------------------------
+ All other tests were passed
+

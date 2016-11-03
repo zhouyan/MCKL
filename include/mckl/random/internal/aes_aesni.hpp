@@ -29,274 +29,53 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(N, rcon)                      \
-    template <>                                                               \
-    inline __m128i AESNIKeyGenAssist<N>(const __m128i &xmm)                   \
+#ifndef MCKL_RANDOM_INTERNAL_AES_AESNI_HPP
+#define MCKL_RANDOM_INTERNAL_AES_AESNI_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/aes_unroll.hpp>
+#include <mckl/random/increment.hpp>
+
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/u01_avx2.hpp>
+#include <mckl/random/internal/uniform_real_avx2.hpp>
+#endif
+
+#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(                       \
+    lr, bits, Lower, Upper)                                                   \
+    template <typename RealType>                                              \
+    static void u01_##lr##_u##bits(Counter<std::uint32_t, 4> &ctr,            \
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk,              \
+        std::size_t n, RealType *r)                                           \
     {                                                                         \
-        return _mm_aeskeygenassist_si128(xmm, rcon);                          \
+        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
+            ctr, rk, n, r);                                                   \
     }
 
-template <std::size_t>
-inline __m128i AESNIKeyGenAssist(const __m128i &);
+#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(bits)         \
+    template <typename RealType>                                              \
+    static void uniform_real_u##bits(Counter<std::uint32_t, 4> &ctr,          \
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk,              \
+        std::size_t n, RealType *r, RealType a, RealType b)                   \
+    {                                                                         \
+        eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>>(             \
+            ctr, rk, n, r, a, b);                                             \
+    }
 
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x00, 0x8D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x01, 0x01)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x02, 0x02)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x03, 0x04)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x04, 0x08)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x05, 0x10)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x06, 0x20)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x07, 0x40)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x08, 0x80)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x09, 0x1B)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x0A, 0x36)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x0B, 0x6C)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x0C, 0xD8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x0D, 0xAB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x0E, 0x4D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x0F, 0x9A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x10, 0x2F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x11, 0x5E)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x12, 0xBC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x13, 0x63)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x14, 0xC6)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x15, 0x97)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x16, 0x35)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x17, 0x6A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x18, 0xD4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x19, 0xB3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x1A, 0x7D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x1B, 0xFA)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x1C, 0xEF)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x1D, 0xC5)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x1E, 0x91)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x1F, 0x39)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x20, 0x72)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x21, 0xE4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x22, 0xD3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x23, 0xBD)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x24, 0x61)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x25, 0xC2)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x26, 0x9F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x27, 0x25)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x28, 0x4A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x29, 0x94)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x2A, 0x33)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x2B, 0x66)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x2C, 0xCC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x2D, 0x83)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x2E, 0x1D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x2F, 0x3A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x30, 0x74)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x31, 0xE8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x32, 0xCB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x33, 0x8D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x34, 0x01)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x35, 0x02)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x36, 0x04)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x37, 0x08)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x38, 0x10)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x39, 0x20)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x3A, 0x40)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x3B, 0x80)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x3C, 0x1B)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x3D, 0x36)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x3E, 0x6C)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x3F, 0xD8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x40, 0xAB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x41, 0x4D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x42, 0x9A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x43, 0x2F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x44, 0x5E)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x45, 0xBC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x46, 0x63)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x47, 0xC6)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x48, 0x97)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x49, 0x35)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x4A, 0x6A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x4B, 0xD4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x4C, 0xB3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x4D, 0x7D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x4E, 0xFA)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x4F, 0xEF)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x50, 0xC5)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x51, 0x91)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x52, 0x39)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x53, 0x72)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x54, 0xE4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x55, 0xD3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x56, 0xBD)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x57, 0x61)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x58, 0xC2)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x59, 0x9F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x5A, 0x25)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x5B, 0x4A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x5C, 0x94)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x5D, 0x33)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x5E, 0x66)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x5F, 0xCC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x60, 0x83)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x61, 0x1D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x62, 0x3A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x63, 0x74)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x64, 0xE8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x65, 0xCB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x66, 0x8D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x67, 0x01)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x68, 0x02)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x69, 0x04)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x6A, 0x08)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x6B, 0x10)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x6C, 0x20)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x6D, 0x40)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x6E, 0x80)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x6F, 0x1B)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x70, 0x36)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x71, 0x6C)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x72, 0xD8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x73, 0xAB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x74, 0x4D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x75, 0x9A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x76, 0x2F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x77, 0x5E)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x78, 0xBC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x79, 0x63)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x7A, 0xC6)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x7B, 0x97)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x7C, 0x35)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x7D, 0x6A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x7E, 0xD4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x7F, 0xB3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x80, 0x7D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x81, 0xFA)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x82, 0xEF)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x83, 0xC5)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x84, 0x91)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x85, 0x39)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x86, 0x72)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x87, 0xE4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x88, 0xD3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x89, 0xBD)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x8A, 0x61)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x8B, 0xC2)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x8C, 0x9F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x8D, 0x25)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x8E, 0x4A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x8F, 0x94)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x90, 0x33)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x91, 0x66)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x92, 0xCC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x93, 0x83)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x94, 0x1D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x95, 0x3A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x96, 0x74)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x97, 0xE8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x98, 0xCB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x99, 0x8D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x9A, 0x01)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x9B, 0x02)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x9C, 0x04)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x9D, 0x08)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x9E, 0x10)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0x9F, 0x20)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA0, 0x40)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA1, 0x80)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA2, 0x1B)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA3, 0x36)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA4, 0x6C)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA5, 0xD8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA6, 0xAB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA7, 0x4D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA8, 0x9A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xA9, 0x2F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xAA, 0x5E)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xAB, 0xBC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xAC, 0x63)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xAD, 0xC6)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xAE, 0x97)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xAF, 0x35)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB0, 0x6A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB1, 0xD4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB2, 0xB3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB3, 0x7D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB4, 0xFA)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB5, 0xEF)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB6, 0xC5)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB7, 0x91)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB8, 0x39)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xB9, 0x72)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xBA, 0xE4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xBB, 0xD3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xBC, 0xBD)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xBD, 0x61)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xBE, 0xC2)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xBF, 0x9F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC0, 0x25)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC1, 0x4A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC2, 0x94)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC3, 0x33)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC4, 0x66)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC5, 0xCC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC6, 0x83)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC7, 0x1D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC8, 0x3A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xC9, 0x74)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xCA, 0xE8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xCB, 0xCB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xCC, 0x8D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xCD, 0x01)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xCE, 0x02)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xCF, 0x04)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD0, 0x08)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD1, 0x10)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD2, 0x20)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD3, 0x40)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD4, 0x80)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD5, 0x1B)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD6, 0x36)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD7, 0x6C)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD8, 0xD8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xD9, 0xAB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xDA, 0x4D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xDB, 0x9A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xDC, 0x2F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xDD, 0x5E)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xDE, 0xBC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xDF, 0x63)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE0, 0xC6)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE1, 0x97)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE2, 0x35)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE3, 0x6A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE4, 0xD4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE5, 0xB3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE6, 0x7D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE7, 0xFA)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE8, 0xEF)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xE9, 0xC5)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xEA, 0x91)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xEB, 0x39)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xEC, 0x72)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xED, 0xE4)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xEE, 0xD3)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xEF, 0xBD)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF0, 0x61)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF1, 0xC2)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF2, 0x9F)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF3, 0x25)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF4, 0x4A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF5, 0x94)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF6, 0x33)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF7, 0x66)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF8, 0xCC)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xF9, 0x83)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFA, 0x1D)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFB, 0x3A)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFC, 0x74)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFD, 0xE8)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFE, 0xCB)
-MCKL_DEFINE_RANDOM_AESNI_KEY_GEN_ASSIST(0xFF, 0x8D)
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
 
-class AES128KeySeqGenerator
+namespace mckl
+{
+
+namespace internal
+{
+
+class AES128KeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -335,7 +114,7 @@ class AES128KeySeqGenerator
     template <std::size_t N, std::size_t Rp1>
     void generate(std::array<__m128i, Rp1> &rk, std::true_type)
     {
-        xmm2_ = AESNIKeyGenAssist<N % 256>(xmm1_);
+        xmm2_ = aeskeygenassist_si128<N % 256>(xmm1_);
         expand_key();
         std::get<N>(rk) = xmm1_;
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
@@ -352,9 +131,9 @@ class AES128KeySeqGenerator
         xmm1_ = _mm_xor_si128(xmm1_, xmm3_);    // pxor   xmm1, xmm3
         xmm1_ = _mm_xor_si128(xmm1_, xmm2_);    // pxor   xmm1, xmm2
     }
-}; // class AES128KeySeqGenerator
+}; // class AES128KeySeqGeneratorAESNIImpl
 
-class AES192KeySeqGenerator
+class AES192KeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 6>;
@@ -422,7 +201,7 @@ class AES192KeySeqGenerator
         // In entry, N * 24 < Rp1 * 16
         // Required Storage: N * 24 + 16;
 
-        xmm2_ = AESNIKeyGenAssist<N % 256>(xmm4_);
+        xmm2_ = aeskeygenassist_si128<N % 256>(xmm4_);
         generate_key_expansion();
         _mm_storeu_si128(reinterpret_cast<__m128i *>(rk_ptr + N * 24), xmm1_);
     }
@@ -479,9 +258,9 @@ class AES192KeySeqGenerator
         char *dst = reinterpret_cast<char *>(rk.data());
         std::memcpy(dst + 24, rk_ptr + 24, Rp1 * 16 - 24);
     }
-}; // class AES192KeySeqGenerator
+}; // class AES192KeySeqGeneratorAESNIImpl
 
-class AES256KeySeqGenerator
+class AES256KeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 8>;
@@ -533,7 +312,7 @@ class AES256KeySeqGenerator
     template <std::size_t N, std::size_t Rp1>
     void generate_key(std::array<__m128i, Rp1> &rk, std::true_type)
     {
-        xmm2_ = AESNIKeyGenAssist<(N / 2) % 256>(xmm3_);
+        xmm2_ = aeskeygenassist_si128<(N / 2) % 256>(xmm3_);
         expand_key(std::true_type());
         std::get<N>(rk) = xmm1_;
     }
@@ -541,7 +320,7 @@ class AES256KeySeqGenerator
     template <std::size_t N, std::size_t Rp1>
     void generate_key(std::array<__m128i, Rp1> &rk, std::false_type)
     {
-        xmm4_ = _mm_aeskeygenassist_si128(xmm1_, 0);
+        xmm4_ = aeskeygenassist_si128<0>(xmm1_);
         expand_key(std::false_type());
         std::get<N>(rk) = xmm3_;
     }
@@ -569,10 +348,10 @@ class AES256KeySeqGenerator
         xmm3_ = _mm_xor_si128(xmm3_, xmm4_);    // pxor   xmm3, xmm4
         xmm3_ = _mm_xor_si128(xmm3_, xmm2_);    // pxor   xmm1, xmm2
     }
-}; // class AES256KeySeqGenerator
+}; // class AES256KeySeqGeneratorAESNIImpl
 
 template <typename Constants>
-class ARSKeySeqGenerator
+class ARSKeySeqGeneratorAESNIImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -617,93 +396,117 @@ class ARSKeySeqGenerator
         std::get<N>(rk) = _mm_add_epi64(key_, w);
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
-}; // class ARSKeySeqGenerator
+}; // class ARSKeySeqGeneratorAESNIImpl
 
 template <typename KeySeqType>
-class AESGeneratorImpl8
+class AESGeneratorAESNIImpl
 {
     public:
     static constexpr bool batch() { return true; }
 
-    static constexpr std::size_t blocks() { return 8; }
-
-    static void eval(std::array<std::uint32_t, 4> &state,
+    static void eval(std::array<std::uint32_t, 4> &s,
         const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
     {
-        __m128i *const sptr = reinterpret_cast<__m128i *>(state.data());
-
-        __m128i s = _mm_load_si128(sptr);
-
-        encfirst(s, rk);
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast(s, rk);
-
-        _mm_store_si128(sptr, s);
+        __m128i *const sptr = reinterpret_cast<__m128i *>(s.data());
+        __m128i t = _mm_load_si128(sptr);
+        eval(t, rk);
+        _mm_store_si128(sptr, t);
     }
 
-    static void eval(std::array<std::array<std::uint32_t, 4>, 8> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
+    template <typename ResultType>
+    static void eval(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        ResultType *r)
     {
-        std::array<__m128i, 8> s;
-        __m128i *sptr = nullptr;
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0>(s) = _mm_load_si128(sptr++);
-        std::get<1>(s) = _mm_load_si128(sptr++);
-        std::get<2>(s) = _mm_load_si128(sptr++);
-        std::get<3>(s) = _mm_load_si128(sptr++);
-        std::get<4>(s) = _mm_load_si128(sptr++);
-        std::get<5>(s) = _mm_load_si128(sptr++);
-        std::get<6>(s) = _mm_load_si128(sptr++);
-        std::get<7>(s) = _mm_load_si128(sptr++);
-
-        encfirst(s, rk);
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast(s, rk);
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0>(s));
-        _mm_store_si128(sptr++, std::get<1>(s));
-        _mm_store_si128(sptr++, std::get<2>(s));
-        _mm_store_si128(sptr++, std::get<3>(s));
-        _mm_store_si128(sptr++, std::get<4>(s));
-        _mm_store_si128(sptr++, std::get<5>(s));
-        _mm_store_si128(sptr++, std::get<6>(s));
-        _mm_store_si128(sptr++, std::get<7>(s));
+        eval<transform>(ctr, rk, n, r);
     }
+
+#if MCKL_HAS_AVX2
+
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(cc, 32, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(co, 32, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oc, 32, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oo, 32, Open, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(32)
+
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(cc, 64, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(co, 64, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oc, 64, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oo, 64, Open, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(64)
+
+#endif // MCKL_HAS_AVX2
 
     private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
+
+    class transform
+    {
+        public:
+        using uint_type = std::uint32_t;
+
+        template <std::size_t S, typename ResultType>
+        MCKL_FLATTEN static ResultType *eval(
+            const std::array<__m128i, S> &s, ResultType *r)
+        {
+            std::memcpy(r, s.data(), sizeof(s));
+
+            return r + sizeof(s) / sizeof(ResultType);
+        }
+
+        template <typename ResultType>
+        MCKL_FLATTEN static ResultType *eval(
+            std::size_t n, const uint_type *s, ResultType *r)
+        {
+            std::memcpy(r, s, sizeof(uint_type) * n);
+
+            return r + sizeof(uint_type) * n / sizeof(ResultType);
+        }
+    }; // class transform
+
+    static void eval(
+        __m128i &s, const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
+    {
+        s = _mm_xor_si128(s, std::get<0>(rk));
+        MCKL_RANDOM_INTERNAL_AES_UNROLL(0);
+        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
+    }
+
+    template <typename Transform, typename ResultType, typename... Args>
+    static void eval(Counter<std::uint32_t, 4> &ctr,
+        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
+        ResultType *r, Args &&... args)
+    {
+        using uint_type = typename Transform::uint_type;
+
+        constexpr std::size_t S = rounds_ < 8 ? 16 : 8;
+        constexpr std::size_t nstride = S;
+        constexpr std::size_t ustride = sizeof(__m128i) / sizeof(uint_type);
+
+        std::array<__m128i, S> s;
+        while (n >= nstride) {
+            MCKL_FLATTEN_CALL increment_si128(ctr, s);
+            MCKL_FLATTEN_CALL xor_si128(s, std::get<0>(rk));
+            MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(0);
+            MCKL_FLATTEN_CALL aesenclast_si128(s, std::get<rounds_>(rk));
+            MCKL_FLATTEN_CALL r =
+                Transform::eval(s, r, std::forward<Args>(args)...);
+            n -= nstride;
+        }
+
+        alignas(32) union {
+            std::array<std::array<std::uint32_t, 4>, nstride> s;
+            std::array<Counter<std::uint32_t, 4>, nstride> c;
+            std::array<uint_type, nstride * ustride> u;
+        } buf;
+        for (std::size_t i = 0; i != n; ++i) {
+            MCKL_FLATTEN_CALL increment(ctr);
+            buf.c[i] = ctr;
+            eval(buf.s[i], rk);
+        }
+        MCKL_FLATTEN_CALL Transform::eval(
+            n * ustride, buf.u.data(), r, std::forward<Args>(args)...);
+    }
 
     template <std::size_t>
     static void round(
@@ -715,285 +518,71 @@ class AESGeneratorImpl8
     static void round(
         __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        enc<N>(s, rk);
-        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
+        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N);
     }
 
-    template <std::size_t>
-    static void round(std::array<__m128i, 8> &,
+    template <std::size_t, std::size_t S>
+    static void round(std::array<__m128i, S> &,
         const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
-    template <std::size_t N>
-    static void round(std::array<__m128i, 8> &s,
+    template <std::size_t N, std::size_t S>
+    static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        enc<N>(s, rk);
-        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
-    }
-
-    static void encfirst(
-        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        s = _mm_xor_si128(s, std::get<0>(rk));
+        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N);
     }
 
     template <std::size_t N>
-    static void enc(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
+    MCKL_FLATTEN static void rbox(
+        __m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
+        rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
 
     template <std::size_t>
-    static void enc(
+    static void rbox(
         __m128i &, const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
     template <std::size_t N>
-    static void enc(
+    static void rbox(
         __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         s = _mm_aesenc_si128(s, std::get<N>(rk));
     }
 
-    static void enclast(__m128i &s, const std::array<__m128i, rounds_ + 1> &rk)
+    template <std::size_t N, std::size_t S>
+    MCKL_FLATTEN static void rbox(
+        std::array<__m128i, S> &s, const std::array<__m128i, rounds_ + 1> &rk)
     {
-        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
+        rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
     }
 
-    static void encfirst(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        const __m128i k = std::get<0>(rk);
-        std::get<0>(s) = _mm_xor_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_xor_si128(std::get<1>(s), k);
-        std::get<2>(s) = _mm_xor_si128(std::get<2>(s), k);
-        std::get<3>(s) = _mm_xor_si128(std::get<3>(s), k);
-        std::get<4>(s) = _mm_xor_si128(std::get<4>(s), k);
-        std::get<5>(s) = _mm_xor_si128(std::get<5>(s), k);
-        std::get<6>(s) = _mm_xor_si128(std::get<6>(s), k);
-        std::get<7>(s) = _mm_xor_si128(std::get<7>(s), k);
-    }
-
-    template <std::size_t N>
-    static void enc(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
-    }
-
-    template <std::size_t>
-    static void enc(std::array<__m128i, 8> &,
+    template <std::size_t, std::size_t S>
+    static void rbox(std::array<__m128i, S> &,
         const std::array<__m128i, rounds_ + 1> &, std::false_type)
     {
     }
 
-    template <std::size_t N>
-    static void enc(std::array<__m128i, 8> &s,
+    template <std::size_t N, std::size_t S>
+    static void rbox(std::array<__m128i, S> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        const __m128i k = std::get<N>(rk);
-        std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_aesenc_si128(std::get<1>(s), k);
-        std::get<2>(s) = _mm_aesenc_si128(std::get<2>(s), k);
-        std::get<3>(s) = _mm_aesenc_si128(std::get<3>(s), k);
-        std::get<4>(s) = _mm_aesenc_si128(std::get<4>(s), k);
-        std::get<5>(s) = _mm_aesenc_si128(std::get<5>(s), k);
-        std::get<6>(s) = _mm_aesenc_si128(std::get<6>(s), k);
-        std::get<7>(s) = _mm_aesenc_si128(std::get<7>(s), k);
+        aesenc_si128(s, std::get<N>(rk));
     }
+}; // class AESGeneratorAESNIImpl
 
-    static void enclast(
-        std::array<__m128i, 8> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        const __m128i k = std::get<rounds_>(rk);
-        std::get<0>(s) = _mm_aesenclast_si128(std::get<0>(s), k);
-        std::get<1>(s) = _mm_aesenclast_si128(std::get<1>(s), k);
-        std::get<2>(s) = _mm_aesenclast_si128(std::get<2>(s), k);
-        std::get<3>(s) = _mm_aesenclast_si128(std::get<3>(s), k);
-        std::get<4>(s) = _mm_aesenclast_si128(std::get<4>(s), k);
-        std::get<5>(s) = _mm_aesenclast_si128(std::get<5>(s), k);
-        std::get<6>(s) = _mm_aesenclast_si128(std::get<6>(s), k);
-        std::get<7>(s) = _mm_aesenclast_si128(std::get<7>(s), k);
-    }
-}; // class AESGeneratorImpl8
+} // namespace mckl::internal
 
-template <typename KeySeqType>
-class AESGeneratorImpl16
-{
-    public:
-    static constexpr bool batch() { return true; }
+} // namespace mckl
 
-    static constexpr std::size_t blocks() { return 16; }
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
 
-    static void eval(std::array<std::uint32_t, 4> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        AESGeneratorImpl8<KeySeqType>::eval(state, rk);
-    }
-
-    static void eval(std::array<std::array<std::uint32_t, 4>, 16> &state,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        std::array<__m128i, 16> s;
-        __m128i *sptr = nullptr;
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        std::get<0x0>(s) = _mm_load_si128(sptr++);
-        std::get<0x1>(s) = _mm_load_si128(sptr++);
-        std::get<0x2>(s) = _mm_load_si128(sptr++);
-        std::get<0x3>(s) = _mm_load_si128(sptr++);
-        std::get<0x4>(s) = _mm_load_si128(sptr++);
-        std::get<0x5>(s) = _mm_load_si128(sptr++);
-        std::get<0x6>(s) = _mm_load_si128(sptr++);
-        std::get<0x7>(s) = _mm_load_si128(sptr++);
-        std::get<0x8>(s) = _mm_load_si128(sptr++);
-        std::get<0x9>(s) = _mm_load_si128(sptr++);
-        std::get<0xA>(s) = _mm_load_si128(sptr++);
-        std::get<0xB>(s) = _mm_load_si128(sptr++);
-        std::get<0xC>(s) = _mm_load_si128(sptr++);
-        std::get<0xD>(s) = _mm_load_si128(sptr++);
-        std::get<0xE>(s) = _mm_load_si128(sptr++);
-        std::get<0xF>(s) = _mm_load_si128(sptr++);
-
-        encfirst(s, rk);
-        enc<0x1>(s, rk);
-        enc<0x2>(s, rk);
-        enc<0x3>(s, rk);
-        enc<0x4>(s, rk);
-        enc<0x5>(s, rk);
-        enc<0x6>(s, rk);
-        enc<0x7>(s, rk);
-        enc<0x8>(s, rk);
-        enc<0x9>(s, rk);
-        enc<0xA>(s, rk);
-        enc<0xB>(s, rk);
-        enc<0xC>(s, rk);
-        enc<0xD>(s, rk);
-        enc<0xE>(s, rk);
-        enc<0xF>(s, rk);
-        round<0x10>(s, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast(s, rk);
-
-        sptr = reinterpret_cast<__m128i *>(state.data());
-        _mm_store_si128(sptr++, std::get<0x0>(s));
-        _mm_store_si128(sptr++, std::get<0x1>(s));
-        _mm_store_si128(sptr++, std::get<0x2>(s));
-        _mm_store_si128(sptr++, std::get<0x3>(s));
-        _mm_store_si128(sptr++, std::get<0x4>(s));
-        _mm_store_si128(sptr++, std::get<0x5>(s));
-        _mm_store_si128(sptr++, std::get<0x6>(s));
-        _mm_store_si128(sptr++, std::get<0x7>(s));
-        _mm_store_si128(sptr++, std::get<0x8>(s));
-        _mm_store_si128(sptr++, std::get<0x9>(s));
-        _mm_store_si128(sptr++, std::get<0xA>(s));
-        _mm_store_si128(sptr++, std::get<0xB>(s));
-        _mm_store_si128(sptr++, std::get<0xC>(s));
-        _mm_store_si128(sptr++, std::get<0xD>(s));
-        _mm_store_si128(sptr++, std::get<0xE>(s));
-        _mm_store_si128(sptr++, std::get<0xF>(s));
-    }
-
-    private:
-    static constexpr std::size_t rounds_ = KeySeqType::rounds();
-
-    template <std::size_t>
-    static void round(std::array<__m128i, 16> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void round(std::array<__m128i, 16> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        enc<N>(s, rk);
-        round<N + 1>(s, rk, std::integral_constant<bool, N + 1 < rounds_>());
-    }
-
-    static void encfirst(
-        std::array<__m128i, 16> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        const __m128i k = std::get<0>(rk);
-        std::get<0x0>(s) = _mm_xor_si128(std::get<0x0>(s), k);
-        std::get<0x1>(s) = _mm_xor_si128(std::get<0x1>(s), k);
-        std::get<0x2>(s) = _mm_xor_si128(std::get<0x2>(s), k);
-        std::get<0x3>(s) = _mm_xor_si128(std::get<0x3>(s), k);
-        std::get<0x4>(s) = _mm_xor_si128(std::get<0x4>(s), k);
-        std::get<0x5>(s) = _mm_xor_si128(std::get<0x5>(s), k);
-        std::get<0x6>(s) = _mm_xor_si128(std::get<0x6>(s), k);
-        std::get<0x7>(s) = _mm_xor_si128(std::get<0x7>(s), k);
-        std::get<0x8>(s) = _mm_xor_si128(std::get<0x8>(s), k);
-        std::get<0x9>(s) = _mm_xor_si128(std::get<0x9>(s), k);
-        std::get<0xA>(s) = _mm_xor_si128(std::get<0xA>(s), k);
-        std::get<0xB>(s) = _mm_xor_si128(std::get<0xB>(s), k);
-        std::get<0xC>(s) = _mm_xor_si128(std::get<0xC>(s), k);
-        std::get<0xD>(s) = _mm_xor_si128(std::get<0xD>(s), k);
-        std::get<0xE>(s) = _mm_xor_si128(std::get<0xE>(s), k);
-        std::get<0xF>(s) = _mm_xor_si128(std::get<0xF>(s), k);
-    }
-
-    template <std::size_t N>
-    static void enc(
-        std::array<__m128i, 16> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        enc<N>(s, rk, std::integral_constant<bool, (N > 0 && N < rounds_)>());
-    }
-
-    template <std::size_t>
-    static void enc(std::array<__m128i, 16> &,
-        const std::array<__m128i, rounds_ + 1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N>
-    static void enc(std::array<__m128i, 16> &s,
-        const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
-    {
-        const __m128i k = std::get<N>(rk);
-        std::get<0x0>(s) = _mm_aesenc_si128(std::get<0x0>(s), k);
-        std::get<0x1>(s) = _mm_aesenc_si128(std::get<0x1>(s), k);
-        std::get<0x2>(s) = _mm_aesenc_si128(std::get<0x2>(s), k);
-        std::get<0x3>(s) = _mm_aesenc_si128(std::get<0x3>(s), k);
-        std::get<0x4>(s) = _mm_aesenc_si128(std::get<0x4>(s), k);
-        std::get<0x5>(s) = _mm_aesenc_si128(std::get<0x5>(s), k);
-        std::get<0x6>(s) = _mm_aesenc_si128(std::get<0x6>(s), k);
-        std::get<0x7>(s) = _mm_aesenc_si128(std::get<0x7>(s), k);
-        std::get<0x8>(s) = _mm_aesenc_si128(std::get<0x8>(s), k);
-        std::get<0x9>(s) = _mm_aesenc_si128(std::get<0x9>(s), k);
-        std::get<0xA>(s) = _mm_aesenc_si128(std::get<0xA>(s), k);
-        std::get<0xB>(s) = _mm_aesenc_si128(std::get<0xB>(s), k);
-        std::get<0xC>(s) = _mm_aesenc_si128(std::get<0xC>(s), k);
-        std::get<0xD>(s) = _mm_aesenc_si128(std::get<0xD>(s), k);
-        std::get<0xE>(s) = _mm_aesenc_si128(std::get<0xE>(s), k);
-        std::get<0xF>(s) = _mm_aesenc_si128(std::get<0xF>(s), k);
-    }
-
-    static void enclast(
-        std::array<__m128i, 16> &s, const std::array<__m128i, rounds_ + 1> &rk)
-    {
-        const __m128i k = std::get<rounds_>(rk);
-        std::get<0x0>(s) = _mm_aesenclast_si128(std::get<0x0>(s), k);
-        std::get<0x1>(s) = _mm_aesenclast_si128(std::get<0x1>(s), k);
-        std::get<0x2>(s) = _mm_aesenclast_si128(std::get<0x2>(s), k);
-        std::get<0x3>(s) = _mm_aesenclast_si128(std::get<0x3>(s), k);
-        std::get<0x4>(s) = _mm_aesenclast_si128(std::get<0x4>(s), k);
-        std::get<0x5>(s) = _mm_aesenclast_si128(std::get<0x5>(s), k);
-        std::get<0x6>(s) = _mm_aesenclast_si128(std::get<0x6>(s), k);
-        std::get<0x7>(s) = _mm_aesenclast_si128(std::get<0x7>(s), k);
-        std::get<0x8>(s) = _mm_aesenclast_si128(std::get<0x8>(s), k);
-        std::get<0x9>(s) = _mm_aesenclast_si128(std::get<0x9>(s), k);
-        std::get<0xA>(s) = _mm_aesenclast_si128(std::get<0xA>(s), k);
-        std::get<0xB>(s) = _mm_aesenclast_si128(std::get<0xB>(s), k);
-        std::get<0xC>(s) = _mm_aesenclast_si128(std::get<0xC>(s), k);
-        std::get<0xD>(s) = _mm_aesenclast_si128(std::get<0xD>(s), k);
-        std::get<0xE>(s) = _mm_aesenclast_si128(std::get<0xE>(s), k);
-        std::get<0xF>(s) = _mm_aesenclast_si128(std::get<0xF>(s), k);
-    }
-}; // class AESGeneratorImpl16
-
-template <typename KeySeqType>
-using AESGeneratorImpl = typename std::conditional<KeySeqType::rounds() < 8,
-    AESGeneratorImpl16<KeySeqType>, AESGeneratorImpl8<KeySeqType>>::type;
+#endif // MCKL_RANDOM_INTERNAL_AES_AESNI_HPP

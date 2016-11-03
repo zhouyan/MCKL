@@ -1,0 +1,32 @@
+========= Summary results of BigCrush =========
+ Generator:        U01
+ Number of statistics:  160
+ ----------------------------------------------
+ 13  BirthdaySpacings, t = 2         0.9993
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  160
+ ----------------------------------------------
+ 13  BirthdaySpacings, t = 2         8.5e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  160
+ ----------------------------------------------
+ 19  BirthdaySpacings, t = 8         2.8e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01OC
+ Number of statistics:  160
+ ----------------------------------------------
+  6  CollisionOver, t = 3            8.6e-4
+ ----------------------------------------------
+ All other tests were passed
+

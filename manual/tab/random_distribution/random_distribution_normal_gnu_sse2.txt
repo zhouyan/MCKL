@@ -1,0 +1,4 @@
+Normal<float>(0,1)                  104.02       88.70       21.00       18.51       VML    (0)--Passed
+Normal<double>(0,1)                 180.93      101.35       43.33       31.83       VML    (0)--Passed
+Normal<float>(0,1)                   95.30       79.33       63.97       18.40       C++    (0)--Passed
+Normal<double>(0,1)                 180.71       93.63       92.05       31.68       C++    (0)--Passed

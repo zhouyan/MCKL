@@ -55,10 +55,10 @@ inline void lognormal_distribution_impl(
     exp(n, r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Lognormal, lognormal, RealType, RealType, m, RealType, s)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Lognormal, lognormal, RealType, RealType, m, RealType, s)
 
 /// \brief Lognormal distribution
 /// \ingroup Distribution

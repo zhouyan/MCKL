@@ -289,7 +289,7 @@ class Skein
             for (std::size_t i = 0; i != n; ++i) {
                 key_type M = ctr;
                 internal::union_le<char>(M);
-                generator.enc(M.data(), buf.data());
+                generator(M.data(), buf.data());
                 buf.front() ^= M.front();
                 std::memcpy(C, buf.data(), bytes());
                 ++ctr.front();
@@ -298,14 +298,14 @@ class Skein
             if (m != 0) {
                 key_type M = ctr;
                 internal::union_le<char>(M);
-                generator.enc(M.data(), buf.data());
+                generator(M.data(), buf.data());
                 buf.front() ^= M.front();
                 std::memcpy(C, buf.data(), m);
             }
         } else {
             for (std::size_t i = 0; i != n; ++i) {
                 key_type M = ctr;
-                generator.enc(M.data(), buf.data());
+                generator(M.data(), buf.data());
                 buf.front() ^= M.front();
                 for (std::size_t j = 0; j != M.size(); ++j)
                     buf[j] ^= M[j];
@@ -316,7 +316,7 @@ class Skein
             if (m != 0) {
                 key_type M = ctr;
                 internal::union_le<char>(M);
-                generator.enc(M.data(), buf.data());
+                generator(M.data(), buf.data());
                 for (std::size_t j = 0; j != M.size(); ++j)
                     buf[j] ^= M[j];
                 std::memcpy(C, buf.data(), m);
@@ -409,7 +409,7 @@ class Skein
         Generator generator;
         generator.reset(H);
         generator.tweak(t0, t1);
-        generator.enc(M.data(), H.data());
+        generator(M.data(), H.data());
         for (std::size_t i = 0; i != M.size(); ++i)
             H[i] ^= M[i];
         internal::union_le<char>(H);

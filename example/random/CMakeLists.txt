@@ -36,8 +36,6 @@ MCKL_ADD_EXAMPLE(random)
 FUNCTION(MCKL_ADD_TEST_RNG testname)
     ADD_CUSTOM_TARGET(random_${testname})
     ADD_CUSTOM_TARGET(random_${testname}-check)
-    ADD_DEPENDENCIES(random random_${testname})
-    ADD_DEPENDENCIES(random-check random_${testname}-check)
     IF(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
         ADD_LIBRARY(librandom_${testname}
             ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
@@ -116,6 +114,23 @@ SET(MCKL_RNG_THREEFRY
     Threefish512  Threefish512_64
     Threefish1024 Threefish1024_64)
 
+IF(Random123_FOUND)
+    SET(MCKL_RNG_R123_HEADER "random_r123.hpp")
+    SET(MCKL_RNG_R123_NAMESPACE "mckl")
+    SET(MCKL_RNG_R123
+        R123_Philox2x32
+        R123_Philox4x32
+        R123_Philox2x64
+        R123_Philox4x64
+        R123_Threefry2x32
+        R123_Threefry4x32
+        R123_Threefry2x64
+        R123_Threefry4x64)
+    IF(AESNI_FOUND)
+        SET(MCKL_RNG_R123 ${MCKL_RNG_R123} R123_AESNI4x32 R123_ARS4x32)
+    ENDIF(AESNI_FOUND)
+ENDIF(Random123_FOUND)
+
 IF(MKL_FOUND)
     SET(MCKL_RNG_MKL_HEADER "mckl/random/mkl.hpp")
     SET(MCKL_RNG_MKL_NAMESPACE "mckl")
@@ -140,6 +155,9 @@ IF(RDRAND_FOUND)
 ENDIF(RDRAND_FOUND)
 
 SET(MCKL_RNG STD AES PHILOX THREEFRY)
+IF(Random123_FOUND)
+    SET(MCKL_RNG ${MCKL_RNG} R123)
+ENDIF(Random123_FOUND)
 IF(MKL_FOUND)
     SET(MCKL_RNG ${MCKL_RNG} MKL)
 ENDIF(MKL_FOUND)
@@ -148,8 +166,9 @@ IF(RDRAND_FOUND)
 ENDIF(RDRAND_FOUND)
 
 SET(MCKL_DISTRIBUTION Arcsine Beta Cauchy ChiSquared Exponential ExtremeValue
-    FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto
-    Rayleigh Stable StudentT U01 UniformReal Weibull Geometric UniformInt)
+    FisherF Gamma Laplace Levy Logistic Lognormal Normal Pareto Rayleigh Stable
+    StudentT U01Canonical U01CC U01CO U01OC U01OO UniformReal Weibull Geometric
+    UniformInt)
 
 ADD_CUSTOM_TARGET(librandom_rng_u01)
 FOREACH(RNG ${MCKL_RNG})
@@ -172,16 +191,26 @@ ENDFOREACH(RNG ${MCKL_RNG})
 
 ADD_CUSTOM_TARGET(random_distribution)
 ADD_CUSTOM_TARGET(random_distribution-check)
-ADD_DEPENDENCIES(random random_distribution)
-ADD_DEPENDENCIES(random-check random_distribution-check)
 FOREACH(Dist ${MCKL_DISTRIBUTION})
     SET(DistName ${Dist})
     SET(DistType ::mckl::${Dist}Distribution)
-    STRING(REGEX REPLACE "([A-Z])" "_\\1" Dist ${Dist})
-    STRING(REGEX REPLACE "^_" "" Dist ${Dist})
-    STRING(TOLOWER ${Dist} distname)
-    STRING(TOUPPER ${Dist} DISTNAME)
-    SET(DistHeader "mckl/random/${distname}_distribution.hpp")
+    IF(${DistName} MATCHES "U01Canonical")
+        SET(DISTNAME "U01_CANONICAL")
+        SET(distname "u01_canonical")
+        SET(DistHeader "mckl/random/u01_distribution.hpp")
+    ELSEIF(${DistName} MATCHES "U01")
+        SET(DISTNAME ${DistName})
+        STRING(REGEX REPLACE "U01(..)" "U01_\\1" Dist ${Dist})
+        STRING(REGEX REPLACE "^_" "" Dist ${Dist})
+        STRING(TOLOWER ${Dist} distname)
+        SET(DistHeader "mckl/random/u01_distribution.hpp")
+    ELSE(${DistName} MATCHES "U01Canonical")
+        STRING(REGEX REPLACE "([A-Z])" "_\\1" Dist ${Dist})
+        STRING(REGEX REPLACE "^_" "" Dist ${Dist})
+        STRING(TOLOWER ${Dist} distname)
+        STRING(TOUPPER ${Dist} DISTNAME)
+        SET(DistHeader "mckl/random/${distname}_distribution.hpp")
+    ENDIF(${DistName} MATCHES "U01Canonical")
     CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/random_distribution.cpp.in
         ${PROJECT_BINARY_DIR}/src/random_distribution_${distname}.cpp)
     MCKL_ADD_TEST(random distribution_${distname} "BIN")
@@ -206,13 +235,14 @@ MCKL_ADD_TEST(random aes)
 MCKL_ADD_TEST(random seed)
 MCKL_ADD_TEST(random skein)
 MCKL_ADD_TEST(random threefish)
-MCKL_ADD_TEST(random u01)
+MCKL_ADD_TEST(random u01_range)
 IF(MKL_FOUND)
     MCKL_ADD_TEST(random mkl_brng)
 ENDIF(MKL_FOUND)
 
 MCKL_ADD_TEST_RNG(rng)
 MCKL_ADD_TEST_RNG(test)
+MCKL_ADD_TEST_RNG(u01)
 IF(TestU01_FOUND)
     MCKL_ADD_TEST_RNG(testu01_bigcrush)
     MCKL_ADD_TEST_RNG(testu01_crush)
@@ -231,6 +261,10 @@ MCKL_ADD_FILE(random random_aes128.txt)
 MCKL_ADD_FILE(random random_aes192.txt)
 MCKL_ADD_FILE(random random_aes256.txt)
 MCKL_ADD_FILE(random random_ars.txt)
+MCKL_ADD_FILE(random random_aes128_64.txt)
+MCKL_ADD_FILE(random random_aes192_64.txt)
+MCKL_ADD_FILE(random random_aes256_64.txt)
+MCKL_ADD_FILE(random random_ars_64.txt)
 
 MCKL_ADD_FILE(random random_philox2x32.txt)
 MCKL_ADD_FILE(random random_philox2x64.txt)

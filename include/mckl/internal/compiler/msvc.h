@@ -32,6 +32,8 @@
 #ifndef MCKL_INTERNAL_COMPILER_MSVC_H
 #define MCKL_INTERNAL_COMPILER_MSVC_H
 
+#include <intrin.h>
+
 #define MCKL_MSVC_VERSION _MSC_VER
 
 #ifndef MCKL_HAS_LITTLE_ENDIAN
@@ -40,18 +42,6 @@
 
 #ifndef MCKL_HAS_BIG_ENDIAN
 #define MCKL_HAS_BIG_ENDIAN 0
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
-#endif
 #endif
 
 #ifdef __SSE2__
@@ -93,6 +83,36 @@
 #ifdef __AVX2__
 #ifndef MCKL_HAS_AVX2
 #define MCKL_HAS_AVX2 1
+#endif
+#endif
+
+#ifdef __AVX__
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_RDRAND
+#define MCKL_HAS_RDRAND 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_BMI
+#define MCKL_HAS_BMI 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_BMI2
+#define MCKL_HAS_BMI2 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_FMA
+#define MCKL_HAS_FMA 1
 #endif
 #endif
 

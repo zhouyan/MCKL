@@ -29,6 +29,10 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#define MCKL_U01_USE_FIXED_POINT 0
+
+#define MCKL_U01_USE_64BITS_DOUBLE 0
+
 // clang-format off
 #define MCKL_EXAMPLE_RANDOM_@DISTNAME@_DISTRIBUTION 1
 // clang-format on

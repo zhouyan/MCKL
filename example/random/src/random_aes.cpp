@@ -40,7 +40,7 @@
     std::memcpy(test_ctr##N.data(), ctr##N, sizeof(test_ctr##N));             \
     mckl::internal::union_le<std::uint8_t>(test_key##N);                      \
     generator##N.reset(test_key##N);                                          \
-    generator##N.enc(test_ctr##N.data(), test_res##N.data());                 \
+    generator##N(test_ctr##N.data(), test_res##N.data());                     \
     bool pass##N =                                                            \
         std::memcmp(test_res##N.data(), res##N, sizeof(test_res##N)) == 0;    \
     std::cout << std::setw(16) << std::left << std::string("AES-" #N ":")     \

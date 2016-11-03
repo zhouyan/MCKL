@@ -172,6 +172,13 @@ MCKL_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 namespace internal
 {
 
+template <typename T, std::size_t K = 1>
+class BufferSize
+    : public std::integral_constant<std::size_t,
+          8192 / (sizeof(T) * K) == 0 ? 1 : 8192 / (sizeof(T) * K)>
+{
+}; // class BufferSize;
+
 template <typename T>
 using is_blas_floating_point = std::integral_constant<bool,
     std::is_same<typename std::remove_cv<T>::type, float>::value ||

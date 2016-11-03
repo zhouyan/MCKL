@@ -58,10 +58,10 @@ inline void arcsine_distribution_impl(
     fma(n, r, b - a, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Arcsine, arcsine, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Arcsine, arcsine, RealType, RealType, a, RealType, b)
 
 /// \brief Arcsine distribution
 /// \ingroup Distribution

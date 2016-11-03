@@ -29,7 +29,19 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-class AES128KeySeqGenerator
+#ifndef MCKL_RANDOM_INTERNAL_AES_GENERIC_HPP
+#define MCKL_RANDOM_INTERNAL_AES_GENERIC_HPP
+
+#include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/aes_constants.hpp>
+
+namespace mckl
+{
+
+namespace internal
+{
+
+class AES128KeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -84,9 +96,9 @@ class AES128KeySeqGenerator
         std::get<N>(rk) = tmp0_;
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
-}; // class AES128KeySeqGenerator
+}; // class AES128KeySeqGeneratorGenericImpl
 
-class AES192KeySeqGenerator
+class AES192KeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 6>;
@@ -147,9 +159,9 @@ class AES192KeySeqGenerator
         std::get<N>(rk) = tmp0_;
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rs1>());
     }
-}; // class AES192KeySeqGenerator
+}; // class AES192KeySeqGeneratorGenericImpl
 
-class AES256KeySeqGenerator
+class AES256KeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 8>;
@@ -238,10 +250,10 @@ class AES256KeySeqGenerator
 
         std::get<N>(rk) = tmp1_;
     }
-}; // class AES256KeySeqGenerator
+}; // class AES256KeySeqGeneratorGenericImpl
 
 template <typename Constants>
-class ARSKeySeqGenerator
+class ARSKeySeqGeneratorGenericImpl
 {
     public:
     using key_type = std::array<std::uint32_t, 4>;
@@ -292,36 +304,21 @@ class ARSKeySeqGenerator
         std::get<3>(std::get<N>(rk)) = static_cast<std::uint32_t>(k1 >> 32);
         generate<N + 1>(rk, std::integral_constant<bool, N + 1 < Rp1>());
     }
-}; // class ARSKeySeqGenerator
+}; // class ARSKeySeqGeneratorGenericImpl
 
 template <typename KeySeqType>
-class AESGeneratorImpl
+class AESGeneratorGenericImpl
 {
     public:
     static constexpr bool batch() { return false; }
 
-    static void eval(std::array<std::uint32_t, 4> &state,
+    static void eval(std::array<std::uint32_t, 4> &s,
         const std::array<std::array<std::uint32_t, 4>,
             KeySeqType::rounds() + 1> &rk)
     {
-        encfirst(state, rk);
-        enc<0x1>(state, rk);
-        enc<0x2>(state, rk);
-        enc<0x3>(state, rk);
-        enc<0x4>(state, rk);
-        enc<0x5>(state, rk);
-        enc<0x6>(state, rk);
-        enc<0x7>(state, rk);
-        enc<0x8>(state, rk);
-        enc<0x9>(state, rk);
-        enc<0xA>(state, rk);
-        enc<0xB>(state, rk);
-        enc<0xC>(state, rk);
-        enc<0xD>(state, rk);
-        enc<0xE>(state, rk);
-        enc<0xF>(state, rk);
-        round<0x10>(state, rk, std::integral_constant<bool, 0x10 < rounds_>());
-        enclast(state, rk);
+        encfirst(s, rk);
+        round<1>(s, rk, std::integral_constant<bool, 1 < rounds_>());
+        enclast(s, rk);
     }
 
     private:
@@ -422,4 +419,10 @@ class AESGeneratorImpl
 
         s = t;
     }
-}; // class AESGeneratorImpl
+}; // class AESGeneratorGenericImpl
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#endif // MCKL_RANDOM_INTERNAL_AES_GENERIC_HPP

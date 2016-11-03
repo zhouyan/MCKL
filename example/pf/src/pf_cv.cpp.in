@@ -33,6 +33,10 @@
 
 int main(int argc, char **argv)
 {
+#if MCKL_EXAMPLE_CROSS_COMPILING
+    mckl::BackendSTD::instance().np(1);
+#endif
+
     std::size_t N = 10000;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
@@ -42,7 +46,7 @@ int main(int argc, char **argv)
         mckl::@Backend@,
         mckl::@Scheme@,
         mckl::@Layout@,
-        mckl::@RNGSet@<>>(N);
+        mckl::@RNGSet@<mckl::RNG>>(N);
     // clang-format on
 
     return 0;

@@ -32,6 +32,8 @@
 #ifndef MCKL_RANDOM_INTERNAL_AES_COSNTANTS_HPP
 #define MCKL_RANDOM_INTERNAL_AES_COSNTANTS_HPP
 
+#include <mckl/random/internal/common.hpp>
+
 namespace mckl
 {
 
@@ -296,7 +298,7 @@ class ARSConstantsWeyl
 } // namespace mckl::internal
 
 /// \brief Default ARS constants
-/// \ingroup AESNI
+/// \ingroup AES
 class ARSConstants
 {
     public:

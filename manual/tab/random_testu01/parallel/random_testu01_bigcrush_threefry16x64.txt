@@ -1,0 +1,16 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  160
+ ----------------------------------------------
+ 35  Gap, r = 25                     4.2e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  160
+ ----------------------------------------------
+ 23  ClosePairs mNP2, t = 5          6.1e-4
+ ----------------------------------------------
+ All other tests were passed
+

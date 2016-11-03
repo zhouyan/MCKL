@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  4
+ ----------------------------------------------
+ 47  MaxOft, t = 16                 1 -  1.5e-5
+ ----------------------------------------------
+ All other tests were passed
+

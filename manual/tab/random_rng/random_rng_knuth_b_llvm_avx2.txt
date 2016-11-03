@@ -1,0 +1,5 @@
+knuth_b                 1032       4          20.83          21.75      ---Passed
+knuth_b                 1032       4          20.76          21.72      ---Passed
+knuth_b                 1032       4          20.83          21.71      ---Passed
+knuth_b                 1032       4          20.87          21.78      ---Passed
+knuth_b                 1032       4          20.83          21.77      ---Passed

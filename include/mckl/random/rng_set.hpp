@@ -55,7 +55,7 @@ namespace mckl
 
 /// \brief Scalar RNG set
 /// \ingroup Random
-template <typename RNGType = RNGFast>
+template <typename RNGType = RNG>
 class RNGSetScalar
 {
     MCKL_DEFINE_NEW_DELETE(RNGSetScalar<RNGType>)
@@ -81,7 +81,7 @@ class RNGSetScalar
 
 /// \brief Vector RNG set
 /// \ingroup Random
-template <typename RNGType = RNGMini>
+template <typename RNGType = RNG>
 class RNGSetVector
 {
     public:
@@ -122,7 +122,7 @@ class RNGSetVector
 
 /// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// \ingroup Random
-template <typename RNGType = RNGFast,
+template <typename RNGType = RNG,
     typename Alloc = ::tbb::cache_aligned_allocator<RNGType>,
     ::tbb::ets_key_usage_type ETSKeyType = ::tbb::ets_no_key>
 class RNGSetTBBEnumerable
@@ -153,14 +153,14 @@ class RNGSetTBBEnumerable
 /// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// without native TLS keys
 /// \ingroup Random
-template <typename RNGType = RNGFast>
+template <typename RNGType = RNG>
 using RNGSetTBB = RNGSetTBBEnumerable<RNGType,
     ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_no_key>;
 
 /// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// with native TLS keys
 /// \ingroup Random
-template <typename RNGType = RNGFast>
+template <typename RNGType = RNG>
 using RNGSetTBBKPI = RNGSetTBBEnumerable<RNGType,
     ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_key_per_instance>;
 

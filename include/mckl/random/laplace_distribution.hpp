@@ -67,10 +67,10 @@ inline void laplace_distribution_impl(
     fma(n, s.data(), r, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Laplace, laplace, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Laplace, laplace, RealType, RealType, a, RealType, b)
 
 /// \brief Laplace distribution
 /// \ingroup Distribution

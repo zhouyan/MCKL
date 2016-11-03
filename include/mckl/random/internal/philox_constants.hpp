@@ -32,6 +32,8 @@
 #ifndef MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP
 #define MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP
 
+#include <mckl/random/internal/common.hpp>
+
 namespace mckl
 {
 
@@ -100,37 +102,6 @@ class PhiloxConstantsMultiplier<T, 4, 64>
     static constexpr T value[2] = {0xCA5A826395121157, 0xD2E7470EE14C6C93};
 }; // class PhiloxConstantsMultiplier
 
-template <typename, std::size_t>
-class PhiloxConstantsPermute;
-
-template <typename T>
-class PhiloxConstantsPermute<T, 2>
-{
-    public:
-    static constexpr std::size_t value[2] = {0, 1};
-}; // class PhiloxConstantsPermute
-
-template <typename T>
-class PhiloxConstantsPermute<T, 4>
-{
-    public:
-    static constexpr std::size_t value[4] = {0, 3, 2, 1};
-}; // class PhiloxConstantsPermute
-
-template <typename T>
-class PhiloxConstantsPermute<T, 8>
-{
-    public:
-    static constexpr std::size_t value[8] = {2, 1, 4, 7, 6, 5, 0, 3};
-}; // class PhiloxConstantsPermute
-
-template <typename T>
-class PhiloxConstantsPermute<T, 16>
-{
-    static constexpr std::size_t value[16] = {
-        0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1};
-}; // class PhiloxConstantsPermute
-
 } // namespace mckl::internal
 
 /// \brief Default Philox constants
@@ -141,7 +112,6 @@ class PhiloxConstants
     public:
     using weyl = internal::PhiloxConstantsWeyl<T, K>;
     using multiplier = internal::PhiloxConstantsMultiplier<T, K>;
-    using permute = internal::PhiloxConstantsPermute<T, K>;
 }; // class PhiloxConstants
 
 } // namespace mckl

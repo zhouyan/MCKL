@@ -186,10 +186,7 @@ using T = StateMatrix<RowMajor, 1, double>;
 class Eval : SamplerEvalSMP<T>
 {
     public:
-    void eval_each(size_t iter, ParticleIndex<T> idx)
-    {
-        idx(0) = normal_(rng_);
-    }
+    void eval_each(size_t iter, ParticleIndex<T> idx) { idx(0) = normal_(rng_); }
 
     private:
     std::mt19937 rng_;
@@ -340,10 +337,7 @@ For example,
 class Eval : SamplerEvalSMP<T, Eval, BackendTBB>
 {
     public:
-    void operator()(size_t iter, Particle<T> &particle)
-    {
-        run(iter, particle, G);
-    }
+    void operator()(size_t iter, Particle<T> &particle) { run(iter, particle, G); }
 
     void eval_each(size_t, ParticleIndex<T> idx);
 };
@@ -459,10 +453,7 @@ class Eval : public SamplerEvalSMP<T>
     public:
     Eval(std::size_t G) : G_(G) {}
 
-    void operator()(size_t iter, Particle<T> &particle)
-    {
-        run(iter, particle, G_);
-    }
+    void operator()(size_t iter, Particle<T> &particle) { run(iter, particle, G_); }
 
     void eval_range(size_t iter, const ParticleRang<T> &range);
 

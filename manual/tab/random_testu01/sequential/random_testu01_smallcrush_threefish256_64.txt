@@ -1,0 +1,8 @@
+========= Summary results of SmallCrush =========
+ Generator:        STD
+ Number of statistics:  15
+ ----------------------------------------------
+ 10  RandomWalk1 J                   0.9998
+ ----------------------------------------------
+ All other tests were passed
+

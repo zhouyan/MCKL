@@ -1,0 +1,16 @@
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+ 63  GCD, r = 0                      5.6e-6
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+ 24  SimpPoker, d = 16               6.8e-4
+ ----------------------------------------------
+ All other tests were passed
+

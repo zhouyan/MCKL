@@ -36,10 +36,9 @@ use Getopt::Long;
 
 my $run = 0;
 my $build = 0;
-my $llvm = "../../build/llvm-release";
-my $gnu = "../../build/gnu-release";
-my $intel = "../../build/intel-release";
-my $make = "ninja";
+my $llvm = "../../build/release-llvm";
+my $gnu = "../../build/release-gnu";
+my $intel = "../../build/release-intel";
 my $name;
 my $write = 0;
 my $pdf = 0;
@@ -49,13 +48,11 @@ GetOptions(
     "llvm=s"   => \$llvm,
     "gnu=s"    => \$gnu,
     "intel=s"  => \$intel,
-    "make=s"   => \$make,
     "name=s"   => \$name,
     "write"    => \$write,
     "pdf"      => \$pdf,
 );
 $build = 1 if $run;
-$write = 0 if $name;
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
@@ -70,6 +67,10 @@ Threefry8x64 Threefry16x64 Threefish256 Threefish512 Threefish1024
 Threefry2x32_64 Threefry4x32_64 Threefry2x64_64 Threefry4x64_64 Threefry8x64_64
 Threefry16x64_64 Threefish256_64 Threefish512_64 Threefish1024_64);
 
+my @r123 = qw(R123_AESNI4x32 R123_ARS4x32 R123_Philox2x32 R123_Philox4x32
+R123_Philox2x64 R123_Philox4x64 R123_Threefry2x32 R123_Threefry4x32
+R123_Threefry2x64 R123_Threefry4x64);
+
 my @mkl = qw(MKL_ARS5 MKL_PHILOX4X32X10 MKL_MCG59 MKL_MT19937 MKL_MT2203
 MKL_SFMT19937 MKL_NONDETERM MKL_ARS5_64 MKL_PHILOX4X32X10_64 MKL_MCG59_64
 MKL_MT19937_64 MKL_MT2203_64 MKL_SFMT19937_64 MKL_NONDETERM_64);
@@ -81,11 +82,12 @@ my %rng = (
     aes      => [@aes],
     philox   => [@philox],
     threefry => [@threefry],
+    r123     => [@r123],
     mkl      => [@mkl],
     rdrand   => [@rdrand],
 );
 
-my @keys = qw(std aes philox threefry mkl rdrand);
+my @keys = qw(std aes philox threefry r123 mkl rdrand);
 
 my @rng;
 for my $k (@keys) {
@@ -105,8 +107,6 @@ my @compiler = qw(llvm gnu intel);
 
 my %cpb_s;
 my %cpb_b;
-my %cpb_sp;
-my %cpb_bp;
 
 &build;
 &run;
@@ -119,13 +119,16 @@ sub build {
 
     my @target;
     push @target, "\Lrandom_rng_$_" for @rng;
-    for my $c (@compiler) {
-        my $d = $compiler{$c};
-        say $d;
-        if ($name) {
-            `$make -C $d @target 2>&1`;
-        } else {
-            `$make -C $d random_rng 2>&1`;
+    if (@target) {
+        for my $c (@compiler) {
+            my $d = $compiler{$c};
+            next if (not -d $d);
+            say $d;
+            if ($name) {
+                `ninja -C $d @target 2>&1`;
+            } else {
+                `ninja -C $d random_rng 2>&1`;
+            }
         }
     }
 }
@@ -134,44 +137,43 @@ sub run {
     return unless $run;
 
     for my $c (@compiler) {
-        my @result;
         my $d = $compiler{$c};
+        next if (not -d $d);
         say $d;
         for my $r (@rng) {
-            my $cmd = "$make -C $d \Lrandom_rng_$r-check 2>&1";
+            my $cmd = "ninja -C $d \Lrandom_rng_$r-check 2>&1";
             my $cpb_s = 0xFFFF;
             my $cpb_b = 0xFFFF;
-            my $cpb_sp = 0xFFFF;
-            my $cpb_bp = 0xFFFF;
             my $count = 0;
             my $pass = 1;
+            my @result;
             for (1..5) {
-                my @lines = grep { $_ =~ /Passed|Failed/ } split "\n", `$cmd`;
-                push @result, @lines;
+                my @lines = `$cmd`;
+                @lines = grep { /Passed|Failed/ } @lines;
                 for (@lines) {
                     $count++;
-                    $pass = 0 if (/Failed/);
-                    my @cpb = (split)[3..6];
-                    $cpb_s  = $cpb[0] if $cpb[0] < $cpb_s;
-                    $cpb_b  = $cpb[1] if $cpb[1] < $cpb_b;
-                    $cpb_sp = $cpb[2] if $cpb[2] < $cpb_sp;
-                    $cpb_bp = $cpb[3] if $cpb[3] < $cpb_bp;
+                    $pass = 0 if /Failed/;
+                    unless (/U01/) {
+                        push @result, $_;
+                        my @cpb = (split)[3, 4];
+                        $cpb_s  = $cpb[0] if $cpb[0] < $cpb_s;
+                        $cpb_b  = $cpb[1] if $cpb[1] < $cpb_b;
+                    }
                 }
             }
             my $line;
             if ($count) {
-                $line .= sprintf("%-20s", $r);
+                $line .= sprintf("%-25s", $r);
                 $line .= &format($cpb_s);
                 $line .= &format($cpb_b);
-                $line .= &format($cpb_sp);
-                $line .= &format($cpb_bp);
                 $line .= $pass ? "Passed" : "Failed";
                 say $line;
             }
-        }
-        if ($write) {
-            open my $txtfile, ">", "rng/random_rng_${c}_${simd}.txt";
-            say $txtfile $_ for @result;
+            if ($write and $count) {
+                open my $txtfile, ">",
+                "\Lrandom_rng/random_rng_${r}_${c}_${simd}.txt";
+                print $txtfile $_ for @result;
+            }
         }
     }
 }
@@ -179,28 +181,20 @@ sub run {
 sub read {
     for my $c (@compiler) {
         for my $s (@simd) {
-            open my $txtfile, "<", "rng/random_rng_${c}_${s}.txt";
-            my @lines = <$txtfile>;
             for my $r (@rng) {
-                my @result = grep { /$r\s+/ } @lines;
+                open my $txtfile, "<",
+                "\Lrandom_rng/random_rng_${r}_${c}_${s}.txt";
+                my @result = <$txtfile>;
                 if (@result) {
                     $cpb_s{$c}{$s}{$r} = 0xFFFF unless $cpb_s{$c}{$s}{$r};
                     $cpb_b{$c}{$s}{$r} = 0xFFFF unless $cpb_b{$c}{$s}{$r};
-                    $cpb_sp{$c}{$s}{$r} = 0xFFFF unless $cpb_sp{$c}{$s}{$r};
-                    $cpb_bp{$c}{$s}{$r} = 0xFFFF unless $cpb_bp{$c}{$s}{$r};
                     for (@result) {
-                        my @cpb = (split)[3..6];
+                        my @cpb = (split)[3, 4];
                         if ($cpb[0] < $cpb_s{$c}{$s}{$r}) {
                             $cpb_s{$c}{$s}{$r} = $cpb[0]
                         }
                         if ($cpb[1] < $cpb_b{$c}{$s}{$r}) {
                             $cpb_b{$c}{$s}{$r} = $cpb[1];
-                        }
-                        if ($cpb[2] < $cpb_sp{$c}{$s}{$r}) {
-                            $cpb_sp{$c}{$s}{$r} = $cpb[2];
-                        }
-                        if ($cpb[3] < $cpb_bp{$c}{$s}{$r}) {
-                            $cpb_bp{$c}{$s}{$r} = $cpb[3];
                         }
                     }
                 }
@@ -232,12 +226,9 @@ sub table {
     for my $k (@keys) {
         for my $s (@simd) {
             my $table;
-            my $table_p;
             for my $r (@{$rng{$k}}) {
                 my $line_s;
                 my $line_b;
-                my $line_sp;
-                my $line_bp;
                 for my $c (@compiler) {
                     if ($cpb_s{$c}{$s}{$r}) {
                         $line_s .= " & ";
@@ -247,23 +238,13 @@ sub table {
                         $line_b .= " & ";
                         $line_b .= &format($cpb_b{$c}{$s}{$r});
                     }
-                    if ($cpb_sp{$c}{$s}{$r}) {
-                        $line_sp .= " & ";
-                        $line_sp .= &format($cpb_sp{$c}{$s}{$r});
-                    }
-                    if ($cpb_bp{$c}{$s}{$r}) {
-                        $line_bp .= " & ";
-                        $line_bp .= &format($cpb_bp{$c}{$s}{$r});
-                    }
                 }
                 my $name = $r;
+                $name =~ s/R123_//g;
                 $name =~ s/_/\\_/g;
-                $name = " " x 2 . sprintf("%-30s", "\\texttt{$name}");
+                $name = " " x 2 . sprintf("%-35s", "\\texttt{$name}");
                 if ($line_s and $line_b) {
                     $table .= $name . $line_s . $line_b . "\\\\\n";
-                }
-                if ($line_sp and $line_bp) {
-                    $table_p .= $name . $line_sp . $line_bp . "\\\\\n";
                 }
             }
             if ($table) {
@@ -271,12 +252,6 @@ sub table {
                 print $texfile $header;
                 print $texfile $table;
                 print $texfile $footer;
-            }
-            if ($table_p) {
-                open my $texfile_p, ">", "\Lrandom_rng_${k}_${s}_p.tex";
-                print $texfile_p $header;
-                print $texfile_p $table_p;
-                print $texfile_p $footer;
             }
         }
     }

@@ -257,7 +257,18 @@ user defined type |T| only needs to support the following signature,
 ReturnType select(size_type N, const size_type *index);
 \end{verbatim}
 where |size_type| is |T::size_type| if such a type exists, and |size_t|
-otherwise.
+otherwise. To replace the type of \rng class within |Particle|, add the
+following definition of member type within the class |T|,
+\begin{verbatim}
+class T
+{
+    public:
+    using rng_set_type = RNGSet<RNGType>;
+};
+\end{verbatim}
+where |RNGType| is the desired type of \rng engine. See
+section~\ref{sec:Multiple RNG streams} for details of the class template
+|RNGSet|.
 
 The |Weight| type object is constructed with a single argument, the sample size
 $N$. To retrieve references to the type |T| and |Weight| objects, one can call,
@@ -335,11 +346,8 @@ $N$-vector of normalized weights. And last, |r| is a pointer of type
 |size_type| that points to the $N$-vector of the number of duplicates of each
 particles $r_{1:N}$. It is required that, the results shall satisfy $r_i\ge0$
 for $i=1,\dots,N$ and $\sum_{i=1}^N r_i = M$. The index vector is generated
-such that,
-\begin{gather*}
-  a_i = i \text{ if } r_i > 0 \text{ for } i = 1,\dots,\min\{N, M\} \\
-  \sum_{i=1}^M\bbI_{\{j\}}(a_i) = r_j \text{ for } j = 1,\dots,N
-\end{gather*}
+such that, $a_i = i$ if $r_i > 0$ for $i = 1,\dots,\min\{N, M\}$ and
+$\sum_{i=1}^M\bbI_{\{j\}}(a_i) = r_j$ for $j = 1,\dots,N$.
 
 \subsubsection{Resize with uniform selection}
 
@@ -429,15 +437,13 @@ class T : public Base
 {
     public:
     template <typename S>
-    using idx_base = Base::particle_index_type<S>;
+    using idx = Base::particle_index_type<S>;
 
     template <typename S>
-    class particle_index_type : public idx_base<S>
+    class particle_index_type : public idx<S>
     {
         public:
-        particle_index_type(size_type i, Particle<S> *pptr) : idx_base<S>(i, pptr)
-        {
-        }
+        particle_index_type(size_type i, Particle<S> *pptr) : idx<S>(i, pptr) {}
     };
 };
 \end{verbatim}
@@ -512,10 +518,6 @@ user defined callback function. More specifically,
 \begin{verbatim}
 using eval_type = std::function<void(size_t, size_t, Particle<T> &, double *)>;
 \end{verbatim}
-For example,
-\begin{verbatim}
-void phi(size_t t, size_t d, Particle<T> &particle, double *r);
-\end{verbatim}
 When this function is called. The first argument passed to it is $t$, the
 iteration number. The second is $d$, the dimension. The third is a reference to
 the particle system at iteration $t$. And the last is a pointer to a vector for
@@ -524,17 +526,14 @@ shall the function above behave. If it is true, then the function |phi| shall
 return the value of $\varphi$ directly, and the output parameter |r| points to
 a $d$-vector. In this case, |Monitor| merely records the values of $\varphi$ at
 each iteration. On the other hand, if |record_only| is false, then it is
-assumed that $\varphi$ takes the following form,
-\begin{equation*}
-  \varphi(X_{1:N}) = \sum_{i=1}^N W_i \varphi_i(X_i).
-\end{equation*}
-And the output parameter |r| is an $N$ by $d$ row major matrix, with the
-$d$-vector value $\varphi_i(X_i)$ written into each row of this matrix. And
-each time |phi| is called, |Monitor| computes and store the result of the
-summation above. The last parameter of the constructor of |Monitor| specifies
-when shall the calculation of $\varphi$ be carried out. We defer its discussion
-until we introduce the sampler in the next section. The evaluation object can
-be replaced later by the following method,
+assumed that $\varphi$ takes the form, $\varphi(X_{1:N}) = \sum_{i=1}^N W_i
+\varphi_i(X_i)$. And the output parameter |r| is an $N$ by $d$ row major
+matrix, with the $d$-vector value $\varphi_i(X_i)$ written into each row of
+this matrix. And each time |phi| is called, |Monitor| computes and store the
+result of the summation above. The last parameter of the constructor of
+|Monitor| specifies when shall the calculation of $\varphi$ be carried out. We
+defer its discussion until we introduce the sampler in the next section. The
+evaluation object can be replaced later by the following method,
 \begin{verbatim}
 void eval(
     const eval_type &e, bool record_only = false, MonitorStage stage = MonitorMCMC);
@@ -709,9 +708,6 @@ step. An example is provided in the next section.
 This is an example used in~\cite{Johansen:2009wd}. Through this example, we
 show how to implement a simple particle filter. It shall walk one through the
 basic features of the library introduced above.
-
-\subsection{Model and algorithm}
-\label{sub:Model and algorithm}
 
 The state space model, known as the almost constant velocity model in the
 tracking literature, provides a simple scenario. The state vector,

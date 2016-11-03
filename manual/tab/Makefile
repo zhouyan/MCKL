@@ -51,4 +51,4 @@ clean :
 	latexmk -c -f -silent random_distribution.tex
 	latexmk -c -f -silent random_rng.tex
 	latexmk -c -f -silent random_testu01.tex
-	rm *.tex
+	rm -f *.tex

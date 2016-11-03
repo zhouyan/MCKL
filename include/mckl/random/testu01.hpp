@@ -64,13 +64,21 @@ class TestU01
 
     /// \brief Reset the TestU01 generator to specified RNG and distribution
     template <typename RNGType, typename U01Type>
-    void reset(const std::string &name)
+    void reset(const std::string &name, bool parallel = false)
     {
-        release();
-        gen_ = ::unif01_CreateExternGen01(
-            const_cast<char *>(name.c_str()), u01<RNGType, U01Type>);
+        parallel ? reset(name, u01_mt<RNGType, U01Type, 1024, 8>) :
+                   reset(name, u01_st<RNGType, U01Type, 4096>);
     }
 
+    /// \brief Reset the TestU01 generator to specified RNG and distribution
+    template <typename RNGType, typename U01Type, std::size_t N, std::size_t M>
+    void reset(const std::string &name, bool parallel = false)
+    {
+        parallel ? reset(name, u01_mt<RNGType, U01Type, N, M>) :
+                   reset(name, u01_st<RNGType, U01Type, N>);
+    }
+
+    /// \brief Reset the TestU01 generator to specified distribution
     void reset(const std::string &name, double (*u01)())
     {
         release();
@@ -131,12 +139,9 @@ class TestU01
 
     ::unif01_Gen *gen_;
 
-    template <typename RNGType, typename U01Type>
-    static double u01()
+    template <typename RNGType, typename U01Type, std::size_t N, std::size_t M>
+    static double u01_mt()
     {
-        static const std::size_t N = internal::BufferSize<double>::value;
-        static const std::size_t M = std::thread::hardware_concurrency();
-
         static std::size_t index = N * M;
         static Vector<RNGType> rs(M);
         static Vector<double> result(N * M);
@@ -155,6 +160,22 @@ class TestU01
                 mckl::rand(rng, dist, N, r);
                 rs[i] = std::move(rng);
             }
+            index = 0;
+        }
+
+        return result[index++];
+    }
+
+    template <typename RNGType, typename U01Type, std::size_t N>
+    static double u01_st()
+    {
+        static std::size_t index = N;
+        static RNGType rng(mckl::Seed<RNGType>::instance().get());
+        static mckl::Vector<double> result(N);
+
+        if (index == N) {
+            U01Type dist;
+            mckl::rand(rng, dist, N, result.data());
             index = 0;
         }
 

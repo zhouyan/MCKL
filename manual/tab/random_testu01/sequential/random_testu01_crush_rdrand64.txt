@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+  9  CollisionOver, t = 20           9.3e-4
+ ----------------------------------------------
+ All other tests were passed
+

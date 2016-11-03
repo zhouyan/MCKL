@@ -32,6 +32,10 @@
 #ifndef MCKL_INTERNAL_COMPILER_INTEL_H
 #define MCKL_INTERNAL_COMPILER_INTEL_H
 
+#if MCKL_HAS_X86
+#include <x86intrin.h>
+#endif
+
 #define MCKL_INTEL_VERSION __INTEL_COMPILER
 
 #ifndef MCKL_HAS_LITTLE_ENDIAN
@@ -40,18 +44,6 @@
 
 #ifndef MCKL_HAS_BIG_ENDIAN
 #define MCKL_HAS_BIG_ENDIAN 0
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 1
-#endif
-#endif
-
-#ifdef __AVX2__
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 1
-#endif
 #endif
 
 #ifdef __SSE2__
@@ -96,17 +88,47 @@
 #endif
 #endif
 
-#ifdef __x86_64__
+#ifdef __AVX__
+#ifndef MCKL_HAS_AESNI
+#define MCKL_HAS_AESNI 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_RDRAND
+#define MCKL_HAS_RDRAND 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_BMI
+#define MCKL_HAS_BMI 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_BMI2
+#define MCKL_HAS_BMI2 1
+#endif
+#endif
+
+#ifdef __AVX2__
+#ifndef MCKL_HAS_FMA
+#define MCKL_HAS_FMA 1
+#endif
+#endif
+
+#ifndef MCKL_INT64
+#define MCKL_INT64 __int64
+#endif
+
+#if MCKL_HAS_X86_64
 #ifndef MCKL_HAS_INT128
 #define MCKL_HAS_INT128 1
 #endif
 #ifndef MCKL_INT128
 #define MCKL_INT128 __int128
 #endif
-#endif
-
-#ifndef MCKL_INT64
-#define MCKL_INT64 __int64
 #endif
 
 #ifndef MCKL_FLATTEN_CALL

@@ -1,0 +1,4 @@
+Arcsine<float>(0,1)                  81.57       81.81       16.90       18.15       VML    (0)--Passed
+Arcsine<double>(0,1)                 90.33       90.31       32.87       34.62       VML    (0)--Passed
+Arcsine<float>(0,1)                  74.97       75.05       42.46       43.71       C++    (0)--Passed
+Arcsine<double>(0,1)                 82.74       82.99       56.41       57.69       C++    (0)--Passed

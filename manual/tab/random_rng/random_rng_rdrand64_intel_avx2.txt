@@ -1,0 +1,5 @@
+RDRAND64                   1       1          30.93          31.03      ---Passed
+RDRAND64                   1       1          29.95          30.05      ---Passed
+RDRAND64                   1       1          30.45          30.50      ---Passed
+RDRAND64                   1       1          31.10          31.16      ---Passed
+RDRAND64                   1       1          30.50          30.55      ---Passed

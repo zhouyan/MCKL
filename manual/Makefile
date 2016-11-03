@@ -32,7 +32,7 @@
 .PHONY : all tab fig clean
 
 BUILD_CMD ?= ninja
-BUILD_DIR ?= ../build/llvm-release-sys
+BUILD_DIR ?= ../build/release-llvm
 
 all :
 	latexmk -silent -f manual.tex >/dev/null

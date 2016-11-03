@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+ 16  BirthdaySpacings, t = 8         6.9e-4
+ ----------------------------------------------
+ All other tests were passed
+

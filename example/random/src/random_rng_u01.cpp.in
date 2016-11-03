@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/include/random_rng_u01.hpp
+// MCKL/example/random/src/random_rng_u01.cpp.in
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -38,29 +38,78 @@
 #include <@RNGHeader@>
 #include "random_rng_u01.hpp"
 
+// clang-format off
+using RNGType = @RNGType@;
+// clang-format on
+
 void random_rng_load_seed(const std::string &basename)
 {
     std::ifstream is(basename + ".seed");
-    // clang-format off
     if (is)
-        is >> mckl::Seed<@RNGType@>::instance();
-    // clang-format on
+        is >> mckl::Seed<RNGType>::instance();
 }
 
 void random_rng_store_seed(const std::string &basename)
 {
     std::ofstream os(basename + ".seed");
-    // clang-format off
     if (os)
-        os << mckl::Seed<@RNGType@>::instance() << std::endl;
-    // clang-format on
+        os << mckl::Seed<RNGType>::instance() << std::endl;
 }
 
 template <typename RNGType, typename U01Type>
 inline double random_rng_u01_impl()
 {
-    static const std::size_t N = mckl::internal::BufferSize<double>::value;
-    static const std::size_t M = std::thread::hardware_concurrency();
+    constexpr std::size_t N = 8192;
+
+    static std::size_t index = N;
+    static RNGType rng(mckl::Seed<RNGType>::instance().get());
+    static mckl::Vector<double> result(N);
+
+    if (index == N) {
+        U01Type dist;
+        mckl::rand(rng, dist, N, result.data());
+        index = 0;
+    }
+
+    return result[index++];
+}
+
+double random_rng_std()
+{
+    return random_rng_u01_impl<RNGType,
+        std::uniform_real_distribution<double>>();
+}
+
+double random_rng_u01()
+{
+    return random_rng_u01_impl<RNGType, mckl::U01Distribution<double>>();
+}
+
+double random_rng_u01cc()
+{
+    return random_rng_u01_impl<RNGType, mckl::U01CCDistribution<double>>();
+}
+
+double random_rng_u01co()
+{
+    return random_rng_u01_impl<RNGType, mckl::U01CODistribution<double>>();
+}
+
+double random_rng_u01oc()
+{
+    return random_rng_u01_impl<RNGType, mckl::U01OCDistribution<double>>();
+}
+
+double random_rng_u01oo()
+{
+    return random_rng_u01_impl<RNGType, mckl::U01OODistribution<double>>();
+}
+
+template <typename RNGType, typename U01Type>
+inline double random_rng_u01_mt_impl()
+{
+    constexpr std::size_t N = 1024;
+    constexpr std::size_t M = 8;
 
     static std::size_t index = N * M;
     static mckl::Vector<RNGType> rs(M);
@@ -86,45 +135,33 @@ inline double random_rng_u01_impl()
     return result[index++];
 }
 
-double random_rng_std()
+double random_rng_std_mt()
 {
-    // clang-format off
-    return random_rng_u01_impl<@RNGType@,
+    return random_rng_u01_mt_impl<RNGType,
         std::uniform_real_distribution<double>>();
-    // clang-format on
 }
 
-double random_rng_u01()
+double random_rng_u01_mt()
 {
-    // clang-format off
-    return random_rng_u01_impl<@RNGType@, mckl::U01Distribution<double>>();
-    // clang-format on
+    return random_rng_u01_mt_impl<RNGType, mckl::U01Distribution<double>>();
 }
 
-double random_rng_u01cc()
+double random_rng_u01cc_mt()
 {
-    // clang-format off
-    return random_rng_u01_impl<@RNGType@, mckl::U01CCDistribution<double>>();
-    // clang-format on
+    return random_rng_u01_mt_impl<RNGType, mckl::U01CCDistribution<double>>();
 }
 
-double random_rng_u01co()
+double random_rng_u01co_mt()
 {
-    // clang-format off
-    return random_rng_u01_impl<@RNGType@, mckl::U01CODistribution<double>>();
-    // clang-format on
+    return random_rng_u01_mt_impl<RNGType, mckl::U01CODistribution<double>>();
 }
 
-double random_rng_u01oc()
+double random_rng_u01oc_mt()
 {
-    // clang-format off
-    return random_rng_u01_impl<@RNGType@, mckl::U01OCDistribution<double>>();
-    // clang-format on
+    return random_rng_u01_mt_impl<RNGType, mckl::U01OCDistribution<double>>();
 }
 
-double random_rng_u01oo()
+double random_rng_u01oo_mt()
 {
-    // clang-format off
-    return random_rng_u01_impl<@RNGType@, mckl::U01OODistribution<double>>();
-    // clang-format on
+    return random_rng_u01_mt_impl<RNGType, mckl::U01OODistribution<double>>();
 }

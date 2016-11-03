@@ -1,0 +1,5 @@
+RDRAND16                   1       1         123.58         123.31      ---Passed
+RDRAND16                   1       1         124.53         124.48      ---Passed
+RDRAND16                   1       1         127.66         127.30      ---Passed
+RDRAND16                   1       1         129.39         128.93      ---Passed
+RDRAND16                   1       1         128.39         128.37      ---Passed

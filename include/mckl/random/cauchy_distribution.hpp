@@ -57,10 +57,10 @@ inline void cauchy_distribution_impl(
     fma(n, r, b, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Cauchy, cauchy, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Cauchy, cauchy, RealType, RealType, a, RealType, b)
 
 /// \brief Cauchy distribution
 /// \ingroup Distribution

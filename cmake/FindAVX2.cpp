@@ -32,7 +32,7 @@
 #include <cassert>
 #include <cstdint>
 
-#ifdef _MSC_VERSION
+#ifdef _MSC_VER
 #include <intrin.h>
 #else
 #include <immintrin.h>

@@ -196,8 +196,13 @@ class Weight
             exp(n, w, w);
         }
         accw = std::accumulate(w, w + n, accw);
+#if MCKL_HAS_BLAS
         essw +=
             internal::cblas_ddot(static_cast<MCKL_BLAS_INT>(n), w, 1, w, 1);
+#else  // MCKL_HAS_BLAS
+        for (std::size_t i = 0; i != n; ++i)
+            essw += w[i] * w[i];
+#endif // MCKL_HAS_BLAS
     }
 }; // class Weight
 

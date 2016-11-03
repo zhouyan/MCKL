@@ -32,10 +32,7 @@
 #ifndef MCKL_INTERNAL_COMPILER_H
 #define MCKL_INTERNAL_COMPILER_H
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-
+#include <mckl/internal/compiler/platform.h>
 #if defined(__OPENCL_VERSION__)
 #define MCKL_OPENCL
 #include <mckl/internal/compiler/opencl.h>
@@ -52,6 +49,8 @@
 #define MCKL_MSVC
 #include <mckl/internal/compiler/msvc.h>
 #endif
+#include <mckl/internal/compiler/byte_order.h>
+#include <mckl/internal/compiler/intrin.h>
 
 #ifndef MCKL_OPENCL
 #ifdef __cplusplus
@@ -64,188 +63,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#endif
-#endif
-
-#ifndef UINT64_C
-#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
-#endif
-
-#ifndef MCKL_HAS_X86
-#if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
-    defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \
-    defined(__x86_64__) || defined(__amd64) || defined(__amd64__) ||          \
-    defined(_M_AMD64) || defined(_M_X64)
-#define MCKL_HAS_X86 1
-#else
-#define MCKL_HAS_X86 0
-#endif
-#endif
-
-#ifndef MCKL_HAS_X86_64
-#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||           \
-    defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
-#define MCKL_HAS_X86_64 1
-#else
-#define MCKL_HAS_X86_64 0
-#endif
-#endif
-
-#ifndef MCKL_HAS_LITTLE_ENDIAN
-#if MCKL_HAS_X86 || MCKL_HAS_X86_64
-#define MCKL_HAS_LITTLE_ENDIAN 1
-#else
-#define MCKL_HAS_LITTLE_ENDIAN 0
-#endif
-#endif
-
-#ifndef MCKL_HAS_BIG_ENDIAN
-#define MCKL_HAS_BIG_ENDIAN 0
-#endif
-
-#if MCKL_HAS_LITTLE_ENDIAN && MCKL_HAS_BIG_ENDIAN
-#error The platform cannot be both little and big endian
-#endif
-
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 0
-#endif
-
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 0
-#endif
-
-#ifndef MCKL_HAS_AVX2
-#define MCKL_HAS_AVX2 0
-#endif
-
-#ifndef MCKL_USE_AVX2
-#define MCKL_USE_AVX2 MCKL_HAS_AVX2
-#endif
-
-#ifndef MCKL_HAS_AVX
-#define MCKL_HAS_AVX MCKL_HAS_AVX2
-#endif
-
-#ifndef MCKL_USE_AVX
-#define MCKL_USE_AVX MCKL_HAS_AVX
-#endif
-
-#ifndef MCKL_HAS_SSE4_2
-#define MCKL_HAS_SSE4_2 MCKL_HAS_AVX
-#endif
-
-#ifndef MCKL_USE_SSE4_2
-#define MCKL_USE_SSE4_2 MCKL_HAS_SSE4_2
-#endif
-
-#ifndef MCKL_HAS_SSE4_1
-#define MCKL_HAS_SSE4_1 MCKL_HAS_SSE4_2
-#endif
-
-#ifndef MCKL_USE_SSE4_1
-#define MCKL_USE_SSE4_1 MCKL_HAS_SSE4_1
-#endif
-
-#ifndef MCKL_HAS_SSSE3
-#define MCKL_HAS_SSSE3 MCKL_HAS_SSE4_1
-#endif
-
-#ifndef MCKL_USE_SSSE3
-#define MCKL_USE_SSSE3 MCKL_HAS_SSSE3
-#endif
-
-#ifndef MCKL_HAS_SSE3
-#define MCKL_HAS_SSE3 MCKL_HAS_SSSE3
-#endif
-
-#ifndef MCKL_USE_SSE3
-#define MCKL_USE_SSE3 MCKL_HAS_SSE3
-#endif
-
-#ifndef MCKL_HAS_SSE2
-#define MCKL_HAS_SSE2 MCKL_HAS_SSE3
-#endif
-
-#ifndef MCKL_USE_SSE2
-#define MCKL_USE_SSE2 MCKL_HAS_SSE2
-#endif
-
-#ifndef MCKL_HAS_INT128
-#define MCKL_HAS_INT128 0
-#endif
-
-#ifndef MCKL_INT64
-#define MCKL_INT64 long long
-#endif
-
-#if MCKL_HAS_AESNI
-#ifdef MCKL_MSVC
-#include <immintrin.h>
-#else
-#include <wmmintrin.h>
-#endif
-#endif
-
-#if MCKL_HAS_RDRAND
-#include <immintrin.h>
-#endif
-
-#if MCKL_USE_SSE2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <emmintrin.h>
-#endif
-#endif
-
-/*
-#if MCKL_USE_SSE3
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <pmmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_SSSE3
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <tmmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_SSE4_1
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <smmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_SSE4_2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <nmmintrin.h>
-#endif
-#endif
-
-#if MCKL_USE_AVX
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <immintrin.h>
-#endif
-#endif
-*/
-
-#if MCKL_USE_AVX2
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#else
-#include <immintrin.h>
 #endif
 #endif
 

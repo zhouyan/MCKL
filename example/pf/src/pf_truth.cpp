@@ -29,7 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <mckl/mckl.hpp>
+#include <mckl/core.hpp>
+#include <mckl/random/normal_distribution.hpp>
 
 using namespace mckl;
 
@@ -45,7 +46,7 @@ class PF : public PFBase
     {
         double x = 0;
         double y = 0;
-        std::ifstream data("pf_cv.data");
+        std::ifstream data("pf.data");
         while (data >> x >> y) {
             obs_x_.push_back(x);
             obs_y_.push_back(y);

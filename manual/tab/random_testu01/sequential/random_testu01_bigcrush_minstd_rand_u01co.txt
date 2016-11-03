@@ -1,0 +1,13 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  12
+ ----------------------------------------------
+ 28  SimpPoker, r = 0                5.4e-7
+ 28  SimpPoker, r = 0                5.1e-7
+ 85  Fourier3, r = 27                7.1e-4
+ 87  LongestHeadRun, r = 27          1.9e-5
+ 102  Run of bits, r = 27             5.6e-6
+ 102  Run of bits, r = 27             6.1e-4
+ ----------------------------------------------
+ All other tests were passed
+

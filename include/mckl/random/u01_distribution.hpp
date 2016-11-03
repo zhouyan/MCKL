@@ -39,7 +39,7 @@
 /// \brief Default U01 distribution using fixed point conversion
 /// \ingroup Config
 #ifndef MCKL_U01_USE_FIXED_POINT
-#define MCKL_U01_USE_FIXED_POINT 1
+#define MCKL_U01_USE_FIXED_POINT 0
 #endif
 
 /// \brief Use 64-bit intermediate random integers for double precison output
@@ -114,29 +114,16 @@ using U01UIntType =
 
 #endif // MCKL_U01_USE_64BITS_DOUBLE
 
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_cc)
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_co)
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oc)
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oo)
-
-#if MCKL_U01_USE_FIXED_POINT
-
-template <std::size_t K, typename RealType, typename RNGType>
-inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
-{
-    u01_co_distribution_impl<K>(rng, n, r);
-}
-
-#else // MCKL_U01_USE_FIXED_POINT
-
 template <std::size_t, typename RealType, typename UIntType>
-inline RealType u01_distribution_impl(const UIntType *, std::false_type)
+inline RealType u01_canonical_distribution_impl_trans(
+    const UIntType *, std::false_type)
 {
     return 0;
 }
 
 template <std::size_t N, typename RealType, typename UIntType>
-inline RealType u01_distribution_impl(const UIntType *u, std::true_type)
+inline RealType u01_canonical_distribution_impl_trans(
+    const UIntType *u, std::true_type)
 {
     constexpr int W = std::numeric_limits<UIntType>::digits;
     constexpr int M = std::numeric_limits<RealType>::digits;
@@ -144,13 +131,32 @@ inline RealType u01_distribution_impl(const UIntType *u, std::true_type)
     constexpr int Q = 1 > P ? 1 : P;
 
     return static_cast<RealType>(u[N]) *
-        U01Pow2Inv<RealType, (Q - N) * W>::value +
-        u01_distribution_impl<N + 1, RealType>(
+        Pow2<RealType, -static_cast<int>((Q - N) * W)>::value +
+        u01_canonical_distribution_impl_trans<N + 1, RealType>(
             u, std::integral_constant<bool, N + 1 < Q>());
 }
 
+template <typename UIntType, typename RealType, int W>
+inline void u01_canonical_distribution_impl_trans(std::size_t n,
+    const UIntType *u, RealType *r, std::integral_constant<int, W>)
+{
+    static_assert(std::numeric_limits<UIntType>::digits == W,
+        "**u01_canonical_distribution_avx2_impl_trans** used with unsigned "
+        "integer type with incorrect width");
+
+    constexpr int M = std::numeric_limits<RealType>::digits;
+    constexpr int P = (M + W - 1) / W;
+    constexpr int Q = 1 > P ? 1 : P;
+
+    for (std::size_t i = 0; i != n; ++i, u += Q) {
+        r[i] = u01_canonical_distribution_impl_trans<0, RealType>(
+            u, std::true_type());
+    }
+}
+
 template <std::size_t K, typename RealType, typename RNGType>
-inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
+inline void u01_canonical_distribution_impl(
+    RNGType &rng, std::size_t n, RealType *r)
 {
     using UIntType = U01UIntType<RNGType, RealType>;
 
@@ -162,52 +168,30 @@ inline void u01_distribution_impl(RNGType &rng, std::size_t n, RealType *r)
     alignas(32) std::array<UIntType, K * Q> s;
     uniform_bits_distribution(rng, n * Q, s.data());
     const UIntType *u = s.data();
-    for (std::size_t i = 0; i != n; ++i, u += Q)
-        r[i] = u01_distribution_impl<0, RealType>(u, std::true_type());
+    u01_canonical_distribution_impl_trans(
+        n, u, r, std::integral_constant<int, W>());
 }
 
-#endif // MCKL_U01_USE_FIXED_POINT
-
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01, u01, RealType)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CC, u01_cc, RealType)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01CO, u01_co, RealType)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OC, u01_oc, RealType)
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(U01OO, u01_oo, RealType)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_cc)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_co)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oc)
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oo)
 
 } // namespace mckl::internal
 
-/// \brief Standard uniform distribution on [0, 1]
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01CC, u01_cc)
-
-/// \brief Standard uniform distribution on [0, 1)
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01CO, u01_co)
-
-/// \brief Standard uniform distribution on (0, 1]
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01OC, u01_oc)
-
-/// \brief Standard uniform distribution on (0, 1)
-/// \ingroup Distribution
-MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01OO, u01_oo)
-
-#if MCKL_U01_USE_FIXED_POINT
-
-template <typename RealType>
-class U01Distribution : public U01CODistribution<RealType>
-{
-}; // class U01Distribution
-
-#else // MCKL_U01_USE_FIXED_POINT
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01Canonical, u01_canonical, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01CC, u01_cc, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01CO, u01_co, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01OC, u01_oc, RealType)
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01OO, u01_oo, RealType)
 
 /// \brief Standard uniform distribution on [0, 1)
 /// \ingroup Distribution
 template <typename RealType>
-class U01Distribution
+class U01CanonicalDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(U01)
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_0(U01, u01, RealType)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(U01Canonical)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_0(U01Canonical, u01_canonical, RealType)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
     public:
@@ -242,18 +226,56 @@ class U01Distribution
         constexpr int Q = 1 > P ? 1 : P;
 
         return static_cast<RealType>(ubits(rng)) *
-            internal::U01Pow2Inv<RealType, (Q - N) * W>::value +
+            internal::Pow2<RealType, -static_cast<int>((Q - N) * W)>::value +
             generate<N + 1>(rng, std::integral_constant<bool, N + 1 < Q>());
     }
-}; // class U01Distribution
+}; // class U01CanonicalDistribution
 
-#endif // MCKL_U01_USE_FIXED_POINT
+/// \brief Standard uniform distribution on [0, 1]
+/// \ingroup Distribution
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01CC, u01_cc)
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01, RealType)
+/// \brief Standard uniform distribution on [0, 1)
+/// \ingroup Distribution
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01CO, u01_co)
+
+/// \brief Standard uniform distribution on (0, 1]
+/// \ingroup Distribution
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01OC, u01_oc)
+
+/// \brief Standard uniform distribution on (0, 1)
+/// \ingroup Distribution
+MCKL_DEFINE_RANDOM_U01_DISTRIBUTION(U01OO, u01_oo)
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01Canonical, RealType)
 MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01CC, RealType)
 MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01CO, RealType)
 MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01OC, RealType)
 MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(U01OO, RealType)
+
+#if MCKL_U01_USE_FIXED_POINT
+
+template <typename RealType>
+using U01Distribution = U01CODistribution<RealType>;
+
+template <typename RealType, typename RNGType>
+inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    u01_co_distribution(rng, n, r);
+}
+
+#else // MCKL_U01_USE_FIXED_POINT
+
+template <typename RealType>
+using U01Distribution = U01CanonicalDistribution<RealType>;
+
+template <typename RealType, typename RNGType>
+inline void u01_distribution(RNGType &rng, std::size_t n, RealType *r)
+{
+    u01_canonical_distribution(rng, n, r);
+}
+
+#endif // MCKL_U01_USE_FIXED_POINT
 
 } // namespace mckl
 

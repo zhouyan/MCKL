@@ -1,0 +1,5 @@
+ranlux24_base            208       8          11.12          10.97      ---Passed
+ranlux24_base            208       8          11.12          10.97      ---Passed
+ranlux24_base            208       8          11.12          10.97      ---Passed
+ranlux24_base            208       8          11.12          10.97      ---Passed
+ranlux24_base            208       8          11.12          10.97      ---Passed

@@ -109,10 +109,6 @@
 
 // Optional libraries
 
-#ifndef MCKL_HAS_OPENCL
-#define MCKL_HAS_OPENCL 0
-#endif
-
 #ifndef MCKL_HAS_OMP
 #ifdef _OPENMP
 #define MCKL_HAS_OMP 1
@@ -155,6 +151,10 @@
 
 #ifndef MCKL_USE_MKL_VSL
 #define MCKL_USE_MKL_VSL MCKL_HAS_MKL
+#endif
+
+#ifndef MCKL_HAS_BLAS
+#define MCKL_HAS_BLAS MCKL_HAS_MKL
 #endif
 
 #ifndef MCKL_USE_CBLAS

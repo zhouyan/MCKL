@@ -66,10 +66,10 @@ inline void student_t_distribution_impl(
             r[i] = dist(rng);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(
-    StudentT, student_t, RealType, RealType, n)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    StudentT, student_t, RealType, RealType, n)
 
 /// \brief Student-t distribution
 /// \ingroup Distribution

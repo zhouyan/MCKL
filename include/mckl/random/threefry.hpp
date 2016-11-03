@@ -34,7 +34,19 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_constants.hpp>
+#include <mckl/random/internal/threefry_generic.hpp>
 #include <mckl/random/counter.hpp>
+#include <mckl/random/increment.hpp>
+
+#if MCKL_HAS_SSE2
+#include <mckl/random/internal/threefry_sse2_32.hpp>
+#include <mckl/random/internal/threefry_sse2_64.hpp>
+#endif
+
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/threefry_avx2_32.hpp>
+#include <mckl/random/internal/threefry_avx2_64.hpp>
+#endif
 
 /// \brief ThreefryGenerator default rounds
 /// \ingroup Config
@@ -42,50 +54,105 @@
 #define MCKL_THREEFRY_ROUNDS 20
 #endif
 
+#define MCKL_DEFINE_RANDOM_THREEFRY_U01(lr, bits)                             \
+    template <typename RealType>                                              \
+    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *r) const  \
+    {                                                                         \
+        internal::ThreefryGeneratorImpl<T, K, Rounds,                         \
+            Constants>::u01_##lr##_u##bits(ctr, par_, n, r);                  \
+    }
+
+#define MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(                         \
+    lr, rbits, tbits, kmax, rmax, ftype)                                      \
+    template <typename ResultType, typename T, std::size_t K,                 \
+        std::size_t Rounds, typename Constants>                               \
+    inline void u01_##lr##_distribution(                                      \
+        ThreefryEngine<ResultType, T, K, Rounds, Constants> &rng,             \
+        std::size_t n, ftype *r,                                              \
+        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
+                rbits &&                                                      \
+            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
+            Rounds <= rmax>::type * = nullptr)                                \
+    {                                                                         \
+        rng.u01_##lr##_u##rbits(n, r);                                        \
+    }
+
+#define MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL(bits)                        \
+    template <typename RealType>                                              \
+    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *r,      \
+        RealType a, RealType b) const                                         \
+    {                                                                         \
+        internal::ThreefryGeneratorImpl<T, K, Rounds,                         \
+            Constants>::uniform_real_u##bits(ctr, par_, n, r, a, b);          \
+    }
+
+#define MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(                \
+    rbits, tbits, kmax, rmax, ftype)                                          \
+    template <typename ResultType, typename T, std::size_t K,                 \
+        std::size_t Rounds, typename Constants>                               \
+    inline void uniform_real_distribution(                                    \
+        ThreefryEngine<ResultType, T, K, Rounds, Constants> &rng,             \
+        std::size_t n, ftype *r, ftype a, ftype b,                            \
+        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
+                rbits &&                                                      \
+            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
+            Rounds <= rmax>::type * = nullptr)                                \
+    {                                                                         \
+        rng.uniform_real_u##rbits(n, r, a, b);                                \
+    }
+
 namespace mckl
 {
 
 namespace internal
 {
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    int = std::numeric_limits<T>::digits>
+class ThreefryGeneratorImpl
+    : public ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
 
-#include <mckl/random/internal/threefry_generic.hpp>
 #if MCKL_USE_AVX2
-#include <mckl/random/internal/threefry_avx2_32.hpp>
-#include <mckl/random/internal/threefry_avx2_64.hpp>
-#elif MCKL_USE_SSE2
-#include <mckl/random/internal/threefry_sse2_32.hpp>
-#include <mckl/random/internal/threefry_sse2_64.hpp>
-#endif
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public ThreefryGeneratorAVX2Impl32<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
+    : public ThreefryGeneratorAVX2Impl64<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+#elif MCKL_USE_SSE2
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public ThreefryGeneratorSSE2Impl32<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class ThreefryGeneratorImpl<T, K, Rounds, Constants, 64>
+    : public ThreefryGeneratorSSE2Impl64<T, K, Rounds, Constants>
+{
+}; // class ThreefryGeneratorImpl
+
+#endif // MCKL_USE_AVX2
 
 } // namespace mckl::internal
 
 /// \brief Threefry RNG generator
 /// \ingroup Threefry
 ///
-/// \tparam T State type, must be 32- or 64-bit unsigned integers
-/// \tparam K State vector length, must be 2 or 4 (for 32- or 64-bit states) or
-/// 8 or 16 (64-bit state)
-/// \tparam Rounds Number of SP rounds
-/// \tparam Constants A trait class that defines algorithm constants, see
-/// ThreefryConstants
-///
-/// \details
-/// This generator implement the Threefry algorithm in
-/// [Random123](http://www.deshawresearch.com/resources_random123.html),
-/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
+/// \tparam T State vector value type
+/// \tparam K State vector length
+/// \tparam Rounds The number of rounds
+/// \tparam Constants A trait class that defines algorithm constants
 template <typename T, std::size_t K, std::size_t Rounds = MCKL_THREEFRY_ROUNDS,
     typename Constants = ThreefryConstants<T, K>>
 class ThreefryGenerator
@@ -138,50 +205,62 @@ class ThreefryGenerator
         std::get<K + 3>(par_) = t0 ^ t1;
     }
 
-    void enc(const void *plain, void *cipher) const
+    void operator()(const void *plain, void *cipher) const
     {
         alignas(32) union {
-            std::array<T, K> state;
-            std::array<char, size()> result;
+            std::array<T, K> s;
+            std::array<char, size()> r;
         } buf;
 
-        std::memcpy(buf.state.data(), plain, size());
-        internal::union_le<char>(buf.state);
+        std::memcpy(buf.s.data(), plain, size());
+        internal::union_le<char>(buf.s);
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buf.state, par_);
-        internal::union_le<T>(buf.result);
-        std::memcpy(cipher, buf.state.data(), size());
+            buf.s, par_);
+        internal::union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), size());
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, ResultType *result) const
+    void operator()(ctr_type &ctr, ResultType *r) const
     {
         alignas(32) union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
+            std::array<T, K> s;
+            ctr_type c;
+            std::array<ResultType, size() / sizeof(ResultType)> r;
         } buf;
 
-        MCKL_FLATTEN_CALL increment(ctr);
-        buf.ctr = ctr;
+        increment(ctr);
+        buf.c = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-        internal::union_le<typename ctr_type::value_type>(buf.state);
+        internal::union_le<typename ctr_type::value_type>(buf.s);
 #endif
         internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-            buf.state, par_);
+            buf.s, par_);
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-        internal::union_le<T>(buf.result);
+        internal::union_le<T>(buf.r);
 #endif
-        std::memcpy(result, buf.result.data(), size());
+        std::memcpy(r, buf.r.data(), size());
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, std::size_t n, ResultType *result) const
+    void operator()(ctr_type &ctr, std::size_t n, ResultType *r) const
     {
-        generate(ctr, n, result,
+        generate(ctr, n, r,
             std::integral_constant<bool, internal::ThreefryGeneratorImpl<T, K,
                                              Rounds, Constants>::batch()>());
     }
+
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(cc, 32)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(co, 32)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(oc, 32)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(oo, 32)
+    MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL(32)
+
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(cc, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(co, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(oc, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_U01(oo, 64)
+    MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL(64)
 
     friend bool operator==(
         const ThreefryGenerator<T, K, Rounds, Constants> &gen1,
@@ -232,47 +311,21 @@ class ThreefryGenerator
     std::array<T, K + 4> par_;
 
     template <typename ResultType>
-    void generate(ctr_type &ctr, std::size_t n, ResultType *result,
-        std::false_type) const
+    void generate(
+        ctr_type &ctr, std::size_t n, ResultType *r, std::false_type) const
     {
         constexpr std::size_t stride = size() / sizeof(ResultType);
 
-        for (std::size_t i = 0; i != n; ++i, result += stride)
-            operator()(ctr, result);
+        for (std::size_t i = 0; i != n; ++i, r += stride)
+            operator()(ctr, r);
     }
 
     template <typename ResultType>
     void generate(
-        ctr_type &ctr, std::size_t n, ResultType *result, std::true_type) const
+        ctr_type &ctr, std::size_t n, ResultType *r, std::true_type) const
     {
-        constexpr std::size_t stride = size() / sizeof(ResultType);
-        constexpr std::size_t blocks =
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::blocks();
-
-        alignas(32) union {
-            std::array<T, K * blocks> state;
-            std::array<std::array<T, K>, blocks> state_block;
-            std::array<ctr_type, blocks> ctr_block;
-            std::array<ResultType, size() / sizeof(ResultType) * blocks>
-                result;
-        } buf;
-
-        const std::size_t m = n / blocks;
-        const std::size_t l = n % blocks;
-        for (std::size_t i = 0; i != m; ++i, result += stride * blocks) {
-            MCKL_FLATTEN_CALL increment(ctr, buf.ctr_block);
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-            internal::union_le<typename ctr_type::value_type>(buf.state);
-#endif
-            internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
-                buf.state_block, par_);
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-            internal::union_le<T>(buf.result);
-#endif
-            std::memcpy(result, buf.result.data(), size() * blocks);
-        }
-        for (std::size_t i = 0; i != l; ++i, result += stride)
-            operator()(ctr, result);
+        internal::ThreefryGeneratorImpl<T, K, Rounds, Constants>::eval(
+            ctr, par_, n, r);
     }
 }; // class ThreefryGenerator
 
@@ -397,6 +450,50 @@ using Threefish512_64 = Threefish512Engine<std::uint64_t>;
 /// \brief Threefish-1024 RNG engine with 64-bit integer output
 /// \ingroup Threefry
 using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
+
+#if MCKL_USE_AVX2
+
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 16, 32, float)
+
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 16, 32, float)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 16, 32, float)
+
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 32, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 32, 16, 32, double)
+
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 64, 64, 16, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(64, 64, 16, 32, double)
+
+#if !MCKL_U01_USE_64BITS_DOUBLE
+
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 32, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 32, 8, 32, double)
+
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oc, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(oo, 32, 64, 8, 32, double)
+MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 8, 32, double)
+
+#endif // !MCKL_U01_USE_64BITS_DOUBLE
+
+#endif // MCKL_USE_AVX2
 
 } // namespace mckl
 

@@ -59,10 +59,10 @@ inline void logistic_distribution_impl(
     fma(n, r, b, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Logistic, logistic, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Logistic, logistic, RealType, RealType, a, RealType, b)
 
 /// \brief Logistic distribution
 /// \ingroup Distribution

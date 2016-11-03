@@ -57,10 +57,10 @@ inline void rayleigh_distribution_impl(
     sqrt(n, r, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(
-    Rayleigh, rayleigh, RealType, RealType, sigma)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    Rayleigh, rayleigh, RealType, RealType, sigma)
 
 /// \brief Rayleigh distribution
 /// \ingroup Distribution

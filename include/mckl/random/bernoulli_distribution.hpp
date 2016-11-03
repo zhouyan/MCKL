@@ -58,9 +58,10 @@ inline void bernoulli_distribution_impl(
             r[i] = 1;
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Bernoulli, bernoulli, InType, double, p)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    Bernoulli, bernoulli, InType, double, p)
 
 /// \brief Bernoulli distribution
 /// \ingroup Distribution

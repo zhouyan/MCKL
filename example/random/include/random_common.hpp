@@ -35,8 +35,18 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-template <typename>
-inline std::string random_typename();
+template <typename IntType>
+inline std::string random_typename()
+{
+    std::string type;
+    if (std::is_unsigned<IntType>::value)
+        type += "u";
+    type += "int";
+    type += std::to_string(sizeof(IntType) * CHAR_BIT);
+    type += "_t";
+
+    return type;
+}
 
 template <>
 inline std::string random_typename<float>()
@@ -54,30 +64,6 @@ template <>
 inline std::string random_typename<long double>()
 {
     return "long double";
-}
-
-template <>
-inline std::string random_typename<std::int32_t>()
-{
-    return "int32_t";
-}
-
-template <>
-inline std::string random_typename<std::uint32_t>()
-{
-    return "uint32_t";
-}
-
-template <>
-inline std::string random_typename<std::int64_t>()
-{
-    return "int64_t";
-}
-
-template <>
-inline std::string random_typename<std::uint64_t>()
-{
-    return "uint64_t";
 }
 
 template <>

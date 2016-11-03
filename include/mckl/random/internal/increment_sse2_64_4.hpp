@@ -29,95 +29,100 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_4_HPP
+#define MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_4_HPP
+
+#include <mckl/random/internal/increment_generic.hpp>
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+#endif
+
+namespace mckl
+{
+
+namespace internal
+{
+
 template <typename T>
-class IncrementBlock<T, 1, 8, 64>
+class IncrementBlockSI128<T, 1, 8, 64>
 {
     static constexpr std::size_t K_ = 1;
-    static constexpr std::size_t blocks_ = 8;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 4> &s)
     {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
+        __m128i c = _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        std::get<0>(s) = _mm_add_epi64(c, _mm_set_epi64x(2, 1));
+        std::get<1>(s) = _mm_add_epi64(c, _mm_set_epi64x(4, 3));
+        std::get<2>(s) = _mm_add_epi64(c, _mm_set_epi64x(6, 5));
+        std::get<3>(s) = _mm_add_epi64(c, _mm_set_epi64x(8, 7));
     }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
-    {
-        __m128i a0 =
-            _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
-
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(2, 1));
-        __m128i c1 = _mm_add_epi64(a0, _mm_set_epi64x(4, 3));
-        __m128i c2 = _mm_add_epi64(a0, _mm_set_epi64x(6, 5));
-        __m128i c3 = _mm_add_epi64(a0, _mm_set_epi64x(8, 7));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, c1);
-        _mm_store_si128(cptr++, c2);
-        _mm_store_si128(cptr++, c3);
-    }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
 
 template <typename T>
-class IncrementBlock<T, 2, 4, 64>
+class IncrementBlockSI128<T, 2, 4, 64>
 {
     static constexpr std::size_t K_ = 2;
-    static constexpr std::size_t blocks_ = 4;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 4> &s)
     {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
-    }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
-    {
-        __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
-        __m128i c1 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-        __m128i c2 = _mm_add_epi64(a0, _mm_set_epi64x(0, 3));
-        __m128i c3 = _mm_add_epi64(a0, _mm_set_epi64x(0, 4));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, c1);
-        _mm_store_si128(cptr++, c2);
-        _mm_store_si128(cptr++, c3);
+        std::get<0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 1));
+        std::get<1>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 2));
+        std::get<2>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 3));
+        std::get<3>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 4));
     }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
 
 template <typename T>
-class IncrementBlock<T, 4, 2, 64>
+class IncrementBlockSI128<T, 4, 2, 64>
 {
     static constexpr std::size_t K_ = 4;
-    static constexpr std::size_t blocks_ = 2;
 
     public:
-    MCKL_FLATTEN static bool aligned(void *ptr)
+    static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 4> &s)
     {
-        return reinterpret_cast<std::uintptr_t>(ptr) % 16 == 0;
-    }
-
-    MCKL_FLATTEN static void eval(std::array<T, K_> &ctr,
-        std::array<std::array<T, K_>, blocks_> &ctr_block)
-    {
-        __m128i a0 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
             static_cast<MCKL_INT64>(std::get<0>(ctr)));
-        __m128i a1 = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
-            static_cast<MCKL_INT64>(std::get<2>(ctr)));
 
-        __m128i c0 = _mm_add_epi64(a0, _mm_set_epi64x(0, 1));
-        __m128i c2 = _mm_add_epi64(a0, _mm_set_epi64x(0, 2));
-
-        __m128i *cptr = reinterpret_cast<__m128i *>(ctr_block.data());
-        _mm_store_si128(cptr++, c0);
-        _mm_store_si128(cptr++, a1);
-        _mm_store_si128(cptr++, c2);
-        _mm_store_si128(cptr++, a1);
+        std::get<0>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 1));
+        std::get<1>(s) =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<3>(ctr)),
+                static_cast<MCKL_INT64>(std::get<2>(ctr)));
+        std::get<2>(s) = _mm_add_epi64(c, _mm_set_epi64x(0, 2));
+        std::get<3>(s) = std::get<1>(s);
     }
-}; // class IncrementBlock
+}; // class IncrementBlockSI128
+
+template <typename T>
+class IncrementBlockSI128<T, 8, 1, 64>
+{
+    static constexpr std::size_t K_ = 8;
+
+    public:
+    static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 4> &s)
+    {
+        std::memcpy(s.data(), ctr.data(), 64);
+        std::get<0>(s) = _mm_add_epi64(std::get<0>(s), _mm_set_epi64x(0, 1));
+    }
+}; // class IncrementBlockSI128
+
+} // namespace mckl::internal
+
+} // namespace mckl
+
+#ifdef MCKL_GCC
+#if MCKL_GCC_VERSION >= 60000
+#pragma GCC diagnostic pop
+#endif
+#endif
+
+#endif // MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_4_HPP

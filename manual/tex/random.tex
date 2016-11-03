@@ -32,18 +32,15 @@
 \chapter{Random number generating}
 \label{chap:Random number generating}
 
-\mckl has an \rng system for implementing Monte Carlo algorithms. Similar to
-the standard library header |<random>|, there are mainly two parts of this
-system. The first is a set of \rng engines that generate random integers. The
-other is a set of distribution generators. The former are documented in
-sections~\ref{sec:Counter-based RNG} to~\ref{sec:MKL RNG}, and the later in
-sections~\ref{sec:Uniform bits distribution} to~\ref{sec:Multivariate
-distribution}. The library also provides facilities for vectorized random
-number generating (section~\ref{sec:Vectorized random number generating}),
-generating distinctive seeds within a program (section~\ref{sec:Seeding
-counter-based RNG}), and using multiple \rng{}s in parallel programs
-(section~\ref{sec:Multiple RNG streams}). Last, in section~\ref{sec:Randomness
-tests}, a few randomness tests are discussed.
+In this chapter, we first introduce vectorized random number generating in
+section~\ref{sec:Vectorized random number generating}. Then a set of \rng
+engines are discussed in sections~\ref{sec:Counter-based RNG}
+to~\ref{sec:Non-deterministic RNG}. Section~\ref{sec:Seeding RNG} shows how to
+seed multiple distinctive \rng instances, either within a single program or
+across multiple computing nodes. Section~\ref{sec:Multiple RNG streams} shows
+how multiple \rng instances in a parallelized program can be managed. Last, a
+set of distribution generators are discussed in sections~\ref{sec:Uniform bits
+distribution} to~\ref{sec:Multivariate distribution}.
 
 \section{Vectorized random number generating}
 \label{sec:Vectorized random number generating}
@@ -55,7 +52,14 @@ integers,
 template <typename RNGType>
 void rand(RNGType &rng, size_t n, typename RNGType::result_type *r);
 \end{verbatim}
-The effect of the function call, |rand(rng, n, r)|, is equivalent to the loop,
+For example,
+\begin{verbatim}
+RNGType rng;
+constexpr std::size_t n = 1024;
+typename RNGType::result_type r[n];
+rand(rng, n, r);
+\end{verbatim}
+The effect of the function call above is equivalent to the following loop,
 \begin{verbatim}
 for (size_t i = 0; i != n; ++i)
     r[i] = rng();
@@ -63,17 +67,19 @@ for (size_t i = 0; i != n; ++i)
 The results are always the same unless a non-deterministic \rng is used (see
 section~\ref{sec:Non-deterministic RNG}). For some \rng{}s implemented in
 \mckl, the vectorized function may have considerable performance advantage. See
-appendix~\ref{chap:Performance of RNG}.
-
-The second variant of |rand| is for generating distribution random variates,
+appendix~\ref{chap:Performance of RNG}. The second variant of |rand| is for
+generating distribution random variates,
 \begin{verbatim}
 template <typename RNGType, typename DistributionType>
-void rand(RNGType &rng, const DistributionType &distribution, size_t n,
+void rand(RNGType &rng, DistributionType &distribution, size_t n,
     typename DistributionType::result_type *r);
 \end{verbatim}
 For example,
 \begin{verbatim}
-NormalDistribution<double> normal;
+RNGType rng;
+NormalDistribution<double> normal(mean, sd);
+constexpr std::size_t n = 1024;
+double r[n];
 rand(rng, normal, n, r);
 \end{verbatim}
 This is similar to the following loop,
@@ -84,7 +90,12 @@ for (size_t i = 0; i != n; ++i)
 Depending on the type of |rng| and the distribution (including its parameters),
 the vectorized function may have superior performance. See
 appendix~\ref{chap:Performance of distribution}. However, the results are not
-be exactly the same as using a loop.
+always the same as using a loop. The uniform bits distribution (see
+section~\ref{sec:Uniform bits distribution}) and the standard uniform
+distributions (see section~\ref{sec:Standard uniform distribution}) will always
+produce exactly the same results as using a loop. For some distributions, such
+as those using the inverse method, the difference is up to rounding errors. For
+others, completely different sequence of random numbers might be generated.
 
 \section{Counter-based \texorpdfstring{\rng}{RNG}}
 \label{sec:Counter-based RNG}
@@ -99,137 +110,90 @@ Compared to more conventional \rng{}s which use recursions $y_i = f_k(y_{i -
 environment. If~$c$, the counter, is an unsigned integer with~$b$ bits,
 and~$k$, the key, is an unsigned integer with~$d$ bits. Then for each $k$, the
 \rng has a period~$2^b$. And there can be at most~$2^d$ independent streams.
-
 \mckl defines the following class template as the interface,
 \begin{verbatim}
 template <typename ResultType, typename Generator>
 class CounterEngine;
 \end{verbatim}
 where |ResultType| shall be an unsigned integer type and it is the output type
-of the \rng engine. The type |Generator| is the class that actually implements
-the algorithms. A few are implemented in \mckl and are introduced in the next
-few sections.
+of the \rng engine. An instance of this class template is compatible with
+standard library \rng engines, and can be used as a drop-in replacement of
+classes such as |std::mt19937|. A few generators are implemented in \mckl and
+discussed briefly in this section. See~\cite{Salmon:2011um} for details of each
+algorithm.
 
-\subsection{\texorpdfstring{\aesni}{AES-NI} instructions based
+\subsection{\texorpdfstring{\aes}{AES} round function based
 \texorpdfstring{\rng}{RNG}}
 \label{sub:AES-NI instructions based RNG}
 
-\aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
-instructions based \rng{}s in~\cite{Salmon:2011um} are implemented in the
-following generator,
+\aes\footnote{\url{https://en.wikipedia.org/wiki/Advanced_Encryption_Standard}}
+round function based \rng{}s in~\cite{Salmon:2011um} are implemented in the
+following generator.
 \begin{verbatim}
-template <typename KeySeqType, size_t Blocks = MCKL_AESNI_BLOCKS>
-class AESNIGenerator;
+template <typename KeySeqType>
+class AESGenerator;
 \end{verbatim}
 The corresponding \rng engine is,
 \begin{verbatim}
-template <typename ResultType, typename KeySeqType,
-    size_t Blocks = MCKL_AESNI_BLOCKS>
-using AESNIEngine = CounterEngine<ResultType, AESNIGenerator<KeySeqType, Blocks>>;
+template <typename ResultType, typename KeySeqType>
+using AESEngine = CounterEngine<ResultType, AESGenerator<KeySeqType>;
 \end{verbatim}
 where |KeySeqType| is the class used to generate the sequences of round keys.
-\aesni encryption instructions have a latency of seven or eight cycles, while
-they can be issued at every cycle. Therefore better performance can be achieved
-if multiple~128-bit random integers are generated at the same time. This is
-specified by the template parameter |Blocks|. Larger blocks, up to eight, may
-improve performance. But this is at the cost of larger state size. Without
+When \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
+instructions are available, they are used to for performance boost. Without
 going into details, there are four types of sequence of round keys implemented
 by \mckl,
 \begin{verbatim}
-using AES128KeySeq = internal::AESKeySeq<10, internal::AES128KeySeqGenerator>;
-using AES192KeySeq = internal::AESKeySeq<12, internal::AES192KeySeqGenerator>;
-using AES256KeySeq = internal::AESKeySeq<14, internal::AES256KeySeqGenerator>;
+template <std::size_t Rounds = MCKL_AES128_ROUNDS>
+class AES128KeySeq;
 
-template <std::size_t Rounds, typename Constants = ARSConstants>
-using ARSKeySeq = internal::ARSKeySeqImpl<Rounds, Constants>;
+template <std::size_t Rounds = MCKL_AES192_ROUNDS>
+class AES192KeySeq;
+
+template <std::size_t Rounds = MCKL_AES256_ROUNDS>
+class AES256KeySeq;
+
+template <std::size_t Rounds = MCKL_ARS_ROUNDS, typename Constants = ARSConstants>
+class ARSKeySeq;
 \end{verbatim}
-and correspondingly four \rng engines,
+The default rounds of the first three are~10, 12 and~14, respectively. And thus
+they are equivalent to \aes-128, \aes-192, and \aes-256 block ciphers,
+respectively. The last one is the \ars algorithm in~\cite{Salmon:2011um}. The
+default rounds is~5, instead of~7 as in the paper, but the same as its \mkl
+implementation. The trait class |Constants| defines the Weyl's sequence
+constants. The only restriction on this trait class is that the following
+expressions are valid,
 \begin{verbatim}
-template <typename ResultType, size_t Blocks = MCKL_AESNI_BLOCKS>
-using AES128Engine = AESNIEngine<ResultType, AES128KeySeq, 10, Blocks>;
-
-template <typename ResultType, size_t Blocks = MCKL_AESNI_BLOCKS>
-using AES192Engine = AESNIEngine<ResultType, AES192KeySeq, 12, Blocks>;
-
-template <typename ResultType, size_t Blocks = MCKL_AESNI_BLOCKS>
-using AES256Engine = AESNIEngine<ResultType, AES256KeySeq, 14, Blocks>;
-
-template <typename ResultType, size_t Rounds = MCKL_ARS_ROUNDS,
-    size_t Blocks = MCKL_AESNI_BLOCKS, typename Constants = ARSConstants>
-using ARSEngine = AESNIEngine<ResultType, ARSKeySeq<Rounds, Constants>, Blocks>;
+constexpr uint64_t w0 = Constants::weyl::value[0];
+constexpr uint64_t w1 = Constants::weyl::value[1];
 \end{verbatim}
-The first three are equivalent to \aes-128, \aes-192 and \aes-256 block ciphers
-used in counter mode. The last is the \ars algorithm introduced
-by~\cite{Salmon:2011um}. The template parameter |Constants| of |ARSKeySeq| and
-|ARSEngine| is a trait class that defines the constants of the Weyl's sequence.
-The defaults are taken from~\cite{Salmon:2011um}.
-
-\subsubsection{Type aliases of \texttt{AES128Engine}}
-
+The member data |value| will not be \odr used. The default constant is taken
+from the paper. Correspondingly there are four \rng engines,
 \begin{verbatim}
-using AES128x1 = AES128Engine<uint32_t, 1>;
-using AES128x2 = AES128Engine<uint32_t, 2>;
-using AES128x4 = AES128Engine<uint32_t, 4>;
-using AES128x8 = AES128Engine<uint32_t, 8>;
+template <typename ResultType, std::size_t Rounds = MCKL_AES128_ROUNDS>
+using AES128Engine = AESEngine<ResultType, AES128KeySeq<Rounds>>;
 
-using AES128x1_64 = AES128Engine<uint64_t, 1>;
-using AES128x2_64 = AES128Engine<uint64_t, 2>;
-using AES128x4_64 = AES128Engine<uint64_t, 4>;
-using AES128x8_64 = AES128Engine<uint64_t, 8>;
+template <typename ResultType, std::size_t Rounds = MCKL_AES192_ROUNDS>
+using AES192Engine = AESEngine<ResultType, AES192KeySeq<Rounds>>;
 
-using AES128 = AES128x8;
-using AES128_64 = AES128x8_64;
+template <typename ResultType, std::size_t Rounds = MCKL_AES256_ROUNDS>
+using AES256Engine = AESEngine<ResultType, AES256KeySeq<Rounds>>;
+
+template <typename ResultType, std::size_t Rounds = MCKL_ARS_ROUNDS,
+    typename Constants = ARSConstants>
+using ARSEngine = AESEngine<ResultType, ARSKeySeq<Rounds, Constants>>;
 \end{verbatim}
-
-\subsubsection{Type aliases of \texttt{AES192Engine}}
-
+A few type aliases are defined for convenience.
 \begin{verbatim}
-using AES192x1 = AES192Engine<uint32_t, 1>;
-using AES192x2 = AES192Engine<uint32_t, 2>;
-using AES192x4 = AES192Engine<uint32_t, 4>;
-using AES192x8 = AES192Engine<uint32_t, 8>;
+using AES128 = AES128Engine<std::uint32_t>;
+using AES192 = AES192Engine<std::uint32_t>;
+using AES256 = AES256Engine<std::uint32_t>;
+using ARS    = ARSEngine<std::uint32_t>;
 
-using AES192x1_64 = AES192Engine<uint64_t, 1>;
-using AES192x2_64 = AES192Engine<uint64_t, 2>;
-using AES192x4_64 = AES192Engine<uint64_t, 4>;
-using AES192x8_64 = AES192Engine<uint64_t, 8>;
-
-using AES192 = AES192x8;
-using AES192_64 = AES192x8_64;
-\end{verbatim}
-
-\subsubsection{Type aliases of \texttt{AES256Engine}}
-
-\begin{verbatim}
-using AES256x1 = AES256Engine<uint32_t, 1>;
-using AES256x2 = AES256Engine<uint32_t, 2>;
-using AES256x4 = AES256Engine<uint32_t, 4>;
-using AES256x8 = AES256Engine<uint32_t, 8>;
-
-using AES256x1_64 = AES256Engine<uint64_t, 1>;
-using AES256x2_64 = AES256Engine<uint64_t, 2>;
-using AES256x4_64 = AES256Engine<uint64_t, 4>;
-using AES256x8_64 = AES256Engine<uint64_t, 8>;
-
-using AES256 = AES256x8;
-using AES256_64 = AES256x8_64;
-\end{verbatim}
-
-\subsubsection{Type aliases of \texttt{ARSEngine}}
-
-\begin{verbatim}
-using ARSx1 = ARSEngine<uint32_t, MCKL_ARS_ROUNDS, 1>;
-using ARSx2 = ARSEngine<uint32_t, MCKL_ARS_ROUNDS, 2>;
-using ARSx4 = ARSEngine<uint32_t, MCKL_ARS_ROUNDS, 4>;
-using ARSx8 = ARSEngine<uint32_t, MCKL_ARS_ROUNDS, 8>;
-
-using ARSx1_64 = ARSEngine<uint64_t, MCKL_ARS_ROUNDS, 1>;
-using ARSx2_64 = ARSEngine<uint64_t, MCKL_ARS_ROUNDS, 2>;
-using ARSx4_64 = ARSEngine<uint64_t, MCKL_ARS_ROUNDS, 4>;
-using ARSx8_64 = ARSEngine<uint64_t, MCKL_ARS_ROUNDS, 8>;
-
-using ARS = ARSx8;
-using ARS_64 = ARSx8_64;
+using AES128_64 = AES128Engine<std::uint64_t>;
+using AES192_64 = AES192Engine<std::uint64_t>;
+using AES256_64 = AES256Engine<std::uint64_t>;
+using ARS_64    = ARSEngine<std::uint64_t>;
 \end{verbatim}
 
 \subsection{Philox}
@@ -250,8 +214,16 @@ template <typename ResultType, typename T, size_t K,
 using PhiloxEngine =
     CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
 \end{verbatim}
-The template parameter |Constants| is a trait class that defines the constants
-of the Weyl's sequence. The defaults are taken from~\cite{Salmon:2011um}.
+The template parameter |Constants| is a trait class that defines the Weyl's
+sequence constants and the multipliers. The only restriction on this trait
+class is that the following expressions are valid,
+\begin{verbatim}
+// i is a compile time constant expression
+constexpr T w = Constants::weyl::value[i];       // i = 0, ..., K / 2 - 1
+constexpr T m = Constants::multiplier::value[i]; // i = 0, ..., K / 2 - 1
+\end{verbatim}
+The member data |value| will not be \odr used. The defaults are taken
+from~\cite{Salmon:2011um}. Four engines are defined in \mckl,
 \begin{verbatim}
 template <typename ResultType>
 using Philox2x32Engine = PhiloxEngine<ResultType, uint32_t, 2>;
@@ -265,9 +237,7 @@ using Philox2x64Engine = PhiloxEngine<ResultType, uint64_t, 2>;
 template <typename ResultType>
 using Philox4x64Engine = PhiloxEngine<ResultType, uint64_t, 4>;
 \end{verbatim}
-
-\subsubsection{Type aliases of \texttt{PhiloxEngine}}
-
+A few type aliases are defined for convenience,
 \begin{verbatim}
 using Philox2x32 = Philox2x32Engine<uint32_t>;
 using Philox4x32 = Philox4x32Engine<uint32_t>;
@@ -298,11 +268,19 @@ template <typename ResultType, typename T, size_t K,
 using ThreefryEngine =
     CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
 \end{verbatim}
-\mckl provides default constants for~64-bit unsigned integer type as |T| and
-|K| taking the values~4, 8 and~16, taken from the
-skein\footnote{\url{http://www.skein-hash.info}} hash algorithm, for which the
-Threefish algorithm was originally developed for. Defaults for 32-bit |T| or
-|K| taking the value~2 are also provided, taken from~\cite{Salmon:2011um}.
+The template parameter |Constants| is a trait class that defines the parity
+constants, the rotation constants, and the permutation. The only restriction on
+this trait class is that the following expressions are valid,
+\begin{verbatim}
+// i, j are compile time constant expression
+constexpr T k = Constants::parity::value;
+constexpr int r = Constants::rotate::value[i][j];  // i = 0, ..., K / 2 - 1
+                                                   // j = 1, ..., 8
+constexpr size_t p = Constants::permute::value[i]; // i = 0, ..., K - 1
+\end{verbatim}
+The member data |value| will not be \odr used. The defaults are taken
+from the skein\footnote{\url{http://www.skein-hash.info}} hash function
+and~\cite{Salmon:2011um}. Six engines are defined in \mckl,
 \begin{verbatim}
 template <typename ResultType>
 using Threefry2x32Engine = ThreefryEngine<ResultType, uint32_t, 2>;
@@ -323,8 +301,7 @@ template <typename ResultType>
 using Threefry16x64Engine = ThreefryEngine<ResultType, uint64_t, 16>;
 \end{verbatim}
 In addition, three engines that are equivalent to Threefish-256, Threefish-512
-and Threefish-1024 block ciphers without tweaks used counter mode are also
-defined type aliases,
+and Threefish-1024 block ciphers, respectively, are also defined,
 \begin{verbatim}
 template <typename ResultType>
 using Threefish256Engine = ThreefryEngine<ResultType, uint64_t, 4, 72>;
@@ -335,30 +312,28 @@ using Threefish512Engine = ThreefryEngine<ResultType, uint64_t, 8, 72>;
 template <typename ResultType>
 using Threefish1024Engine = ThreefryEngine<ResultType, uint64_t, 16, 80>;
 \end{verbatim}
-
-\subsubsection{Type aliases of \texttt{ThreefryEngine}}
-
+A few type aliases are defined for convenience,
 \begin{verbatim}
-using Threefry2x32 = Threefry2x32Engine<uint32_t>;
-using Threefry4x32 = Threefry4x32Engine<uint32_t>;
-using Threefry2x64 = Threefry2x64Engine<uint32_t>;
-using Threefry4x64 = Threefry4x64Engine<uint32_t>;
-using Threefry8x64 = Threefry8x64Engine<uint32_t>;
+using Threefry2x32  = Threefry2x32Engine<uint32_t>;
+using Threefry4x32  = Threefry4x32Engine<uint32_t>;
+using Threefry2x64  = Threefry2x64Engine<uint32_t>;
+using Threefry4x64  = Threefry4x64Engine<uint32_t>;
+using Threefry8x64  = Threefry8x64Engine<uint32_t>;
 using Threefry16x64 = Threefry16x64Engine<uint32_t>;
 
-using Threefish256 = Threefish256Engine<uint32_t>;
-using Threefish512 = Threefish512Engine<uint32_t>;
-using Threefish1024 = Threefish1024Engine<uint32_t>;
-
-using Threefry2x32_64 = Threefry2x32Engine<uint64_t>;
-using Threefry4x32_64 = Threefry4x32Engine<uint64_t>;
-using Threefry2x64_64 = Threefry2x64Engine<uint64_t>;
-using Threefry4x64_64 = Threefry4x64Engine<uint64_t>;
-using Threefry8x64_64 = Threefry8x64Engine<uint64_t>;
+using Threefry2x32_64  = Threefry2x32Engine<uint64_t>;
+using Threefry4x32_64  = Threefry4x32Engine<uint64_t>;
+using Threefry2x64_64  = Threefry2x64Engine<uint64_t>;
+using Threefry4x64_64  = Threefry4x64Engine<uint64_t>;
+using Threefry8x64_64  = Threefry8x64Engine<uint64_t>;
 using Threefry16x64_64 = Threefry16x64Engine<uint64_t>;
 
-using Threefish256_64 = Threefish256Engine<uint64_t>;
-using Threefish512_64 = Threefish512Engine<uint64_t>;
+using Threefish256  = Threefish256Engine<uint32_t>;
+using Threefish512  = Threefish512Engine<uint32_t>;
+using Threefish1024 = Threefish1024Engine<uint32_t>;
+
+using Threefish256_64  = Threefish256Engine<uint64_t>;
+using Threefish512_64  = Threefish512Engine<uint64_t>;
 using Threefish1024_64 = Threefish1024Engine<uint64_t>;
 \end{verbatim}
 
@@ -370,41 +345,35 @@ using Threefish1024_64 = Threefish1024Engine<uint64_t>;
 template <MKL_INT BRNG, int Bits>
 class MKLEngine;
 \end{verbatim}
-that makes them accessible as \cpp engines. The output is either 32- or 64-bit
+that makes them accessible as \cpp engines. The output is either~32- or~64-bit
 unsigned integers. This is determined by the template parameter |Bits|, which
-can only take one of these two values. The template paramter |BRNG| can be any
-\mkl \brng macro that supports |viRngUniformBits32| (|Bits| is 32) or
-|viRngUniformBits64| (|Bits| is 64). Type aliases are listed in below.
+can only take one of these two values. The template parameter |BRNG| can be any
+\mkl \brng macro that supports |viRngUniformBits32| (|Bits| is~32) or
+|viRngUniformBits64| (|Bits| is~64). Type aliases are listed below,
 \begin{verbatim}
-using MKL_MCG59 = MKLEngine<VSL_BRNG_MCG59, 32>;
-using MKL_MCG59_64 = MKLEngine<VSL_BRNG_MCG59, 64>;
-
-using MKL_MT19937 = MKLEngine<VSL_BRNG_MT19937, 32>;
-using MKL_MT19937_64 = MKLEngine<VSL_BRNG_MT19937, 64>;
-
-using MKL_MT2203 = MKLEngine<VSL_BRNG_MT2203, 32>;
-using MKL_MT2203_64 = MKLEngine<VSL_BRNG_MT2203, 64>;
-
-using MKL_SFMT19937 = MKLEngine<VSL_BRNG_SFMT19937, 32>;
-using MKL_SFMT19937_64 = MKLEngine<VSL_BRNG_SFMT19937, 64>;
-
-using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, 32>;
-using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
-
-using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
-using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
-
-using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
+using MKL_ARS5             = MKLEngine<VSL_BRNG_ARS5, 32>;
+using MKL_ARS5_64          = MKLEngine<VSL_BRNG_ARS5, 64>;
+using MKL_PHILOX4X32X10    = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
 using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
+using MKL_MCG59            = MKLEngine<VSL_BRNG_MCG59, 32>;
+using MKL_MCG59_64         = MKLEngine<VSL_BRNG_MCG59, 64>;
+using MKL_MT19937          = MKLEngine<VSL_BRNG_MT19937, 32>;
+using MKL_MT19937_64       = MKLEngine<VSL_BRNG_MT19937, 64>;
+using MKL_MT2203           = MKLEngine<VSL_BRNG_MT2203, 32>;
+using MKL_MT2203_64        = MKLEngine<VSL_BRNG_MT2203, 64>;
+using MKL_SFMT19937        = MKLEngine<VSL_BRNG_SFMT19937, 32>;
+using MKL_SFMT19937_64     = MKLEngine<VSL_BRNG_SFMT19937, 64>;
+using MKL_NONDETERM        = MKLEngine<VSL_BRNG_NONDETERM, 32>;
+using MKL_NONDETERM_64     = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 \end{verbatim}
 Note that, \mkl \rng{}s perform the best when they are used to generate vectors
 of random numbers. These wrappers use a buffer to store such vectors. And thus
 they have much larger state space than usual \rng{}s. When there are \mkl
 routines for generating distribution random variates for one of the
 distributions discussed later in sections~\ref{sec:Continuous distribution}
-and~\ref{sec:Discrete distribution}, the library automatically uses these
-routines for vectorized random number generating if the \rng is one of that
-listed above. For example,
+and~\ref{sec:Discrete distribution}, \mckl automatically uses these routines
+for vectorized random number generating if the \rng is one of that listed
+above. For example,
 \begin{verbatim}
 MKL_MT2203 rng;
 NormalDistribution<double> normal;
@@ -432,18 +401,83 @@ A value of zero, the default, means the number of trials is unlimited. If it is
 a positive number, and if after the specified number of trials no random
 integer is returned by \rdrand instructions, zero is returned.
 
-\section{Seeding counter-based \texorpdfstring{\rng}{RNG}}
-\label{sec:Seeding counter-based RNG}
+\section{Seeding \texorpdfstring{\rng}{RNG}}
+\label{sec:Seeding RNG}
 
-The singleton class template |Seed| can be used to generate distinctive seeds
-sequentially. Each \rng class has its own seeding class. For example,
+The following singleton class template,
 \begin{verbatim}
-auto &seed = Seed<RNG>::instance();
-RNG rng1(seed()); // Construct rng1
-RNG rng2(seed()); // Construct rng2 with another seed
+template <typename ResultType,
+    typename ID = std::integral_constant<std::size_t, sizeof(ResultType)>,
+    bool Randomize = true, bool Atomic = true>
+class SeedGenerator;
 \end{verbatim}
-The parameter of the template is the intended \rng type. One can save and set
-the seed generator using standard streams. For example,
+can be used to generate distinctive seeds. The method |instance| returns a
+reference to the singleton. For example,
+\begin{verbatim}
+auto &seed = SeedGenerator<unsigned>::instance();      // Generate integers
+auto &keys = SeedGenerator<ARS::key_type>::instance(); // Generate keys for ARS
+\end{verbatim}
+Different combinations of the template parameters will create different
+instances of the singleton. To generate new seeds,
+\begin{verbatim}
+RNG rng1(seed.get()); // Construct rng1 with a random seed
+RNG rng2(seed.get()); // Construct rng2 with a different random seed
+ARS ars1(keys.get()); // Construct ars1 with a random key
+ARS ars2(keys.get()); // Construct ars2 with a different random key
+\end{verbatim}
+The procedure for generating the seeds is described here. Let $N$ be the total
+number of bits of |ResultType|, that is,
+\begin{verbatim}
+constexpr int N = sizeof(ResultType) * CHAR_BIT;
+\end{verbatim}
+If $N$ is not a multiple of~32, then a compile time error will be raised.
+Otherwise, let $S = \min\{N,64\}$ and $M = N / S$. The generator keeps an
+$S$-bit unsigned integer as its internal counter, say $c$. Use the |set| method
+to set the value of this internal integer. For example,
+\begin{verbatim}
+seed.set(101);
+\end{verbatim}
+Each time a new seed is requested, this counter is incremented. If the template
+parameter |Atomic| is true, then this increment is atomic and thread-safe. Let
+the old value be $s$. That is,
+\begin{equation*}
+  s \leftarrow c,\qquad c \leftarrow c + 1.
+\end{equation*}
+The generator first calculates an $N$-bit unsigned integer $t$ as the
+following.
+\begin{equation*}
+  t = \begin{cases}
+    (s \bmod m) p + r &\text{if } M = 1 \\
+    s + 2^{N - S}r    &\text{otherwise}
+  \end{cases},
+\end{equation*}
+where $m = (2^S - 1 - r) / p + 1$ and $p = 1$ and $r = 0$ by default. To change
+their values, use the |partition| method. For example,
+\begin{verbatim}
+seed.partition(10, 3); // p = 10, r = 3
+\end{verbatim}
+Last, if |Randomize| is false, then $t$ is returned as the requested seed, with
+possible reordering of bytes on big-endian platforms such that the results are
+exactly the same as on little-endian platforms. Otherwise, i.e., |Randomize| is
+true, then $t$ is transformed through a randomize function. If $N = 32$, then
+it is transformed using a~32-bit Speck block
+cipher\footnote{\url{https://en.wikipedia.org/wiki/Speck_(cipher)}} with zero
+key. If $N = 2^W$, $W = 5,\dots,10$, then it is transformed with the bijection
+of |Threefry2x32|, |Threefry2x64|, |Threefry4x64|, |Threefry8x64|, and
+|Threefry16x64| \rng{}s with zero key, respectively. Otherwise, it is
+transformed with the Skein-512 hash function.
+
+It is clear that, if $N = 2^W$, $W = 5,\dots,10$, or |Randomize| is false, then
+the seeds generated are always distinctive if the values of the internal
+counter $c$ are distinctive. Therefore, the seed generator has a period of
+$\Floor{2^S / p}$ if $M = 1$ and $2^S$ if $M > 1$. Moreover, the values of $t$
+belongs to the equivalent class $t \equiv r \pmod{p}$ if $M = 1$ and $\Floor{t
+/ 2^{N - S}} = r$ if $M > 1$. Therefore, using the |partition| method, one can
+generate distinctive seeds across multiple computing nodes or multiple
+programs.
+
+One can save and restore the seed generator using standard library streams. For
+example,
 \begin{verbatim}
 std::ifstream is("seed.txt");
 if (is)
@@ -456,136 +490,66 @@ std::ofstream os("seed.txt");
 os << Seed<RNG>::instance();        // Write the seed to a file
 os.close();
 \end{verbatim}
-This way, if the simulation program needs to be run repeatedly, each time it
-uses a different set of seeds. A single seed generator is enough for a single
-program. However, it is more difficult to ensure that each computing node has a
-distinctive set of seeds in a distributed system. A simple solution is to use
-the |modulo| method of |Seed|. For example,
+This is useful when one need to run a simulation program multiple times, but
+need a different set of seeds for each run.
+
+Last, the following class is defined for convenience,
 \begin{verbatim}
-Seed<RNG>::instance().modulo(n, r);
-\end{verbatim}
-where~$n$ is the number of processes and~$r$ is the rank of the current node.
-If $r_1$ and $r_2$ are ranks of two nodes, and $r_1 \ne r_2$, then $s_1 \ne
-s_2$ for any two seeds generated on the two notes, respectively.
-
-\subsection{Seeding behavior for different \texorpdfstring{\rng}{RNG}}
-\label{sub:Seeding behavior for different RNG}
-
-The class template |Seed| is actually a type alias,
-\begin{verbatim}
-template <typename ResultType, typename ID = ResultType>
-class SeedGenerator;
-
 template <typename RNGType>
-using Seed = SeedGenerator<typename SeedType<RNGType>::type>;
+class Seed;
 \end{verbatim}
-For different |ResultType|, |ID| or both, a different instance of
-|SeedGenerator| is initialized. Each instance produces its own seed sequence.
-One can use this property to initialize new generator.
+which is a derived class of the following generator,
+\begin{verbatim}
+SeedGenerator<typename SeedType<RNGType>::type>;
+\end{verbatim}
+where |SeedType| is defined and partially specialized as the following,
+\begin{verbatim}
+template <typename RNGType>
+class SeedType
+{
+    public:
+    using type = unsigned;
+};
 
-The default generator |Seed| depends on the type |SeedType<RNGType>|. The
-default behavior is such that, all \rng{}s, except counter-based \rng{}s (see
-section~\ref{sec:Counter-based RNG}), with the same |result_type| share the
-same sequence of seeds. All \mkl \rng{}s (seed section~\ref{sec:MKL RNG}),
-share the same seed sequences with those with |result_type| being |MKL_UINT|,
-which is |unsigned| by default. Each of these generators produce a sequence of
-seeds that belongs to the equivalent class $s \equiv r \pmod{n}$, where $n$ and
-$r$ are the arguments of the |modulo| method. For example,
-\begin{verbatim}
-Seed<std::mt19937>::instance()();    // => 1; the default initial seed
-Seed<std::knuth_b>::instance()();    // => 2; share the same sequence as above
-Seed<MKL_MT19937>::instance()();     // => 3
-Seed<MKL_MT19937_64>::instance()();  // => 4
-SeedGenerator<unsigned>::instance().modulo(10, 7); // set modulo
-Seed<std::mt19937>::instance()();    // => 57
-Seed<std::knuth_b>::instance()();    // => 67
-Seed<MKL_MT19937>::instance()();     // => 77
-Seed<MKL_MT19937_64>::instance()();  // => 87
+template <typename ResultType, typename Generator>
+class SeedType<CounterEngine<ResultType, Generator>>
+{
+    public:
+    using type = typename CounterEngine<ResultType, Generator>::key_type;
+};
 \end{verbatim}
-Counter-based \rng{}s are handled differently. They can accept their
-corresponding |key_type| as seeds. Therefore, the default seed generator for
-these \rng{}s generates keys instead of scalar seeds. If the length of the key
-greater is than one, then the first element is taken from the sequence
-$1,2,\dots$, the last element is set to $r$, where $r$ is the argument to the
-|modulo| method, and all other elements are set to zero. For example
-\begin{verbatim}
-Seed<Philox4x32>::instance()();      // => {1, 0}; Key type std::array<uint32_t, 2>
-Seed<Threefry2x32>::instance()();    // => {2, 0}; share the same sequence as above
-Seed<Threefry2x64>::instance()();    // => {1, 0}; Key type std::array<uint32_t, 4>
-SeedGenerator<std::array<uint32_t, 2>>::instance().modulo(10, 7); // set modulo
-Seed<Philox4x32>::instance()();      // => {3, 7}
-Seed<Threefry2x32>::instance()();    // => {4, 7}
-\end{verbatim}
-If the length of the key is exactly one, then the single element is handled the
-same way as those \rng{}s that accepts only a scalar seeds. For example,
-\begin{verbatim}
-SeedGenerator<std::array<uint32_t, 1>>::instance().modulo(10, 7); // set modulo
-Seed<Philox2x32>::instance()(); // => {17}
-Seed<Philox2x32>::instance()(); // => {27}
-\end{verbatim}
-It shall be obvious now that |Seed| is only appropriate for counter-based
-\rng{}s. For other \rng{}s, it merely produce distinctive seeds. It exists only
-for source level compatibility.
+Therefore, for most \rng{}s, the unsigned integers are generated as seeds and
+they share the same internal counter $c$. For counter-based \rng{}s implemented
+in \mckl, keys will be generated as seeds and \rng{}s with the same key width
+will share the same internal counter $c$.
 
 \section{Multiple \texorpdfstring{\rng}{RNG} streams}
 \label{sec:Multiple RNG streams}
 
-Earlier in section~\ref{sec:Particle} we introduced that |particle.rng(i)|
-returns an independent \rng instance. This is actually done through a class
-template called |RNGSet|. Three of them are implemented in \mckl. They all have
-the same interface,
+The class template |RNGSet| can be used to manage multiple \rng instances
+within a parallel program. Three of them are implemented in \mckl. They all
+have the same interface,
 \begin{verbatim}
 RNGSet<RNG> rng_set(N); // A set of N RNGs
 rng_set.resize(n);      // Change the size of the set
 rng_set[i];             // Get a reference to the i-th RNG
 rng_set.reset();        // Re-seed each RNG in the set
 \end{verbatim}
+The |reset| method use |Seed<RNG>| discussed earlier to generate new seeds.
+
 The first implementation is |RNGSetScalar|. As its name suggests, it is only a
 wrapper of a single \rng. All calls to |rng_set[i]| returns a reference to the
 same \rng. It is only useful when an |RNGSet| interface is required while the
-thread-safety and other issues are not important.
-
-The second implementation is |RNGSetVector|. It is an array of \rng{}s with
-length~$N$. It has memory cost $O(N)$. Many of the counter-based \rng{}s (see
-section~\ref{sec:Counter-based RNG}) have small state sizes and thus for
-moderate~$N$, this cost is not significant. The method calls |rng_set[i]| and
-|rng_set[j]| return independent \rng{}s if $i \ne j$. This implementation has
-the advantage that the behavior of an algorithm can be deterministic and
-reproducible (up to rounding errors) even when the scheduling of parallel
-execution is dynamic, since each sample has its own \rng.
-
-If \tbb is available, there is a third implementation, |RNGSetTBB|, which
-uses thread-local storage (\tls). It has much smaller memory footprint than
-|RNGSetVector| while maintains better thread-safety. The performance impact of
-using \tls is minimal unless the computation at the calling site is trivial. To
-minimize the \tls cost, a reference to the \rng shall be obtained first if it
-is used multiple times. For example,
-\begin{verbatim}
-void eval_each(size_t, ParticleIndex<T> idx)
-{
-    auto &rng = idx.rng();
-    // Use rng
-}
-\end{verbatim}
-
-Last, an implementation |RNGSetTBBKPI| is provided if \tbb is available. It is
-similar to |RNGSetTBB|. It consumes operating system native \tls keys. It has
-potentially higher performance than |RNGSetTBB|. However, native \tls keys is a
-scarce system resources. So this should be used with care.
-
-The type alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is available,
-otherwise it is defined to be |RNGSetVector|. It is used by the |Particle|
-class template. One can replace the type of \rng set used by |Particle<T>| with
-a member type of |T|. For example,
-\begin{verbatim}
-class T
-{
-    public:
-    using rng_set_type = RNGSetScalar<RNG>;
-};
-\end{verbatim}
-One can also define their own replacement type, as long as it has the same
-interface as the builtin ones.
+thread-safety and other issues are not important. The second implementation is
+|RNGSetVector|. It is an array of \rng{}s with length~$N$. It has memory cost
+$O(N)$. Many of the counter-based \rng{}s (see section~\ref{sec:Counter-based
+RNG}) have small state sizes and thus for moderate~$N$, this cost is not
+significant. The method calls |rng_set[i]| and |rng_set[j]| return independent
+\rng{}s if $i \ne j$. If \tbb is available, there is a third implementation,
+|RNGSetTBB|, which uses thread-local storage (\tls). It has much smaller memory
+footprint than |RNGSetVector| while maintains better thread-safety. The type
+alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is available, otherwise it
+is defined to be |RNGSetVector|.
 
 \section{Uniform bits distribution}
 \label{sec:Uniform bits distribution}
@@ -627,48 +591,36 @@ directly. If there does not exist an integer $V > 0$ such that $R = 2^V$, then
 templates with a single template type parameter |RealType|. The random integers
 produced by \rng{}s are transferred to~32- or~64-bit random integers through
 the class |UniformBitsDistribution| before they are mapped to floating point
-numbers within the interval $[0, 1]$. The integer type depends on |RealType|,
-the range of the \rng{}, $R$, and |MCKL_U01_USE_64BITS_DOUBLE|, a configuration
-macro. The exact relations are listed in table~\ref{tab:Intermediate integer
-types of uniform distribution}. In the following, let~$W$ be the number of bits
-of the integer type, and~$M$ be the number of significant bits (including the
-implicit one) of |RealType|. We also denote the input random integers as~$U$
-and the output random real numbers as~$X$.
+numbers within the interval $[0, 1]$. The integer type depends on |RealType|
+and the range of the \rng{}, $R$. If $\log_2 R \ge 64$ or |RealType| is
+|long double|, then the integer type is |uint64_t|. If the configuration macro
+|MCKL_U01_USE_64BITS_DOUBLE| is true and |RealType| is |double|, then the
+integer type is also |uint64_t|. Otherwise, the integer type is |uint32_t|.
 
-\begin{table}
-  \begin{tabularx}{\textwidth}{LlL}
-    \toprule
-    \texttt{RealType} & Conditions & Integer type \\
-    \midrule
-    \texttt{float}  & $\log_2 R \ge 64$ & \texttt{uint64\_t} \\
-                    & Otherwise         & \texttt{uint32\_t} \\
-    \texttt{double} & $\log_2 R \ge 64$ & \texttt{uint64\_t} \\
-    & \texttt{MCKL\_U01\_USE\_64BITS\_DOUBLE} & \texttt{uint64\_t} \\
-    & Otherwise & \texttt{uint32\_t} \\
-    \texttt{long double} & Always & \texttt{uint64\_t} \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Intermediate integer types of uniform distribution}
-  \label{tab:Intermediate integer types of uniform distribution}
-\end{table}
+In the following, let~$W$ be the number of bits of the integer type, and~$M$ be
+the number of significant bits (including the implicit one) of |RealType|. We
+also denote the input random integers as~$U$ and the output random real numbers
+as~$X$. The type |U01Distribution| is aliased to |U01CanonicalDistribution| if
+the configuration macro |MCKL_U01_USE_FIXED_POINT| is set to true. Otherwise it
+is aliased to |U01CODistribution|.
 
-\subsection{Standard form}
-\label{sub:Standard form}
+\subsection{Canonical form}
+\label{sub:Canonical form}
 
 The class template,
 \begin{verbatim}
 template <typename RealType = double>
-class U01Distribution;
+class U01CanonicalDistribution;
 \end{verbatim}
-implements the uniform distribution on $[0, 1)$. If |MCKL_U01_USE_FIXED_POINT|
-  is true, which is the default, then it is a type alias to |U01CODistribution|
-  (section~\ref{sub:Closed-open interval}). Otherwise, it is implemented
-  through the mapping,
+implements the uniform distribution on $[0, 1)$. It is implemented through the
+mapping,
 \begin{equation*}
   P = \Floor{(W + M - 1) / W},\qquad
   K = \max\{1, P\},\qquad
   X = \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{equation*}
+This is equivalent to the standard library |std::generate_canonical|. The
+minimum and maximum are~$0$ and~$1 - 2^{-KW}$, respectively.
 
 \subsection{Closed-closed interval}
 \label{sub:Closed-closed interval}
@@ -680,12 +632,12 @@ class U01CCDistribution;
 \end{verbatim}
 implements the uniform distribution on $[0, 1]$ through the mapping,
 \begin{align*}
-  P &= \min\{W - 1, M\} \\
+  P &= \min\{W - 1, M\} &
   V &= \begin{cases}
     U &\text{if } P + 1 < W \\
     \Floor{(U \bmod 2^{W - 1}) / 2^{W - P -2}} &\text{otherwise}
   \end{cases} \\
-  Z &= (V \bmod 2) + V \\
+  Z &= (V \bmod 2) + V &
   X &= 2^{-(P + 1)} Z.
 \end{align*}
 The minimum and maximum are~$0$ and~$1$, respectively.
@@ -863,12 +815,8 @@ implements the distribution with \pdf,
 \end{align*}
 The implementation uses the fact that if~$U$ and~$V$ are $\chi^2$-distributed
 random variables with degrees of freedom~$m$ and~$n$, respectively, and they
-are independent, then
-\begin{equation*}
-  X = \frac{U / V}{m / n}
-\end{equation*}
-is a Fisher's $F$-distributed random variable with the respective degrees of
-freedom.
+are independent, then $X = (U / V)(m / n)$ is a Fisher's $F$-distributed random
+variable with the respective degrees of freedom.
 
 \subsection{Gamma distribution}
 \label{sub:Gamma distribution}
@@ -923,11 +871,8 @@ implements the distribution with \pdf,
   x \in [a, \infty),\quad a \in \Real,\quad b \in (0, \infty).
 \end{equation*}
 The implementation uses the fact that if~$Z$ is a standard Normal random
-variable, then
-\begin{equation*}
-  X = a + b / Z^2
-\end{equation*}
-is Levy distributed with location~$a$ and scale~$b$.
+variable, then $X = a + b / Z^2$ is Levy distributed with location~$a$ and
+scale~$b$.
 
 \subsection{Logistic distribution}
 \label{sub:Logistic distribution}
@@ -960,11 +905,8 @@ implements the distribution with \pdf,
   x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty).
 \end{equation*}
 The implementation uses the fact that if~$Z$ is a standard Normal random
-variable, then
-\begin{equation*}
-  X = \exp\{m + sZ\}
-\end{equation*}
-is Log-normal distributed with location~$m$ and scale~$s$.
+variable, then $X = \exp\{m + sZ\}$ is Log-normal distributed with location~$m$
+and scale~$s$.
 
 \subsection{Normal distribution}
 \label{sub:Normal distribution}
@@ -1072,11 +1014,8 @@ implements the distribution with \pdf,
 \end{equation*}
 The implementation uses the fact that if~$Z$ is a standard Normal random
 variable, $V$ is a $\chi^2$-distributed random variable with degree of freedom
-$n$, and they are independent, then
-\begin{equation*}
-  X = \frac{Z}{\sqrt{V / n}}
-\end{equation*}
-is Student's $t$-distributed with the respective degree of freedom.
+$n$, and they are independent, then $X = Z/\sqrt{V / n}$ is Student's
+$t$-distributed with the respective degree of freedom.
 
 \subsection{Uniform real distribution}
 \label{sub:Uniform real distribution}
@@ -1146,14 +1085,11 @@ implements the distribution with \pdf,
   k \in \Natural,\quad p \in (0, 1].
 \end{equation*}
 The implementation uses the fact that if~$U$ is a standard uniform random
-variable, than
-\begin{equation*}
-  X = \Floor{\ln U / \ln(1-p)}
-\end{equation*}
-is a Geometric random variable with success probability~$p$.
+variable, then $X = \Floor{\ln U / \ln(1-p)}$ is a Geometric random variable
+with success probability~$p$.
 
-\subsection{Uniform distribution}
-\label{sub:Uniform distribution}
+\subsection{Uniform integer distribution}
+\label{sub:Uniform integer distribution}
 
 The class template,
 \begin{verbatim}
@@ -1170,11 +1106,9 @@ The specific algorithm used depends on the parameters. If $a = b$, then it
 simply returns~$a$. If $b - a + 1 = 2^W$ where~$W$ is the number of bits of
 |IntType|, then |UniformBitsDistribution| is used (see section~\ref{sec:Uniform
 bits distribution}). If $\max\{\Abs{a}, b\} < 2^{32}$, then it uses the fact
-that if~$U$ is a standard uniform random variable, then
-\begin{equation*}
-  X = \Floor{a + (b - a + 1) U}
-\end{equation*}
-is uniform on the set $\{a,\dots,b\}$. Otherwise the standard library is used.
+that if~$U$ is a standard uniform random variable, then $X = \Floor{a + (b - a
++ 1) U}$ is uniform on the set $\{a,\dots,b\}$. Otherwise the standard library
+is used.
 
 \section{Multivariate distribution}
 \label{sec:Multivariate distribution}
@@ -1279,193 +1213,3 @@ rand(rng, normal_mv, n, r);
 \end{verbatim}
 where the output parameter |r| is a pointer to an~$n$ by~$d$ matrix of row
 major order.
-
-\section{Randomness test}
-\label{sec:Randomness tests}
-
-\mckl implements a few classical randomness tests in~\cite{Knuth:1997us}. It is
-nowhere near as comprehensive as the \testu library~\cite{Lecuyer:2007hv}.
-However, they are easier to use with \cpp \rng engines and distributions. All
-tests below follows the same interfaces. They have the following operator,
-\begin{verbatim}
-template <typename RNGType, typename DistributionType>
-result_type operator()(RNGType &rng, DistributionType &distribution);
-\end{verbatim}
-that accepts the \rng engine and distribution as input and returns the value of
-the test statistic. They also have two methods that return the values of \pdf
-and \cdf of the test statistic under the null hypothesis, respectively,
-\begin{verbatim}
-double pdf(result_type s) const;
-double cdf(result_type s) const;
-\end{verbatim}
-Last, they have the following method,
-\begin{verbatim}
-bool pass(double alpha, result_type s) const;
-\end{verbatim}
-that returns if the test passes at significance level $\alpha$ given the test
-statistic.
-
-Most tests are implemented as class templates. There are a few common template
-parameters. The first is~$D$, which is the multiplier. Let $U_{1:n}$ be the
-sequence of standard uniform random numbers, then $Y_{1:n}$ is the sequence of
-random numbers in $\{0,\dots,D - 1\}$ with $Y_i = \Floor{DU_i}$. Tests with the
-template parameter~$D$ use the sequence $Y_{1:n}$ and others use the sequence
-$U_{1:n}$ (see~\cite[pp.~61]{Knuth:1997us}). Another common template parameter
-is~$T$, which is the length of tuples. Some tests operate on the tuples
-$X_{1:n}$, $X_i = (U_{iT},\dots,U_{(i+1)T})$.
-
-\subsection{Serial test}
-\label{sub:Serial test}
-
-The template,
-\begin{verbatim}
-template <size_t D, size_t T, bool Overlap>
-using SerialTest = internal::SerialTestImpl<D, T, Overlap && 1 < T>;
-\end{verbatim}
-is a type alias to implementations of the serial tests with independent
-(|Overlap| is false) or overlapping tuples (|Overlap| is true) as described
-by~\cite[pp.~62]{Knuth:1997us} and~\cite[ex.~24, pp.~78]{Knuth:1997us},
-respectively. The constructor,
-\begin{verbatim}
-SerialTest<D, T, Overlap> test(n);
-\end{verbatim}
-accepts the number of tuples as the argument. The tests generate~$nT$ and~$n$
-random numbers, respectively. The equidistribution test using the
-$\chi^2$-statistic~\cite[pp.~61]{Knuth:1997us} is a special case of this test
-with $T = 1$.
-
-\subsection{Gap test}
-\label{sub:Gap test}
-
-The class template,
-\begin{verbatim}
-template <size_t NTrialMax = std::numeric_limits<size_t>::max()>
-class GapTest;
-\end{verbatim}
-implements the gap test~\cite[pp.~62]{Knuth:1997us}. The constructor,
-\begin{verbatim}
-GapTest(size_t n, double alpha, double beta);
-\end{verbatim}
-accepts the number of gaps, the lower and upper bounds of the gap. The gap test
-may not terminate given a deficient sequence. The template parameter
-|NTrialMax| is the maximum number of random numbers to be generated for one
-gap.
-
-\subsection{Poker test}
-\label{sub:Poker test}
-
-The class template,
-\begin{verbatim}
-template <size_t D, size_t T>
-class PokerTest;
-\end{verbatim}
-implements the (simplified) poker test~\cite[pp.~63]{Knuth:1997us}. The
-constructor,
-\begin{verbatim}
-PokerTest(size_t n);
-\end{verbatim}
-accepts the number of tuples.
-
-\subsection{Coupon collector's test}
-\label{sub:Coupon collector's test}
-
-The class template,
-\begin{verbatim}
-template <size_t D, size_t NTrialMax = std::numeric_limits<size_t>::max()>
-class CouponCollectorTest;
-\end{verbatim}
-implements the coupon collector's test~\cite[pp.~64]{Knuth:1997us}. The
-constructor,
-\begin{verbatim}
-CouponCollectorTest(size_t n);
-\end{verbatim}
-accepts the number of tuples. Similar to the gap test, the test may not
-terminate given a deficient sequence. The template parameter |NTrialMax| is the
-maximum number of trials to generate one complete set.
-
-\subsection{Permutation test}
-\label{sub:Permutation test}
-
-The class template,
-\begin{verbatim}
-template <size_t T>
-class PermutationTest;
-\end{verbatim}
-implements the permutation test~\cite[pp.~65]{Knuth:1997us}. The constructor,
-\begin{verbatim}
-PermutationTest(size_t n);
-\end{verbatim}
-accepts the number of tuples.
-
-\subsection{Run test}
-\label{sub:Run test}
-
-The templates,
-\begin{verbatim}
-template <bool Indepenent, bool Up = true>
-using RunTest = internal::RunTestImpl<Independent, Up>;
-\end{verbatim}
-is a type alias to implementations of the run tests with dependent or
-independent tuples as described by~\cite[pp.~66]{Knuth:1997us}
-and~\cite[ex.~14, pp.~77]{Knuth:1997us}, respectively. The constructors,
-\begin{verbatim}
-RunTest<Independent, Up> test(n);
-\end{verbatim}
-accept the number of samples and number runs, respectively. The independent
-test generates~$n$ random numbers. The dependent test always terminates,
-but may take a very long time if the sequence is deficient.
-
-\subsection{Maximum-of-\texorpdfstring{$t$}{t} test}
-\label{Maximum-of-t test}
-
-The class template,
-\begin{verbatim}
-template <size_t D, size_t T>
-class MaximumOfTTest;
-\end{verbatim}
-implements the maximum-of-$t$ test~\cite[pp.~70]{Knuth:1997us}. The test is
-based on the euquidistribution test using the $\chi^2$-statistic with~$D$
-categories~\cite[pp.~61]{Knuth:1997us}. The constructor,
-\begin{verbatim}
-MaximumOfTTest(size_t n);
-\end{verbatim}
-accepts the number of tuples.
-
-\subsection{Collision test}
-\label{Collision test}
-
-The class template,
-\begin{verbatim}
-template <size_t D, size_t T>
-class CollisionTest;
-\end{verbatim}
-implements the collision test~\cite[pp.~70]{Knuth:1997us}. The constructor,
-\begin{verbatim}
-Collision(size_t n);
-\end{verbatim}
-accepts the number of tuples. The implementation is simplified by using the
-asymptotic distribution of the number of collisions, a Poisson distribution
-with mean,
-\begin{equation*}
-  \lambda = k\Round[Big]{
-    \frac{n}{k} - 1 + \Round[Big]{1 - \frac{1}{k}}^n},\qquad k = D^T.
-\end{equation*}
-This is valid when both~$n$ and~$k$ are large and are of the same order or
-$n \ll k$.
-
-\subsection{Birthday spacings test}
-\label{sub:Birthday spacings test}
-
-The class templates,
-\begin{verbatim}
-template <size_t D, size_t T>
-class BirthdaySpacingsTest;
-\end{verbatim}
-implements the birthday spacings test~\cite[pp.~71]{Knuth:1997us}. The
-constructor,
-\begin{verbatim}
-BirthdaySpacingsTest(size_t n);
-\end{verbatim}
-accepts the number of tuples. It uses approximate a Poisson distribution with
-mean, $\lambda = n^3/4k$, $k = D^T$. This test is only useful when $\lambda$ is
-not too big and~$n$ and~$k$ are large.

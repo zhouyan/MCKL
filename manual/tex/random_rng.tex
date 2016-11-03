@@ -39,7 +39,8 @@
 Two usage cases of \rng{}s are considered. The first is generating random
 integers within a loop, each iteration generate a single random integer,
 \begin{verbatim}
-UniformBitsDistribution<uint64_t> ubits;
+RNGType rng;
+UniformBitsDistribution<typename RNGType::result_type> ubits;
 for (std:size_t i = 0; i != n; ++i)
     r[i] = rand(rng, ubits);
 \end{verbatim}
@@ -54,9 +55,11 @@ number of bytes generated. This gives the performance measurement in \cpb. This
 experiment is repeated ten times, and the best results are shown. The two cases
 are labeled ``\single'' and ``\batch'', respectively, in the tables below.
 
-\newpage
+\perftable{rng}{std}{\rng{}s in the standard library}{%
+RNG in the standard library}
 
-\perftable{rng}{std}{\rng in the standard library}{RNG in the standard library}
+\perftable{rng}{r123}{\rng{}s in the Random123 library}{%
+RNGs in the Random123 library}
 
 \perftable{rng}{aes}{\protect\texttt{AESEngine}}{AESEngine}
 

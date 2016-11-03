@@ -33,237 +33,77 @@
 #define MCKL_RANDOM_COUNTER_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/increment.hpp>
+#include <mckl/random/u01_distribution.hpp>
+
+#define MCKL_DEFINE_RANDOM_COUNTER_U01(lr, bits)                              \
+    template <typename RealType>                                              \
+    void u01_##lr##_u##bits(std::size_t n, RealType *r)                       \
+    {                                                                         \
+        static_assert(std::numeric_limits<ResultType>::digits == bits,        \
+            "**CounterEngine::u01_" #lr "_u" #bits                            \
+            "** is used with ResultType not a " #bits                         \
+            "-bit unsigned integer type");                                    \
+                                                                              \
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);     \
+        if (n < remain) {                                                     \
+            ::mckl::u01_##lr(n, result_.data() + index_, r);                  \
+            index_ += static_cast<unsigned>(n);                               \
+            return;                                                           \
+        }                                                                     \
+                                                                              \
+        ::mckl::u01_##lr(remain, result_.data() + index_, r);                 \
+        r += remain;                                                          \
+        n -= remain;                                                          \
+        index_ = M_;                                                          \
+                                                                              \
+        const std::size_t m = n / M_;                                         \
+        generator_.u01_##lr##_u##bits(ctr_, m, r);                            \
+        r += m * M_;                                                          \
+        n -= m * M_;                                                          \
+                                                                              \
+        generator_(ctr_, result_.data());                                     \
+        ::mckl::u01_##lr(n, result_.data(), r);                               \
+        index_ = static_cast<unsigned>(n);                                    \
+    }
+
+#define MCKL_DEFINE_RANDOM_COUNTER_UNIFORM_REAL(bits)                         \
+    template <typename RealType>                                              \
+    void uniform_real_u##bits(                                                \
+        std::size_t n, RealType *r, RealType a, RealType b)                   \
+    {                                                                         \
+        static_assert(std::numeric_limits<ResultType>::digits == bits,        \
+            "**CounterEngine::uniform_real_u" #bits                           \
+            "** is used with ResultType not a " #bits                         \
+            "-bit unsigned integer type");                                    \
+                                                                              \
+        const std::size_t remain = static_cast<std::size_t>(M_ - index_);     \
+        if (n < remain) {                                                     \
+            ::mckl::u01_co(n, result_.data() + index_, r);                    \
+            ::mckl::fma(n, r, b - a, a, r);                                   \
+            index_ += static_cast<unsigned>(n);                               \
+            return;                                                           \
+        }                                                                     \
+                                                                              \
+        ::mckl::u01_co(remain, result_.data() + index_, r);                   \
+        ::mckl::fma(remain, r, b - a, a, r);                                  \
+        r += remain;                                                          \
+        n -= remain;                                                          \
+        index_ = M_;                                                          \
+                                                                              \
+        const std::size_t m = n / M_;                                         \
+        generator_.uniform_real_u##bits(ctr_, m, r, a, b);                    \
+        r += m * M_;                                                          \
+        n -= m * M_;                                                          \
+                                                                              \
+        generator_(ctr_, result_.data());                                     \
+        ::mckl::u01_co(n, result_.data(), r);                                 \
+        ::mckl::fma(n, r, b - a, a, r);                                       \
+        index_ = static_cast<unsigned>(n);                                    \
+    }
 
 namespace mckl
 {
-
-namespace internal
-{
-
-template <std::size_t, typename T, std::size_t K>
-MCKL_FLATTEN inline void increment_single(std::array<T, K> &, std::false_type)
-{
-}
-
-template <std::size_t N, typename T, std::size_t K>
-MCKL_FLATTEN inline void increment_single(
-    std::array<T, K> &ctr, std::true_type)
-{
-    if (++std::get<N>(ctr) != 0)
-        return;
-
-    increment_single<N + 1>(ctr, std::integral_constant<bool, N + 1 < K>());
-}
-
-} // namespace mckl::internal
-
-/// \brief Increment a counter by one
-/// \ingroup Random
-template <typename T, std::size_t K>
-MCKL_FLATTEN inline void increment(std::array<T, K> &ctr)
-{
-    internal::increment_single<0>(ctr, std::true_type());
-}
-
-/// \brief Increment a counter by given steps
-/// \ingroup Random
-template <typename T, std::size_t K, T NSkip>
-MCKL_FLATTEN inline void increment(
-    std::array<T, K> &ctr, std::integral_constant<T, NSkip>)
-{
-    if (ctr.front() < std::numeric_limits<T>::max() - NSkip) {
-        ctr.front() += NSkip;
-    } else {
-        ctr.front() += NSkip;
-        internal::increment_single<1>(
-            ctr, std::integral_constant<bool, 1 < K>());
-    }
-}
-
-/// \brief Increment a counter by given steps
-/// \ingroup Random
-template <typename T, std::size_t K>
-MCKL_FLATTEN inline void increment(std::array<T, K> &ctr, T nskip)
-{
-    if (ctr.front() < std::numeric_limits<T>::max() - nskip) {
-        ctr.front() += nskip;
-    } else {
-        ctr.front() += nskip;
-        internal::increment_single<1>(
-            ctr, std::integral_constant<bool, 1 < K>());
-    }
-}
-
-namespace internal
-{
-
-template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block_set(const std::array<T, K> &,
-    std::array<std::array<T, K>, Blocks> &, std::false_type)
-{
-}
-
-template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block_set(const std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
-{
-    std::get<B>(ctr_block) = ctr;
-    increment_block_set<B + 1>(
-        ctr, ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
-}
-
-template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block_add(
-    std::array<std::array<T, K>, Blocks> &, std::false_type)
-{
-}
-
-template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block_add(
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
-{
-    increment(std::get<B>(ctr_block), std::integral_constant<T, B + 1>());
-    increment_block_add<B + 1>(
-        ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
-}
-
-template <std::size_t, typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block_add_safe(
-    std::array<std::array<T, K>, Blocks> &, std::false_type)
-{
-}
-
-template <std::size_t B, typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block_add_safe(
-    std::array<std::array<T, K>, Blocks> &ctr_block, std::true_type)
-{
-    std::get<B>(ctr_block).front() += B + 1;
-    increment_block_add_safe<B + 1>(
-        ctr_block, std::integral_constant<bool, B + 1 < Blocks>());
-}
-
-template <typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment_block(const std::array<T, K> &ctr,
-    std::array<std::array<T, K>, Blocks> &ctr_block)
-{
-    increment_block_set<0>(
-        ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    increment_block_add<0>(
-        ctr_block, std::integral_constant<bool, 0 < Blocks>());
-}
-
-template <typename T, std::size_t K, std::size_t Blocks,
-    int = std::numeric_limits<T>::digits>
-class IncrementBlock
-{
-    public:
-    static constexpr bool aligned(void *) { return true; }
-
-    MCKL_FLATTEN static void eval(const std::array<T, K> &ctr,
-        std::array<std::array<T, K>, Blocks> &ctr_block)
-    {
-        increment_block_set<0>(
-            ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
-        increment_block_add_safe<0>(
-            ctr_block, std::integral_constant<bool, 0 < Blocks>());
-    }
-}; // class IncrementBlock
-
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
-
-#if MCKL_USE_AVX2
-#include <mckl/random/internal/increment_avx2_64.hpp>
-#elif MCKL_USE_SSE2
-#include <mckl/random/internal/increment_sse2_64.hpp>
-#endif
-
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
-
-} // namespace mckl::internal
-
-/// \brief Increment a counter by a given steps, and store each step in an
-/// array of counters
-/// \ingroup Random
-template <typename T, std::size_t K, std::size_t Blocks>
-MCKL_FLATTEN inline void increment(
-    std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
-{
-    const bool safe =
-        internal::IncrementBlock<T, K, Blocks>::aligned(ctr_block.data()) &&
-        ctr.front() < std::numeric_limits<T>::max() - static_cast<T>(Blocks);
-    safe ? internal::IncrementBlock<T, K, Blocks>::eval(ctr, ctr_block) :
-           internal::increment_block(ctr, ctr_block);
-    ctr = ctr_block.back();
-}
-
-namespace internal
-{
-
-template <typename T, std::size_t K,
-    bool = (sizeof(T) * K) % sizeof(std::uint8_t) == 0,
-    bool = (sizeof(T) * K) % sizeof(std::uint16_t) == 0,
-    bool = (sizeof(T) * K) % sizeof(std::uint32_t) == 0,
-    bool = (sizeof(T) * K) % sizeof(std::uint64_t) == 0>
-class CounterImpl
-{
-    public:
-    using type = std::array<T, K>;
-}; // class CounterImpl
-
-template <typename T, std::size_t K>
-class CounterImpl<T, K, true, false, false, false>
-{
-    public:
-    using type =
-        std::array<std::uint8_t, sizeof(T) * K / sizeof(std::uint8_t)>;
-}; // class CounterImpl
-
-template <typename T, std::size_t K>
-class CounterImpl<T, K, true, true, false, false>
-{
-    public:
-    using type =
-        std::array<std::uint16_t, sizeof(T) * K / sizeof(std::uint16_t)>;
-}; // class CounterImpl
-
-template <typename T, std::size_t K>
-class CounterImpl<T, K, true, true, true, false>
-{
-    public:
-    using type =
-        std::array<std::uint32_t, sizeof(T) * K / sizeof(std::uint32_t)>;
-}; // class CounterImpl
-
-template <typename T, std::size_t K>
-class CounterImpl<T, K, true, true, true, true>
-{
-    public:
-    using type =
-        std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
-}; // class CounterImpl
-
-} // namespace internal
-
-/// \brief A counter type with the same width as `std::array<T, K>` but with
-/// possibly fewer elements
-///
-/// \ingroup Random
-template <typename T, std::size_t K>
-using Counter = typename internal::CounterImpl<T, K>::type;
-
-namespace internal
-{
-
-} // namespace mckl::internal
 
 /// \brief Counter based RNG engine
 /// \ingroup Random
@@ -279,10 +119,10 @@ namespace internal
 /// void reset(const key_type &key);     // reset generator key
 ///
 /// // Increment counter once and generate one result block
-/// void operator()(ctr_type &ctr, result_type *result);
+/// void operator()(ctr_type &ctr, result_type *r);
 ///
 /// // Increment counter n times and generate n result blocks
-/// void operator()(ctr_type &ctr, std::size_t n, result_type *result);
+/// void operator()(ctr_type &ctr, std::size_t n, result_type *r);
 /// ~~~
 /// - Restrictions: `size() % sizeof(ResultType) == 0`
 template <typename ResultType, typename Generator>
@@ -363,7 +203,7 @@ class CounterEngine
             index_ = 0;
         }
 
-        return result_[static_cast<std::size_t>(index_++)];
+        return result_[index_++];
     }
 
     void operator()(std::size_t n, result_type *r)
@@ -391,7 +231,21 @@ class CounterEngine
         index_ = static_cast<unsigned>(n);
     }
 
+    MCKL_DEFINE_RANDOM_COUNTER_U01(cc, 32)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(co, 32)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oc, 32)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oo, 32)
+    MCKL_DEFINE_RANDOM_COUNTER_UNIFORM_REAL(32)
+
+    MCKL_DEFINE_RANDOM_COUNTER_U01(cc, 64)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(co, 64)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oc, 64)
+    MCKL_DEFINE_RANDOM_COUNTER_U01(oo, 64)
+    MCKL_DEFINE_RANDOM_COUNTER_UNIFORM_REAL(64)
+
     /// \brief Discard the result
+    ///
+    /// \return The number of results discarded
     std::size_t discard()
     {
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
@@ -432,9 +286,6 @@ class CounterEngine
         return std::numeric_limits<result_type>::max();
     }
 
-    /// \brief `eng1 == eng2` is a sufficent condition for subsequent call of
-    /// `operator()` output the same results. But it is not a necessary
-    /// condition.
     friend bool operator==(const CounterEngine<ResultType, Generator> &eng1,
         const CounterEngine<ResultType, Generator> &eng2)
     {
@@ -449,9 +300,6 @@ class CounterEngine
         return true;
     }
 
-    /// \brief `eng1 != eng2` is a necessary condition for subsequent call of
-    /// `operator()` output different results. But it is not a sufficient
-    /// condition.
     friend bool operator!=(const CounterEngine<ResultType, Generator> &eng1,
         const CounterEngine<ResultType, Generator> &eng2)
     {
@@ -509,6 +357,13 @@ class CounterEngine
         index_ = M_;
     }
 }; // class CounterEngine
+
+template <typename ResultType, typename Generator>
+class SeedType<CounterEngine<ResultType, Generator>>
+{
+    public:
+    using type = typename CounterEngine<ResultType, Generator>::key_type;
+}; // class SeedType
 
 template <typename ResultType, typename Generator>
 inline void rand(

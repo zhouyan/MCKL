@@ -55,7 +55,7 @@ inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
     mckl::StopWatch watch_dealloc;
     mckl::StopWatch watch_vec;
     mckl::StopWatch watch_val;
-    mckl::RNGFast rng;
+    mckl::RNG rng;
     std::uniform_int_distribution<std::size_t> runif(N / 2, N * 2);
 
     using Alloc = mckl::Allocator<T, Alignment, Memory>;

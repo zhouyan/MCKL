@@ -33,6 +33,7 @@
 
 use v5.16;
 use Getopt::Long;
+use Data::Dumper;
 
 my $failure = 1e-6;
 my $suspect = 1e-3;
@@ -80,23 +81,30 @@ MKL_SFMT19937 MKL_SFMT19937_64
 MKL_NONDETERM MKL_NONDETERM_64
 RDRAND16 RDRAND32 RDRAND64);
 
+my $subdir;
 my %failure;
 my %suspect;
 
-&filter;
-&check;
-&target;
-&recheck;
-&check_suspect;
-&table;
-&pdf;
+my @subdirs = qw(parallel sequential);
+for (@subdirs) {
+    $subdir = $_;
+    %failure = ();
+    %suspect = ();
+    &filter;
+    &check;
+    &target;
+    &recheck;
+    &count;
+    &table;
+    &pdf;
+}
 
 sub filter {
     for my $b (@bat) {
         for my $r (@rng) {
-            &filter_txt("${b}_${r}");
+            &filter_txt("${b}_${r}", 0);
             for my $u (@u01) {
-                &filter_txt("${b}_${r}_${u}");
+                &filter_txt("${b}_${r}_${u}", 1);
             }
         }
     }
@@ -126,7 +134,8 @@ sub target {
         }
         if (%target) {
             my @keys = sort keys %target;
-            open my $makefile, ">", "\Ltestu01/random_testu01_$b.make";
+            open my $makefile, ">",
+            "\Lrandom_testu01/$subdir/random_testu01_$b.make";
             print $makefile ".PHONY : all run";
             print $makefile " \\\n\t$_" for @keys;
             print $makefile "\n";
@@ -155,7 +164,7 @@ sub recheck {
     }
 }
 
-sub check_suspect {
+sub count {
     for my $b (keys %suspect) {
         for my $r (keys %{$suspect{$b}}) {
             for my $u (keys %{$suspect{$b}{$r}}) {
@@ -206,7 +215,9 @@ sub table {
                 $table .= " \\\\\n"
             }
         }
-        open my $texfile, ">", "\Lrandom_testu01_$b.tex";
+        my $suffix;
+        $suffix = "_p" if $subdir eq "parallel";
+        open my $texfile, ">", "\Lrandom_testu01_$b$suffix.tex";
         print $texfile $header;
         print $texfile $table;
         print $texfile $footer;
@@ -231,7 +242,8 @@ sub pdf {
 }
 
 sub filter_txt {
-    my $txt = "\Ltestu01/random_testu01_$_[0].txt";
+    my $txt = "\Lrandom_testu01/$subdir/random_testu01_$_[0].txt";
+    my $recheck = $_[1];
     return unless -e $txt;
 
     open my $txtfile, "<", $txt;
@@ -240,9 +252,18 @@ sub filter_txt {
     my $lines;
     $lines .= $_ for @lines;
     my @lines;
-    while ($lines =~ s/(==+.*?tests were passed)//s) {
-        if ($1 =~ /(.*All other tests were passed.*)/s) {
-            push @lines, (split "\n", $1);
+    if ($recheck) {
+        if ($lines =~ /---/s) {
+            push @lines, (split "\n", $lines);
+            if ($lines !~ /All other tests were passed/) {
+                push @lines, " All other tests were passed";
+            }
+        }
+    } else {
+        while ($lines =~ s/(==+.*?tests were passed)//s) {
+            if ($1 =~ /(.*All other tests were passed.*)/s) {
+                push @lines, (split "\n", $1);
+            }
         }
     }
     if (@lines) {
@@ -264,7 +285,7 @@ sub filter_txt {
 }
 
 sub check_txt {
-    my $txt = "\Ltestu01/random_testu01_$_[0].txt";
+    my $txt = "\Lrandom_testu01/$subdir/random_testu01_$_[0].txt";
     return unless -e $txt;
 
     shift;

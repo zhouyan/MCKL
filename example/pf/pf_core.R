@@ -31,8 +31,8 @@
 
 library(ggtikz)
 
+obs <- read.table("pf.data", header = FALSE)
 est <- read.table("pf.out", header = TRUE)
-obs <- read.table("pf_cv.data", header = FALSE)
 dat <- data.frame(
     X = c(est[["pos.0"]], obs[,1]),
     Y = c(est[["pos.1"]], obs[,2]))

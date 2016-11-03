@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "random_testu01.hpp"
 #include "random_testu01_crush.hpp"
+#include "random_testu01.hpp"
 
 void random_testu01_crush(int argc, char **argv)
 {

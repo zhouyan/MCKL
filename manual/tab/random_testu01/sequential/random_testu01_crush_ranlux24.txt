@@ -1,0 +1,17 @@
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+ 48  SampleCorr                      0.9992
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+ 18  ClosePairs mNP, t = 2           7.6e-4
+ 20  ClosePairs mNP1, t = 7          5.3e-4
+ ----------------------------------------------
+ All other tests were passed
+

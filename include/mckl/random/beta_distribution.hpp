@@ -347,22 +347,24 @@ inline std::size_t beta_distribution_impl(RNGType &rng, std::size_t n,
     return 0;
 }
 
+} // namespace mckl::internal
+
 template <typename RealType, typename RNGType>
 inline void beta_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     const std::size_t k = BufferSize<RealType>::value;
-    const BetaDistributionConstant<RealType> constant(alpha, beta);
+    const internal::BetaDistributionConstant<RealType> constant(alpha, beta);
     while (n > k) {
-        std::size_t m =
-            beta_distribution_impl<k>(rng, k, r, alpha, beta, constant);
+        std::size_t m = internal::beta_distribution_impl<k>(
+            rng, k, r, alpha, beta, constant);
         if (m == 0)
             break;
         n -= m;
         r += m;
     }
     std::size_t m =
-        beta_distribution_impl<k>(rng, n, r, alpha, beta, constant);
+        internal::beta_distribution_impl<k>(rng, n, r, alpha, beta, constant);
     n -= m;
     r += m;
     if (n > 0) {
@@ -378,8 +380,6 @@ inline void beta_distribution(RNGType &rng, std::size_t n, RealType *r,
 {
     beta_distribution(rng, n, r, param.alpha(), param.beta());
 }
-
-} // namespace mckl::internal
 
 /// \brief Beta distribution
 /// \ingroup Distribution

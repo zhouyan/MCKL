@@ -51,6 +51,7 @@
 \UseAbbr{mcmc}
 \UseAbbr{mkl}
 \UseAbbr{msvc}
+\UseAbbr{odr}
 \UseAbbr{pdf}
 \UseAbbr{pmf}
 \UseAbbr{posix}
@@ -98,7 +99,7 @@
   cores and eight logical ones through hyperthreading, with CentOS
   (verison~7.2) and the second is an Intel Core~i7-4960\textsc{hq}, running
   at~2.60~Ghz base frequency with four physical cores and eight logical ones
-  through hyperthreading, with macOS Sierra (version~10.12). They are labeled
+  through hyperthreading, with macOS Sierra (version~10.12.1). They are labeled
   as ``Nehalem'' and ``Haswell'', respectively, based on their \cpu
   microarchitecture. Both single core and parallel (using number of threads
   equal the number of the \cpu logical cores) performance are tested. They are
@@ -119,31 +120,16 @@ compiler.}
   \file_if_exist:nT{tab/random_#1_#2_sse2.tex}{
     \begin{table}
       \input{tab/random_#1_#2_sse2}
-      \caption{Performance~of~#3~(Nehalem,~sequential)}
-      \label{tab:Performance~of~#4~(Nehalem,~sequential)}
-    \end{table}
-  }
-  \file_if_exist:nT{tab/random_#1_#2_sse2_p.tex}{
-    \begin{table}
-      \input{tab/random_#1_#2_sse2_p}
-      \caption{Performance~of~#3~(Nehalem,~parallel)}
-      \label{tab:Performance~of~#4~(Nehalem,~parallel)}
+      \caption{Performance~of~#3~(Nehalem)}
+      \label{tab:Performance~of~#4~(Nehalem)}
     \end{table}
   }
   \file_if_exist:nT{tab/random_#1_#2_avx2.tex}{
     \begin{table}
       \input{tab/random_#1_#2_avx2}
-      \caption{Performance~of~#3~(Haswell,~sequential)}
-      \label{tab:Performance~of~#4~(Haswell,~sequential)}
+      \caption{Performance~of~#3~(Haswell)}
+      \label{tab:Performance~of~#4~(Haswell)}
     \end{table}
   }
-  \file_if_exist:nT{tab/random_#1_#2_avx2_p.tex}{
-    \begin{table}
-      \input{tab/random_#1_#2_avx2_p}
-      \caption{Performance~of~#3~(Haswell,~parallel)}
-      \label{tab:Performance~of~#4~(Haswell,~parallel)}
-    \end{table}
-  }
-  \clearpage
 }
 \ExplSyntaxOff

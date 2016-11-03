@@ -36,11 +36,10 @@ use Getopt::Long;
 
 my $run = 0;
 my $build = 0;
-my $llvm = "../../build/llvm-release";
-my $gnu = "../../build/gnu-release";
-my $intel = "../../build/intel-release";
+my $llvm = "../../build/release-llvm";
+my $gnu = "../../build/release-gnu";
+my $intel = "../../build/release-intel";
 my $compiler = "llvm";
-my $make = "ninja";
 my $name;
 my $write = 0;
 my $pdf = 0;
@@ -51,13 +50,13 @@ GetOptions(
     "gnu=s"      => \$gnu,
     "intel=s"    => \$intel,
     "compiler=s" => \$compiler,
-    "make=s"     => \$make,
     "name=s"     => \$name,
     "write"      => \$write,
     "pdf"        => \$pdf,
 );
 $build = 1 if $run;
-$write = 0 if $name;
+
+my @u01 = qw(U01Canonical U01CC U01CO U01OC U01OO);
 
 my @inverse = qw(Arcsine Cauchy Exponential ExtremeValue Laplace Logistic
 Pareto Rayleigh UniformReal Weibull);
@@ -79,6 +78,7 @@ my @studentt = qw(StudentT);
 my @int = qw(Geometric UniformInt);
 
 my %distribution = (
+    u01        => [@u01],
     inverse    => [@inverse],
     beta       => [@beta],
     chisquared => [@chisquared],
@@ -90,7 +90,7 @@ my %distribution = (
     int        => [@int],
 );
 
-my @keys = qw(inverse beta chisquared gamma fisherf normal stable studentt
+my @keys = qw(u01 inverse beta chisquared gamma fisherf normal stable studentt
 int);
 
 my @distribution;
@@ -111,8 +111,9 @@ my @compiler = qw(llvm gnu intel);
 
 my %nostd;
 my %nomkl;
-my @nostd = qw(Arcsine Beta Laplace Levy Logistic Pareto Rayleigh Stable);
-my @nomkl = qw(Arcsine Pareto Stable);
+my @nostd = qw(U01CC U01OC U01OO Arcsine Beta Laplace Levy Logistic Pareto
+Rayleigh Stable);
+my @nomkl = qw(U01Canonical U01CC U01OC U01OO Arcsine Pareto Stable);
 $nostd{$_} = 1 for @nostd;
 $nomkl{$_} = 1 for @nomkl;
 
@@ -121,11 +122,6 @@ my %cpe_m;
 my %cpe_b;
 my %cpe_v;
 my %cpe_i;
-my %cpe_sp;
-my %cpe_mp;
-my %cpe_bp;
-my %cpe_vp;
-my %cpe_ip;
 
 &build;
 &run;
@@ -142,13 +138,16 @@ sub build {
         push @target, "\Lrandom_distribution_${name}";
         push @target, "\Lrandom_distribution_${name}_novml";
     }
-    for my $c (@compiler) {
-        my $d = $compiler{$c};
-        say $d;
-        if ($name) {
-            `$make -C $d @target 2>&1`;
-        } else {
-            `$make -C $d random_distribution 2>&1`;
+    if (@target) {
+        for my $c (@compiler) {
+            my $d = $compiler{$c};
+            next if (not -d $d);
+            say $d;
+            if ($name) {
+                `ninja -C $d @target 2>&1`;
+            } else {
+                `ninja -C $d random_distribution 2>&1`;
+            }
         }
     }
 }
@@ -159,25 +158,32 @@ sub run {
     for my $c (@compiler) {
         my $result;
         my $d = $compiler{$c};
+        next if (not -d $d);
         say $d;
-        my @result;
         for my $r (@distribution) {
+            my @result;
             my $name = &distribution_name($r);
-            my $cmd1 = "$make -C $d";
-            my $cmd2 = "$make -C $d";
+            my $cmd1 = "ninja -C $d";
+            my $cmd2 = "ninja -C $d";
             $cmd1 .= " \Lrandom_distribution_${name}-check 2>&1";
             $cmd2 .= " \Lrandom_distribution_${name}_novml-check 2>&1";
-            my @lines1 = grep { /Passed|Failed/ } split "\n", `$cmd1`;
+            my @lines1 = `$cmd1`;
+            my @lines2 = `$cmd2`;
+            @lines1 = grep { /Passed|Failed/ } @lines1;
+            @lines2 = grep { /Passed|Failed/ } @lines2;
             push @result, @lines1;
-            say $_ for @lines1;
-            my @lines2 = grep { /Passed|Failed/ } split "\n", `$cmd2`;
             push @result, @lines2;
-            say $_ for @lines2;
-        }
-        if ($write) {
-            open my $txtfile, ">",
-            "distribution/random_distribution_${c}_${simd}.txt";
-            say $txtfile $_ for @result;
+            for (@lines1) {
+                print $_ if /<(double|int64_t)>.*VML/;
+            }
+            for (@lines2) {
+                print $_ if /<(double|int64_t)>.*VML/;
+            }
+            if ($write) {
+                open my $txtfile, ">", "random_distribution/" .
+                "\Lrandom_distribution_${r}_${c}_${simd}.txt";
+                print $txtfile $_ for @result;
+            }
         }
     }
 
@@ -185,11 +191,11 @@ sub run {
 
 sub read {
     for my $s (@simd) {
-        open my $txtfile, "<",
-        "distribution/random_distribution_${compiler}_${s}.txt";
-        my @lines = <$txtfile>;
         for my $r (@distribution) {
-            my @result = grep { /$r<(double|int32_t)>/ } @lines;
+            open my $txtfile, "<", "random_distribution/" .
+            "\Lrandom_distribution_${r}_${compiler}_${s}.txt";
+            my @lines = <$txtfile>;
+            my @result = grep { /$r<(double|int64_t)>/ } @lines;
             for (@result) {
                 my ($name, $cpe_s, $cpe_m, $cpe_b, $cpe_i, $lib) = (split);
                 $name =~ s/(.*)<.*>(.*)/$1$2/;
@@ -198,34 +204,17 @@ sub read {
                 $cpe_b{$s}{$name} = 0xFFFF unless $cpe_b{$s}{$name};
                 $cpe_v{$s}{$name} = 0xFFFF unless $cpe_v{$s}{$name};
                 $cpe_i{$s}{$name} = 0xFFFF unless $cpe_i{$s}{$name};
-                $cpe_sp{$s}{$name} = 0xFFFF unless $cpe_sp{$s}{$name};
-                $cpe_mp{$s}{$name} = 0xFFFF unless $cpe_mp{$s}{$name};
-                $cpe_bp{$s}{$name} = 0xFFFF unless $cpe_bp{$s}{$name};
-                $cpe_vp{$s}{$name} = 0xFFFF unless $cpe_vp{$s}{$name};
-                $cpe_ip{$s}{$name} = 0xFFFF unless $cpe_ip{$s}{$name};
-                if ($lib eq "SCPP") {
+                if ($lib eq "C++") {
                     $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
                     $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
                     $cpe_b{$s}{$name} = $cpe_b if $cpe_b < $cpe_b{$s}{$name};
                     $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
                 }
-                if ($lib eq "PCPP") {
-                    $cpe_sp{$s}{$name} = $cpe_s if $cpe_s < $cpe_sp{$s}{$name};
-                    $cpe_mp{$s}{$name} = $cpe_m if $cpe_m < $cpe_mp{$s}{$name};
-                    $cpe_bp{$s}{$name} = $cpe_b if $cpe_b < $cpe_bp{$s}{$name};
-                    $cpe_ip{$s}{$name} = $cpe_i if $cpe_i < $cpe_ip{$s}{$name};
-                }
-                if ($lib eq "SVML") {
+                if ($lib eq "VML") {
                     $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
                     $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
                     $cpe_v{$s}{$name} = $cpe_b if $cpe_b < $cpe_v{$s}{$name};
                     $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
-                }
-                if ($lib eq "PVML") {
-                    $cpe_sp{$s}{$name} = $cpe_s if $cpe_s < $cpe_sp{$s}{$name};
-                    $cpe_mp{$s}{$name} = $cpe_m if $cpe_m < $cpe_mp{$s}{$name};
-                    $cpe_vp{$s}{$name} = $cpe_b if $cpe_b < $cpe_vp{$s}{$name};
-                    $cpe_ip{$s}{$name} = $cpe_i if $cpe_i < $cpe_ip{$s}{$name};
                 }
             }
         }
@@ -248,9 +237,8 @@ sub table {
     for my $k (@keys) {
         for my $s (@simd) {
             my $table;
-            my $table_p;
             for my $r (@{$distribution{$k}}) {
-                my @name = sort grep { /$r/ } keys %{$cpe_s{$s}};
+                my @name = sort grep { /^$r(\(|$)/ } keys %{$cpe_s{$s}};
                 for my $name (@name) {
                     $table .= " " x 2 . sprintf("%-40s", "\\texttt{$name}");
                     $table .= " & ";
@@ -269,33 +257,15 @@ sub table {
                         $table .= &format($cpe_i{$s}{$name});
                     }
                     $table .= "\\\\\n";
-                    $table_p .= " " x 2 . sprintf("%-40s", "\\texttt{$name}");
-                    $table_p .= " & ";
-                    if ($nostd{$r}) {
-                        $table_p .= &format("--");
-                    } else {
-                        $table_p .= &format($cpe_sp{$s}{$name});
-                    }
-                    $table_p .= " & " . &format($cpe_mp{$s}{$name});
-                    $table_p .= " & " . &format($cpe_bp{$s}{$name});
-                    $table_p .= " & " . &format($cpe_vp{$s}{$name});
-                    $table_p .= " & ";
-                    if ($nomkl{$r}) {
-                        $table_p .= &format("--");
-                    } else {
-                        $table_p .= &format($cpe_ip{$s}{$name});
-                    }
-                    $table_p .= "\\\\\n";
                 }
             }
-            open my $texfile, ">", "\Lrandom_distribution_${k}_${s}.tex";
-            print $texfile $header;
-            print $texfile $table;
-            print $texfile $footer;
-            open my $texfile_p, ">", "\Lrandom_distribution_${k}_${s}_p.tex";
-            print $texfile_p $header;
-            print $texfile_p $table_p;
-            print $texfile_p $footer;
+            if ($table) {
+                open my $texfile, ">",
+                "\Lrandom_distribution_${k}_${s}.tex";
+                print $texfile $header;
+                print $texfile $table;
+                print $texfile $footer;
+            }
         }
     }
 }
@@ -319,8 +289,14 @@ sub pdf {
 
 sub distribution_name {
     my $name = shift;
-    $name =~ s/([A-Z])/_$1/g;
-    $name =~ s/^_//g;
+    if ($name eq "U01Canonical") {
+        $name = "U01_Canonical";
+    } elsif ($name =~ /U01(..)/) {
+        $name =~ s/U01(..)/U01_$1/;
+    } else {
+        $name =~ s/([A-Z])/_$1/g;
+        $name =~ s/^_//g;
+    }
     $name
 }
 

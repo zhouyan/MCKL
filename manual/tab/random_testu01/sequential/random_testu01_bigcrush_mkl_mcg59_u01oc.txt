@@ -1,0 +1,12 @@
+========= Summary results of BigCrush =========
+ Generator:        U01OC
+ Number of statistics:  12
+ ----------------------------------------------
+ 37  Gap, r = 20                    1 -  8.3e-5
+ 58  AppearanceSpacings, r = 27     1 -  1.5e-7
+ 58  AppearanceSpacings, r = 27     1 -  1.3e-7
+ 87  LongestHeadRun, r = 27           eps
+ 87  LongestHeadRun, r = 27           eps
+ ----------------------------------------------
+ All other tests were passed
+

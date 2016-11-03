@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  160
+ ----------------------------------------------
+ 97  HammingIndep, L=300, r=0        0.9995
+ ----------------------------------------------
+ All other tests were passed
+
