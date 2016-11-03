@@ -51,7 +51,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void logistic_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    Array<RealType, K> s;
+    alignas(32) std::array<RealType, K> s;
     u01_oo_distribution(rng, n, r);
     sub(n, const_one<RealType>(), r, s.data());
     div(n, r, s.data(), r);
@@ -59,10 +59,10 @@ inline void logistic_distribution_impl(
     fma(n, r, b, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Logistic, logistic, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Logistic, logistic, RealType, RealType, a, RealType, b)
 
 /// \brief Logistic distribution
 /// \ingroup Distribution

@@ -31,20 +31,20 @@
 
 \documentclass[
   bib,
-  lines=35,
+  hyper,
+  a4paper,
+  lines=42,
   linespread=1.2,
   fontsize=11pt,
   fontset=Minion,
+  monofont=TheSansMonoCd,
   monoscale=MatchLowercase,
 ]{mbook}
 
-\ExplSyntaxOn
-\geometry{paperwidth=28\c_mclass_baseline_dim}
-\geometry{paperheight=45\c_mclass_baseline_dim}
-\ExplSyntaxOff
-
 \input{tex/macro}
-\tryinput{tex/inc.tex}
+\input{tex/inc.tex}
+
+\addbibresource{manual.bib}
 
 \begin{document}
 
@@ -59,11 +59,13 @@
 \include{tex/math}
 \include{tex/random}
 \include{tex/utility}
+
 \printbibliography
 
 \appendix
 \include{tex/config}
-\include{tex/perf_random_rng}
-\include{tex/perf_random_distribution}
+\include{tex/random_rng}
+\include{tex/random_distribution}
+\include{tex/random_testu01}
 
 \end{document}

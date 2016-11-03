@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
 
 ##############################################################################
 # Disable in source build
@@ -43,7 +43,8 @@ ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 # Basics
 ##############################################################################
 
-PROJECT(MCKL VERSION 0.1 LANGUAGES CXX)
+PROJECT(MCKL C CXX)
+SET(MCKL_VERSION 0.1)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 SET (MCKL_GOOD_COMPILER TRUE)
@@ -57,7 +58,6 @@ ENDIF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
 # Options
 ##############################################################################
 
-OPTION(MCKL_ENABLE_LIBRARY "Enable building of library" ON)
 OPTION(MCKL_ENABLE_EXAMPLE "Enable building of example" ON)
 
 ##############################################################################
@@ -99,44 +99,11 @@ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include/mckl
 # Check features
 ##############################################################################
 
-IF(MCKL_ENABLE_LIBRARY OR MCKL_ENABLE_EXAMPLE)
+IF(MCKL_ENABLE_EXAMPLE)
     INCLUDE(MCKL)
-ELSE(MCKL_ENABLE_LIBRARY OR MCKL_ENABLE_EXAMPLE)
+ELSE(MCKL_ENABLE_EXAMPLE)
     RETURN()
-ENDIF(MCKL_ENABLE_LIBRARY OR MCKL_ENABLE_EXAMPLE)
-
-IF (NOT (MKL_FOUND OR BLAS_FOUND))
-    RETURN()
-ENDIF (NOT (MKL_FOUND OR BLAS_FOUND))
-
-##############################################################################
-# Enable backends
-##############################################################################
-
-MESSAGE(STATUS "=================== Enable backends ===================")
-FOREACH(backend ${BACKENDS})
-    MESSAGE(STATUS ${backend})
-ENDFOREACH(backend ${BACKENDS})
-
-##############################################################################
-# Enable features
-##############################################################################
-
-MESSAGE(STATUS "=================== Enable features ===================")
-FOREACH(feature ${FEATURES})
-    MESSAGE(STATUS ${feature})
-ENDFOREACH(feature ${FEATURES})
-
-##############################################################################
-# Library
-##############################################################################
-
-IF(MCKL_ENABLE_LIBRARY)
-    ADD_CUSTOM_TARGET(lib ALL)
-    IF(MCKL_GOOD_COMPILER)
-        ADD_SUBDIRECTORY(lib)
-    ENDIF(MCKL_GOOD_COMPILER)
-ENDIF(MCKL_ENABLE_LIBRARY)
+ENDIF(MCKL_ENABLE_EXAMPLE)
 
 ##############################################################################
 # Example
@@ -144,7 +111,6 @@ ENDIF(MCKL_ENABLE_LIBRARY)
 
 IF(MCKL_ENABLE_EXAMPLE)
     ADD_CUSTOM_TARGET(example ALL)
-    ADD_CUSTOM_TARGET(check)
     ADD_SUBDIRECTORY(example)
 ENDIF(MCKL_ENABLE_EXAMPLE)
 
@@ -154,8 +120,7 @@ ENDIF(MCKL_ENABLE_EXAMPLE)
 
 MESSAGE(STATUS "=======================================================")
 IF (NOT MCKL_GOOD_COMPILER)
-    MESSAGE(STATUS "Runtime library and some examples are disabled due to")
-    MESSAGE(STATUS "known issues with compilers")
+    MESSAGE(STATUS "Some examples disabled due to known issues with compilers")
     MESSAGE (STATUS
         "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
     MESSAGE(STATUS "=======================================================")

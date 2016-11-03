@@ -57,6 +57,8 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
             std::log(static_cast<double>(K_)) - 2 * const_ln_2<double>());
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(std::size_t)
+
     template <typename RNGType, typename U01DistributionType>
     std::size_t operator()(RNGType &rng, U01DistributionType &u01)
     {
@@ -66,21 +68,21 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
         const std::size_t m = n_ / k;
         const std::size_t l = n_ % k;
         Vector<result_type> r(k * T);
-        spacings_.resize(n_);
-        std::size_t *s = spacings_.data();
+        Vector<std::size_t> spacings(n_);
+        std::size_t *s = spacings.data();
         for (std::size_t i = 0; i != m; ++i, s += k)
             generate(rng, u01, k, r.data(), s);
         generate(rng, u01, l, r.data(), s);
 
-        std::size_t d0 = spacings_.front();
-        std::sort(spacings_.begin(), spacings_.end());
+        std::size_t d0 = spacings.front();
+        std::sort(spacings.begin(), spacings.end());
         for (std::size_t i = 0; i != n_ - 1; ++i)
-            spacings_[i] = spacings_[i + 1] - spacings_[i];
-        spacings_.back() = K_ - spacings_.back() + d0;
-        std::sort(spacings_.begin(), spacings_.end());
+            spacings[i] = spacings[i + 1] - spacings[i];
+        spacings.back() = K_ - spacings.back() + d0;
+        std::sort(spacings.begin(), spacings.end());
         std::size_t e = 0;
         for (std::size_t i = 0; i != n_ - 1; ++i) {
-            if (spacings_[i] == spacings_[i + 1])
+            if (spacings[i] == spacings[i + 1])
                 ++e;
         }
 
@@ -94,7 +96,6 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
 
     std::size_t n_;
     double mean_;
-    Vector<std::size_t> spacings_;
 
     template <typename RNGType, typename U01DistributionType>
     void generate(RNGType &rng, U01DistributionType &u01, std::size_t n,

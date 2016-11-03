@@ -1,0 +1,5 @@
+ranlux48                 120       8         181.63         165.48      ---Passed
+ranlux48                 120       8         176.95         166.89      ---Passed
+ranlux48                 120       8         177.42         164.13      ---Passed
+ranlux48                 120       8         185.62         172.16      ---Passed
+ranlux48                 120       8         179.63         164.73      ---Passed

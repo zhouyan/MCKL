@@ -41,22 +41,7 @@ int main(int argc, char **argv)
     if (argc > 2)
         ncol = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    std::cout << std::string(100, '=') << std::endl;
-    std::cout << std::setw(20) << std::left << "Orignal type" << std::setw(20)
-              << std::left << "Load type" << std::setw(20) << std::right
-              << std::fixed << "Time (ms) store" << std::setw(20) << std::right
-              << std::fixed << "Time (ms) load" << std::setw(20) << std::right
-              << "Test" << std::endl;
-    std::cout << std::string(100, '-') << std::endl;
-    MCKL_HDF5_TEST(float, float);
-    MCKL_HDF5_TEST(float, double);
-    MCKL_HDF5_TEST(float, long double);
-    MCKL_HDF5_TEST(double, float);
-    MCKL_HDF5_TEST(double, double);
-    MCKL_HDF5_TEST(double, long double);
-    MCKL_HDF5_TEST(long double, float);
-    MCKL_HDF5_TEST(long double, float);
-    MCKL_HDF5_TEST(long double, long double);
+    utility_hdf5(nrow, ncol);
 
     return 0;
 }

@@ -40,7 +40,7 @@
 #if MCKL_HAS_AESNI
 #define MCKL_RNG_TYPE ::mckl::ARS
 #else
-#define MCKL_RNG_TYPE ::mckl::Threefry
+#define MCKL_RNG_TYPE ::mckl::Philox4x32
 #endif
 #endif
 
@@ -48,30 +48,15 @@
 /// \ingroup Config
 #ifndef MCKL_RNG_64_TYPE
 #if MCKL_HAS_AESNI
-#define MCKL_RNG_64_TYPE ARS_64
+#define MCKL_RNG_64_TYPE ::mckl::ARS_64
 #else
-#define MCKL_RNG_64_TYPE Threefry_64
+#define MCKL_RNG_64_TYPE ::mckl::Philox4x32_64
 #endif
 #endif
 
-/// \brief Default `RNGMini` type
-/// \ingroup Config
-#ifndef MCKL_RNG_MINI_TYPE
-#define MCKL_RNG_MINI_TYPE ::mckl::Philox2x32
-#endif
-
-/// \brief Default `RNG_64` type
-/// \ingroup Config
-#ifndef MCKL_RNG_MINI_64_TYPE
-#define MCKL_RNG_MINI_64_TYPE ::mckl::Philox2x32_64
-#endif
-
+#include <mckl/random/aes.hpp>
 #include <mckl/random/philox.hpp>
 #include <mckl/random/threefry.hpp>
-
-#if MCKL_HAS_AESNI
-#include <mckl/random/aesni.hpp>
-#endif
 
 #if MCKL_HAS_MKL
 #include <mckl/random/mkl.hpp>
@@ -91,14 +76,6 @@ using RNG = MCKL_RNG_TYPE;
 /// \brief The default 64-bit RNG
 /// \ingroup Random
 using RNG_64 = MCKL_RNG_64_TYPE;
-
-/// \brief The 32-bit RNG with smallest state
-/// \ingroup Random
-using RNGMini = MCKL_RNG_MINI_TYPE;
-
-/// \brief The 64-bit RNG with smallest state
-/// \ingroup Random
-using RNGMini_64 = MCKL_RNG_MINI_64_TYPE;
 
 } // namespace mckl
 

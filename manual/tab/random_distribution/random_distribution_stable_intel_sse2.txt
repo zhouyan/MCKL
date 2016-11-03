@@ -1,0 +1,12 @@
+Stable<float>(2,0,0,1)              378.23      375.58       62.95       66.86       VML    (0)--Passed
+Stable<float>(1,0,0,1)              223.09      222.94       49.70       53.96       VML    (0)--Passed
+Stable<float>(0.5,1,0,1)            378.53      375.60       57.43       61.81       VML    (0)--Passed
+Stable<double>(2,0,0,1)             470.22      468.96      150.79      156.70       VML    (0)--Passed
+Stable<double>(1,0,0,1)             286.87      286.82      113.79      118.98       VML    (0)--Passed
+Stable<double>(0.5,1,0,1)           470.01      469.32      127.07      132.95       VML    (0)--Passed
+Stable<float>(2,0,0,1)              374.84      374.58      134.99      138.98       C++    (0)--Passed
+Stable<float>(1,0,0,1)              222.94      222.94       73.02       77.23       C++    (0)--Passed
+Stable<float>(0.5,1,0,1)            375.57      376.93      135.11      139.16       C++    (0)--Passed
+Stable<double>(2,0,0,1)             466.29      466.66      248.16      252.43       C++    (0)--Passed
+Stable<double>(1,0,0,1)             275.17      274.52      118.70      121.51       C++    (0)--Passed
+Stable<double>(0.5,1,0,1)           467.52      465.36      247.95      255.33       C++    (0)--Passed

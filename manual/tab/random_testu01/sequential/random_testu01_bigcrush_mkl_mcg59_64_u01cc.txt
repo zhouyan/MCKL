@@ -1,0 +1,11 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  14
+ ----------------------------------------------
+ 22  ClosePairs mNP2S, t = 3        1.2e-60
+ 22  ClosePairs mNP2S, t = 3       5.0e-104
+ 37  Gap, r = 20                      eps
+ 37  Gap, r = 20                      eps
+ ----------------------------------------------
+ All other tests were passed
+

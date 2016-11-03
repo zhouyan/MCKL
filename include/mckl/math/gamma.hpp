@@ -32,8 +32,11 @@
 #ifndef MCKL_MATH_GAMMA_HPP
 #define MCKL_MATH_GAMMA_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
 #include <mckl/math/constants.hpp>
+
+#include <algorithm>
+#include <cmath>
 
 namespace mckl
 {
@@ -80,7 +83,7 @@ inline double gammap_approx(double a, double x, bool psig)
 
 inline double gammap_gser(double a, double x)
 {
-    static constexpr double eps = std::numeric_limits<double>::epsilon();
+    constexpr double eps = std::numeric_limits<double>::epsilon();
 
     double ap = a;
     double del = 1 / a;
@@ -96,8 +99,8 @@ inline double gammap_gser(double a, double x)
 
 inline double gammap_gcf(double a, double x)
 {
-    static constexpr double eps = std::numeric_limits<double>::epsilon();
-    static constexpr double fpmin = std::numeric_limits<double>::min() / eps;
+    constexpr double eps = std::numeric_limits<double>::epsilon();
+    constexpr double fpmin = std::numeric_limits<double>::min() / eps;
 
     double b = x + 1 - a;
     double c = 1.0 / fpmin;
@@ -145,7 +148,7 @@ inline double gammap(double a, double x)
 /// \ingroup Special
 inline double gammapinv(double a, double y)
 {
-    static constexpr double eps = 1e-8;
+    constexpr double eps = 1e-8;
 
     if (a <= 0)
         return const_nan<double>();

@@ -320,8 +320,8 @@ class MonitorEvalBase
     template <typename D>
     void eval_range_dispatch(std::size_t iter, std::size_t dim,
         const ParticleRange<T> &range, double *r,
-        void (D::*)(std::size_t, std::size_t, const ParticleRange<T> &,
-                                 double *))
+        void (D::*)(
+            std::size_t, std::size_t, const ParticleRange<T> &, double *))
     {
         static_cast<Derived *>(this)->eval_range(iter, dim, range, r);
     }
@@ -345,7 +345,7 @@ class MonitorEvalBase
     template <typename D>
     void eval_dispatch(std::size_t iter, std::size_t dim, ParticleIndex<T> idx,
         double *r, void (D::*)(std::size_t, std::size_t, ParticleIndex<T>,
-                           double *) const)
+                       double *) const)
     {
         static_cast<Derived *>(this)->eval_each(iter, dim, idx, r);
     }
@@ -354,7 +354,7 @@ class MonitorEvalBase
     void eval_range_dispatch(std::size_t iter, std::size_t dim,
         const ParticleRange<T> &range, double *r,
         void (D::*)(std::size_t, std::size_t, const ParticleRange<T> &,
-                                 double *) const)
+            double *) const)
     {
         static_cast<Derived *>(this)->eval_range(iter, dim, range, r);
     }
@@ -404,15 +404,15 @@ class MonitorEvalBase
     // base
 
     void eval_dispatch(std::size_t, std::size_t, ParticleIndex<T>, double *,
-        void (MonitorEvalBase::*)(std::size_t, std::size_t, ParticleIndex<T>,
-                           double *))
+        void (MonitorEvalBase::*)(
+            std::size_t, std::size_t, ParticleIndex<T>, double *))
     {
     }
 
     void eval_range_dispatch(std::size_t iter, std::size_t dim,
         const ParticleRange<T> &range, double *r,
-        void (MonitorEvalBase::*)(std::size_t, std::size_t,
-                                 const ParticleRange<T> &, double *))
+        void (MonitorEvalBase::*)(
+            std::size_t, std::size_t, const ParticleRange<T> &, double *))
     {
         for (auto idx : range) {
             eval_each(iter, dim, idx, r);

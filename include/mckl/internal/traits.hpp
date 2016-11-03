@@ -172,30 +172,24 @@ MCKL_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 namespace internal
 {
 
-template <typename T, typename T1, typename... Types>
-class is_one_of : public std::integral_constant<bool,
-                      is_one_of<T, T1>::value || is_one_of<T, Types...>::value>
+template <typename T, std::size_t K = 1>
+class BufferSize
+    : public std::integral_constant<std::size_t,
+          8192 / (sizeof(T) * K) == 0 ? 1 : 8192 / (sizeof(T) * K)>
 {
-}; // class is_one_of
+}; // class BufferSize;
 
-template <typename T, typename T1>
-class is_one_of<T, T1>
-    : public std::integral_constant<bool, std::is_same<T, T1>::value>
-{
-}; // class is_one_of
+template <typename T>
+using is_blas_floating_point = std::integral_constant<bool,
+    std::is_same<typename std::remove_cv<T>::type, float>::value ||
+        std::is_same<typename std::remove_cv<T>::type, double>::value>;
 
-template <typename T, typename T1, typename... Types>
-class is_seed_seq
-    : public std::integral_constant<bool,
-          is_seed_seq<T, T1>::value && is_seed_seq<T, Types...>::value>
-{
-}; // class is_seed_seq
-
-template <typename T, typename T1>
-class is_seed_seq<T, T1>
-    : public std::integral_constant<bool, !std::is_convertible<T, T1>::value>
-{
-}; // class is_seed_seq
+template <typename T, typename RNGType,
+    typename KeyType = typename RNGType::result_type>
+using is_seed_seq = std::integral_constant<bool, std::is_class<T>::value &&
+        !std::is_convertible<T, RNGType>::value &&
+        !std::is_convertible<T, typename RNGType::result_type>::value &&
+        !std::is_convertible<T, KeyType>::value>;
 
 } // namespace mckl::internal
 

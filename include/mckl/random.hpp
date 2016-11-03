@@ -40,4 +40,8 @@
 #include <mckl/random/test.hpp>
 #include <mckl/random/u01.hpp>
 
+#if MCKL_HAS_TESTU01
+#include <mckl/random/testu01.hpp>
+#endif
+
 #endif // MCKL_RANDOM_HPP

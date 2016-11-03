@@ -29,34 +29,36 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\addbibresource{manual.bib}
-
 \UseAbbr{aes}
 \UseAbbr{ars}
 \UseAbbr{avx}
+\UseAbbr{batch}
 \UseAbbr{blas}
 \UseAbbr{brng}
 \UseAbbr{cdf}
+\UseAbbr{cpb}
+\UseAbbr{cpe}
 \UseAbbr{cpu}
 \UseAbbr{crtp}
 \UseAbbr{ess}
 \UseAbbr{gcc}
 \UseAbbr{gnu}
 \UseAbbr{icc}
-\UseAbbr{ilp}
+\UseAbbr{intel}
 \UseAbbr{lapack}
 \UseAbbr{llvm}
-\UseAbbr{lp}
 \UseAbbr{mckl}
 \UseAbbr{mcmc}
 \UseAbbr{mkl}
 \UseAbbr{msvc}
+\UseAbbr{odr}
 \UseAbbr{pdf}
 \UseAbbr{pmf}
 \UseAbbr{posix}
 \UseAbbr{rdrand}
 \UseAbbr{rng}
 \UseAbbr{simd}
+\UseAbbr{single}
 \UseAbbr{smc}
 \UseAbbr{smp}
 \UseAbbr{std}
@@ -70,7 +72,9 @@
 \UseAbbr[\aesni][\textsc]{aes-ni}
 \UseAbbr[\cpp][\textcase]{C++}
 \UseAbbr[\hdf]{hdf5}
+\UseAbbr[\ilp]{ilp64}
 \UseAbbr[\ith][\textsups]{t{}h}
+\UseAbbr[\lp]{lp64}
 \UseAbbr[\testu][\lnfigures]{TestU01}
 
 \UseMathBB{I}
@@ -78,12 +82,7 @@
 \UseMathCal{N}
 \UseMathCal{X}
 
-\fvset{gobble=2, formatcom=\color{MGrey}, hfuzz=0pt}
-\hypersetup{anchorcolor=MBlue}
-\hypersetup{citecolor=MBlue}
-\hypersetup{colorlinks}
-\hypersetup{linkcolor=MBlue}
-\hypersetup{linktocpage}
+\MakeShortVerb{\|}
 
 \def\rmin{r_{\mathrm{min}}}
 \def\rmax{r_{\mathrm{max}}}
@@ -94,3 +93,43 @@
 \def\yobs{Y_{\mathrm{obs}}}
 \def\ypos{Y_{\mathrm{pos}}}
 \def\yvel{Y_{\mathrm{vel}}}
+
+\def\system{Two \cpu and operation system combinations are tested. The first is
+  an Intel Xeon~W3550, running at~3.07~GHz base frequency with four physical
+  cores and eight logical ones through hyperthreading, with CentOS
+  (verison~7.2) and the second is an Intel Core~i7-4960\textsc{hq}, running
+  at~2.60~Ghz base frequency with four physical cores and eight logical ones
+  through hyperthreading, with macOS Sierra (version~10.12.1). They are labeled
+  as ``Nehalem'' and ``Haswell'', respectively, based on their \cpu
+  microarchitecture. Both single core and parallel (using number of threads
+  equal the number of the \cpu logical cores) performance are tested. They are
+labeled as ``sequential'' and ``parallel'', respectively.}
+
+\def\compiler{Three compilers are tested on each system, \llvm clang
+  (version~3.9.1 on CentOS and version Apple~8.0.0 on macOS), \gnu \gcc
+(version~6.2.0), and Intel \cpp compiler (version~17.0.0).}
+
+\def\compilerone{\compiler{} The results shown here is with the \llvm clang
+compiler.}
+
+\def\compilerthree{\compiler{} They are labeled as ``\llvm'', ``\gnu'' and
+``\intel'', respectively.}
+
+\ExplSyntaxOn
+\def\perftable#1#2#3#4{
+  \file_if_exist:nT{tab/random_#1_#2_sse2.tex}{
+    \begin{table}
+      \input{tab/random_#1_#2_sse2}
+      \caption{Performance~of~#3~(Nehalem)}
+      \label{tab:Performance~of~#4~(Nehalem)}
+    \end{table}
+  }
+  \file_if_exist:nT{tab/random_#1_#2_avx2.tex}{
+    \begin{table}
+      \input{tab/random_#1_#2_avx2}
+      \caption{Performance~of~#3~(Haswell)}
+      \label{tab:Performance~of~#4~(Haswell)}
+    \end{table}
+  }
+}
+\ExplSyntaxOff

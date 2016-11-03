@@ -1,0 +1,26 @@
+========= Summary results of BigCrush =========
+ Generator:        U01OO
+ Number of statistics:  24
+ ----------------------------------------------
+ 53  SampleMean, r = 0               6.1e-7
+ 53  SampleMean, r = 0               9.4e-8
+ 54  SampleMean, r = 10              6.0e-5
+ 54  SampleMean, r = 10              2.0e-6
+ 76  RandomWalk1 H (L=1000, r=0)     3.5e-4
+ 76  RandomWalk1 M (L=1000, r=0)      eps
+ 76  RandomWalk1 J (L=1000, r=0)     3.6e-5
+ 76  RandomWalk1 R (L=1000, r=0)      eps
+ 76  RandomWalk1 C (L=1000, r=0)     7.4e-4
+ 76  RandomWalk1 H (L=1000, r=0)     1.4e-5
+ 76  RandomWalk1 M (L=1000, r=0)      eps
+ 76  RandomWalk1 J (L=1000, r=0)     1.0e-4
+ 76  RandomWalk1 R (L=1000, r=0)      eps
+ 77  RandomWalk1 M (L=1000, r=20)     eps
+ 77  RandomWalk1 R (L=1000, r=20)     eps
+ 77  RandomWalk1 H (L=1000, r=20)    5.6e-7
+ 77  RandomWalk1 M (L=1000, r=20)     eps
+ 77  RandomWalk1 J (L=1000, r=20)    3.0e-7
+ 77  RandomWalk1 R (L=1000, r=20)     eps
+ ----------------------------------------------
+ All other tests were passed
+

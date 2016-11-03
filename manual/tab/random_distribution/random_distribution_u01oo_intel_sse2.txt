@@ -1,0 +1,4 @@
+U01OO<float>                        259.99       26.38        7.68        9.74       VML    (0)--Passed
+U01OO<double>                       279.20       31.86        8.39       11.01       VML    (0)--Passed
+U01OO<float>                        252.74       26.32        7.72        9.75       C++    (0)--Passed
+U01OO<double>                       279.65       31.70        8.41       10.98       C++    (0)--Passed

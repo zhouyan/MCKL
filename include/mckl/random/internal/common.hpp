@@ -34,19 +34,13 @@
 
 #include <mckl/internal/common.hpp>
 
-#if MCKL_HAS_MKL
-#include <mkl_version.h>
-#include <mkl_vsl.h>
-#endif
-
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Name)                \
     static_assert(std::is_floating_point<RealType>::value,                    \
         "**" #Name                                                            \
         "Distribution** used with RealType other than floating point types");
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_BLAS_TYPE(Name)                \
-    static_assert(                                                            \
-        ::mckl::internal::is_one_of<RealType, float, double>::value,          \
+    static_assert(::mckl::internal::is_blas_floating_point<RealType>::value,  \
         "**" #Name                                                            \
         "Distribution** used with RealType other than float or double");
 
@@ -72,7 +66,7 @@
         "**" #Name                                                            \
         "Distribution** used with RealType other than floating point types");
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_0(Name, name, T)                 \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(Name, name, T)                \
     template <typename T, typename RNGType>                                   \
     inline void name##_distribution(RNGType &rng, std::size_t n, T *r)        \
     {                                                                         \
@@ -80,8 +74,8 @@
         const std::size_t M = n / K;                                          \
         const std::size_t L = n % K;                                          \
         for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            name##_distribution_impl<K>(rng, K, r);                           \
-        name##_distribution_impl<K>(rng, L, r);                               \
+            ::mckl::internal::name##_distribution_impl<K>(rng, K, r);         \
+        ::mckl::internal::name##_distribution_impl<K>(rng, L, r);             \
     }                                                                         \
                                                                               \
     template <typename T, typename RNGType>                                   \
@@ -91,7 +85,7 @@
         name##_distribution(rng, N, r);                                       \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Name, name, T, T1, p1)         \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(Name, name, T, T1, p1)        \
     template <typename T, typename RNGType>                                   \
     inline void name##_distribution(RNGType &rng, std::size_t N, T *r, T1 p1) \
     {                                                                         \
@@ -99,8 +93,8 @@
         const std::size_t M = N / K;                                          \
         const std::size_t L = N % K;                                          \
         for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            name##_distribution_impl<K>(rng, K, r, p1);                       \
-        name##_distribution_impl<K>(rng, L, r, p1);                           \
+            ::mckl::internal::name##_distribution_impl<K>(rng, K, r, p1);     \
+        ::mckl::internal::name##_distribution_impl<K>(rng, L, r, p1);         \
     }                                                                         \
                                                                               \
     template <typename T, typename RNGType>                                   \
@@ -110,7 +104,8 @@
         name##_distribution(rng, N, r, param.p1());                           \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(Name, name, T, T1, p1, T2, p2) \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(                              \
+    Name, name, T, T1, p1, T2, p2)                                            \
     template <typename T, typename RNGType>                                   \
     inline void name##_distribution(                                          \
         RNGType &rng, std::size_t N, T *r, T1 p1, T2 p2)                      \
@@ -119,8 +114,8 @@
         const std::size_t M = N / K;                                          \
         const std::size_t L = N % K;                                          \
         for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            name##_distribution_impl<K>(rng, K, r, p1, p2);                   \
-        name##_distribution_impl<K>(rng, L, r, p1, p2);                       \
+            ::mckl::internal::name##_distribution_impl<K>(rng, K, r, p1, p2); \
+        ::mckl::internal::name##_distribution_impl<K>(rng, L, r, p1, p2);     \
     }                                                                         \
                                                                               \
     template <typename T, typename RNGType>                                   \
@@ -130,18 +125,21 @@
         name##_distribution(rng, N, r, param.p1(), param.p2());               \
     }
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_4(                               \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_4(                              \
     Name, name, T, T1, p1, T2, p2, T3, p3, T4, p4)                            \
     template <typename T, typename RNGType>                                   \
     inline void name##_distribution(                                          \
-        RNGType &rng, std::size_t N, T *r, T1 p1, T2 p2, T3 p3 T4 p4)         \
+        RNGType &rng, std::size_t N, T *r, T1 p1, T2 p2, T3 p3, T4 p4)        \
     {                                                                         \
         const std::size_t K = BufferSize<T>::value;                           \
         const std::size_t M = N / K;                                          \
         const std::size_t L = N % K;                                          \
-        for (std::size_t i = 0; i != M; ++i, r += K)                          \
-            name##_distribution_impl<K>(rng, K, r, p1, p2, p3, p4);           \
-        name##_distribution_impl<K>(rng, L, r, p1, p2, p3, p4);               \
+        for (std::size_t i = 0; i != M; ++i, r += K) {                        \
+            ::mckl::internal::name##_distribution_impl<K>(                    \
+                rng, K, r, p1, p2, p3, p4);                                   \
+        }                                                                     \
+        ::mckl::internal::name##_distribution_impl<K>(                        \
+            rng, L, r, p1, p2, p3, p4);                                       \
     }                                                                         \
                                                                               \
     template <typename T, typename RNGType>                                   \
@@ -648,12 +646,7 @@
     void operator()(                                                          \
         RNGType &rng, std::size_t n, result_type *r, const param_type &param) \
     {                                                                         \
-        if (n < 100) {                                                        \
-            for (std::size_t i = 0; i != n; ++i)                              \
-                r[i] = operator()(rng, param);                                \
-        } else {                                                              \
-            ::mckl::internal::name##_distribution(rng, n, r, param);          \
-        }                                                                     \
+        name##_distribution(rng, n, r, param);                                \
     }                                                                         \
                                                                               \
     friend bool operator==(                                                   \
@@ -732,14 +725,47 @@
         Name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)              \
     MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)
 
+#define MCKL_DEFINE_RANDOM_TEST_OPERATOR(ResultType)                          \
+    template <typename DistributionType>                                      \
+    ResultType operator()(DistributionType &&distribution)                    \
+    {                                                                         \
+        ::mckl::internal::DummyRNG rng;                                       \
+        ::mckl::internal::DummyDistribution<DistributionType> dist(           \
+            distribution);                                                    \
+                                                                              \
+        return operator()(rng, dist);                                         \
+    }
+
 namespace mckl
 {
 
 namespace internal
 {
 
-MCKL_DEFINE_TYPE_DISPATCH_TRAIT(CtrType, ctr_type, NullType)
-MCKL_DEFINE_TYPE_DISPATCH_TRAIT(KeyType, key_type, NullType)
+class DummyRNG
+{
+}; // class DummyRNG
+
+template <typename DistributionType>
+class DummyDistribution
+{
+    public:
+    using result_type = double;
+
+    DummyDistribution(const DistributionType &distribution)
+        : distribution_(distribution)
+    {
+    }
+
+    template <typename RNGType>
+    double operator()(RNGType &)
+    {
+        return distribution_();
+    }
+
+    private:
+    DistributionType distribution_;
+}; // class DummyDistribution
 
 template <std::size_t N, std::size_t D, std::size_t T>
 inline std::size_t serial_index(const std::size_t *, std::false_type)
@@ -752,7 +778,7 @@ inline std::size_t serial_index(const std::size_t *s, std::true_type)
 {
     return Pow<std::size_t, D, T - 1 - N>::value * s[N] +
         serial_index<N + 1, D, T>(
-               s, std::integral_constant<bool, N + 1 < T>());
+            s, std::integral_constant<bool, N + 1 < T>());
 }
 
 template <std::size_t D, std::size_t T, typename ResultType>
@@ -856,7 +882,7 @@ inline IntType ftoi(RealType r)
 template <typename IntType, typename RealType>
 inline IntType ftoi(RealType x, std::true_type)
 {
-    static constexpr RealType maxval =
+    constexpr RealType maxval =
         static_cast<RealType>(std::numeric_limits<IntType>::max());
 
     return static_cast<IntType>(std::min(maxval, x));
@@ -865,7 +891,7 @@ inline IntType ftoi(RealType x, std::true_type)
 template <typename IntType, typename RealType>
 inline IntType ftoi(RealType x, std::false_type)
 {
-    static constexpr RealType maxval =
+    constexpr RealType maxval =
         static_cast<RealType>(std::numeric_limits<IntType>::max() / 2);
 
     return static_cast<IntType>(std::min(maxval, x));
@@ -874,11 +900,19 @@ inline IntType ftoi(RealType x, std::false_type)
 template <typename IntType, typename RealType>
 inline IntType ftoi(RealType x)
 {
-    static constexpr int W = std::numeric_limits<IntType>::digits;
-    static constexpr int M = std::numeric_limits<RealType>::digits;
+    constexpr int W = std::numeric_limits<IntType>::digits;
+    constexpr int M = std::numeric_limits<RealType>::digits;
 
     return ftoi<IntType>(x, std::integral_constant<bool, W <= M>());
 }
+
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
+class IncrementBlockSI128;
+
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
+class IncrementBlockSI256;
 
 } // namespace mckl::internal
 
@@ -947,8 +981,12 @@ inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
         r[i] = distribution(rng);
 }
 
-template <typename, typename>
-class CounterEngine;
+template <typename RNGType>
+class SeedType
+{
+    public:
+    using type = unsigned;
+}; // class SeedType
 
 template <typename = double>
 class ArcsineDistribution;
@@ -1011,7 +1049,7 @@ template <typename = double>
 class StudentTDistribution;
 
 template <typename = double>
-class U01Distribution;
+class U01CanonicalDistribution;
 
 template <typename = double>
 class U01CCDistribution;
@@ -1042,370 +1080,6 @@ class GeometricDistribution;
 
 template <typename = int>
 class UniformIntDistribution;
-
-template <typename ResultType, typename Generator>
-inline void rand(
-    CounterEngine<ResultType, Generator> &, std::size_t, ResultType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, ArcsineDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, BetaDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, CauchyDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, ChiSquaredDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(RNGType &, DirichletDistribution<RealType, Dim> &,
-    std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, DiscreteDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, ExponentialDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, ExtremeValueDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, FisherFDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, GammaDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, LaplaceDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, LevyDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, LogisticDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, LognormalDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, NormalDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(
-    RNGType &, NormalMVDistribution<RealType, Dim> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, ParetoDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, RayleighDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, StableDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, StudentTDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, U01Distribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, U01CCDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, U01CODistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, U01OCDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, U01OODistribution<RealType> &, std::size_t, RealType *);
-
-template <typename UIntType, typename RNGType>
-inline void rand(
-    RNGType &, UniformBitsDistribution<UIntType> &, std::size_t, UIntType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, UniformRealDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename RealType, typename RNGType>
-inline void rand(
-    RNGType &, WeibullDistribution<RealType> &, std::size_t, RealType *);
-
-template <typename IntType, typename RNGType>
-inline void rand(
-    RNGType &, BernoulliDistribution<IntType> &, std::size_t, IntType *);
-
-template <typename IntType, typename RNGType>
-inline void rand(
-    RNGType &, GeometricDistribution<IntType> &, std::size_t, IntType *);
-
-template <typename IntType, typename RNGType>
-inline void rand(
-    RNGType &, UniformIntDistribution<IntType> &, std::size_t, IntType *);
-
-namespace internal
-{
-
-template <typename RealType, typename RNGType>
-inline void beta_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void cauchy_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void chi_squared_distribution(
-    RNGType &, std::size_t, RealType *, RealType);
-
-template <typename RealType, typename RNGType>
-inline void exponential_distribution(
-    RNGType &, std::size_t, RealType *, RealType);
-
-template <typename RealType, typename RNGType>
-inline void extreme_value_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void fisher_f_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void gamma_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void laplace_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void levy_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void logistic_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void lognormal_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void normal_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void normal_mv_distribution(RNGType &, std::size_t, RealType *,
-    std::size_t, const RealType *, const RealType *);
-
-template <typename RealType, typename RNGType>
-inline void pareto_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void rayleigh_distribution(
-    RNGType &, std::size_t, RealType *, RealType);
-
-template <typename RealType, typename RNGType>
-inline void stable_distribution(RNGType &, std::size_t, RealType *, RealType,
-    RealType, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void student_t_distribution(
-    RNGType &, std::size_t, RealType *, RealType);
-
-template <typename RealType, typename RNGType>
-inline void u01_distribution(RNGType &, std::size_t, RealType *);
-
-template <typename, typename, typename RealType, typename RNGType>
-inline void u01_lr_distribution(RNGType &, std::size_t, RealType *);
-
-template <typename UIntType, typename RNGType>
-inline void uniform_bits_distribution(RNGType &, std::size_t, UIntType *);
-
-template <typename RealType, typename RNGType>
-inline void uniform_real_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename RealType, typename RNGType>
-inline void weibull_distribution(
-    RNGType &, std::size_t, RealType *, RealType, RealType);
-
-template <typename IntType, typename RNGType>
-inline void bernoulli_distribution(RNGType &, std::size_t, IntType *, double);
-
-template <typename IntType, typename RNGType>
-inline void geometric_distribution(RNGType &, std::size_t, IntType *, double);
-
-template <typename IntType, typename RNGType>
-inline void uniform_int_distribution(
-    RNGType &, std::size_t, IntType *, IntType, IntType);
-
-} // namespace mckl::internal
-
-#if MCKL_HAS_MKL
-
-class MKLStream;
-
-template <MKL_INT, int>
-class MKLEngine;
-
-template <MKL_INT BRNG, int Bits>
-inline void rand(MKLEngine<BRNG, Bits> &, std::size_t,
-    typename MKLEngine<BRNG, Bits>::result_type *);
-
-#if MCKL_USE_MKL_VSL
-
-namespace internal
-{
-
-template <MKL_INT BRNG, int Bits>
-inline void beta_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void beta_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void cauchy_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void cauchy_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void exponential_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void exponential_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void extreme_value_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void extreme_value_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void gamma_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void gamma_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void laplace_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void laplace_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void lognormal_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void lognormal_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void normal_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *r, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void normal_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *r, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &, std::size_t,
-    float *, std::size_t, const float *, const float *);
-
-template <MKL_INT BRNG, int Bits>
-inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &, std::size_t,
-    double *, std::size_t, const double *, const double *);
-
-template <MKL_INT BRNG, int Bits>
-inline void rayleigh_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void rayleigh_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, float *);
-
-template <MKL_INT BRNG, int Bits>
-inline void u01_distribution(MKLEngine<BRNG, Bits> &, std::size_t, double *);
-
-template <MKL_INT BRNG, int Bits>
-inline void uniform_real_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void uniform_real_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void weibull_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, float *, float, float);
-
-template <MKL_INT BRNG, int Bits>
-inline void weibull_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, double *, double, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void bernoulli_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void geometric_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, int *, double);
-
-template <MKL_INT BRNG, int Bits>
-inline void uniform_int_distribution(
-    MKLEngine<BRNG, Bits> &, std::size_t, int *, int, int);
-
-} // namespace mckl::internal
-
-#endif // MCKL_USE_MKL_VSL
-
-#endif // MCKL_HAS_MKL
 
 } // namespace mckl
 

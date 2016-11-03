@@ -33,13 +33,63 @@ PROJECT(MCKLExample-pf CXX)
 
 MCKL_ADD_EXAMPLE(pf)
 
-MCKL_ADD_TEST(pf cv)
-MCKL_ADD_TEST(pf core)
-MCKL_ADD_TEST(pf smp)
+SET(PF_BACKEND BackendSEQ BackendSTD)
+IF(OPENMP_FOUND)
+    SET(PF_BACKEND ${PF_BACKEND} BackendOMP)
+ENDIF(OPENMP_FOUND)
+IF(TBB_FOUND)
+    SET(PF_BACKEND ${PF_BACKEND} BackendTBB)
+ENDIF(TBB_FOUND)
 
+SET(PF_SCHEME Multinomial Stratified Systematic Residual ResidualStratified
+    ResidualSystematic)
+
+SET(PF_LAYOUT RowMajor ColMajor)
+
+SET(PF_RNGSET RNGSetVector)
+IF(TBB_FOUND)
+    SET(PF_RNGSET ${PF_RNGSET} RNGSetTBB RNGSetTBBKPI)
+ENDIF(TBB_FOUND)
+
+MCKL_ADD_TEST(pf core  "OpenMP")
+MCKL_ADD_TEST(pf smp   "OpenMP")
+MCKL_ADD_TEST(pf truth "OpenMP")
+
+MCKL_ADD_FILE(pf pf.data)
+MCKL_ADD_FILE(pf pf.truth)
+MCKL_ADD_FILE(pf pf_core.R)
 MCKL_ADD_FILE(pf pf_cv.R)
-MCKL_ADD_FILE(pf pf_cv.data)
-MCKL_ADD_FILE(pf pf_cv.truth)
+
+ADD_LIBRARY(libpf ${PROJECT_SOURCE_DIR}/src/pf.cpp)
+SET_TARGET_PROPERTIES(libpf PROPERTIES OUTPUT_NAME pf)
+
+ADD_CUSTOM_TARGET(pf_cv)
+ADD_CUSTOM_TARGET(pf_cv-check)
+FOREACH(Backend ${PF_BACKEND})
+    FOREACH(Scheme ${PF_SCHEME})
+        FOREACH(Layout ${PF_LAYOUT})
+            FOREACH(RNGSet ${PF_RNGSET})
+                STRING(TOLOWER ${Backend} smp)
+                STRING(TOLOWER ${Scheme} res)
+                STRING(TOLOWER ${Layout} rc)
+                STRING(TOLOWER ${RNGSet} rs)
+                SET(config ${smp}_${res}_${rc}_${rs})
+                CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/pf_cv.cpp.in
+                    ${PROJECT_BINARY_DIR}/src/pf_cv_${config}.cpp)
+                MCKL_ADD_TEST(pf cv_${config} "BIN" "OpenMP")
+                TARGET_LINK_LIBRARIES(pf_cv_${config} libpf)
+                ADD_DEPENDENCIES(pf_cv pf_cv_${config})
+                ADD_DEPENDENCIES(pf_cv-check pf_cv_${config}-check)
+            ENDFOREACH(RNGSet ${PF_RNGSET})
+        ENDFOREACH(Layout ${PF_LAYOUT})
+    ENDFOREACH(Scheme ${PF_SCHEME})
+ENDFOREACH(Backend ${PF_BACKEND})
+
+ADD_CUSTOM_TARGET(pf_core-pdf
+    DEPENDS pf-files pf_core-check
+    COMMAND Rscript "${PROJECT_BINARY_DIR}/pf_core.R"
+    COMMENT "Plotting pf_core-check results"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
 ADD_CUSTOM_TARGET(pf_cv-pdf
     DEPENDS pf-files pf_cv-check

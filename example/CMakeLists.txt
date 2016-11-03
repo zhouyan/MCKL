@@ -31,25 +31,29 @@
 
 PROJECT(MCKLExample CXX)
 
-ADD_DEFINITIONS(${EXAMPLE_DEFINITIONS})
+IF(CMAKE_CROSSCOMPILING)
+    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=1)
+ELSE(CMAKE_CROSSCOMPILING)
+    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=0)
+ENDIF(CMAKE_CROSSCOMPILING)
+
+ADD_DEFINITIONS(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
 
 ##############################################################################
 # Check examples
 ##############################################################################
 
-ADD_CUSTOM_TARGET(example-files)
-ADD_DEPENDENCIES(example example-files)
-
 SET(EXAMPLES ${EXAMPLES} "mckl")
 ADD_SUBDIRECTORY(mckl)
 
-IF (MCKL_GOOD_COMPILER)
-    SET(EXAMPLES ${EXAMPLES} "gmm")
-    ADD_SUBDIRECTORY(gmm)
+SET(EXAMPLES ${EXAMPLES} "gmm")
+ADD_SUBDIRECTORY(gmm)
 
-    SET(EXAMPLES ${EXAMPLES} "pf")
-    ADD_SUBDIRECTORY(pf)
-ENDIF (MCKL_GOOD_COMPILER)
+SET(EXAMPLES ${EXAMPLES} "math")
+ADD_SUBDIRECTORY(math)
+
+SET(EXAMPLES ${EXAMPLES} "pf")
+ADD_SUBDIRECTORY(pf)
 
 SET(EXAMPLES ${EXAMPLES} "random")
 ADD_SUBDIRECTORY(random)
@@ -64,7 +68,7 @@ ADD_SUBDIRECTORY(utility)
 # Enable examples
 ##############################################################################
 
-MESSAGE(STATUS "=================== Enable examples ===================")
+MESSAGE(STATUS "=================== Examples ==========================")
 FOREACH(example ${EXAMPLES})
     MESSAGE(STATUS ${example})
 ENDFOREACH(example ${EXAMPLES})

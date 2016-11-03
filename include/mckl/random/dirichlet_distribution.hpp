@@ -51,12 +51,14 @@ inline void dirichlet_distribution_avg(
     }
 }
 
+} // namespace mckl::internal
+
 template <typename RealType, typename RNGType>
 inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType alpha)
 {
     gamma_distribution(rng, n * dim, r, alpha, const_one<RealType>());
-    dirichlet_distribution_avg(n, dim, r);
+    internal::dirichlet_distribution_avg(n, dim, r);
 }
 
 template <typename RealType, typename RNGType>
@@ -73,10 +75,8 @@ inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
         for (std::size_t j = 0; j != n; ++j, t += dim)
             *t = s[i];
     }
-    dirichlet_distribution_avg(n, dim, r);
+    internal::dirichlet_distribution_avg(n, dim, r);
 }
-
-} // namespace internal
 
 template <typename RealType, std::size_t Dim>
 class DirichletDistribution
@@ -281,13 +281,10 @@ class DirichletDistribution
     void operator()(
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
-        if (param.is_scalar_) {
-            internal::dirichlet_distribution(
-                rng, n, r, param.dim(), param.alpha()[0]);
-        } else {
-            internal::dirichlet_distribution(
-                rng, n, r, param.dim(), param.alpha());
-        }
+        if (param.is_scalar_)
+            dirichlet_distribution(rng, n, r, param.dim(), param.alpha()[0]);
+        else
+            dirichlet_distribution(rng, n, r, param.dim(), param.alpha());
     }
 
     friend bool operator==(

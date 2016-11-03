@@ -309,7 +309,7 @@ class GMM : public GMMBase
                 double resid = obs_[k] - state.mu(i);
                 lli += state.weight(i) *
                     std::exp(0.5 * state.log_lambda(i) -
-                           0.5 * state.lambda(i) * resid * resid);
+                        0.5 * state.lambda(i) * resid * resid);
             }
             ll += std::log(lli + 1e-13); // lli can be numerically zero!
         }

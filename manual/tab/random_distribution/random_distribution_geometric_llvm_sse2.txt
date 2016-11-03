@@ -1,0 +1,8 @@
+Geometric<int32_t>(0.5)             200.88       93.98       26.83       12.97       VML    (0)--Passed
+Geometric<uint32_t>(0.5)            199.12       94.30       29.97       33.03       VML    (0)--Passed
+Geometric<int64_t>(0.5)             202.04       93.70       26.72       29.99       VML    (0)--Passed
+Geometric<uint64_t>(0.5)            206.19      102.41       30.04       33.28       VML    (0)--Passed
+Geometric<int32_t>(0.5)             198.23       93.74       51.12       12.94       C++    (0)--Passed
+Geometric<uint32_t>(0.5)            196.44       93.70       54.29       57.13       C++    (0)--Passed
+Geometric<int64_t>(0.5)             200.01       94.22       50.86       54.10       C++    (0)--Passed
+Geometric<uint64_t>(0.5)            200.46      104.57       54.22       57.38       C++    (0)--Passed

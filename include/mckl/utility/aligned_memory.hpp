@@ -32,7 +32,12 @@
 #ifndef MCKL_UTILITY_ALIGNED_MEMORY_HPP
 #define MCKL_UTILITY_ALIGNED_MEMORY_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
+
+#include <cstdlib>
+#include <memory>
+#include <new>
+#include <vector>
 
 #if MCKL_HAS_POSIX
 #include <stdlib.h>
@@ -172,7 +177,7 @@ class AlignmentTrait : public std::integral_constant<std::size_t,
 class AlignedMemorySTD
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         std::size_t bytes = (n > 0 ? n : 1) + alignment + sizeof(void *);
         if (bytes < n)
@@ -192,7 +197,7 @@ class AlignedMemorySTD
         return ptr;
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr) {
             std::free(*reinterpret_cast<void **>(
@@ -212,7 +217,7 @@ class AlignedMemorySTD
 class AlignedMemorySYS
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         void *ptr;
         if (posix_memalign(&ptr, alignment, n > 0 ? n : 1) != 0)
@@ -220,7 +225,7 @@ class AlignedMemorySYS
         return ptr;
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr)
             free(ptr);
@@ -232,12 +237,12 @@ class AlignedMemorySYS
 class AlignedMemorySYS
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         return _aligned_malloc(n > 0 ? n : 1, alignment);
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr)
             _aligned_free(ptr);
@@ -254,12 +259,12 @@ class AlignedMemorySYS
 class AlignedMemoryTBB
 {
     public:
-    static void *aligned_malloc(std::size_t n, std::size_t alignment) noexcept
+    static void *aligned_malloc(std::size_t n, std::size_t alignment)
     {
         return scalable_aligned_malloc(n > 0 ? n : 1, alignment);
     }
 
-    static void aligned_free(void *ptr) noexcept
+    static void aligned_free(void *ptr)
     {
         if (ptr != nullptr)
             scalable_aligned_free(ptr);
@@ -341,7 +346,7 @@ class Allocator : public std::allocator<T>
 
     pointer allocate(size_type n, const void * = nullptr)
     {
-        n = std::max(n, static_cast<size_type>(1));
+        n = n > 1 ? n : 1;
         size_type bytes = n * sizeof(value_type);
         if (bytes < n)
             throw std::bad_alloc();
@@ -354,7 +359,7 @@ class Allocator : public std::allocator<T>
         return ptr;
     }
 
-    void deallocate(pointer ptr, size_type = 0) noexcept
+    void deallocate(pointer ptr, size_type = 0)
     {
         if (ptr != nullptr)
             Memory::aligned_free(ptr);
@@ -364,8 +369,8 @@ class Allocator : public std::allocator<T>
     void construct(U *ptr)
     {
         construct_dispatch(ptr,
-            std::integral_constant<bool, (MCKL_CONSTRUCT_SCALAR != 0 ||
-                                             !std::is_scalar<U>::value)>());
+            std::integral_constant<bool,
+                (MCKL_CONSTRUCT_SCALAR != 0 || !std::is_scalar<U>::value)>());
     }
 
     template <typename U, typename Arg, typename... Args>
@@ -457,20 +462,6 @@ class AllocatorAlignment<Allocator<T, Alignment, Memory>>
 /// \ingroup AlignedMemory
 template <typename T, typename Alloc = Allocator<T>>
 using Vector = std::vector<T, Alloc>;
-
-/// \brief std::array with proper alignment
-/// \ingroup AlignedMemory
-template <typename T, std::size_t N,
-    std::size_t Alignment = AlignmentTrait<T>::value>
-class alignas(Alignment) Array : public std::array<T, N>
-{
-    static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
-        "**Array** used with Alignment other than a power of two positive "
-        "integer");
-
-    static_assert(Alignment >= sizeof(void *),
-        "**Array** used with Alignment less than sizeof(void *)");
-}; // class Array
 
 } // namespace mckl
 

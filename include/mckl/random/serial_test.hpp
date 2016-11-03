@@ -57,6 +57,8 @@ class SerialTestImpl<D, T, false>
     {
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)
     {
@@ -116,6 +118,8 @@ class SerialTestImpl<D, T, true>
             n >= T, "**SerialTest** constructed with n less then T");
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)
     {
@@ -132,8 +136,8 @@ class SerialTestImpl<D, T, true>
         // generate the first tuple
         rand(rng, u01, k, r.data());
         mul(k, static_cast<result_type>(D), r.data(), r.data());
-        std::copy_n(r.begin(), T, rhead.begin());
-        std::copy_n(r.begin(), T, rtail.begin());
+        std::memcpy(rhead.data(), r.data(), sizeof(result_type) * T);
+        std::memcpy(rtail.data(), r.data(), sizeof(result_type) * T);
 
         // generate the first n - t + 1 counts
         cidx_ = serial_index<D, T>(rhead.data());
@@ -192,23 +196,16 @@ class SerialTestImpl<D, T, true>
     }
 }; // class SerialTestImpl
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Serial test
 /// \ingroup RandomTest
 ///
 /// \tparam D Multiplier
 /// \tparam T Length of the tuple
-template <std::size_t D, std::size_t T>
-using SerialTest = internal::SerialTestImpl<D, T, false>;
-
-/// \brief Serial test with overlapping tuples
-/// \ingroup RandomTest
-///
-/// \tparam D Multiplier
-/// \tparam T Length of the tuple
-template <std::size_t D, std::size_t T>
-using SerialOverTest = internal::SerialTestImpl<D, T, 1 < T>;
+/// \tparam Overlap Using overlapping tuples
+template <std::size_t D, std::size_t T, bool Overlap>
+using SerialTest = internal::SerialTestImpl<D, T, Overlap && 1 < T>;
 
 } // namespace mckl
 

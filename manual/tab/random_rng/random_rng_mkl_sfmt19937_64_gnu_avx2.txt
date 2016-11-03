@@ -1,0 +1,5 @@
+MKL_SFMT19937_64        2064       8           0.61           0.15      ---Passed
+MKL_SFMT19937_64        2064       8           0.61           0.15      ---Passed
+MKL_SFMT19937_64        2064       8           0.61           0.15      ---Passed
+MKL_SFMT19937_64        2064       8           0.63           0.15      ---Passed
+MKL_SFMT19937_64        2064       8           0.61           0.15      ---Passed

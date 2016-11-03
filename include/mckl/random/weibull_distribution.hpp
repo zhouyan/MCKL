@@ -63,10 +63,10 @@ inline void weibull_distribution_impl(
     }
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    Weibull, weibull, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    Weibull, weibull, RealType, RealType, a, RealType, b)
 
 /// \brief Weibull distribution
 /// \ingroup Distribution

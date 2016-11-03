@@ -32,9 +32,12 @@
 #ifndef MCKL_MATH_BETA_HPP
 #define MCKL_MATH_BETA_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
 #include <mckl/math/constants.hpp>
 #include <mckl/math/gamma.hpp>
+
+#include <algorithm>
+#include <limits>
 
 namespace mckl
 {
@@ -44,8 +47,8 @@ namespace internal
 
 inline double betai_acf(double a, double b, double x)
 {
-    static constexpr double eps = std::numeric_limits<double>::epsilon();
-    static constexpr double fpmin = std::numeric_limits<double>::min() / eps;
+    constexpr double eps = std::numeric_limits<double>::epsilon();
+    constexpr double fpmin = std::numeric_limits<double>::min() / eps;
 
     double qab = a + b;
     double qap = a + 1;
@@ -173,7 +176,7 @@ inline double betaiinv(double a, double b, double y)
         double u = std::exp(b * lnb) / b;
         double w = t + u;
         x = y < t / w ? std::pow(a * w * y, 1 / a) :
-                        1 - pow(b * w * (1 - y), 1 / b);
+                        1 - std::pow(b * w * (1 - y), 1 / b);
     }
     double afac = -std::lgamma(a) - std::lgamma(b) + std::lgamma(a + b);
     for (int i = 0; i != 10; ++i) {

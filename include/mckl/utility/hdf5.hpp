@@ -45,7 +45,7 @@
 #pragma warning(pop)
 #endif
 
-#define MCKL_DEFINE_HDF5TYPE(CPPName, CName)                                  \
+#define MCKL_DEFINE_UTILITY_HDF5_TYPE(CPPName, CName)                         \
     class HDF5##CPPName : public HDF5ID<HDF5##CPPName>                        \
     {                                                                         \
         public:                                                               \
@@ -84,11 +84,11 @@ class HDF5ID
     ::hid_t id_;
 }; // class HDFID
 
-MCKL_DEFINE_HDF5TYPE(DataSet, D)
-MCKL_DEFINE_HDF5TYPE(DataSpace, S)
-MCKL_DEFINE_HDF5TYPE(DataType, T)
-MCKL_DEFINE_HDF5TYPE(File, F)
-MCKL_DEFINE_HDF5TYPE(Group, G)
+MCKL_DEFINE_UTILITY_HDF5_TYPE(DataSet, D)
+MCKL_DEFINE_UTILITY_HDF5_TYPE(DataSpace, S)
+MCKL_DEFINE_UTILITY_HDF5_TYPE(DataType, T)
+MCKL_DEFINE_UTILITY_HDF5_TYPE(File, F)
+MCKL_DEFINE_UTILITY_HDF5_TYPE(Group, G)
 
 template <typename T>
 class HDF5StoreDataPtr
@@ -492,8 +492,7 @@ inline void hdf5store(const std::vector<T, Alloc> &vector,
 /// // 3 6
 /// hdf5store_matrix<double>(ColMajor, 3, 2, data, "col.hdf5", "data");
 /// ~~~
-/// When the results are read by other program, for example R, a transpose
-/// may
+/// When the results are read by other program, for example R, a transpose may
 /// be needed. For instance,
 /// ~~~{.r}
 /// library(rhdf5)

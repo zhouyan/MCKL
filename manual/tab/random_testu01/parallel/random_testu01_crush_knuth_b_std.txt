@@ -1,0 +1,9 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  6
+ ----------------------------------------------
+ 44  MaxOft, t = 30                 1 - eps1
+ 44  MaxOft, t = 30                 1 - eps1
+ ----------------------------------------------
+ All other tests were passed
+

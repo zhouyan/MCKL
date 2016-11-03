@@ -30,7 +30,12 @@
 //============================================================================
 
 #include <iostream>
+
+#ifdef _MSC_VER
+#include <immintrin.h>
+#else
 #include <wmmintrin.h>
+#endif
 
 int main()
 {
@@ -42,4 +47,6 @@ int main()
     m = _mm_aeskeygenassist_si128(m, 1);
     _mm_storeu_si128(reinterpret_cast<__m128i *>(a), m);
     std::cout << a[0] << std::endl;
+
+    return 0;
 }

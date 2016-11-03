@@ -37,6 +37,31 @@
 namespace mckl
 {
 
+class BackendSTD
+{
+    public:
+    BackendSTD(const BackendSTD &) = delete;
+    BackendSTD &operator=(const BackendSTD &) = delete;
+
+    static BackendSTD &instance()
+    {
+        static BackendSTD backend;
+
+        return backend;
+    }
+
+    void reset() { np_ = std::thread::hardware_concurrency(); }
+
+    unsigned np() const { return np_; }
+
+    void np(unsigned n) { np_ = n; }
+
+    private:
+    unsigned np_;
+
+    BackendSTD() : np_(std::thread::hardware_concurrency()) {}
+}; // class BackendSTD
+
 namespace internal
 {
 
@@ -46,8 +71,8 @@ inline void backend_std_range(
 {
     first.clear();
     last.clear();
-    const IntType np = std::max(const_one<IntType>(),
-        static_cast<IntType>(std::thread::hardware_concurrency()));
+    const IntType np =
+        static_cast<IntType>(std::max(1U, BackendSTD::instance().np()));
     if (np == 1) {
         first.push_back(0);
         last.push_back(N);
@@ -65,7 +90,7 @@ inline void backend_std_range(
     }
 }
 
-} // namespace internal
+} // namespace mckl::internal
 
 /// \brief Sampler<T>::eval_type subtype using the standard library
 /// \ingroup STD

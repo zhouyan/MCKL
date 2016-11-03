@@ -75,6 +75,8 @@ class RunTestImpl<false, Up> : public ChiSquaredTest<RunTestImpl<false, Up>>
     public:
     RunTestImpl(std::size_t n) : n_(n) {}
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename DistributionType>
     double operator()(RNGType &rng, DistributionType &distribution)
     {
@@ -150,6 +152,8 @@ class RunTestImpl<true, Up> : public ChiSquaredTest<RunTestImpl<true, Up>>
     public:
     RunTestImpl(std::size_t n) : n_(n) {}
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename DistributionType>
     double operator()(RNGType &rng, DistributionType &distribution)
     {
@@ -196,16 +200,10 @@ class RunTestImpl<true, Up> : public ChiSquaredTest<RunTestImpl<true, Up>>
 /// \brief Run test
 /// \ingroup RandomTest
 ///
+/// \tparam Independent Using independent runs
 /// \tparam Up If the run counts shall be upward
-template <bool Up = true>
-using RunTest = internal::RunTestImpl<false, Up>;
-
-/// \brief Run test with independent tuples
-/// \ingroup RandomTest
-///
-/// \tparam Up If the run counts shall be upward
-template <bool Up = true>
-using RunIndepTest = internal::RunTestImpl<true, Up>;
+template <bool Independent, bool Up = true>
+using RunTest = internal::RunTestImpl<Independent, Up>;
 
 } // namespace mckl
 

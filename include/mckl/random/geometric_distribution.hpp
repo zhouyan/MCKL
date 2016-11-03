@@ -50,7 +50,7 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void geometric_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, double p)
 {
-    Array<double, K> s;
+    alignas(32) std::array<double, K> s;
     u01_oc_distribution(rng, n, s.data());
     log(n, s.data(), s.data());
     mul(n, 1 / std::log(1 - p), s.data(), s.data());
@@ -59,9 +59,10 @@ inline void geometric_distribution_impl(
         r[i] = ftoi<IntType>(s[i]);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Geometric, geometric, InType, double, p)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    Geometric, geometric, InType, double, p)
 
 /// \brief Geometric distribution
 /// \ingroup Distribution

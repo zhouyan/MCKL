@@ -252,12 +252,21 @@ class Monitor
         }
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
-        buffer_.resize(N * dim_);
-        eval_(iter, dim_, particle, buffer_.data());
+        r_.resize(N * dim_);
+        eval_(iter, dim_, particle, r_.data());
+        std::fill(result_.begin(), result_.end(), 0);
+#if MCKL_HAS_BLAS
         internal::cblas_dgemv(internal::CblasColMajor, internal::CblasNoTrans,
             static_cast<MCKL_BLAS_INT>(dim_), static_cast<MCKL_BLAS_INT>(N),
-            1.0, buffer_.data(), static_cast<MCKL_BLAS_INT>(dim_),
+            1.0, r_.data(), static_cast<MCKL_BLAS_INT>(dim_),
             particle.weight().data(), 1, 0.0, result_.data(), 1);
+#else  // MCKL_HAS_BLAS
+        const double *w = particle.weight().data();
+        const double *r = r_.data();
+        for (std::size_t i = 0; i != N; ++i, ++w)
+            for (std::size_t d = 0; d != dim_; ++d, ++r)
+                result_[d] += (*w) * (*r);
+#endif // MCKL_HAS_BLAS
         push_back(iter);
     }
 
@@ -277,7 +286,7 @@ class Monitor
     Vector<std::size_t> index_;
     Vector<double> record_;
     Vector<double> result_;
-    Vector<double> buffer_;
+    Vector<double> r_;
 
     void push_back(std::size_t iter)
     {

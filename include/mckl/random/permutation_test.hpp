@@ -53,22 +53,22 @@ class PermutationTest : public ChiSquaredTest<PermutationTest<T>>
     /// \brief Construct a Permutation test
     ///
     /// \param n The number of tuples
-    PermutationTest(std::size_t n)
-        : n_(n), np_(static_cast<double>(n) / M_), count_(M_)
-    {
-    }
+    PermutationTest(std::size_t n) : n_(n), np_(static_cast<double>(n) / M_) {}
+
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
 
     template <typename RNGType, typename DistributionType>
     double operator()(RNGType &rng, DistributionType &distribution)
     {
         std::array<typename DistributionType::result_type, T> r;
-        std::fill(count_.begin(), count_.end(), 0);
+        Vector<double> count(M_);
+        std::fill(count.begin(), count.end(), 0);
         for (std::size_t i = 0; i != n_; ++i) {
             rand(rng, distribution, T, r.data());
-            count_[internal::permutation_index<T>(r.data())] += 1;
+            count[internal::permutation_index<T>(r.data())] += 1;
         }
 
-        return this->stat(M_, count_.data(), np_);
+        return this->stat(M_, count.data(), np_);
     }
 
     double degree_of_freedom() const { return M_ - 1; }
@@ -79,7 +79,6 @@ class PermutationTest : public ChiSquaredTest<PermutationTest<T>>
 
     std::size_t n_;
     double np_;
-    Vector<double> count_;
 }; // class PermutationTest
 
 } // namespace mckl

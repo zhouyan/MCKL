@@ -44,7 +44,7 @@ template <std::size_t Dim>
 class StateMatrixDim
 {
     protected:
-    void swap(StateMatrixDim<Dim> &) noexcept {}
+    void swap(StateMatrixDim<Dim> &) {}
 
     std::size_t get_dim() const { return Dim; }
 
@@ -57,10 +57,7 @@ class StateMatrixDim<Dynamic>
     protected:
     StateMatrixDim() : dim_(0) {}
 
-    void swap(StateMatrixDim<Dynamic> &other) noexcept
-    {
-        std::swap(dim_, other.dim_);
-    }
+    void swap(StateMatrixDim<Dynamic> &other) { std::swap(dim_, other.dim_); }
 
     std::size_t get_dim() const { return dim_; }
 
@@ -161,7 +158,7 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
     const value_type *data() const { return data_.data(); }
 
     /// \brief Swap two StateMatrix objects
-    void swap(StateMatrixBase<Layout, Dim, T> &other) noexcept
+    void swap(StateMatrixBase<Layout, Dim, T> &other)
     {
         internal::StateMatrixDim<Dim>::swap(other);
         std::swap(size_, other.size_);
@@ -188,7 +185,7 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
     StateMatrixBase(StateMatrixBase<Layout, Dim, T> &&) = default;
 
     StateMatrixBase<Layout, Dim, T> &operator=(
-        StateMatrixBase<Layout, Dim, T> &&other) = default;
+        StateMatrixBase<Layout, Dim, T> &&) = default;
 
     void resize_data(size_type N, size_type dim)
     {
@@ -226,7 +223,7 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
 /// \ingroup Core
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 inline void swap(StateMatrixBase<Layout, Dim, T> &state1,
-    StateMatrixBase<Layout, Dim, T> &state2) noexcept
+    StateMatrixBase<Layout, Dim, T> &state2)
 {
     state1.swap(state2);
 }

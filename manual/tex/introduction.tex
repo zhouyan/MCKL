@@ -32,17 +32,47 @@
 \chapter{Introduction}
 \label{chap:Introduction}
 
-\section{Monte Carlo algorithms}
-\label{sec:Monte Carlo algorithms}
-
-\section{Using the library}
-\label{sec:Using the library}
-
-\subsection{Installation}
-\label{sub:Installation}
-
-\subsection{Documents}
-\label{sub:Documents}
-
 \section{Organization of headers}
 \label{sec:Organization of headers}
+
+\mckl is a header-only library. All headers files are under the |mckl|
+directory. To include all functionalities,
+\begin{verbatim}
+#include <mckl/mckl.hpp>
+\end{verbatim}
+There are a few other headers that include a subset of functionalities of
+\mckl, each documented in a subsequent chapter in this manual. They are listed
+in table~\ref{tab:headers}. These headers does not define anything other than
+including other headers that each implement a specific feature. If only one a
+few features are needed, then one can include only headers that implement those
+features to save compilation time. For example,
+\begin{verbatim}
+#include <mckl/random/threefry.hpp>
+\end{verbatim}
+includes only the header that implements \rng engines based on the Threefry
+algorithm in~\cite{Salmon:2011um} (see section~\ref{sub:Threefry}). See the
+reference manual\footnote{\url{http://zhouyan.github.io/MCKLDoc/master}} for
+the header file for each class and function defined in \mckl.
+
+\begin{table}[ht]
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Header & Documents \\
+    \midrule
+    \texttt{mckl/core.hpp}     & Chapter~\ref{chap:Core concepts}             \\
+    \texttt{mckl/smp.hpp}      & Chapter~\ref{chap:Symmetric multiprocessing} \\
+    \texttt{mckl/resample.hpp} & Chapter~\ref{chap:Resampling}                \\
+    \texttt{mckl/math.hpp}     & Chapter~\ref{chap:Mathemtical functions}     \\
+    \texttt{mckl/random.hpp}   & Chapter~\ref{chap:Random number generating}  \\
+    \texttt{mckl/random/rng.hpp}
+    & Sections~\ref{sec:Counter-based RNG}
+    to~\ref{sec:Non-deterministic RNG} \\
+    \texttt{mckl/random/distribution.hpp}
+    & Sections~\ref{sec:Uniform bits distribution}
+    to~\ref{sec:Multivariate distribution} \\
+    \texttt{mckl/utility.hpp} & Chapter~\ref{chap:Utilities} \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Top-level headers}
+  \label{tab:headers}
+\end{table}

@@ -1,0 +1,15 @@
+========= Summary results of BigCrush =========
+ Generator:        U01OO
+ Number of statistics:  10
+ ----------------------------------------------
+  6  CollisionOver, t = 3           1 - eps1
+  6  CollisionOver, t = 3           1 - eps1
+ 27  SimpPoker, r = 27                eps
+ 27  SimpPoker, r = 27                eps
+ 29  SimpPoker, r = 25                eps
+ 29  SimpPoker, r = 25                eps
+ 87  LongestHeadRun, r = 27          2.0e-9
+ 87  LongestHeadRun, r = 27         5.6e-10
+ ----------------------------------------------
+ All other tests were passed
+

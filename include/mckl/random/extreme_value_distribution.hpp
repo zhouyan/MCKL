@@ -58,10 +58,10 @@ inline void extreme_value_distribution_impl(
     fma(n, r, -b, a, r);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    ExtremeValue, extreme_value, RealType, RealType, a, RealType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    ExtremeValue, extreme_value, RealType, RealType, a, RealType, b)
 
 /// \brief Extreme value distribution
 /// \ingroup Distribution

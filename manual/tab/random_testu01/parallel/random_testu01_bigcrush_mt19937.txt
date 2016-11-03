@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  160
+ ----------------------------------------------
+ 52  SampleProd, t = 24              0.9993
+ ----------------------------------------------
+ All other tests were passed
+

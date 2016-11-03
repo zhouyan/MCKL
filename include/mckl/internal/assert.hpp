@@ -35,7 +35,8 @@
 #include <mckl/internal/config.h>
 
 #include <cassert>
-#include <cstdio>
+#include <exception>
+#include <iostream>
 #include <limits>
 #include <stdexcept>
 #include <string>
@@ -57,23 +58,24 @@ class RuntimeAssert : public std::runtime_error
 }; // class RuntimeAssert
 
 #if MCKL_NO_RUNTIME_ASSERT
+
 inline void runtime_assert(bool, const char *, bool) {}
+
 #else // MCKL_NO_RUNTIME_ASSERT
+
 inline void runtime_assert(bool cond, const char *msg, bool soft = false)
 {
 #if MCKL_RUNTIME_ASSERT_AS_EXCEPTION
-    if (!cond) {
+    if (!cond)
         throw ::mckl::RuntimeAssert(msg);
-    }
 #else  // MCKL_RUNTIME_ASSERT_AS_EXCEPTION
-    if (!cond) {
-        std::fprintf(stderr, "MCKL runtime assertion failed:%s\n", msg);
-        std::fflush(stderr);
-    }
+    if (!cond)
+        std::cerr << "MCKL runtime assertion failed: " << msg << std::endl;
     if (!soft)
         assert(cond);
 #endif // MCKL_RUNTIME_ASSERT_AS_EXCEPTION
 }
+
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 inline void runtime_assert(
@@ -86,24 +88,117 @@ namespace internal
 {
 
 #if MCKL_NO_RUNTIME_ASSERT
+
 template <typename IntType, typename SizeType>
 inline void size_check(SizeType, const char *)
 {
 }
-#else  // MCKL_NO_RUNTIME_ASSERT
+
+#else // MCKL_NO_RUNTIME_ASSERT
+
 template <typename IntType, typename SizeType>
-inline void size_check(SizeType n, const char *f)
+inline void size_check(SizeType, const char *, std::false_type)
 {
-    static constexpr std::uintmax_t nmax =
+}
+
+template <typename IntType, typename SizeType>
+inline void size_check(SizeType n, const char *f, std::true_type)
+{
+    constexpr std::uintmax_t nmax =
         static_cast<std::uintmax_t>(std::numeric_limits<IntType>::max());
+
     std::string msg;
     msg += "**";
     msg += f;
-    msg += "** INPUT SIZE TOO BIG";
+    msg += "** input size too large";
 
     runtime_assert((static_cast<std::uintmax_t>(n) <= nmax), msg.c_str());
 }
+
+template <typename IntType, typename SizeType>
+inline void size_check(SizeType n, const char *f)
+{
+    constexpr std::uintmax_t nmax =
+        static_cast<std::uintmax_t>(std::numeric_limits<IntType>::max());
+    constexpr std::uintmax_t smax =
+        static_cast<std::uintmax_t>(std::numeric_limits<SizeType>::max());
+
+    size_check<IntType>(n, f, std::integral_constant<bool, (nmax < smax)>());
+}
+
 #endif // MCKL_NO_RUNTIME_ASSERT
+
+template <typename T>
+inline bool is_equal(const T &a, const T &b, std::true_type)
+{
+    return !(a < b || a > b);
+}
+
+template <typename T>
+inline bool is_equal(const T &a, const T &b, std::false_type)
+{
+    return a == b;
+}
+
+template <typename T>
+inline bool is_equal(const T &a, const T &b)
+{
+    return is_equal(a, b, std::is_floating_point<T>());
+}
+
+template <typename T>
+inline bool is_zero(const T &a)
+{
+    return is_equal(a, static_cast<T>(0));
+}
+
+template <typename T>
+inline bool is_one(const T &a)
+{
+    return is_equal(a, static_cast<T>(1));
+}
+
+template <typename T>
+inline bool is_negative(const T &, std::true_type)
+{
+    return false;
+}
+
+template <typename T>
+inline bool is_negative(const T &a, std::false_type)
+{
+    return a < 0;
+}
+
+template <typename T>
+inline bool is_negative(const T &a)
+{
+    return is_negative(a, std::is_unsigned<T>());
+}
+
+template <typename T>
+inline bool is_nullptr(T ptr, std::true_type)
+{
+    return ptr == nullptr;
+}
+
+template <typename T>
+inline bool is_nullptr(T, std::false_type)
+{
+    return false;
+}
+
+template <typename T>
+inline bool is_nullptr(T ptr)
+{
+    return is_nullptr(
+        ptr, std::integral_constant<bool,
+                 (std::is_pointer<T>::value ||
+                     std::is_same<std::nullptr_t,
+                         typename std::remove_cv<T>::type>::value)>());
+}
+
+inline bool is_nullptr(std::nullptr_t) { return true; }
 
 } // namespace mckl::internal
 

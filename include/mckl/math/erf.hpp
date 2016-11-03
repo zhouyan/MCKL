@@ -32,33 +32,36 @@
 #ifndef MCKL_MATH_ERF_HPP
 #define MCKL_MATH_ERF_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
 #include <mckl/math/constants.hpp>
+
+#include <cmath>
 
 namespace mckl
 {
 
 /// \brief Inverse complement error function
 /// \ingroup Special
-inline double erfcinv(double y)
+template <typename T>
+inline T erfcinv(T y)
 {
     if (y >= 2)
-        return -const_inf<double>();
+        return -const_inf<T>();
     if (y <= 0)
-        return const_inf<double>();
+        return const_inf<T>();
 
-    static constexpr double a = 0.70771;
-    static constexpr double b = 2.30753;
-    static constexpr double c = 0.27061;
-    static constexpr double d = 0.99229;
-    static constexpr double e = 0.04481;
-    static constexpr double f = 1.12837916709551257;
+    constexpr T a = static_cast<T>(0.70771);
+    constexpr T b = static_cast<T>(2.30753);
+    constexpr T c = static_cast<T>(0.27061);
+    constexpr T d = static_cast<T>(0.99229);
+    constexpr T e = static_cast<T>(0.04481);
+    constexpr T f = static_cast<T>(1.12837916709551257);
 
-    double z = y < 1 ? y : 2 - y;
-    double t = std::sqrt(-2 * std::log(0.5 * z));
-    double x = -a * ((b + t * c) / (1 + t * (d + t * e)) - t);
+    T z = y < 1 ? y : 2 - y;
+    T t = std::sqrt(-2 * std::log(static_cast<T>(0.5) * z));
+    T x = -a * ((b + t * c) / (1 + t * (d + t * e)) - t);
     for (int i = 0; i != 2; ++i) {
-        double err = std::erfc(x) - z;
+        T err = std::erfc(x) - z;
         x += err / (f * std::exp(-(x * x)) - x * err);
     }
 
@@ -67,7 +70,11 @@ inline double erfcinv(double y)
 
 /// \brief Inverse error function
 /// \ingroup Special
-inline double erfinv(double y) { return erfcinv(1 - y); }
+template <typename T>
+inline T erfinv(T y)
+{
+    return erfcinv<T>(1 - y);
+}
 
 } // namespace mckl
 

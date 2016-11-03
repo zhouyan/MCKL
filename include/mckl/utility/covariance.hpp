@@ -42,8 +42,8 @@ namespace mckl
 template <typename RealType = double>
 class Covariance
 {
-    static_assert(internal::is_one_of<RealType, float, double>::value,
-        "**Covariance** USED WITH RealType OTHER THAN float OR double");
+    static_assert(internal::is_blas_floating_point<RealType>::value,
+        "**Covariance** used with RealType other than float or double");
 
     public:
     using result_type = RealType;
@@ -110,8 +110,10 @@ class Covariance
             mean_init(layout, n, p, x, w);
         }
         div(p, mean_.data(), sw, mean_.data());
-        if (mean != nullptr)
-            std::copy(mean_.begin(), mean_.end(), mean);
+        if (mean != nullptr) {
+            std::memcpy(
+                mean, mean_.data(), sizeof(result_type) * mean_.size());
+        }
         if (cov == nullptr)
             return;
 
@@ -126,16 +128,16 @@ class Covariance
             cov_update(layout, n, p, x, B, BW);
         } else {
             wsqrt_.resize(n);
-            buffer_.resize(n * p);
+            x_.resize(n * p);
             sqrt(n, w, wsqrt_.data());
             if (layout == RowMajor) {
                 for (std::size_t i = 0; i != n; ++i)
-                    mul(p, x + i * p, wsqrt_[i], buffer_.data() + i * p);
+                    mul(p, x + i * p, wsqrt_[i], x_.data() + i * p);
             } else {
                 for (std::size_t i = 0; i != p; ++i)
-                    mul(n, x + i * n, wsqrt_.data(), buffer_.data() + i * n);
+                    mul(n, x + i * n, wsqrt_.data(), x_.data() + i * n);
             }
-            cov_update(layout, n, p, buffer_.data(), B, BW);
+            cov_update(layout, n, p, x_.data(), B, BW);
         }
         cov_pack(p, cov, layout, cov_layout, cov_upper, cov_packed);
     }
@@ -144,7 +146,7 @@ class Covariance
     Vector<result_type> mean_;
     Vector<result_type> cov_;
     Vector<result_type> wsqrt_;
-    Vector<result_type> buffer_;
+    Vector<result_type> x_;
 
     void mean_init(MatrixLayout layout, std::size_t n, std::size_t p,
         const float *x, const float *w)
@@ -230,7 +232,7 @@ class Covariance
                     cov_[i * p + j] = cov_[j * p + i];
 
         if (!cov_packed) {
-            std::copy(cov_.begin(), cov_.end(), cov);
+            std::memcpy(cov, cov_.data(), sizeof(result_type) * cov_.size());
             return;
         }
 

@@ -1,5 +1,13 @@
 # Important changes
 
+`Seed` is now a class template. Each `RNGType` has its own seeding class
+`Seed<RNGType>`. It is not possible to set globally a new seed with
+`Seed::instance().set(s)`. This can only be done with each type of RNG
+separately.
+
+RNG set classes (`RNGSetScalar` etc.) now has an `reset` method instead of
+`seed`.
+
 `StateMatrix` member `state` is replaced by `operator()`, `copy` renamed to
 `select` and `copy_particle` renamed to `duplicate`.
 

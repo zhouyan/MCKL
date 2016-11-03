@@ -34,6 +34,8 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
+#include <mkl_version.h>
+#include <mkl_vsl.h>
 
 namespace mckl
 {
@@ -42,11 +44,14 @@ namespace internal
 {
 
 #if MCKL_NO_RUNTIME_ASSERT
+
 inline int mkl_error_check(int status, const char *, const char *)
 {
     return status;
 }
-#else  // MCKL_NO_RUNTIME_ASSERT
+
+#else // MCKL_NO_RUNTIME_ASSERT
+
 inline int mkl_error_check(int status, const char *cpp, const char *c)
 {
     if (status == VSL_ERROR_OK)
@@ -66,6 +71,7 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
 
     return status;
 }
+
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 } // namespace mckl::internal
@@ -93,7 +99,7 @@ class MKLStream
     }
 
     /// \brief `vslCopyStream`
-    MKLStream(const MKLStream &other)
+    MKLStream(const MKLStream &other) : ptr_(nullptr)
     {
         ::VSLStreamStatePtr ptr = nullptr;
         if (internal::mkl_error_check(::vslCopyStream(&ptr, other.ptr_),
@@ -721,44 +727,48 @@ class MKLOffset<BRNG, 0>
     static MKL_INT eval(MKL_INT) { return BRNG; }
 }; // class MKLOffset
 
-template <int>
-class MKLResultTypeTrait;
-
-template <>
-class MKLResultTypeTrait<32>
-{
-    public:
-    using type = unsigned;
-}; // class MKLResultTypeTrait
-
-template <>
-class MKLResultTypeTrait<64>
-{
-    public:
-    using type = unsigned MKL_INT64;
-}; // class MKLResultTypeTrait
-
-template <int Bits>
-using MKLResultType = typename MKLResultTypeTrait<Bits>::type;
-
-template <int>
+template <MKL_INT, int>
 class MKLUniformBits;
 
-template <>
-class MKLUniformBits<32>
+template <MKL_INT BRNG>
+class MKLUniformBits<BRNG, 32>
 {
     public:
-    static void eval(MKLStream &stream, MKL_INT n, unsigned *r)
+    using result_type = unsigned;
+
+    static constexpr result_type min()
+    {
+        return std::numeric_limits<result_type>::min();
+    }
+
+    static constexpr result_type max()
+    {
+        return std::numeric_limits<result_type>::max();
+    }
+
+    static void eval(MKLStream &stream, MKL_INT n, result_type *r)
     {
         stream.uniform_bits32(n, r);
     }
 }; // class MKLUniformBits
 
-template <>
-class MKLUniformBits<64>
+template <MKL_INT BRNG>
+class MKLUniformBits<BRNG, 64>
 {
     public:
-    static void eval(MKLStream &stream, MKL_INT n, unsigned MKL_INT64 *r)
+    using result_type = unsigned MKL_INT64;
+
+    static constexpr result_type min()
+    {
+        return std::numeric_limits<result_type>::min();
+    }
+
+    static constexpr result_type max()
+    {
+        return std::numeric_limits<result_type>::max();
+    }
+
+    static void eval(MKLStream &stream, MKL_INT n, result_type *r)
     {
         stream.uniform_bits64(n, r);
     }
@@ -781,14 +791,19 @@ class MKLEngine
         "**MKLEngine** used with bits other than 32, or 64");
 
     public:
-    using result_type = internal::MKLResultType<Bits>;
+    using result_type =
+        typename internal::MKLUniformBits<BRNG, Bits>::result_type;
 
+    private:
+    template <typename T>
+    using is_seed_seq = internal::is_seed_seq<T, MKLEngine<BRNG, Bits>>;
+
+    public:
     explicit MKLEngine(result_type s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_INT,
-            result_type, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
         : index_(M_)
     {
         seed(seq);
@@ -804,8 +819,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, MKL_INT,
-            MKL_UINT, MKLEngine<BRNG, Bits>>::value>::type * = nullptr)
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
         : index_(M_)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
@@ -823,9 +837,8 @@ class MKLEngine
     }
 
     template <typename SeedSeq>
-    void seed(
-        SeedSeq &seq, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                          MKL_INT, result_type>::value>::type * = nullptr)
+    void seed(SeedSeq &seq,
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
     {
         MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
         Vector<MKL_UINT> params;
@@ -847,8 +860,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<
-            internal::is_seed_seq<SeedSeq, MKL_UINT>::value>::type * = nullptr)
+        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
             "**MKLEngine** does not support offseting");
@@ -867,7 +879,7 @@ class MKLEngine
             index_ = 0;
         }
 
-        return buffer_[index_++];
+        return result_[index_++];
     }
 
     void operator()(std::size_t n, result_type *r)
@@ -877,28 +889,29 @@ class MKLEngine
         const std::size_t remain = M_ - index_;
 
         if (n < remain) {
-            std::copy_n(buffer_.data() + index_, n, r);
+            std::memcpy(r, result_.data() + index_, sizeof(result_type) * n);
             index_ += n;
             return;
         }
 
-        std::copy_n(buffer_.data() + index_, remain, r);
+        std::memcpy(r, result_.data() + index_, sizeof(result_type) * remain);
         r += remain;
         n -= remain;
         index_ = M_;
 
         const std::size_t m = n / M_ * M_;
-        const std::size_t l = n % M_;
-        internal::MKLUniformBits<Bits>::eval(
-            stream_, static_cast<MKL_INT>(m), r);
+        generate(m, r);
         r += m;
+        n -= m;
 
         generate();
-        std::copy_n(buffer_.data(), l, r);
-        index_ = l;
+        std::memcpy(r, result_.data(), sizeof(result_type) * n);
+        index_ = static_cast<unsigned>(n);
     }
 
-    /// \brief Discard the buffer
+    /// \brief Discard the result
+    ///
+    /// \return The number of results discarded
     std::size_t discard()
     {
         const std::size_t remain = M_ - index_;
@@ -929,6 +942,12 @@ class MKLEngine
         if (Bits >= bits)
             m *= Bits / bits + (Bits % bits == 0 ? 0 : 1);
         switch (stream_.get_brng()) {
+            case VSL_BRNG_ARS5:
+                stream_.skip_ahead(m);
+                break;
+            case VSL_BRNG_PHILOX4X32X10:
+                stream_.skip_ahead(m);
+                break;
             case VSL_BRNG_MCG31:
                 stream_.skip_ahead(m);
                 break;
@@ -953,14 +972,6 @@ class MKLEngine
             case VSL_BRNG_NIEDERR:
                 stream_.skip_ahead(m);
                 break;
-#if INTEL_MKL_VERSION >= 110300
-            case VSL_BRNG_PHILOX4X32X10:
-                stream_.skip_ahead(m);
-                break;
-            case VSL_BRNG_ARS5:
-                stream_.skip_ahead(m);
-                break;
-#endif
             default:
                 while (nskip >= M) {
                     generate();
@@ -968,17 +979,17 @@ class MKLEngine
                 }
         };
         generate();
-        index_ = static_cast<std::size_t>(nskip % M);
+        index_ = static_cast<unsigned>(nskip % M);
     }
 
     static constexpr result_type min()
     {
-        return std::numeric_limits<result_type>::min();
+        return internal::MKLUniformBits<BRNG, Bits>::min();
     }
 
     static constexpr result_type max()
     {
-        return std::numeric_limits<result_type>::max();
+        return internal::MKLUniformBits<BRNG, Bits>::max();
     }
 
     MKLStream &stream() { return stream_; }
@@ -992,7 +1003,7 @@ class MKLEngine
     {
         if (eng1.stream_ != eng2.stream_)
             return false;
-        if (eng1.buffer_ != eng2.buffer_)
+        if (eng1.result_ != eng2.result_)
             return false;
         if (eng1.index_ != eng2.index_)
             return false;
@@ -1017,7 +1028,7 @@ class MKLEngine
             return os;
 
         os << eng.stream_ << ' ';
-        os << eng.buffer_ << ' ';
+        os << eng.result_ << ' ';
         os << eng.index_;
 
         return os;
@@ -1031,15 +1042,15 @@ class MKLEngine
             return is;
 
         MKLStream stream;
-        Vector<result_type> buffer;
-        std::size_t index;
+        std::array<result_type, M_> result;
+        unsigned index;
         is >> std::ws >> stream;
-        is >> std::ws >> buffer;
+        is >> std::ws >> result;
         is >> std::ws >> index;
 
         if (is) {
             eng.stream_ = std::move(stream);
-            eng.buffer_ = std::move(buffer);
+            eng.result_ = result;
             eng.index_ = index;
         }
 
@@ -1047,17 +1058,22 @@ class MKLEngine
     }
 
     private:
-    static constexpr std::size_t M_ = internal::BufferSize<result_type>::value;
+    static constexpr std::size_t M_ = 256;
 
-    Vector<result_type> buffer_;
-    std::size_t index_;
+    std::array<result_type, M_> result_;
     MKLStream stream_;
+    unsigned index_;
 
     void generate()
     {
-        buffer_.resize(M_);
-        internal::MKLUniformBits<Bits>::eval(
-            stream_, static_cast<MKL_INT>(M_), buffer_.data());
+        internal::MKLUniformBits<BRNG, Bits>::eval(
+            stream_, static_cast<MKL_INT>(M_), result_.data());
+    }
+
+    void generate(std::size_t n, result_type *r)
+    {
+        internal::MKLUniformBits<BRNG, Bits>::eval(
+            stream_, static_cast<MKL_INT>(n), r);
     }
 
     template <typename SeedSeq>
@@ -1079,6 +1095,22 @@ inline void rand(MKLEngine<BRNG, Bits> &rng, std::size_t n,
 {
     rng(n, r);
 }
+
+/// \brief A counter-based random number generator
+/// \ingroup MKL
+using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
+
+/// \brief A counter-based random number generator (64-bit)
+/// \ingroup MKL
+using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
+
+/// \brief A counter-based random number generator
+/// \ingroup MKL
+using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
+
+/// \brief A counter-based random number generator (64-bit)
+/// \ingroup MKL
+using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
 
 /// \brief A 59-bit multiplicative congruential generator
 /// \ingroup MKL
@@ -1122,26 +1154,6 @@ using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, 32>;
 /// \ingroup MKL
 using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 
-#if INTEL_MKL_VERSION >= 110300
-
-/// \brief A counter-based random number generator
-/// \ingroup MKL
-using MKL_ARS5 = MKLEngine<VSL_BRNG_ARS5, 32>;
-
-/// \brief A counter-based random number generator (64-bit)
-/// \ingroup MKL
-using MKL_ARS5_64 = MKLEngine<VSL_BRNG_ARS5, 64>;
-
-/// \brief A counter-based random number generator
-/// \ingroup MKL
-using MKL_PHILOX4X32X10 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 32>;
-
-/// \brief A counter-based random number generator (64-bit)
-/// \ingroup MKL
-using MKL_PHILOX4X32X10_64 = MKLEngine<VSL_BRNG_PHILOX4X32X10, 64>;
-
-#endif // INTEL_MKL_VERSION >= 110300
-
 namespace internal
 {
 
@@ -1155,58 +1167,11 @@ class MKLStreamState
 }; // class MKLStreamState
 
 template <typename RNGType>
-inline constexpr int mkl_nseeds(std::false_type)
-{
-    return (sizeof(typename RNGType::ctr_type) +
-               sizeof(typename RNGType::key_type)) /
-        sizeof(unsigned);
-}
-
-template <typename RNGType>
-inline constexpr int mkl_nseeds(std::true_type)
-{
-    return 1;
-}
-
-template <typename RNGType>
 inline constexpr int mkl_nseeds()
 {
-    return mkl_nseeds<RNGType>(std::integral_constant<
-        bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
-                  std::is_same<KeyType<RNGType>, NullType>::value)>());
-}
-
-template <typename RNGType>
-inline int mkl_init(
-    RNGType &rng, int n, const unsigned *param, std::false_type)
-{
-    int nc = static_cast<int>(
-        sizeof(typename RNGType::ctr_type) / sizeof(unsigned));
-    int nk = static_cast<int>(
-        sizeof(typename RNGType::key_type) / sizeof(unsigned));
-    new (static_cast<void *>(&rng)) RNGType();
-
-    if (n > 0) {
-        std::size_t size =
-            static_cast<std::size_t>(std::min(n, nk)) * sizeof(unsigned);
-        typename RNGType::key_type key;
-        std::fill(key.begin(), key.end(), 0);
-        std::memcpy(key.data(), param, size);
-        rng.key(key);
-    }
-
-    if (n > nk) {
-        n -= nk;
-        param += nk;
-        std::size_t size =
-            static_cast<std::size_t>(std::min(n, nc)) * sizeof(unsigned);
-        typename RNGType::ctr_type ctr;
-        std::fill(ctr.begin(), ctr.end(), 0);
-        std::memcpy(ctr.data(), param, size);
-        rng.ctr(ctr);
-    }
-
-    return 0;
+    return sizeof(typename SeedType<RNGType>::type) < sizeof(unsigned) ?
+        1 :
+        sizeof(typename SeedType<RNGType>::type) / sizeof(unsigned);
 }
 
 template <typename RNGType>
@@ -1226,14 +1191,21 @@ template <typename RNGType>
 inline int mkl_init(
     int method, ::VSLStreamStatePtr stream, int n, const unsigned *param)
 {
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*static_cast<MKLStreamState<RNGType> *>(stream)).rng;
 
     if (method == VSL_INIT_METHOD_STANDARD) {
-        return mkl_init(
-            rng, n, param,
-            std::integral_constant<
-                bool, (std::is_same<CtrType<RNGType>, NullType>::value ||
-                          std::is_same<KeyType<RNGType>, NullType>::value)>());
+        if (n == 0) {
+            new (static_cast<void *>(&rng)) RNGType();
+        } else {
+            constexpr std::size_t ns = mkl_nseeds<RNGType>();
+            union {
+                typename SeedType<RNGType>::type seed;
+                std::array<unsigned, ns> useed;
+            } buf;
+            std::copy_n(param, std::min(static_cast<std::size_t>(n), ns),
+                buf.useed.data());
+            new (static_cast<void *>(&rng)) RNGType(buf.seed);
+        }
     }
 
     if (method == VSL_INIT_METHOD_LEAPFROG)
@@ -1249,7 +1221,7 @@ template <typename RNGType, typename RealType>
 inline int mkl_uniform_real(
     ::VSLStreamStatePtr stream, int n, RealType *r, RealType a, RealType b)
 {
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*static_cast<MKLStreamState<RNGType> *>(stream)).rng;
     uniform_real_distribution(rng, static_cast<std::size_t>(n), r, a, b);
 
     return 0;
@@ -1258,7 +1230,7 @@ inline int mkl_uniform_real(
 template <typename RNGType>
 inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 {
-    RNGType &rng = (*reinterpret_cast<MKLStreamState<RNGType> *>(stream)).rng;
+    RNGType &rng = (*static_cast<MKLStreamState<RNGType> *>(stream)).rng;
     uniform_bits_distribution(rng, static_cast<std::size_t>(n), r);
 
     return 0;
@@ -1288,14 +1260,11 @@ inline int mkl_brng()
 
 #if MCKL_USE_MKL_VSL
 
-namespace internal
-{
-
 template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
-    size_check<MKL_INT>(n, "beta_distribution");
+    internal::size_check<MKL_INT>(n, "beta_distribution");
     rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
 }
 
@@ -1303,7 +1272,7 @@ template <MKL_INT BRNG, int Bits>
 inline void beta_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {
-    size_check<MKL_INT>(n, "beta_distribution");
+    internal::size_check<MKL_INT>(n, "beta_distribution");
     rng.stream().beta(static_cast<MKL_INT>(n), r, alpha, beta, 0, 1);
 }
 
@@ -1311,7 +1280,7 @@ template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    size_check<MKL_INT>(n, "cauchy_distribution");
+    internal::size_check<MKL_INT>(n, "cauchy_distribution");
     rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -1319,7 +1288,7 @@ template <MKL_INT BRNG, int Bits>
 inline void cauchy_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    size_check<MKL_INT>(n, "cauchy_distribution");
+    internal::size_check<MKL_INT>(n, "cauchy_distribution");
     rng.stream().cauchy(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -1327,7 +1296,7 @@ template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float lambda)
 {
-    size_check<MKL_INT>(n, "exponential_distribution");
+    internal::size_check<MKL_INT>(n, "exponential_distribution");
     rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
@@ -1335,7 +1304,7 @@ template <MKL_INT BRNG, int Bits>
 inline void exponential_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double lambda)
 {
-    size_check<MKL_INT>(n, "exponential_distribution");
+    internal::size_check<MKL_INT>(n, "exponential_distribution");
     rng.stream().exponential(static_cast<MKL_INT>(n), r, 0, 1 / lambda);
 }
 
@@ -1343,7 +1312,7 @@ template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    size_check<MKL_INT>(n, "extreme_value_distribution");
+    internal::size_check<MKL_INT>(n, "extreme_value_distribution");
     rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
     sub(n, 2 * a, r, r);
 }
@@ -1352,7 +1321,7 @@ template <MKL_INT BRNG, int Bits>
 inline void extreme_value_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    size_check<MKL_INT>(n, "extreme_value_distribution");
+    internal::size_check<MKL_INT>(n, "extreme_value_distribution");
     rng.stream().gumbel(static_cast<MKL_INT>(n), r, a, b);
     sub(n, 2 * a, r, r);
 }
@@ -1361,7 +1330,7 @@ template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float alpha, float beta)
 {
-    size_check<MKL_INT>(n, "gamma_distribution");
+    internal::size_check<MKL_INT>(n, "gamma_distribution");
     rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
 }
 
@@ -1369,7 +1338,7 @@ template <MKL_INT BRNG, int Bits>
 inline void gamma_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double alpha, double beta)
 {
-    size_check<MKL_INT>(n, "gamma_distribution");
+    internal::size_check<MKL_INT>(n, "gamma_distribution");
     rng.stream().gamma(static_cast<MKL_INT>(n), r, alpha, 0, beta);
 }
 
@@ -1377,7 +1346,7 @@ template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float location, float scale)
 {
-    size_check<MKL_INT>(n, "lapace_distribution");
+    internal::size_check<MKL_INT>(n, "lapace_distribution");
     rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
@@ -1385,7 +1354,7 @@ template <MKL_INT BRNG, int Bits>
 inline void laplace_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double location, double scale)
 {
-    size_check<MKL_INT>(n, "lapace_distribution");
+    internal::size_check<MKL_INT>(n, "lapace_distribution");
     rng.stream().laplace(static_cast<MKL_INT>(n), r, location, scale);
 }
 
@@ -1393,7 +1362,7 @@ template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float m, float s)
 {
-    size_check<MKL_INT>(n, "lognormal_distribution");
+    internal::size_check<MKL_INT>(n, "lognormal_distribution");
     rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
@@ -1401,7 +1370,7 @@ template <MKL_INT BRNG, int Bits>
 inline void lognormal_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double m, double s)
 {
-    size_check<MKL_INT>(n, "lognormal_distribution");
+    internal::size_check<MKL_INT>(n, "lognormal_distribution");
     rng.stream().lognormal(static_cast<MKL_INT>(n), r, m, s, 0, 1);
 }
 
@@ -1409,7 +1378,7 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, float mean, float stddev)
 {
-    size_check<MKL_INT>(n, "normal_distribution");
+    internal::size_check<MKL_INT>(n, "normal_distribution");
     rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
@@ -1417,7 +1386,7 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, double mean, double stddev)
 {
-    size_check<MKL_INT>(n, "normal_distribution");
+    internal::size_check<MKL_INT>(n, "normal_distribution");
     rng.stream().gaussian(static_cast<MKL_INT>(n), r, mean, stddev);
 }
 
@@ -1425,8 +1394,8 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     float *r, std::size_t m, const float *mean, const float *chol)
 {
-    size_check<MKL_INT>(n, "normal_mv_distribution");
-    size_check<MKL_INT>(m, "normal_mv_distribution");
+    internal::size_check<MKL_INT>(n, "normal_mv_distribution");
+    internal::size_check<MKL_INT>(m, "normal_mv_distribution");
     rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
         static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
 }
@@ -1435,8 +1404,8 @@ template <MKL_INT BRNG, int Bits>
 inline void normal_mv_distribution(MKLEngine<BRNG, Bits> &rng, std::size_t n,
     double *r, std::size_t m, const double *mean, const double *chol)
 {
-    size_check<MKL_INT>(n, "normal_mv_distribution");
-    size_check<MKL_INT>(m, "normal_mv_distribution");
+    internal::size_check<MKL_INT>(n, "normal_mv_distribution");
+    internal::size_check<MKL_INT>(m, "normal_mv_distribution");
     rng.stream().gaussian_mv(static_cast<MKL_INT>(n), r,
         static_cast<MKL_INT>(m), VSL_MATRIX_STORAGE_PACKED, mean, chol);
 }
@@ -1445,7 +1414,7 @@ template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float sigma)
 {
-    size_check<MKL_INT>(n, "rayleigh_distribution");
+    internal::size_check<MKL_INT>(n, "rayleigh_distribution");
     rng.stream().rayleigh(
         static_cast<MKL_INT>(n), r, 0, const_sqrt_2<float>() * sigma);
 }
@@ -1454,48 +1423,16 @@ template <MKL_INT BRNG, int Bits>
 inline void rayleigh_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double sigma)
 {
-    size_check<MKL_INT>(n, "rayleigh_distribution");
+    internal::size_check<MKL_INT>(n, "rayleigh_distribution");
     rng.stream().rayleigh(
         static_cast<MKL_INT>(n), r, 0, const_sqrt_2<double>() * sigma);
-}
-
-template <MKL_INT BRNG, int Bits>
-inline void u01_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
-{
-    size_check<MKL_INT>(n, "u01_distribution");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
-}
-
-template <MKL_INT BRNG, int Bits>
-inline void u01_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
-{
-    size_check<MKL_INT>(n, "u01_distribution");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
-}
-
-template <MKL_INT BRNG, int Bits>
-inline void u01_co_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r)
-{
-    size_check<MKL_INT>(n, "u01_co_distribution");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
-}
-
-template <MKL_INT BRNG, int Bits>
-inline void u01_co_distribution(
-    MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r)
-{
-    size_check<MKL_INT>(n, "u01_co_distribution");
-    rng.stream().uniform(static_cast<MKL_INT>(n), r, 0, 1);
 }
 
 template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    size_check<MKL_INT>(n, "uniform_real_distribution");
+    internal::size_check<MKL_INT>(n, "uniform_real_distribution");
     rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -1503,7 +1440,7 @@ template <MKL_INT BRNG, int Bits>
 inline void uniform_real_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    size_check<MKL_INT>(n, "uniform_real_distribution");
+    internal::size_check<MKL_INT>(n, "uniform_real_distribution");
     rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b);
 }
 
@@ -1511,7 +1448,7 @@ template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, float *r, float a, float b)
 {
-    size_check<MKL_INT>(n, "weibull_distribution");
+    internal::size_check<MKL_INT>(n, "weibull_distribution");
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
 }
 
@@ -1519,7 +1456,7 @@ template <MKL_INT BRNG, int Bits>
 inline void weibull_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, double *r, double a, double b)
 {
-    size_check<MKL_INT>(n, "weibull_distribution");
+    internal::size_check<MKL_INT>(n, "weibull_distribution");
     rng.stream().weibull(static_cast<MKL_INT>(n), r, a, 0, b);
 }
 
@@ -1527,7 +1464,7 @@ template <MKL_INT BRNG, int Bits>
 inline void bernoulli_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, double p)
 {
-    size_check<MKL_INT>(n, "bernoulli_distribution");
+    internal::size_check<MKL_INT>(n, "bernoulli_distribution");
     rng.stream().bernoulli(static_cast<MKL_INT>(n), r, p);
 }
 
@@ -1535,7 +1472,7 @@ template <MKL_INT BRNG, int Bits>
 inline void geometric_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, double p)
 {
-    size_check<MKL_INT>(n, "geometric_distribution");
+    internal::size_check<MKL_INT>(n, "geometric_distribution");
     rng.stream().geometric(static_cast<MKL_INT>(n), r, p);
 }
 
@@ -1543,7 +1480,7 @@ template <MKL_INT BRNG, int Bits>
 inline void uniform_int_distribution(
     MKLEngine<BRNG, Bits> &rng, std::size_t n, int *r, int a, int b)
 {
-    size_check<MKL_INT>(n, "uniform_int_distribution");
+    internal::size_check<MKL_INT>(n, "uniform_int_distribution");
     if (b < std::numeric_limits<int>::max()) {
         rng.stream().uniform(static_cast<MKL_INT>(n), r, a, b + 1);
     } else if (a > 0) {
@@ -1554,8 +1491,6 @@ inline void uniform_int_distribution(
             static_cast<MKL_INT>(n), reinterpret_cast<unsigned *>(r));
     }
 }
-
-} // namespace mckl::internal
 
 #endif // MCKL_USE_MKL_VSL
 

@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-# Doxyfile 1.8.11
+# Doxyfile 1.8.12
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project.
@@ -69,7 +69,7 @@ PROJECT_NAME           = "@PROJECT_NAME@"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = v@PROJECT_VERSION@
+PROJECT_NUMBER         = v@MCKL_VERSION@
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -323,6 +323,15 @@ EXTENSION_MAPPING      =
 # The default value is: YES.
 
 MARKDOWN_SUPPORT       = YES
+
+# When the TOC_INCLUDE_HEADINGS tag is set to a non-zero value, all headings up
+# to that level are automatically included in the table of contents, even if
+# they do not have an id attribute.
+# Note: This feature currently applies only to Markdown headings.
+# Minimum value: 0, maximum value: 99, default value: 0.
+# This tag requires that the tag MARKDOWN_SUPPORT is set to YES.
+
+TOC_INCLUDE_HEADINGS   = 0
 
 # When enabled doxygen tries to link words that correspond to documented
 # classes, or namespaces to their corresponding documentation. Such a link can
@@ -825,15 +834,14 @@ INPUT_ENCODING         = UTF-8
 # If left blank the following patterns are tested:*.c, *.cc, *.cxx, *.cpp,
 # *.c++, *.java, *.ii, *.ixx, *.ipp, *.i++, *.inl, *.idl, *.ddl, *.odl, *.h,
 # *.hh, *.hxx, *.hpp, *.h++, *.cs, *.d, *.php, *.php4, *.php5, *.phtml, *.inc,
-# *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.pyw, *.f90, *.f, *.for, *.tcl,
-# *.vhd, *.vhdl, *.ucf, *.qsf, *.as and *.js.
+# *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.pyw, *.f90, *.f95, *.f03, *.f08,
+# *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf and *.qsf.
 
 FILE_PATTERNS          = *.h \
                          *.hpp \
                          *.c \
                          *.cpp \
                          *.cl \
-                         *.f90 \
                          *.md
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
@@ -2061,11 +2069,27 @@ INCLUDE_FILE_PATTERNS  = *.h \
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED             = __TBB_TASK_GROUP_CONTEXT \
-                         MCKL_HAS_MKL \
-                         MCKL_HAS_OMP \
-                         MCKL_HAS_POSIX \
-                         MCKL_HAS_AESNI \
-                         MCKL_HAS_TBB
+                         __clang__                \
+                         __x86__                  \
+                         __x86_64__               \
+                         __SSE2__                 \
+                         __SSE3__                 \
+                         __SSSE3__                \
+                         __SSE4_1__               \
+                         __SSE4_2__               \
+                         __AVX__                  \
+                         __AVX2__                 \
+                         __AES__                  \
+                         __RDRND__                \
+                         __BMI__                  \
+                         __BMI2__                 \
+                         __BYTE_ORDER__           \
+                         __ORDER_LITTLE_ENDIAN__  \
+                         MCKL_HAS_POSIX           \
+                         MCKL_HAS_INT128          \
+                         MCKL_HAS_OMP             \
+                         MCKL_HAS_TBB             \
+                         MCKL_HAS_MKL             \
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

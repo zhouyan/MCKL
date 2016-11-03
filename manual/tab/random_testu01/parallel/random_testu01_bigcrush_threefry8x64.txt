@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        U01OO
+ Number of statistics:  160
+ ----------------------------------------------
+ 38  Run, r = 0                      0.9992
+ ----------------------------------------------
+ All other tests were passed
+

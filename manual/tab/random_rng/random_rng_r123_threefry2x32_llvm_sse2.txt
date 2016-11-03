@@ -1,0 +1,5 @@
+R123_Threefry2x32         48       8          10.45          10.15      ---Passed
+R123_Threefry2x32         48       8          10.53          10.60      ---Passed
+R123_Threefry2x32         48       8          10.94          10.15      ---Passed
+R123_Threefry2x32         48       8          10.46          10.15      ---Passed
+R123_Threefry2x32         48       8          10.96          10.15      ---Passed

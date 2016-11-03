@@ -50,7 +50,7 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void bernoulli_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, double p)
 {
-    Array<double, K> s;
+    alignas(32) std::array<double, K> s;
     u01_co_distribution(rng, n, s.data());
     std::fill_n(r, n, 0);
     for (std::size_t i = 0; i != n; ++i)
@@ -58,9 +58,10 @@ inline void bernoulli_distribution_impl(
             r[i] = 1;
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(Bernoulli, bernoulli, InType, double, p)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    Bernoulli, bernoulli, InType, double, p)
 
 /// \brief Bernoulli distribution
 /// \ingroup Distribution

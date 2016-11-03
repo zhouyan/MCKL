@@ -79,14 +79,12 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
     std::stringstream ss;
     ss << error / std::numeric_limits<RealType>::epsilon() << " eps";
 
-    double c1 = watch1.cycles() / num;
-    double c2 = watch2.cycles() / num;
+    double c1 = 1.0 * watch1.cycles() / num;
+    double c2 = 1.0 * watch2.cycles() / num;
     if (std::is_same<RealType, float>::value)
         std::cout << std::setw(twid) << std::left << "float";
     if (std::is_same<RealType, double>::value)
         std::cout << std::setw(twid) << std::left << "double";
-    if (std::is_same<RealType, long double>::value)
-        std::cout << std::setw(twid) << std::left << "long double";
     std::cout << std::setw(twid) << std::left << name;
     std::cout << std::setw(twid) << std::right << c1;
     std::cout << std::setw(twid) << std::right << c2;
@@ -113,8 +111,8 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M)
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(twid) << std::left << "Precision";
     std::cout << std::setw(twid) << std::left << "Algorithm";
-    std::cout << std::setw(twid) << std::right << "cpE (Transform)";
-    std::cout << std::setw(twid) << std::right << "cpE (Generate)";
+    std::cout << std::setw(twid) << std::right << "CPE (Transform)";
+    std::cout << std::setw(twid) << std::right << "CPE (Generate)";
     std::cout << std::setw(twid) << std::right << "Error";
     std::cout << std::endl;
 
@@ -123,8 +121,6 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M)
     resample_u01_sequence<float>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
     resample_u01_sequence<double>(N, M, twid);
-    std::cout << std::string(lwid, '-') << std::endl;
-    resample_u01_sequence<long double>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 

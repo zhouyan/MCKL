@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  144
+ ----------------------------------------------
+ 81  HammingWeight2, r = 20          1.6e-4
+ ----------------------------------------------
+ All other tests were passed
+

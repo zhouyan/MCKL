@@ -32,49 +32,99 @@
 #ifndef MCKL_INTERNAL_COMMON_HPP
 #define MCKL_INTERNAL_COMMON_HPP
 
-#include <mckl/internal/basic.hpp>
+#include <mckl/internal/config.h>
+
+#include <mckl/internal/assert.hpp>
+#include <mckl/internal/defines.hpp>
+#include <mckl/internal/forward.hpp>
+#include <mckl/internal/traits.hpp>
+
+#include <mckl/internal/byte_order.hpp>
+#include <mckl/internal/cblas.hpp>
+#include <mckl/internal/const_math.hpp>
+#include <mckl/internal/iostream.hpp>
+
+#if MCKL_HAS_SSE2
+#include <mckl/internal/sse2.hpp>
+#endif
+
+#if MCKL_HAS_AVX2
+#include <mckl/internal/avx2.hpp>
+#endif
+
+#if MCKL_HAS_AESNI
+#include <mckl/internal/aesni.hpp>
+#endif
+
+#if MCKL_HAS_FMA
+#include <mckl/internal/fma.hpp>
+#endif
+
 #include <mckl/math.hpp>
 #include <mckl/utility/aligned_memory.hpp>
 
-namespace mckl
-{
+// Utilities
+#include <bitset>
+#include <chrono>
+#include <cstddef>
+#include <cstdlib>
+#include <functional>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
-namespace internal
-{
+// Numeric limits
+#include <cfloat>
+#include <cinttypes>
+#include <climits>
+#include <cstdint>
+#include <limits>
 
-template <typename T, std::size_t N>
-using StaticVector =
-    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
+// String
+#include <cctype>
+#include <cstring>
+#include <string>
 
-class StirlingMatrix2
-{
-    public:
-    StirlingMatrix2(std::size_t n, std::size_t m)
-        : ncol_(m + 1), data_((n + 1) * (m + 1))
-    {
-        std::fill(data_.begin(), data_.end(), 0);
-        get(0, 0) = 1;
-        for (std::size_t j = 1; j <= m; ++j) {
-            get(j, j) = 1;
-            for (std::size_t i = j + 1; i <= n; ++i)
-                get(i, j) = j * get(i - 1, j) + get(i - 1, j - 1);
-        }
-    }
+// Containers
+#include <array>
+#include <deque>
+#include <forward_list>
+#include <list>
+#include <map>
+#include <queue>
+#include <set>
+#include <stack>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
-    double operator()(std::size_t i, std::size_t j) const
-    {
-        return data_[i * ncol_ + j];
-    }
+// Algorithms
+#include <algorithm>
 
-    private:
-    std::size_t ncol_;
-    Vector<double> data_;
+// Iterators
+#include <iterator>
 
-    double &get(std::size_t i, std::size_t j) { return data_[i * ncol_ + j]; }
-}; // class StirlingMatrix
+// Numerics
+#include <cfenv>
+#include <cmath>
+#include <complex>
+#include <numeric>
+#include <random>
+#include <ratio>
 
-} // namespace mckl::internal
+// Input/Output
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
-} // namespace mckl
+// Atomic operation
+#include <atomic>
+
+// Thread support
+#include <condition_variable>
+#include <future>
+#include <mutex>
+#include <thread>
 
 #endif // MCKL_INTERNAL_COMMON_HPP

@@ -1,0 +1,15 @@
+========= Summary results of BigCrush =========
+ Generator:        U01
+ Number of statistics:  14
+ ----------------------------------------------
+ 44  CollisionPermut, r = 0         1.1e-20
+ 44  CollisionPermut, r = 0         2.5e-21
+ 45  CollisionPermut, r = 10         4.1e-5
+ 45  CollisionPermut, r = 10         2.7e-6
+ 87  LongestHeadRun, r = 27          2.3e-9
+ 87  LongestHeadRun, r = 27         1 -  9.0e-5
+ 87  LongestHeadRun, r = 27         1.5e-10
+ 87  LongestHeadRun, r = 27         1 -  9.0e-5
+ ----------------------------------------------
+ All other tests were passed
+

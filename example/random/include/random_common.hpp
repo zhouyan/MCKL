@@ -32,42 +32,21 @@
 #ifndef MCKL_EXAMPLE_RANDOM_COMMON_HPP
 #define MCKL_EXAMPLE_RANDOM_COMMON_HPP
 
-#include <mckl/random/rng.hpp>
+#include <mckl/random/internal/common.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-#define MCKL_EXAMPLE_RANDOM_MAIN(prg, NVal, MVal)                             \
-    int main(int argc, char **argv)                                           \
-    {                                                                         \
-        --argc;                                                               \
-        ++argv;                                                               \
-                                                                              \
-        std::size_t N = NVal;                                                 \
-        if (argc > 0) {                                                       \
-            std::size_t n = static_cast<std::size_t>(std::atoi(*argv));       \
-            if (n != 0) {                                                     \
-                N = n;                                                        \
-                --argc;                                                       \
-                ++argv;                                                       \
-            }                                                                 \
-        }                                                                     \
-                                                                              \
-        std::size_t M = MVal;                                                 \
-        if (argc > 0) {                                                       \
-            std::size_t m = static_cast<std::size_t>(std::atoi(*argv));       \
-            if (m != 0) {                                                     \
-                M = m;                                                        \
-                --argc;                                                       \
-                ++argv;                                                       \
-            }                                                                 \
-        }                                                                     \
-                                                                              \
-        random_##prg(N, M, argc, argv);                                       \
-                                                                              \
-        return 0;                                                             \
-    }
+template <typename IntType>
+inline std::string random_typename()
+{
+    std::string type;
+    if (std::is_unsigned<IntType>::value)
+        type += "u";
+    type += "int";
+    type += std::to_string(sizeof(IntType) * CHAR_BIT);
+    type += "_t";
 
-template <typename>
-inline std::string random_typename();
+    return type;
+}
 
 template <>
 inline std::string random_typename<float>()
@@ -85,18 +64,6 @@ template <>
 inline std::string random_typename<long double>()
 {
     return "long double";
-}
-
-template <>
-inline std::string random_typename<int>()
-{
-    return "int";
-}
-
-template <>
-inline std::string random_typename<unsigned>()
-{
-    return "unsigned";
 }
 
 template <>

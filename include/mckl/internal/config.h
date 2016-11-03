@@ -66,28 +66,41 @@
 #define MCKL_RUNTIME_WARNING_AS_EXCEPTION 0
 #endif
 
+/// \brief Produce exact the same results regardless of endianness
+/// \ingroup Config
+#ifndef MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+#define MCKL_REQUIRE_ENDIANNESS_NEUTURAL 0
+#endif
+
+#ifndef MCKL_CROSS_COMPILING
+#define MCKL_CROSS_COMPILING 0
+#endif
+
 // OS dependent macros
 
 #ifndef MCKL_OPENCL
-#if defined(__APPLE__) || defined(__MACOSX)
+#ifdef __APPLE__
 #include <Availability.h>
+#if defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(__MAC_10_5)
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
 #ifndef MCKL_HAS_POSIX
 #define MCKL_HAS_POSIX 1
 #endif
-#endif
-#else // __APPLE__
-#if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+#endif // __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_5
+#endif // defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && defined(__MAC_10_5)
+#elif defined(__POSIX_C_SOURCE)
+#if _POSIX_C_SOURCE >= 200112L
 #ifndef MCKL_HAS_POSIX
 #define MCKL_HAS_POSIX 1
 #endif
 #endif // _POSIX_C_SOURCE >= 200112L
-#if defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 600
+#elif defined(_XOPEN_SOURCE)
+#if _XOPEN_SOURCE >= 600
 #ifndef MCKL_HAS_POSIX
 #define MCKL_HAS_POSIX 1
 #endif
 #endif // _XOPEN_SOURCE >= 600
-#endif // MCKL_MACOSX
+#endif // __APPLE__
 #endif // MCKL_OPENCL
 
 #ifndef MCKL_HAS_POSIX
@@ -106,14 +119,6 @@
 
 #ifndef MCKL_USE_OMP
 #define MCKL_USE_OMP MCKL_HAS_OMP
-#endif
-
-#ifndef MCKL_HAS_OPENCL
-#define MCKL_HAS_OPENCL 0
-#endif
-
-#ifndef MCKL_HAS_HDF5
-#define MCKL_HAS_HDF5 0
 #endif
 
 #ifndef MCKL_HAS_TBB
@@ -148,8 +153,20 @@
 #define MCKL_USE_MKL_VSL MCKL_HAS_MKL
 #endif
 
+#ifndef MCKL_HAS_BLAS
+#define MCKL_HAS_BLAS MCKL_HAS_MKL
+#endif
+
 #ifndef MCKL_USE_CBLAS
 #define MCKL_USE_CBLAS MCKL_USE_MKL_CBLAS
+#endif
+
+#ifndef MCKL_HAS_HDF5
+#define MCKL_HAS_HDF5 0
+#endif
+
+#ifndef MCKL_HAS_TESTU01
+#define MCKL_HAS_TESTU01 0
 #endif
 
 #endif // MCKL_INTERNAL_CONFIG_H

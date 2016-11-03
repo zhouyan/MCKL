@@ -29,22 +29,26 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-all : random_distribution random_rng_clang random_rng_gcc random_rng_intel
+.PHONY : all pdf rng distribution
+
+all :
 	./random_distribution.pl
 	./random_rng.pl
+	./random_testu01.pl
 
-random_distribution :
-	ninja -C ../../build/clang-Release random_distribution_perf-check \
-	    > random_distribution.txt
+pdf :
+	./random_distribution.pl --pdf
+	./random_rng.pl --pdf
+	./random_testu01.pl --pdf
 
-random_rng_clang :
-	ninja -C ../../build/clang-Release random_rng-check > random_rng_clang.txt
+distribution :
+	./random_distribution.pl --run --write
 
-random_rng_gcc :
-	ninja -C ../../build/gcc-Release random_rng-check > random_rng_gcc.txt
-
-random_rng_intel :
-	ninja -C ../../build/intel-Release random_rng-check > random_rng_intel.txt
+rng :
+	./random_rng.pl --run --write
 
 clean :
+	latexmk -c -f -silent random_distribution.tex
+	latexmk -c -f -silent random_rng.tex
+	latexmk -c -f -silent random_testu01.tex
 	rm -f *.tex

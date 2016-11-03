@@ -65,6 +65,13 @@ enum ResampleScheme {
     ResidualSystematic  ///< Systematic resampling on residuals
 };                      // enum ResampleScheme
 
+template <typename T, std::size_t K = 1>
+class BufferSize
+    : public std::integral_constant<std::size_t,
+          8192 / (sizeof(T) * K) == 0 ? 1 : 8192 / (sizeof(T) * K)>
+{
+}; // class BufferSize;
+
 } // namespace mckl
 
 #endif // MCKL_INTERNAL_DEFINES_HPP

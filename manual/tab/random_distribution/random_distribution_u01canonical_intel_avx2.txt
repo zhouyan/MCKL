@@ -1,0 +1,4 @@
+U01Canonical<float>                  22.20       22.19        2.05        2.42       VML    (0)--Passed
+U01Canonical<double>                 43.16       41.41        5.03        5.25       VML    (0)--Passed
+U01Canonical<float>                  22.19       22.16        2.05        2.18       C++    (0)--Passed
+U01Canonical<double>                 43.05       41.41        5.04        5.26       C++    (0)--Passed

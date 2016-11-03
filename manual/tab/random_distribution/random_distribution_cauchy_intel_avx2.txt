@@ -1,0 +1,4 @@
+Cauchy<float>(0,1)                   86.82       59.65        7.35        3.69       VML    (0)--Passed
+Cauchy<double>(0,1)                 114.05       77.15       13.84        8.00       VML    (0)--Passed
+Cauchy<float>(0,1)                   86.72       59.77        5.48        3.72       C++    (0)--Passed
+Cauchy<double>(0,1)                 114.38       77.72       11.08        8.02       C++    (0)--Passed

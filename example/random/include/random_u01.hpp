@@ -32,184 +32,184 @@
 #ifndef MCKL_EXAMPLE_RANDOM_U01_HPP
 #define MCKL_EXAMPLE_RANDOM_U01_HPP
 
-#include <mckl/random/u01.hpp>
-#include <mckl/randomc/u01.h>
+#include <mckl/random/u01_distribution.hpp>
+#include <mckl/random/uniform_real_distribution.hpp>
 #include "random_common.hpp"
+#include "random_rng.hpp"
 
-#define MCKL_DEFINE_RANDOMC_U01_TEST(                                         \
-    ubits, fsuffix, lr, Lower, Upper, RealType)                               \
-    template <>                                                               \
-    inline RealType random_u01_c<std::uint##ubits##_t, RealType, mckl::Lower, \
-        mckl::Upper>(std::uint##ubits##_t u)                                  \
-    {                                                                         \
-        return mckl_u01_##lr##_u##ubits##fsuffix(u);                          \
-    }
-
-#define MCKL_RANDOM_U01_TEST(Lower, Upper)                                    \
-    random_u01<std::uint32_t, float, mckl::Lower, mckl::Upper>(               \
-        N, M, nwid, swid, twid);                                              \
-    random_u01<std::uint64_t, float, mckl::Lower, mckl::Upper>(               \
-        N, M, nwid, swid, twid);                                              \
-    random_u01<std::uint32_t, double, mckl::Lower, mckl::Upper>(              \
-        N, M, nwid, swid, twid);                                              \
-    random_u01<std::uint64_t, double, mckl::Lower, mckl::Upper>(              \
-        N, M, nwid, swid, twid);                                              \
-    random_u01<std::uint32_t, long double, mckl::Lower, mckl::Upper>(         \
-        N, M, nwid, swid, twid);                                              \
-    random_u01<std::uint64_t, long double, mckl::Lower, mckl::Upper>(         \
-        N, M, nwid, swid, twid);
-
-template <typename UIntType, typename RealType, typename, typename>
-inline RealType random_u01_c(UIntType u);
-
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, cc, Closed, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, cc, Closed, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, cc, Closed, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, cc, Closed, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, cc, Closed, Closed, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, cc, Closed, Closed, long double)
-
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, co, Closed, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, co, Closed, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, co, Closed, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, co, Closed, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, co, Closed, Open, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, co, Closed, Open, long double)
-
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, oc, Open, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, oc, Open, Closed, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, oc, Open, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, oc, Open, Closed, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, oc, Open, Closed, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, oc, Open, Closed, long double)
-
-MCKL_DEFINE_RANDOMC_U01_TEST(32, f, oo, Open, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, f, oo, Open, Open, float)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, d, oo, Open, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, d, oo, Open, Open, double)
-MCKL_DEFINE_RANDOMC_U01_TEST(32, l, oo, Open, Open, long double)
-MCKL_DEFINE_RANDOMC_U01_TEST(64, l, oo, Open, Open, long double)
-
-template <typename UIntType, typename RealType, typename Lower, typename Upper>
-inline std::string random_u01_function_name()
+template <typename RNGType>
+inline void random_u01_p(std::size_t N, std::size_t M)
 {
-    std::stringstream ss;
-    ss << "u01<uint";
-    ss << std::numeric_limits<UIntType>::digits << "_t, ";
-    ss << random_typename<RealType>() << ", ";
-    ss << random_typename<Lower>() << ", ";
-    ss << random_typename<Upper>() << ">";
+    using f01cc = mckl::U01CCDistribution<float>;
+    using f01co = mckl::U01CODistribution<float>;
+    using f01oc = mckl::U01OCDistribution<float>;
+    using f01oo = mckl::U01OODistribution<float>;
+    using funif = mckl::UniformRealDistribution<float>;
 
-    return ss.str();
-}
+    using d01cc = mckl::U01CCDistribution<double>;
+    using d01co = mckl::U01CODistribution<double>;
+    using d01oc = mckl::U01OCDistribution<double>;
+    using d01oo = mckl::U01OODistribution<double>;
+    using dunif = mckl::UniformRealDistribution<double>;
 
-template <typename RealType>
-inline void random_u01_lb(RealType x, std::string &minimum, std::string &left)
-{
-    std::stringstream ss;
-    if (mckl::internal::is_equal(x, static_cast<RealType>(0)))
-        ss << 0;
-    else
-        ss << "2^" << std::log2(x);
-    minimum = ss.str();
+    using l01cc = mckl::U01CCDistribution<long double>;
+    using l01co = mckl::U01CODistribution<long double>;
+    using l01oc = mckl::U01OCDistribution<long double>;
+    using l01oo = mckl::U01OODistribution<long double>;
+    using lunif = mckl::UniformRealDistribution<long double>;
 
-    if (x < static_cast<RealType>(0))
-        left = "< 0";
-    else if (x > static_cast<RealType>(0))
-        left = "Open";
-    else
-        left = "Closed";
-}
+    RandomRNGPerf perf_f01cc(random_rng_p<RNGType, f01cc>(N, M));
+    RandomRNGPerf perf_f01co(random_rng_p<RNGType, f01co>(N, M));
+    RandomRNGPerf perf_f01oc(random_rng_p<RNGType, f01oc>(N, M));
+    RandomRNGPerf perf_f01oo(random_rng_p<RNGType, f01oo>(N, M));
+    RandomRNGPerf perf_funif(random_rng_p<RNGType, funif>(N, M));
 
-template <typename RealType>
-inline void random_u01_rb(RealType x, std::string &maximum, std::string &right)
-{
-    std::stringstream ss;
-    if (mckl::internal::is_equal(x, static_cast<RealType>(1)))
-        ss << 1;
-    else
-        ss << "1 - 2^" << std::log2(static_cast<RealType>(1) - x);
-    maximum = ss.str();
-    if (x > static_cast<RealType>(1))
-        right = "> 1";
-    else if (x < static_cast<RealType>(1))
-        right = "Open";
-    else
-        right = "Closed";
-}
+    RandomRNGPerf perf_d01cc(random_rng_p<RNGType, d01cc>(N, M));
+    RandomRNGPerf perf_d01co(random_rng_p<RNGType, d01co>(N, M));
+    RandomRNGPerf perf_d01oc(random_rng_p<RNGType, d01oc>(N, M));
+    RandomRNGPerf perf_d01oo(random_rng_p<RNGType, d01oo>(N, M));
+    RandomRNGPerf perf_dunif(random_rng_p<RNGType, dunif>(N, M));
 
-template <typename UIntType, typename RealType, typename Lower, typename Upper>
-inline void random_u01(
-    std::size_t N, std::size_t M, int nwid, int swid, int twid)
-{
-    mckl::ThreefryEngine<UIntType> rng;
-    mckl::Vector<UIntType> u(N);
-    mckl::Vector<RealType> r(N);
-    mckl::Vector<RealType> r1(N);
-    mckl::Vector<RealType> r2(N);
-    bool pass1 = true;
-    bool pass2 = true;
-    for (std::size_t i = 0; i != M; ++i) {
-        mckl::rand(rng, N, u.data());
+    RandomRNGPerf perf_l01cc(random_rng_p<RNGType, l01cc>(N, M));
+    RandomRNGPerf perf_l01co(random_rng_p<RNGType, l01co>(N, M));
+    RandomRNGPerf perf_l01oc(random_rng_p<RNGType, l01oc>(N, M));
+    RandomRNGPerf perf_l01oo(random_rng_p<RNGType, l01oo>(N, M));
+    RandomRNGPerf perf_lunif(random_rng_p<RNGType, lunif>(N, M));
 
-        for (std::size_t j = 0; j != N; ++j)
-            r[j] = mckl::u01<UIntType, RealType, Lower, Upper>(u[j]);
+    const int nwid = 50;
+    const int twid = 15;
+    const std::size_t lwid = nwid + twid * 3;
 
-        for (std::size_t j = 0; j != N; ++j)
-            r1[j] = random_u01_c<UIntType, RealType, Lower, Upper>(u[j]);
-        pass1 = pass1 && r1 == r;
-
-        mckl::u01<UIntType, RealType, Lower, Upper>(N, u.data(), r2.data());
-        pass2 = pass2 && r2 == r;
-    }
-
-    std::string function =
-        random_u01_function_name<UIntType, RealType, Lower, Upper>();
-    std::string minimum;
-    std::string maximum;
-    std::string left;
-    std::string right;
-    random_u01_lb(mckl::u01<UIntType, RealType, Lower, Upper>(
-                      std::numeric_limits<UIntType>::min()),
-        minimum, left);
-    random_u01_rb(mckl::u01<UIntType, RealType, Lower, Upper>(
-                      std::numeric_limits<UIntType>::max()),
-        maximum, right);
-    std::cout << std::setw(nwid) << std::left << function;
-    std::cout << std::setw(swid) << std::right << minimum;
-    std::cout << std::setw(swid) << std::right << maximum;
-    std::cout << std::setw(twid) << std::right << left;
-    std::cout << std::setw(twid) << std::right << right;
-    std::cout << std::setw(twid) << std::right << random_pass(pass1);
-    std::cout << std::setw(twid) << std::right << random_pass(pass2);
-    std::cout << std::endl;
-}
-
-inline void random_u01(std::size_t N, std::size_t M, int, char **)
-{
-    const int nwid = 45;
-    const int swid = 15;
-    const int twid = 10;
-    const std::size_t lwid = nwid + swid * 2 + twid * 4;
+    std::cout << std::fixed << std::setprecision(2);
 
     std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::setw(nwid) << std::left << "Function";
-    std::cout << std::setw(swid) << std::right << "Mininum";
-    std::cout << std::setw(swid) << std::right << "Maximum";
-    std::cout << std::setw(twid) << std::right << "Lower";
-    std::cout << std::setw(twid) << std::right << "Upper";
-    std::cout << std::setw(twid) << std::right << "C API";
-    std::cout << std::setw(twid) << std::right << "Batch";
+
+    std::cout << std::setw(nwid) << std::left << "Distribution";
+    if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(twid) << std::right << "cpE (S)";
+        std::cout << std::setw(twid) << std::right << "cpE (B)";
+    } else {
+        std::cout << std::setw(twid) << std::right << "ME/s (S)";
+        std::cout << std::setw(twid) << std::right << "ME/s (B)";
+    }
+    std::cout << std::setw(twid) << std::right << "Deterministics";
     std::cout << std::endl;
+
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Closed, Closed);
+
+    std::cout << std::setw(nwid) << std::left << "U01CCDistribution<float>";
+    std::cout << std::setw(twid) << std::right << perf_f01cc.c1;
+    std::cout << std::setw(twid) << std::right << perf_f01cc.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_f01cc.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "U01CODistribution<float>";
+    std::cout << std::setw(twid) << std::right << perf_f01co.c1;
+    std::cout << std::setw(twid) << std::right << perf_f01co.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_f01co.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "U01OCDistribution<float>";
+    std::cout << std::setw(twid) << std::right << perf_f01oc.c1;
+    std::cout << std::setw(twid) << std::right << perf_f01oc.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_f01oc.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "U01OODistribution<float>";
+    std::cout << std::setw(twid) << std::right << perf_f01oo.c1;
+    std::cout << std::setw(twid) << std::right << perf_f01oo.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_f01oo.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left
+              << "UniformRealDistribution<float>";
+    std::cout << std::setw(twid) << std::right << perf_funif.c1;
+    std::cout << std::setw(twid) << std::right << perf_funif.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_funif.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "U01CCDistribution<double>";
+    std::cout << std::setw(twid) << std::right << perf_d01cc.c1;
+    std::cout << std::setw(twid) << std::right << perf_d01cc.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_d01cc.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "U01CODistribution<double>";
+    std::cout << std::setw(twid) << std::right << perf_d01co.c1;
+    std::cout << std::setw(twid) << std::right << perf_d01co.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_d01co.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "U01OCDistribution<double>";
+    std::cout << std::setw(twid) << std::right << perf_d01oc.c1;
+    std::cout << std::setw(twid) << std::right << perf_d01oc.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_d01oc.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "U01OODistribution<double>";
+    std::cout << std::setw(twid) << std::right << perf_d01oo.c1;
+    std::cout << std::setw(twid) << std::right << perf_d01oo.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_d01oo.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left
+              << "UniformRealDistribution<double>";
+    std::cout << std::setw(twid) << std::right << perf_dunif.c1;
+    std::cout << std::setw(twid) << std::right << perf_dunif.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_dunif.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left
+              << "U01CCDistribution<long double>";
+    std::cout << std::setw(twid) << std::right << perf_l01cc.c1;
+    std::cout << std::setw(twid) << std::right << perf_l01cc.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_l01cc.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left
+              << "U01CODistribution<long double>";
+    std::cout << std::setw(twid) << std::right << perf_l01co.c1;
+    std::cout << std::setw(twid) << std::right << perf_l01co.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_l01co.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left
+              << "U01OCDistribution<long double>";
+    std::cout << std::setw(twid) << std::right << perf_l01oc.c1;
+    std::cout << std::setw(twid) << std::right << perf_l01oc.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_l01oc.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left
+              << "U01OODistribution<long double>";
+    std::cout << std::setw(twid) << std::right << perf_l01oo.c1;
+    std::cout << std::setw(twid) << std::right << perf_l01oo.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_l01oo.pass);
+    std::cout << std::endl;
+
+    std::cout << std::setw(nwid) << std::left
+              << "UniformRealDistribution<long double>";
+    std::cout << std::setw(twid) << std::right << perf_lunif.c1;
+    std::cout << std::setw(twid) << std::right << perf_lunif.c2;
+    std::cout << std::setw(twid) << std::right << random_pass(perf_lunif.pass);
+    std::cout << std::endl;
+
     std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Closed, Open);
-    std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Open, Closed);
-    std::cout << std::string(lwid, '-') << std::endl;
-    MCKL_RANDOM_U01_TEST(Open, Open);
-    std::cout << std::string(lwid, '-') << std::endl;
+}
+
+template <typename RNGType>
+inline void random_u01(std::size_t N, std::size_t M, const std::string &name)
+{
+    std::cout << std::string(95, '=') << std::endl;
+    std::cout << std::setw(40) << std::left << "RNGType:" << name << std::endl;
+    std::cout << std::setw(40) << std::left << "result_type:"
+              << random_typename<typename RNGType::result_type>() << std::endl;
+    std::cout << std::setw(40) << std::left
+              << "Number of random bits:" << mckl::RNGTraits<RNGType>::bits
+              << std::endl;
+    std::cout << std::string(95, '-') << std::endl;
+
+    random_u01_p<RNGType>(N, M);
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_U01_HPP

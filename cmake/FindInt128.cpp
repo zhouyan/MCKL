@@ -33,11 +33,12 @@
 
 int main()
 {
-    unsigned a = 0;
-    unsigned b = 0;
-    INT128 c = static_cast<INT128>(a) * static_cast<INT128>(b);
-    assert(static_cast<unsigned>(c) == 0);
-    assert(static_cast<unsigned>(c >> 64) == 0);
+    unsigned long long a = 0x0123456789ABCDEF;
+    unsigned long long b = 0xFEDCBA9876543210;
+    unsigned INT128 c =
+        static_cast<unsigned INT128>(a) * static_cast<unsigned INT128>(b);
+    assert(static_cast<unsigned long long>(c >> 0x00) == 0x2236D88FE5618CF0);
+    assert(static_cast<unsigned long long>(c >> 0x40) == 0x0121FA00AD77D742);
 
     return 0;
 }

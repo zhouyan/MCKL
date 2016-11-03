@@ -1,0 +1,8 @@
+========= Summary results of SmallCrush =========
+ Generator:        U01
+ Number of statistics:  15
+ ----------------------------------------------
+  2  Collision                       9.9e-4
+ ----------------------------------------------
+ All other tests were passed
+

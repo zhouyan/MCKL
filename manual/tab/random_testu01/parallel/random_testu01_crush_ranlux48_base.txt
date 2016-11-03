@@ -1,0 +1,189 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+  9  CollisionOver, t = 20            eps
+ 10  CollisionOver, t = 20            eps
+ 27  CouponCollector, d = 4          1.4e-6
+ 28  CouponCollector, d = 4          8.1e-6
+ 31  Gap, r = 0                       eps
+ 32  Gap, r = 27                      eps
+ 39  CollisionPermut, r = 0        6.0e-175
+ 40  CollisionPermut, r = 15       1.4e-152
+ 46  SampleProd, t = 30             1 -  2.6e-6
+ 47  SampleMean                     2.4e-27
+ 55  SumCollector                     eps
+ 62  Savir2                           eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+  9  CollisionOver, t = 20            eps
+ 10  CollisionOver, t = 20            eps
+ 27  CouponCollector, d = 4         7.3e-11
+ 28  CouponCollector, d = 4          7.5e-6
+ 31  Gap, r = 0                     4.5e-11
+ 32  Gap, r = 27                    1.1e-10
+ 39  CollisionPermut, r = 0        3.4e-165
+ 40  CollisionPermut, r = 15       1.2e-194
+ 46  SampleProd, t = 30             1 -  9.8e-6
+ 47  SampleMean                     6.2e-21
+ 55  SumCollector                     eps
+ 62  Savir2                           eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  144
+ ----------------------------------------------
+  9  CollisionOver, t = 20            eps
+ 10  CollisionOver, t = 20            eps
+ 23  SimpPoker, d = 16                eps
+ 24  SimpPoker, d = 16                eps
+ 25  SimpPoker, d = 64                eps
+ 26  SimpPoker, d = 64                eps
+ 27  CouponCollector, d = 4           eps
+ 28  CouponCollector, d = 4           eps
+ 29  CouponCollector, d = 16          eps
+ 30  CouponCollector, d = 16          eps
+ 31  Gap, r = 0                       eps
+ 32  Gap, r = 27                      eps
+ 33  Gap, r = 0                       eps
+ 34  Gap, r = 22                      eps
+ 39  CollisionPermut, r = 0           eps
+ 40  CollisionPermut, r = 15          eps
+ 43  MaxOft, t = 20                   eps
+ 43  MaxOft AD, t = 20              1 - eps1
+ 44  MaxOft, t = 30                   eps
+ 44  MaxOft AD, t = 30              1 - eps1
+ 46  SampleProd, t = 30             1 - eps1
+ 47  SampleMean                     8.8e-18
+ 51  WeightDistrib, r = 0             eps
+ 52  WeightDistrib, r = 8             eps
+ 53  WeightDistrib, r = 16            eps
+ 54  WeightDistrib, r = 24            eps
+ 55  SumCollector                     eps
+ 62  Savir2                           eps
+ 67  RandomWalk1 R (L = 1000)        2.4e-4
+ 79  PeriodsInStrings, r = 15        4.3e-4
+ 87  HammingIndep, L = 300            eps
+ 88  HammingIndep, L = 300            eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+  9  CollisionOver, t = 20            eps
+ 10  CollisionOver, t = 20            eps
+ 23  SimpPoker, d = 16                eps
+ 24  SimpPoker, d = 16                eps
+ 25  SimpPoker, d = 64                eps
+ 26  SimpPoker, d = 64                eps
+ 27  CouponCollector, d = 4           eps
+ 28  CouponCollector, d = 4           eps
+ 29  CouponCollector, d = 16          eps
+ 30  CouponCollector, d = 16          eps
+ 31  Gap, r = 0                       eps
+ 32  Gap, r = 27                      eps
+ 33  Gap, r = 0                       eps
+ 34  Gap, r = 22                      eps
+ 39  CollisionPermut, r = 0           eps
+ 40  CollisionPermut, r = 15          eps
+ 43  MaxOft, t = 20                   eps
+ 43  MaxOft AD, t = 20              1 - eps1
+ 44  MaxOft, t = 30                   eps
+ 44  MaxOft AD, t = 30              1 - eps1
+ 46  SampleProd, t = 30             1 - eps1
+ 47  SampleMean                     2.4e-21
+ 51  WeightDistrib, r = 0             eps
+ 52  WeightDistrib, r = 8             eps
+ 53  WeightDistrib, r = 16            eps
+ 54  WeightDistrib, r = 24            eps
+ 55  SumCollector                     eps
+ 62  Savir2                           eps
+ 87  HammingIndep, L = 300            eps
+ 88  HammingIndep, L = 300          6.7e-16
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+  9  CollisionOver, t = 20            eps
+ 10  CollisionOver, t = 20            eps
+ 23  SimpPoker, d = 16                eps
+ 24  SimpPoker, d = 16                eps
+ 25  SimpPoker, d = 64                eps
+ 26  SimpPoker, d = 64                eps
+ 27  CouponCollector, d = 4           eps
+ 28  CouponCollector, d = 4           eps
+ 29  CouponCollector, d = 16          eps
+ 30  CouponCollector, d = 16          eps
+ 31  Gap, r = 0                       eps
+ 32  Gap, r = 27                      eps
+ 33  Gap, r = 0                       eps
+ 34  Gap, r = 22                      eps
+ 39  CollisionPermut, r = 0           eps
+ 40  CollisionPermut, r = 15          eps
+ 43  MaxOft, t = 20                   eps
+ 43  MaxOft AD, t = 20              1 - eps1
+ 44  MaxOft, t = 30                   eps
+ 44  MaxOft AD, t = 30              1 - eps1
+ 46  SampleProd, t = 30             1 - eps1
+ 47  SampleMean                     3.7e-20
+ 51  WeightDistrib, r = 0             eps
+ 52  WeightDistrib, r = 8             eps
+ 53  WeightDistrib, r = 16            eps
+ 54  WeightDistrib, r = 24            eps
+ 55  SumCollector                     eps
+ 62  Savir2                           eps
+ 68  RandomWalk1 H (L = 1000)        4.0e-8
+ 87  HammingIndep, L = 300          1.8e-13
+ 88  HammingIndep, L = 300            eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+  9  CollisionOver, t = 20            eps
+ 10  CollisionOver, t = 20            eps
+ 23  SimpPoker, d = 16                eps
+ 24  SimpPoker, d = 16                eps
+ 25  SimpPoker, d = 64                eps
+ 26  SimpPoker, d = 64                eps
+ 27  CouponCollector, d = 4           eps
+ 28  CouponCollector, d = 4           eps
+ 29  CouponCollector, d = 16          eps
+ 30  CouponCollector, d = 16          eps
+ 31  Gap, r = 0                       eps
+ 32  Gap, r = 27                      eps
+ 33  Gap, r = 0                       eps
+ 34  Gap, r = 22                      eps
+ 39  CollisionPermut, r = 0           eps
+ 40  CollisionPermut, r = 15          eps
+ 43  MaxOft, t = 20                   eps
+ 43  MaxOft AD, t = 20              1 - eps1
+ 44  MaxOft, t = 30                   eps
+ 44  MaxOft AD, t = 30              1 - eps1
+ 46  SampleProd, t = 30             1 - eps1
+ 47  SampleMean                     1.2e-17
+ 51  WeightDistrib, r = 0             eps
+ 52  WeightDistrib, r = 8             eps
+ 53  WeightDistrib, r = 16            eps
+ 54  WeightDistrib, r = 24            eps
+ 55  SumCollector                     eps
+ 62  Savir2                           eps
+ 87  HammingIndep, L = 300          5.3e-13
+ 88  HammingIndep, L = 300            eps
+ ----------------------------------------------
+ All other tests were passed
+

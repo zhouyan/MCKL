@@ -33,7 +33,6 @@
 #define MCKL_RANDOM_RDRAND_HPP
 
 #include <mckl/random/internal/common.hpp>
-#include <immintrin.h>
 
 #ifndef MCKL_RDRAND_NTRIAL_MAX
 #define MCKL_RDRAND_NTRIAL_MAX 0
@@ -105,20 +104,15 @@ class RDRANDEngine
     public:
     using result_type = ResultType;
 
-    explicit RDRANDEngine(result_type = 0) {}
+    RDRANDEngine() {}
 
-    template <typename SeedSeq>
-    explicit RDRANDEngine(SeedSeq &,
-        typename std::enable_if<internal::is_seed_seq<SeedSeq, result_type,
-            RDRANDEngine<ResultType, NTrialMax>>::value>::type * = nullptr)
+    template <typename Seed>
+    explicit RDRANDEngine(const Seed &)
     {
     }
 
-    void seed(result_type) {}
-
-    template <typename SeedSeq>
-    void seed(SeedSeq &, typename std::enable_if<internal::is_seed_seq<SeedSeq,
-                             result_type>::value>::type * = nullptr)
+    template <typename Seed>
+    void seed(const Seed &)
     {
     }
 

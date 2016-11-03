@@ -32,10 +32,7 @@
 #ifndef MCKL_INTERNAL_COMPILER_H
 #define MCKL_INTERNAL_COMPILER_H
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-
+#include <mckl/internal/compiler/platform.h>
 #if defined(__OPENCL_VERSION__)
 #define MCKL_OPENCL
 #include <mckl/internal/compiler/opencl.h>
@@ -52,6 +49,8 @@
 #define MCKL_MSVC
 #include <mckl/internal/compiler/msvc.h>
 #endif
+#include <mckl/internal/compiler/byte_order.h>
+#include <mckl/internal/compiler/intrin.h>
 
 #ifndef MCKL_OPENCL
 #ifdef __cplusplus
@@ -67,40 +66,12 @@
 #endif
 #endif
 
-#ifndef UINT64_C
-#error __STDC_CONSTANT_MACROS not defined before #include<stdint.h>
+#ifndef MCKL_FLATTEN
+#define MCKL_FLATTEN
 #endif
 
-#ifndef MCKL_HAS_X86
-#if defined(i386) || defined(__i386) || defined(__i386__) ||                  \
-    defined(_M_IX86) || defined(_X86_) || defined(__x86_64) ||                \
-    defined(__x86_64__) || defined(__amd64) || defined(__amd64__) ||          \
-    defined(_M_AMD64) || defined(_M_X64)
-#define MCKL_HAS_X86 1
-#else
-#define MCKL_HAS_X86 0
-#endif
-#endif
-
-#ifndef MCKL_HAS_X86_64
-#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) ||           \
-    defined(__amd64__) || defined(_M_AMD64) || defined(_M_X64)
-#define MCKL_HAS_X86_64 1
-#else
-#define MCKL_HAS_X86_64 0
-#endif
-#endif
-
-#ifndef MCKL_HAS_AESNI
-#define MCKL_HAS_AESNI 0
-#endif
-
-#ifndef MCKL_HAS_RDRAND
-#define MCKL_HAS_RDRAND 0
-#endif
-
-#ifndef MCKL_HAS_INT128
-#define MCKL_HAS_INT128 0
+#ifndef MCKL_FLATTEN_CALL
+#define MCKL_FLATTEN_CALL
 #endif
 
 #endif // MCKL_INTERNAL_COMPILER_HPP

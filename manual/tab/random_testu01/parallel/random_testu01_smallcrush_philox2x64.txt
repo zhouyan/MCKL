@@ -1,0 +1,8 @@
+========= Summary results of SmallCrush =========
+ Generator:        U01CC
+ Number of statistics:  15
+ ----------------------------------------------
+  7  WeightDistrib                   0.9994
+ ----------------------------------------------
+ All other tests were passed
+

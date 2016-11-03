@@ -1,0 +1,28 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  24
+ ----------------------------------------------
+ 25  ClosePairs NP, t = 16          2.2e-11
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16       1.0e-221
+ 25  ClosePairs mNP2, t = 16        2.8e-67
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16        1.3e-8
+ 25  ClosePairs NP, t = 16          7.7e-13
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16       3.8e-225
+ 25  ClosePairs mNP2, t = 16        2.1e-60
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16        8.0e-6
+ 32  CouponCollector, r = 20         3.2e-8
+ 33  CouponCollector, r = 27         1.3e-4
+ 33  CouponCollector, r = 27         4.4e-4
+ 47  MaxOft AD, t = 16              2.1e-44
+ 47  MaxOft, t = 16                  1.7e-4
+ 47  MaxOft AD, t = 16              7.2e-46
+ 48  MaxOft, t = 24                  5.6e-4
+ 48  MaxOft AD, t = 24               3.0e-4
+ 48  MaxOft AD, t = 24               2.8e-4
+ ----------------------------------------------
+ All other tests were passed
+

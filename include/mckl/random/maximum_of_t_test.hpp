@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/maximum_of_t.hpp
+// MCKL/include/mckl/random/maximum_of_t_test.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -51,14 +51,17 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
     static_assert(T > 0, "**MaximumOfTTest** used with T equal to zero");
 
     public:
-    MaximumOfTTest(std::size_t n) : n_(n), count_(D) {}
+    MaximumOfTTest(std::size_t n) : n_(n) {}
+
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
 
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)
     {
         using result_type = typename U01DistributionType::result_type;
 
-        std::fill(count_.begin(), count_.end(), 0);
+        Vector<double> count(D);
+        std::fill(count.begin(), count.end(), 0);
 
         const std::size_t k = internal::BufferSize<result_type>::value;
         const std::size_t m = n_ / k;
@@ -66,22 +69,21 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
         Vector<result_type> r(k * T);
         Vector<result_type> s(k);
         for (std::size_t i = 0; i != m; ++i)
-            generate(rng, u01, k, r.data(), s.data());
-        generate(rng, u01, l, r.data(), s.data());
+            generate(rng, u01, k, r.data(), s.data(), count.data());
+        generate(rng, u01, l, r.data(), s.data(), count.data());
 
-        return this->stat(D, count_.data(), static_cast<double>(n_) / D);
+        return this->stat(D, count.data(), static_cast<double>(n_) / D);
     }
 
     double degree_of_freedom() const { return D - 1; }
 
     private:
     std::size_t n_;
-    Vector<double> count_;
 
     template <typename RNGType, typename U01DistributionType>
     void generate(RNGType &rng, U01DistributionType &u01, std::size_t n,
         typename U01DistributionType::result_type *r,
-        typename U01DistributionType::result_type *s)
+        typename U01DistributionType::result_type *s, double *count)
     {
         using result_type = typename U01DistributionType::result_type;
 
@@ -91,7 +93,7 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
         pow(n, s, static_cast<result_type>(T), s);
         mul(n, static_cast<result_type>(D), s, s);
         for (std::size_t i = 0; i != n; ++i)
-            ++count_[internal::ftoi<std::size_t, D>(s[i])];
+            ++count[internal::ftoi<std::size_t, D>(s[i])];
     }
 }; // class MaximumOfTTest
 

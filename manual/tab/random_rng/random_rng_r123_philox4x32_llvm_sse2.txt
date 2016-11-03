@@ -1,0 +1,5 @@
+R123_Philox4x32           64       8           7.28           7.23      ---Passed
+R123_Philox4x32           64       8           7.13           7.00      ---Passed
+R123_Philox4x32           64       8           7.27           7.22      ---Passed
+R123_Philox4x32           64       8           7.21           7.09      ---Passed
+R123_Philox4x32           64       8           7.13           7.00      ---Passed

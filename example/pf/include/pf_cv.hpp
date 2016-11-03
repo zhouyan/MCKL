@@ -29,10 +29,124 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_PFCV_HPP
-#define MCKL_EXAMPLE_PFCV_HPP
+#ifndef MCKL_EXAMPLE_PF_CV_HPP
+#define MCKL_EXAMPLE_PF_CV_HPP
 
+#include <mckl/core.hpp>
+#include <mckl/smp.hpp>
 #include "pf.hpp"
+
+#if MCKL_HAS_HDF5
+#include <mckl/utility/hdf5.hpp>
+#endif
+
+template <typename>
+std::string pf_cv_backend_name();
+
+template <>
+std::string pf_cv_backend_name<mckl::BackendSEQ>()
+{
+    return "BackendSEQ";
+}
+
+template <>
+std::string pf_cv_backend_name<mckl::BackendSTD>()
+{
+    return "BackendSTD";
+}
+
+#if MCKL_HAS_OMP
+template <>
+std::string pf_cv_backend_name<mckl::BackendOMP>()
+{
+    return "BackendOMP";
+}
+#endif
+
+#if MCKL_HAS_TBB
+template <>
+std::string pf_cv_backend_name<mckl::BackendTBB>()
+{
+    return "BackendTBB";
+}
+#endif
+
+template <mckl::ResampleScheme>
+std::string pf_cv_scheme_name();
+
+template <>
+std::string pf_cv_scheme_name<mckl::Multinomial>()
+{
+    return "Multinomial";
+}
+
+template <>
+std::string pf_cv_scheme_name<mckl::Residual>()
+{
+    return "Residual";
+}
+
+template <>
+std::string pf_cv_scheme_name<mckl::ResidualStratified>()
+{
+    return "ResidualStratified";
+}
+
+template <>
+std::string pf_cv_scheme_name<mckl::ResidualSystematic>()
+{
+    return "ResidualSystematic";
+}
+
+template <>
+std::string pf_cv_scheme_name<mckl::Stratified>()
+{
+    return "Stratified";
+}
+
+template <>
+std::string pf_cv_scheme_name<mckl::Systematic>()
+{
+    return "Systematic";
+}
+
+template <mckl::MatrixLayout>
+std::string pf_cv_layout_name();
+
+template <>
+std::string pf_cv_layout_name<mckl::RowMajor>()
+{
+    return "RowMajor";
+}
+
+template <>
+std::string pf_cv_layout_name<mckl::ColMajor>()
+{
+    return "ColMajor";
+}
+
+template <typename>
+std::string pf_cv_rng_set_name();
+
+template <>
+std::string pf_cv_rng_set_name<mckl::RNGSetVector<mckl::RNG>>()
+{
+    return "RNGSetVector";
+}
+
+#if MCKL_HAS_TBB
+template <>
+std::string pf_cv_rng_set_name<mckl::RNGSetTBB<mckl::RNG>>()
+{
+    return "RNGSetTBB";
+}
+
+template <>
+std::string pf_cv_rng_set_name<mckl::RNGSetTBBKPI<mckl::RNG>>()
+{
+    return "RNGSetTBBKPI";
+}
+#endif
 
 template <mckl::MatrixLayout Layout>
 using PFCVBase = mckl::StateMatrix<Layout, 4, double>;
@@ -64,18 +178,9 @@ class PFCV : public PFCVBase<Layout>
 
         double log_likelihood(std::size_t iter)
         {
-            const double scale = 10;
-            const double nu = 10;
-
-            double llh_x =
-                scale * (pos_x() - this->particle().state().obs_x_[iter]);
-            double llh_y =
-                scale * (pos_y() - this->particle().state().obs_y_[iter]);
-
-            llh_x = std::log(1 + llh_x * llh_x / nu);
-            llh_y = std::log(1 + llh_y * llh_y / nu);
-
-            return -0.5 * (nu + 1) * (llh_x + llh_y);
+            return pf_log_likelihood(pos_x(), pos_y(),
+                this->particle().state().obs_x_[iter],
+                this->particle().state().obs_x_[iter]);
         }
     }; // class particle_index_type
 
@@ -83,7 +188,7 @@ class PFCV : public PFCVBase<Layout>
     {
         double x = 0;
         double y = 0;
-        std::ifstream data("pf_cv.data");
+        std::ifstream data("pf.data");
         while (data >> x >> y) {
             obs_x_.push_back(x);
             obs_y_.push_back(y);
@@ -107,16 +212,8 @@ class PFCVInit : public mckl::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
 
     void eval_each(std::size_t, mckl::ParticleIndex<T> idx)
     {
-        const double sd_pos0 = 2;
-        const double sd_vel0 = 1;
-        mckl::NormalDistribution<double> normal_pos(0, sd_pos0);
-        mckl::NormalDistribution<double> normal_vel(0, sd_vel0);
-
-        auto &rng = idx.rng();
-        idx.pos_x() = normal_pos(rng);
-        idx.pos_y() = normal_pos(rng);
-        idx.vel_x() = normal_vel(rng);
-        idx.vel_y() = normal_vel(rng);
+        pf_init_each(
+            idx.rng(), idx.pos_x(), idx.pos_y(), idx.vel_x(), idx.vel_y());
     }
 }; // PFCVInit
 
@@ -129,17 +226,8 @@ class PFCVMove : public mckl::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
 
     void eval_each(std::size_t, mckl::ParticleIndex<T> idx)
     {
-        const double sd_pos = std::sqrt(0.02);
-        const double sd_vel = std::sqrt(0.001);
-        const double delta = 0.1;
-        mckl::NormalDistribution<double> normal_pos(0, sd_pos);
-        mckl::NormalDistribution<double> normal_vel(0, sd_vel);
-
-        auto &rng = idx.rng();
-        idx.pos_x() += normal_pos(rng) + delta * idx.vel_x();
-        idx.pos_y() += normal_pos(rng) + delta * idx.vel_y();
-        idx.vel_x() += normal_vel(rng);
-        idx.vel_y() += normal_vel(rng);
+        pf_move_each(
+            idx.rng(), idx.pos_x(), idx.pos_y(), idx.vel_x(), idx.vel_y());
     }
 }; // class PFCVMove
 
@@ -158,35 +246,12 @@ class PFCVMove<Backend, mckl::ColMajor, RNGSetType>
 
     void eval_range(std::size_t, const mckl::ParticleRange<T> &range)
     {
-        const double sd_pos = std::sqrt(0.02);
-        const double sd_vel = std::sqrt(0.001);
-        const double delta = 0.1;
-        mckl::NormalDistribution<double> normal_pos(0, sd_pos);
-        mckl::NormalDistribution<double> normal_vel(0, sd_vel);
-
-        double *const pos_x =
-            range.particle().state().col_data(0) + range.first();
-        double *const pos_y =
-            range.particle().state().col_data(1) + range.first();
-        double *const vel_x =
-            range.particle().state().col_data(2) + range.first();
-        double *const vel_y =
-            range.particle().state().col_data(3) + range.first();
-        double *const w = w_.data() + range.first();
-        double *const v = v_.data() + range.first();
-
-        const std::size_t n = range.size();
-        auto &rng = range.begin().rng();
-        normal_pos(rng, n, w);
-        normal_pos(rng, n, v);
-        mckl::add(n, w, pos_x, pos_x);
-        mckl::add(n, v, pos_y, pos_y);
-        mckl::fma(n, delta, vel_x, pos_x, pos_x);
-        mckl::fma(n, delta, vel_y, pos_y, pos_y);
-        normal_vel(rng, n, w);
-        normal_vel(rng, n, v);
-        mckl::add(n, w, vel_x, vel_x);
-        mckl::add(n, v, vel_y, vel_y);
+        pf_move_range(range.begin().rng(), range.size(),
+            range.particle().state().col_data(0) + range.first(),
+            range.particle().state().col_data(1) + range.first(),
+            range.particle().state().col_data(2) + range.first(),
+            range.particle().state().col_data(3) + range.first(),
+            w_.data() + range.first(), v_.data() + range.first());
     }
 
     void eval_first(std::size_t, mckl::Particle<T> &particle)
@@ -227,8 +292,8 @@ class PFCVWeight : public mckl::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
 }; // class PFCVWeight
 
 template <typename Backend, mckl::MatrixLayout Layout, typename RNGSetType>
-class PFCVEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
-                     PFCVEval<Backend, Layout, RNGSetType>, Backend>
+class PFCVMEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
+                      PFCVMEval<Backend, Layout, RNGSetType>, Backend>
 {
     public:
     using T = PFCV<Layout, RNGSetType>;
@@ -239,152 +304,105 @@ class PFCVEval : public mckl::MonitorEvalSMP<PFCV<Layout, RNGSetType>,
         res[0] = idx.pos_x();
         res[1] = idx.pos_y();
     }
-}; // class PFCVEval
+}; // class PFCVMEval
 
-template <typename Backend, mckl::ResampleScheme Scheme,
-    mckl::MatrixLayout Layout, typename RNGSetType>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
+template <typename T>
+inline double pf_cv_error(const mckl::Sampler<T> &sampler)
 {
-    using T = PFCV<Layout, RNGSetType>;
+    static mckl::Vector<double> tx;
+    static mckl::Vector<double> ty;
 
-    mckl::Seed::instance().set(101);
-    mckl::Sampler<T> sampler(N);
-    sampler.resample_method(Scheme, 0.5);
-    sampler.eval(PFCVInit<Backend, Layout, RNGSetType>(), mckl::SamplerInit);
-    sampler.eval(PFCVMove<Backend, Layout, RNGSetType>(), mckl::SamplerMove);
-    sampler.eval(PFCVWeight<Backend, Layout, RNGSetType>(),
-        mckl::SamplerInit | mckl::SamplerMove);
-    sampler.monitor(
-        "pos", mckl::Monitor<T>(2, PFCVEval<Backend, Layout, RNGSetType>()));
-    sampler.monitor("pos").name(0) = "pos.x";
-    sampler.monitor("pos").name(1) = "pos.y";
-    sampler.initialize();
-
-    const std::size_t n = sampler.particle().state().n();
-    const std::string smp(pf_backend_name<Backend>());
-    const std::string res(pf_scheme_name<Scheme>());
-    const std::string rc(pf_layout_name<Layout>());
-    const std::string rs(pf_rng_set_name<RNGSetType>());
-
-    std::string basename = "pf_cv." + smp + "." + res + "." + rc + "." + rs;
-
-#if MCKL_HAS_HDF5
-    std::string h5file = basename + ".h5";
-    mckl::hdf5store(h5file);
-    mckl::hdf5store(h5file, "Particle", true);
-    mckl::hdf5store(sampler.particle(), h5file, "Particle/Iter.0", true);
-#endif
-
-    mckl::StopWatch watch;
-    for (std::size_t i = 1; i < n; ++i) {
-        watch.start();
-        sampler.iterate();
-        watch.stop();
-#if MCKL_HAS_HDF5
-        mckl::hdf5store(sampler.particle(), h5file,
-            "Particle/Iter." + std::to_string(i), true);
-#endif
+    if (tx.size() == 0) {
+        double x = 0;
+        double y = 0;
+        std::ifstream truth("pf.truth");
+        while (truth >> x >> y) {
+            tx.push_back(x);
+            ty.push_back(y);
+        }
     }
 
-#if MCKL_HAS_HDF5
-    mckl::hdf5store(sampler, h5file, "Sampler", true);
-    mckl::hdf5store(sampler.monitor("pos"), h5file, "Monitor", true);
-#endif
-    std::ofstream txt(basename + ".txt");
-    txt << sampler << std::endl;
-    txt.close();
-
+    const std::size_t n = tx.size();
     mckl::Vector<double> rx(n);
     mckl::Vector<double> ry(n);
     sampler.monitor("pos").read_record(0, rx.data());
     sampler.monitor("pos").read_record(1, ry.data());
-
-    mckl::Vector<double> tx;
-    mckl::Vector<double> ty;
-    double x = 0;
-    double y = 0;
-    std::ifstream truth("pf_cv.truth");
-    while (truth >> x >> y) {
-        tx.push_back(x);
-        ty.push_back(y);
-    }
     mckl::sub(n, tx.data(), rx.data(), rx.data());
     mckl::sub(n, ty.data(), ry.data(), ry.data());
     mckl::sqr(n, rx.data(), rx.data());
     mckl::sqr(n, ry.data(), ry.data());
     mckl::add(n, rx.data(), ry.data(), rx.data());
     mckl::sqrt(n, rx.data(), rx.data());
-    double error = std::accumulate(rx.begin(), rx.end(), 0.0) / n;
-    double time = watch.seconds();
 
-    std::cout << std::setw(nwid) << std::left << N;
-    std::cout << std::setw(twid) << std::left << smp;
-    std::cout << std::setw(twid + 5) << std::left << res;
-    std::cout << std::setw(twid) << std::left << rc;
-    std::cout << std::setw(twid) << std::left << rs;
-    std::cout << std::setw(twid) << std::right << std::fixed << error;
-    std::cout << std::setw(twid) << std::right << std::fixed << time;
-    std::cout << std::endl;
+    return std::accumulate(rx.begin(), rx.end(), 0.0) / n;
 }
 
 template <typename Backend, mckl::ResampleScheme Scheme,
-    mckl::MatrixLayout Layout>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
-{
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetVector<>>(N, nwid, twid);
-#if MCKL_HAS_TBB
-    pf_cv_run<Backend, Scheme, Layout, mckl::RNGSetTBB<>>(N, nwid, twid);
-#endif
-}
-
-template <typename Backend, mckl::ResampleScheme Scheme>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
-{
-    pf_cv_run<Backend, Scheme, mckl::RowMajor>(N, nwid, twid);
-    pf_cv_run<Backend, Scheme, mckl::ColMajor>(N, nwid, twid);
-}
-
-template <typename Backend>
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
-{
-    pf_cv_run<Backend, mckl::Multinomial>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::Residual>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::ResidualStratified>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::ResidualSystematic>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::Stratified>(N, nwid, twid);
-    pf_cv_run<Backend, mckl::Systematic>(N, nwid, twid);
-}
-
-inline void pf_cv_run(std::size_t N, int nwid, int twid)
-{
-    pf_cv_run<mckl::BackendSEQ>(N, nwid, twid);
-    pf_cv_run<mckl::BackendSTD>(N, nwid, twid);
-#if MCKL_HAS_OMP
-    pf_cv_run<mckl::BackendOMP>(N, nwid, twid);
-#endif
-#if MCKL_HAS_TBB
-    pf_cv_run<mckl::BackendTBB>(N, nwid, twid);
-#endif
-}
-
+    mckl::MatrixLayout Layout, typename RNGSetType>
 inline void pf_cv(std::size_t N)
 {
-    const int nwid = 10;
-    const int twid = 15;
-    const std::size_t lwid = nwid + twid * 6 + 5;
+    using T = PFCV<Layout, RNGSetType>;
+    using init = PFCVInit<Backend, Layout, RNGSetType>;
+    using move = PFCVMove<Backend, Layout, RNGSetType>;
+    using weight = PFCVWeight<Backend, Layout, RNGSetType>;
+    using meval = PFCVMEval<Backend, Layout, RNGSetType>;
 
-    std::cout << std::string(lwid, '=') << std::endl;
-    std::cout << std::setw(nwid) << std::left << "N";
-    std::cout << std::setw(twid) << std::left << "Backend";
-    std::cout << std::setw(twid + 5) << std::left << "ResampleScheme";
-    std::cout << std::setw(twid) << std::left << "MatrixLayout";
-    std::cout << std::setw(twid) << std::left << "rng_set_type";
-    std::cout << std::setw(twid) << std::right << "Error";
-    std::cout << std::setw(twid) << std::right << "Time (s)";
-    std::cout << std::endl;
-    std::cout << std::string(lwid, '-') << std::endl;
-    pf_cv_run(N, nwid, twid);
-    std::cout << std::string(lwid, '-') << std::endl;
+    mckl::Sampler<T> sampler(N);
+    sampler.resample_method(Scheme, 0.5);
+    sampler.eval(init(), mckl::SamplerInit);
+    sampler.eval(move(), mckl::SamplerMove);
+    sampler.eval(weight(), mckl::SamplerInit | mckl::SamplerMove);
+    sampler.monitor("pos", mckl::Monitor<T>(2, meval()));
+    sampler.monitor("pos").name(0) = "pos.x";
+    sampler.monitor("pos").name(1) = "pos.y";
+
+    const std::size_t n = sampler.particle().state().n();
+    const std::string smp(pf_cv_backend_name<Backend>());
+    const std::string res(pf_cv_scheme_name<Scheme>());
+    const std::string rc(pf_cv_layout_name<Layout>());
+    const std::string rs(pf_cv_rng_set_name<RNGSetType>());
+    const std::string base = "pf_cv." + smp + "." + res + "." + rc + "." + rs;
+
+    sampler.initialize();
+#if MCKL_HAS_HDF5
+    std::string h5file = base + ".h5";
+    mckl::hdf5store(h5file);
+    mckl::hdf5store(h5file, "Particle", true);
+    mckl::hdf5store(sampler.particle(), h5file, "Particle/Iter.0", true);
+#endif
+
+    for (std::size_t i = 1; i < n; ++i) {
+        sampler.iterate();
+#if MCKL_HAS_HDF5
+        mckl::hdf5store(sampler.particle(), h5file,
+            "Particle/Iter." + std::to_string(i), true);
+#endif
+    }
+#if MCKL_HAS_HDF5
+    mckl::hdf5store(sampler, h5file, "Sampler", true);
+    mckl::hdf5store(sampler.monitor("pos"), h5file, "Monitor", true);
+#endif
+
+    std::ofstream txt(base + ".txt");
+    txt << sampler << std::endl;
+    txt.close();
+
+    std::ofstream err;
+    err.open(base + ".err.txt");
+    err.precision(16);
+    err << "N\t";
+    err << "Backend\t";
+    err << "ResampleScheme\t";
+    err << "MatrixLayout\t";
+    err << "RNGSetType\t";
+    err << "Error\n";
+    err << N << '\t';
+    err << smp << '\t';
+    err << res << '\t';
+    err << rc << '\t';
+    err << rs << '\t';
+    err << pf_cv_error(sampler) << '\n';
+    err.close();
 }
 
-#endif // MCKL_EXAMPLE_PFCV_HPP
+#endif // MCKL_EXAMPLE_PF_CV_HPP

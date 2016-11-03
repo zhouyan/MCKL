@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        STD
+ Number of statistics:  160
+ ----------------------------------------------
+ 22  ClosePairs NP, t = 3            5.4e-4
+ ----------------------------------------------
+ All other tests were passed
+

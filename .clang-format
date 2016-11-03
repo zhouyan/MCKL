@@ -36,16 +36,22 @@ DisableFormat                                  : false
 ExperimentalAutoDetectBinPacking               : false
 # ForEachMacros :
 IncludeCategories :
-  - Regex:    '^<mckl/.*/internal'
+  - Regex:    '^<mckl/internal/config.*'
     Priority: 1
-  - Regex:    '^<mckl/internal'
+  - Regex:    '^<mckl/.*/internal/common.*'
     Priority: 2
-  - Regex:    '^<mckl/'
+  - Regex:    '^<mckl/.*/internal'
     Priority: 3
-  - Regex:    '^<'
+  - Regex:    '^<mckl/internal/common.*'
     Priority: 4
-  - Regex:    '.\*'
+  - Regex:    '^<mckl/internal'
     Priority: 5
+  - Regex:    '^<mckl/'
+    Priority: 6
+  - Regex:    '^<'
+    Priority: 7
+  - Regex:    '.\*'
+    Priority: 8
 # IncludeIsMainRegex                             :
 IndentCaseLabels                               : true
 IndentWidth                                    : 4

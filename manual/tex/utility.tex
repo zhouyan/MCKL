@@ -38,92 +38,70 @@ programs.
 \section{Aligned memory allocation}
 \label{sec:Aligned memory allocation}
 
-The standard library class \verb|std::allocator| is used by containers to
-allocate memory. It works fine in most cases. However, sometime it is desirable
-to allocate memory aligned by a certain boundary. The library provides the
-class template,
-\begin{Verbatim}
-  template <
-      typename T,
-      size_t Alignment = AlignmentTrait<T>::value,
-      typename Memory = AlignedMemory>
-  class Allocator;
-\end{Verbatim}
-which conforms to the \verb|std::allocator| interface. The address of the
-pointer returned by the \verb|allocate| method will be a multiple of
-\verb|Alignment|. The value of alignment has to be positive, larger than
-\verb|sizeof(void *)|, and a power of two. Violating any of these conditions
-will result in compile-time error. The last template parameter \verb|Memory|
-shall have two static methods,
-\begin{Verbatim}
-  static void *aligned_malloc(size_t n, size_t alignment);
-  static void aligned_free(void *ptr);
-\end{Verbatim}
-The method \verb|aligned_malloc| shall behave similar to \verb|std::malloc|
-with the additional alignment requirement. It shall return a null pointer if it
-fails to allocate memory. In any other case, including zero input size, it
-shall return a reachable non-null pointer. The method \verb|aligned_free| shall
-behave similar to \verb|std::free|. It shall be able to handle a null pointer
-as its input. The library provides three implementations, discussed below. The
-default argument \verb|AlignedMemory| is an alias to one of them by default. It
-can be changed by defining the macro \verb|MCKL_ALIGNED_MEMORY_TYPE|.
+The standard library class |std::allocator| is used by containers to allocate
+memory. It works fine in most cases. However, sometime it is desirable to
+allocate memory aligned by a certain boundary. The library provides the class
+template,
+\begin{verbatim}
+template <
+    typename T,
+    size_t Alignment = AlignmentTrait<T>::value,
+    typename Memory = AlignedMemory>
+class Allocator;
+\end{verbatim}
+which conforms to the |std::allocator| interface. The address of the pointer
+returned by the |allocate| method is a multiple of |Alignment|. The value of
+alignment has to be positive, larger than |sizeof(void *)|, and a power of two.
+Violating any of these conditions results in compile-time error. The last
+template parameter |Memory| shall have two static methods,
+\begin{verbatim}
+static void *aligned_malloc(size_t n, size_t alignment);
+static void aligned_free(void *ptr);
+\end{verbatim}
+The method |aligned_malloc| shall behave similar to |std::malloc| with the
+additional alignment requirement. It shall return a null pointer if it fails to
+allocate memory. It may or may not raise an exception in this situation. In any
+other case, including zero input size, it shall return a reachable non-null
+pointer. The method |aligned_free| shall behave similar to |std::free|. It
+shall be able to handle a null pointer as its input. The library provides three
+implementations, discussed below. The default argument |AlignedMemory| is an
+alias to one of them by default. It can be changed by defining the
+configuration macro |MCKL_ALIGNED_MEMORY_TYPE|.
 
-\paragraph{\texttt{AlignedMemoryTBB}} This class uses the functions
-\verb|scalable_aligned_malloc| and \verb|scalable_aligned_free| from the \tbb
-library.
-This is the default method if \verb|MCKL_USE_TBB_MALLOC| is true.
+The |AlignedMemoryTBB| class uses the functions from the \tbb library. This is
+the default method if |MCKL_USE_TBB_MALLOC| is true. The |AlignedMemorySYS|
+This class uses operating system specific functions. If this class is define,
+it is the default method if |MCKL_USE_TBB_MALLOC| is false. Last, the
+|AlignedMemorySTD| class uses functions in the standard library and pads the
+memory manually when the alignment is insufficient. It is the last resort
+method that the library uses.
 
-\paragraph{\texttt{AlignedMemorySYS}} On \posix platforms, this class uses
-\verb|posix_memalign| and \verb|free|. If the compiler is \msvc, it uses
-\verb|_aligned_malloc| and \verb|_aligned_free|. Otherwise, this class is not
-defined. If this class is define, it is the default method if
-\verb|MCKL_USE_TBB_MALLOC| is false.
-
-\paragraph{\texttt{AlignedMemorySTD}} This class uses \verb|std::malloc| and
-\verb|std::free| and padding the memory manually when the alignment is
-insufficient. It is the last resort method that the library will use.
-
-The default alignment depends on the type \verb|T|. If it is a scalar type,
-then the alignment is \verb|MCKL_ALIGNMENT|, whose default is 32. This
-alignment is sufficient for modern \simd operations, such as \avx. For other
-types, the alignment is the maximum of \verb|alignof(T)| and
-\verb|MCKL_ALIGNMENT_MIN|, whose default is 16.
-
-Two container types are defined for convenience. The first is a drop-in
-replacement for \verb|std::vector|. It is merely a type alias with a different
-default allocator,
-\begin{Verbatim}
-  template <typename T>
-  using Vector = std::vector<T, Allocator<T>>;
-\end{Verbatim}
-Any function template that accepts \verb|std::vector| will also accept this
-class, as long as the template is defined correctly. For example,
-\begin{Verbatim}
-  template <typename T, typename Alloc>
-  void func(std::vector<T, Alloc> &vec);
-\end{Verbatim}
-The second can be used as a drop-in replaced of \verb|std::array| in most
-situations,
-\begin{Verbatim}
-  template <
-      typename T,
-      size_t N,
-      size_t Alignment = AlignmentTrait<T>::value>
-  class alignas(Alignment) Array;
-\end{Verbatim}
-It is a derived class and can be implicitly converted to the standard
-library class. The data is in the base class, and thus there will be no loss of
-contents. Unlike the standard library versions, they will allocate memory with
-bigger alignment for scalar types, on the heap and stack, respectively.
+The default alignment depends on the type |T|. If it is a scalar type, then the
+alignment is |MCKL_ALIGNMENT|, whose default is 32. This alignment is
+sufficient for modern \simd operations, such as \avx. For other types, the
+alignment is |MCKL_ALIGNMENT_MIN|, whose default is 16, unless the natural
+alignment of the type |T|, |alignof(T)|, is larger. A container type is
+defined for convenience, as a drop-in replacement for |std::vector|. It is
+merely a type alias with a different default allocator,
+\begin{verbatim}
+template <typename T>
+using Vector = std::vector<T, Allocator<T>>;
+\end{verbatim}
+Any function template that accepts |std::vector| also accepts this class, as
+long as the template is defined correctly. For example,
+\begin{verbatim}
+template <typename T, typename Alloc>
+void func(std::vector<T, Alloc> &vec);
+\end{verbatim}
 
 \section{Sample covariance}
 \label{sec:Sample covariance}
 
 The library provides the class template
-\begin{Verbatim}
-  template <typename RealType = double>
-  class Covariance;
-\end{Verbatim}
+\begin{verbatim}
+template <typename RealType = double>
+class Covariance;
+\end{verbatim}
 to estimate the sample covariance $\Sigma$, for samples $x\in\Real^p$, $p\ge1$,
 \begin{align*}
   \Sigma_{i,j} &= \frac{\sum_{i=1}^N w_i}
@@ -132,26 +110,17 @@ to estimate the sample covariance $\Sigma$, for samples $x\in\Real^p$, $p\ge1$,
   \bar{x}_i &= \frac{1}{\sum_{i=1}^N w_i}\sum_{k=1}^N w_k x_{k,i}
 \end{align*}
 where $x_{i,j}$ is the $j$\ith component of the $i$\ith sample, and $w_i$ is
-the weight of the $i$\ith sample. At the time of writing, only \verb|float| and
-\verb|double| are supported. The class has the following operator as its
-interface,
-\begin{Verbatim}
-  void operator()(
-      MatrixLayout layout,
-      size_t n,
-      size_t p,
-      const RealType *x,
-      const RealType *w,
-      RealType *mean,
-      RealType *cov,
-      MatrixLayout cov_layout = RowMajor,
-      bool cov_upper = false,
-      bool cov_packed = false)
-\end{Verbatim}
+the weight of the $i$\ith sample. At the time of writing, only |float| and
+|double| are supported. The class has the following operator as its interface,
+\begin{verbatim}
+void operator()(
+    MatrixLayout layout, size_t n, size_t p, const RealType *x, const RealType *w,
+    RealType *mean, RealType *cov, MatrixLayout cov_layout = RowMajor,
+    bool cov_upper = false, bool cov_packed = false)
+\end{verbatim}
 It computes the sample covariance matrix $\Sigma$,
 where $x$ is the $n$ by $p$ matrix of samples, and $w$ is the $n$-vector of
-weights. Below we given detailed description of each parameter,
-
+weights. Below we give description of each parameter,
 \begin{description}
   \item[\texttt{layout}] The storage layout of sample matrix $x$.
   \item[\texttt{n}] The number of samples.
@@ -160,92 +129,88 @@ weights. Below we given detailed description of each parameter,
     computation is done.
   \item[\texttt{w}] The weight vector. If it is a null pointer, then $w_i = 1$
     for $i = 1,\dots,n$.
-  \item[\texttt{mean}] Output storage of the mean. If it is a null pointer,
-    then it is ignored.
+  \item[\texttt{mean}] Output storage of the mean vector. If it is a null
+    pointer, then it is ignored.
   \item[\texttt{cov}] Output storage of the covariance matrix. If it is a null
     pointer, then it is ignored.
   \item[\texttt{cov\_layout}] The storage layout of the covariance matrix.
   \item[\texttt{cov\_upper}] If true, then the upper triangular of the
-    covariance matrix is packed, otherwise the lower triangular is packed.
-    It is ignored if \verb|cov_pack| is false.
+    covariance matrix is packed. Otherwise the lower triangular is packed. It
+    is ignored if |cov_pack| is false.
   \item[\texttt{cov\_packed}] If true, then the covariance matrix is
     packed.
 \end{description}
-
 The last three parameters specify the storage scheme of the covariance matrix.
 See any reference of \blas or \lapack for explanation of the scheme. Below is
 an example of the class in use,
-\begin{Verbatim}
-  using T = StateMatrix<RowMajor, p, double>;
-  Sampler<T> sampler(n);
-  // Configure and iterate the sampler
-  double mean[p];
-  double cov[p * (p + 1) / 2];
-  Covariance eval;
-  auto x = sampler.particle().state().data();
-  auto w = sampler.particle().weight().data();
-  eval(RowMajor, n, p, x, w, mean, cov, RowMajor, false, true);
-\end{Verbatim}
+\begin{verbatim}
+using T = StateMatrix<RowMajor, p, double>;
+Sampler<T> sampler(n);
+// Configure and iterate the sampler
+double mean[p];
+double cov[p * (p + 1) / 2];
+Covariance eval;
+auto x = sampler.particle().state().data();
+auto w = sampler.particle().weight().data();
+eval(RowMajor, n, p, x, w, mean, cov, RowMajor, false, true);
+\end{verbatim}
 One can later compute the Cholesky decomposition using \lapack or other linear
 algebra libraries. Below is an example of using the covariance matrix to
-generate multivariate Normal proposals,
-\begin{Verbatim}
-  double chol[p * (p + 1) / 2];
-  double y[p];
-  LAPACKE_dpptrf(LAPACK_ROW_MAJOR, 'L', p, chol);
-  NormalMVDistribution<double, p> normal_mv(mean, chol);
-  normal_mv(rng, y);
-\end{Verbatim}
+generate multivariate Normal random numbers,
+\begin{verbatim}
+double chol[p * (p + 1) / 2];
+double y[p];
+LAPACKE_dpptrf(LAPACK_ROW_MAJOR, 'L', p, chol);
+NormalMVDistribution<double, p> normal_mv(mean, chol);
+normal_mv(rng, y);
+\end{verbatim}
 
-\section{Store objects in \texorpdfstring{\protect\hdf5}{HDF5} format}
+\section{Store objects in \texorpdfstring{\hdf}{HDF5} format}
 \label{sec:Store objects in HDF5 format}
 
-If the \hdf library is available (\verb|MCKL_HAS_HDF5|), it is possible to
-store \verb|Sampler| objects, etc., in the \hdf format. For example,
-\begin{Verbatim}
-  hdf5store(sampler, "pf.h5", "sampler", false);
-\end{Verbatim}
-creates an \hdf file named \verb|pf.h5| with the sampler stored as a list in
-the group \verb|sampler|. If the last argument is \verb|true|, the data is
-inserted to an existing file. Otherwise a new file is created. In R it can be
-processed as the following,
-\begin{Verbatim}
-  library(rhdf5)
-  pf <- as.data.frame(h5read("pf.h5", "sampler"))
-\end{Verbatim}
-This creates a \verb|data.frame| similar to that shown in
-section~\ref{sub:Implementation (PF)}. The \verb|hdf5store| function is
-overloaded for \verb|StateMatrix|, \verb|Sampler| and \verb|Monitor|. It is
-also overloaded for \verb|Particle| if an overload for \verb|T| is defined.
-They all follow the format as above. In addition, the following creates a new
-empty \hdf file,
-\begin{Verbatim}
-  hdf5store(filename);
-\end{Verbatim}
-and the following creates a new group named \verb|dataname|,
-\begin{Verbatim}
-  hdf5store(filename, dataname, append);
-\end{Verbatim}
+If the \hdf library is available (|MCKL_HAS_HDF5|), it is possible to store
+|Sampler| objects, etc., in the \hdf format. For example,
+\begin{verbatim}
+hdf5store(sampler, "pf.h5", "sampler", false);
+\end{verbatim}
+creates an \hdf file named |pf.h5| with the sampler stored as a list in the
+group |sampler|. If the last argument is |true|, the data is inserted to an
+existing file. Otherwise a new file is created. In R it can be processed as the
+following,
+\begin{verbatim}
+library(rhdf5)
+pf <- as.data.frame(h5read("pf.h5", "sampler"))
+\end{verbatim}
+This creates a |data.frame| similar to that shown in
+section~\ref{sub:Implementation (PF)}. The |hdf5store| function is overloaded
+for |StateMatrix|, |Sampler| and |Monitor|. It is also overloaded for
+|Particle| if an overload for |T| is defined. They all follow the format as
+above. In addition, the following creates a new empty \hdf file,
+\begin{verbatim}
+hdf5store(filename);
+\end{verbatim}
+and the following creates a new group named |dataname|,
+\begin{verbatim}
+hdf5store(filename, dataname, append);
+\end{verbatim}
 
 \section{Stop watch}
 \label{sec:Stop watch}
 
 Performance can only be improved after it is first properly profiled. There are
 advanced profiling programs for this purpose. However, sometime simple timing
-facilities are enough. The library provides a simple class \verb|StopWatch| for
-this purpose. As its name suggests, it works much like a physical stop watch.
-Here is a simple example
-\begin{Verbatim}
-  StopWatch watch;
-  for (int i = 0; i != n; ++i) {
-      // Some computation
-      watch.start();
-      // Computation to be benchmarked;
-      watch.stop();
-      // Some other computation
-  }
-  double t = watch.seconds(); // The time in seconds
-\end{Verbatim}
+facilities are enough. The library provides a simple class |StopWatch| for this
+purpose. As its name suggests, it works much like a physical stop watch. Here
+is a simple example
+\begin{verbatim}
+StopWatch watch;
+for (int i = 0; i != n; ++i) {
+    watch.start(); // Some computation
+    // Computation to be benchmarked;
+    watch.stop();  // Some other computation
+}
+double t = watch.seconds(); // The time in seconds
+\end{verbatim}
 The above example demonstrate that timing can be accumulated between loop
 iterations, function calls, etc. It shall be noted that, the timing is only
-using if the computation between \verb|start| and \verb|stop| is non-trivial.
+useful if the computation between |start| and |stop| is non-trivial.

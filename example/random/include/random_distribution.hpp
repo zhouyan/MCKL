@@ -32,60 +32,143 @@
 #ifndef MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 #define MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP
 
+#ifndef MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION                          \
+    (MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION ||                            \
+        MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION)
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION                                \
+    MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION                               \
+    MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION                                 \
+    MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION                               \
+    MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION 0
+#endif
+
+#ifndef MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION
+#define MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION 0
+#endif
+
 #include <mckl/math/beta.hpp>
 #include <mckl/math/erf.hpp>
 #include <mckl/math/gamma.hpp>
-#include <mckl/random/distribution.hpp>
 #include "random_common.hpp"
 
-#define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(test)               \
-    random_distribution_test_##test<mckl::ArcsineDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::BetaDistribution<RealType>>(        \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::CauchyDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::ChiSquaredDistribution<RealType>>(  \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::ExponentialDistribution<RealType>>( \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<                                          \
-        mckl::ExtremeValueDistribution<RealType>>(                            \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::FisherFDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::GammaDistribution<RealType>>(       \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LaplaceDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LevyDistribution<RealType>>(        \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LogisticDistribution<RealType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::LognormalDistribution<RealType>>(   \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::NormalDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::ParetoDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::RayleighDistribution<RealType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::StableDistribution<RealType>>(      \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::StudentTDistribution<RealType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::U01Distribution<RealType>>(         \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::UniformRealDistribution<RealType>>( \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::WeibullDistribution<RealType>>(     \
-        N, M, nwid, twid, distname);
+#if MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
+#include <mckl/random/cauchy_distribution.hpp>
+#include <mckl/random/levy_distribution.hpp>
+#include <mckl/random/normal_distribution.hpp>
+#endif
 
-#define MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(test)                \
-    random_distribution_test_##test<mckl::GeometricDistribution<IntType>>(    \
-        N, M, nwid, twid, distname);                                          \
-    random_distribution_test_##test<mckl::UniformIntDistribution<IntType>>(   \
-        N, M, nwid, twid, distname);
+#if MCKL_HAS_AESNI
+#include <mckl/random/aes.hpp>
+using MCKLRNGType = mckl::ARS;
+#else
+#include <mckl/random/philox.hpp>
+using MCKLRNGType = mckl::Philox4x32;
+#endif
+
+#if MCKL_HAS_MKL
+#include <mckl/random/mkl.hpp>
+#if MCKL_HAS_AESNI
+using MKLRNGType = mckl::MKL_ARS5;
+#else
+using MKLRNGType = mckl::MKL_PHILOX4X32X10;
+#endif
+#endif
 
 template <typename RNGType>
 class RNG01 : public RNGType
@@ -122,7 +205,7 @@ class RandomDistributionTraitBase
         const RandomDistributionTraitBase<ResultType, ParamNum> &) = default;
     virtual ~RandomDistributionTraitBase() {}
 
-    static const std::size_t param_num = ParamNum;
+    static constexpr bool invariant() { return false; }
 
     virtual std::string distname() const = 0;
 
@@ -238,10 +321,12 @@ class RandomDistributionTraitBase
 
         return ss.str();
     }
-};
+}; // class RandomDistributionTraitBase
 
 template <typename DistType>
 class RandomDistributionTrait;
+
+#if MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
@@ -277,7 +362,11 @@ class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_ARCSINE_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
@@ -323,7 +412,11 @@ class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_BETA_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
@@ -359,7 +452,11 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_CAUCHY_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
@@ -400,7 +497,11 @@ class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_GAMMA_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
@@ -437,7 +538,11 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_CHI_SQUARED_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
@@ -470,7 +575,11 @@ class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_EXPONENTIAL_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
@@ -504,7 +613,11 @@ class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_EXTREME_VALUE_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
@@ -543,7 +656,11 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_FISHER_F_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
@@ -581,7 +698,11 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_LAPLACE_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
@@ -615,7 +736,11 @@ class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_LEVY_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
@@ -649,7 +774,11 @@ class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_LOGISTIC_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
@@ -685,7 +814,11 @@ class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_LOGNORMAL_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
@@ -720,7 +853,11 @@ class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_NORMAL_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
@@ -738,7 +875,7 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
             [&](double p) {
                 return dist.b() /
                     std::exp(
-                           static_cast<RealType>(std::log(1 - p)) / dist.a());
+                        static_cast<RealType>(std::log(1 - p)) / dist.a());
             },
             dist);
     }
@@ -755,7 +892,11 @@ class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_PARETO_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
@@ -789,7 +930,11 @@ class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_RAYLEIGH_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::StableDistribution<RealType>>
@@ -832,7 +977,11 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
@@ -870,17 +1019,23 @@ class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
 
         return chi_trait.params();
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_STUDENT_T_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION
 
 template <typename RealType>
-class RandomDistributionTrait<mckl::U01Distribution<RealType>>
+class RandomDistributionTrait<mckl::U01CanonicalDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
 {
     public:
-    using dist_type = mckl::U01Distribution<RealType>;
+    using dist_type = mckl::U01CanonicalDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
-    std::string distname() const { return "U01"; }
+    static constexpr bool invariant() { return true; }
+
+    std::string distname() const { return "U01Canonical"; }
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
@@ -897,7 +1052,143 @@ class RandomDistributionTrait<mckl::U01Distribution<RealType>>
     {
         return mckl::Vector<std::array<RealType, 0>>(1);
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01_CANONICAL_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01CCDistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01CCDistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
+
+    std::string distname() const { return "U01CC"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01CC_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01CODistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01CODistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
+
+    std::string distname() const { return "U01CO"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01CO_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01OCDistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01OCDistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
+
+    std::string distname() const { return "U01OC"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01OC_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION
+
+template <typename RealType>
+class RandomDistributionTrait<mckl::U01OODistribution<RealType>>
+    : public RandomDistributionTraitBase<RealType, 0>
+{
+    public:
+    using dist_type = mckl::U01OODistribution<RealType>;
+    using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
+
+    std::string distname() const { return "U01OO"; }
+
+    mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
+    {
+        return this->partition_quantile(
+            n, [&](double p) { return static_cast<RealType>(p); }, dist);
+    }
+
+    mckl::Vector<double> probability(std::size_t n, const dist_type &) const
+    {
+        return this->probability_quantile(n);
+    }
+
+    mckl::Vector<std::array<RealType, 0>> params() const
+    {
+        return mckl::Vector<std::array<RealType, 0>>(1);
+    }
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_U01OO_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
@@ -906,6 +1197,8 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     public:
     using dist_type = mckl::UniformRealDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
+
+    static constexpr bool invariant() { return true; }
 
     std::string distname() const { return "UniformReal"; }
 
@@ -927,11 +1220,15 @@ class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     mckl::Vector<std::array<RealType, 2>> params() const
     {
         mckl::Vector<std::array<RealType, 2>> params;
-        this->add_param(params, -0.5, 0.5);
+        this->add_param(params, -1.3, 1.3);
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_UNIFORM_REAL_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION
 
 template <typename RealType>
 class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
@@ -948,8 +1245,8 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
         return this->partition_quantile(n,
             [&](double p) {
                 return dist.b() *
-                    std::pow(-static_cast<RealType>(std::log(1 - p)),
-                           1 / dist.a());
+                    std::pow(
+                        -static_cast<RealType>(std::log(1 - p)), 1 / dist.a());
             },
             dist);
     }
@@ -966,7 +1263,11 @@ class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_WEIBULL_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION
 
 template <typename IntType>
 class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
@@ -1015,7 +1316,11 @@ class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
 
         return probability;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_GEOMETRIC_DISTRIBUTION
+
+#if MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION
 
 template <typename IntType>
 class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
@@ -1068,7 +1373,9 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
 
         return params;
     }
-};
+}; // class RandomDistributionTrait
+
+#endif // MCKL_EXAMPLE_RANDOM_UNIFORM_INT_DISTRIBUTION
 
 template <typename DistType, typename ParamType>
 inline DistType random_distribution_init(const std::array<ParamType, 0> &)
@@ -1202,9 +1509,9 @@ inline void random_distribution_summary_pval(
     const mckl::Vector<std::string> &names,
     const std::array<mckl::Vector<double>, 6> &pval, int nwid, int twid)
 {
-    std::size_t D = names.size();
-    std::size_t R = pval[0].size() / D;
-    std::size_t lwid =
+    const std::size_t D = names.size();
+    const std::size_t R = pval[0].size() / D;
+    const std::size_t lwid =
         static_cast<std::size_t>(nwid + twid * (3 + MCKL_HAS_MKL));
 
     const double *p0 = pval[0].data();
@@ -1270,7 +1577,7 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     RandomDistributionTrait<MCKLDistType> trait;
     names.push_back(trait.name(param));
 
-    mckl::RNG rng;
+    MCKLRNGType rng;
     MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));
     std_type dist_std(random_distribution_init<std_type>(param));
 
@@ -1302,28 +1609,21 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     random_distribution_pval(chi2, ksad, pval);
 
 #if MCKL_HAS_MKL
-    mckl::MKL_SFMT19937 random_mkl;
+    MKLRNGType random_mkl;
     for (std::size_t i = 0; i != M; ++i) {
         mckl::rand(random_mkl, dist_mckl, N, r.data());
         chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);
         ksad[i] = random_distribution_ksad(N, r.data(), dist_mckl);
     }
     random_distribution_pval(chi2, ksad, pval);
-#endif // MCKL_HAS_MKL
+#endif
 }
 
 template <typename MCKLDistType>
-inline void random_distribution_test_pval(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
+inline void random_distribution_test_pval(
+    std::size_t N, std::size_t M, int nwid, int twid)
 {
     RandomDistributionTrait<MCKLDistType> trait;
-    if (!distname.empty()) {
-        auto iter =
-            std::find(distname.begin(), distname.end(), trait.distname());
-        if (iter == distname.end())
-            return;
-    }
-
     mckl::Vector<std::string> names;
     std::array<mckl::Vector<double>, 6> pval;
     auto params = trait.params();
@@ -1332,37 +1632,387 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     random_distribution_summary_pval(names, pval, nwid, twid);
 }
 
-template <typename RealType>
-inline void random_distribution_pval_real(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
+template <template <typename> class DistributionType>
+inline void random_distribution_pval(
+    std::size_t N, std::size_t M, int nwid, int twid, std::true_type)
 {
-    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_REAL(pval);
+    random_distribution_test_pval<DistributionType<float>>(N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<double>>(N, M, nwid, twid);
 }
 
-template <typename IntType>
-inline void random_distribution_pval_int(std::size_t N, std::size_t M,
-    int nwid, int twid, const mckl::Vector<std::string> &distname)
+template <template <typename> class DistributionType>
+inline void random_distribution_pval(
+    std::size_t N, std::size_t M, int nwid, int twid, std::false_type)
 {
-    MCKL_DEFINE_EXAMPLE_RANDOM_DISTRIBUTION_TEST_INT(pval);
+    random_distribution_test_pval<DistributionType<std::int32_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<std::uint32_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<std::int64_t>>(
+        N, M, nwid, twid);
+    random_distribution_test_pval<DistributionType<std::uint64_t>>(
+        N, M, nwid, twid);
 }
 
-inline void random_distribution(
-    std::size_t N, std::size_t M, int argc, char **argv)
+template <template <typename> class DistributionType, typename ResultType>
+inline void random_distribution_pval(std::size_t N, std::size_t M)
 {
-    mckl::Vector<std::string> distname;
-    for (int i = 0; i != argc; ++i)
-        distname.push_back(argv[i]);
-
     N = std::max(N, static_cast<std::size_t>(10000));
     M = std::max(M, static_cast<std::size_t>(10));
 
-    int nwid = 30;
-    int twid = 12;
+    const int nwid = 30;
+    const int twid = 12;
 
-    random_distribution_pval_real<float>(N, M, nwid, twid, distname);
-    random_distribution_pval_real<double>(N, M, nwid, twid, distname);
-    random_distribution_pval_int<int>(N, M, nwid, twid, distname);
-    random_distribution_pval_int<unsigned>(N, M, nwid, twid, distname);
+    random_distribution_pval<DistributionType>(
+        N, M, nwid, twid, std::is_floating_point<ResultType>());
+}
+
+struct RandomDistributionPerf {
+    std::string name;
+    bool pass;
+    double e1;
+    double e2;
+    double c1;
+    double c2;
+    double c3;
+    double c4;
+}; // struct RandomDistributionPerf
+
+template <typename T>
+inline void random_distribution_perf_e(
+    std::size_t, T *, T *, T &, T &, std::false_type)
+{
+    std::make_pair(mckl::const_zero<T>(), mckl::const_zero<T>());
+}
+
+template <typename T>
+inline void random_distribution_perf_e(
+    std::size_t n, T *r1, T *r2, T &e1, T &e2, std::true_type)
+{
+    mckl::sub(n, r1, r2, r1);
+    mckl::div(n, r1, r2, r2);
+    T f1 = 0;
+    T f2 = 0;
+    for (std::size_t i = 0; i != n; ++i)
+        f1 = std::max(f1, r1[i]);
+    for (std::size_t i = 0; i != n; ++i)
+        f2 = std::max(f2, r2[i]);
+    f1 /= std::numeric_limits<T>::epsilon();
+    f2 /= std::numeric_limits<T>::epsilon();
+    e1 = std::max(e1, f1);
+    e2 = std::max(e2, f2);
+}
+
+template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
+inline void random_distribution_perf_d(std::size_t N, std::size_t M,
+    const std::array<ParamType, ParamNum> &param,
+    mckl::Vector<RandomDistributionPerf> &perf)
+{
+    using result_type = typename MCKLDistType::result_type;
+
+    RNG01<MCKLRNGType> rng01;
+    MCKLRNGType rng;
+    MCKLRNGType rng1;
+    MCKLRNGType rng2;
+
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    MCKLDistType dist(random_distribution_init<MCKLDistType>(param));
+    bool pass = true;
+
+    result_type e1 = 0;
+    result_type e2 = 0;
+    mckl::Vector<result_type> r(N);
+    mckl::Vector<result_type> r1(N);
+    mckl::Vector<result_type> r2(N);
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = rsize(rng);
+        r.resize(K);
+        r1.resize(K);
+        r2.resize(K);
+
+        mckl::rand(rng01, dist, K, r.data());
+        for (std::size_t j = 0; j != K; ++j) {
+            pass = pass && std::isfinite(r[j]);
+            pass = pass && std::isfinite(dist(rng01));
+        }
+
+        constexpr bool invariant =
+            RandomDistributionTrait<MCKLDistType>::invariant();
+        if (invariant) {
+            for (std::size_t j = 0; j != K; ++j)
+                r1[j] = dist(rng1);
+            mckl::rand(rng2, dist, K, r2.data());
+            pass = pass && r1 == r2;
+            random_distribution_perf_e(K, r1.data(), r2.data(), e1, e2,
+                std::integral_constant<bool, invariant>());
+        }
+
+        std::stringstream ss1;
+        ss1.precision(20);
+        ss1 << dist;
+        for (std::size_t j = 0; j != K; ++j)
+            r1[j] = dist(rng1);
+        ss1 >> dist;
+        for (std::size_t j = 0; j != K; ++j)
+            r2[j] = dist(rng2);
+        pass = pass && r1 == r2;
+
+        std::stringstream ssb;
+        ssb << dist;
+        mckl::rand(rng1, dist, K, r1.data());
+        ssb >> dist;
+        mckl::rand(rng2, dist, K, r2.data());
+        pass = pass && r1 == r2;
+    }
+
+    RandomDistributionPerf result;
+    result.pass = pass;
+    result.e1 = static_cast<double>(e1);
+    result.e2 = static_cast<double>(e2);
+    perf.push_back(result);
+}
+
+template <typename MCKLDistType>
+inline void random_distribution_perf_d(
+    std::size_t N, std::size_t M, mckl::Vector<RandomDistributionPerf> &perf)
+{
+    RandomDistributionTrait<MCKLDistType> trait;
+    auto params = trait.params();
+    for (const auto &param : params)
+        random_distribution_perf_d<MCKLDistType>(N, M, param, perf);
+}
+
+template <template <typename> class DistributionType>
+inline void random_distribution_perf_d(std::size_t N, std::size_t M,
+    mckl::Vector<RandomDistributionPerf> &perf, std::true_type)
+{
+    random_distribution_perf_d<DistributionType<float>>(N, M, perf);
+    random_distribution_perf_d<DistributionType<double>>(N, M, perf);
+}
+
+template <template <typename> class DistributionType>
+inline void random_distribution_perf_d(std::size_t N, std::size_t M,
+    mckl::Vector<RandomDistributionPerf> &perf, std::false_type)
+{
+    random_distribution_perf_d<DistributionType<std::int32_t>>(N, M, perf);
+    random_distribution_perf_d<DistributionType<std::uint32_t>>(N, M, perf);
+    random_distribution_perf_d<DistributionType<std::int64_t>>(N, M, perf);
+    random_distribution_perf_d<DistributionType<std::uint64_t>>(N, M, perf);
+}
+
+template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
+inline void random_distribution_perf_p(std::size_t N, std::size_t M,
+    const std::array<ParamType, ParamNum> &param,
+    mckl::Vector<RandomDistributionPerf> &perf)
+{
+    using result_type = typename MCKLDistType::result_type;
+    using std_type = typename RandomDistributionTrait<MCKLDistType>::std_type;
+
+    MCKLRNGType rng;
+#if MCKL_HAS_MKL
+    MKLRNGType rng_mkl;
+#endif
+
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));
+    std_type dist_std(random_distribution_init<std_type>(param));
+    bool pass = true;
+
+    mckl::Vector<result_type> r1(N);
+    mckl::Vector<result_type> r2(N);
+    mckl::Vector<result_type> r3(N);
+#if MCKL_HAS_MKL
+    mckl::Vector<result_type> r4(N);
+#endif
+
+    bool has_cycles = mckl::StopWatch::has_cycles();
+
+    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c3 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+#if MCKL_HAS_MKL
+    double c4 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+#endif
+    for (std::size_t k = 0; k != 10; ++k) {
+        std::size_t num = 0;
+        mckl::StopWatch watch1;
+        mckl::StopWatch watch2;
+        mckl::StopWatch watch3;
+#if MCKL_HAS_MKL
+        mckl::StopWatch watch4;
+#endif
+        for (std::size_t i = 0; i != M; ++i) {
+            std::size_t K = rsize(rng);
+            num += K;
+            r1.resize(K);
+            r2.resize(K);
+            r3.resize(K);
+#if MCKL_HAS_MKL
+            r4.resize(K);
+#endif
+
+            watch1.start();
+            for (std::size_t j = 0; j != K; ++j)
+                r1[j] = mckl::rand(rng, dist_std);
+            watch1.stop();
+
+            watch2.start();
+            for (std::size_t j = 0; j != K; ++j)
+                r2[j] = mckl::rand(rng, dist_mckl);
+            watch2.stop();
+
+            watch3.start();
+            mckl::rand(rng, dist_mckl, K, r3.data());
+            watch3.stop();
+
+#if MCKL_HAS_MKL
+            watch4.start();
+            mckl::rand(rng_mkl, dist_mckl, K, r4.data());
+            watch4.stop();
+#endif
+
+            pass = pass && r1 != r2;
+            pass = pass && r1 != r3;
+#if MCKL_HAS_MKL
+            pass = pass && r1 != r4;
+#endif
+        }
+        if (has_cycles) {
+            c1 = std::min(c1, 1.0 * watch1.cycles() / num);
+            c2 = std::min(c2, 1.0 * watch2.cycles() / num);
+            c3 = std::min(c3, 1.0 * watch3.cycles() / num);
+#if MCKL_HAS_MKL
+            c4 = std::min(c4, 1.0 * watch4.cycles() / num);
+#endif
+        } else {
+            c1 = std::max(c1, num / watch1.seconds() * 1e-6);
+            c2 = std::max(c2, num / watch2.seconds() * 1e-6);
+            c3 = std::max(c3, num / watch3.seconds() * 1e-6);
+#if MCKL_HAS_MKL
+            c4 = std::max(c4, num / watch4.seconds() * 1e-6);
+#endif
+        }
+    }
+
+    RandomDistributionTrait<MCKLDistType> trait;
+    RandomDistributionPerf result;
+    result.name = trait.name(param);
+    result.pass = pass;
+    result.c1 = c1;
+    result.c2 = c2;
+    result.c3 = c3;
+#if MCKL_HAS_MKL
+    result.c4 = c4;
+#endif
+
+    perf.push_back(result);
+}
+
+template <typename MCKLDistType>
+inline void random_distribution_perf_p(
+    std::size_t N, std::size_t M, mckl::Vector<RandomDistributionPerf> &perf)
+{
+    RandomDistributionTrait<MCKLDistType> trait;
+    auto params = trait.params();
+    for (const auto &param : params)
+        random_distribution_perf_p<MCKLDistType>(N, M, param, perf);
+}
+
+template <template <typename> class DistributionType>
+inline void random_distribution_perf_p(std::size_t N, std::size_t M,
+    mckl::Vector<RandomDistributionPerf> &perf, std::true_type)
+{
+    random_distribution_perf_p<DistributionType<float>>(N, M, perf);
+    random_distribution_perf_p<DistributionType<double>>(N, M, perf);
+}
+
+template <template <typename> class DistributionType>
+inline void random_distribution_perf_p(std::size_t N, std::size_t M,
+    mckl::Vector<RandomDistributionPerf> &perf, std::false_type)
+{
+    random_distribution_perf_p<DistributionType<std::int32_t>>(N, M, perf);
+    random_distribution_perf_p<DistributionType<std::uint32_t>>(N, M, perf);
+    random_distribution_perf_p<DistributionType<std::int64_t>>(N, M, perf);
+    random_distribution_perf_p<DistributionType<std::uint64_t>>(N, M, perf);
+}
+
+template <template <typename> class DistributionType, typename ResultType>
+inline void random_distribution_perf(std::size_t N, std::size_t M)
+{
+    mckl::Vector<RandomDistributionPerf> perf_d;
+    random_distribution_perf_d<DistributionType>(
+        N, M, perf_d, std::is_floating_point<ResultType>());
+
+    mckl::Vector<RandomDistributionPerf> perf_p;
+    random_distribution_perf_p<DistributionType>(
+        N, M, perf_p, std::is_floating_point<ResultType>());
+
+    const int nwid = 30;
+    const int twid = 12;
+#if MCKL_HAS_MKL
+    const std::size_t lwid = nwid + twid * 4 + 25;
+#else
+    const std::size_t lwid = nwid + twid * 3 + 25;
+#endif
+
+    std::cout << std::fixed << std::setprecision(2);
+
+    std::cout << std::string(lwid, '=') << std::endl;
+
+    if (mckl::StopWatch::has_cycles())
+        std::cout << std::setw(nwid) << std::left << "Distribution (cpE)";
+    else
+        std::cout << std::setw(nwid) << std::left << "Distribution (ME/s)";
+    std::cout << std::setw(twid) << std::right << "STD";
+    std::cout << std::setw(twid) << std::right << "MCKL";
+    std::cout << std::setw(twid) << std::right << "Batch";
+#if MCKL_HAS_MKL
+    std::cout << std::setw(twid) << std::right << "MKL";
+#endif
+    std::cout << std::setw(10) << std::right << "vMath";
+    std::cout << std::setw(15) << std::right << "Deterministics";
+    std::cout << std::endl;
+
+    std::cout << std::string(lwid, '-') << std::endl;
+
+#if MCKL_USE_MKL_VML
+    std::string vmath = "VML";
+#else
+    std::string vmath = "C++";
+#endif
+
+    for (std::size_t i = 0; i != perf_p.size(); ++i) {
+        std::cout << std::setw(nwid) << std::left << perf_p[i].name;
+        std::cout << std::setw(twid) << std::right << perf_p[i].c1;
+        std::cout << std::setw(twid) << std::right << perf_p[i].c2;
+        std::cout << std::setw(twid) << std::right << perf_p[i].c3;
+#if MCKL_HAS_MKL
+        std::cout << std::setw(twid) << std::right << perf_p[i].c4;
+#endif
+        std::cout << std::setw(10) << std::right << vmath;
+
+        std::stringstream ss;
+        ss << "(";
+        ss << std::min(perf_d[i].e1, perf_d[i].e2);
+        ss << ")";
+
+        std::string pass;
+        pass += ss.str();
+        pass += perf_d[i].pass ? "-" : "*";
+        pass += perf_p[i].pass ? "-" : "*";
+        pass += random_pass(perf_d[i].pass && perf_p[i].pass);
+        std::cout << std::setw(15) << std::right << pass;
+        std::cout << std::endl;
+    }
+
+    std::cout << std::string(lwid, '-') << std::endl;
+}
+
+template <template <typename> class DistributionType, typename ResultType>
+inline void random_distribution(std::size_t N, std::size_t M)
+{
+    random_distribution_pval<DistributionType, ResultType>(N, M);
+    random_distribution_perf<DistributionType, ResultType>(N, M);
 }
 
 #endif // MCKL_EXAMPLE_RANDOM_DISTRIBUTION_HPP

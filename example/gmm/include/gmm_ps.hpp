@@ -44,7 +44,6 @@ inline void gmm_ps_run(
     else
         alpha_setter = GMMAlphaPrior(n, power);
 
-    mckl::Seed::instance().set(101);
     mckl::Sampler<GMM> sampler(N);
     sampler.resample_method(mckl::Stratified, 0.5);
     sampler.particle().state().comp_num(c);

@@ -1,0 +1,13 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  8
+ ----------------------------------------------
+ 32  CouponCollector, r = 20        2.3e-13
+ 32  CouponCollector, r = 20        5.5e-13
+ 49  MaxOft, t = 32                   eps
+ 49  MaxOft AD, t = 32               6.9e-6
+ 49  MaxOft, t = 32                   eps
+ 49  MaxOft AD, t = 32               8.9e-6
+ ----------------------------------------------
+ All other tests were passed
+

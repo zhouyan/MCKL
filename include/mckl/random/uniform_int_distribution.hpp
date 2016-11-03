@@ -45,7 +45,7 @@ template <typename IntType>
 inline bool uniform_int_distribution_use_double_big(
     IntType a, IntType b, std::true_type)
 {
-    static constexpr IntType imax = const_one<IntType>() << 32;
+    constexpr IntType imax = const_one<IntType>() << 32;
 
     return a > -imax && b < imax;
 }
@@ -54,7 +54,7 @@ template <typename IntType>
 inline bool uniform_int_distribution_use_double_big(
     IntType, IntType b, std::false_type)
 {
-    static constexpr IntType imax = const_one<IntType>() << 32;
+    constexpr IntType imax = const_one<IntType>() << 32;
 
     return b < imax;
 }
@@ -92,9 +92,9 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void uniform_int_distribution_impl(RNGType &rng, std::size_t n,
     IntType *r, IntType a, IntType b, std::true_type)
 {
+    alignas(32) std::array<double, K> s;
     double ra = static_cast<double>(a);
     double rb = static_cast<double>(b);
-    Array<double, K> s;
     double *const u = s.data();
     u01_co_distribution(rng, n, u);
     fma(n, u, rb - ra + const_one<double>(), ra, u);
@@ -115,18 +115,8 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void uniform_int_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, IntType a, IntType b)
 {
-    using UIntType = typename std::make_unsigned<IntType>::type;
-
-    static constexpr IntType imin = std::numeric_limits<IntType>::min();
-    static constexpr IntType imax = std::numeric_limits<IntType>::max();
-
     if (a == b) {
         std::fill_n(r, n, a);
-        return;
-    }
-
-    if (a == imin && b == imax) {
-        uniform_bits_distribution(rng, n, reinterpret_cast<UIntType *>(r));
         return;
     }
 
@@ -135,10 +125,10 @@ inline void uniform_int_distribution_impl(
         uniform_int_distribution_impl<K>(rng, n, r, a, b, std::false_type());
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_2(
-    UniformInt, uniform_int, IntType, IntType, a, IntType, b)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
+    UniformInt, uniform_int, IntType, IntType, a, IntType, b)
 
 /// \brief Uniform integer distribution
 /// \ingroup Distribution
@@ -164,10 +154,8 @@ class UniformIntDistribution
     {
         using UIntType = typename std::make_unsigned<result_type>::type;
 
-        static constexpr result_type imin =
-            std::numeric_limits<result_type>::min();
-        static constexpr result_type imax =
-            std::numeric_limits<result_type>::max();
+        constexpr result_type imin = std::numeric_limits<result_type>::min();
+        constexpr result_type imax = std::numeric_limits<result_type>::max();
 
         if (param.a() == param.b())
             return param.a();

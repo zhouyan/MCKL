@@ -116,9 +116,9 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
+    alignas(32) std::array<RealType, K * 3> s;
     const RealType d = constant.d();
     const RealType c = constant.c();
-    Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const x = s.data() + n * 2;
@@ -152,9 +152,9 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
+    alignas(32) std::array<RealType, K * 3> s;
     const RealType d = constant.d();
     const RealType c = constant.c();
-    Array<RealType, K * 3> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const x = s.data() + n * 2;
@@ -182,9 +182,9 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta,
     const GammaDistributionConstant<RealType> &constant)
 {
+    alignas(32) std::array<RealType, K * 5> s;
     const RealType d = constant.d();
     const RealType c = constant.c();
-    Array<RealType, K * 5> s;
     RealType *const u = s.data();
     RealType *const e = s.data() + n;
     RealType *const v = s.data() + n * 2;
@@ -259,22 +259,24 @@ inline std::size_t gamma_distribution_impl(RNGType &rng, std::size_t n,
     return 0;
 }
 
+} // namespace mckl::internal
+
 template <typename RealType, typename RNGType>
 inline void gamma_distribution(
     RNGType &rng, std::size_t n, RealType *r, RealType alpha, RealType beta)
 {
     const std::size_t k = BufferSize<RealType>::value;
-    const GammaDistributionConstant<RealType> constant(alpha, beta);
+    const internal::GammaDistributionConstant<RealType> constant(alpha, beta);
     while (n > k) {
-        std::size_t m =
-            gamma_distribution_impl<k>(rng, k, r, alpha, beta, constant);
+        std::size_t m = internal::gamma_distribution_impl<k>(
+            rng, k, r, alpha, beta, constant);
         if (m == 0)
             break;
         n -= m;
         r += m;
     }
     std::size_t m =
-        gamma_distribution_impl<k>(rng, n, r, alpha, beta, constant);
+        internal::gamma_distribution_impl<k>(rng, n, r, alpha, beta, constant);
     n -= m;
     r += m;
     if (n > 0) {
@@ -290,8 +292,6 @@ inline void gamma_distribution(RNGType &rng, std::size_t n, RealType *r,
 {
     gamma_distribution(rng, n, r, param.alpha(), param.beta());
 }
-
-} // namespace internal
 
 /// \brief Gamma distribution
 /// \ingroup Distribution

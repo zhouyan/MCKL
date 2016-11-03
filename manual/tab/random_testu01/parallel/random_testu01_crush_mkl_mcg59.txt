@@ -1,0 +1,110 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           5.8e-26
+  8  CollisionOver, t = 8             eps
+ 10  CollisionOver, t = 20          1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7        8.4e-13
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 24  SimpPoker, d = 16                eps
+ 28  CouponCollector, d = 4           eps
+ 30  CouponCollector, d = 16         1.0e-6
+ 32  Gap, r = 27                     8.9e-5
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7         9.6e-7
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 28  CouponCollector, d = 4          1.5e-5
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7         7.0e-4
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 18  ClosePairs mNP1, t = 2          6.9e-4
+ 28  CouponCollector, d = 4           eps
+ 30  CouponCollector, d = 16         3.1e-6
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 28  CouponCollector, d = 4          1.0e-6
+ 32  Gap, r = 27                     2.2e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7         1.3e-5
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 28  CouponCollector, d = 4          6.0e-4
+ 32  Gap, r = 27                     2.5e-5
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+  6  CollisionOver, t = 4           1 - eps1
+  8  CollisionOver, t = 8           1 - eps1
+ 10  CollisionOver, t = 20          1 -  1.2e-5
+ 11  BirthdaySpacings, t = 2          eps
+ 12  BirthdaySpacings, t = 3          eps
+ 13  BirthdaySpacings, t = 4          eps
+ 14  BirthdaySpacings, t = 7        3.8e-10
+ 15  BirthdaySpacings, t = 7          eps
+ 16  BirthdaySpacings, t = 8          eps
+ 17  BirthdaySpacings, t = 8          eps
+ 28  CouponCollector, d = 4         1.3e-13
+ ----------------------------------------------
+ All other tests were passed
+

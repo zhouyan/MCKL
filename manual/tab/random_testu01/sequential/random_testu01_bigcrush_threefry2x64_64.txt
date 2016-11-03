@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        U01OC
+ Number of statistics:  160
+ ----------------------------------------------
+ 70  MatrixRank, L=5000              1.7e-4
+ ----------------------------------------------
+ All other tests were passed
+

@@ -37,7 +37,7 @@
 #include <mckl/random/seed.hpp>
 
 #if MCKL_HAS_TBB
-#include <tbb/combinable.h>
+#include <tbb/enumerable_thread_specific.h>
 #endif
 
 /// \brief Default RNG set type
@@ -64,13 +64,13 @@ class RNGSetScalar
     using rng_type = RNGType;
     using size_type = std::size_t;
 
-    explicit RNGSetScalar(size_type N = 0) : size_(N) { seed(); }
+    explicit RNGSetScalar(size_type = 0) { reset(); }
 
-    size_type size() const { return size_; }
+    size_type size() const { return 1; }
 
     void resize(std::size_t) {}
 
-    void seed() { Seed::instance()(rng_); }
+    void reset() { rng_.seed(Seed<rng_type>::instance().get()); }
 
     rng_type &operator[](size_type) { return rng_; }
 
@@ -81,14 +81,14 @@ class RNGSetScalar
 
 /// \brief Vector RNG set
 /// \ingroup Random
-template <typename RNGType = RNGMini>
+template <typename RNGType = RNG>
 class RNGSetVector
 {
     public:
     using rng_type = RNGType;
     using size_type = typename Vector<rng_type>::size_type;
 
-    explicit RNGSetVector(size_type N = 0) : rng_(N, rng_type()) { seed(); }
+    explicit RNGSetVector(size_type N = 0) : rng_(N, rng_type()) { reset(); }
 
     size_type size() const { return rng_.size(); }
 
@@ -102,10 +102,15 @@ class RNGSetVector
 
         size_type m = rng_.size();
         rng_.resize(n);
-        Seed::instance()(n - m, rng_.begin() + m);
+        for (std::size_t i = m; i != n; ++i)
+            rng_[i].seed(Seed<rng_type>::instance().get());
     }
 
-    void seed() { Seed::instance()(rng_.size(), rng_.begin()); }
+    void reset()
+    {
+        for (auto &rng : rng_)
+            rng.seed(Seed<rng_type>::instance().get());
+    }
 
     rng_type &operator[](size_type id) { return rng_[id % size()]; }
 
@@ -115,45 +120,55 @@ class RNGSetVector
 
 #if MCKL_HAS_TBB
 
-/// \brief Thread-local storage RNG set using tbb::combinable
+/// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
 /// \ingroup Random
-template <typename RNGType = RNG>
-class RNGSetTBB
+template <typename RNGType = RNG,
+    typename Alloc = ::tbb::cache_aligned_allocator<RNGType>,
+    ::tbb::ets_key_usage_type ETSKeyType = ::tbb::ets_no_key>
+class RNGSetTBBEnumerable
 {
     public:
     using rng_type = RNGType;
     using size_type = std::size_t;
 
-    explicit RNGSetTBB(size_type N = 0)
-        : size_(N), rng_([]() {
-            rng_type rng;
-            Seed::instance()(rng);
-            return rng;
-        })
+    explicit RNGSetTBBEnumerable(size_type = 0)
+        : rng_([]() { return rng_type(Seed<rng_type>::instance().get()); })
     {
-        seed();
+        reset();
     }
 
-    size_type size() const { return size_; }
+    size_type size() const { return rng_.size(); }
 
     void resize(std::size_t) {}
 
-    void seed() { rng_.clear(); }
+    void reset() { rng_.clear(); }
 
     rng_type &operator[](size_type) { return rng_.local(); }
 
     private:
     std::size_t size_;
-    ::tbb::combinable<rng_type> rng_;
-}; // class RNGSetTBB
+    ::tbb::enumerable_thread_specific<rng_type, Alloc, ETSKeyType> rng_;
+}; // class RNGSetTBBEnumerable
+
+/// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
+/// without native TLS keys
+/// \ingroup Random
+template <typename RNGType = RNG>
+using RNGSetTBB = RNGSetTBBEnumerable<RNGType,
+    ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_no_key>;
+
+/// \brief Thread-local storage RNG set using tbb::enumerable_thread_specific
+/// with native TLS keys
+/// \ingroup Random
+template <typename RNGType = RNG>
+using RNGSetTBBKPI = RNGSetTBBEnumerable<RNGType,
+    ::tbb::cache_aligned_allocator<RNGType>, ::tbb::ets_key_per_instance>;
 
 #endif // MCKL_HAS_TBB
 
 /// \brief Default RNG set
 /// \ingroup Random
-template <typename RNGType = typename std::conditional<
-              std::is_same<MCKL_RNG_SET_TYPE<RNG>, RNGSetVector<RNG>>::value,
-              RNGMini, RNG>::type>
+template <typename RNGType = typename MCKL_RNG_SET_TYPE<>::rng_type>
 using RNGSet = MCKL_RNG_SET_TYPE<RNGType>;
 
 /// \brief Particle::rng_set_type trait

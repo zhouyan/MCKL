@@ -33,26 +33,18 @@
 #define MCKL_RANDOM_PHILOX_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/philox_constants.hpp>
+#include <mckl/random/internal/philox_generic.hpp>
 #include <mckl/random/counter.hpp>
-#include <mckl/random/threefry.hpp>
+#include <mckl/random/increment.hpp>
 
-#ifdef MCKL_MSVC
-#include <intrin.h>
+#if MCKL_HAS_SSE2
+#include <mckl/random/internal/philox_sse2_32.hpp>
 #endif
 
-#define MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(W, K, val)                    \
-    template <typename T>                                                     \
-    class PhiloxWeylConstant<T, K, W>                                         \
-        : public std::integral_constant<T, UINT##W##_C(val)>                  \
-    {                                                                         \
-    }; // PhiloxMulConstant
-
-#define MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(W, K, I, val)                  \
-    template <typename T>                                                     \
-    class PhiloxMulConstant<T, K, I, W>                                       \
-        : public std::integral_constant<T, UINT##W##_C(val)>                  \
-    {                                                                         \
-    }; // PhiloxMulConstant
+#if MCKL_HAS_AVX2
+#include <mckl/random/internal/philox_avx2_32.hpp>
+#endif
 
 /// \brief PhiloxGenerator default rounds
 /// \ingroup Config
@@ -60,11 +52,52 @@
 #define MCKL_PHILOX_ROUNDS 10
 #endif
 
-/// \brief PhiloxGenerator default vector length
-/// \ingroup Config
-#ifndef MCKL_PHILOX_VECTOR_LENGTH
-#define MCKL_PHILOX_VECTOR_LENGTH 4
-#endif
+#define MCKL_DEFINE_RANDOM_PHILOX_U01(lr, bits)                               \
+    template <typename RealType>                                              \
+    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *r) const  \
+    {                                                                         \
+        internal::PhiloxGeneratorImpl<T, K, Rounds,                           \
+            Constants>::u01_##lr##_u##bits(ctr, key_, n, r);                  \
+    }
+
+#define MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(                           \
+    lr, rbits, tbits, kmax, rmax, ftype)                                      \
+    template <typename ResultType, typename T, std::size_t K,                 \
+        std::size_t Rounds, typename Constants>                               \
+    inline void u01_##lr##_distribution(                                      \
+        PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng,               \
+        std::size_t n, ftype *r,                                              \
+        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
+                rbits &&                                                      \
+            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
+            Rounds <= rmax>::type * = nullptr)                                \
+    {                                                                         \
+        rng.u01_##lr##_u##rbits(n, r);                                        \
+    }
+
+#define MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL(bits)                          \
+    template <typename RealType>                                              \
+    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *r,      \
+        RealType a, RealType b) const                                         \
+    {                                                                         \
+        internal::PhiloxGeneratorImpl<T, K, Rounds,                           \
+            Constants>::uniform_real_u##bits(ctr, key_, n, r, a, b);          \
+    }
+
+#define MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(                  \
+    rbits, tbits, kmax, rmax, ftype)                                          \
+    template <typename ResultType, typename T, std::size_t K,                 \
+        std::size_t Rounds, typename Constants>                               \
+    inline void uniform_real_distribution(                                    \
+        PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng,               \
+        std::size_t n, ftype *r, ftype a, ftype b,                            \
+        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
+                rbits &&                                                      \
+            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
+            Rounds <= rmax>::type * = nullptr)                                \
+    {                                                                         \
+        rng.uniform_real_u##rbits(n, r, a, b);                                \
+    }
 
 namespace mckl
 {
@@ -72,332 +105,41 @@ namespace mckl
 namespace internal
 {
 
-template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
-class PhiloxWeylConstant;
-
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(32, 0, 0x9E3779B9)
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(32, 1, 0xBB67AE85)
-
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(64, 0, 0x9E3779B97F4A7C15)
-MCKL_DEFINE_RANDOM_PHILOX_WEYL_CONSTANT(64, 1, 0xBB67AE8584CAA73B)
-
-template <typename T, std::size_t, std::size_t,
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     int = std::numeric_limits<T>::digits>
-class PhiloxMulConstant;
-
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(32, 2, 0, 0xD256D193)
-
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(32, 4, 0, 0xCD9E8D57)
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(32, 4, 1, 0xD2511F53)
-
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(64, 2, 0, 0xD2B74407B1CE6E93)
-
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(64, 4, 0, 0xCA5A826395121157)
-MCKL_DEFINE_RANDOM_PHILOX_MUL_CONSTANT(64, 4, 1, 0xD2E7470EE14C6C93)
-
-} // namespace internal
-
-/// \brief Default Philox constants
-/// \ingroup Philox
-template <typename T, std::size_t K>
-class PhiloxConstants
+class PhiloxGeneratorImpl
+    : public PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>
 {
-    public:
-    /// \brief Weyl constant of I-th element of the key
-    template <std::size_t I>
-    using weyl = internal::PhiloxWeylConstant<T, I>;
+}; // class PhiloxGeneratorImpl
 
-    /// \brief Multiplier of I-th S-box
-    template <std::size_t I>
-    using multiplier = internal::PhiloxMulConstant<T, K, I>;
-}; // class PhiloxConstants
+#if MCKL_USE_AVX2
 
-namespace internal
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public PhiloxGeneratorAVX2Impl32<T, K, Rounds, Constants>
 {
+}; // class PhiloxGeneratorImpl
 
-template <typename T, int = std::numeric_limits<T>::digits>
-class PhiloxHiLo;
+#elif MCKL_USE_SSE2
 
-template <typename T>
-class PhiloxHiLo<T, 32>
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+class PhiloxGeneratorImpl<T, K, Rounds, Constants, 32>
+    : public PhiloxGeneratorSSE2Impl32<T, K, Rounds, Constants>
 {
-    public:
-    static void eval(T a, T b, T &hi, T &lo)
-    {
-        union {
-            std::uint64_t prod;
-            std::array<T, 2> result;
-        } buf;
+}; // class PhiloxGeneratorImpl
 
-        buf.prod =
-            static_cast<std::uint64_t>(a) * static_cast<std::uint64_t>(b);
-#if MCKL_HAS_X86 // little endian
-        hi = std::get<1>(buf.result);
-        lo = std::get<0>(buf.result);
-#else  // MCKL_HAS_X86
-        hi = static_cast<T>(buf.prod >> 32);
-        lo = static_cast<T>(buf.prod);
-#endif // MCKL_HAS_X86
-    }
-}; // class PhiloxHiLo
-
-template <typename T>
-class PhiloxHiLo<T, 64>
-{
-    public:
-    static void eval(T a, T b, T &hi, T &lo)
-    {
-#if MCKL_HAS_INT128
-
-#ifdef MCKL_GCC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#endif // MCKL_GCC
-        union {
-            unsigned MCKL_INT128 prod;
-            std::array<T, 2> result;
-        } buf;
-
-        buf.prod = static_cast<unsigned MCKL_INT128>(a) *
-            static_cast<unsigned MCKL_INT128>(b);
-#ifdef MCKL_GCC
-#pragma GCC diagnostic pop
-#endif // MCKL_GCC
-
-#if MCKL_HAS_X86 // littel endia
-        hi = std::get<1>(buf.result);
-        lo = std::get<0>(buf.result);
-#else  // MCKL_HAS_X86
-        hi = static_cast<T>(buf.prod >> 64);
-        lo = static_cast<T>(buf.prod);
-#endif // MCKL_HAS_X86
-
-#elif defined(MCKL_MSVC)
-
-        unsigned __int64 Multiplier =
-            static_cast<unsigned __int64>(multiplier::value);
-        unsigned __int64 Multiplicand = static_cast<unsigned __int64>(b);
-        unsigned __int64 hi_tmp = 0;
-        lo = static_cast<T>(_umul128(Multiplier, Multiplicand, &hi_tmp));
-        hi = static_cast<T>(hi_tmp);
-
-#else // MCKL_HAS_INT128
-
-        const T a = multiplier::value;
-        const T lomask = (const_one<T>() << 32) - 1;
-        const T ahi = a >> 32;
-        const T alo = a & lomask;
-        const T bhi = b >> 32;
-        const T blo = b & lomask;
-        const T ahbl = ahi * blo;
-        const T albh = alo * bhi;
-        const T ahbl_albh = ((ahbl & lomask) + (albh & lomask));
-
-        lo = a * b;
-        hi = ahi * bhi + (ahbl >> 32) + (albh >> 32);
-        hi += ahbl_albh >> 32;
-        hi += ((lo >> 32) < (ahbl_albh & lomask));
-        std::array<T, 2> hilo = {{lo, hi}};
-
-        return hilo;
-
-#endif // MCKL_HAS_INT128
-    }
-}; // class PhiloxHiLo
-
-template <typename T, std::size_t K, std::size_t N, typename Constants,
-    bool = (N > 1)>
-class PhiloxBumpKey
-{
-    public:
-    static void eval(std::array<T, K / 2> &) {}
-}; // class PhiloxBumpKey
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxBumpKey<T, 2, N, Constants, true>
-{
-    template <std::size_t I>
-    using weyl = typename Constants::template weyl<I>;
-
-    public:
-    static void eval(std::array<T, 1> &par)
-    {
-        std::get<0>(par) += weyl<0>::value;
-    }
-}; // class PhiloxBumpKey
-
-template <typename T, std::size_t N, typename Constants>
-class PhiloxBumpKey<T, 4, N, Constants, true>
-{
-    template <std::size_t I>
-    using weyl = typename Constants::template weyl<I>;
-
-    public:
-    static void eval(std::array<T, 2> &par)
-    {
-        std::get<0>(par) += weyl<0>::value;
-        std::get<1>(par) += weyl<1>::value;
-    }
-}; // class PhiloxBumpKey
-
-template <typename T, std::size_t K, typename Constants>
-class PhiloxInitPar
-{
-    public:
-    template <std::size_t Rp1>
-    static void eval(const std::array<T, K / 2> &key,
-        std::array<std::array<T, K / 2>, Rp1> &par)
-    {
-        std::get<0>(par) = key;
-        eval<1>(par, std::integral_constant<bool, 1 < Rp1>());
-    }
-
-    private:
-    template <std::size_t, std::size_t Rp1>
-    static void eval(std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t N, std::size_t Rp1>
-    static void eval(
-        std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
-    {
-        std::get<N>(par) = std::get<N - 1>(par);
-        PhiloxBumpKey<T, K, N, Constants>::eval(std::get<N>(par));
-        eval<N + 1>(par, std::integral_constant<bool, N + 1 < Rp1>());
-    }
-}; // class PhiloxInitPar
-
-template <typename T, std::size_t K, std::size_t N, typename, bool = (N > 0)>
-class PhiloxSBox
-{
-    public:
-    template <std::size_t Rp1>
-    static void eval(
-        std::array<T, K> &, const std::array<std::array<T, K / 2>, Rp1> &)
-    {
-    }
-}; // class PhiloxSBox
-
-template <typename T, std::size_t K, std::size_t N, typename Constants>
-class PhiloxSBox<T, K, N, Constants, true>
-{
-    public:
-    template <std::size_t Rp1>
-    static void eval(std::array<T, K> &state,
-        const std::array<std::array<T, K / 2>, Rp1> &par)
-    {
-        eval<0>(state, par, std::integral_constant<bool, 1 < K>());
-    }
-
-    private:
-    template <std::size_t I>
-    using multiplier = typename Constants::template multiplier<I>;
-
-    template <std::size_t, std::size_t Rp1>
-    static void eval(std::array<T, K> &,
-        const std::array<std::array<T, K / 2>, Rp1> &, std::false_type)
-    {
-    }
-
-    template <std::size_t I, std::size_t Rp1>
-    static void eval(std::array<T, K> &state,
-        const std::array<std::array<T, K / 2>, Rp1> &par, std::true_type)
-    {
-        T x = std::get<I + 1>(state) ^ std::get<I / 2>(std::get<N>(par));
-        PhiloxHiLo<T>::eval(std::get<I>(state), multiplier<I / 2>::value,
-            std::get<I>(state), std::get<I + 1>(state));
-        std::get<I>(state) ^= x;
-        eval<I + 2>(state, par, std::integral_constant<bool, I + 3 < K>());
-    }
-}; // class PhiloxSBox
-
-template <typename T, std::size_t K, std::size_t N, bool = (N > 0)>
-class PhiloxPBox
-{
-    public:
-    static void eval(std::array<T, K> &) {}
-}; // class PhiloxPBox
-
-template <typename T, std::size_t K, std::size_t N>
-class PhiloxPBox<T, K, N, true>
-{
-    public:
-    static void eval(std::array<T, K> &state)
-    {
-        std::array<T, K> tmp;
-        eval<0>(state, tmp, std::integral_constant<bool, 0 < K>());
-        std::memcpy(state.data(), tmp.data(), sizeof(T) * K);
-    }
-
-    private:
-    template <std::size_t>
-    static void eval(
-        const std::array<T, K> &, std::array<T, K> &, std::false_type)
-    {
-    }
-
-    template <std::size_t I>
-    static void eval(
-        const std::array<T, K> &state, std::array<T, K> &tmp, std::true_type)
-    {
-        static constexpr std::size_t J =
-            K - ThreefryPermuteConstant<K, K - I - 1>::value - 1;
-
-        std::get<I>(tmp) = std::get<J>(state);
-        eval<I + 1>(state, tmp, std::integral_constant<bool, I + 1 < K>());
-    }
-}; // class PhiloxPBox
-
-template <typename T, std::size_t N>
-class PhiloxPBox<T, 2, N, true>
-{
-    public:
-    static void eval(std::array<T, 2> &) {}
-}; // class PhiloxPBox
-
-template <typename T, std::size_t N>
-class PhiloxPBox<T, 4, N, true>
-{
-    public:
-    static void eval(std::array<T, 4> &state)
-    {
-        std::swap(std::get<0>(state), std::get<2>(state));
-    }
-}; // class PhiloxPBox
-
-template <typename T, std::size_t N>
-class PhiloxPBox<T, 8, N, true>
-{
-    public:
-    static void eval(std::array<T, 8> &state)
-    {
-        std::swap(std::get<0>(state), std::get<4>(state));
-        T x = std::get<7>(state);
-        std::get<7>(state) = std::get<5>(state);
-        std::get<5>(state) = std::get<3>(state);
-        std::get<3>(state) = std::get<1>(state);
-        std::get<1>(state) = x;
-    }
-}; // class PhiloxPBox
+#endif // MCKL_USE_AVX2
 
 } // namespace mckl::internal
 
 /// \brief Philox RNG generator
 /// \ingroup Philox
 ///
-/// \tparam T State type, must be 32- or 64-bit unsigned integers
-/// \tparam K State vector length, must be 2 or 4 (for 32- or 64-bit states)
-/// \tparam Rounds Number of SP rounds
-/// \tparam Constants A trait class that defines algorithm constants, see
-/// PhiloxConstants
-///
-/// \details
-/// This generator implement the Philox algorithm in
-/// [Random123](http://www.deshawresearch.com/resources_random123.html),
-/// developed John K. Salmon, Mark A. Moraes, Ron O. Dror, and David E. Shaw.
-template <typename T, std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
-    std::size_t Rounds = MCKL_PHILOX_ROUNDS,
+/// \tparam T State vector value type
+/// \tparam K State vector length
+/// \tparam Rounds The number of rounds
+/// \tparam Constants A trait class that defines algorithm constants
+template <typename T, std::size_t K, std::size_t Rounds = MCKL_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>
 class PhiloxGenerator
 {
@@ -411,61 +153,82 @@ class PhiloxGenerator
         Rounds != 0, "**PhiloxGenerator** used with rounds equal to zero");
 
     public:
-    using ctr_type = std::array<T, K>;
+    using ctr_type = Counter<T, K>;
     using key_type = std::array<T, K / 2>;
 
     static constexpr std::size_t size() { return sizeof(T) * K; }
 
+    key_type key() const { return key_; }
+
     void reset(const key_type &key) { key_ = key; }
 
-    template <typename ResultType>
-    void operator()(ctr_type &ctr,
-        std::array<ResultType, size() / sizeof(ResultType)> &buffer) const
+    void operator()(const void *plain, void *cipher) const
     {
-        union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
+        alignas(32) union {
+            std::array<T, K> s;
+            std::array<char, size()> r;
         } buf;
 
-        std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<T, K, Constants>::eval(key_, par);
-
-        increment(ctr);
-        buf.ctr = ctr;
-        generate<0>(buf.state, par, std::true_type());
-        buffer = buf.result;
+        std::memcpy(buf.s.data(), plain, size());
+        internal::union_le<char>(buf.s);
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buf.s, key_);
+        internal::union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), size());
     }
 
     template <typename ResultType>
-    void operator()(ctr_type &ctr, std::size_t n,
-        std::array<ResultType, size() / sizeof(ResultType)> *buffer) const
+    void operator()(ctr_type &ctr, ResultType *r) const
     {
-        union {
-            std::array<T, K> state;
-            ctr_type ctr;
-            std::array<ResultType, size() / sizeof(ResultType)> result;
+        alignas(32) union {
+            std::array<T, K> s;
+            ctr_type c;
+            std::array<ResultType, size() / sizeof(ResultType)> r;
         } buf;
 
-        std::array<key_type, Rounds + 1> par;
-        internal::PhiloxInitPar<T, K, Constants>::eval(key_, par);
-
-        for (std::size_t i = 0; i != n; ++i) {
-            increment(ctr);
-            buf.ctr = ctr;
-            generate<0>(buf.state, par, std::true_type());
-            buffer[i] = buf.result;
-        }
+        MCKL_FLATTEN_CALL increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<typename ctr_type::value_type>(buf.s);
+#endif
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+            buf.s, key_);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        internal::union_le<T>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), size());
     }
 
-    friend bool operator==(const PhiloxGenerator<T, K, Rounds> &gen1,
-        const PhiloxGenerator<T, K, Rounds> &gen2)
+    template <typename ResultType>
+    void operator()(ctr_type &ctr, std::size_t n, ResultType *r) const
+    {
+        generate(ctr, n, r,
+            std::integral_constant<bool, internal::PhiloxGeneratorImpl<T, K,
+                                             Rounds, Constants>::batch()>());
+    }
+
+    MCKL_DEFINE_RANDOM_PHILOX_U01(cc, 32)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(co, 32)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oc, 32)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oo, 32)
+    MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL(32)
+
+    MCKL_DEFINE_RANDOM_PHILOX_U01(cc, 64)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(co, 64)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oc, 64)
+    MCKL_DEFINE_RANDOM_PHILOX_U01(oo, 64)
+    MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL(64)
+
+    friend bool operator==(
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen1,
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen2)
     {
         return gen1.key_ == gen2.key_;
     }
 
-    friend bool operator!=(const PhiloxGenerator<T, K, Rounds> &gen1,
-        const PhiloxGenerator<T, K, Rounds> &gen2)
+    friend bool operator!=(
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen1,
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen2)
     {
         return !(gen1 == gen2);
     }
@@ -473,7 +236,7 @@ class PhiloxGenerator
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os,
-        const PhiloxGenerator<T, K, Rounds> &gen)
+        const PhiloxGenerator<T, K, Rounds, Constants> &gen)
     {
         if (!os)
             return os;
@@ -486,16 +249,17 @@ class PhiloxGenerator
     template <typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is,
-        PhiloxGenerator<T, K, Rounds> &gen)
+        PhiloxGenerator<T, K, Rounds, Constants> &gen)
     {
         if (!is)
             return is;
 
-        key_type key = {{0}};
-        is >> std::ws >> key;
+        PhiloxGenerator<T, K, Rounds, Constants> gen_tmp;
+        gen_tmp.key_.fill(0);
+        is >> std::ws >> gen_tmp.key_;
 
         if (is)
-            gen.key_ = std::move(key);
+            gen = std::move(gen_tmp);
 
         return is;
     }
@@ -503,27 +267,28 @@ class PhiloxGenerator
     private:
     key_type key_;
 
-    template <std::size_t>
-    void generate(std::array<T, K> &, std::array<key_type, Rounds + 1> &,
-        std::false_type) const
+    template <typename ResultType>
+    void generate(
+        ctr_type &ctr, std::size_t n, ResultType *r, std::false_type) const
     {
+        constexpr std::size_t stride = size() / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += stride)
+            operator()(ctr, r);
     }
 
-    template <std::size_t N>
-    void generate(std::array<T, K> &state,
-        std::array<key_type, Rounds + 1> &par, std::true_type) const
+    template <typename ResultType>
+    void generate(
+        ctr_type &ctr, std::size_t n, ResultType *r, std::true_type) const
     {
-        internal::PhiloxPBox<T, K, N>::eval(state);
-        internal::PhiloxSBox<T, K, N, Constants>::eval(state, par);
-        generate<N + 1>(
-            state, par, std::integral_constant<bool, (N < Rounds)>());
+        internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
+            ctr, key_, n, r);
     }
 }; // class PhiloxGenerator
 
 /// \brief Philox RNG engine
 /// \ingroup Philox
-template <typename ResultType, typename T = ResultType,
-    std::size_t K = MCKL_PHILOX_VECTOR_LENGTH,
+template <typename ResultType, typename T, std::size_t K,
     std::size_t Rounds = MCKL_PHILOX_ROUNDS,
     typename Constants = PhiloxConstants<T, K>>
 using PhiloxEngine =
@@ -581,13 +346,31 @@ using Philox2x64_64 = Philox2x64Engine<std::uint64_t>;
 /// \ingroup Philox
 using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
-/// \brief The default 32-bit Philox engine
-/// \ingroup Philox
-using Philox = Philox4x64Engine<std::uint32_t>;
+#if MCKL_USE_AVX2
 
-/// \brief The default 64-bit Philox engine
-/// \ingroup Philox
-using Philox_64 = Philox4x64Engine<std::uint64_t>;
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, 4, 32, float)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, 4, 32, float)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, 4, 32, float)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, 4, 32, float)
+MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(32, 32, 4, 32, float)
+
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 64, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 64, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 64, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 64, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(64, 32, 4, 32, double)
+
+#if !MCKL_U01_USE_64BITS_DOUBLE
+
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, 4, 32, double)
+MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(32, 32, 4, 32, double)
+
+#endif // !MCKL_U01_USE_64BITS_DOUBLE
+
+#endif // MCKL_USE_AVX2
 
 } // namespace mckl
 

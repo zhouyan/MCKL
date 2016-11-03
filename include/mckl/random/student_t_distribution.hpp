@@ -52,7 +52,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void student_t_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType df)
 {
-    Array<RealType, K> s;
+    alignas(32) std::array<RealType, K> s;
     chi_squared_distribution(rng, n, r, df);
     mul(n, 1 / df, r, r);
     sqrt(n, r, r);
@@ -66,10 +66,10 @@ inline void student_t_distribution_impl(
             r[i] = dist(rng);
 }
 
-MCKL_DEFINE_RANDOM_DISTRIBUTION_IMPL_1(
-    StudentT, student_t, RealType, RealType, n)
-
 } // namespace mckl::internal
+
+MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
+    StudentT, student_t, RealType, RealType, n)
 
 /// \brief Student-t distribution
 /// \ingroup Distribution

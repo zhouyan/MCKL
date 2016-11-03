@@ -1,0 +1,24 @@
+========= Summary results of BigCrush =========
+ Generator:        U01
+ Number of statistics:  160
+ ----------------------------------------------
+ 24  ClosePairs mNP1, t = 9          6.2e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  160
+ ----------------------------------------------
+ 10  CollisionOver, t = 14           5.4e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01OO
+ Number of statistics:  160
+ ----------------------------------------------
+ 30  CouponCollector, r = 0          6.6e-4
+ ----------------------------------------------
+ All other tests were passed
+

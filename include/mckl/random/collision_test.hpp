@@ -63,6 +63,8 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
         mean_ = K_ * (p / K_ - 1 + std::pow(1 - 1.0 / K_, p));
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(std::size_t)
+
     template <typename RNGType, typename U01DistributionType>
     std::size_t operator()(RNGType &rng, U01DistributionType &u01)
     {

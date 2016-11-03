@@ -86,6 +86,8 @@ class GapTest : public ChiSquaredTest<GapTest<NTrialMax>>
         np_.push_back(n - std::accumulate(np_.begin(), np_.end(), 0.0));
     }
 
+    MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
+
     template <typename RNGType, typename U01DistributionType>
     double operator()(RNGType &rng, U01DistributionType &u01)
     {
