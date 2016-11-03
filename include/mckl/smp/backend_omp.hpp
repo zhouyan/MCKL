@@ -46,8 +46,13 @@ namespace internal
 template <typename IntType>
 inline void backend_omp_range(IntType N, IntType &first, IntType &last)
 {
+#if MCKL_HAS_OMP
     const IntType np = static_cast<IntType>(::omp_get_num_threads());
     const IntType id = static_cast<IntType>(::omp_get_thread_num());
+#else
+    const IntType np = 1;
+    const IntType id = 0;
+#endif
     const IntType m = N / np;
     const IntType r = N % np;
     const IntType n = m + (id < r ? 1 : 0);
