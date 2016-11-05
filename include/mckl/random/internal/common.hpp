@@ -934,7 +934,7 @@ class TransformCopy
     {
         std::memcpy(r, s, n);
 
-        return r + n;
+        return r + n / sizeof(ResultType);
     }
 }; // class TransformCopy
 
