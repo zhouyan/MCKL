@@ -318,7 +318,8 @@ class AESGeneratorGenericImpl
             std::array<char, sizeof(std::uint32_t) * 4> r;
         } buf;
 
-        std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(ks.get());
+        const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(
+            ks.get());
 
         std::memcpy(buf.s.data(), plain, sizeof(std::uint32_t) * 4);
         union_le<char>(buf.s);
@@ -341,7 +342,8 @@ class AESGeneratorGenericImpl
                 r;
         } buf;
 
-        std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(ks.get());
+        const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(
+            ks.get());
 
         MCKL_FLATTEN_CALL increment(ctr);
         buf.c = ctr;
@@ -369,7 +371,8 @@ class AESGeneratorGenericImpl
                 r;
         } buf;
 
-        std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(ks.get());
+        const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(
+            ks.get());
 
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_FLATTEN_CALL increment(ctr);
