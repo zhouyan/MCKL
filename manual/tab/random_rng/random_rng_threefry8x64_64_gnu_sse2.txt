@@ -1,5 +1,5 @@
-Threefry8x64_64          232       8           3.05           1.96      ---Passed
-Threefry8x64_64          232       8           3.04           1.97      ---Passed
-Threefry8x64_64          232       8           3.04           1.96      ---Passed
-Threefry8x64_64          232       8           3.05           1.97      ---Passed
-Threefry8x64_64          232       8           3.05           1.97      ---Passed
+Threefry8x64_64                     232     8      2.62      1.97      ---Passed
+Threefry8x64_64                     232     8      2.62      1.97      ---Passed
+Threefry8x64_64                     232     8      2.62      1.97      ---Passed
+Threefry8x64_64                     232     8      2.62      1.97      ---Passed
+Threefry8x64_64                     232     8      2.62      1.96      ---Passed
