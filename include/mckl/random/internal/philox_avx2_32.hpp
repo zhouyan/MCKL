@@ -148,7 +148,7 @@ class PhiloxGeneratorAVX2Impl32
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key)
     {
-        eval<transform>(ctr, n, r, key);
+        eval<TransformCopy>(ctr, n, r, key);
     }
 
     MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(cc, 32, Closed, Closed)
@@ -164,43 +164,19 @@ class PhiloxGeneratorAVX2Impl32
     MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_UNIFORM_REAL(64)
 
     private:
-    class transform
-    {
-        public:
-        using uint_type = T;
-
-        template <std::size_t S, typename ResultType>
-        MCKL_FLATTEN static ResultType *eval(
-            const std::array<__m256i, S> &s, ResultType *r)
-        {
-            std::memcpy(r, s.data(), sizeof(s));
-
-            return r + sizeof(s) / sizeof(ResultType);
-        }
-
-        template <typename ResultType>
-        MCKL_FLATTEN static ResultType *eval(
-            std::size_t n, const uint_type *s, ResultType *r)
-        {
-            std::memcpy(r, s, sizeof(uint_type) * n);
-
-            return r + sizeof(uint_type) * n / sizeof(ResultType);
-        }
-    }; // class transform
-
     template <typename Transform, typename ResultType, typename... Args>
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key, Args &&... args)
     {
-        using uint_type = typename Transform::uint_type;
+        using input_type = typename Transform::input_type;
 
-        static_assert(sizeof(T) * K % sizeof(uint_type) == 0,
+        static_assert(sizeof(T) * K % sizeof(input_type) == 0,
             "**PhiloxGeneratorAVX2Impl32::eval** sizeof(T) * K is not "
-            "divisible by sizeof(Transform::uint_type)");
+            "divisible by sizeof(Transform::input_type)");
 
         constexpr std::size_t S = 8;
         constexpr std::size_t nstride = sizeof(__m256i) * S / (sizeof(T) * K);
-        constexpr std::size_t ustride = sizeof(T) * K / sizeof(uint_type);
+        constexpr std::size_t istride = sizeof(T) * K / sizeof(input_type);
 
         std::array<__m256i, S> s;
         std::array<__m256i, Rounds> rk;
@@ -215,11 +191,11 @@ class PhiloxGeneratorAVX2Impl32
             n -= nstride;
         }
 
-        alignas(32) std::array<uint_type, nstride * ustride> u;
+        alignas(32) std::array<input_type, nstride * istride> u;
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             ctr, n, u.data(), key);
         MCKL_FLATTEN_CALL Transform::eval(
-            n * ustride, u.data(), r, std::forward<Args>(args)...);
+            n * istride, u.data(), r, std::forward<Args>(args)...);
     }
 
     template <std::size_t, std::size_t S>

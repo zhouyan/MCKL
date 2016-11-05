@@ -34,6 +34,7 @@
 
 #include <mckl/internal/config.h>
 #include <mckl/internal/avx2_op.hpp>
+#include <mckl/internal/const_math.hpp>
 #include <array>
 
 #if MCKL_HAS_FMA
@@ -262,9 +263,9 @@ template <std::size_t S>
 MCKL_FLATTEN inline void cvtepi64_pd(std::array<__m256i, S> &s)
 {
     const __m256i m32 =
-        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x41F0000000000000));
+        _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, 32>::value));
     const __m256i m52 =
-        _mm256_set1_epi64x(static_cast<MCKL_INT64>(0x4330000000000000));
+        _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, 52>::value));
     const __m256i mask =
         _mm256_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
 

@@ -290,7 +290,7 @@ using Philox2x64_64 = Philox2x64Engine<std::uint64_t>;
 /// \ingroup Philox
 using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
 
-#if MCKL_USE_AVX2
+#if MCKL_USE_SSE2 || MCKL_USE_AVX2
 
 MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, 4, 32, float)
 MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, 4, 32, float)
@@ -314,7 +314,7 @@ MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(32, 32, 4, 32, double)
 
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 
-#endif // MCKL_USE_AVX2
+#endif // MCKL_USE_SSE2 || MCKL_USE_AVX2
 
 } // namespace mckl
 

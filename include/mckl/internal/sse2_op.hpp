@@ -162,6 +162,18 @@ MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 4> &s,
     std::get<3>(t) = _mm_mul_epu32(std::get<3>(s), a);
 }
 
+MCKL_FLATTEN inline void add_ps(std::array<__m128i, 4> &s, const __m128i &a)
+{
+    std::get<0>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0>(s)), _mm_castsi128_ps(a)));
+    std::get<1>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<1>(s)), _mm_castsi128_ps(a)));
+    std::get<2>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<2>(s)), _mm_castsi128_ps(a)));
+    std::get<3>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<3>(s)), _mm_castsi128_ps(a)));
+}
+
 MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castps_si128(
@@ -172,6 +184,18 @@ MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 4> &s, const __m128i &a)
         _mm_mul_ps(_mm_castsi128_ps(std::get<2>(s)), _mm_castsi128_ps(a)));
     std::get<3>(s) = _mm_castps_si128(
         _mm_mul_ps(_mm_castsi128_ps(std::get<3>(s)), _mm_castsi128_ps(a)));
+}
+
+MCKL_FLATTEN inline void add_pd(std::array<__m128i, 4> &s, const __m128i &a)
+{
+    std::get<0>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
+    std::get<1>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<1>(s)), _mm_castsi128_pd(a)));
+    std::get<2>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<2>(s)), _mm_castsi128_pd(a)));
+    std::get<3>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(a)));
 }
 
 MCKL_FLATTEN inline void add_pd(
@@ -390,6 +414,26 @@ MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 8> &s,
     std::get<7>(t) = _mm_mul_epu32(std::get<7>(s), a);
 }
 
+MCKL_FLATTEN inline void add_ps(std::array<__m128i, 8> &s, const __m128i &a)
+{
+    std::get<0>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0>(s)), _mm_castsi128_ps(a)));
+    std::get<1>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<1>(s)), _mm_castsi128_ps(a)));
+    std::get<2>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<2>(s)), _mm_castsi128_ps(a)));
+    std::get<3>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<3>(s)), _mm_castsi128_ps(a)));
+    std::get<4>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<4>(s)), _mm_castsi128_ps(a)));
+    std::get<5>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<5>(s)), _mm_castsi128_ps(a)));
+    std::get<6>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<6>(s)), _mm_castsi128_ps(a)));
+    std::get<7>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<7>(s)), _mm_castsi128_ps(a)));
+}
+
 MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castps_si128(
@@ -408,6 +452,26 @@ MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 8> &s, const __m128i &a)
         _mm_mul_ps(_mm_castsi128_ps(std::get<6>(s)), _mm_castsi128_ps(a)));
     std::get<7>(s) = _mm_castps_si128(
         _mm_mul_ps(_mm_castsi128_ps(std::get<7>(s)), _mm_castsi128_ps(a)));
+}
+
+MCKL_FLATTEN inline void add_pd(std::array<__m128i, 8> &s, const __m128i &a)
+{
+    std::get<0>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
+    std::get<1>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<1>(s)), _mm_castsi128_pd(a)));
+    std::get<2>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<2>(s)), _mm_castsi128_pd(a)));
+    std::get<3>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(a)));
+    std::get<4>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<4>(s)), _mm_castsi128_pd(a)));
+    std::get<5>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<5>(s)), _mm_castsi128_pd(a)));
+    std::get<6>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<6>(s)), _mm_castsi128_pd(a)));
+    std::get<7>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<7>(s)), _mm_castsi128_pd(a)));
 }
 
 MCKL_FLATTEN inline void add_pd(
@@ -765,6 +829,42 @@ MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 16> &s,
     std::get<0xF>(t) = _mm_mul_epu32(std::get<0xF>(s), a);
 }
 
+MCKL_FLATTEN inline void add_ps(std::array<__m128i, 16> &s, const __m128i &a)
+{
+    std::get<0x0>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x0>(s)), _mm_castsi128_ps(a)));
+    std::get<0x1>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x1>(s)), _mm_castsi128_ps(a)));
+    std::get<0x2>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x2>(s)), _mm_castsi128_ps(a)));
+    std::get<0x3>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x3>(s)), _mm_castsi128_ps(a)));
+    std::get<0x4>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x4>(s)), _mm_castsi128_ps(a)));
+    std::get<0x5>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x5>(s)), _mm_castsi128_ps(a)));
+    std::get<0x6>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x6>(s)), _mm_castsi128_ps(a)));
+    std::get<0x7>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x7>(s)), _mm_castsi128_ps(a)));
+    std::get<0x8>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x8>(s)), _mm_castsi128_ps(a)));
+    std::get<0x9>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0x9>(s)), _mm_castsi128_ps(a)));
+    std::get<0xA>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0xA>(s)), _mm_castsi128_ps(a)));
+    std::get<0xB>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0xB>(s)), _mm_castsi128_ps(a)));
+    std::get<0xC>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0xC>(s)), _mm_castsi128_ps(a)));
+    std::get<0xD>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0xD>(s)), _mm_castsi128_ps(a)));
+    std::get<0xE>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0xE>(s)), _mm_castsi128_ps(a)));
+    std::get<0xF>(s) = _mm_castps_si128(
+        _mm_add_ps(_mm_castsi128_ps(std::get<0xF>(s)), _mm_castsi128_ps(a)));
+}
+
 MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_castps_si128(
@@ -799,6 +899,42 @@ MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 16> &s, const __m128i &a)
         _mm_mul_ps(_mm_castsi128_ps(std::get<0xE>(s)), _mm_castsi128_ps(a)));
     std::get<0xF>(s) = _mm_castps_si128(
         _mm_mul_ps(_mm_castsi128_ps(std::get<0xF>(s)), _mm_castsi128_ps(a)));
+}
+
+MCKL_FLATTEN inline void add_pd(std::array<__m128i, 16> &s, const __m128i &a)
+{
+    std::get<0x0>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x0>(s)), _mm_castsi128_pd(a)));
+    std::get<0x1>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x1>(s)), _mm_castsi128_pd(a)));
+    std::get<0x2>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x2>(s)), _mm_castsi128_pd(a)));
+    std::get<0x3>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x3>(s)), _mm_castsi128_pd(a)));
+    std::get<0x4>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x4>(s)), _mm_castsi128_pd(a)));
+    std::get<0x5>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x5>(s)), _mm_castsi128_pd(a)));
+    std::get<0x6>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x6>(s)), _mm_castsi128_pd(a)));
+    std::get<0x7>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x7>(s)), _mm_castsi128_pd(a)));
+    std::get<0x8>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x8>(s)), _mm_castsi128_pd(a)));
+    std::get<0x9>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0x9>(s)), _mm_castsi128_pd(a)));
+    std::get<0xA>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0xA>(s)), _mm_castsi128_pd(a)));
+    std::get<0xB>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0xB>(s)), _mm_castsi128_pd(a)));
+    std::get<0xC>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0xC>(s)), _mm_castsi128_pd(a)));
+    std::get<0xD>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0xD>(s)), _mm_castsi128_pd(a)));
+    std::get<0xE>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0xE>(s)), _mm_castsi128_pd(a)));
+    std::get<0xF>(s) = _mm_castpd_si128(
+        _mm_add_pd(_mm_castsi128_pd(std::get<0xF>(s)), _mm_castsi128_pd(a)));
 }
 
 MCKL_FLATTEN inline void add_pd(

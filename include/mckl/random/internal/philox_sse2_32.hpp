@@ -35,7 +35,28 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
 #include <mckl/random/internal/philox_unroll.hpp>
+#include <mckl/random/internal/u01_sse2.hpp>
+#include <mckl/random/internal/uniform_real_sse2.hpp>
 #include <mckl/random/increment.hpp>
+
+#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(                       \
+    lr, bits, Lower, Upper)                                                   \
+    template <typename RealType>                                              \
+    static void u01_##lr##_u##bits(Counter<T, K> &ctr, std::size_t n,         \
+        RealType *r, const std::array<T, K / 2> &key)                         \
+    {                                                                         \
+        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
+            ctr, n, r, key);                                                  \
+    }
+
+#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_UNIFORM_REAL(bits)         \
+    template <typename RealType>                                              \
+    static void uniform_real_u##bits(Counter<T, K> &ctr, std::size_t n,       \
+        RealType *r, const std::array<T, K / 2> &key, RealType a, RealType b) \
+    {                                                                         \
+        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>>(             \
+            ctr, n, r, key, a, b);                                            \
+    }
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -127,10 +148,35 @@ class PhiloxGeneratorSSE2Impl32
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key)
     {
+        eval<TransformCopy>(ctr, n, r, key);
+    }
+
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(cc, 32, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(co, 32, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(oc, 32, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(oo, 32, Open, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_UNIFORM_REAL(32)
+
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(cc, 64, Closed, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(co, 64, Closed, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(oc, 64, Open, Closed)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(oo, 64, Open, Open)
+    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_UNIFORM_REAL(64)
+
+    private:
+    template <typename Transform, typename ResultType, typename... Args>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K / 2> &key, Args &&... args)
+    {
+        using input_type = typename Transform::input_type;
+
+        static_assert(sizeof(T) * K % sizeof(input_type) == 0,
+            "**PhiloxGeneratorSSE2Impl32::eval** sizeof(T) * K is not "
+            "divisible by sizeof(Transform::input_type)");
+
         constexpr std::size_t S = 8;
-        constexpr std::size_t cstride = sizeof(__m128i) * S;
-        constexpr std::size_t nstride = cstride / (sizeof(T) * K);
-        constexpr std::size_t rstride = cstride / sizeof(ResultType);
+        constexpr std::size_t nstride = sizeof(__m128i) * S / (sizeof(T) * K);
+        constexpr std::size_t istride = sizeof(T) * K / sizeof(input_type);
 
         std::array<__m128i, S> s;
         std::array<__m128i, Rounds> rk;
@@ -140,15 +186,18 @@ class PhiloxGeneratorSSE2Impl32
             MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::first(s);
             MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, s, rk);
             MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::last(s);
-            std::memcpy(r, s.data(), cstride);
+            MCKL_FLATTEN_CALL r =
+                Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
-            r += rstride;
         }
+
+        alignas(32) std::array<input_type, nstride * istride> u;
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
-            ctr, n, r, key);
+            ctr, n, u.data(), key);
+        MCKL_FLATTEN_CALL Transform::eval(
+            n * istride, u.data(), r, std::forward<Args>(args)...);
     }
 
-    private:
     template <std::size_t, std::size_t S>
     static void round(std::array<__m128i, S> &,
         const std::array<__m128i, Rounds> &, std::false_type)

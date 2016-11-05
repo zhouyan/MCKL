@@ -58,7 +58,7 @@ template <typename UIntType, typename RealType, typename Lower, typename Upper>
 class U01AVX2ImplBase
 {
     public:
-    using uint_type = UIntType;
+    using input_type = UIntType;
 
     static RealType eval(UIntType u)
     {
@@ -231,7 +231,7 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
 #if MCKL_USE_FMA
         fmadd_ps(s, d23, d24);
 #else
-        mul_ps(s, d24);
+        mul_ps(s, d23);
         add_ps(s, d24);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
@@ -524,7 +524,7 @@ class U01AVX2Impl<UIntType, double, Open, Open, 64>
 #if MCKL_USE_FMA
         fmadd_pd(s, d52, d53);
 #else
-        mul_pd(s, d53);
+        mul_pd(s, d52);
         add_pd(s, d53);
 #endif
         std::memcpy(r, s.data(), sizeof(s));

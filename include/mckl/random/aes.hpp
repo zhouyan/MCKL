@@ -474,7 +474,7 @@ using AES256_64 = AES256Engine<std::uint64_t>;
 /// \ingroup AES
 using ARS_64 = ARSEngine<std::uint64_t>;
 
-#if MCKL_USE_AESNI && MCKL_USE_AVX2
+#if MCKL_USE_AESNI
 
 MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 32, float)
 MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 32, float)
@@ -498,7 +498,7 @@ MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(32, double)
 
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 
-#endif // MCKL_USE_AESNI && MCKL_USE_AVX2
+#endif // MCKL_USE_AESNI
 
 } // namespace mckl
 

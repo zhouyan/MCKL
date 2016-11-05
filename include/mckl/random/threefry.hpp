@@ -383,7 +383,7 @@ using Threefish512_64 = Threefish512Engine<std::uint64_t>;
 /// \ingroup Threefry
 using Threefish1024_64 = Threefish1024Engine<std::uint64_t>;
 
-#if MCKL_USE_AVX2
+#if MCKL_USE_SSE2 || MCKL_USE_AVX2
 
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(cc, 32, 32, 16, 32, float)
 MCKL_DEFINE_RANDOM_THREEFRY_U01_DISTRIBUTION(co, 32, 32, 16, 32, float)
@@ -425,7 +425,7 @@ MCKL_DEFINE_RANDOM_THREEFRY_UNIFORM_REAL_DISTRIBUTION(32, 64, 8, 32, double)
 
 #endif // !MCKL_U01_USE_64BITS_DOUBLE
 
-#endif // MCKL_USE_AVX2
+#endif // MCKL_USE_SSE2 || MCKL_USE_AVX2
 
 } // namespace mckl
 

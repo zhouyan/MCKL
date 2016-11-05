@@ -33,6 +33,7 @@
 #define MCKL_INTERNAL_SSE2_HPP
 
 #include <mckl/internal/config.h>
+#include <mckl/internal/const_math.hpp>
 #include <mckl/internal/sse2_op.hpp>
 #include <array>
 
@@ -48,6 +49,133 @@ namespace mckl
 
 namespace internal
 {
+
+MCKL_FLATTEN inline void cvtepu32_epi64(
+    const std::array<__m128i, 2> &s, std::array<__m128i, 4> &t)
+{
+    const __m128i m = _mm_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(s), 0xD8);
+    std::get<2>(t) = _mm_shuffle_epi32(std::get<1>(s), 0xD8);
+
+    std::get<1>(t) = _mm_srli_epi64(std::get<0>(t), 32);
+    std::get<3>(t) = _mm_srli_epi64(std::get<2>(t), 32);
+
+    std::get<0>(t) = _mm_and_si128(std::get<0>(t), m);
+    std::get<2>(t) = _mm_and_si128(std::get<2>(t), m);
+}
+
+MCKL_FLATTEN inline void cvtepu32_epi64(
+    const std::array<__m128i, 4> &s, std::array<__m128i, 8> &t)
+{
+    const __m128i m = _mm_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::get<0>(t) = _mm_shuffle_epi32(std::get<0>(s), 0xD8);
+    std::get<2>(t) = _mm_shuffle_epi32(std::get<1>(s), 0xD8);
+    std::get<4>(t) = _mm_shuffle_epi32(std::get<2>(s), 0xD8);
+    std::get<6>(t) = _mm_shuffle_epi32(std::get<3>(s), 0xD8);
+
+    std::get<1>(t) = _mm_srli_epi64(std::get<0>(t), 32);
+    std::get<3>(t) = _mm_srli_epi64(std::get<2>(t), 32);
+    std::get<5>(t) = _mm_srli_epi64(std::get<4>(t), 32);
+    std::get<7>(t) = _mm_srli_epi64(std::get<6>(t), 32);
+
+    std::get<0>(t) = _mm_and_si128(std::get<0>(t), m);
+    std::get<2>(t) = _mm_and_si128(std::get<2>(t), m);
+    std::get<4>(t) = _mm_and_si128(std::get<4>(t), m);
+    std::get<6>(t) = _mm_and_si128(std::get<6>(t), m);
+}
+
+MCKL_FLATTEN inline void cvtepu32_epi64(
+    const std::array<__m128i, 8> &s, std::array<__m128i, 16> &t)
+{
+    const __m128i m = _mm_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::get<0x0>(t) = _mm_shuffle_epi32(std::get<0>(s), 0xD8);
+    std::get<0x2>(t) = _mm_shuffle_epi32(std::get<1>(s), 0xD8);
+    std::get<0x4>(t) = _mm_shuffle_epi32(std::get<2>(s), 0xD8);
+    std::get<0x6>(t) = _mm_shuffle_epi32(std::get<3>(s), 0xD8);
+    std::get<0x8>(t) = _mm_shuffle_epi32(std::get<4>(s), 0xD8);
+    std::get<0xA>(t) = _mm_shuffle_epi32(std::get<5>(s), 0xD8);
+    std::get<0xC>(t) = _mm_shuffle_epi32(std::get<6>(s), 0xD8);
+    std::get<0xE>(t) = _mm_shuffle_epi32(std::get<7>(s), 0xD8);
+
+    std::get<0x1>(t) = _mm_srli_epi64(std::get<0x0>(t), 32);
+    std::get<0x3>(t) = _mm_srli_epi64(std::get<0x2>(t), 32);
+    std::get<0x5>(t) = _mm_srli_epi64(std::get<0x4>(t), 32);
+    std::get<0x7>(t) = _mm_srli_epi64(std::get<0x6>(t), 32);
+    std::get<0x9>(t) = _mm_srli_epi64(std::get<0x8>(t), 32);
+    std::get<0xB>(t) = _mm_srli_epi64(std::get<0xA>(t), 32);
+    std::get<0xD>(t) = _mm_srli_epi64(std::get<0xC>(t), 32);
+    std::get<0xF>(t) = _mm_srli_epi64(std::get<0xE>(t), 32);
+
+    std::get<0x0>(t) = _mm_and_si128(std::get<0x0>(t), m);
+    std::get<0x2>(t) = _mm_and_si128(std::get<0x2>(t), m);
+    std::get<0x4>(t) = _mm_and_si128(std::get<0x4>(t), m);
+    std::get<0x6>(t) = _mm_and_si128(std::get<0x6>(t), m);
+    std::get<0x8>(t) = _mm_and_si128(std::get<0x8>(t), m);
+    std::get<0xA>(t) = _mm_and_si128(std::get<0xA>(t), m);
+    std::get<0xC>(t) = _mm_and_si128(std::get<0xC>(t), m);
+    std::get<0xE>(t) = _mm_and_si128(std::get<0xE>(t), m);
+}
+
+MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m128i, 4> &s)
+{
+    std::get<0>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0>(s)));
+    std::get<1>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<1>(s)));
+    std::get<2>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<2>(s)));
+    std::get<3>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<3>(s)));
+}
+
+MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m128i, 8> &s)
+{
+    std::get<0>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0>(s)));
+    std::get<1>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<1>(s)));
+    std::get<2>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<2>(s)));
+    std::get<3>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<3>(s)));
+    std::get<4>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<4>(s)));
+    std::get<5>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<5>(s)));
+    std::get<6>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<6>(s)));
+    std::get<7>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<7>(s)));
+}
+
+MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m128i, 16> &s)
+{
+    std::get<0x0>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x0>(s)));
+    std::get<0x1>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x1>(s)));
+    std::get<0x2>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x2>(s)));
+    std::get<0x3>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x3>(s)));
+    std::get<0x4>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x4>(s)));
+    std::get<0x5>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x5>(s)));
+    std::get<0x6>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x6>(s)));
+    std::get<0x7>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x7>(s)));
+    std::get<0x8>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x8>(s)));
+    std::get<0x9>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0x9>(s)));
+    std::get<0xA>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0xA>(s)));
+    std::get<0xB>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0xB>(s)));
+    std::get<0xC>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0xC>(s)));
+    std::get<0xD>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0xD>(s)));
+    std::get<0xE>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0xE>(s)));
+    std::get<0xF>(s) = _mm_castps_si128(_mm_cvtepi32_ps(std::get<0xF>(s)));
+}
+
+template <std::size_t S>
+MCKL_FLATTEN inline void cvtepi64_pd(std::array<__m128i, S> &s)
+{
+    const __m128i m32 = _mm_castpd_si128(_mm_set1_pd(Pow2<double, 32>::value));
+    const __m128i m52 = _mm_castpd_si128(_mm_set1_pd(Pow2<double, 52>::value));
+    const __m128i mask = _mm_set1_epi64x(static_cast<MCKL_INT64>(0xFFFFFFFF));
+
+    std::array<__m128i, S> t;
+    and_si128(s, mask, t);
+    srli_epi64<32>(s);
+    add_epi64(s, m52);
+    add_epi64(t, m52);
+    sub_pd(s, m52);
+    sub_pd(t, m52);
+    mul_pd(s, m32);
+    add_pd(s, t);
+}
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t N>

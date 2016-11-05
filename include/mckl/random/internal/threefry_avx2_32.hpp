@@ -102,7 +102,7 @@ class ThreefryGeneratorAVX2Impl32
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K + 4> &par)
     {
-        eval<transform>(ctr, n, r, par);
+        eval<TransformCopy>(ctr, n, r, par);
     }
 
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_32_U01(cc, 32, Closed, Closed)
@@ -118,39 +118,15 @@ class ThreefryGeneratorAVX2Impl32
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_32_UNIFORM_REAL(64)
 
     private:
-    class transform
-    {
-        public:
-        using uint_type = T;
-
-        template <std::size_t S, typename ResultType>
-        MCKL_FLATTEN static ResultType *eval(
-            const std::array<__m256i, S> &s, ResultType *r)
-        {
-            std::memcpy(r, s.data(), sizeof(s));
-
-            return r + sizeof(s) / sizeof(ResultType);
-        }
-
-        template <typename ResultType>
-        MCKL_FLATTEN static ResultType *eval(
-            std::size_t n, const uint_type *s, ResultType *r)
-        {
-            std::memcpy(r, s, sizeof(uint_type) * n);
-
-            return r + sizeof(uint_type) * n / sizeof(ResultType);
-        }
-    }; // class transform
-
     template <typename Transform, typename ResultType, typename... Args>
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K + 4> &par, Args &&... args)
     {
-        using uint_type = typename Transform::uint_type;
+        using input_type = typename Transform::input_type;
 
         constexpr std::size_t S = K <= 8 ? 8 : K;
         constexpr std::size_t nstride = sizeof(__m256i) * S / (sizeof(T) * K);
-        constexpr std::size_t ustride = sizeof(T) * K / sizeof(uint_type);
+        constexpr std::size_t istride = sizeof(T) * K / sizeof(input_type);
 
         std::array<__m256i, S> s;
         while (n >= nstride) {
@@ -163,11 +139,11 @@ class ThreefryGeneratorAVX2Impl32
             n -= nstride;
         }
 
-        alignas(32) std::array<uint_type, nstride * ustride> u;
+        alignas(32) std::array<input_type, nstride * istride> u;
         ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             ctr, n, u.data(), par);
         MCKL_FLATTEN_CALL Transform::eval(
-            n * ustride, u.data(), r, std::forward<Args>(args)...);
+            n * istride, u.data(), r, std::forward<Args>(args)...);
     }
 
     template <std::size_t, std::size_t S>

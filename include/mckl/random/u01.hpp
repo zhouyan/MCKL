@@ -35,6 +35,10 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/u01_generic.hpp>
 
+#if MCKL_HAS_SSE2
+#include <mckl/random/internal/u01_sse2.hpp>
+#endif
+
 #if MCKL_HAS_AVX2
 #include <mckl/random/internal/u01_avx2.hpp>
 #endif
@@ -48,10 +52,13 @@ namespace internal
 #if MCKL_USE_AVX2
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 using U01Impl = U01AVX2Impl<UIntType, RealType, Lower, Upper>;
-#else
+#elif MCKL_USE_SSE2
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
+using U01Impl = U01SSE2Impl<UIntType, RealType, Lower, Upper>;
+#else  // MCKL_USE_AVX2
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 using U01Impl = U01GenericImpl<UIntType, RealType, Lower, Upper>;
-#endif
+#endif // MCKL_USE_AVX2
 
 } // namespace mckl::inernal
 
