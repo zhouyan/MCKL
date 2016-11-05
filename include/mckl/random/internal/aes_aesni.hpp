@@ -511,7 +511,7 @@ class AESGeneratorAESNIImpl
         }
 
         alignas(32) std::array<UIntType, N * R> t;
-        for (std::size_t i = 0; i != n; ++i, r += R) {
+        for (std::size_t i = 0; i != n; ++i) {
             MCKL_INLINE_CALL increment(ctr);
             __m128i s =
                 _mm_loadu_si128(reinterpret_cast<const __m128i *>(ctr.data()));
