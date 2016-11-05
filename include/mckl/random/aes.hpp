@@ -161,7 +161,7 @@ class AESKeySeqImpl
         generator(key, rk_);
     }
 
-    const std::array<rk_type, rounds() + 1> get() const { return rk_; }
+    const std::array<rk_type, rounds() + 1> &get() const { return rk_; }
 
     friend bool operator==(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
         const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
