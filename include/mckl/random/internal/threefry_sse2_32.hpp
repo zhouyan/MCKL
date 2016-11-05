@@ -53,20 +53,33 @@ namespace internal
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorSSE2Impl32
 {
-    public:
-    static constexpr bool batch()
-    {
-        return std::numeric_limits<T>::digits == 32 && K != 0 && 16 % K == 0;
-    }
+    static_assert(std::numeric_limits<T>::digits == 32,
+        "**ThreefryGeneratorAVX2Impl32 used with T other than an 32-bit "
+        "unsigned integer type");
 
-    static void eval(std::array<T, K> &s, const std::array<T, K + 4> &par)
+    static_assert(K != 0 && 16 % K == 0,
+        "**ThreefryGeneratorAVX2Impl32 used with K that does not divide by "
+        "16");
+
+    public:
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
-        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(s, par);
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            plain, cipher, par);
     }
 
     template <typename ResultType>
-    static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
-        std::size_t n, ResultType *r)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K + 4> &par)
+    {
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, r, par);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K + 4> &par)
     {
         constexpr std::size_t S = K <= 8 ? 8 : K;
         constexpr std::size_t cstride = sizeof(__m128i) * S;
@@ -77,23 +90,14 @@ class ThreefryGeneratorSSE2Impl32
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si128(ctr, s);
             MCKL_FLATTEN_CALL transpose4x32_load_si128(s);
-            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0);
+            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, s, par);
             MCKL_FLATTEN_CALL transpose4x32_store_si128(s);
             std::memcpy(r, s.data(), cstride);
             n -= nstride;
             r += rstride;
         }
-
-        alignas(32) union {
-            std::array<std::array<T, K>, nstride> s;
-            std::array<Counter<T, K>, nstride> c;
-        } buf;
-        for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.c[i] = ctr;
-            eval(buf.s[i], par);
-        }
-        std::memcpy(r, buf.s.data(), sizeof(T) * K * n);
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, n, r, par);
     }
 
     private:
@@ -107,7 +111,7 @@ class ThreefryGeneratorSSE2Impl32
     static void round(std::array<__m128i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N);
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par);
     }
 
     template <std::size_t N, std::size_t S>

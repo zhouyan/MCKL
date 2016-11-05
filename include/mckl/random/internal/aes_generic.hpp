@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_constants.hpp>
+#include <mckl/random/increment.hpp>
 
 namespace mckl
 {
@@ -310,15 +311,80 @@ template <typename KeySeqType>
 class AESGeneratorGenericImpl
 {
     public:
-    static constexpr bool batch() { return false; }
-
-    static void eval(std::array<std::uint32_t, 4> &s,
-        const std::array<std::array<std::uint32_t, 4>,
-            KeySeqType::rounds() + 1> &rk)
+    static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
-        encfirst(s, rk);
-        round<1>(s, rk, std::integral_constant<bool, 1 < rounds_>());
-        enclast(s, rk);
+        alignas(32) union {
+            std::array<std::uint32_t, 4> s;
+            std::array<char, sizeof(std::uint32_t) * 4> r;
+        } buf;
+
+        std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(ks.get());
+
+        std::memcpy(buf.s.data(), plain, sizeof(std::uint32_t) * 4);
+        union_le<char>(buf.s);
+        encfirst(buf.s, rk);
+        round<1>(buf.s, rk, std::integral_constant<bool, 1 < rounds_>());
+        enclast(buf.s, rk);
+        union_le<std::uint32_t>(buf.r);
+        std::memcpy(cipher, buf.s.data(), sizeof(std::uint32_t) * 4);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        Counter<std::uint32_t, 4> &ctr, ResultType *r, const KeySeqType &ks)
+    {
+        alignas(32) union {
+            std::array<std::uint32_t, 4> s;
+            Counter<std::uint32_t, 4> c;
+            std::array<ResultType,
+                sizeof(std::uint32_t) * 4 / sizeof(ResultType)>
+                r;
+        } buf;
+
+        std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(ks.get());
+
+        MCKL_FLATTEN_CALL increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<typename Counter<std::uint32_t, 4>::value_type>(buf.s);
+#endif
+        encfirst(buf.s, rk);
+        round<1>(buf.s, rk, std::integral_constant<bool, 1 < rounds_>());
+        enclast(buf.s, rk);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<std::uint32_t>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), sizeof(std::uint32_t) * 4);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<std::uint32_t, 4> &ctr, std::size_t n,
+        ResultType *r, const KeySeqType &ks)
+    {
+        alignas(32) union {
+            std::array<std::uint32_t, 4> s;
+            Counter<std::uint32_t, 4> c;
+            std::array<ResultType,
+                sizeof(std::uint32_t) * 4 / sizeof(ResultType)>
+                r;
+        } buf;
+
+        std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(ks.get());
+
+        for (std::size_t i = 0; i != n; ++i) {
+            MCKL_FLATTEN_CALL increment(ctr);
+            buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+            union_le<typename Counter<std::uint32_t, 4>::value_type>(buf.s);
+#endif
+            encfirst(buf.s, rk);
+            round<1>(buf.s, rk, std::integral_constant<bool, 1 < rounds_>());
+            enclast(buf.s, rk);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+            union_le<std::uint32_t>(buf.r);
+#endif
+            std::memcpy(r, buf.r.data(), sizeof(std::uint32_t) * 4);
+        }
     }
 
     private:

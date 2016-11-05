@@ -45,21 +45,20 @@
     lr, bits, Lower, Upper)                                                   \
     template <typename RealType>                                              \
     static void u01_##lr##_u##bits(Counter<std::uint32_t, 4> &ctr,            \
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk,              \
-        std::size_t n, RealType *r)                                           \
+        std::size_t n, RealType *r, const KeySeqType &ks)                     \
     {                                                                         \
         eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
-            ctr, rk, n, r);                                                   \
+            ctr, n, r, ks);                                                   \
     }
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(bits)         \
     template <typename RealType>                                              \
     static void uniform_real_u##bits(Counter<std::uint32_t, 4> &ctr,          \
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk,              \
-        std::size_t n, RealType *r, RealType a, RealType b)                   \
+        std::size_t n, RealType *r, const KeySeqType &ks, RealType a,         \
+        RealType b)                                                           \
     {                                                                         \
         eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>>(             \
-            ctr, rk, n, r, a, b);                                             \
+            ctr, n, r, ks, a, b);                                             \
     }
 
 #ifdef MCKL_GCC
@@ -402,23 +401,35 @@ template <typename KeySeqType>
 class AESGeneratorAESNIImpl
 {
     public:
-    static constexpr bool batch() { return true; }
-
-    static void eval(std::array<std::uint32_t, 4> &s,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
+    static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
-        __m128i *const sptr = reinterpret_cast<__m128i *>(s.data());
-        __m128i t = _mm_load_si128(sptr);
-        eval(t, rk);
-        _mm_store_si128(sptr, t);
+        __m128i s = _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
+        std::array<__m128i, rounds_ + 1> rk(ks.get());
+        s = _mm_xor_si128(s, std::get<0>(rk));
+        MCKL_RANDOM_INTERNAL_AES_UNROLL(0, s, rk);
+        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), s);
     }
 
     template <typename ResultType>
-    static void eval(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        ResultType *r)
+    static void eval(
+        Counter<std::uint32_t, 4> &ctr, ResultType *r, const KeySeqType &ks)
     {
-        eval<transform>(ctr, rk, n, r);
+        increment(ctr);
+        __m128i s =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(ctr.data()));
+        std::array<__m128i, rounds_ + 1> rk(ks.get());
+        s = _mm_xor_si128(s, std::get<0>(rk));
+        MCKL_RANDOM_INTERNAL_AES_UNROLL(0, s, rk);
+        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(r), s);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<std::uint32_t, 4> &ctr, std::size_t n,
+        ResultType *r, const KeySeqType &ks)
+    {
+        eval<transform>(ctr, n, r, ks);
     }
 
 #if MCKL_HAS_AVX2
@@ -464,18 +475,9 @@ class AESGeneratorAESNIImpl
         }
     }; // class transform
 
-    static void eval(
-        __m128i &s, const std::array<__m128i, KeySeqType::rounds() + 1> &rk)
-    {
-        s = _mm_xor_si128(s, std::get<0>(rk));
-        MCKL_RANDOM_INTERNAL_AES_UNROLL(0);
-        s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
-    }
-
     template <typename Transform, typename ResultType, typename... Args>
-    static void eval(Counter<std::uint32_t, 4> &ctr,
-        const std::array<__m128i, KeySeqType::rounds() + 1> &rk, std::size_t n,
-        ResultType *r, Args &&... args)
+    static void eval(Counter<std::uint32_t, 4> &ctr, std::size_t n,
+        ResultType *r, const KeySeqType &ks, Args &&... args)
     {
         using uint_type = typename Transform::uint_type;
 
@@ -484,28 +486,29 @@ class AESGeneratorAESNIImpl
         constexpr std::size_t ustride = sizeof(__m128i) / sizeof(uint_type);
 
         std::array<__m128i, S> s;
+        std::array<__m128i, rounds_ + 1> rk(ks.get());
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si128(ctr, s);
             MCKL_FLATTEN_CALL xor_si128(s, std::get<0>(rk));
-            MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(0);
+            MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(0, s, rk);
             MCKL_FLATTEN_CALL aesenclast_si128(s, std::get<rounds_>(rk));
             MCKL_FLATTEN_CALL r =
                 Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
         }
 
-        alignas(32) union {
-            std::array<std::array<std::uint32_t, 4>, nstride> s;
-            std::array<Counter<std::uint32_t, 4>, nstride> c;
-            std::array<uint_type, nstride * ustride> u;
-        } buf;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_FLATTEN_CALL increment(ctr);
-            buf.c[i] = ctr;
-            eval(buf.s[i], rk);
+            s[i] =
+                _mm_loadu_si128(reinterpret_cast<const __m128i *>(ctr.data()));
+            s[i] = _mm_xor_si128(s[i], std::get<0>(rk));
+            MCKL_RANDOM_INTERNAL_AES_UNROLL(0, s[i], rk);
+            s[i] = _mm_aesenclast_si128(s[i], std::get<rounds_>(rk));
         }
+        alignas(32) std::array<uint_type, nstride * ustride> u;
+        std::memcpy(u.data(), s.data(), sizeof(__m128i) * n);
         MCKL_FLATTEN_CALL Transform::eval(
-            n * ustride, buf.u.data(), r, std::forward<Args>(args)...);
+            n * ustride, u.data(), r, std::forward<Args>(args)...);
     }
 
     template <std::size_t>
@@ -518,7 +521,7 @@ class AESGeneratorAESNIImpl
     static void round(
         __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N);
+        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N, s, rk);
     }
 
     template <std::size_t, std::size_t S>
@@ -531,7 +534,7 @@ class AESGeneratorAESNIImpl
     static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N);
+        MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N, s, rk);
     }
 
     template <std::size_t N>

@@ -101,20 +101,31 @@ class PhiloxGeneratorSSE2Impl32Permute<4>
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorSSE2Impl32
 {
-    public:
-    static constexpr bool batch()
-    {
-        return std::numeric_limits<T>::digits == 32 && K != 0 && 4 % K == 0;
-    }
+    static_assert(std::numeric_limits<T>::digits == 32,
+        "**PhiloxGeneratorSSE2Impl32 used with T other than a 32-bit unsigned "
+        "integer type");
 
-    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &key)
+    static_assert(K != 0 && 4 % K == 0,
+        "**PhiloxGeneratorSSE2Impl32 used with K that does not divide by 4");
+
+    public:
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
-        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(s, key);
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            plain, cipher, key);
     }
 
     template <typename ResultType>
-    static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
-        std::size_t n, ResultType *r)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K / 2> &key)
+    {
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(ctr, r, key);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K / 2> &key)
     {
         constexpr std::size_t S = 8;
         constexpr std::size_t cstride = sizeof(__m128i) * S;
@@ -127,23 +138,14 @@ class PhiloxGeneratorSSE2Impl32
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si128(ctr, s);
             MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::first(s);
-            MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0);
+            MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, s, rk);
             MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::last(s);
             std::memcpy(r, s.data(), cstride);
             n -= nstride;
             r += rstride;
         }
-
-        alignas(32) union {
-            std::array<std::array<T, K>, nstride> s;
-            std::array<Counter<T, K>, nstride> c;
-        } buf;
-        for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.c[i] = ctr;
-            eval(buf.s[i], key);
-        }
-        std::memcpy(r, buf.s.data(), sizeof(T) * K * n);
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, n, r, key);
     }
 
     private:
@@ -157,7 +159,7 @@ class PhiloxGeneratorSSE2Impl32
     static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, Rounds> &rk, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N);
+        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk);
     }
 
     template <std::size_t N, std::size_t S>

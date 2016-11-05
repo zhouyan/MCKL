@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_constants.hpp>
+#include <mckl/random/increment.hpp>
 
 namespace mckl
 {
@@ -285,11 +286,51 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorGenericImpl
 {
     public:
-    static constexpr bool batch() { return false; }
-
-    static void eval(std::array<T, K> &s, const std::array<T, K + 4> &par)
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
-        round<0>(s, par, std::integral_constant<bool, 0 <= Rounds>());
+        alignas(32) union {
+            std::array<T, K> s;
+            std::array<char, sizeof(T) * K> r;
+        } buf;
+
+        std::memcpy(buf.s.data(), plain, sizeof(T) * K);
+        union_le<char>(buf.s);
+        round<0>(buf.s, par, std::integral_constant<bool, 0 <= Rounds>());
+        union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K + 4> &par)
+    {
+        alignas(32) union {
+            std::array<T, K> s;
+            Counter<T, K> c;
+            std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
+        } buf;
+
+        increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<typename Counter<T, K>::value_type>(buf.s);
+#endif
+        round<0>(buf.s, par, std::integral_constant<bool, 0 <= Rounds>());
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<T>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), sizeof(T) * K);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K + 4> &par)
+    {
+        constexpr std::size_t rstride = sizeof(T) * K / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += rstride)
+            eval(ctr, r, par);
     }
 
     private:

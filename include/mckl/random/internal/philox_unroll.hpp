@@ -32,7 +32,7 @@
 #ifndef MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_HPP
 #define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_HPP
 
-#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(N)                                 \
+#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(N, s, rk)                          \
     MCKL_FLATTEN_CALL rbox<N + 0x0>(s, rk);                                   \
     MCKL_FLATTEN_CALL rbox<N + 0x1>(s, rk);                                   \
     MCKL_FLATTEN_CALL rbox<N + 0x2>(s, rk);                                   \
@@ -50,8 +50,8 @@
     MCKL_FLATTEN_CALL rbox<N + 0xE>(s, rk);                                   \
     MCKL_FLATTEN_CALL rbox<N + 0xF>(s, rk);
 
-#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N)                           \
-    MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(0x00)                                  \
+#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk)                    \
+    MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(0x00, s, rk)                           \
     round<N + 0x10>(s, rk, std::integral_constant<bool, N + 0x10 <= Rounds>());
 
 #endif // MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP

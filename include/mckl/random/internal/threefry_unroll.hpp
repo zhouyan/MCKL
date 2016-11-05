@@ -32,7 +32,7 @@
 #ifndef MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP
 #define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP
 
-#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N)                               \
+#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N, s, par)                       \
     MCKL_FLATTEN_CALL rbox<N + 0x0>(s);                                       \
     MCKL_FLATTEN_CALL kbox<N + 0x0>(s, par);                                  \
     MCKL_FLATTEN_CALL rbox<N + 0x1>(s);                                       \
@@ -66,9 +66,9 @@
     MCKL_FLATTEN_CALL rbox<N + 0xF>(s);                                       \
     MCKL_FLATTEN_CALL kbox<N + 0xF>(s, par);
 
-#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N)                         \
-    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x00)                            \
-    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x10)                            \
+#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par)                 \
+    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x00, s, par)                    \
+    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x10, s, par)                    \
     round<N + 0x20>(                                                          \
         s, par, std::integral_constant<bool, N + 0x20 <= Rounds>());
 

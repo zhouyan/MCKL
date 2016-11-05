@@ -42,21 +42,20 @@
 #define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_32_U01(                     \
     lr, bits, Lower, Upper)                                                   \
     template <typename RealType>                                              \
-    static void u01_##lr##_u##bits(Counter<T, K> &ctr,                        \
-        const std::array<T, K + 4> &par, std::size_t n, RealType *r)          \
+    static void u01_##lr##_u##bits(Counter<T, K> &ctr, std::size_t n,         \
+        RealType *r, const std::array<T, K + 4> &par)                         \
     {                                                                         \
         eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
-            ctr, par, n, r);                                                  \
+            ctr, n, r, par);                                                  \
     }
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_32_UNIFORM_REAL(bits)       \
     template <typename RealType>                                              \
-    static void uniform_real_u##bits(Counter<T, K> &ctr,                      \
-        const std::array<T, K + 4> &par, std::size_t n, RealType *r,          \
-        RealType a, RealType b)                                               \
+    static void uniform_real_u##bits(Counter<T, K> &ctr, std::size_t n,       \
+        RealType *r, const std::array<T, K + 4> &par, RealType a, RealType b) \
     {                                                                         \
         eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>>(             \
-            ctr, par, n, r, a, b);                                            \
+            ctr, n, r, par, a, b);                                            \
     }
 
 #ifdef MCKL_GCC
@@ -75,22 +74,35 @@ namespace internal
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorAVX2Impl32
 {
-    public:
-    static constexpr bool batch()
-    {
-        return std::numeric_limits<T>::digits == 32 && K != 0 && 16 % K == 0;
-    }
+    static_assert(std::numeric_limits<T>::digits == 32,
+        "**ThreefryGeneratorAVX2Impl32 used with T other than an 32-bit "
+        "unsigned integer type");
 
-    static void eval(std::array<T, K> &s, const std::array<T, K + 4> &par)
+    static_assert(K != 0 && 16 % K == 0,
+        "**ThreefryGeneratorAVX2Impl32 used with K that does not divide by "
+        "16");
+
+    public:
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
-        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(s, par);
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            plain, cipher, par);
     }
 
     template <typename ResultType>
-    static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
-        std::size_t n, ResultType *r)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K + 4> &par)
     {
-        eval<transform>(ctr, par, n, r);
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, r, par);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K + 4> &par)
+    {
+        eval<transform>(ctr, n, r, par);
     }
 
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_AVX2_32_U01(cc, 32, Closed, Closed)
@@ -131,8 +143,8 @@ class ThreefryGeneratorAVX2Impl32
     }; // class transform
 
     template <typename Transform, typename ResultType, typename... Args>
-    static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
-        std::size_t n, ResultType *r, Args &&... args)
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K + 4> &par, Args &&... args)
     {
         using uint_type = typename Transform::uint_type;
 
@@ -144,25 +156,18 @@ class ThreefryGeneratorAVX2Impl32
         while (n >= nstride) {
             MCKL_FLATTEN_CALL increment_si256(ctr, s);
             MCKL_FLATTEN_CALL transpose8x32_load_si256(s);
-            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0);
+            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, s, par);
             MCKL_FLATTEN_CALL transpose8x32_store_si256(s);
             MCKL_FLATTEN_CALL r =
                 Transform::eval(s, r, std::forward<Args>(args)...);
             n -= nstride;
         }
 
-        alignas(32) union {
-            std::array<std::array<T, K>, nstride> s;
-            std::array<Counter<T, K>, nstride> c;
-            std::array<uint_type, nstride * ustride> u;
-        } buf;
-        for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.c[i] = ctr;
-            eval(buf.s[i], par);
-        }
+        alignas(32) std::array<uint_type, nstride * ustride> u;
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, n, u.data(), par);
         MCKL_FLATTEN_CALL Transform::eval(
-            n * ustride, buf.u.data(), r, std::forward<Args>(args)...);
+            n * ustride, u.data(), r, std::forward<Args>(args)...);
     }
 
     template <std::size_t, std::size_t S>
@@ -175,7 +180,7 @@ class ThreefryGeneratorAVX2Impl32
     static void round(std::array<__m256i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N);
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par);
     }
 
     template <std::size_t N, std::size_t S>

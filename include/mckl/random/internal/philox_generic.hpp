@@ -188,11 +188,11 @@ template <typename T, std::size_t K, std::size_t N, typename Constants>
 class PhiloxRBox
 {
     public:
-    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &key)
+    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &k)
     {
         std::array<T, K> t;
         pbox<0>(s, t, std::integral_constant<bool, 0 < K>());
-        sbox<0>(s, t, key, std::integral_constant<bool, 0 < K / 2>());
+        sbox<0>(s, t, k, std::integral_constant<bool, 0 < K / 2>());
     }
 
     private:
@@ -204,7 +204,7 @@ class PhiloxRBox
 
     template <std::size_t I>
     static void sbox(std::array<T, K> &s, const std::array<T, K> &t,
-        const std::array<T, K / 2> &key, std::true_type)
+        const std::array<T, K / 2> &k, std::true_type)
     {
         constexpr std::size_t I0 = I * 2;
         constexpr std::size_t I1 = I * 2 + 1;
@@ -213,8 +213,8 @@ class PhiloxRBox
 
         T h;
         std::get<I1>(s) = PhiloxHiLo<T>::eval(std::get<I0>(t), m, h);
-        std::get<I0>(s) = (std::get<I>(key) + w) ^ (std::get<I1>(t) ^ h);
-        sbox<I + 1>(s, t, key, std::integral_constant<bool, I + 1 < K / 2>());
+        std::get<I0>(s) = (std::get<I>(k) + w) ^ (std::get<I1>(t) ^ h);
+        sbox<I + 1>(s, t, k, std::integral_constant<bool, I + 1 < K / 2>());
     }
 
     template <std::size_t>
@@ -240,7 +240,7 @@ template <typename T, std::size_t N, typename Constants>
 class PhiloxRBox<T, 2, N, Constants>
 {
     public:
-    static void eval(std::array<T, 2> &s, const std::array<T, 1> &key)
+    static void eval(std::array<T, 2> &s, const std::array<T, 1> &k)
     {
         constexpr T w0 = Constants::weyl::value[0] * static_cast<T>(N - 1);
         constexpr T m0 = Constants::multiplier::value[0];
@@ -248,7 +248,7 @@ class PhiloxRBox<T, 2, N, Constants>
         T s1 = std::get<1>(s);
         T h0;
         std::get<1>(s) = PhiloxHiLo<T>::eval(std::get<0>(s), m0, h0);
-        std::get<0>(s) = (std::get<0>(key) + w0) ^ (s1 ^ h0);
+        std::get<0>(s) = (std::get<0>(k) + w0) ^ (s1 ^ h0);
     }
 }; // class PhiloxRBox
 
@@ -256,7 +256,7 @@ template <typename T, std::size_t N, typename Constants>
 class PhiloxRBox<T, 4, N, Constants>
 {
     public:
-    static void eval(std::array<T, 4> &s, const std::array<T, 2> &key)
+    static void eval(std::array<T, 4> &s, const std::array<T, 2> &k)
     {
         constexpr T w0 = Constants::weyl::value[0] * static_cast<T>(N - 1);
         constexpr T w1 = Constants::weyl::value[1] * static_cast<T>(N - 1);
@@ -269,8 +269,8 @@ class PhiloxRBox<T, 4, N, Constants>
         T h0;
         std::get<1>(s) = PhiloxHiLo<T>::eval(std::get<2>(s), m2, h2);
         std::get<3>(s) = PhiloxHiLo<T>::eval(std::get<0>(s), m0, h0);
-        std::get<0>(s) = (std::get<0>(key) + w0) ^ (s1 ^ h2);
-        std::get<2>(s) = (std::get<1>(key) + w1) ^ (s3 ^ h0);
+        std::get<0>(s) = (std::get<0>(k) + w0) ^ (s1 ^ h2);
+        std::get<2>(s) = (std::get<1>(k) + w1) ^ (s3 ^ h0);
     }
 }; // class PhiloxRBox
 
@@ -278,11 +278,51 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorGenericImpl
 {
     public:
-    static constexpr bool batch() { return false; }
-
-    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &key)
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
-        round<0>(s, key, std::integral_constant<bool, 0 <= Rounds>());
+        alignas(32) union {
+            std::array<T, K> s;
+            std::array<char, sizeof(T) * K> r;
+        } buf;
+
+        std::memcpy(buf.s.data(), plain, sizeof(T) * K);
+        union_le<char>(buf.s);
+        round<0>(buf.s, key, std::integral_constant<bool, 0 <= Rounds>());
+        union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K / 2> &key)
+    {
+        alignas(32) union {
+            std::array<T, K> s;
+            Counter<T, K> c;
+            std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
+        } buf;
+
+        MCKL_FLATTEN_CALL increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<typename Counter<T, K>::value_type>(buf.s);
+#endif
+        round<0>(buf.s, key, std::integral_constant<bool, 0 <= Rounds>());
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<T>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), sizeof(T) * K);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K / 2> &key)
+    {
+        constexpr std::size_t rstride = sizeof(T) * K / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += rstride)
+            eval(ctr, r, key);
     }
 
     private:
@@ -294,17 +334,16 @@ class PhiloxGeneratorGenericImpl
 
     template <std::size_t N>
     static void round(
-        std::array<T, K> &s, const std::array<T, K / 2> &key, std::true_type)
+        std::array<T, K> &s, const std::array<T, K / 2> &k, std::true_type)
     {
-        rbox<N>(s, key);
-        round<N + 1>(s, key, std::integral_constant<bool, N + 1 <= Rounds>());
+        rbox<N>(s, k);
+        round<N + 1>(s, k, std::integral_constant<bool, N + 1 <= Rounds>());
     }
 
     template <std::size_t N>
-    static void rbox(std::array<T, K> &s, const std::array<T, K / 2> &key)
+    static void rbox(std::array<T, K> &s, const std::array<T, K / 2> &k)
     {
-        rbox<N>(
-            s, key, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
+        rbox<N>(s, k, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t>
@@ -315,9 +354,9 @@ class PhiloxGeneratorGenericImpl
 
     template <std::size_t N>
     static void rbox(
-        std::array<T, K> &s, const std::array<T, K / 2> &key, std::true_type)
+        std::array<T, K> &s, const std::array<T, K / 2> &k, std::true_type)
     {
-        PhiloxRBox<T, K, N, Constants>::eval(s, key);
+        PhiloxRBox<T, K, N, Constants>::eval(s, k);
     }
 }; // class PhiloxGeneratorGenericImpl
 
