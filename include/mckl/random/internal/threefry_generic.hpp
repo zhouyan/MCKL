@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_constants.hpp>
+#include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/increment.hpp>
 
 namespace mckl
@@ -296,7 +297,7 @@ class ThreefryGeneratorGenericImpl
 
         std::memcpy(buf.s.data(), plain, sizeof(T) * K);
         union_le<char>(buf.s);
-        round<0>(buf.s, par, std::integral_constant<bool, 0 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, buf.s, par);
         union_le<T>(buf.r);
         std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
     }
@@ -311,12 +312,12 @@ class ThreefryGeneratorGenericImpl
             std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
         } buf;
 
-        increment(ctr);
+        MCKL_INLINE_CALL increment(ctr);
         buf.c = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         union_le<typename Counter<T, K>::value_type>(buf.s);
 #endif
-        round<0>(buf.s, par, std::integral_constant<bool, 0 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, buf.s, par);
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         union_le<T>(buf.r);
 #endif
@@ -341,16 +342,15 @@ class ThreefryGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void round(
+    MCKL_NOINLINE static void round(
         std::array<T, K> &s, const std::array<T, K + 4> &par, std::true_type)
     {
-        rbox<N>(s);
-        kbox<N>(s, par);
-        round<N + 1>(s, par, std::integral_constant<bool, N + 1 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par);
     }
 
     template <std::size_t N>
-    static void kbox(std::array<T, K> &s, const std::array<T, K + 4> &par)
+    MCKL_INLINE static void kbox(
+        std::array<T, K> &s, const std::array<T, K + 4> &par)
     {
         kbox<N>(s, par,
             std::integral_constant<bool, (N % 4 == 0 && N <= Rounds)>());
@@ -370,7 +370,7 @@ class ThreefryGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void rbox(std::array<T, K> &s)
+    MCKL_INLINE static void rbox(std::array<T, K> &s)
     {
         rbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }

@@ -49,7 +49,7 @@ namespace internal
 {
 
 template <int imm8>
-MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 4> &s)
+MCKL_INLINE inline void slli_epi32(std::array<__m128i, 4> &s)
 {
     std::get<0>(s) = _mm_slli_epi32(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_slli_epi32(std::get<1>(s), imm8);
@@ -58,7 +58,7 @@ MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 4> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 4> &s)
+MCKL_INLINE inline void srli_epi32(std::array<__m128i, 4> &s)
 {
     std::get<0>(s) = _mm_srli_epi32(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_srli_epi32(std::get<1>(s), imm8);
@@ -67,7 +67,7 @@ MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 4> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 4> &s)
+MCKL_INLINE inline void slli_epi64(std::array<__m128i, 4> &s)
 {
     std::get<0>(s) = _mm_slli_epi64(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_slli_epi64(std::get<1>(s), imm8);
@@ -76,7 +76,7 @@ MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 4> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 4> &s)
+MCKL_INLINE inline void srli_epi64(std::array<__m128i, 4> &s)
 {
     std::get<0>(s) = _mm_srli_epi64(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_srli_epi64(std::get<1>(s), imm8);
@@ -85,7 +85,7 @@ MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 4> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void shuffle_epi32(std::array<__m128i, 4> &s)
+MCKL_INLINE inline void shuffle_epi32(std::array<__m128i, 4> &s)
 {
     std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), imm8);
@@ -93,7 +93,7 @@ MCKL_FLATTEN inline void shuffle_epi32(std::array<__m128i, 4> &s)
     std::get<3>(s) = _mm_shuffle_epi32(std::get<3>(s), imm8);
 }
 
-MCKL_FLATTEN inline void and_si128(const std::array<__m128i, 4> &s,
+MCKL_INLINE inline void and_si128(const std::array<__m128i, 4> &s,
     const __m128i &a, std::array<__m128i, 4> &t)
 {
     std::get<0>(t) = _mm_and_si128(std::get<0>(s), a);
@@ -102,7 +102,7 @@ MCKL_FLATTEN inline void and_si128(const std::array<__m128i, 4> &s,
     std::get<3>(t) = _mm_and_si128(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void and_si128(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void and_si128(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_and_si128(std::get<0>(s), a);
     std::get<1>(s) = _mm_and_si128(std::get<1>(s), a);
@@ -110,7 +110,7 @@ MCKL_FLATTEN inline void and_si128(std::array<__m128i, 4> &s, const __m128i &a)
     std::get<3>(s) = _mm_and_si128(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void xor_si128(
+MCKL_INLINE inline void xor_si128(
     std::array<__m128i, 4> &s, const std::array<__m128i, 4> &a)
 {
     std::get<0>(s) = _mm_xor_si128(std::get<0>(s), std::get<0>(a));
@@ -119,7 +119,7 @@ MCKL_FLATTEN inline void xor_si128(
     std::get<3>(s) = _mm_xor_si128(std::get<3>(s), std::get<3>(a));
 }
 
-MCKL_FLATTEN inline void xor_si128(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void xor_si128(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_xor_si128(std::get<0>(s), a);
     std::get<1>(s) = _mm_xor_si128(std::get<1>(s), a);
@@ -127,7 +127,7 @@ MCKL_FLATTEN inline void xor_si128(std::array<__m128i, 4> &s, const __m128i &a)
     std::get<3>(s) = _mm_xor_si128(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void add_epi32(
+MCKL_INLINE inline void add_epi32(
     std::array<__m128i, 4> &s, const std::array<__m128i, 4> &a)
 {
     std::get<0>(s) = _mm_add_epi32(std::get<0>(s), std::get<0>(a));
@@ -136,7 +136,7 @@ MCKL_FLATTEN inline void add_epi32(
     std::get<3>(s) = _mm_add_epi32(std::get<3>(s), std::get<3>(a));
 }
 
-MCKL_FLATTEN inline void add_epi64(
+MCKL_INLINE inline void add_epi64(
     std::array<__m128i, 4> &s, const std::array<__m128i, 4> &a)
 {
     std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<0>(a));
@@ -145,7 +145,7 @@ MCKL_FLATTEN inline void add_epi64(
     std::get<3>(s) = _mm_add_epi64(std::get<3>(s), std::get<3>(a));
 }
 
-MCKL_FLATTEN inline void add_epi64(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void add_epi64(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_add_epi64(std::get<0>(s), a);
     std::get<1>(s) = _mm_add_epi64(std::get<1>(s), a);
@@ -153,7 +153,7 @@ MCKL_FLATTEN inline void add_epi64(std::array<__m128i, 4> &s, const __m128i &a)
     std::get<3>(s) = _mm_add_epi64(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 4> &s,
+MCKL_INLINE inline void mul_epu32(const std::array<__m128i, 4> &s,
     const __m128i &a, std::array<__m128i, 4> &t)
 {
     std::get<0>(t) = _mm_mul_epu32(std::get<0>(s), a);
@@ -162,7 +162,7 @@ MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 4> &s,
     std::get<3>(t) = _mm_mul_epu32(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void add_ps(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void add_ps(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castps_si128(
         _mm_add_ps(_mm_castsi128_ps(std::get<0>(s)), _mm_castsi128_ps(a)));
@@ -174,7 +174,7 @@ MCKL_FLATTEN inline void add_ps(std::array<__m128i, 4> &s, const __m128i &a)
         _mm_add_ps(_mm_castsi128_ps(std::get<3>(s)), _mm_castsi128_ps(a)));
 }
 
-MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void mul_ps(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castps_si128(
         _mm_mul_ps(_mm_castsi128_ps(std::get<0>(s)), _mm_castsi128_ps(a)));
@@ -186,7 +186,7 @@ MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 4> &s, const __m128i &a)
         _mm_mul_ps(_mm_castsi128_ps(std::get<3>(s)), _mm_castsi128_ps(a)));
 }
 
-MCKL_FLATTEN inline void add_pd(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void add_pd(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castpd_si128(
         _mm_add_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
@@ -198,7 +198,7 @@ MCKL_FLATTEN inline void add_pd(std::array<__m128i, 4> &s, const __m128i &a)
         _mm_add_pd(_mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void add_pd(
+MCKL_INLINE inline void add_pd(
     std::array<__m128i, 4> &s, const std::array<__m128i, 4> &a)
 {
     std::get<0>(s) = _mm_castpd_si128(_mm_add_pd(
@@ -211,7 +211,7 @@ MCKL_FLATTEN inline void add_pd(
         _mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(std::get<3>(a))));
 }
 
-MCKL_FLATTEN inline void sub_pd(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void sub_pd(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castpd_si128(
         _mm_sub_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
@@ -223,7 +223,7 @@ MCKL_FLATTEN inline void sub_pd(std::array<__m128i, 4> &s, const __m128i &a)
         _mm_sub_pd(_mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 4> &s, const __m128i &a)
+MCKL_INLINE inline void mul_pd(std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castpd_si128(
         _mm_mul_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
@@ -235,7 +235,7 @@ MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 4> &s, const __m128i &a)
         _mm_mul_pd(_mm_castsi128_pd(std::get<3>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void mul_pd(
+MCKL_INLINE inline void mul_pd(
     std::array<__m128i, 4> &s, const std::array<__m128i, 4> &a)
 {
     std::get<0>(s) = _mm_castpd_si128(_mm_mul_pd(
@@ -249,7 +249,7 @@ MCKL_FLATTEN inline void mul_pd(
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 8> &s)
+MCKL_INLINE inline void slli_epi32(std::array<__m128i, 8> &s)
 {
     std::get<0>(s) = _mm_slli_epi32(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_slli_epi32(std::get<1>(s), imm8);
@@ -262,7 +262,7 @@ MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 8> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 8> &s)
+MCKL_INLINE inline void srli_epi32(std::array<__m128i, 8> &s)
 {
     std::get<0>(s) = _mm_srli_epi32(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_srli_epi32(std::get<1>(s), imm8);
@@ -275,7 +275,7 @@ MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 8> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 8> &s)
+MCKL_INLINE inline void slli_epi64(std::array<__m128i, 8> &s)
 {
     std::get<0>(s) = _mm_slli_epi64(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_slli_epi64(std::get<1>(s), imm8);
@@ -288,7 +288,7 @@ MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 8> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 8> &s)
+MCKL_INLINE inline void srli_epi64(std::array<__m128i, 8> &s)
 {
     std::get<0>(s) = _mm_srli_epi64(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_srli_epi64(std::get<1>(s), imm8);
@@ -301,7 +301,7 @@ MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 8> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void shuffle_epi32(std::array<__m128i, 8> &s)
+MCKL_INLINE inline void shuffle_epi32(std::array<__m128i, 8> &s)
 {
     std::get<0>(s) = _mm_shuffle_epi32(std::get<0>(s), imm8);
     std::get<1>(s) = _mm_shuffle_epi32(std::get<1>(s), imm8);
@@ -313,7 +313,7 @@ MCKL_FLATTEN inline void shuffle_epi32(std::array<__m128i, 8> &s)
     std::get<7>(s) = _mm_shuffle_epi32(std::get<7>(s), imm8);
 }
 
-MCKL_FLATTEN inline void and_si128(const std::array<__m128i, 8> &s,
+MCKL_INLINE inline void and_si128(const std::array<__m128i, 8> &s,
     const __m128i &a, std::array<__m128i, 8> &t)
 {
     std::get<0>(t) = _mm_and_si128(std::get<0>(s), a);
@@ -326,7 +326,7 @@ MCKL_FLATTEN inline void and_si128(const std::array<__m128i, 8> &s,
     std::get<7>(t) = _mm_and_si128(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void and_si128(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void and_si128(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_and_si128(std::get<0>(s), a);
     std::get<1>(s) = _mm_and_si128(std::get<1>(s), a);
@@ -338,7 +338,7 @@ MCKL_FLATTEN inline void and_si128(std::array<__m128i, 8> &s, const __m128i &a)
     std::get<7>(s) = _mm_and_si128(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void xor_si128(
+MCKL_INLINE inline void xor_si128(
     std::array<__m128i, 8> &s, const std::array<__m128i, 8> &a)
 {
     std::get<0>(s) = _mm_xor_si128(std::get<0>(s), std::get<0>(a));
@@ -351,7 +351,7 @@ MCKL_FLATTEN inline void xor_si128(
     std::get<7>(s) = _mm_xor_si128(std::get<7>(s), std::get<7>(a));
 }
 
-MCKL_FLATTEN inline void xor_si128(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void xor_si128(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_xor_si128(std::get<0>(s), a);
     std::get<1>(s) = _mm_xor_si128(std::get<1>(s), a);
@@ -363,7 +363,7 @@ MCKL_FLATTEN inline void xor_si128(std::array<__m128i, 8> &s, const __m128i &a)
     std::get<7>(s) = _mm_xor_si128(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void add_epi32(
+MCKL_INLINE inline void add_epi32(
     std::array<__m128i, 8> &s, const std::array<__m128i, 8> &a)
 {
     std::get<0>(s) = _mm_add_epi32(std::get<0>(s), std::get<0>(a));
@@ -376,7 +376,7 @@ MCKL_FLATTEN inline void add_epi32(
     std::get<7>(s) = _mm_add_epi32(std::get<7>(s), std::get<7>(a));
 }
 
-MCKL_FLATTEN inline void add_epi64(
+MCKL_INLINE inline void add_epi64(
     std::array<__m128i, 8> &s, const std::array<__m128i, 8> &a)
 {
     std::get<0>(s) = _mm_add_epi64(std::get<0>(s), std::get<0>(a));
@@ -389,7 +389,7 @@ MCKL_FLATTEN inline void add_epi64(
     std::get<7>(s) = _mm_add_epi64(std::get<7>(s), std::get<7>(a));
 }
 
-MCKL_FLATTEN inline void add_epi64(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void add_epi64(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_add_epi64(std::get<0>(s), a);
     std::get<1>(s) = _mm_add_epi64(std::get<1>(s), a);
@@ -401,7 +401,7 @@ MCKL_FLATTEN inline void add_epi64(std::array<__m128i, 8> &s, const __m128i &a)
     std::get<7>(s) = _mm_add_epi64(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 8> &s,
+MCKL_INLINE inline void mul_epu32(const std::array<__m128i, 8> &s,
     const __m128i &a, std::array<__m128i, 8> &t)
 {
     std::get<0>(t) = _mm_mul_epu32(std::get<0>(s), a);
@@ -414,7 +414,7 @@ MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 8> &s,
     std::get<7>(t) = _mm_mul_epu32(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void add_ps(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void add_ps(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castps_si128(
         _mm_add_ps(_mm_castsi128_ps(std::get<0>(s)), _mm_castsi128_ps(a)));
@@ -434,7 +434,7 @@ MCKL_FLATTEN inline void add_ps(std::array<__m128i, 8> &s, const __m128i &a)
         _mm_add_ps(_mm_castsi128_ps(std::get<7>(s)), _mm_castsi128_ps(a)));
 }
 
-MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void mul_ps(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castps_si128(
         _mm_mul_ps(_mm_castsi128_ps(std::get<0>(s)), _mm_castsi128_ps(a)));
@@ -454,7 +454,7 @@ MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 8> &s, const __m128i &a)
         _mm_mul_ps(_mm_castsi128_ps(std::get<7>(s)), _mm_castsi128_ps(a)));
 }
 
-MCKL_FLATTEN inline void add_pd(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void add_pd(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castpd_si128(
         _mm_add_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
@@ -474,7 +474,7 @@ MCKL_FLATTEN inline void add_pd(std::array<__m128i, 8> &s, const __m128i &a)
         _mm_add_pd(_mm_castsi128_pd(std::get<7>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void add_pd(
+MCKL_INLINE inline void add_pd(
     std::array<__m128i, 8> &s, const std::array<__m128i, 8> &a)
 {
     std::get<0>(s) = _mm_castpd_si128(_mm_add_pd(
@@ -495,7 +495,7 @@ MCKL_FLATTEN inline void add_pd(
         _mm_castsi128_pd(std::get<7>(s)), _mm_castsi128_pd(std::get<7>(a))));
 }
 
-MCKL_FLATTEN inline void sub_pd(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void sub_pd(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castpd_si128(
         _mm_sub_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
@@ -515,7 +515,7 @@ MCKL_FLATTEN inline void sub_pd(std::array<__m128i, 8> &s, const __m128i &a)
         _mm_sub_pd(_mm_castsi128_pd(std::get<7>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 8> &s, const __m128i &a)
+MCKL_INLINE inline void mul_pd(std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_castpd_si128(
         _mm_mul_pd(_mm_castsi128_pd(std::get<0>(s)), _mm_castsi128_pd(a)));
@@ -535,7 +535,7 @@ MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 8> &s, const __m128i &a)
         _mm_mul_pd(_mm_castsi128_pd(std::get<7>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void mul_pd(
+MCKL_INLINE inline void mul_pd(
     std::array<__m128i, 8> &s, const std::array<__m128i, 8> &a)
 {
     std::get<0>(s) = _mm_castpd_si128(_mm_mul_pd(
@@ -557,7 +557,7 @@ MCKL_FLATTEN inline void mul_pd(
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 16> &s)
+MCKL_INLINE inline void slli_epi32(std::array<__m128i, 16> &s)
 {
     std::get<0x0>(s) = _mm_slli_epi32(std::get<0x0>(s), imm8);
     std::get<0x1>(s) = _mm_slli_epi32(std::get<0x1>(s), imm8);
@@ -578,7 +578,7 @@ MCKL_FLATTEN inline void slli_epi32(std::array<__m128i, 16> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 16> &s)
+MCKL_INLINE inline void srli_epi32(std::array<__m128i, 16> &s)
 {
     std::get<0x0>(s) = _mm_srli_epi32(std::get<0x0>(s), imm8);
     std::get<0x1>(s) = _mm_srli_epi32(std::get<0x1>(s), imm8);
@@ -599,7 +599,7 @@ MCKL_FLATTEN inline void srli_epi32(std::array<__m128i, 16> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 16> &s)
+MCKL_INLINE inline void slli_epi64(std::array<__m128i, 16> &s)
 {
     std::get<0x0>(s) = _mm_slli_epi64(std::get<0x0>(s), imm8);
     std::get<0x1>(s) = _mm_slli_epi64(std::get<0x1>(s), imm8);
@@ -620,7 +620,7 @@ MCKL_FLATTEN inline void slli_epi64(std::array<__m128i, 16> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 16> &s)
+MCKL_INLINE inline void srli_epi64(std::array<__m128i, 16> &s)
 {
     std::get<0x0>(s) = _mm_srli_epi64(std::get<0x0>(s), imm8);
     std::get<0x1>(s) = _mm_srli_epi64(std::get<0x1>(s), imm8);
@@ -641,7 +641,7 @@ MCKL_FLATTEN inline void srli_epi64(std::array<__m128i, 16> &s)
 }
 
 template <int imm8>
-MCKL_FLATTEN inline void shuffle_epi32(std::array<__m128i, 16> &s)
+MCKL_INLINE inline void shuffle_epi32(std::array<__m128i, 16> &s)
 {
     std::get<0x0>(s) = _mm_shuffle_epi32(std::get<0x0>(s), imm8);
     std::get<0x1>(s) = _mm_shuffle_epi32(std::get<0x1>(s), imm8);
@@ -661,7 +661,7 @@ MCKL_FLATTEN inline void shuffle_epi32(std::array<__m128i, 16> &s)
     std::get<0xF>(s) = _mm_shuffle_epi32(std::get<0xF>(s), imm8);
 }
 
-MCKL_FLATTEN inline void and_si128(const std::array<__m128i, 16> &s,
+MCKL_INLINE inline void and_si128(const std::array<__m128i, 16> &s,
     const __m128i &a, std::array<__m128i, 16> &t)
 {
     std::get<0x0>(t) = _mm_and_si128(std::get<0x0>(s), a);
@@ -682,8 +682,7 @@ MCKL_FLATTEN inline void and_si128(const std::array<__m128i, 16> &s,
     std::get<0xF>(t) = _mm_and_si128(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void and_si128(
-    std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void and_si128(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_and_si128(std::get<0x0>(s), a);
     std::get<0x1>(s) = _mm_and_si128(std::get<0x1>(s), a);
@@ -703,7 +702,7 @@ MCKL_FLATTEN inline void and_si128(
     std::get<0xF>(s) = _mm_and_si128(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void xor_si128(
+MCKL_INLINE inline void xor_si128(
     std::array<__m128i, 16> &s, const std::array<__m128i, 16> &a)
 {
     std::get<0x0>(s) = _mm_xor_si128(std::get<0x0>(s), std::get<0x0>(a));
@@ -724,8 +723,7 @@ MCKL_FLATTEN inline void xor_si128(
     std::get<0xF>(s) = _mm_xor_si128(std::get<0xF>(s), std::get<0xF>(a));
 }
 
-MCKL_FLATTEN inline void xor_si128(
-    std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void xor_si128(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_xor_si128(std::get<0x0>(s), a);
     std::get<0x1>(s) = _mm_xor_si128(std::get<0x1>(s), a);
@@ -745,7 +743,7 @@ MCKL_FLATTEN inline void xor_si128(
     std::get<0xF>(s) = _mm_xor_si128(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void add_epi32(
+MCKL_INLINE inline void add_epi32(
     std::array<__m128i, 16> &s, const std::array<__m128i, 16> &a)
 {
     std::get<0x0>(s) = _mm_add_epi32(std::get<0x0>(s), std::get<0x0>(a));
@@ -766,7 +764,7 @@ MCKL_FLATTEN inline void add_epi32(
     std::get<0xF>(s) = _mm_add_epi32(std::get<0xF>(s), std::get<0xF>(a));
 }
 
-MCKL_FLATTEN inline void add_epi64(
+MCKL_INLINE inline void add_epi64(
     std::array<__m128i, 16> &s, const std::array<__m128i, 16> &a)
 {
     std::get<0x0>(s) = _mm_add_epi64(std::get<0x0>(s), std::get<0x0>(a));
@@ -787,8 +785,7 @@ MCKL_FLATTEN inline void add_epi64(
     std::get<0xF>(s) = _mm_add_epi64(std::get<0xF>(s), std::get<0xF>(a));
 }
 
-MCKL_FLATTEN inline void add_epi64(
-    std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void add_epi64(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_add_epi64(std::get<0x0>(s), a);
     std::get<0x1>(s) = _mm_add_epi64(std::get<0x1>(s), a);
@@ -808,7 +805,7 @@ MCKL_FLATTEN inline void add_epi64(
     std::get<0xF>(s) = _mm_add_epi64(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 16> &s,
+MCKL_INLINE inline void mul_epu32(const std::array<__m128i, 16> &s,
     const __m128i &a, std::array<__m128i, 16> &t)
 {
     std::get<0x0>(t) = _mm_mul_epu32(std::get<0x0>(s), a);
@@ -829,7 +826,7 @@ MCKL_FLATTEN inline void mul_epu32(const std::array<__m128i, 16> &s,
     std::get<0xF>(t) = _mm_mul_epu32(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void add_ps(std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void add_ps(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_castps_si128(
         _mm_add_ps(_mm_castsi128_ps(std::get<0x0>(s)), _mm_castsi128_ps(a)));
@@ -865,7 +862,7 @@ MCKL_FLATTEN inline void add_ps(std::array<__m128i, 16> &s, const __m128i &a)
         _mm_add_ps(_mm_castsi128_ps(std::get<0xF>(s)), _mm_castsi128_ps(a)));
 }
 
-MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void mul_ps(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_castps_si128(
         _mm_mul_ps(_mm_castsi128_ps(std::get<0x0>(s)), _mm_castsi128_ps(a)));
@@ -901,7 +898,7 @@ MCKL_FLATTEN inline void mul_ps(std::array<__m128i, 16> &s, const __m128i &a)
         _mm_mul_ps(_mm_castsi128_ps(std::get<0xF>(s)), _mm_castsi128_ps(a)));
 }
 
-MCKL_FLATTEN inline void add_pd(std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void add_pd(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_castpd_si128(
         _mm_add_pd(_mm_castsi128_pd(std::get<0x0>(s)), _mm_castsi128_pd(a)));
@@ -937,7 +934,7 @@ MCKL_FLATTEN inline void add_pd(std::array<__m128i, 16> &s, const __m128i &a)
         _mm_add_pd(_mm_castsi128_pd(std::get<0xF>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void add_pd(
+MCKL_INLINE inline void add_pd(
     std::array<__m128i, 16> &s, const std::array<__m128i, 16> &a)
 {
     std::get<0x0>(s) =
@@ -990,7 +987,7 @@ MCKL_FLATTEN inline void add_pd(
             _mm_castsi128_pd(std::get<0xF>(a))));
 }
 
-MCKL_FLATTEN inline void sub_pd(std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void sub_pd(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_castpd_si128(
         _mm_sub_pd(_mm_castsi128_pd(std::get<0x0>(s)), _mm_castsi128_pd(a)));
@@ -1026,7 +1023,7 @@ MCKL_FLATTEN inline void sub_pd(std::array<__m128i, 16> &s, const __m128i &a)
         _mm_sub_pd(_mm_castsi128_pd(std::get<0xF>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 16> &s, const __m128i &a)
+MCKL_INLINE inline void mul_pd(std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_castpd_si128(
         _mm_mul_pd(_mm_castsi128_pd(std::get<0x0>(s)), _mm_castsi128_pd(a)));
@@ -1062,7 +1059,7 @@ MCKL_FLATTEN inline void mul_pd(std::array<__m128i, 16> &s, const __m128i &a)
         _mm_mul_pd(_mm_castsi128_pd(std::get<0xF>(s)), _mm_castsi128_pd(a)));
 }
 
-MCKL_FLATTEN inline void mul_pd(
+MCKL_INLINE inline void mul_pd(
     std::array<__m128i, 16> &s, const std::array<__m128i, 16> &a)
 {
     std::get<0x0>(s) =

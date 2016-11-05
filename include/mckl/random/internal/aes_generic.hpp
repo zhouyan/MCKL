@@ -345,7 +345,7 @@ class AESGeneratorGenericImpl
         const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(
             ks.get());
 
-        MCKL_FLATTEN_CALL increment(ctr);
+        MCKL_INLINE_CALL increment(ctr);
         buf.c = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         union_le<typename Counter<std::uint32_t, 4>::value_type>(buf.s);
@@ -375,7 +375,7 @@ class AESGeneratorGenericImpl
             ks.get());
 
         for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
+            MCKL_INLINE_CALL increment(ctr);
             buf.c = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
             union_le<typename Counter<std::uint32_t, 4>::value_type>(buf.s);

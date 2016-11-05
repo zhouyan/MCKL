@@ -45,8 +45,8 @@
     static void u01_##lr##_u##bits(Counter<T, K> &ctr, std::size_t n,         \
         RealType *r, const std::array<T, K + 4> &par)                         \
     {                                                                         \
-        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
-            ctr, n, r, par);                                                  \
+        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>,        \
+            std::uint##bits##_t>(ctr, n, r, par);                             \
     }
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_UNIFORM_REAL(bits)       \
@@ -54,8 +54,8 @@
     static void uniform_real_u##bits(Counter<T, K> &ctr, std::size_t n,       \
         RealType *r, const std::array<T, K + 4> &par, RealType a, RealType b) \
     {                                                                         \
-        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>>(             \
-            ctr, n, r, par, a, b);                                            \
+        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>,              \
+            std::uint##bits##_t>(ctr, n, r, par, a, b);                       \
     }
 
 #ifdef MCKL_GCC
@@ -74,14 +74,6 @@ namespace internal
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorSSE2Impl64
 {
-    static_assert(std::numeric_limits<T>::digits == 64,
-        "**ThreefryGeneratorAVX2Impl64 used with T other than an 64-bit "
-        "unsigned integer type");
-
-    static_assert(K != 0 && 16 % K == 0,
-        "**ThreefryGeneratorAVX2Impl64 used with K that does not divide by "
-        "16");
-
     public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
@@ -102,7 +94,7 @@ class ThreefryGeneratorSSE2Impl64
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K + 4> &par)
     {
-        eval<TransformCopy>(ctr, n, r, par);
+        eval<CopyResult, ResultType>(ctr, n, r, par);
     }
 
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_U01(cc, 32, Closed, Closed)
@@ -118,32 +110,31 @@ class ThreefryGeneratorSSE2Impl64
     MCKL_DEFINE_RANDOM_INTERNAL_THREEFRY_SSE2_64_UNIFORM_REAL(64)
 
     private:
-    template <typename Transform, typename ResultType, typename... Args>
+    template <typename Trans, typename UIntType, typename ResultType,
+        typename... Args>
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K + 4> &par, Args &&... args)
     {
-        using input_type = typename Transform::input_type;
-
         constexpr std::size_t S = K <= 8 ? 8 : K;
-        constexpr std::size_t nstride = sizeof(__m128i) * S / (sizeof(T) * K);
-        constexpr std::size_t istride = sizeof(T) * K / sizeof(input_type);
+        constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
+        constexpr std::size_t R = sizeof(T) * K / sizeof(UIntType);
 
-        std::array<__m128i, S> s;
-        while (n >= nstride) {
-            MCKL_FLATTEN_CALL increment_si128(ctr, s);
-            MCKL_FLATTEN_CALL transpose2x64_load_si128(s);
+        while (n >= N) {
+            std::array<__m128i, S> s;
+            MCKL_INLINE_CALL increment_si128(ctr, s);
+            MCKL_INLINE_CALL transpose2x64_load_si128(s);
             MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, s, par);
-            MCKL_FLATTEN_CALL transpose2x64_store_si128(s);
-            MCKL_FLATTEN_CALL r =
-                Transform::eval(s, r, std::forward<Args>(args)...);
-            n -= nstride;
+            MCKL_INLINE_CALL transpose2x64_store_si128(s);
+            MCKL_INLINE_CALL Trans::eval(s, r, std::forward<Args>(args)...);
+            n -= N;
+            r += N * R;
         }
 
-        alignas(32) std::array<input_type, nstride * istride> u;
+        alignas(32) std::array<UIntType, N * R> t;
         ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
-            ctr, n, u.data(), par);
-        MCKL_FLATTEN_CALL Transform::eval(
-            n * istride, u.data(), r, std::forward<Args>(args)...);
+            ctr, n, t.data(), par);
+        MCKL_INLINE_CALL Trans::eval(
+            n * R, t.data(), r, std::forward<Args>(args)...);
     }
 
     template <std::size_t, std::size_t S>
@@ -153,14 +144,14 @@ class ThreefryGeneratorSSE2Impl64
     }
 
     template <std::size_t N, std::size_t S>
-    static void round(std::array<__m128i, S> &s,
+    MCKL_NOINLINE static void round(std::array<__m128i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par);
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_FLATTEN static void kbox(
+    MCKL_INLINE static void kbox(
         std::array<__m128i, S> &s, const std::array<T, K + 4> &par)
     {
         kbox<N>(s, par,
@@ -232,7 +223,7 @@ class ThreefryGeneratorSSE2Impl64
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_FLATTEN static void rbox(std::array<__m128i, S> &s)
+    MCKL_INLINE static void rbox(std::array<__m128i, S> &s)
     {
         rbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }

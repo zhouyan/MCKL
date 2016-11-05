@@ -58,26 +58,25 @@ template <typename UIntType, typename RealType, typename Lower, typename Upper>
 class U01AVX2ImplBase
 {
     public:
-    using input_type = UIntType;
-
-    static RealType eval(UIntType u)
+    MCKL_INLINE static RealType eval(UIntType u)
     {
         return U01GenericImpl<UIntType, RealType, Lower, Upper>::eval(u);
     }
 
-    static void eval(std::size_t n, const UIntType *u, RealType *r)
+    MCKL_INLINE static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
         constexpr std::size_t S = 8;
-        constexpr std::size_t cstride = sizeof(__m256i) * S;
-        constexpr std::size_t nstride = cstride / sizeof(UIntType);
+        constexpr std::size_t N = sizeof(__m256i) * S / sizeof(UIntType);
 
-        std::array<__m256i, S> s;
-        while (n >= nstride) {
-            std::memcpy(s.data(), u, cstride);
-            r = U01AVX2Impl<UIntType, RealType, Lower, Upper>::eval(s, r);
-            n -= nstride;
-            u += nstride;
+        while (n >= N) {
+            std::array<__m256i, S> s;
+            std::memcpy(s.data(), u, sizeof(s));
+            U01AVX2Impl<UIntType, RealType, Lower, Upper>::eval(s, r);
+            n -= N;
+            u += N;
+            r += N;
         }
+
         for (std::size_t i = 0; i != n; ++i)
             r[i] = eval(u[i]);
     }
@@ -87,24 +86,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
     : public U01AVX2ImplBase<UIntType, float, Closed, Closed>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, float, Closed, Closed>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
     {
         const __m256i d25 =
             _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -25>::value));
@@ -118,8 +112,6 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
         cvtepi32_ps(s);
         mul_ps(s, d25);
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
 
@@ -127,24 +119,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     : public U01AVX2ImplBase<UIntType, float, Closed, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, float, Closed, Open>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
     {
         const __m256i d24 =
             _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -24>::value));
@@ -153,8 +140,6 @@ class U01AVX2Impl<UIntType, float, Closed, Open, 32>
         cvtepi32_ps(s);
         mul_ps(s, d24);
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
 
@@ -162,24 +147,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Closed, 32>
     : public U01AVX2ImplBase<UIntType, float, Open, Closed>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, float, Open, Closed>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
     {
         const __m256i d24 =
             _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -24>::value));
@@ -193,8 +173,6 @@ class U01AVX2Impl<UIntType, float, Open, Closed, 32>
         add_ps(s, d24);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
 
@@ -202,24 +180,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Open, 32>
     : public U01AVX2ImplBase<UIntType, float, Open, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, float, Open, Open>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m128i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(std::array<__m256i, S> &s, float *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
     {
         const __m256i d23 =
             _mm256_castps_si256(_mm256_set1_ps(Pow2<float, -23>::value));
@@ -235,8 +208,6 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
         add_ps(s, d24);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(float);
     }
 }; // class U01AVX2Impl
 
@@ -244,15 +215,11 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
     : public U01AVX2ImplBase<UIntType, double, Closed, Closed>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
 
     template <typename T, std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
@@ -269,8 +236,6 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
         sub_pd(t, m52);
         mul_pd(t, d32);
         std::memcpy(r, t.data(), sizeof(t));
-
-        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -278,15 +243,11 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     : public U01AVX2ImplBase<UIntType, double, Closed, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
 
     template <typename T, std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
@@ -299,8 +260,6 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 32>
         sub_pd(t, m52);
         mul_pd(t, d32);
         std::memcpy(r, t.data(), sizeof(t));
-
-        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -308,15 +267,11 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     : public U01AVX2ImplBase<UIntType, double, Open, Closed>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
 
     template <typename T, std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
@@ -334,8 +289,6 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 32>
         add_pd(t, d32);
 #endif
         std::memcpy(r, t.data(), sizeof(t));
-
-        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -343,15 +296,11 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Open, 32>
     : public U01AVX2ImplBase<UIntType, double, Open, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
 
     template <typename T, std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<T, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<T, S> &s, double *r)
     {
         const __m256i d32 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -32>::value));
@@ -371,8 +320,6 @@ class U01AVX2Impl<UIntType, double, Open, Open, 32>
         add_pd(t, d33);
 #endif
         std::memcpy(r, t.data(), sizeof(t));
-
-        return r + sizeof(t) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -380,24 +327,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Closed, 64>
     : public U01AVX2ImplBase<UIntType, double, Closed, Closed>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 64,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
+    MCKL_INLINE static double *eval(std::array<__m128i, S> &s, double *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d54 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -54>::value));
@@ -411,8 +353,6 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 64>
         cvtepi64_pd(s);
         mul_pd(s, d54);
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -420,24 +360,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Open, 64>
     : public U01AVX2ImplBase<UIntType, double, Closed, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 64,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d53 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -53>::value));
@@ -446,8 +381,6 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 64>
         cvtepi64_pd(s);
         mul_pd(s, d53);
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -455,24 +388,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Closed, 64>
     : public U01AVX2ImplBase<UIntType, double, Open, Closed>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 64,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d53 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -53>::value));
@@ -486,8 +414,6 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 64>
         add_pd(s, d53);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(double);
     }
 }; // class U01AVX2Impl
 
@@ -495,24 +421,19 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Open, 64>
     : public U01AVX2ImplBase<UIntType, double, Open, Open>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 64,
-        "**U01AVX2Impl** used with unsigned integer type with incorrect "
-        "width");
-
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m128i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r);
+        eval(t, r);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(std::array<__m256i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d52 =
             _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, -52>::value));
@@ -528,8 +449,6 @@ class U01AVX2Impl<UIntType, double, Open, Open, 64>
         add_pd(s, d53);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(double);
     }
 }; // class U01AVX2Impl
 

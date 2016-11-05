@@ -56,8 +56,6 @@ template <typename UIntType, typename RealType>
 class UniformRealAVX2ImplBase
 {
     public:
-    using input_type = UIntType;
-
     static RealType eval(UIntType u, RealType a, RealType b)
     {
 #if MCKL_USE_FMA
@@ -75,16 +73,17 @@ class UniformRealAVX2ImplBase
         std::size_t n, const UIntType *u, RealType *r, RealType a, RealType b)
     {
         constexpr std::size_t S = 8;
-        constexpr std::size_t cstride = sizeof(__m256i) * S;
-        constexpr std::size_t nstride = cstride / sizeof(UIntType);
+        constexpr std::size_t N = sizeof(__m256i) * S / sizeof(UIntType);
 
-        std::array<__m256i, S> s;
-        while (n >= nstride) {
-            std::memcpy(s.data(), u, cstride);
-            r = UniformRealAVX2Impl<UIntType, RealType>::eval(s, r, a, b);
-            n -= nstride;
-            u += nstride;
+        while (n >= N) {
+            std::array<__m256i, S> s;
+            std::memcpy(s.data(), u, sizeof(s));
+            UniformRealAVX2Impl<UIntType, RealType>::eval(s, r, a, b);
+            n -= N;
+            u += N;
+            r += N;
         }
+
         for (std::size_t i = 0; i != n; ++i)
             r[i] = eval(u[i], a, b);
     }
@@ -94,25 +93,20 @@ template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, float, 32>
     : public UniformRealAVX2ImplBase<UIntType, float>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**UniformRealAVX2Impl** used with unsigned integer type with "
-        "incorrect width");
-
     public:
     using UniformRealAVX2ImplBase<UIntType, float>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(
+    MCKL_INLINE static void eval(
         std::array<__m128i, S> &s, float *r, float a, float b)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);
-
-        return eval(t, r, a, b);
+        eval(t, r, a, b);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(
+    MCKL_INLINE static void eval(
         std::array<__m256i, S> &s, float *r, float a, float b)
     {
         const __m256i d24 =
@@ -130,8 +124,6 @@ class UniformRealAVX2Impl<UIntType, float, 32>
         add_ps(s, ma);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(float);
     }
 }; // class UniformRealAVX2Impl
 
@@ -139,15 +131,11 @@ template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, double, 32>
     : public UniformRealAVX2ImplBase<UIntType, double>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**UniformRealAVX2Impl** used with unsigned integer type with "
-        "incorrect width");
-
     public:
     using UniformRealAVX2ImplBase<UIntType, double>::eval;
 
     template <typename T, std::size_t S>
-    MCKL_FLATTEN static double *eval(
+    MCKL_INLINE static void eval(
         std::array<T, S> &s, double *r, double a, double b)
     {
         const __m256i d32 =
@@ -169,8 +157,6 @@ class UniformRealAVX2Impl<UIntType, double, 32>
         add_pd(t, ma);
 #endif
         std::memcpy(r, t.data(), sizeof(t));
-
-        return r + sizeof(t) / sizeof(double);
     }
 }; // class UniformRealAVX2Impl
 
@@ -178,15 +164,11 @@ template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, double, 64>
     : public UniformRealAVX2ImplBase<UIntType, double>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 64,
-        "**UniformRealAVX2Impl** used with unsigned integer type with "
-        "incorrect width");
-
     public:
     using UniformRealAVX2ImplBase<UIntType, double>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(
+    MCKL_INLINE static void eval(
         std::array<__m128i, S> &s, double *r, double a, double b)
     {
         std::array<__m256i, S / 2> t;
@@ -196,7 +178,7 @@ class UniformRealAVX2Impl<UIntType, double, 64>
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(
+    MCKL_INLINE static void eval(
         std::array<__m256i, S> &s, double *r, double a, double b)
     {
         const __m256i d53 =
@@ -214,8 +196,6 @@ class UniformRealAVX2Impl<UIntType, double, 64>
         add_pd(s, ma);
 #endif
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(double);
     }
 }; // class UniformRealAVX2Impl
 

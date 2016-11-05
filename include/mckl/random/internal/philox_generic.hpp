@@ -33,6 +33,7 @@
 #define MCKL_RANDOM_INTERNAL_PHILOX_GENERIC_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/philox_unroll.hpp>
 #include <mckl/random/internal/threefry_constants.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -288,7 +289,7 @@ class PhiloxGeneratorGenericImpl
 
         std::memcpy(buf.s.data(), plain, sizeof(T) * K);
         union_le<char>(buf.s);
-        round<0>(buf.s, key, std::integral_constant<bool, 0 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, buf.s, key);
         union_le<T>(buf.r);
         std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
     }
@@ -303,12 +304,12 @@ class PhiloxGeneratorGenericImpl
             std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
         } buf;
 
-        MCKL_FLATTEN_CALL increment(ctr);
+        MCKL_INLINE_CALL increment(ctr);
         buf.c = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         union_le<typename Counter<T, K>::value_type>(buf.s);
 #endif
-        round<0>(buf.s, key, std::integral_constant<bool, 0 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, buf.s, key);
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         union_le<T>(buf.r);
 #endif
@@ -319,9 +320,9 @@ class PhiloxGeneratorGenericImpl
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key)
     {
-        constexpr std::size_t rstride = sizeof(T) * K / sizeof(ResultType);
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        for (std::size_t i = 0; i != n; ++i, r += rstride)
+        for (std::size_t i = 0; i != n; ++i, r += R)
             eval(ctr, r, key);
     }
 
@@ -333,15 +334,15 @@ class PhiloxGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    static void round(
+    MCKL_NOINLINE static void round(
         std::array<T, K> &s, const std::array<T, K / 2> &k, std::true_type)
     {
-        rbox<N>(s, k);
-        round<N + 1>(s, k, std::integral_constant<bool, N + 1 <= Rounds>());
+        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, k);
     }
 
     template <std::size_t N>
-    static void rbox(std::array<T, K> &s, const std::array<T, K / 2> &k)
+    MCKL_INLINE static void rbox(
+        std::array<T, K> &s, const std::array<T, K / 2> &k)
     {
         rbox<N>(s, k, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }

@@ -56,9 +56,7 @@ template <typename UIntType, typename RealType>
 class UniformRealSSE2ImplBase
 {
     public:
-    using input_type = UIntType;
-
-    static RealType eval(UIntType u, RealType a, RealType b)
+    MCKL_INLINE static RealType eval(UIntType u, RealType a, RealType b)
     {
 #if MCKL_USE_FMA
         return std::fma(
@@ -75,16 +73,17 @@ class UniformRealSSE2ImplBase
         std::size_t n, const UIntType *u, RealType *r, RealType a, RealType b)
     {
         constexpr std::size_t S = 8;
-        constexpr std::size_t cstride = sizeof(__m128i) * S;
-        constexpr std::size_t nstride = cstride / sizeof(UIntType);
+        constexpr std::size_t N = sizeof(__m128i) * S / sizeof(UIntType);
 
-        std::array<__m128i, S> s;
-        while (n >= nstride) {
-            std::memcpy(s.data(), u, cstride);
-            r = UniformRealSSE2Impl<UIntType, RealType>::eval(s, r, a, b);
-            n -= nstride;
-            u += nstride;
+        while (n >= N) {
+            std::array<__m128i, S> s;
+            std::memcpy(s.data(), u, sizeof(s));
+            UniformRealSSE2Impl<UIntType, RealType>::eval(s, r, a, b);
+            n -= N;
+            u += N;
+            r += N;
         }
+
         for (std::size_t i = 0; i != n; ++i)
             r[i] = eval(u[i], a, b);
     }
@@ -94,15 +93,11 @@ template <typename UIntType>
 class UniformRealSSE2Impl<UIntType, float, 32>
     : public UniformRealSSE2ImplBase<UIntType, float>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**UniformRealSSE2Impl** used with unsigned integer type with "
-        "incorrect width");
-
     public:
     using UniformRealSSE2ImplBase<UIntType, float>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static float *eval(
+    MCKL_INLINE static void eval(
         std::array<__m128i, S> &s, float *r, float a, float b)
     {
         const __m128i d24 =
@@ -116,8 +111,6 @@ class UniformRealSSE2Impl<UIntType, float, 32>
         mul_ps(s, md);
         add_ps(s, ma);
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(float);
     }
 }; // class UniformRealSSE2Impl
 
@@ -125,15 +118,11 @@ template <typename UIntType>
 class UniformRealSSE2Impl<UIntType, double, 32>
     : public UniformRealSSE2ImplBase<UIntType, double>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 32,
-        "**UniformRealSSE2Impl** used with unsigned integer type with "
-        "incorrect width");
-
     public:
     using UniformRealSSE2ImplBase<UIntType, double>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(
+    MCKL_INLINE static void eval(
         std::array<__m128i, S> &s, double *r, double a, double b)
     {
         const __m128i d32 =
@@ -151,8 +140,6 @@ class UniformRealSSE2Impl<UIntType, double, 32>
         mul_pd(t, md);
         add_pd(t, ma);
         std::memcpy(r, t.data(), sizeof(t));
-
-        return r + sizeof(t) / sizeof(double);
     }
 }; // class UniformRealSSE2Impl
 
@@ -160,15 +147,11 @@ template <typename UIntType>
 class UniformRealSSE2Impl<UIntType, double, 64>
     : public UniformRealSSE2ImplBase<UIntType, double>
 {
-    static_assert(std::numeric_limits<UIntType>::digits == 64,
-        "**UniformRealSSE2Impl** used with unsigned integer type with "
-        "incorrect width");
-
     public:
     using UniformRealSSE2ImplBase<UIntType, double>::eval;
 
     template <std::size_t S>
-    MCKL_FLATTEN static double *eval(
+    MCKL_INLINE static void eval(
         std::array<__m128i, S> &s, double *r, double a, double b)
     {
         const __m128i d53 =
@@ -182,8 +165,6 @@ class UniformRealSSE2Impl<UIntType, double, 64>
         mul_pd(s, md);
         add_pd(s, ma);
         std::memcpy(r, s.data(), sizeof(s));
-
-        return r + sizeof(s) / sizeof(double);
     }
 }; // class UniformRealSSE2Impl
 

@@ -45,8 +45,8 @@
     static void u01_##lr##_u##bits(Counter<T, K> &ctr, std::size_t n,         \
         RealType *r, const std::array<T, K / 2> &key)                         \
     {                                                                         \
-        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
-            ctr, n, r, key);                                                  \
+        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>,        \
+            std::uint##bits##_t>(ctr, n, r, key);                             \
     }
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_UNIFORM_REAL(bits)         \
@@ -54,8 +54,8 @@
     static void uniform_real_u##bits(Counter<T, K> &ctr, std::size_t n,       \
         RealType *r, const std::array<T, K / 2> &key, RealType a, RealType b) \
     {                                                                         \
-        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>>(             \
-            ctr, n, r, key, a, b);                                            \
+        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>,              \
+            std::uint##bits##_t>(ctr, n, r, key, a, b);                       \
     }
 
 #ifdef MCKL_GCC
@@ -79,20 +79,20 @@ class PhiloxGeneratorSSE2Impl32Permute<2>
 {
     public:
     template <std::size_t S>
-    MCKL_FLATTEN static void first(std::array<__m128i, S> &)
+    MCKL_INLINE static void first(std::array<__m128i, S> &)
     {
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void round(std::array<__m128i, S> &s)
+    MCKL_INLINE static void round(std::array<__m128i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void last(std::array<__m128i, S> &s)
+    MCKL_INLINE static void last(std::array<__m128i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 }; // class PhiloxGeneratorSSE2Impl32Permute
 
@@ -101,34 +101,27 @@ class PhiloxGeneratorSSE2Impl32Permute<4>
 {
     public:
     template <std::size_t S>
-    MCKL_FLATTEN static void first(std::array<__m128i, S> &s)
+    MCKL_INLINE static void first(std::array<__m128i, S> &s)
     {
-        shuffle_epi32<0xC6>(s); // 3 0 1 2
+        shuffle_epi32<0xC6>(s);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void round(std::array<__m128i, S> &s)
+    MCKL_INLINE static void round(std::array<__m128i, S> &s)
     {
-        shuffle_epi32<0x93>(s); // 2 1 0 3
+        shuffle_epi32<0x93>(s);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void last(std::array<__m128i, S> &s)
+    MCKL_INLINE static void last(std::array<__m128i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 }; // class PhiloxGeneratorSSE2Impl32Permute
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorSSE2Impl32
 {
-    static_assert(std::numeric_limits<T>::digits == 32,
-        "**PhiloxGeneratorSSE2Impl32 used with T other than a 32-bit unsigned "
-        "integer type");
-
-    static_assert(K != 0 && 4 % K == 0,
-        "**PhiloxGeneratorSSE2Impl32 used with K that does not divide by 4");
-
     public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
@@ -148,7 +141,7 @@ class PhiloxGeneratorSSE2Impl32
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key)
     {
-        eval<TransformCopy>(ctr, n, r, key);
+        eval<CopyResult, ResultType>(ctr, n, r, key);
     }
 
     MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_U01(cc, 32, Closed, Closed)
@@ -164,38 +157,32 @@ class PhiloxGeneratorSSE2Impl32
     MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_SSE2_32_UNIFORM_REAL(64)
 
     private:
-    template <typename Transform, typename ResultType, typename... Args>
+    template <typename Trans, typename UIntType, typename ResultType,
+        typename... Args>
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key, Args &&... args)
     {
-        using input_type = typename Transform::input_type;
-
-        static_assert(sizeof(T) * K % sizeof(input_type) == 0,
-            "**PhiloxGeneratorSSE2Impl32::eval** sizeof(T) * K is not "
-            "divisible by sizeof(Transform::input_type)");
-
         constexpr std::size_t S = 8;
-        constexpr std::size_t nstride = sizeof(__m128i) * S / (sizeof(T) * K);
-        constexpr std::size_t istride = sizeof(T) * K / sizeof(input_type);
+        constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
+        constexpr std::size_t R = sizeof(T) * K / sizeof(UIntType);
 
-        std::array<__m128i, S> s;
-        std::array<__m128i, Rounds> rk;
-        MCKL_FLATTEN_CALL set_key(rk, key);
-        while (n >= nstride) {
-            MCKL_FLATTEN_CALL increment_si128(ctr, s);
-            MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::first(s);
+        const std::array<__m128i, Rounds> rk(round_key(key));
+        while (n >= N) {
+            std::array<__m128i, S> s;
+            MCKL_INLINE_CALL increment_si128(ctr, s);
+            MCKL_INLINE_CALL PhiloxGeneratorSSE2Impl32Permute<K>::first(s);
             MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, s, rk);
-            MCKL_FLATTEN_CALL PhiloxGeneratorSSE2Impl32Permute<K>::last(s);
-            MCKL_FLATTEN_CALL r =
-                Transform::eval(s, r, std::forward<Args>(args)...);
-            n -= nstride;
+            MCKL_INLINE_CALL PhiloxGeneratorSSE2Impl32Permute<K>::last(s);
+            MCKL_INLINE_CALL Trans::eval(s, r, std::forward<Args>(args)...);
+            n -= N;
+            r += N * R;
         }
 
-        alignas(32) std::array<input_type, nstride * istride> u;
+        alignas(32) std::array<UIntType, N * R> t;
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
-            ctr, n, u.data(), key);
-        MCKL_FLATTEN_CALL Transform::eval(
-            n * istride, u.data(), r, std::forward<Args>(args)...);
+            ctr, n, t.data(), key);
+        MCKL_INLINE_CALL Trans::eval(
+            n * R, t.data(), r, std::forward<Args>(args)...);
     }
 
     template <std::size_t, std::size_t S>
@@ -205,14 +192,14 @@ class PhiloxGeneratorSSE2Impl32
     }
 
     template <std::size_t N, std::size_t S>
-    static void round(std::array<__m128i, S> &s,
+    MCKL_NOINLINE static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, Rounds> &rk, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk);
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_FLATTEN static void rbox(
+    MCKL_INLINE static void rbox(
         std::array<__m128i, S> &s, const std::array<__m128i, Rounds> &rk)
     {
         rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
@@ -246,13 +233,16 @@ class PhiloxGeneratorSSE2Impl32
         permute<N>(s);
     }
 
-    MCKL_FLATTEN static void set_key(
-        std::array<__m128i, Rounds> &rk, const std::array<T, K / 2> &key)
+    MCKL_INLINE static std::array<__m128i, Rounds> round_key(
+        const std::array<T, K / 2> &key)
     {
         const int k0 = static_cast<int>(std::get<0 % (K / 2)>(key));
         const int k1 = static_cast<int>(std::get<1 % (K / 2)>(key));
 
+        std::array<__m128i, Rounds> rk;
         set_key<0>(rk, _mm_set_epi32(k1, 0, k0, 0), std::true_type());
+
+        return rk;
     }
 
     template <std::size_t>

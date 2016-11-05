@@ -343,7 +343,7 @@ class IncrementBlock<T, K, 16>
 /// \brief Increment a counter by one
 /// \ingroup Random
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr)
+MCKL_INLINE inline void increment(std::array<T, K> &ctr)
 {
     internal::Increment<T, K>::eval(ctr);
 }

@@ -386,10 +386,10 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 template <typename RNGType>
 inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
 {
-    const int nwid = 20;
-    const int swid = 8;
-    const int twid = 15;
-    const std::size_t lwid = nwid + swid * 2 + twid * 3;
+    const int nwid = 33;
+    const int swid = 6;
+    const int twid = 10;
+    const std::size_t lwid = nwid + swid * 2 + twid * 2 + 15;
 
     bool pass_k = random_rng_k(RNGType());
     bool pass_d = random_rng_d<RNGType>(N, M);
@@ -411,7 +411,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
         std::cout << std::setw(twid) << std::right << "GB/s (S)";
         std::cout << std::setw(twid) << std::right << "GB/s (B)";
     }
-    std::cout << std::setw(twid) << std::right << "Deterministics";
+    std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
@@ -426,7 +426,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     pass += pass_d ? "-" : "*";
     pass += perf_ubits.pass ? "-" : "*";
     pass += random_pass(pass_k && pass_d && perf_ubits.pass);
-    std::cout << std::setw(twid) << std::right << pass;
+    std::cout << std::setw(15) << std::right << pass;
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;

@@ -54,7 +54,7 @@ namespace mckl
 namespace internal
 {
 
-MCKL_FLATTEN inline void set_m128i(
+MCKL_INLINE inline void set_m128i(
     const std::array<__m128i, 8> &s, std::array<__m256i, 4> &t)
 {
     std::get<0>(t) = _mm256_insertf128_si256(
@@ -67,7 +67,7 @@ MCKL_FLATTEN inline void set_m128i(
         _mm256_castsi128_si256(std::get<6>(s)), std::get<7>(s), 1);
 }
 
-MCKL_FLATTEN inline void set_m128i(
+MCKL_INLINE inline void set_m128i(
     const std::array<__m128i, 16> &s, std::array<__m256i, 8> &t)
 {
     std::get<0>(t) = _mm256_insertf128_si256(
@@ -88,7 +88,7 @@ MCKL_FLATTEN inline void set_m128i(
         _mm256_castsi128_si256(std::get<0xE>(s)), std::get<0xF>(s), 1);
 }
 
-MCKL_FLATTEN inline void cvtepu32_epi64(
+MCKL_INLINE inline void cvtepu32_epi64(
     const std::array<__m128i, 4> &s, std::array<__m256i, 4> &t)
 {
     std::get<0>(t) = _mm256_cvtepu32_epi64(std::get<0>(s));
@@ -97,7 +97,7 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
     std::get<3>(t) = _mm256_cvtepu32_epi64(std::get<3>(s));
 }
 
-MCKL_FLATTEN inline void cvtepu32_epi64(
+MCKL_INLINE inline void cvtepu32_epi64(
     const std::array<__m128i, 8> &s, std::array<__m256i, 8> &t)
 {
     std::get<0>(t) = _mm256_cvtepu32_epi64(std::get<0>(s));
@@ -110,7 +110,7 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
     std::get<7>(t) = _mm256_cvtepu32_epi64(std::get<7>(s));
 }
 
-MCKL_FLATTEN inline void cvtepu32_epi64(
+MCKL_INLINE inline void cvtepu32_epi64(
     const std::array<__m128i, 16> &s, std::array<__m256i, 16> &t)
 {
     std::get<0x0>(t) = _mm256_cvtepu32_epi64(std::get<0x0>(s));
@@ -131,7 +131,7 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
     std::get<0xF>(t) = _mm256_cvtepu32_epi64(std::get<0xF>(s));
 }
 
-MCKL_FLATTEN inline void cvtepu32_epi64(
+MCKL_INLINE inline void cvtepu32_epi64(
     const std::array<__m256i, 2> &s, std::array<__m256i, 4> &t)
 {
     const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
@@ -147,7 +147,7 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
     std::get<2>(t) = _mm256_and_si256(std::get<2>(t), m);
 }
 
-MCKL_FLATTEN inline void cvtepu32_epi64(
+MCKL_INLINE inline void cvtepu32_epi64(
     const std::array<__m256i, 4> &s, std::array<__m256i, 8> &t)
 {
     const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
@@ -169,7 +169,7 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
     std::get<6>(t) = _mm256_and_si256(std::get<6>(t), m);
 }
 
-MCKL_FLATTEN inline void cvtepu32_epi64(
+MCKL_INLINE inline void cvtepu32_epi64(
     const std::array<__m256i, 8> &s, std::array<__m256i, 16> &t)
 {
     const __m256i p = _mm256_set_epi32(7, 3, 6, 2, 5, 1, 4, 0);
@@ -203,7 +203,7 @@ MCKL_FLATTEN inline void cvtepu32_epi64(
     std::get<0xE>(t) = _mm256_and_si256(std::get<0xE>(t), m);
 }
 
-MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 4> &s)
+MCKL_INLINE inline void cvtepi32_ps(std::array<__m256i, 4> &s)
 {
     std::get<0>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0>(s)));
     std::get<1>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<1>(s)));
@@ -211,7 +211,7 @@ MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 4> &s)
     std::get<3>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<3>(s)));
 }
 
-MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 8> &s)
+MCKL_INLINE inline void cvtepi32_ps(std::array<__m256i, 8> &s)
 {
     std::get<0>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0>(s)));
     std::get<1>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<1>(s)));
@@ -223,7 +223,7 @@ MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 8> &s)
     std::get<7>(s) = _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<7>(s)));
 }
 
-MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 16> &s)
+MCKL_INLINE inline void cvtepi32_ps(std::array<__m256i, 16> &s)
 {
     std::get<0x0>(s) =
         _mm256_castps_si256(_mm256_cvtepi32_ps(std::get<0x0>(s)));
@@ -260,7 +260,7 @@ MCKL_FLATTEN inline void cvtepi32_ps(std::array<__m256i, 16> &s)
 }
 
 template <std::size_t S>
-MCKL_FLATTEN inline void cvtepi64_pd(std::array<__m256i, S> &s)
+MCKL_INLINE inline void cvtepi64_pd(std::array<__m256i, S> &s)
 {
     const __m256i m32 =
         _mm256_castpd_si256(_mm256_set1_pd(Pow2<double, 32>::value));
@@ -287,7 +287,7 @@ MCKL_FLATTEN inline void cvtepi64_pd(std::array<__m256i, S> &s)
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t I4, std::size_t I5, std::size_t I6, std::size_t I7,
     std::size_t N>
-MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
+MCKL_INLINE inline void transpose8x32_si256(std::array<__m256i, N> &s)
 {
     __m256i t0 = _mm256_unpacklo_epi32(std::get<I0>(s), std::get<I1>(s));
     __m256i t1 = _mm256_unpacklo_epi32(std::get<I2>(s), std::get<I3>(s));
@@ -315,17 +315,17 @@ MCKL_FLATTEN inline void transpose8x32_si256(std::array<__m256i, N> &s)
     std::get<I7>(s) = _mm256_permute2x128_si256(tE, tF, 0x31);
 }
 
-MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 8> &s)
+MCKL_INLINE inline void transpose8x32_load_si256(std::array<__m256i, 8> &s)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
+MCKL_INLINE inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
 {
     transpose8x32_si256<0, 1, 2, 3, 4, 5, 6, 7>(s);
 }
 
-MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
+MCKL_INLINE inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
 {
     __m256i t0 = std::get<0x1>(s);
     std::get<0x1>(s) = std::get<0x2>(s);
@@ -353,7 +353,7 @@ MCKL_FLATTEN inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 }
 
-MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
+MCKL_INLINE inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
 {
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
@@ -383,7 +383,7 @@ MCKL_FLATTEN inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
     std::size_t N>
-MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
+MCKL_INLINE inline void transpose4x64_si256(std::array<__m256i, N> &s)
 {
     __m256i t0 = _mm256_unpacklo_epi64(std::get<I0>(s), std::get<I1>(s));
     __m256i t1 = _mm256_unpacklo_epi64(std::get<I2>(s), std::get<I3>(s));
@@ -395,17 +395,17 @@ MCKL_FLATTEN inline void transpose4x64_si256(std::array<__m256i, N> &s)
     std::get<I3>(s) = _mm256_permute2x128_si256(t2, t3, 0x31);
 }
 
-MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 4> &s)
+MCKL_INLINE inline void transpose4x64_load_si256(std::array<__m256i, 4> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
+MCKL_INLINE inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
+MCKL_INLINE inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
 {
     __m256i t0 = std::get<1>(s);
     std::get<1>(s) = std::get<2>(s);
@@ -421,7 +421,7 @@ MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
     transpose4x64_si256<4, 5, 6, 7>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
+MCKL_INLINE inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
 {
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
@@ -437,7 +437,7 @@ MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
     std::get<5>(s) = t1;
 }
 
-MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
+MCKL_INLINE inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
 {
     __m256i s1 = std::get<0x1>(s);
     __m256i s2 = std::get<0x2>(s);
@@ -464,7 +464,7 @@ MCKL_FLATTEN inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)
     transpose4x64_si256<0xC, 0xD, 0xE, 0xF>(s);
 }
 
-MCKL_FLATTEN inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
+MCKL_INLINE inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
 {
     transpose4x64_si256<0x0, 0x1, 0x2, 0x3>(s);
     transpose4x64_si256<0x4, 0x5, 0x6, 0x7>(s);

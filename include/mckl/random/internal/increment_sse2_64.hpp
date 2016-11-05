@@ -76,12 +76,9 @@ inline void increment_si128(
 }
 
 template <typename T, std::size_t K, std::size_t S>
-MCKL_FLATTEN inline void increment_si128(
+MCKL_INLINE inline void increment_si128(
     std::array<T, K> &ctr, std::array<__m128i, S> &s)
 {
-    static_assert((sizeof(__m128i) * S) % (sizeof(T) * K) == 0,
-        "**increment_si128** invalid blocks size");
-
     constexpr bool direct = S == 4 || S == 8 || S == 16;
     constexpr bool bits = std::numeric_limits<T>::digits == 64;
 
