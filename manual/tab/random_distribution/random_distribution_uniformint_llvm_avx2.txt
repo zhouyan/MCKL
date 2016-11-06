@@ -1,8 +1,0 @@
-UniformInt<int32_t>(-10,10)          25.58        9.54        2.48        3.31       VML    (0)--Passed
-UniformInt<uint32_t>(0,20)           24.98        9.54        3.04        4.23       VML    (0)--Passed
-UniformInt<int64_t>(-10,10)         102.68       20.66        4.34        5.37       VML    (0)--Passed
-UniformInt<uint64_t>(0,20)          103.29       21.03        5.44        6.51       VML    (0)--Passed
-UniformInt<int32_t>(-10,10)          25.56        9.55        2.42        3.32       C++    (0)--Passed
-UniformInt<uint32_t>(0,20)           25.33        9.54        3.02        4.09       C++    (0)--Passed
-UniformInt<int64_t>(-10,10)          96.81       20.66        4.20        5.25       C++    (0)--Passed
-UniformInt<uint64_t>(0,20)           98.16       21.45        5.30        6.34       C++    (0)--Passed

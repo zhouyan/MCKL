@@ -1,5 +1,0 @@
-MKL_ARS5                1040       8           1.62           0.29      ---Passed
-MKL_ARS5                1040       8           1.62           0.29      ---Passed
-MKL_ARS5                1040       8           1.62           0.29      ---Passed
-MKL_ARS5                1040       8           1.62           0.29      ---Passed
-MKL_ARS5                1040       8           1.62           0.29      ---Passed

@@ -1,5 +1,0 @@
-ranlux24                 216       8         107.76         107.74      ---Passed
-ranlux24                 216       8         107.76         107.75      ---Passed
-ranlux24                 216       8         107.77         107.75      ---Passed
-ranlux24                 216       8         107.78         107.76      ---Passed
-ranlux24                 216       8         107.78         107.76      ---Passed

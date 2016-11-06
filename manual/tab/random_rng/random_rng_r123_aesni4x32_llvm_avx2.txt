@@ -1,5 +1,0 @@
-R123_AESNI4x32           256      16           4.56           4.61      ---Passed
-R123_AESNI4x32           256      16           4.62           4.67      ---Passed
-R123_AESNI4x32           256      16           4.56           4.60      ---Passed
-R123_AESNI4x32           256      16           4.56           4.60      ---Passed
-R123_AESNI4x32           256      16           4.56           4.60      ---Passed

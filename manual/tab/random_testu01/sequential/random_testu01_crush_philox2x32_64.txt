@@ -1,8 +1,0 @@
-========= Summary results of Crush =========
- Generator:        STD
- Number of statistics:  144
- ----------------------------------------------
- 88  HammingIndep, L = 300           0.9992
- ----------------------------------------------
- All other tests were passed
-

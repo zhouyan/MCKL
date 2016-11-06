@@ -1,5 +1,0 @@
-Threefry16x64            424       8           3.22           0.77      ---Passed
-Threefry16x64            424       8           3.17           0.76      ---Passed
-Threefry16x64            424       8           3.22           0.77      ---Passed
-Threefry16x64            424       8           3.28           0.79      ---Passed
-Threefry16x64            424       8           3.28           0.78      ---Passed

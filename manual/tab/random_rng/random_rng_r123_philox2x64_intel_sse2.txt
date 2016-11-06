@@ -1,5 +1,0 @@
-R123_Philox2x64           64       8           9.00           8.91      ---Passed
-R123_Philox2x64           64       8           9.00           8.90      ---Passed
-R123_Philox2x64           64       8           9.00           8.92      ---Passed
-R123_Philox2x64           64       8           9.00           8.90      ---Passed
-R123_Philox2x64           64       8           9.00           8.91      ---Passed

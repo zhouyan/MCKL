@@ -1,5 +1,0 @@
-Philox4x32                           48     8      6.84      1.65      ---Passed
-Philox4x32                           48     8      6.83      1.64      ---Passed
-Philox4x32                           48     8      6.83      1.64      ---Passed
-Philox4x32                           48     8      6.83      2.01      ---Passed
-Philox4x32                           48     8      6.83      1.64      ---Passed

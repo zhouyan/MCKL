@@ -1,5 +1,0 @@
-Threefry4x64                        136     8      3.43      1.99      ---Passed
-Threefry4x64                        136     8      3.44      1.99      ---Passed
-Threefry4x64                        136     8      3.43      2.00      ---Passed
-Threefry4x64                        136     8      3.43      1.99      ---Passed
-Threefry4x64                        136     8      3.44      2.00      ---Passed

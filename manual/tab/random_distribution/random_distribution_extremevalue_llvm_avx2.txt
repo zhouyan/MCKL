@@ -1,4 +1,0 @@
-ExtremeValue<float>(0,1)             43.94       42.42        4.49        4.16       VML    (0)--Passed
-ExtremeValue<double>(0,1)            89.67       70.75       11.69       11.47       VML    (0)--Passed
-ExtremeValue<float>(0,1)             43.91       42.43       25.22        4.27       C++    (0)--Passed
-ExtremeValue<double>(0,1)            90.01       71.22       42.18       11.47       C++    (0)--Passed

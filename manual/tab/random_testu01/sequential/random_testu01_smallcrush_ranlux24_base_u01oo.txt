@@ -1,9 +1,0 @@
-========= Summary results of SmallCrush =========
- Generator:        U01OO
- Number of statistics:  2
- ----------------------------------------------
-  3  Gap                             4.4e-6
-  3  Gap                             7.6e-7
- ----------------------------------------------
- All other tests were passed
-

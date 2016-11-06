@@ -1,9 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01CO
- Number of statistics:  4
- ----------------------------------------------
- 28  CouponCollector, d = 4          7.5e-8
- 28  CouponCollector, d = 4          3.1e-5
- ----------------------------------------------
- All other tests were passed
-

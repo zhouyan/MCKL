@@ -12,6 +12,8 @@
 *.toc
 .DS_Store
 /build
+/manual/manual.tex.latexmain
+/manual/random_distribution
+/manual/random_rng
 /manual/tab/*.tex
 /manual/tex/inc.tex
-/manual/manual.tex.latexmain

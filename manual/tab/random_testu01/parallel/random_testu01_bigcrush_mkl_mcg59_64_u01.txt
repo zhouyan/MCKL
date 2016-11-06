@@ -1,9 +1,0 @@
-========= Summary results of BigCrush =========
- Generator:        U01
- Number of statistics:  2
- ----------------------------------------------
- 35  Gap, r = 25                     7.9e-6
- 35  Gap, r = 25                    7.0e-15
- ----------------------------------------------
- All other tests were passed
-

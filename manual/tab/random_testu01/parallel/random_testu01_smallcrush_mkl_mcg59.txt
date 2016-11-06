@@ -1,8 +1,0 @@
-========= Summary results of SmallCrush =========
- Generator:        U01
- Number of statistics:  15
- ----------------------------------------------
-  1  BirthdaySpacings                5.9e-4
- ----------------------------------------------
- All other tests were passed
-

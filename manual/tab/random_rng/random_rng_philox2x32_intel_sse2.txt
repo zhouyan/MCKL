@@ -1,5 +1,0 @@
-Philox2x32                           24     8      6.40      1.39      ---Passed
-Philox2x32                           24     8      6.39      1.39      ---Passed
-Philox2x32                           24     8      6.40      1.39      ---Passed
-Philox2x32                           24     8      6.39      1.39      ---Passed
-Philox2x32                           24     8      6.40      1.39      ---Passed

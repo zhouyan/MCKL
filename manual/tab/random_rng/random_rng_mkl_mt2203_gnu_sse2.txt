@@ -1,5 +1,0 @@
-MKL_MT2203              1040       8           2.84           1.27      ---Passed
-MKL_MT2203              1040       8           2.84           1.27      ---Passed
-MKL_MT2203              1040       8           3.95           1.77      ---Passed
-MKL_MT2203              1040       8           2.84           1.28      ---Passed
-MKL_MT2203              1040       8           2.86           1.27      ---Passed

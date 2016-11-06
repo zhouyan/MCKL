@@ -1,5 +1,0 @@
-R123_ARS4x32              80       8           4.48           4.39      -*-Failed
-R123_ARS4x32              80       8           4.48           4.40      -*-Failed
-R123_ARS4x32              80       8           4.47           4.39      -*-Failed
-R123_ARS4x32              80       8           4.44           4.36      -*-Failed
-R123_ARS4x32              80       8           4.44           4.38      -*-Failed

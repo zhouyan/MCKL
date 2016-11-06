@@ -1,5 +1,0 @@
-knuth_b                 2064       8          58.56          58.34      ---Passed
-knuth_b                 2064       8          58.40          58.13      ---Passed
-knuth_b                 2064       8          58.58          58.37      ---Passed
-knuth_b                 2064       8          58.65          58.35      ---Passed
-knuth_b                 2064       8          57.70          57.47      ---Passed

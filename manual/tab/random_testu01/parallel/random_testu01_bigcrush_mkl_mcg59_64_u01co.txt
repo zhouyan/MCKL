@@ -1,8 +1,0 @@
-========= Summary results of BigCrush =========
- Generator:        U01CO
- Number of statistics:  14
- ----------------------------------------------
- 77  RandomWalk1 J (L=1000, r=20)    7.3e-4
- ----------------------------------------------
- All other tests were passed
-

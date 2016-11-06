@@ -1,4 +1,0 @@
-Weibull<float>(1,1)                  75.60       26.18        3.54        3.16       VML    (0)--Passed
-Weibull<double>(1,1)                130.60       34.60        8.08        7.97       VML    (0)--Passed
-Weibull<float>(1,1)                  73.19       25.85       13.32        3.21       C++    (0)--Passed
-Weibull<double>(1,1)                126.71       33.51       22.39        7.49       C++    (0)--Passed

@@ -1,5 +1,0 @@
-minstd_rand                8       8           9.55           9.38      ---Passed
-minstd_rand                8       8           9.55           9.38      ---Passed
-minstd_rand                8       8           9.55           9.38      ---Passed
-minstd_rand                8       8           9.55           9.38      ---Passed
-minstd_rand                8       8           9.55           9.38      ---Passed

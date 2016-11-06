@@ -34,6 +34,8 @@
 use v5.16;
 use Getopt::Long;
 
+`mkdir -p random_rng`;
+
 my $run = 0;
 my $build = 0;
 my $llvm = "../../build/release-llvm";

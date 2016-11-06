@@ -1,5 +1,0 @@
-MKL_PHILOX4X32X10       1040       8           3.89           1.82      ---Passed
-MKL_PHILOX4X32X10       1040       8           3.88           1.82      ---Passed
-MKL_PHILOX4X32X10       1040       8           3.89           1.82      ---Passed
-MKL_PHILOX4X32X10       1040       8           3.88           1.82      ---Passed
-MKL_PHILOX4X32X10       1040       8           3.88           1.82      ---Passed

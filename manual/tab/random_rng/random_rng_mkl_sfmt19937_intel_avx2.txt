@@ -1,5 +1,0 @@
-MKL_SFMT19937           1040       8           1.41           0.16      ---Passed
-MKL_SFMT19937           1040       8           1.37           0.16      ---Passed
-MKL_SFMT19937           1040       8           1.43           0.17      ---Passed
-MKL_SFMT19937           1040       8           1.37           0.16      ---Passed
-MKL_SFMT19937           1040       8           1.37           0.16      ---Passed
