@@ -35,6 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_constants.hpp>
 #include <mckl/random/internal/aes_generic.hpp>
+#include <mckl/random/internal/aes_key_seq.hpp>
 #include <mckl/random/counter.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -144,174 +145,25 @@ using AESGeneratorImpl = AESGeneratorGenericImpl<KeySeqType>;
 
 #endif // MCKL_USE_AESNI
 
-template <std::size_t Rounds, typename KeySeqGenerator>
-class AESKeySeqImpl
-{
-    public:
-    using key_type = typename KeySeqGenerator::key_type;
-    using rk_type = typename KeySeqGenerator::rk_type;
-
-    static constexpr std::size_t rounds() { return Rounds; }
-
-    key_type key() const { return KeySeqGenerator::key(rk_); }
-
-    void set(const key_type &key)
-    {
-        KeySeqGenerator generator;
-        generator(key, rk_);
-    }
-
-    const std::array<rk_type, rounds() + 1> &get() const { return rk_; }
-
-    friend bool operator==(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
-    {
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks1;
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks2;
-        std::memcpy(ks1.data(), seq1.rk_.data(),
-            sizeof(std::uint64_t) * 2 * (rounds() + 1));
-        std::memcpy(ks2.data(), seq2.rk_.data(),
-            sizeof(std::uint64_t) * 2 * (rounds() + 1));
-
-        return ks1 == ks2;
-    }
-
-    friend bool operator!=(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
-    {
-        return !(seq1 == seq2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
-    {
-        if (!os)
-            return os;
-
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
-        std::memcpy(ks.data(), seq.rk_.data(),
-            sizeof(std::uint64_t) * 2 * (rounds() + 1));
-        ostream(os, ks);
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
-    {
-        if (!is)
-            return is;
-
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
-        istream(is, ks);
-        if (is) {
-            std::memcpy(seq.rk_.data(), ks.data(),
-                sizeof(std::uint64_t) * 2 * (rounds() + 1));
-        }
-
-        return is;
-    }
-
-    private:
-    std::array<rk_type, rounds() + 1> rk_;
-}; // class AESKeySeqImpl
-
-template <std::size_t Rounds, typename Constants>
-class ARSKeySeqImpl
-{
-    public:
-    using key_type = typename ARSKeySeqGenerator<Constants>::key_type;
-    using rk_type = typename ARSKeySeqGenerator<Constants>::rk_type;
-
-    static constexpr std::size_t rounds() { return Rounds; }
-
-    key_type key() const { return key_; }
-
-    void set(const key_type &key) { key_ = key; }
-
-    std::array<rk_type, rounds() + 1> get() const
-    {
-        ARSKeySeqGenerator<Constants> generator;
-        std::array<rk_type, rounds() + 1> rk;
-        generator(key_, rk);
-
-        return rk;
-    }
-
-    friend bool operator==(const ARSKeySeqImpl<Rounds, Constants> &seq1,
-        const ARSKeySeqImpl<Rounds, Constants> &seq2)
-    {
-        return seq1.key_ == seq2.key_;
-    }
-
-    friend bool operator!=(const ARSKeySeqImpl<Rounds, Constants> &seq1,
-        const ARSKeySeqImpl<Rounds, Constants> &seq2)
-    {
-        return !(seq1 == seq2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const ARSKeySeqImpl<Rounds, Constants> &seq)
-    {
-        if (!os)
-            return os;
-
-        ostream(os, seq.key_);
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        ARSKeySeqImpl<Rounds, Constants> &seq)
-    {
-        if (!is)
-            return is;
-
-        key_type k = {{0}};
-        istream(is, k);
-        if (is)
-            seq.key_ = k;
-
-        return is;
-    }
-
-    private:
-    key_type key_;
-}; // class ARSKeySeqImpl
-
 } // namespace mck::internal
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES128_ROUNDS>
-class AES128KeySeq
-    : public internal::AESKeySeqImpl<Rounds, internal::AES128KeySeqGenerator>
-{
-}; // class AES128KeySeq
+using AES128KeySeq =
+    internal::AESKeySeqImpl<Rounds, internal::AES128KeySeqGenerator>;
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES192_ROUNDS>
-class AES192KeySeq
-    : public internal::AESKeySeqImpl<Rounds, internal::AES192KeySeqGenerator>
-{
-}; // class AES192KeySeq
+using AES192KeySeq =
+    internal::AESKeySeqImpl<Rounds, internal::AES192KeySeqGenerator>;
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES256_ROUNDS>
-class AES256KeySeq
-    : public internal::AESKeySeqImpl<Rounds, internal::AES256KeySeqGenerator>
-{
-}; // class AES256KeySeq
+using AES256KeySeq =
+    internal::AESKeySeqImpl<Rounds, internal::AES256KeySeqGenerator>;
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AES
@@ -320,9 +172,8 @@ class AES256KeySeq
 /// \tparam Constants A trait class that defines algorithm constants
 template <std::size_t Rounds = MCKL_ARS_ROUNDS,
     typename Constants = ARSConstants>
-class ARSKeySeq : public internal::ARSKeySeqImpl<Rounds, Constants>
-{
-}; // class ARSKeySeq
+using ARSKeySeq =
+    internal::ARSKeySeqImpl<Rounds, internal::ARSKeySeqGenerator<Constants>>;
 
 /// \brief RNG generator using AES round functions
 /// \ingroup AES

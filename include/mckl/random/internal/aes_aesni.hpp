@@ -33,6 +33,7 @@
 #define MCKL_RANDOM_INTERNAL_AES_AESNI_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/aes_key_seq.hpp>
 #include <mckl/random/internal/aes_unroll.hpp>
 #include <mckl/random/internal/u01_sse2.hpp>
 #include <mckl/random/internal/uniform_real_sse2.hpp>
