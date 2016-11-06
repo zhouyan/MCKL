@@ -33,6 +33,7 @@
 #define MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_constants.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
 #include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/increment.hpp>

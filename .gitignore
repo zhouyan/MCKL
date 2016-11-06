@@ -13,7 +13,7 @@
 .DS_Store
 /build
 /manual/manual.tex.latexmain
-/manual/random_distribution
-/manual/random_rng
 /manual/tab/*.tex
+/manual/tab/random_distribution
+/manual/tab/random_rng
 /manual/tex/inc.tex
