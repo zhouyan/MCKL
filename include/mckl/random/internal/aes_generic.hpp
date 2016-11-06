@@ -363,6 +363,9 @@ class AESGeneratorGenericImpl
     static void eval(Counter<std::uint32_t, 4> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)
     {
+        constexpr std::size_t R =
+            sizeof(std::uint32_t) * 4 / sizeof(ResultType);
+
         alignas(32) union {
             std::array<std::uint32_t, 4> s;
             Counter<std::uint32_t, 4> c;
@@ -374,7 +377,7 @@ class AESGeneratorGenericImpl
         const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(
             ks.get());
 
-        for (std::size_t i = 0; i != n; ++i) {
+        for (std::size_t i = 0; i != n; ++i, r += R) {
             MCKL_INLINE_CALL increment(ctr);
             buf.c = ctr;
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL

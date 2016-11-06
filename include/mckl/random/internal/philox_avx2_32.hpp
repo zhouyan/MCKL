@@ -35,28 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
 #include <mckl/random/internal/philox_unroll.hpp>
-#include <mckl/random/internal/u01_avx2.hpp>
-#include <mckl/random/internal/uniform_real_avx2.hpp>
 #include <mckl/random/increment.hpp>
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(                       \
-    lr, bits, Lower, Upper)                                                   \
-    template <typename RealType>                                              \
-    static void u01_##lr##_u##bits(Counter<T, K> &ctr, std::size_t n,         \
-        RealType *r, const std::array<T, K / 2> &key)                         \
-    {                                                                         \
-        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>,        \
-            std::uint##bits##_t>(ctr, n, r, key);                             \
-    }
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_UNIFORM_REAL(bits)         \
-    template <typename RealType>                                              \
-    static void uniform_real_u##bits(Counter<T, K> &ctr, std::size_t n,       \
-        RealType *r, const std::array<T, K / 2> &key, RealType a, RealType b) \
-    {                                                                         \
-        eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>,              \
-            std::uint##bits##_t>(ctr, n, r, key, a, b);                       \
-    }
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -141,30 +120,9 @@ class PhiloxGeneratorAVX2Impl32
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key)
     {
-        eval<CopyResult, ResultType>(ctr, n, r, key);
-    }
-
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(cc, 32, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(co, 32, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oc, 32, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oo, 32, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_UNIFORM_REAL(32)
-
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(cc, 64, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(co, 64, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oc, 64, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oo, 64, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_UNIFORM_REAL(64)
-
-    private:
-    template <typename Trans, typename UIntType, typename ResultType,
-        typename... Args>
-    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
-        const std::array<T, K / 2> &key, Args &&... args)
-    {
         constexpr std::size_t S = 8;
         constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
-        constexpr std::size_t R = sizeof(T) * K / sizeof(UIntType);
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
         const std::array<__m256i, Rounds> rk(round_key(key));
         while (n >= N) {
@@ -173,18 +131,18 @@ class PhiloxGeneratorAVX2Impl32
             MCKL_INLINE_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
             MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, s, rk);
             MCKL_INLINE_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
-            MCKL_INLINE_CALL Trans::eval(s, r, std::forward<Args>(args)...);
+            std::memcpy(r, s.data(), sizeof(T) * K * N);
             n -= N;
             r += N * R;
         }
 
-        alignas(32) std::array<UIntType, N * R> t;
+        alignas(32) std::array<ResultType, N * R> t;
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             ctr, n, t.data(), key);
-        MCKL_INLINE_CALL Trans::eval(
-            n * R, t.data(), r, std::forward<Args>(args)...);
+        std::memcpy(r, t.data(), sizeof(T) * K * n);
     }
 
+    private:
     template <std::size_t, std::size_t S>
     static void round(std::array<__m256i, S> &,
         const std::array<__m256i, Rounds> &, std::false_type)

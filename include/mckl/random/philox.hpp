@@ -52,53 +52,6 @@
 #define MCKL_PHILOX_ROUNDS 10
 #endif
 
-#define MCKL_DEFINE_RANDOM_PHILOX_U01(lr, bits)                               \
-    template <typename RealType>                                              \
-    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *r) const  \
-    {                                                                         \
-        internal::PhiloxGeneratorImpl<T, K, Rounds,                           \
-            Constants>::u01_##lr##_u##bits(ctr, n, r, key_);                  \
-    }
-
-#define MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(                           \
-    lr, rbits, tbits, kmax, rmax, ftype)                                      \
-    template <typename ResultType, typename T, std::size_t K,                 \
-        std::size_t Rounds, typename Constants>                               \
-    inline void u01_##lr##_distribution(                                      \
-        PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng,               \
-        std::size_t n, ftype *r,                                              \
-        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
-                rbits &&                                                      \
-            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
-            Rounds <= rmax>::type * = nullptr)                                \
-    {                                                                         \
-        rng.u01_##lr##_u##rbits(n, r);                                        \
-    }
-
-#define MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL(bits)                          \
-    template <typename RealType>                                              \
-    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *r,      \
-        RealType a, RealType b) const                                         \
-    {                                                                         \
-        internal::PhiloxGeneratorImpl<T, K, Rounds,                           \
-            Constants>::uniform_real_u##bits(ctr, n, r, key_, a, b);          \
-    }
-
-#define MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(                  \
-    rbits, tbits, kmax, rmax, ftype)                                          \
-    template <typename ResultType, typename T, std::size_t K,                 \
-        std::size_t Rounds, typename Constants>                               \
-    inline void uniform_real_distribution(                                    \
-        PhiloxEngine<ResultType, T, K, Rounds, Constants> &rng,               \
-        std::size_t n, ftype *r, ftype a, ftype b,                            \
-        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
-                rbits &&                                                      \
-            std::numeric_limits<T>::digits == tbits && K <= kmax &&           \
-            Rounds <= rmax>::type * = nullptr)                                \
-    {                                                                         \
-        rng.uniform_real_u##rbits(n, r, a, b);                                \
-    }
-
 namespace mckl
 {
 
@@ -168,18 +121,6 @@ class PhiloxGenerator
         internal::PhiloxGeneratorImpl<T, K, Rounds, Constants>::eval(
             ctr, n, r, key_);
     }
-
-    MCKL_DEFINE_RANDOM_PHILOX_U01(cc, 32)
-    MCKL_DEFINE_RANDOM_PHILOX_U01(co, 32)
-    MCKL_DEFINE_RANDOM_PHILOX_U01(oc, 32)
-    MCKL_DEFINE_RANDOM_PHILOX_U01(oo, 32)
-    MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL(32)
-
-    MCKL_DEFINE_RANDOM_PHILOX_U01(cc, 64)
-    MCKL_DEFINE_RANDOM_PHILOX_U01(co, 64)
-    MCKL_DEFINE_RANDOM_PHILOX_U01(oc, 64)
-    MCKL_DEFINE_RANDOM_PHILOX_U01(oo, 64)
-    MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL(64)
 
     friend bool operator==(
         const PhiloxGenerator<T, K, Rounds, Constants> &gen1,
@@ -289,32 +230,6 @@ using Philox2x64_64 = Philox2x64Engine<std::uint64_t>;
 /// \brief Philox4x64 RNG engine with 64-bit integer output
 /// \ingroup Philox
 using Philox4x64_64 = Philox4x64Engine<std::uint64_t>;
-
-#if MCKL_USE_SSE2 || MCKL_USE_AVX2
-
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, 4, 32, float)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, 4, 32, float)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, 4, 32, float)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, 4, 32, float)
-MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(32, 32, 4, 32, float)
-
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 64, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 64, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 64, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 64, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(64, 32, 4, 32, double)
-
-#if !MCKL_U01_USE_64BITS_DOUBLE
-
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(cc, 32, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(co, 32, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oc, 32, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_U01_DISTRIBUTION(oo, 32, 32, 4, 32, double)
-MCKL_DEFINE_RANDOM_PHILOX_UNIFORM_REAL_DISTRIBUTION(32, 32, 4, 32, double)
-
-#endif // !MCKL_U01_USE_64BITS_DOUBLE
-
-#endif // MCKL_USE_SSE2 || MCKL_USE_AVX2
 
 } // namespace mckl
 

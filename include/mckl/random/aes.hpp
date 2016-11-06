@@ -44,44 +44,6 @@
 #else
 #endif
 
-#define MCKL_DEFINE_RANDOM_AES_U01(lr, bits)                                  \
-    template <typename RealType>                                              \
-    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *r) const  \
-    {                                                                         \
-        internal::AESGeneratorImpl<KeySeqType>::u01_##lr##_u##bits(           \
-            ctr, n, r, key_seq_);                                             \
-    }
-
-#define MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(lr, rbits, ftype)             \
-    template <typename ResultType, typename KeySeqType>                       \
-    inline void u01_##lr##_distribution(                                      \
-        AESEngine<ResultType, KeySeqType> &rng, std::size_t n, ftype *r,      \
-        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
-            rbits>::type * = nullptr)                                         \
-    {                                                                         \
-        rng.u01_##lr##_u##rbits(n, r);                                        \
-    }
-
-#define MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL(bits)                             \
-    template <typename RealType>                                              \
-    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *r,      \
-        RealType a, RealType b) const                                         \
-    {                                                                         \
-        internal::AESGeneratorImpl<KeySeqType>::uniform_real_u##bits(         \
-            ctr, n, r, key_seq_, a, b);                                       \
-    }
-
-#define MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(rbits, ftype)        \
-    template <typename ResultType, typename KeySeqType>                       \
-    inline void uniform_real_distribution(                                    \
-        AESEngine<ResultType, KeySeqType> &rng, std::size_t n, ftype *r,      \
-        ftype a, ftype b,                                                     \
-        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
-            rbits>::type * = nullptr)                                         \
-    {                                                                         \
-        rng.uniform_real_u##rbits(n, r, a, b);                                \
-    }
-
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
 #pragma GCC diagnostic push
@@ -210,18 +172,6 @@ class AESGenerator
         internal::AESGeneratorImpl<KeySeqType>::eval(ctr, n, r, key_seq_);
     }
 
-    MCKL_DEFINE_RANDOM_AES_U01(cc, 32)
-    MCKL_DEFINE_RANDOM_AES_U01(co, 32)
-    MCKL_DEFINE_RANDOM_AES_U01(oc, 32)
-    MCKL_DEFINE_RANDOM_AES_U01(oo, 32)
-    MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL(32)
-
-    MCKL_DEFINE_RANDOM_AES_U01(cc, 64)
-    MCKL_DEFINE_RANDOM_AES_U01(co, 64)
-    MCKL_DEFINE_RANDOM_AES_U01(oc, 64)
-    MCKL_DEFINE_RANDOM_AES_U01(oo, 64)
-    MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL(64)
-
     friend bool operator==(const AESGenerator<KeySeqType> &gen1,
         const AESGenerator<KeySeqType> &gen2)
     {
@@ -324,32 +274,6 @@ using AES256_64 = AES256Engine<std::uint64_t>;
 /// \brief ARS RNG engine with 64-bit integers output
 /// \ingroup AES
 using ARS_64 = ARSEngine<std::uint64_t>;
-
-#if MCKL_USE_AESNI
-
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 32, float)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 32, float)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 32, float)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 32, float)
-MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(32, float)
-
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 64, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 64, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 64, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 64, double)
-MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(64, double)
-
-#if !MCKL_U01_USE_64BITS_DOUBLE
-
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 32, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 32, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 32, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 32, double)
-MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(32, double)
-
-#endif // !MCKL_U01_USE_64BITS_DOUBLE
-
-#endif // MCKL_USE_AESNI
 
 } // namespace mckl
 

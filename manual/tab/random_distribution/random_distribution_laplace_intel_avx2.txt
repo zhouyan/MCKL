@@ -1,4 +1,4 @@
-Laplace<float>(0,1)                  59.00       58.86        4.15        5.63       VML    (0)--Passed
-Laplace<double>(0,1)                 61.02       61.10        9.19       10.27       VML    (0)--Passed
-Laplace<float>(0,1)                  59.04       59.00        4.24        5.67       C++    (0)--Passed
-Laplace<double>(0,1)                 61.40       61.43       10.81       10.30       C++    (0)--Passed
+Laplace<float>(0,1)                  45.48       45.52        3.84        5.81       VML    (0)--Passed
+Laplace<double>(0,1)                 48.70       49.05        8.32       10.28       VML    (0)--Passed
+Laplace<float>(0,1)                  45.35       45.23        3.88        5.88       C++    (0)--Passed
+Laplace<double>(0,1)                 49.27       48.85        9.42       10.28       C++    (0)--Passed

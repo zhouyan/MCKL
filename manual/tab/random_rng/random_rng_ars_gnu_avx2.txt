@@ -1,5 +1,5 @@
-ARS                       56       8           3.00           0.31      ---Passed
-ARS                       56       8           2.95           0.29      ---Passed
-ARS                       56       8           2.96           0.30      ---Passed
-ARS                       56       8           3.01           0.30      ---Passed
-ARS                       56       8           2.92           0.29      ---Passed
+ARS                                  56     8      0.91      0.22      ---Passed
+ARS                                  56     8      1.02      0.24      ---Passed
+ARS                                  56     8      0.91      0.22      ---Passed
+ARS                                  56     8      1.02      0.24      ---Passed
+ARS                                  56     8      0.91      0.22      ---Passed

@@ -35,54 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_key_seq.hpp>
 #include <mckl/random/internal/aes_unroll.hpp>
-#include <mckl/random/internal/u01_sse2.hpp>
-#include <mckl/random/internal/uniform_real_sse2.hpp>
 #include <mckl/random/increment.hpp>
-
-#if MCKL_HAS_AVX2
-#include <mckl/random/internal/u01_avx2.hpp>
-#include <mckl/random/internal/uniform_real_avx2.hpp>
-#endif
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(                       \
-    lr, bits, Lower, Upper)                                                   \
-    template <typename RealType>                                              \
-    static void u01_##lr##_u##bits(Counter<std::uint32_t, 4> &ctr,            \
-        std::size_t n, RealType *r, const KeySeqType &ks)                     \
-    {                                                                         \
-        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>,        \
-            std::uint##bits##_t>(ctr, n, r, ks);                              \
-    }
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_UNIFORM_REAL(bits)         \
-    template <typename RealType>                                              \
-    static void uniform_real_u##bits(Counter<std::uint32_t, 4> &ctr,          \
-        std::size_t n, RealType *r, const KeySeqType &ks, RealType a,         \
-        RealType b)                                                           \
-    {                                                                         \
-        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>,              \
-            std::uint##bits##_t>(ctr, n, r, ks, a, b);                        \
-    }
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(                       \
-    lr, bits, Lower, Upper)                                                   \
-    template <typename RealType>                                              \
-    static void u01_##lr##_u##bits(Counter<std::uint32_t, 4> &ctr,            \
-        std::size_t n, RealType *r, const KeySeqType &ks)                     \
-    {                                                                         \
-        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>,        \
-            std::uint##bits##_t>(ctr, n, r, ks);                              \
-    }
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(bits)         \
-    template <typename RealType>                                              \
-    static void uniform_real_u##bits(Counter<std::uint32_t, 4> &ctr,          \
-        std::size_t n, RealType *r, const KeySeqType &ks, RealType a,         \
-        RealType b)                                                           \
-    {                                                                         \
-        eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>,              \
-            std::uint##bits##_t>(ctr, n, r, ks, a, b);                        \
-    }
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -454,50 +407,9 @@ class AESGeneratorAESNIImpl
     static void eval(Counter<std::uint32_t, 4> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)
     {
-        eval<CopyResult, ResultType>(ctr, n, r, ks);
-    }
-
-#if MCKL_HAS_AVX2
-
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(cc, 32, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(co, 32, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oc, 32, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oo, 32, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(32)
-
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(cc, 64, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(co, 64, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oc, 64, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(oo, 64, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(64)
-
-#else // MCKL_HAS_AVX2
-
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(cc, 32, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(co, 32, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(oc, 32, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(oo, 32, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_UNIFORM_REAL(32)
-
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(cc, 64, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(co, 64, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(oc, 64, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_U01(oo, 64, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_UNIFORM_REAL(64)
-
-#endif // MCKL_HAS_AVX2
-
-    private:
-    static constexpr std::size_t rounds_ = KeySeqType::rounds();
-
-    template <typename Trans, typename UIntType, typename ResultType,
-        typename... Args>
-    static void eval(Counter<std::uint32_t, 4> &ctr, std::size_t n,
-        ResultType *r, const KeySeqType &ks, Args &&... args)
-    {
         constexpr std::size_t S = 8;
         constexpr std::size_t N = S;
-        constexpr std::size_t R = sizeof(__m128i) / sizeof(UIntType);
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
 
         const std::array<__m128i, rounds_ + 1> rk(ks.get());
         while (n >= N) {
@@ -506,12 +418,12 @@ class AESGeneratorAESNIImpl
             MCKL_INLINE_CALL xor_si128(s, std::get<0>(rk));
             MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(0, s, rk);
             MCKL_INLINE_CALL aesenclast_si128(s, std::get<rounds_>(rk));
-            MCKL_INLINE_CALL Trans::eval(s, r, std::forward<Args>(args)...);
+            std::memcpy(r, s.data(), sizeof(__m128i) * N * R);
             n -= N;
             r += N * R;
         }
 
-        alignas(32) std::array<UIntType, N * R> t;
+        alignas(32) std::array<ResultType, N * R> t;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_INLINE_CALL increment(ctr);
             __m128i s =
@@ -521,9 +433,11 @@ class AESGeneratorAESNIImpl
             s = _mm_aesenclast_si128(s, std::get<rounds_>(rk));
             _mm_store_si128(reinterpret_cast<__m128i *>(t.data() + i * R), s);
         }
-        MCKL_INLINE_CALL Trans::eval(
-            n * R, t.data(), r, std::forward<Args>(args)...);
+        std::memcpy(r, t.data(), sizeof(__m128i) * n * R);
     }
+
+    private:
+    static constexpr std::size_t rounds_ = KeySeqType::rounds();
 
     template <std::size_t>
     static void round(
@@ -589,6 +503,1017 @@ class AESGeneratorAESNIImpl
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         aesenc_si128(s, std::get<N>(rk));
+    }
+}; // class AESGeneratorAESNIImpl
+
+template <>
+class AESGeneratorAESNIImpl<AESKeySeqImpl<10, AES128KeySeqGeneratorAESNIImpl>>
+{
+    using KeySeqType = AESKeySeqImpl<10, AES128KeySeqGeneratorAESNIImpl>;
+
+    public:
+    static void eval(const void *plain, void *cipher, const KeySeqType &ks)
+    {
+        __m128i xmm0 =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
+
+        xmm0 = _mm_xor_si128(xmm0, ks.get<0x0>());        // Round 0x0
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x1>());     // Round 0x1
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x2>());     // Round 0x2
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x3>());     // Round 0x3
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x4>());     // Round 0x4
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x5>());     // Round 0x5
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+        xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xA>()); // Round 0xA
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        std::array<std::uint64_t, 2> &ctr, ResultType *r, const KeySeqType &ks)
+    {
+        ++std::get<0>(ctr);
+        if (std::get<0>(ctr) == 0)
+            ++std::get<1>(ctr);
+
+        __m128i xmm0 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        xmm0 = _mm_xor_si128(xmm0, ks.get<0x0>());        // Round 0x0
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x1>());     // Round 0x1
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x2>());     // Round 0x2
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x3>());     // Round 0x3
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x4>());     // Round 0x4
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x5>());     // Round 0x5
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+        xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xA>()); // Round 0xA
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const KeySeqType &ks)
+    {
+        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
+            MCKL_NOINLINE_CALL eval_overflow(ctr, n, r, ks);
+            return;
+        }
+
+        constexpr std::size_t N = 8;
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        __m128i xmmk0 = ks.get<0x0>();
+        __m128i xmmk1 = ks.get<0x1>();
+        __m128i xmmk2 = ks.get<0x2>();
+        __m128i xmmk3 = ks.get<0x3>();
+        __m128i xmmk4 = ks.get<0x4>();
+        __m128i xmmk5 = ks.get<0x5>();
+        __m128i xmmk;
+
+        __m128i xmmc =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        while (n >= N) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            __m128i xmm1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
+            __m128i xmm2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
+            __m128i xmm3 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 4));
+            __m128i xmm4 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 5));
+            __m128i xmm5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 6));
+            __m128i xmm6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 7));
+            __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
+            xmmc = xmm7;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0); // Round 0x0
+            xmm1 = _mm_xor_si128(xmm1, xmmk0); // Round 0x0
+            xmm2 = _mm_xor_si128(xmm2, xmmk0); // Round 0x0
+            xmm3 = _mm_xor_si128(xmm3, xmmk0); // Round 0x0
+            xmm4 = _mm_xor_si128(xmm4, xmmk0); // Round 0x0
+            xmm5 = _mm_xor_si128(xmm5, xmmk0); // Round 0x0
+            xmm6 = _mm_xor_si128(xmm6, xmmk0); // Round 0x0
+            xmm7 = _mm_xor_si128(xmm7, xmmk0); // Round 0x0
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1); // Round 0x1
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk1); // Round 0x1
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk1); // Round 0x1
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk1); // Round 0x1
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk1); // Round 0x1
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk1); // Round 0x1
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk1); // Round 0x1
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk1); // Round 0x1
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2); // Round 0x2
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk2); // Round 0x2
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk2); // Round 0x2
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk2); // Round 0x2
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk2); // Round 0x2
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk2); // Round 0x2
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk2); // Round 0x2
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk2); // Round 0x2
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3); // Round 0x3
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk3); // Round 0x3
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk3); // Round 0x3
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk3); // Round 0x3
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk3); // Round 0x3
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk3); // Round 0x3
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk3); // Round 0x3
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk3); // Round 0x3
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4); // Round 0x4
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk4); // Round 0x4
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk4); // Round 0x4
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk4); // Round 0x4
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk4); // Round 0x4
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk4); // Round 0x4
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk4); // Round 0x4
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk4); // Round 0x4
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk5); // Round 0x5
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk5); // Round 0x5
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk5); // Round 0x5
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk5); // Round 0x5
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk5); // Round 0x5
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk5); // Round 0x5
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk5); // Round 0x5
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk5); // Round 0x5
+
+            xmmk = ks.get<0x6>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x6
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x6
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x6
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x6
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x6
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x6
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x6
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x6
+
+            xmmk = ks.get<0x7>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x7
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x7
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x7
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x7
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x7
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x7
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x7
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x7
+
+            xmmk = ks.get<0x8>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x8
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x8
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x8
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x8
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x8
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x8
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x8
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x8
+
+            xmmk = ks.get<0x9>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x9
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x9
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x9
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x9
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x9
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x9
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x9
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x9
+
+            xmmk = ks.get<0xA>();
+            xmm0 = _mm_aesenclast_si128(xmm0, xmmk); // Round 0xA
+            xmm1 = _mm_aesenclast_si128(xmm1, xmmk); // Round 0xA
+            xmm2 = _mm_aesenclast_si128(xmm2, xmmk); // Round 0xA
+            xmm3 = _mm_aesenclast_si128(xmm3, xmmk); // Round 0xA
+            xmm4 = _mm_aesenclast_si128(xmm4, xmmk); // Round 0xA
+            xmm5 = _mm_aesenclast_si128(xmm5, xmmk); // Round 0xA
+            xmm6 = _mm_aesenclast_si128(xmm6, xmmk); // Round 0xA
+            xmm7 = _mm_aesenclast_si128(xmm7, xmmk); // Round 0xA
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 0), xmm0);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 1), xmm1);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 2), xmm2);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 3), xmm3);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 4), xmm4);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 5), xmm5);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 6), xmm6);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 7), xmm7);
+
+            n -= N;
+            r += N * R;
+        }
+
+        for (std::size_t i = 0; i != n; ++i, r += R) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            xmmc = xmm0;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0);                // Round 0x0
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);             // Round 0x1
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);             // Round 0x2
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);             // Round 0x3
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);             // Round 0x4
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk5);             // Round 0x5
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+            xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xA>()); // Round 0xA
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+        }
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(ctr.data()), xmmc);
+    }
+
+    private:
+    template <typename ResultType>
+    MCKL_NOINLINE static void eval_overflow(std::array<std::uint64_t, 2> &ctr,
+        std::size_t n, ResultType *r, const KeySeqType &ks)
+    {
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += R)
+            eval(ctr, r, ks);
+    }
+}; // class AESGeneratorAESNIImpl
+
+template <>
+class AESGeneratorAESNIImpl<AESKeySeqImpl<12, AES192KeySeqGeneratorAESNIImpl>>
+{
+    using KeySeqType = AESKeySeqImpl<12, AES192KeySeqGeneratorAESNIImpl>;
+
+    public:
+    static void eval(const void *plain, void *cipher, const KeySeqType &ks)
+    {
+        __m128i xmm0 =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
+
+        xmm0 = _mm_xor_si128(xmm0, ks.get<0x0>());        // Round 0x0
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x1>());     // Round 0x1
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x2>());     // Round 0x2
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x3>());     // Round 0x3
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x4>());     // Round 0x4
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x5>());     // Round 0x5
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xA>());     // Round 0xA
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xB>());     // Round 0xB
+        xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xC>()); // Round 0xC
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        std::array<std::uint64_t, 2> &ctr, ResultType *r, const KeySeqType &ks)
+    {
+        ++std::get<0>(ctr);
+        if (std::get<0>(ctr) == 0)
+            ++std::get<1>(ctr);
+
+        __m128i xmm0 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        xmm0 = _mm_xor_si128(xmm0, ks.get<0x0>());        // Round 0x0
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x1>());     // Round 0x1
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x2>());     // Round 0x2
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x3>());     // Round 0x3
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x4>());     // Round 0x4
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x5>());     // Round 0x5
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xA>());     // Round 0xA
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xB>());     // Round 0xB
+        xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xC>()); // Round 0xC
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const KeySeqType &ks)
+    {
+        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
+            MCKL_NOINLINE_CALL eval_overflow(ctr, n, r, ks);
+            return;
+        }
+
+        constexpr std::size_t N = 8;
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        __m128i xmmk0 = ks.get<0x0>();
+        __m128i xmmk1 = ks.get<0x1>();
+        __m128i xmmk2 = ks.get<0x2>();
+        __m128i xmmk3 = ks.get<0x3>();
+        __m128i xmmk4 = ks.get<0x4>();
+        __m128i xmmk5 = ks.get<0x5>();
+        __m128i xmmk;
+
+        __m128i xmmc =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        while (n >= N) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            __m128i xmm1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
+            __m128i xmm2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
+            __m128i xmm3 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 4));
+            __m128i xmm4 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 5));
+            __m128i xmm5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 6));
+            __m128i xmm6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 7));
+            __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
+            xmmc = xmm7;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0); // Round 0x0
+            xmm1 = _mm_xor_si128(xmm1, xmmk0); // Round 0x0
+            xmm2 = _mm_xor_si128(xmm2, xmmk0); // Round 0x0
+            xmm3 = _mm_xor_si128(xmm3, xmmk0); // Round 0x0
+            xmm4 = _mm_xor_si128(xmm4, xmmk0); // Round 0x0
+            xmm5 = _mm_xor_si128(xmm5, xmmk0); // Round 0x0
+            xmm6 = _mm_xor_si128(xmm6, xmmk0); // Round 0x0
+            xmm7 = _mm_xor_si128(xmm7, xmmk0); // Round 0x0
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1); // Round 0x1
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk1); // Round 0x1
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk1); // Round 0x1
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk1); // Round 0x1
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk1); // Round 0x1
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk1); // Round 0x1
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk1); // Round 0x1
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk1); // Round 0x1
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2); // Round 0x2
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk2); // Round 0x2
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk2); // Round 0x2
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk2); // Round 0x2
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk2); // Round 0x2
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk2); // Round 0x2
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk2); // Round 0x2
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk2); // Round 0x2
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3); // Round 0x3
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk3); // Round 0x3
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk3); // Round 0x3
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk3); // Round 0x3
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk3); // Round 0x3
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk3); // Round 0x3
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk3); // Round 0x3
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk3); // Round 0x3
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4); // Round 0x4
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk4); // Round 0x4
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk4); // Round 0x4
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk4); // Round 0x4
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk4); // Round 0x4
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk4); // Round 0x4
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk4); // Round 0x4
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk4); // Round 0x4
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk5); // Round 0x5
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk5); // Round 0x5
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk5); // Round 0x5
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk5); // Round 0x5
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk5); // Round 0x5
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk5); // Round 0x5
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk5); // Round 0x5
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk5); // Round 0x5
+
+            xmmk = ks.get<0x6>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x6
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x6
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x6
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x6
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x6
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x6
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x6
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x6
+
+            xmmk = ks.get<0x7>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x7
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x7
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x7
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x7
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x7
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x7
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x7
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x7
+
+            xmmk = ks.get<0x8>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x8
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x8
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x8
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x8
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x8
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x8
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x8
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x8
+
+            xmmk = ks.get<0x9>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x9
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x9
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x9
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x9
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x9
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x9
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x9
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x9
+
+            xmmk = ks.get<0xA>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0xA
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0xA
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0xA
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0xA
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0xA
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0xA
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0xA
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0xA
+
+            xmmk = ks.get<0xB>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0xB
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0xB
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0xB
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0xB
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0xB
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0xB
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0xB
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0xB
+
+            xmmk = ks.get<0xC>();
+            xmm0 = _mm_aesenclast_si128(xmm0, xmmk); // Round 0xC
+            xmm1 = _mm_aesenclast_si128(xmm1, xmmk); // Round 0xC
+            xmm2 = _mm_aesenclast_si128(xmm2, xmmk); // Round 0xC
+            xmm3 = _mm_aesenclast_si128(xmm3, xmmk); // Round 0xC
+            xmm4 = _mm_aesenclast_si128(xmm4, xmmk); // Round 0xC
+            xmm5 = _mm_aesenclast_si128(xmm5, xmmk); // Round 0xC
+            xmm6 = _mm_aesenclast_si128(xmm6, xmmk); // Round 0xC
+            xmm7 = _mm_aesenclast_si128(xmm7, xmmk); // Round 0xC
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 0), xmm0);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 1), xmm1);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 2), xmm2);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 3), xmm3);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 4), xmm4);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 5), xmm5);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 6), xmm6);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 7), xmm7);
+
+            n -= N;
+            r += N * R;
+        }
+
+        for (std::size_t i = 0; i != n; ++i, r += R) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            xmmc = xmm0;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0);                // Round 0x0
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);             // Round 0x1
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);             // Round 0x2
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);             // Round 0x3
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);             // Round 0x4
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk5);             // Round 0x5
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xA>());     // Round 0xA
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xB>());     // Round 0xB
+            xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xC>()); // Round 0xC
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+        }
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(ctr.data()), xmmc);
+    }
+
+    private:
+    template <typename ResultType>
+    MCKL_NOINLINE static void eval_overflow(std::array<std::uint64_t, 2> &ctr,
+        std::size_t n, ResultType *r, const KeySeqType &ks)
+    {
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += R)
+            eval(ctr, r, ks);
+    }
+}; // class AESGeneratorAESNIImpl
+
+template <>
+class AESGeneratorAESNIImpl<AESKeySeqImpl<14, AES256KeySeqGeneratorAESNIImpl>>
+{
+    using KeySeqType = AESKeySeqImpl<14, AES256KeySeqGeneratorAESNIImpl>;
+
+    public:
+    static void eval(const void *plain, void *cipher, const KeySeqType &ks)
+    {
+        __m128i xmm0 =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
+
+        xmm0 = _mm_xor_si128(xmm0, ks.get<0x0>());        // Round 0x0
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x1>());     // Round 0x1
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x2>());     // Round 0x2
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x3>());     // Round 0x3
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x4>());     // Round 0x4
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x5>());     // Round 0x5
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xA>());     // Round 0xA
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xB>());     // Round 0xB
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xC>());     // Round 0xC
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xD>());     // Round 0xD
+        xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xE>()); // Round 0xE
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        std::array<std::uint64_t, 2> &ctr, ResultType *r, const KeySeqType &ks)
+    {
+        ++std::get<0>(ctr);
+        if (std::get<0>(ctr) == 0)
+            ++std::get<1>(ctr);
+
+        __m128i xmm0 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        xmm0 = _mm_xor_si128(xmm0, ks.get<0x0>());        // Round 0x0
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x1>());     // Round 0x1
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x2>());     // Round 0x2
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x3>());     // Round 0x3
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x4>());     // Round 0x4
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x5>());     // Round 0x5
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xA>());     // Round 0xA
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xB>());     // Round 0xB
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xC>());     // Round 0xC
+        xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xD>());     // Round 0xD
+        xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xE>()); // Round 0xE
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const KeySeqType &ks)
+    {
+        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
+            MCKL_NOINLINE_CALL eval_overflow(ctr, n, r, ks);
+            return;
+        }
+
+        constexpr std::size_t N = 8;
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        __m128i xmmk0 = ks.get<0x0>();
+        __m128i xmmk1 = ks.get<0x1>();
+        __m128i xmmk2 = ks.get<0x2>();
+        __m128i xmmk3 = ks.get<0x3>();
+        __m128i xmmk4 = ks.get<0x4>();
+        __m128i xmmk5 = ks.get<0x5>();
+        __m128i xmmk;
+
+        __m128i xmmc =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        while (n >= N) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            __m128i xmm1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
+            __m128i xmm2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
+            __m128i xmm3 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 4));
+            __m128i xmm4 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 5));
+            __m128i xmm5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 6));
+            __m128i xmm6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 7));
+            __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
+            xmmc = xmm7;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0); // Round 0x0
+            xmm1 = _mm_xor_si128(xmm1, xmmk0); // Round 0x0
+            xmm2 = _mm_xor_si128(xmm2, xmmk0); // Round 0x0
+            xmm3 = _mm_xor_si128(xmm3, xmmk0); // Round 0x0
+            xmm4 = _mm_xor_si128(xmm4, xmmk0); // Round 0x0
+            xmm5 = _mm_xor_si128(xmm5, xmmk0); // Round 0x0
+            xmm6 = _mm_xor_si128(xmm6, xmmk0); // Round 0x0
+            xmm7 = _mm_xor_si128(xmm7, xmmk0); // Round 0x0
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1); // Round 0x1
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk1); // Round 0x1
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk1); // Round 0x1
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk1); // Round 0x1
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk1); // Round 0x1
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk1); // Round 0x1
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk1); // Round 0x1
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk1); // Round 0x1
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2); // Round 0x2
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk2); // Round 0x2
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk2); // Round 0x2
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk2); // Round 0x2
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk2); // Round 0x2
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk2); // Round 0x2
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk2); // Round 0x2
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk2); // Round 0x2
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3); // Round 0x3
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk3); // Round 0x3
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk3); // Round 0x3
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk3); // Round 0x3
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk3); // Round 0x3
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk3); // Round 0x3
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk3); // Round 0x3
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk3); // Round 0x3
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4); // Round 0x4
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk4); // Round 0x4
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk4); // Round 0x4
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk4); // Round 0x4
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk4); // Round 0x4
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk4); // Round 0x4
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk4); // Round 0x4
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk4); // Round 0x4
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk5); // Round 0x5
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk5); // Round 0x5
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk5); // Round 0x5
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk5); // Round 0x5
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk5); // Round 0x5
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk5); // Round 0x5
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk5); // Round 0x5
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk5); // Round 0x5
+
+            xmmk = ks.get<0x6>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x6
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x6
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x6
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x6
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x6
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x6
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x6
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x6
+
+            xmmk = ks.get<0x7>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x7
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x7
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x7
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x7
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x7
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x7
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x7
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x7
+
+            xmmk = ks.get<0x8>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x8
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x8
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x8
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x8
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x8
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x8
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x8
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x8
+
+            xmmk = ks.get<0x9>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0x9
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0x9
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0x9
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0x9
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0x9
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0x9
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0x9
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0x9
+
+            xmmk = ks.get<0xA>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0xA
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0xA
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0xA
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0xA
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0xA
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0xA
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0xA
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0xA
+
+            xmmk = ks.get<0xB>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0xB
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0xB
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0xB
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0xB
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0xB
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0xB
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0xB
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0xB
+
+            xmmk = ks.get<0xC>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0xC
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0xC
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0xC
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0xC
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0xC
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0xC
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0xC
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0xC
+
+            xmmk = ks.get<0xD>();
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk); // Round 0xD
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk); // Round 0xD
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk); // Round 0xD
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk); // Round 0xD
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk); // Round 0xD
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk); // Round 0xD
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk); // Round 0xD
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk); // Round 0xD
+
+            xmmk = ks.get<0xE>();
+            xmm0 = _mm_aesenclast_si128(xmm0, xmmk); // Round 0xE
+            xmm1 = _mm_aesenclast_si128(xmm1, xmmk); // Round 0xE
+            xmm2 = _mm_aesenclast_si128(xmm2, xmmk); // Round 0xE
+            xmm3 = _mm_aesenclast_si128(xmm3, xmmk); // Round 0xE
+            xmm4 = _mm_aesenclast_si128(xmm4, xmmk); // Round 0xE
+            xmm5 = _mm_aesenclast_si128(xmm5, xmmk); // Round 0xE
+            xmm6 = _mm_aesenclast_si128(xmm6, xmmk); // Round 0xE
+            xmm7 = _mm_aesenclast_si128(xmm7, xmmk); // Round 0xE
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 0), xmm0);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 1), xmm1);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 2), xmm2);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 3), xmm3);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 4), xmm4);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 5), xmm5);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 6), xmm6);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 7), xmm7);
+
+            n -= N;
+            r += N * R;
+        }
+
+        for (std::size_t i = 0; i != n; ++i, r += R) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            xmmc = xmm0;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0);                // Round 0x0
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);             // Round 0x1
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);             // Round 0x2
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);             // Round 0x3
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);             // Round 0x4
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk5);             // Round 0x5
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x6>());     // Round 0x6
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x7>());     // Round 0x7
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x8>());     // Round 0x8
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0x9>());     // Round 0x9
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xA>());     // Round 0xA
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xB>());     // Round 0xB
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xC>());     // Round 0xC
+            xmm0 = _mm_aesenc_si128(xmm0, ks.get<0xD>());     // Round 0xD
+            xmm0 = _mm_aesenclast_si128(xmm0, ks.get<0xE>()); // Round 0xE
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+        }
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(ctr.data()), xmmc);
+    }
+
+    private:
+    template <typename ResultType>
+    MCKL_NOINLINE static void eval_overflow(std::array<std::uint64_t, 2> &ctr,
+        std::size_t n, ResultType *r, const KeySeqType &ks)
+    {
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += R)
+            eval(ctr, r, ks);
+    }
+}; // class AESGeneratorAESNIImpl
+
+template <typename Constants>
+class AESGeneratorAESNIImpl<
+    ARSKeySeqImpl<5, ARSKeySeqGeneratorAESNIImpl<Constants>>>
+{
+    using KeySeqType =
+        ARSKeySeqImpl<5, ARSKeySeqGeneratorAESNIImpl<Constants>>;
+
+    public:
+    static void eval(const void *plain, void *cipher, const KeySeqType &ks)
+    {
+        constexpr MCKL_INT64 w0 =
+            static_cast<MCKL_INT64>(Constants::weyl::value[0]);
+        constexpr MCKL_INT64 w1 =
+            static_cast<MCKL_INT64>(Constants::weyl::value[1]);
+        __m128i xmmw = _mm_set_epi64x(w1, w0);
+
+        auto &&key = ks.key();
+        __m128i xmmk =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
+                static_cast<MCKL_INT64>(std::get<0>(key)));
+
+        __m128i xmm0 =
+            _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
+
+        xmm0 = _mm_xor_si128(xmm0, xmmk);        // Round 0
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 1
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 1
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 2
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 2
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 3
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 3
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 4
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 4
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 5
+        xmm0 = _mm_aesenclast_si128(xmm0, xmmk); // Round 5
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        std::array<std::uint64_t, 2> &ctr, ResultType *r, const KeySeqType &ks)
+    {
+        ++std::get<0>(ctr);
+        if (std::get<0>(ctr) == 0)
+            ++std::get<1>(ctr);
+
+        constexpr MCKL_INT64 w0 =
+            static_cast<MCKL_INT64>(Constants::weyl::value[0]);
+        constexpr MCKL_INT64 w1 =
+            static_cast<MCKL_INT64>(Constants::weyl::value[1]);
+        __m128i xmmw = _mm_set_epi64x(w1, w0);
+
+        auto &&key = ks.key();
+        __m128i xmmk =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
+                static_cast<MCKL_INT64>(std::get<0>(key)));
+
+        __m128i xmm0 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        xmm0 = _mm_xor_si128(xmm0, xmmk);        // Round 0
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 1
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 1
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 2
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 2
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 3
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 3
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 4
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 4
+        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 5
+        xmm0 = _mm_aesenclast_si128(xmm0, xmmk); // Round 5
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+    }
+
+    template <typename ResultType>
+    static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const KeySeqType &ks)
+    {
+        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
+            MCKL_NOINLINE_CALL eval_overflow(ctr, n, r, ks);
+            return;
+        }
+
+        constexpr std::size_t N = 8;
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        constexpr MCKL_INT64 w0 =
+            static_cast<MCKL_INT64>(Constants::weyl::value[0]);
+        constexpr MCKL_INT64 w1 =
+            static_cast<MCKL_INT64>(Constants::weyl::value[1]);
+        __m128i xmmw = _mm_set_epi64x(w1, w0);
+
+        auto &&key = ks.key();
+        __m128i xmmk0 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
+                static_cast<MCKL_INT64>(std::get<0>(key)));
+        __m128i xmmk1 = _mm_add_epi64(xmmk0, xmmw);
+        __m128i xmmk2 = _mm_add_epi64(xmmk1, xmmw);
+        __m128i xmmk3 = _mm_add_epi64(xmmk2, xmmw);
+        __m128i xmmk4 = _mm_add_epi64(xmmk3, xmmw);
+        __m128i xmmk5 = _mm_add_epi64(xmmk4, xmmw);
+
+        __m128i xmmc =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)));
+
+        while (n >= N) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            __m128i xmm1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
+            __m128i xmm2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
+            __m128i xmm3 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 4));
+            __m128i xmm4 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 5));
+            __m128i xmm5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 6));
+            __m128i xmm6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 7));
+            __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
+            xmmc = xmm7;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0); // Round 0
+            xmm1 = _mm_xor_si128(xmm1, xmmk0); // Round 0
+            xmm2 = _mm_xor_si128(xmm2, xmmk0); // Round 0
+            xmm3 = _mm_xor_si128(xmm3, xmmk0); // Round 0
+            xmm4 = _mm_xor_si128(xmm4, xmmk0); // Round 0
+            xmm5 = _mm_xor_si128(xmm5, xmmk0); // Round 0
+            xmm6 = _mm_xor_si128(xmm6, xmmk0); // Round 0
+            xmm7 = _mm_xor_si128(xmm7, xmmk0); // Round 0
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1); // Round 1
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk1); // Round 1
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk1); // Round 1
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk1); // Round 1
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk1); // Round 1
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk1); // Round 1
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk1); // Round 1
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk1); // Round 1
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2); // Round 2
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk2); // Round 2
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk2); // Round 2
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk2); // Round 2
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk2); // Round 2
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk2); // Round 2
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk2); // Round 2
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk2); // Round 2
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3); // Round 3
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk3); // Round 3
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk3); // Round 3
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk3); // Round 3
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk3); // Round 3
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk3); // Round 3
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk3); // Round 3
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk3); // Round 3
+
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4); // Round 4
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk4); // Round 4
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk4); // Round 4
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk4); // Round 4
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk4); // Round 4
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk4); // Round 4
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk4); // Round 4
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk4); // Round 4
+
+            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5); // Round 5
+            xmm1 = _mm_aesenclast_si128(xmm1, xmmk5); // Round 5
+            xmm2 = _mm_aesenclast_si128(xmm2, xmmk5); // Round 5
+            xmm3 = _mm_aesenclast_si128(xmm3, xmmk5); // Round 5
+            xmm4 = _mm_aesenclast_si128(xmm4, xmmk5); // Round 5
+            xmm5 = _mm_aesenclast_si128(xmm5, xmmk5); // Round 5
+            xmm6 = _mm_aesenclast_si128(xmm6, xmmk5); // Round 5
+            xmm7 = _mm_aesenclast_si128(xmm7, xmmk5); // Round 5
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 0), xmm0);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 1), xmm1);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 2), xmm2);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 3), xmm3);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 4), xmm4);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 5), xmm5);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 6), xmm6);
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 7), xmm7);
+
+            n -= N;
+            r += N * R;
+        }
+
+        for (std::size_t i = 0; i != n; ++i, r += R) {
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            xmmc = xmm0;
+
+            xmm0 = _mm_xor_si128(xmm0, xmmk0);        // Round 0
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);     // Round 1
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);     // Round 2
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);     // Round 3
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);     // Round 4
+            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5); // Round 5
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
+        }
+
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(ctr.data()), xmmc);
+    }
+
+    private:
+    template <typename ResultType>
+    MCKL_NOINLINE static void eval_overflow(std::array<std::uint64_t, 2> &ctr,
+        std::size_t n, ResultType *r, const KeySeqType &ks)
+    {
+        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += R)
+            eval(ctr, r, ks);
     }
 }; // class AESGeneratorAESNIImpl
 

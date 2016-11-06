@@ -914,22 +914,6 @@ template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
 class IncrementBlockSI256;
 
-class CopyResult
-{
-    public:
-    template <typename T, std::size_t K, typename ResultType>
-    MCKL_INLINE static void eval(const std::array<T, K> &s, ResultType *r)
-    {
-        std::memcpy(r, s.data(), sizeof(T) * K);
-    }
-
-    template <typename T, typename ResultType>
-    MCKL_INLINE static void eval(std::size_t n, const T *s, ResultType *r)
-    {
-        std::memcpy(r, s, sizeof(T) * n);
-    }
-}; // class CopyResult
-
 } // namespace mckl::internal
 
 /// \brief Traits of RNG engines

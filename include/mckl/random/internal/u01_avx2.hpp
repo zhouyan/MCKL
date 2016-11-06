@@ -90,14 +90,6 @@ class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
     using U01AVX2ImplBase<UIntType, float, Closed, Closed>::eval;
 
     template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
-
-    template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
     {
         const __m256i d25 =
@@ -123,14 +115,6 @@ class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     using U01AVX2ImplBase<UIntType, float, Closed, Open>::eval;
 
     template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
-
-    template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
     {
         const __m256i d24 =
@@ -149,14 +133,6 @@ class U01AVX2Impl<UIntType, float, Open, Closed, 32>
 {
     public:
     using U01AVX2ImplBase<UIntType, float, Open, Closed>::eval;
-
-    template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
 
     template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
@@ -182,14 +158,6 @@ class U01AVX2Impl<UIntType, float, Open, Open, 32>
 {
     public:
     using U01AVX2ImplBase<UIntType, float, Open, Open>::eval;
-
-    template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, float *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
 
     template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, float *r)
@@ -331,14 +299,6 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 64>
     using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
 
     template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
-
-    template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d54 =
@@ -364,14 +324,6 @@ class U01AVX2Impl<UIntType, double, Closed, Open, 64>
     using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
 
     template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
-
-    template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
     {
         const __m256i d53 =
@@ -390,14 +342,6 @@ class U01AVX2Impl<UIntType, double, Open, Closed, 64>
 {
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
-
-    template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
 
     template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
@@ -423,14 +367,6 @@ class U01AVX2Impl<UIntType, double, Open, Open, 64>
 {
     public:
     using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
-
-    template <std::size_t S>
-    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
-    {
-        std::array<__m256i, S / 2> t;
-        set_m128i(s, t);
-        eval(t, r);
-    }
 
     template <std::size_t S>
     MCKL_INLINE static void eval(std::array<__m256i, S> &s, double *r)
