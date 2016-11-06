@@ -331,7 +331,7 @@ class U01AVX2Impl<UIntType, double, Closed, Closed, 64>
     using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
 
     template <std::size_t S>
-    MCKL_INLINE static double *eval(std::array<__m128i, S> &s, double *r)
+    MCKL_INLINE static void eval(std::array<__m128i, S> &s, double *r)
     {
         std::array<__m256i, S / 2> t;
         set_m128i(s, t);

@@ -49,8 +49,8 @@
     static void u01_##lr##_u##bits(Counter<std::uint32_t, 4> &ctr,            \
         std::size_t n, RealType *r, const KeySeqType &ks)                     \
     {                                                                         \
-        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
-            ctr, n, r, ks);                                                   \
+        eval<U01SSE2Impl<std::uint##bits##_t, RealType, Lower, Upper>,        \
+            std::uint##bits##_t>(ctr, n, r, ks);                              \
     }
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_SSE2_UNIFORM_REAL(bits)         \
@@ -59,8 +59,8 @@
         std::size_t n, RealType *r, const KeySeqType &ks, RealType a,         \
         RealType b)                                                           \
     {                                                                         \
-        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>>(             \
-            ctr, n, r, ks, a, b);                                             \
+        eval<UniformRealSSE2Impl<std::uint##bits##_t, RealType>,              \
+            std::uint##bits##_t>(ctr, n, r, ks, a, b);                        \
     }
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_U01(                       \
@@ -69,8 +69,8 @@
     static void u01_##lr##_u##bits(Counter<std::uint32_t, 4> &ctr,            \
         std::size_t n, RealType *r, const KeySeqType &ks)                     \
     {                                                                         \
-        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
-            ctr, n, r, ks);                                                   \
+        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>,        \
+            std::uint##bits##_t>(ctr, n, r, ks);                              \
     }
 
 #define MCKL_DEFINE_RANDOM_INTERNAL_AES_AESNI_AVX2_UNIFORM_REAL(bits)         \
@@ -79,8 +79,8 @@
         std::size_t n, RealType *r, const KeySeqType &ks, RealType a,         \
         RealType b)                                                           \
     {                                                                         \
-        eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>>(             \
-            ctr, n, r, ks, a, b);                                             \
+        eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>,              \
+            std::uint##bits##_t>(ctr, n, r, ks, a, b);                        \
     }
 
 #ifdef MCKL_GCC
