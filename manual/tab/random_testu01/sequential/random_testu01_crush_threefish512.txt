@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+ 13  BirthdaySpacings, t = 4         5.6e-4
+ ----------------------------------------------
+ All other tests were passed
+

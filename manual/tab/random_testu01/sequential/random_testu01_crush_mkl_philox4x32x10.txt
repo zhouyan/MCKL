@@ -1,0 +1,50 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+ 27  CouponCollector, d = 4          3.7e-4
+ 56  MatrixRank, 60 x 60             0.9992
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+ 21  ClosePairsBitMatch, t = 2       4.4e-4
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  144
+ ----------------------------------------------
+ 44  MaxOft AD, t = 30               0.9994
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+ 32  Gap, r = 27                     2.2e-4
+ 65  RandomWalk1 R (L = 90)          0.9991
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  144
+ ----------------------------------------------
+ 66  RandomWalk1 J (L = 90)          0.9994
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+ 25  SimpPoker, d = 64               0.9992
+ ----------------------------------------------
+ All other tests were passed
+

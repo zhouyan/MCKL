@@ -1,0 +1,9 @@
+========= Summary results of SmallCrush =========
+ Generator:        U01OC
+ Number of statistics:  4
+ ----------------------------------------------
+  5  CouponCollector                 4.8e-4
+  9  HammingIndep                    7.6e-4
+ ----------------------------------------------
+ All other tests were passed
+

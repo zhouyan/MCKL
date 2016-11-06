@@ -1,0 +1,9 @@
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+ 89  HammingIndep, L = 1200          0.9994
+ 91  Run of bits, r = 0              5.2e-5
+ ----------------------------------------------
+ All other tests were passed
+

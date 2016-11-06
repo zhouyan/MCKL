@@ -1,0 +1,17 @@
+========= Summary results of Crush =========
+ Generator:        U01
+ Number of statistics:  144
+ ----------------------------------------------
+ 77  LongestHeadRun, r = 20          8.5e-4
+ 81  HammingWeight2, r = 20          0.9994
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of Crush =========
+ Generator:        U01OO
+ Number of statistics:  144
+ ----------------------------------------------
+ 10  CollisionOver, t = 20           1.8e-5
+ ----------------------------------------------
+ All other tests were passed
+

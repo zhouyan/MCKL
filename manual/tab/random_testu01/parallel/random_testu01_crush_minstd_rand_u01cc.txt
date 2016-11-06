@@ -1,0 +1,13 @@
+========= Summary results of Crush =========
+ Generator:        U01CC
+ Number of statistics:  8
+ ----------------------------------------------
+  9  CollisionOver, t = 20          1 -  5.2e-7
+  9  CollisionOver, t = 20          1 -  4.3e-5
+ 10  CollisionOver, t = 20           0.9999
+ 10  CollisionOver, t = 20          1 -  8.0e-5
+ 73  LempelZiv                       0.9998
+ 73  LempelZiv                       0.9992
+ ----------------------------------------------
+ All other tests were passed
+

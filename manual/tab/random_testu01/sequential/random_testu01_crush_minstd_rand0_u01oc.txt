@@ -1,0 +1,13 @@
+========= Summary results of Crush =========
+ Generator:        U01OC
+ Number of statistics:  16
+ ----------------------------------------------
+  9  CollisionOver, t = 20          1 - 2.4e-10
+  9  CollisionOver, t = 20          1 -  9.8e-5
+ 39  CollisionPermut, r = 0         1 -  8.4e-7
+ 39  CollisionPermut, r = 0         1 -  4.0e-8
+ 65  RandomWalk1 J (L = 90)          3.4e-8
+ 65  RandomWalk1 J (L = 90)          4.3e-5
+ ----------------------------------------------
+ All other tests were passed
+

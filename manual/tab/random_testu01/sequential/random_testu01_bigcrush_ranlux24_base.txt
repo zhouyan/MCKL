@@ -1,0 +1,288 @@
+========= Summary results of BigCrush =========
+ Generator:        U01
+ Number of statistics:  160
+ ----------------------------------------------
+  9  CollisionOver, t = 14            eps
+ 10  CollisionOver, t = 14            eps
+ 11  CollisionOver, t = 21            eps
+ 12  CollisionOver, t = 21            eps
+ 20  BirthdaySpacings, t = 16         eps
+ 21  BirthdaySpacings, t = 16         eps
+ 25  ClosePairs NP, t = 16          6.2e-12
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16       4.2e-223
+ 25  ClosePairs mNP2, t = 16        4.0e-78
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16       9.3e-12
+ 28  SimpPoker, r = 0                 eps
+ 29  SimpPoker, r = 25                eps
+ 30  CouponCollector, r = 0          1.2e-6
+ 31  CouponCollector, r = 10         3.7e-9
+ 33  CouponCollector, r = 27         2.9e-6
+ 44  CollisionPermut, r = 0           eps
+ 45  CollisionPermut, r = 10          eps
+ 47  MaxOft, t = 16                  5.9e-8
+ 47  MaxOft AD, t = 16              1.1e-44
+ 48  MaxOft AD, t = 24               1.8e-6
+ 51  SampleProd, t = 16             2.9e-84
+ 52  SampleProd, t = 24            3.3e-138
+ 53  SampleMean, r = 0              2.2e-41
+ 54  SampleMean, r = 10             1.5e-48
+ 59  WeightDistrib, r = 0            1.6e-5
+ 60  WeightDistrib, r = 20           1.5e-4
+ 65  SumCollector                     eps
+ 72  Savir2                        1.8e-184
+ 95  HammingIndep, L=30, r=0          eps
+ 96  HammingIndep, L=30, r=27         eps
+ 97  HammingIndep, L=300, r=0       4.7e-12
+ 98  HammingIndep, L=300, r=26      5.0e-12
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  160
+ ----------------------------------------------
+  9  CollisionOver, t = 14            eps
+ 10  CollisionOver, t = 14            eps
+ 11  CollisionOver, t = 21            eps
+ 12  CollisionOver, t = 21            eps
+ 20  BirthdaySpacings, t = 16         eps
+ 21  BirthdaySpacings, t = 16         eps
+ 25  ClosePairs NP, t = 16          1.5e-15
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16          eps
+ 25  ClosePairs mNP2, t = 16          eps
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16       1.5e-22
+ 28  SimpPoker, r = 0                 eps
+ 29  SimpPoker, r = 25                eps
+ 30  CouponCollector, r = 0           eps
+ 31  CouponCollector, r = 10          eps
+ 32  CouponCollector, r = 20          eps
+ 33  CouponCollector, r = 27          eps
+ 34  Gap, r = 0                       eps
+ 35  Gap, r = 25                      eps
+ 36  Gap, r = 0                       eps
+ 37  Gap, r = 20                      eps
+ 44  CollisionPermut, r = 0           eps
+ 45  CollisionPermut, r = 10          eps
+ 47  MaxOft, t = 16                   eps
+ 47  MaxOft AD, t = 16                eps
+ 48  MaxOft, t = 24                   eps
+ 48  MaxOft AD, t = 24                eps
+ 49  MaxOft, t = 32                   eps
+ 49  MaxOft AD, t = 32                eps
+ 51  SampleProd, t = 16               eps
+ 52  SampleProd, t = 24               eps
+ 53  SampleMean, r = 0               4.2e-4
+ 54  SampleMean, r = 10              5.7e-6
+ 59  WeightDistrib, r = 0             eps
+ 60  WeightDistrib, r = 20            eps
+ 61  WeightDistrib, r = 28            eps
+ 62  WeightDistrib, r = 0             eps
+ 63  WeightDistrib, r = 10            eps
+ 64  WeightDistrib, r = 26            eps
+ 65  SumCollector                     eps
+ 72  Savir2                           eps
+ 74  RandomWalk1 J (L=50, r=0)       0.9995
+ 76  RandomWalk1 H (L=1000, r=0)     6.6e-5
+ 76  RandomWalk1 M (L=1000, r=0)      eps
+ 76  RandomWalk1 R (L=1000, r=0)      eps
+ 77  RandomWalk1 H (L=1000, r=20)     eps
+ 77  RandomWalk1 M (L=1000, r=20)     eps
+ 77  RandomWalk1 J (L=1000, r=20)    1.4e-5
+ 77  RandomWalk1 R (L=1000, r=20)     eps
+ 77  RandomWalk1 C (L=1000, r=20)    1.9e-6
+ 95  HammingIndep, L=30, r=0          eps
+ 96  HammingIndep, L=30, r=27         eps
+ 97  HammingIndep, L=300, r=0         eps
+ 98  HammingIndep, L=300, r=26        eps
+ 100  HammingIndep, L=1200, r=25       eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  160
+ ----------------------------------------------
+  9  CollisionOver, t = 14            eps
+ 10  CollisionOver, t = 14            eps
+ 11  CollisionOver, t = 21            eps
+ 12  CollisionOver, t = 21            eps
+ 20  BirthdaySpacings, t = 16         eps
+ 21  BirthdaySpacings, t = 16         eps
+ 25  ClosePairs NP, t = 16          3.5e-15
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16          eps
+ 25  ClosePairs mNP2, t = 16          eps
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16       4.1e-32
+ 28  SimpPoker, r = 0                 eps
+ 29  SimpPoker, r = 25                eps
+ 30  CouponCollector, r = 0           eps
+ 31  CouponCollector, r = 10          eps
+ 32  CouponCollector, r = 20          eps
+ 33  CouponCollector, r = 27          eps
+ 34  Gap, r = 0                       eps
+ 35  Gap, r = 25                      eps
+ 36  Gap, r = 0                       eps
+ 37  Gap, r = 20                      eps
+ 44  CollisionPermut, r = 0           eps
+ 45  CollisionPermut, r = 10          eps
+ 47  MaxOft, t = 16                   eps
+ 47  MaxOft AD, t = 16                eps
+ 48  MaxOft, t = 24                   eps
+ 48  MaxOft AD, t = 24                eps
+ 49  MaxOft, t = 32                   eps
+ 49  MaxOft AD, t = 32                eps
+ 51  SampleProd, t = 16               eps
+ 52  SampleProd, t = 24               eps
+ 53  SampleMean, r = 0               8.3e-7
+ 54  SampleMean, r = 10              5.3e-5
+ 59  WeightDistrib, r = 0             eps
+ 60  WeightDistrib, r = 20            eps
+ 61  WeightDistrib, r = 28            eps
+ 62  WeightDistrib, r = 0             eps
+ 63  WeightDistrib, r = 10            eps
+ 64  WeightDistrib, r = 26            eps
+ 65  SumCollector                     eps
+ 72  Savir2                           eps
+ 76  RandomWalk1 H (L=1000, r=0)     2.4e-7
+ 76  RandomWalk1 M (L=1000, r=0)      eps
+ 76  RandomWalk1 J (L=1000, r=0)     3.0e-4
+ 76  RandomWalk1 R (L=1000, r=0)      eps
+ 76  RandomWalk1 C (L=1000, r=0)     3.2e-4
+ 77  RandomWalk1 M (L=1000, r=20)     eps
+ 77  RandomWalk1 J (L=1000, r=20)    4.1e-4
+ 77  RandomWalk1 R (L=1000, r=20)     eps
+ 95  HammingIndep, L=30, r=0          eps
+ 96  HammingIndep, L=30, r=27         eps
+ 97  HammingIndep, L=300, r=0         eps
+ 98  HammingIndep, L=300, r=26        eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01OC
+ Number of statistics:  160
+ ----------------------------------------------
+  9  CollisionOver, t = 14            eps
+ 10  CollisionOver, t = 14            eps
+ 11  CollisionOver, t = 21            eps
+ 12  CollisionOver, t = 21            eps
+ 20  BirthdaySpacings, t = 16         eps
+ 21  BirthdaySpacings, t = 16         eps
+ 25  ClosePairs NP, t = 16          2.3e-16
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16          eps
+ 25  ClosePairs mNP2, t = 16          eps
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16       1.6e-36
+ 28  SimpPoker, r = 0                 eps
+ 29  SimpPoker, r = 25                eps
+ 30  CouponCollector, r = 0           eps
+ 31  CouponCollector, r = 10          eps
+ 32  CouponCollector, r = 20          eps
+ 33  CouponCollector, r = 27          eps
+ 34  Gap, r = 0                       eps
+ 35  Gap, r = 25                      eps
+ 36  Gap, r = 0                       eps
+ 37  Gap, r = 20                      eps
+ 44  CollisionPermut, r = 0           eps
+ 45  CollisionPermut, r = 10          eps
+ 47  MaxOft, t = 16                   eps
+ 47  MaxOft AD, t = 16                eps
+ 48  MaxOft, t = 24                   eps
+ 48  MaxOft AD, t = 24                eps
+ 49  MaxOft, t = 32                   eps
+ 49  MaxOft AD, t = 32                eps
+ 51  SampleProd, t = 16               eps
+ 52  SampleProd, t = 24               eps
+ 53  SampleMean, r = 0               6.0e-5
+ 54  SampleMean, r = 10              5.6e-5
+ 59  WeightDistrib, r = 0             eps
+ 60  WeightDistrib, r = 20            eps
+ 61  WeightDistrib, r = 28            eps
+ 62  WeightDistrib, r = 0             eps
+ 63  WeightDistrib, r = 10            eps
+ 64  WeightDistrib, r = 26            eps
+ 65  SumCollector                     eps
+ 72  Savir2                           eps
+ 76  RandomWalk1 H (L=1000, r=0)     4.0e-6
+ 76  RandomWalk1 M (L=1000, r=0)    8.8e-15
+ 76  RandomWalk1 J (L=1000, r=0)     2.6e-5
+ 76  RandomWalk1 R (L=1000, r=0)      eps
+ 76  RandomWalk1 C (L=1000, r=0)     1.4e-5
+ 77  RandomWalk1 H (L=1000, r=20)     eps
+ 77  RandomWalk1 M (L=1000, r=20)     eps
+ 77  RandomWalk1 J (L=1000, r=20)    2.6e-7
+ 77  RandomWalk1 R (L=1000, r=20)     eps
+ 95  HammingIndep, L=30, r=0          eps
+ 96  HammingIndep, L=30, r=27         eps
+ 97  HammingIndep, L=300, r=0         eps
+ 98  HammingIndep, L=300, r=26        eps
+ 100  HammingIndep, L=1200, r=25       eps
+ ----------------------------------------------
+ All other tests were passed
+
+========= Summary results of BigCrush =========
+ Generator:        U01OO
+ Number of statistics:  160
+ ----------------------------------------------
+  9  CollisionOver, t = 14            eps
+ 10  CollisionOver, t = 14            eps
+ 11  CollisionOver, t = 21            eps
+ 12  CollisionOver, t = 21            eps
+ 20  BirthdaySpacings, t = 16         eps
+ 21  BirthdaySpacings, t = 16         eps
+ 25  ClosePairs NP, t = 16          1.5e-14
+ 25  ClosePairs mNP, t = 16         1.8e-79
+ 25  ClosePairs mNP1, t = 16          eps
+ 25  ClosePairs mNP2, t = 16          eps
+ 25  ClosePairs NJumps, t = 16        eps
+ 25  ClosePairs mNP2S, t = 16       2.6e-28
+ 28  SimpPoker, r = 0                 eps
+ 29  SimpPoker, r = 25                eps
+ 30  CouponCollector, r = 0           eps
+ 31  CouponCollector, r = 10          eps
+ 32  CouponCollector, r = 20          eps
+ 33  CouponCollector, r = 27          eps
+ 34  Gap, r = 0                       eps
+ 35  Gap, r = 25                      eps
+ 36  Gap, r = 0                       eps
+ 37  Gap, r = 20                      eps
+ 44  CollisionPermut, r = 0           eps
+ 45  CollisionPermut, r = 10          eps
+ 47  MaxOft, t = 16                   eps
+ 47  MaxOft AD, t = 16                eps
+ 48  MaxOft, t = 24                   eps
+ 48  MaxOft AD, t = 24                eps
+ 49  MaxOft, t = 32                   eps
+ 49  MaxOft AD, t = 32                eps
+ 51  SampleProd, t = 16               eps
+ 52  SampleProd, t = 24               eps
+ 53  SampleMean, r = 0               5.6e-5
+ 54  SampleMean, r = 10              1.8e-4
+ 59  WeightDistrib, r = 0             eps
+ 60  WeightDistrib, r = 20            eps
+ 61  WeightDistrib, r = 28            eps
+ 62  WeightDistrib, r = 0             eps
+ 63  WeightDistrib, r = 10            eps
+ 64  WeightDistrib, r = 26            eps
+ 65  SumCollector                     eps
+ 72  Savir2                           eps
+ 76  RandomWalk1 H (L=1000, r=0)     1.2e-5
+ 76  RandomWalk1 M (L=1000, r=0)      eps
+ 76  RandomWalk1 R (L=1000, r=0)    1.1e-16
+ 77  RandomWalk1 H (L=1000, r=20)   2.7e-13
+ 77  RandomWalk1 M (L=1000, r=20)     eps
+ 77  RandomWalk1 J (L=1000, r=20)    1.8e-4
+ 77  RandomWalk1 R (L=1000, r=20)   3.7e-12
+ 95  HammingIndep, L=30, r=0          eps
+ 96  HammingIndep, L=30, r=27         eps
+ 97  HammingIndep, L=300, r=0         eps
+ 98  HammingIndep, L=300, r=26        eps
+ ----------------------------------------------
+ All other tests were passed
+

@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        STD
+ Number of statistics:  144
+ ----------------------------------------------
+ 66  RandomWalk1 R (L = 90)         1 -  4.2e-5
+ ----------------------------------------------
+ All other tests were passed
+

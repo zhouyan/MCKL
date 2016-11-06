@@ -1,0 +1,8 @@
+========= Summary results of Crush =========
+ Generator:        U01CO
+ Number of statistics:  144
+ ----------------------------------------------
+ 46  SampleProd, t = 30              0.9998
+ ----------------------------------------------
+ All other tests were passed
+

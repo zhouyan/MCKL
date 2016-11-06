@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CO
+ Number of statistics:  160
+ ----------------------------------------------
+ 17  BirthdaySpacings, t = 7         0.9997
+ ----------------------------------------------
+ All other tests were passed
+
