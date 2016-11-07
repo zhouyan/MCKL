@@ -40,18 +40,18 @@ namespace mckl
 namespace internal
 {
 
-template <typename T, std::size_t, int = std::numeric_limits<T>::digits>
+template <typename T, int = std::numeric_limits<T>::digits>
 class ThreefryConstantsParity;
 
-template <typename T, std::size_t K>
-class ThreefryConstantsParity<T, K, 32>
+template <typename T>
+class ThreefryConstantsParity<T, 32>
 {
     public:
     static constexpr T value = 0x1BD11BDA;
 }; // class ThreefryConstantsParity
 
-template <typename T, std::size_t K>
-class ThreefryConstantsParity<T, K, 64>
+template <typename T>
+class ThreefryConstantsParity<T, 64>
 {
     public:
     static constexpr T value = 0x1BD11BDAA9FC1A22;
@@ -110,32 +110,32 @@ class ThreefryConstantsRotate<T, 16, 64>
         {37, 52, 17, 25, 30, 41, 25, 20}};
 }; // class ThreefryConstantsRotate
 
-template <typename, std::size_t>
+template <std::size_t>
 class ThreefryConstantsPermute;
 
-template <typename T>
-class ThreefryConstantsPermute<T, 2>
+template <>
+class ThreefryConstantsPermute<2>
 {
     public:
     static constexpr std::size_t value[2] = {0, 1};
 }; // class ThreefryConstantsPermute
 
-template <typename T>
-class ThreefryConstantsPermute<T, 4>
+template <>
+class ThreefryConstantsPermute<4>
 {
     public:
     static constexpr std::size_t value[4] = {0, 3, 2, 1};
 }; // class ThreefryConstantsPermute
 
-template <typename T>
-class ThreefryConstantsPermute<T, 8>
+template <>
+class ThreefryConstantsPermute<8>
 {
     public:
     static constexpr std::size_t value[8] = {2, 1, 4, 7, 6, 5, 0, 3};
 }; // class ThreefryConstantsPermute
 
-template <typename T>
-class ThreefryConstantsPermute<T, 16>
+template <>
+class ThreefryConstantsPermute<16>
 {
     static constexpr std::size_t value[16] = {
         0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1};
@@ -149,9 +149,9 @@ template <typename T, std::size_t K>
 class ThreefryConstants
 {
     public:
-    using parity = internal::ThreefryConstantsParity<T, K>;
+    using parity = internal::ThreefryConstantsParity<T>;
     using rotate = internal::ThreefryConstantsRotate<T, K>;
-    using permute = internal::ThreefryConstantsPermute<T, K>;
+    using permute = internal::ThreefryConstantsPermute<K>;
 }; // class ThreefryConstants
 
 } // namespace mckl
