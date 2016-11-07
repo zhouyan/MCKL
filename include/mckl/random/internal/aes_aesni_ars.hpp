@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_key_seq.hpp>
+#include <mckl/random/increment.hpp>
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -141,9 +142,7 @@ class AESGeneratorAESNIImplARS
     static void eval(
         std::array<std::uint64_t, 2> &ctr, ResultType *r, const KeySeqType &ks)
     {
-        ++std::get<0>(ctr);
-        if (std::get<0>(ctr) == 0)
-            ++std::get<1>(ctr);
+        MCKL_INLINE_CALL increment(ctr);
 
         constexpr MCKL_INT64 w0 =
             static_cast<MCKL_INT64>(Constants::weyl::value[0]);

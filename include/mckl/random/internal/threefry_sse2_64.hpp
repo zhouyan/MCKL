@@ -33,7 +33,11 @@
 #define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_64_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_common.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
+#include <mckl/random/internal/threefry_sse2_16x64.hpp>
+#include <mckl/random/internal/threefry_sse2_4x64.hpp>
+#include <mckl/random/internal/threefry_sse2_8x64.hpp>
 #include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -398,6 +402,42 @@ class ThreefryGeneratorSSE2Impl64
         ThreefryPBox<__m128i, K, Constants>::eval(s.data() + I * K);
         permute<I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
+}; // class ThreefryGeneratorSSE2Impl64
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl64<T, 4, 20, ThreefryConstants<T, 4>>
+    : public Threefry4x64GeneratorSSE2Impl<T>
+{
+}; // class ThreefryGeneratorSSE2Impl64
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl64<T, 4, 72, ThreefryConstants<T, 4>>
+    : public Threefish256GeneratorSSE2Impl<T>
+{
+}; // class ThreefryGeneratorSSE2Impl64
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl64<T, 8, 20, ThreefryConstants<T, 8>>
+    : public Threefry8x64GeneratorSSE2Impl<T>
+{
+}; // class ThreefryGeneratorSSE2Impl64
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl64<T, 8, 72, ThreefryConstants<T, 8>>
+    : public Threefish512GeneratorSSE2Impl<T>
+{
+}; // class ThreefryGeneratorSSE2Impl64
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl64<T, 16, 20, ThreefryConstants<T, 16>>
+    : public Threefry16x64GeneratorSSE2Impl<T>
+{
+}; // class ThreefryGeneratorSSE2Impl64
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl64<T, 16, 80, ThreefryConstants<T, 16>>
+    : public Threefish1024GeneratorSSE2Impl<T>
+{
 }; // class ThreefryGeneratorSSE2Impl64
 
 } // namespace mckl::internal
