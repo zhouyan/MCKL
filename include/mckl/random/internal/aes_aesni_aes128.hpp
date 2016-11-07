@@ -110,10 +110,10 @@ using AES128KeySeqAESNI = AESKeySeqImpl<10, AES128KeySeqGeneratorAESNIImpl>;
 
 class AESGeneratorAESNIImplAES128
 {
-    public:
-    using key_seq_type = AES128KeySeqAESNI;
+    using KeySeqType = AES128KeySeqAESNI;
 
-    static void eval(const void *plain, void *cipher, const key_seq_type &ks)
+    public:
+    static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
         __m128i xmm0 =
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
@@ -134,8 +134,8 @@ class AESGeneratorAESNIImplAES128
     }
 
     template <typename ResultType>
-    static void eval(std::array<std::uint64_t, 2> &ctr, ResultType *r,
-        const key_seq_type &ks)
+    static void eval(
+        std::array<std::uint64_t, 2> &ctr, ResultType *r, const KeySeqType &ks)
     {
         ++std::get<0>(ctr);
         if (std::get<0>(ctr) == 0)
@@ -162,7 +162,7 @@ class AESGeneratorAESNIImplAES128
 
     template <typename ResultType>
     static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
-        ResultType *r, const key_seq_type &ks)
+        ResultType *r, const KeySeqType &ks)
     {
         if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
             MCKL_NOINLINE_CALL eval_overflow(ctr, n, r, ks);
@@ -337,7 +337,7 @@ class AESGeneratorAESNIImplAES128
     private:
     template <typename ResultType>
     MCKL_NOINLINE static void eval_overflow(std::array<std::uint64_t, 2> &ctr,
-        std::size_t n, ResultType *r, const key_seq_type &ks)
+        std::size_t n, ResultType *r, const KeySeqType &ks)
     {
         constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
 
