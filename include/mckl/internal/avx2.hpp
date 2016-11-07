@@ -327,27 +327,27 @@ MCKL_INLINE inline void transpose8x32_store_si256(std::array<__m256i, 8> &s)
 
 MCKL_INLINE inline void transpose8x32_load_si256(std::array<__m256i, 16> &s)
 {
-    __m256i t0 = std::get<0x1>(s);
+    __m256i s1 = std::get<0x1>(s);
     std::get<0x1>(s) = std::get<0x2>(s);
     std::get<0x2>(s) = std::get<0x4>(s);
     std::get<0x4>(s) = std::get<0x8>(s);
-    std::get<0x8>(s) = t0;
+    std::get<0x8>(s) = s1;
 
-    __m256i t1 = std::get<0x3>(s);
+    __m256i s3 = std::get<0x3>(s);
     std::get<0x3>(s) = std::get<0x6>(s);
     std::get<0x6>(s) = std::get<0xC>(s);
     std::get<0xC>(s) = std::get<0x9>(s);
-    std::get<0x9>(s) = t1;
+    std::get<0x9>(s) = s3;
 
-    __m256i t2 = std::get<0x7>(s);
+    __m256i s7 = std::get<0x7>(s);
     std::get<0x7>(s) = std::get<0xE>(s);
     std::get<0xE>(s) = std::get<0xD>(s);
     std::get<0xD>(s) = std::get<0xB>(s);
-    std::get<0xB>(s) = t2;
+    std::get<0xB>(s) = s7;
 
-    __m256i t3 = std::get<0x5>(s);
+    __m256i s5 = std::get<0x5>(s);
     std::get<0x5>(s) = std::get<0xA>(s);
-    std::get<0xA>(s) = t3;
+    std::get<0xA>(s) = s5;
 
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
@@ -358,27 +358,27 @@ MCKL_INLINE inline void transpose8x32_store_si256(std::array<__m256i, 16> &s)
     transpose8x32_si256<0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7>(s);
     transpose8x32_si256<0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF>(s);
 
-    __m256i t0 = std::get<0x2>(s);
+    __m256i s2 = std::get<0x2>(s);
     std::get<0x2>(s) = std::get<0x1>(s);
     std::get<0x1>(s) = std::get<0x8>(s);
     std::get<0x8>(s) = std::get<0x4>(s);
-    std::get<0x4>(s) = t0;
+    std::get<0x4>(s) = s2;
 
-    __m256i t1 = std::get<0x6>(s);
+    __m256i s6 = std::get<0x6>(s);
     std::get<0x6>(s) = std::get<0x3>(s);
     std::get<0x3>(s) = std::get<0x9>(s);
     std::get<0x9>(s) = std::get<0xC>(s);
-    std::get<0xC>(s) = t1;
+    std::get<0xC>(s) = s6;
 
-    __m256i t2 = std::get<0xE>(s);
+    __m256i sE = std::get<0xE>(s);
     std::get<0xE>(s) = std::get<0x7>(s);
     std::get<0x7>(s) = std::get<0xB>(s);
     std::get<0xB>(s) = std::get<0xD>(s);
-    std::get<0xD>(s) = t2;
+    std::get<0xD>(s) = sE;
 
-    __m256i t3 = std::get<0x5>(s);
+    __m256i s5 = std::get<0x5>(s);
     std::get<0x5>(s) = std::get<0xA>(s);
-    std::get<0xA>(s) = t3;
+    std::get<0xA>(s) = s5;
 }
 
 template <std::size_t I0, std::size_t I1, std::size_t I2, std::size_t I3,
@@ -407,15 +407,15 @@ MCKL_INLINE inline void transpose4x64_store_si256(std::array<__m256i, 4> &s)
 
 MCKL_INLINE inline void transpose4x64_load_si256(std::array<__m256i, 8> &s)
 {
-    __m256i t0 = std::get<1>(s);
+    __m256i s1 = std::get<1>(s);
     std::get<1>(s) = std::get<2>(s);
     std::get<2>(s) = std::get<4>(s);
-    std::get<4>(s) = t0;
+    std::get<4>(s) = s1;
 
-    __m256i t1 = std::get<3>(s);
+    __m256i s3 = std::get<3>(s);
     std::get<3>(s) = std::get<6>(s);
     std::get<6>(s) = std::get<5>(s);
-    std::get<5>(s) = t1;
+    std::get<5>(s) = s3;
 
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
@@ -426,15 +426,15 @@ MCKL_INLINE inline void transpose4x64_store_si256(std::array<__m256i, 8> &s)
     transpose4x64_si256<0, 1, 2, 3>(s);
     transpose4x64_si256<4, 5, 6, 7>(s);
 
-    __m256i t0 = std::get<2>(s);
+    __m256i s2 = std::get<2>(s);
     std::get<2>(s) = std::get<1>(s);
     std::get<1>(s) = std::get<4>(s);
-    std::get<4>(s) = t0;
+    std::get<4>(s) = s2;
 
-    __m256i t1 = std::get<6>(s);
+    __m256i s6 = std::get<6>(s);
     std::get<6>(s) = std::get<3>(s);
     std::get<3>(s) = std::get<5>(s);
-    std::get<5>(s) = t1;
+    std::get<5>(s) = s6;
 }
 
 MCKL_INLINE inline void transpose4x64_load_si256(std::array<__m256i, 16> &s)

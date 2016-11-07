@@ -203,15 +203,15 @@ MCKL_INLINE inline void transpose4x32_store_si128(std::array<__m128i, 4> &s)
 
 MCKL_INLINE inline void transpose4x32_load_si128(std::array<__m128i, 8> &s)
 {
-    __m128i t0 = std::get<2>(s);
+    __m128i s2 = std::get<2>(s);
     std::get<2>(s) = std::get<1>(s);
     std::get<1>(s) = std::get<4>(s);
-    std::get<4>(s) = t0;
+    std::get<4>(s) = s2;
 
-    __m128i t1 = std::get<6>(s);
+    __m128i s6 = std::get<6>(s);
     std::get<6>(s) = std::get<3>(s);
     std::get<3>(s) = std::get<5>(s);
-    std::get<5>(s) = t1;
+    std::get<5>(s) = s6;
 
     transpose4x32_si128<0, 1, 2, 3>(s);
     transpose4x32_si128<4, 5, 6, 7>(s);
@@ -222,15 +222,15 @@ MCKL_INLINE inline void transpose4x32_store_si128(std::array<__m128i, 8> &s)
     transpose4x32_si128<0, 1, 2, 3>(s);
     transpose4x32_si128<4, 5, 6, 7>(s);
 
-    __m128i t0 = std::get<1>(s);
+    __m128i s1 = std::get<1>(s);
     std::get<1>(s) = std::get<2>(s);
     std::get<2>(s) = std::get<4>(s);
-    std::get<4>(s) = t0;
+    std::get<4>(s) = s1;
 
-    __m128i t1 = std::get<3>(s);
+    __m128i s3 = std::get<3>(s);
     std::get<3>(s) = std::get<6>(s);
     std::get<6>(s) = std::get<5>(s);
-    std::get<5>(s) = t1;
+    std::get<5>(s) = s3;
 }
 
 MCKL_INLINE inline void transpose4x32_load_si128(std::array<__m128i, 16> &s)
@@ -328,15 +328,15 @@ MCKL_INLINE inline void transpose2x64_store_si128(std::array<__m128i, 4> &s)
 
 MCKL_INLINE inline void transpose2x64_load_si128(std::array<__m128i, 8> &s)
 {
-    __m128i t0 = std::get<2>(s);
+    __m128i s2 = std::get<2>(s);
     std::get<2>(s) = std::get<1>(s);
     std::get<1>(s) = std::get<4>(s);
-    std::get<4>(s) = t0;
+    std::get<4>(s) = s2;
 
-    __m128i t1 = std::get<6>(s);
+    __m128i s6 = std::get<6>(s);
     std::get<6>(s) = std::get<3>(s);
     std::get<3>(s) = std::get<5>(s);
-    std::get<5>(s) = t1;
+    std::get<5>(s) = s6;
 
     transpose2x64_si128<0, 1>(s);
     transpose2x64_si128<2, 3>(s);
@@ -351,40 +351,40 @@ MCKL_INLINE inline void transpose2x64_store_si128(std::array<__m128i, 8> &s)
     transpose2x64_si128<4, 5>(s);
     transpose2x64_si128<6, 7>(s);
 
-    __m128i t0 = std::get<1>(s);
+    __m128i s1 = std::get<1>(s);
     std::get<1>(s) = std::get<2>(s);
     std::get<2>(s) = std::get<4>(s);
-    std::get<4>(s) = t0;
+    std::get<4>(s) = s1;
 
-    __m128i t1 = std::get<3>(s);
+    __m128i s3 = std::get<3>(s);
     std::get<3>(s) = std::get<6>(s);
     std::get<6>(s) = std::get<5>(s);
-    std::get<5>(s) = t1;
+    std::get<5>(s) = s3;
 }
 
 MCKL_INLINE inline void transpose2x64_load_si128(std::array<__m128i, 16> &s)
 {
-    __m128i t0 = std::get<0x2>(s);
+    __m128i s2 = std::get<0x2>(s);
     std::get<0x2>(s) = std::get<0x1>(s);
     std::get<0x1>(s) = std::get<0x8>(s);
     std::get<0x8>(s) = std::get<0x4>(s);
-    std::get<0x4>(s) = t0;
+    std::get<0x4>(s) = s2;
 
-    __m128i t1 = std::get<0x6>(s);
+    __m128i s6 = std::get<0x6>(s);
     std::get<0x6>(s) = std::get<0x3>(s);
     std::get<0x3>(s) = std::get<0x9>(s);
     std::get<0x9>(s) = std::get<0xC>(s);
-    std::get<0xC>(s) = t1;
+    std::get<0xC>(s) = s6;
 
-    __m128i t2 = std::get<0xE>(s);
+    __m128i sE = std::get<0xE>(s);
     std::get<0xE>(s) = std::get<0x7>(s);
     std::get<0x7>(s) = std::get<0xB>(s);
     std::get<0xB>(s) = std::get<0xD>(s);
-    std::get<0xD>(s) = t2;
+    std::get<0xD>(s) = sE;
 
-    __m128i t3 = std::get<0x5>(s);
+    __m128i s5 = std::get<0x5>(s);
     std::get<0x5>(s) = std::get<0xA>(s);
-    std::get<0xA>(s) = t3;
+    std::get<0xA>(s) = s5;
 
     transpose2x64_si128<0x0, 0x1>(s);
     transpose2x64_si128<0x2, 0x3>(s);
@@ -407,27 +407,27 @@ MCKL_INLINE inline void transpose2x64_store_si128(std::array<__m128i, 16> &s)
     transpose2x64_si128<0xC, 0xD>(s);
     transpose2x64_si128<0xE, 0xF>(s);
 
-    __m128i t0 = std::get<0x1>(s);
+    __m128i s1 = std::get<0x1>(s);
     std::get<0x1>(s) = std::get<0x2>(s);
     std::get<0x2>(s) = std::get<0x4>(s);
     std::get<0x4>(s) = std::get<0x8>(s);
-    std::get<0x8>(s) = t0;
+    std::get<0x8>(s) = s1;
 
-    __m128i t1 = std::get<0x3>(s);
+    __m128i s3 = std::get<0x3>(s);
     std::get<0x3>(s) = std::get<0x6>(s);
     std::get<0x6>(s) = std::get<0xC>(s);
     std::get<0xC>(s) = std::get<0x9>(s);
-    std::get<0x9>(s) = t1;
+    std::get<0x9>(s) = s3;
 
-    __m128i t2 = std::get<0x7>(s);
+    __m128i s7 = std::get<0x7>(s);
     std::get<0x7>(s) = std::get<0xE>(s);
     std::get<0xE>(s) = std::get<0xD>(s);
     std::get<0xD>(s) = std::get<0xB>(s);
-    std::get<0xB>(s) = t2;
+    std::get<0xB>(s) = s7;
 
-    __m128i t3 = std::get<0x5>(s);
+    __m128i s5 = std::get<0x5>(s);
     std::get<0x5>(s) = std::get<0xA>(s);
-    std::get<0xA>(s) = t3;
+    std::get<0xA>(s) = s5;
 }
 
 } // namespace mckl::internal

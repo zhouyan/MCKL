@@ -33,6 +33,10 @@
 #define MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_64_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_avx2_16x64.hpp>
+#include <mckl/random/internal/threefry_avx2_4x64.hpp>
+#include <mckl/random/internal/threefry_avx2_8x64.hpp>
+#include <mckl/random/internal/threefry_common.hpp>
 #include <mckl/random/internal/threefry_constants.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
 #include <mckl/random/internal/threefry_unroll.hpp>
@@ -415,6 +419,42 @@ class ThreefryGeneratorAVX2Impl64
         ThreefryPBox<__m256i, K, Constants>::eval(s.data() + I * K);
         permute<I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
+}; // class ThreefryGeneratorAVX2Impl64
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl64<T, 4, 20, ThreefryConstants<T, 4>>
+    : public Threefry4x64GeneratorAVX2Impl<T>
+{
+}; // class ThreefryGeneratorAVX2Impl64
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl64<T, 4, 72, ThreefryConstants<T, 4>>
+    : public Threefish256GeneratorAVX2Impl<T>
+{
+}; // class ThreefryGeneratorAVX2Impl64
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl64<T, 8, 20, ThreefryConstants<T, 8>>
+    : public Threefry8x64GeneratorAVX2Impl<T>
+{
+}; // class ThreefryGeneratorAVX2Impl64
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl64<T, 8, 72, ThreefryConstants<T, 8>>
+    : public Threefish512GeneratorAVX2Impl<T>
+{
+}; // class ThreefryGeneratorAVX2Impl64
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl64<T, 16, 20, ThreefryConstants<T, 16>>
+    : public Threefry16x64GeneratorAVX2Impl<T>
+{
+}; // class ThreefryGeneratorAVX2Impl64
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl64<T, 16, 80, ThreefryConstants<T, 16>>
+    : public Threefish1024GeneratorAVX2Impl<T>
+{
 }; // class ThreefryGeneratorAVX2Impl64
 
 } // namespace mckl::internal
