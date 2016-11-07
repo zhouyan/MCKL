@@ -69,7 +69,7 @@ using ThreefryGeneratorImpl =
 #else  // MCKL_USE_AVX2
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 using ThreefryGeneratorImpl =
-    ThreefryGeneratorGeneric2Impl<T, K, Rounds, Constants>;
+    ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>;
 #endif // MCKL_USE_AVX2
 
 } // namespace mckl::internal
