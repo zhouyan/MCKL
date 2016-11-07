@@ -47,13 +47,13 @@
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_4X64_KBOX(N)                       \
     xmmt0 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0>(par)));             \
+        ThreefryKBox<T, K, N>::template key<0>(par)));                        \
     xmmt1 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<1>(par)));             \
+        ThreefryKBox<T, K, N>::template key<1>(par)));                        \
     xmmt2 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<2>(par)));             \
+        ThreefryKBox<T, K, N>::template key<2>(par)));                        \
     xmmt3 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<3>(par)));             \
+        ThreefryKBox<T, K, N>::template key<3>(par)));                        \
     xmms0 = _mm_add_epi64(xmms0, xmmt0);                                      \
     xmms1 = _mm_add_epi64(xmms1, xmmt1);                                      \
     xmms2 = _mm_add_epi64(xmms2, xmmt2);                                      \

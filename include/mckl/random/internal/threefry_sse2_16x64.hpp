@@ -47,37 +47,37 @@
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_KBOX(N)                      \
     xmmt0 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x0>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x0>(par)));                      \
     xmmt1 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x1>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x1>(par)));                      \
     xmmt2 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x2>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x2>(par)));                      \
     xmmt3 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x3>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x3>(par)));                      \
     xmmt4 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x4>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x4>(par)));                      \
     xmmt5 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x5>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x5>(par)));                      \
     xmmt6 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x6>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x6>(par)));                      \
     xmmt7 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x7>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x7>(par)));                      \
     xmmt8 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x8>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x8>(par)));                      \
     xmmt9 = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0x9>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x9>(par)));                      \
     xmmtA = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0xA>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xA>(par)));                      \
     xmmtB = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0xB>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xB>(par)));                      \
     xmmtC = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0xC>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xC>(par)));                      \
     xmmtD = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0xD>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xD>(par)));                      \
     xmmtE = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0xE>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xE>(par)));                      \
     xmmtF = _mm_set1_epi64x(static_cast<MCKL_INT64>(                          \
-        ThreefryKBox<T, K, N, Constants>::template key<0xF>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xF>(par)));                      \
     xmms0 = _mm_add_epi64(xmms0, xmmt0);                                      \
     xmms1 = _mm_add_epi64(xmms1, xmmt1);                                      \
     xmms2 = _mm_add_epi64(xmms2, xmmt2);                                      \

@@ -211,7 +211,7 @@ class ThreefryPBox<T, 16, ThreefryConstants<U, 16>>
     }
 }; // class ThreefryPBox
 
-template <typename T, std::size_t K, std::size_t N, typename Constants>
+template <typename T, std::size_t K, std::size_t N>
 class ThreefryKBox
 {
     public:

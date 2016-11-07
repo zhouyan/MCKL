@@ -134,7 +134,7 @@ class ThreefryGeneratorGenericImpl
     static void kbox(
         std::array<T, K> &s, const std::array<T, K + 4> &par, std::true_type)
     {
-        ThreefryKBox<T, K, N, Constants>::eval(s, par);
+        ThreefryKBox<T, K, N>::eval(s, par);
     }
 
     template <std::size_t N>

@@ -38,8 +38,8 @@
 #include <mckl/random/increment.hpp>
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_KBOX(N)                    \
-    s0 += ThreefryKBox<T, K, N, Constants>::template key<0>(par);             \
-    s1 += ThreefryKBox<T, K, N, Constants>::template key<1>(par);
+    s0 += ThreefryKBox<T, K, N>::template key<0>(par);                        \
+    s1 += ThreefryKBox<T, K, N>::template key<1>(par);
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_RBOX(N)                    \
     {                                                                         \
@@ -70,15 +70,14 @@
     MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_KBOX(N * 8 + 8);
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_ROUND_20                   \
-    std::uint32_t s0 = static_cast<std::uint32_t>(std::get<0>(ctr));          \
-    std::uint32_t s1 = static_cast<std::uint32_t>(std::get<0>(ctr) >> 32);    \
+    T s0 = std::get<0>(buf.s);                                                \
+    T s1 = std::get<1>(buf.s);                                                \
     MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_KBOX(0)                        \
     MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_CYCLE_8(0)                     \
     MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_CYCLE_8(1)                     \
     MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_CYCLE_4(2)                     \
-    std::array<std::uint32_t, 2> res;                                         \
-    std::get<0>(res) = s0;                                                    \
-    std::get<1>(res) = s1;
+    std::get<0>(buf.s) = s0;                                                  \
+    std::get<1>(buf.s) = s1;
 
 namespace mckl
 {
@@ -101,24 +100,43 @@ class Threefry2x32GeneratorGenericImpl
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
-        std::array<std::uint64_t, 1> ctr;
-        std::memcpy(ctr.data(), plain, sizeof(T) * K);
+        alignas(32) union {
+            std::array<T, K> s;
+            std::array<char, sizeof(T) * K> r;
+        } buf;
+
+        std::memcpy(buf.s.data(), plain, sizeof(T) * K);
+        union_le<char>(buf.s);
         MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_ROUND_20
-        std::memcpy(cipher, res.data(), sizeof(T) * K);
+        union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>
-    static void eval(std::array<std::uint64_t, 1> &ctr, ResultType *r,
-        const std::array<T, K + 4> &par)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K + 4> &par)
     {
+        alignas(32) union {
+            std::array<T, K> s;
+            Counter<T, K> c;
+            std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
+        } buf;
+
         MCKL_INLINE_CALL increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<typename Counter<T, K>::value_type>(buf.s);
+#endif
         MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_2X32_ROUND_20
-        std::memcpy(r, res.data(), sizeof(T) * K);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<T>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>
-    MCKL_NOINLINE static void eval(std::array<std::uint64_t, 1> &ctr,
-        std::size_t n, ResultType *r, const std::array<T, K + 4> &par)
+    MCKL_NOINLINE static void eval(Counter<T, K> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K + 4> &par)
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 

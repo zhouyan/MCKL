@@ -38,14 +38,14 @@
 #include <mckl/random/increment.hpp>
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_KBOX(N)                    \
-    s0 += ThreefryKBox<T, K, N, Constants>::template key<0>(par);             \
-    s1 += ThreefryKBox<T, K, N, Constants>::template key<1>(par);             \
-    s2 += ThreefryKBox<T, K, N, Constants>::template key<2>(par);             \
-    s3 += ThreefryKBox<T, K, N, Constants>::template key<3>(par);             \
-    s4 += ThreefryKBox<T, K, N, Constants>::template key<4>(par);             \
-    s5 += ThreefryKBox<T, K, N, Constants>::template key<5>(par);             \
-    s6 += ThreefryKBox<T, K, N, Constants>::template key<6>(par);             \
-    s7 += ThreefryKBox<T, K, N, Constants>::template key<7>(par);
+    s0 += ThreefryKBox<T, K, N>::template key<0>(par);                        \
+    s1 += ThreefryKBox<T, K, N>::template key<1>(par);                        \
+    s2 += ThreefryKBox<T, K, N>::template key<2>(par);                        \
+    s3 += ThreefryKBox<T, K, N>::template key<3>(par);                        \
+    s4 += ThreefryKBox<T, K, N>::template key<4>(par);                        \
+    s5 += ThreefryKBox<T, K, N>::template key<5>(par);                        \
+    s6 += ThreefryKBox<T, K, N>::template key<6>(par);                        \
+    s7 += ThreefryKBox<T, K, N>::template key<7>(par);
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_RBOX(N)                    \
     {                                                                         \
@@ -113,32 +113,31 @@
     MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_CYCLE_8(8)
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_ROUND(L)                   \
-    std::uint64_t s0 = std::get<0>(ctr);                                      \
-    std::uint64_t s1 = std::get<1>(ctr);                                      \
-    std::uint64_t s2 = std::get<2>(ctr);                                      \
-    std::uint64_t s3 = std::get<3>(ctr);                                      \
-    std::uint64_t s4 = std::get<4>(ctr);                                      \
-    std::uint64_t s5 = std::get<5>(ctr);                                      \
-    std::uint64_t s6 = std::get<6>(ctr);                                      \
-    std::uint64_t s7 = std::get<7>(ctr);                                      \
-    std::uint64_t t0;                                                         \
-    std::uint64_t t1;                                                         \
-    std::uint64_t t2;                                                         \
-    std::uint64_t t3;                                                         \
-    std::uint64_t t4;                                                         \
-    std::uint64_t t5;                                                         \
-    std::uint64_t t6;                                                         \
-    std::uint64_t t7;                                                         \
+    T s0 = std::get<0>(buf.s);                                                \
+    T s1 = std::get<1>(buf.s);                                                \
+    T s2 = std::get<2>(buf.s);                                                \
+    T s3 = std::get<3>(buf.s);                                                \
+    T s4 = std::get<4>(buf.s);                                                \
+    T s5 = std::get<5>(buf.s);                                                \
+    T s6 = std::get<6>(buf.s);                                                \
+    T s7 = std::get<7>(buf.s);                                                \
+    T t0;                                                                     \
+    T t1;                                                                     \
+    T t2;                                                                     \
+    T t3;                                                                     \
+    T t4;                                                                     \
+    T t5;                                                                     \
+    T t6;                                                                     \
+    T t7;                                                                     \
     MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_ROUND_##L;                     \
-    std::array<std::uint64_t, 8> res;                                         \
-    std::get<0>(res) = s0;                                                    \
-    std::get<1>(res) = s1;                                                    \
-    std::get<2>(res) = s2;                                                    \
-    std::get<3>(res) = s3;                                                    \
-    std::get<4>(res) = s4;                                                    \
-    std::get<5>(res) = s5;                                                    \
-    std::get<6>(res) = s6;                                                    \
-    std::get<7>(res) = s7;
+    std::get<0>(buf.s) = s0;                                                  \
+    std::get<1>(buf.s) = s1;                                                  \
+    std::get<2>(buf.s) = s2;                                                  \
+    std::get<3>(buf.s) = s3;                                                  \
+    std::get<4>(buf.s) = s4;                                                  \
+    std::get<5>(buf.s) = s5;                                                  \
+    std::get<6>(buf.s) = s6;                                                  \
+    std::get<7>(buf.s) = s7;
 
 namespace mckl
 {
@@ -161,24 +160,43 @@ class Threefry8x64GeneratorGenericImpl
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
-        std::array<std::uint64_t, 8> ctr;
-        std::memcpy(ctr.data(), plain, sizeof(T) * K);
+        alignas(32) union {
+            std::array<T, K> s;
+            std::array<char, sizeof(T) * K> r;
+        } buf;
+
+        std::memcpy(buf.s.data(), plain, sizeof(T) * K);
+        union_le<char>(buf.s);
         MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_ROUND(20)
-        std::memcpy(cipher, res.data(), sizeof(T) * K);
+        union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>
-    static void eval(std::array<std::uint64_t, 8> &ctr, ResultType *r,
-        const std::array<T, K + 4> &par)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K + 4> &par)
     {
+        alignas(32) union {
+            std::array<T, K> s;
+            Counter<T, K> c;
+            std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
+        } buf;
+
         MCKL_INLINE_CALL increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<typename Counter<T, K>::value_type>(buf.s);
+#endif
         MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_ROUND(20)
-        std::memcpy(r, res.data(), sizeof(T) * K);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<T>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>
-    MCKL_NOINLINE static void eval(std::array<std::uint64_t, 8> &ctr,
-        std::size_t n, ResultType *r, const std::array<T, K + 4> &par)
+    MCKL_NOINLINE static void eval(Counter<T, K> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K + 4> &par)
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
@@ -202,24 +220,43 @@ class Threefish512GeneratorGenericImpl
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
-        std::array<std::uint64_t, 8> ctr;
-        std::memcpy(ctr.data(), plain, sizeof(T) * K);
+        alignas(32) union {
+            std::array<T, K> s;
+            std::array<char, sizeof(T) * K> r;
+        } buf;
+
+        std::memcpy(buf.s.data(), plain, sizeof(T) * K);
+        union_le<char>(buf.s);
         MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_ROUND(72)
-        std::memcpy(cipher, res.data(), sizeof(T) * K);
+        union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>
-    static void eval(std::array<std::uint64_t, 8> &ctr, ResultType *r,
-        const std::array<T, K + 4> &par)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K + 4> &par)
     {
+        alignas(32) union {
+            std::array<T, K> s;
+            Counter<T, K> c;
+            std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
+        } buf;
+
         MCKL_INLINE_CALL increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<typename Counter<T, K>::value_type>(buf.s);
+#endif
         MCKL_RANDOM_INTERNAL_THREEFRY_GENERIC_8X64_ROUND(72)
-        std::memcpy(r, res.data(), sizeof(T) * K);
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<T>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>
-    MCKL_NOINLINE static void eval(std::array<std::uint64_t, 8> &ctr,
-        std::size_t n, ResultType *r, const std::array<T, K + 4> &par)
+    MCKL_NOINLINE static void eval(Counter<T, K> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K + 4> &par)
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 

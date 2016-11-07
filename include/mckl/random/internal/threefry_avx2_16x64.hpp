@@ -47,37 +47,37 @@
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_16X64_KBOX_B(N)                    \
     ymmt0 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x0>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x0>(par)));                      \
     ymmt1 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x1>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x1>(par)));                      \
     ymmt2 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x2>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x2>(par)));                      \
     ymmt3 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x3>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x3>(par)));                      \
     ymmt4 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x4>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x4>(par)));                      \
     ymmt5 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x5>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x5>(par)));                      \
     ymmt6 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x6>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x6>(par)));                      \
     ymmt7 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x7>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x7>(par)));                      \
     ymmt8 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x8>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x8>(par)));                      \
     ymmt9 = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0x9>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0x9>(par)));                      \
     ymmtA = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0xA>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xA>(par)));                      \
     ymmtB = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0xB>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xB>(par)));                      \
     ymmtC = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0xC>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xC>(par)));                      \
     ymmtD = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0xD>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xD>(par)));                      \
     ymmtE = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0xE>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xE>(par)));                      \
     ymmtF = _mm256_set1_epi64x(static_cast<MCKL_INT64>(                       \
-        ThreefryKBox<T, K, N, Constants>::template key<0xF>(par)));           \
+        ThreefryKBox<T, K, N>::template key<0xF>(par)));                      \
     ymms0 = _mm256_add_epi64(ymms0, ymmt0);                                   \
     ymms1 = _mm256_add_epi64(ymms1, ymmt1);                                   \
     ymms2 = _mm256_add_epi64(ymms2, ymmt2);                                   \
@@ -164,42 +164,42 @@
     }
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_16X64_KBOX_1(N)                    \
-    ymmt0 = _mm256_set_epi64x(                                                \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x6>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x4>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x2>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x0>(par)));       \
-    ymmt1 = _mm256_set_epi64x(                                                \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x7>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x5>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x3>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x1>(par)));       \
-    ymmt2 = _mm256_set_epi64x(                                                \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0xE>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0xC>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0xA>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x8>(par)));       \
-    ymmt3 = _mm256_set_epi64x(                                                \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0xF>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0xD>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0xB>(par)),        \
-        static_cast<MCKL_INT64>(                                              \
-            ThreefryKBox<T, K, N, Constants>::template key<0x9>(par)));       \
+    ymmt0 =                                                                   \
+        _mm256_set_epi64x(static_cast<MCKL_INT64>(                            \
+                              ThreefryKBox<T, K, N>::template key<0x6>(par)), \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x4>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x2>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x0>(par)));              \
+    ymmt1 =                                                                   \
+        _mm256_set_epi64x(static_cast<MCKL_INT64>(                            \
+                              ThreefryKBox<T, K, N>::template key<0x7>(par)), \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x5>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x3>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x1>(par)));              \
+    ymmt2 =                                                                   \
+        _mm256_set_epi64x(static_cast<MCKL_INT64>(                            \
+                              ThreefryKBox<T, K, N>::template key<0xE>(par)), \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0xC>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0xA>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x8>(par)));              \
+    ymmt3 =                                                                   \
+        _mm256_set_epi64x(static_cast<MCKL_INT64>(                            \
+                              ThreefryKBox<T, K, N>::template key<0xF>(par)), \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0xD>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0xB>(par)),               \
+            static_cast<MCKL_INT64>(                                          \
+                ThreefryKBox<T, K, N>::template key<0x9>(par)));              \
     ymms0 = _mm256_add_epi64(ymms0, ymmt0);                                   \
     ymms1 = _mm256_add_epi64(ymms1, ymmt1);                                   \
     ymms2 = _mm256_add_epi64(ymms2, ymmt2);                                   \
