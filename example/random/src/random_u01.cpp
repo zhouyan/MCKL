@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/random/src/random_u01.cpp.in
+// MCKL/example/random/src/random_u01.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,15 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#define MCKL_U01_USE_FIXED_POINT 0
-
-#define MCKL_U01_USE_64BITS_DOUBLE 0
-
-// clang-format off
-#define MCKL_EXAMPLE_RANDOM_@RNG@_RNG 1
-// clang-format on
-
-#include <@RNGHeader@>
 #include "random_u01.hpp"
 
 int main(int argc, char **argv)
@@ -65,9 +56,7 @@ int main(int argc, char **argv)
         }
     }
 
-    // clang-format off
-    random_u01<@RNGType@>(N, M, "@RNGName@");
-    // clang-format on
+    random_u01(N, M);
 
     return 0;
 }
