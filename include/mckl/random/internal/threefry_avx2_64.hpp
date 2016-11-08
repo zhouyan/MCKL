@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_avx2_16x64.hpp>
+#include <mckl/random/internal/threefry_avx2_2x64.hpp>
 #include <mckl/random/internal/threefry_avx2_4x64.hpp>
 #include <mckl/random/internal/threefry_avx2_8x64.hpp>
 #include <mckl/random/internal/threefry_common.hpp>
@@ -419,6 +420,12 @@ class ThreefryGeneratorAVX2Impl64
         ThreefryPBox<__m256i, K, Constants>::eval(s.data() + I * K);
         permute<I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
+}; // class ThreefryGeneratorAVX2Impl64
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl64<T, 2, 20, ThreefryConstants<T, 2>>
+    : public Threefry2x64GeneratorAVX2Impl<T>
+{
 }; // class ThreefryGeneratorAVX2Impl64
 
 template <typename T>

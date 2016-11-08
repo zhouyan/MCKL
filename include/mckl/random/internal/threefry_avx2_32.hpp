@@ -33,6 +33,10 @@
 #define MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_32_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_avx2_2x32.hpp>
+#include <mckl/random/internal/threefry_avx2_4x32.hpp>
+#include <mckl/random/internal/threefry_common.hpp>
+#include <mckl/random/internal/threefry_constants.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
 #include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/increment.hpp>
@@ -414,6 +418,18 @@ class ThreefryGeneratorAVX2Impl32
         ThreefryPBox<__m256i, K, Constants>::eval(s.data() + I * K);
         permute<I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
+}; // class ThreefryGeneratorAVX2Impl32
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl32<T, 2, 20, ThreefryConstants<T, 2>>
+    : public Threefry2x32GeneratorAVX2Impl<T>
+{
+}; // class ThreefryGeneratorAVX2Impl32
+
+template <typename T>
+class ThreefryGeneratorAVX2Impl32<T, 4, 20, ThreefryConstants<T, 4>>
+    : public Threefry4x32GeneratorAVX2Impl<T>
+{
 }; // class ThreefryGeneratorAVX2Impl32
 
 } // namespace mckl::internal

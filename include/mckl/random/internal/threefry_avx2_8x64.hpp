@@ -223,15 +223,15 @@
         __m256i ymmt6;                                                        \
         __m256i ymmt7;                                                        \
                                                                               \
-        ymmt0 = ymms1;                                                        \
+        ymmt1 = ymms1;                                                        \
         ymms1 = ymms2;                                                        \
         ymms2 = ymms4;                                                        \
-        ymms4 = ymmt0;                                                        \
+        ymms4 = ymmt1;                                                        \
                                                                               \
-        ymmt1 = ymms3;                                                        \
+        ymmt3 = ymms3;                                                        \
         ymms3 = ymms6;                                                        \
         ymms6 = ymms5;                                                        \
-        ymms5 = ymmt1;                                                        \
+        ymms5 = ymmt3;                                                        \
                                                                               \
         ymmt0 = _mm256_unpacklo_epi64(ymms0, ymms1);                          \
         ymmt1 = _mm256_unpacklo_epi64(ymms2, ymms3);                          \
@@ -269,15 +269,15 @@
         ymms6 = _mm256_permute2x128_si256(ymmt4, ymmt5, 0x31);                \
         ymms7 = _mm256_permute2x128_si256(ymmt6, ymmt7, 0x31);                \
                                                                               \
-        ymmt0 = ymms2;                                                        \
+        ymmt2 = ymms2;                                                        \
         ymms2 = ymms1;                                                        \
         ymms1 = ymms4;                                                        \
-        ymms4 = ymmt0;                                                        \
+        ymms4 = ymmt2;                                                        \
                                                                               \
-        ymmt1 = ymms6;                                                        \
+        ymmt6 = ymms6;                                                        \
         ymms6 = ymms3;                                                        \
         ymms3 = ymms5;                                                        \
-        ymms5 = ymmt1;                                                        \
+        ymms5 = ymmt6;                                                        \
                                                                               \
         _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 0), ymms0);   \
         _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 1), ymms1);   \
