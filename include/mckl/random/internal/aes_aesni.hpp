@@ -188,26 +188,27 @@ class AESGeneratorAESNIImpl
 }; // class AESGeneratorAESNIImpl
 
 template <>
-class AESGeneratorAESNIImpl<AES128KeySeqAESNI>
-    : public AESGeneratorAESNIImplAES128
+class AESGeneratorAESNIImpl<AESKeySeqImpl<10, AES128KeySeqGeneratorAESNIImpl>>
+    : public AES128GeneratorAESNIImpl
 {
 }; // class AESGeneratorAESNIImpl
 
 template <>
-class AESGeneratorAESNIImpl<AES192KeySeqAESNI>
-    : public AESGeneratorAESNIImplAES192
+class AESGeneratorAESNIImpl<AESKeySeqImpl<12, AES192KeySeqGeneratorAESNIImpl>>
+    : public AES192GeneratorAESNIImpl
 {
 }; // class AESGeneratorAESNIImpl
 
 template <>
-class AESGeneratorAESNIImpl<AES256KeySeqAESNI>
-    : public AESGeneratorAESNIImplAES256
+class AESGeneratorAESNIImpl<AESKeySeqImpl<14, AES256KeySeqGeneratorAESNIImpl>>
+    : public AES256GeneratorAESNIImpl
 {
 }; // class AESGeneratorAESNIImpl
 
 template <typename Constants>
-class AESGeneratorAESNIImpl<ARSKeySeqAESNI<Constants>>
-    : public AESGeneratorAESNIImplARS<Constants>
+class AESGeneratorAESNIImpl<
+    ARSKeySeqImpl<5, ARSKeySeqGeneratorAESNIImpl<Constants>>>
+    : public ARSGeneratorAESNIImpl<Constants>
 {
 }; // class AESGeneratorAESNIImpl
 

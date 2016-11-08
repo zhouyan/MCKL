@@ -107,11 +107,9 @@ class AES128KeySeqGeneratorAESNIImpl
     }
 }; // class AES128KeySeqGeneratorAESNIImpl
 
-using AES128KeySeqAESNI = AESKeySeqImpl<10, AES128KeySeqGeneratorAESNIImpl>;
-
-class AESGeneratorAESNIImplAES128
+class AES128GeneratorAESNIImpl
 {
-    using KeySeqType = AES128KeySeqAESNI;
+    using KeySeqType = AESKeySeqImpl<10, AES128KeySeqGeneratorAESNIImpl>;
 
     public:
     static void eval(const void *plain, void *cipher, const KeySeqType &ks)
@@ -343,7 +341,7 @@ class AESGeneratorAESNIImplAES128
         for (std::size_t i = 0; i != n; ++i, r += R)
             eval(ctr, r, ks);
     }
-}; // class AESGeneratorAESNIImpl
+}; // class AES128GeneratorAESNIImpl
 
 } // namespace mckl::internal
 

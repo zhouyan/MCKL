@@ -98,13 +98,10 @@ class ARSKeySeqGeneratorAESNIImpl
 }; // class ARSKeySeqGeneratorAESNIImpl
 
 template <typename Constants>
-using ARSKeySeqAESNI =
-    ARSKeySeqImpl<5, ARSKeySeqGeneratorAESNIImpl<Constants>>;
-
-template <typename Constants>
-class AESGeneratorAESNIImplARS
+class ARSGeneratorAESNIImpl
 {
-    using KeySeqType = ARSKeySeqAESNI<Constants>;
+    using KeySeqType =
+        ARSKeySeqImpl<5, ARSKeySeqGeneratorAESNIImpl<Constants>>;
 
     public:
     static void eval(const void *plain, void *cipher, const KeySeqType &ks)
@@ -311,7 +308,7 @@ class AESGeneratorAESNIImplARS
         for (std::size_t i = 0; i != n; ++i, r += R)
             eval(ctr, r, ks);
     }
-}; // class AESGeneratorAESNIImplARS
+}; // class ARSGeneratorAESNIImpl
 
 } // namespace mckl::internal
 
