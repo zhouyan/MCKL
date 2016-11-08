@@ -33,7 +33,10 @@
 #define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/philox_common.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
+#include <mckl/random/internal/philox_sse2_2x32.hpp>
+#include <mckl/random/internal/philox_sse2_4x32.hpp>
 #include <mckl/random/internal/philox_unroll.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -239,6 +242,18 @@ class PhiloxGeneratorSSE2Impl32
         PhiloxGeneratorSSE2Impl32Permute<K>::round(s);
     }
 }; // class PhiloxGeneratorSSE2Impl32
+
+template <typename T, typename Constants>
+class PhiloxGeneratorSSE2Impl32<T, 2, 10, Constants>
+    : public Philox2x32GeneratorSSE2Impl<T, Constants>
+{
+}; // PhiloxGeneratorSSE2Impl32
+
+template <typename T, typename Constants>
+class PhiloxGeneratorSSE2Impl32<T, 4, 10, Constants>
+    : public Philox4x32GeneratorSSE2Impl<T, Constants>
+{
+}; // PhiloxGeneratorSSE2Impl32
 
 } // namespace mckl::internal
 

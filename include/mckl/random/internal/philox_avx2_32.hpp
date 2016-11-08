@@ -33,6 +33,9 @@
 #define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/philox_avx2_2x32.hpp>
+#include <mckl/random/internal/philox_avx2_4x32.hpp>
+#include <mckl/random/internal/philox_common.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
 #include <mckl/random/internal/philox_unroll.hpp>
 #include <mckl/random/increment.hpp>
@@ -251,6 +254,18 @@ class PhiloxGeneratorAVX2Impl32
         PhiloxGeneratorAVX2Impl32Permute<K>::round(s);
     }
 }; // class PhiloxGeneratorImplAVX2
+
+template <typename T, typename Constants>
+class PhiloxGeneratorAVX2Impl32<T, 2, 10, Constants>
+    : public Philox2x32GeneratorAVX2Impl<T, Constants>
+{
+}; // PhiloxGeneratorAVX2Impl32
+
+template <typename T, typename Constants>
+class PhiloxGeneratorAVX2Impl32<T, 4, 10, Constants>
+    : public Philox4x32GeneratorAVX2Impl<T, Constants>
+{
+}; // PhiloxGeneratorAVX2Impl32
 
 } // namespace mckl::internal
 
