@@ -325,3 +325,5 @@ MESSAGE(STATUS "=================== Features ==========================")
 FOREACH(feature ${FEATURES})
     MESSAGE(STATUS ${feature})
 ENDFOREACH(feature ${FEATURES})
+
+MESSAGE(STATUS "=======================================================")
