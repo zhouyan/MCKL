@@ -33,10 +33,8 @@
 #define MCKL_UTILITY_STOP_WATCH_HPP
 
 #include <mckl/internal/common.hpp>
-
-#ifdef MCKL_MSVC
-#include <intrin.h>
-#endif
+#include <chrono>
+#include <ratio>
 
 namespace mckl
 {

@@ -149,7 +149,7 @@ class AESGenerator
     using ctr_type = Counter<std::uint32_t, 4>;
     using key_type = typename KeySeqType::key_type;
 
-    static constexpr std::size_t size() { return 128 / CHAR_BIT; }
+    static constexpr std::size_t size() { return sizeof(std::uint32_t) * 4; }
 
     key_type key() const { return key_seq_.key(); }
 

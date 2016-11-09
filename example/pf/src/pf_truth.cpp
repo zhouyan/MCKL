@@ -31,6 +31,7 @@
 
 #include <mckl/core.hpp>
 #include <mckl/random/normal_distribution.hpp>
+#include <future>
 
 using namespace mckl;
 

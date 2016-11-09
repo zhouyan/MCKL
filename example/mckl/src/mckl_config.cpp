@@ -81,8 +81,5 @@ int main()
     std::cout << std::setw(40) << std::left << "is_big_endian()"
               << mckl::internal::is_big_endian() << std::endl;
 
-    std::cout << std::setw(40) << std::left << "hardware_concurrency()"
-              << std::thread::hardware_concurrency() << std::endl;
-
     return 0;
 }

@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/chi_squared_test.hpp>
+#include <bitset>
 
 namespace mckl
 {

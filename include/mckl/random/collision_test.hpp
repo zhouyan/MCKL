@@ -34,6 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/poisson_test.hpp>
+#include <bitset>
 
 namespace mckl
 {
@@ -76,7 +77,6 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
         Vector<result_type> r(k * T);
         std::size_t s = 0;
         occurs_type occurs;
-        reserve(occurs);
         for (std::size_t i = 0; i != m; ++i)
             generate(rng, u01, k, r.data(), s, occurs);
         generate(rng, u01, l, r.data(), s, occurs);
@@ -90,7 +90,7 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
     static constexpr std::size_t K_ = internal::Pow<std::size_t, D, T>::value;
 
     using occurs_type = typename std::conditional<K_ <= 1U << 27,
-        std::bitset<K_>, std::unordered_set<std::size_t>>::type;
+        std::bitset<K_>, std::set<std::size_t>>::type;
 
     std::size_t n_;
     double mean_;
@@ -107,13 +107,6 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
             count(internal::serial_index<D, T>(r), s, occurs);
     }
 
-    void reserve(std::bitset<K_> &) const {}
-
-    void reserve(std::unordered_set<std::size_t> &occurs) const
-    {
-        occurs.reserve(static_cast<std::size_t>(mean_ * 2));
-    }
-
     void count(std::size_t u, std::size_t &s, std::bitset<K_> &occurs) const
     {
         if (occurs.test(u))
@@ -122,8 +115,8 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
             occurs.set(u);
     }
 
-    void count(std::size_t u, std::size_t &s,
-        std::unordered_set<std::size_t> &occurs) const
+    void count(
+        std::size_t u, std::size_t &s, std::set<std::size_t> &occurs) const
     {
         if (occurs.count(u))
             ++s;

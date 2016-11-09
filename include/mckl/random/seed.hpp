@@ -35,6 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/skein.hpp>
 #include <mckl/random/threefry.hpp>
+#include <atomic>
 
 /// \brief SeedGeneartor by default use randomized output
 /// \ingroup Config

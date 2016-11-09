@@ -33,6 +33,8 @@
 #define MCKL_SMP_BACKEND_STD_HPP
 
 #include <mckl/smp/backend_base.hpp>
+#include <future>
+#include <thread>
 
 namespace mckl
 {

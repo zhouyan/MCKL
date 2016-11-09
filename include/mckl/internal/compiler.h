@@ -52,20 +52,6 @@
 #include <mckl/internal/compiler/byte_order.h>
 #include <mckl/internal/compiler/intrin.h>
 
-#ifndef MCKL_OPENCL
-#ifdef __cplusplus
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#else
-#include <math.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#endif
-#endif
-
 #ifndef MCKL_INLINE
 #define MCKL_INLINE
 #endif
