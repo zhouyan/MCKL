@@ -182,14 +182,14 @@ class Philox4x32GeneratorSSE2Impl
             __m128i xmmt6;
             __m128i xmmt7;
 
-            xmms0 = _mm_shuffle_epi32(xmms0, 0xC6); // 3 0 1 2
-            xmms1 = _mm_shuffle_epi32(xmms1, 0xC6); // 3 0 1 2
-            xmms2 = _mm_shuffle_epi32(xmms2, 0xC6); // 3 0 1 2
-            xmms3 = _mm_shuffle_epi32(xmms3, 0xC6); // 3 0 1 2
-            xmms4 = _mm_shuffle_epi32(xmms4, 0xC6); // 3 0 1 2
-            xmms5 = _mm_shuffle_epi32(xmms5, 0xC6); // 3 0 1 2
-            xmms6 = _mm_shuffle_epi32(xmms6, 0xC6); // 3 0 1 2
-            xmms7 = _mm_shuffle_epi32(xmms7, 0xC6); // 3 0 1 2
+            xmms0 = _mm_shuffle_epi32(xmms0, 0xC6);
+            xmms1 = _mm_shuffle_epi32(xmms1, 0xC6);
+            xmms2 = _mm_shuffle_epi32(xmms2, 0xC6);
+            xmms3 = _mm_shuffle_epi32(xmms3, 0xC6);
+            xmms4 = _mm_shuffle_epi32(xmms4, 0xC6);
+            xmms5 = _mm_shuffle_epi32(xmms5, 0xC6);
+            xmms6 = _mm_shuffle_epi32(xmms6, 0xC6);
+            xmms7 = _mm_shuffle_epi32(xmms7, 0xC6);
 
             MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk0, 0x93)
             MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk1, 0x93)

@@ -275,4 +275,4 @@ class Threefry2x64GeneratorAVX2Impl
 #endif
 #endif
 
-#endif // MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_4X64_HPP
+#endif // MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_2X64_HPP

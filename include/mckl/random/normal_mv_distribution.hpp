@@ -605,4 +605,4 @@ inline void rand(RNGType &rng,
 
 } // namespace mckl
 
-#endif // MCKL_RANDOM_NORMAL_DISTRIBUTION_HPP
+#endif // MCKL_RANDOM_NORMAL_MV_DISTRIBUTION_HPP

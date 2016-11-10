@@ -29,40 +29,41 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample CXX)
+project(MCKLExample CXX)
 
-ADD_DEFINITIONS(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
+add_definitions(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
 
 ##############################################################################
 # Check examples
 ##############################################################################
 
-SET(EXAMPLES ${EXAMPLES} "mckl")
-ADD_SUBDIRECTORY(mckl)
+set(EXAMPLES ${EXAMPLES} "mckl")
+add_subdirectory(mckl)
 
-SET(EXAMPLES ${EXAMPLES} "gmm")
-ADD_SUBDIRECTORY(gmm)
+set(EXAMPLES ${EXAMPLES} "gmm")
+add_subdirectory(gmm)
 
-SET(EXAMPLES ${EXAMPLES} "math")
-ADD_SUBDIRECTORY(math)
+set(EXAMPLES ${EXAMPLES} "math")
+add_subdirectory(math)
 
-SET(EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY(pf)
+set(EXAMPLES ${EXAMPLES} "pf")
+add_subdirectory(pf)
 
-SET(EXAMPLES ${EXAMPLES} "random")
-ADD_SUBDIRECTORY(random)
+set(EXAMPLES ${EXAMPLES} "random")
+add_subdirectory(random)
 
-SET(EXAMPLES ${EXAMPLES} "resample")
-ADD_SUBDIRECTORY(resample)
+set(EXAMPLES ${EXAMPLES} "resample")
+add_subdirectory(resample)
 
-SET(EXAMPLES ${EXAMPLES} "utility")
-ADD_SUBDIRECTORY(utility)
+set(EXAMPLES ${EXAMPLES} "utility")
+add_subdirectory(utility)
 
 ##############################################################################
 # Enable examples
 ##############################################################################
 
-MESSAGE(STATUS "=================== Examples ==========================")
-FOREACH(example ${EXAMPLES})
-    MESSAGE(STATUS ${example})
-ENDFOREACH(example ${EXAMPLES})
+message(STATUS "=================== Examples ==========================")
+foreach(example ${EXAMPLES})
+    message(STATUS ${example})
+endforeach(example ${EXAMPLES})
+message(STATUS "=======================================================")

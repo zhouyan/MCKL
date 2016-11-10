@@ -211,7 +211,7 @@ class PFCVInit : public mckl::SamplerEvalSMP<PFCV<Layout, RNGSetType>,
         pf_init_each(
             idx.rng(), idx.pos_x(), idx.pos_y(), idx.vel_x(), idx.vel_y());
     }
-}; // PFCVInit
+}; // class PFCVInit
 
 template <typename Backend, mckl::MatrixLayout Layout, typename RNGSetType>
 class PFCVMove : public mckl::SamplerEvalSMP<PFCV<Layout, RNGSetType>,

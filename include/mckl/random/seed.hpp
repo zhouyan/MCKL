@@ -336,7 +336,7 @@ class SeedGenerator
 template <typename RNGType>
 class Seed : public SeedGenerator<typename SeedType<RNGType>::type>
 {
-};
+}; // class Seed
 
 } // namespace mckl
 

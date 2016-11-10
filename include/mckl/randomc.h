@@ -29,12 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOMC_RANDOMC_H
-#define MCKL_RANDOMC_RANDOMC_H
+#ifndef MCKL_RANDOMC_H
+#define MCKL_RANDOMC_H
 
 #include <mckl/internal/config.h>
 #include <mckl/randomc/philox.h>
 #include <mckl/randomc/threefry.h>
 #include <mckl/randomc/u01.h>
 
-#endif // MCKL_RANDOMC_RANDOMC_H
+#endif // MCKL_RANDOMC_H

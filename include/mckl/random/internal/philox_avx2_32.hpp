@@ -68,13 +68,13 @@ class PhiloxGeneratorAVX2Impl32Permute<2>
     template <std::size_t S>
     MCKL_INLINE static void round(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 
     template <std::size_t S>
     MCKL_INLINE static void last(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 }; // class PhiloxGeneratorAVX2Impl32Permute
 
@@ -85,19 +85,19 @@ class PhiloxGeneratorAVX2Impl32Permute<4>
     template <std::size_t S>
     MCKL_INLINE static void first(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xC6>(s); // 3 0 1 2
+        shuffle_epi32<0xC6>(s);
     }
 
     template <std::size_t S>
     MCKL_INLINE static void round(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0x93>(s); // 2 1 0 3
+        shuffle_epi32<0x93>(s);
     }
 
     template <std::size_t S>
     MCKL_INLINE static void last(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 }; // class PhiloxGeneratorAVX2Impl32Permute
 
@@ -259,13 +259,13 @@ template <typename T, typename Constants>
 class PhiloxGeneratorAVX2Impl32<T, 2, 10, Constants>
     : public Philox2x32GeneratorAVX2Impl<T, Constants>
 {
-}; // PhiloxGeneratorAVX2Impl32
+}; // class PhiloxGeneratorAVX2Impl32
 
 template <typename T, typename Constants>
 class PhiloxGeneratorAVX2Impl32<T, 4, 10, Constants>
     : public Philox4x32GeneratorAVX2Impl<T, Constants>
 {
-}; // PhiloxGeneratorAVX2Impl32
+}; // class PhiloxGeneratorAVX2Impl32
 
 } // namespace mckl::internal
 

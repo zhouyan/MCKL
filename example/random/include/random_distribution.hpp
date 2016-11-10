@@ -1667,7 +1667,9 @@ inline void random_distribution_pval(std::size_t N, std::size_t M)
         N, M, nwid, twid, std::is_floating_point<ResultType>());
 }
 
-struct RandomDistributionPerf {
+class RandomDistributionPerf
+{
+    public:
     std::string name;
     bool pass;
     double e1;
@@ -1676,7 +1678,7 @@ struct RandomDistributionPerf {
     double c2;
     double c3;
     double c4;
-}; // struct RandomDistributionPerf
+}; // class RandomDistributionPerf
 
 template <typename T>
 inline void random_distribution_perf_e(

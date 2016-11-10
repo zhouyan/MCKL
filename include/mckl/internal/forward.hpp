@@ -61,6 +61,6 @@ class Sampler;
 template <typename>
 class Monitor;
 
-} // namesapce mckl
+} // namespace mckl
 
 #endif // MCKL_INTERNAL_FORWARD_HPP

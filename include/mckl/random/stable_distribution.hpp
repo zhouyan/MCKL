@@ -186,7 +186,7 @@ inline void stable_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     fma(n, r, b, a, r);
 }
 
-} // namepsace mckl::internal
+} // namespace mckl::internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_4(Stable, stable, RealType, RealType,
     alpha, RealType, beta, RealType, a, RealType, b)

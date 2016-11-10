@@ -700,18 +700,18 @@ namespace internal
 template <MKL_INT BRNG>
 class MKLMaxOffset : public std::integral_constant<MKL_INT, 0>
 {
-}; // MKLMaxOffset;
+}; // class MKLMaxOffset;
 
 template <>
 class MKLMaxOffset<VSL_BRNG_MT2203>
     : public std::integral_constant<MKL_INT, 6024>
 {
-}; // MKLMaxOffset
+}; // class MKLMaxOffset
 
 template <>
 class MKLMaxOffset<VSL_BRNG_WH> : public std::integral_constant<MKL_INT, 273>
 {
-}; // MKLMaxOffset
+}; // class MKLMaxOffset
 
 template <MKL_INT BRNG, MKL_INT MaxOffset = MKLMaxOffset<BRNG>::value>
 class MKLOffset

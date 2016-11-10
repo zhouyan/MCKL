@@ -248,7 +248,7 @@ class U01SequenceSorted
     {
         u01_rand_sorted(rng, N, r);
     }
-}; // U01SequenceSorted
+}; // class U01SequenceSorted
 
 /// \brief Stratified standard uniform numbers
 /// \ingroup Resample

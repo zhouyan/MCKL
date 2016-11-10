@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP
-#define MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP
+#ifndef MCKL_RANDOM_INTERNAL_PHILOX_CONSTANTS_HPP
+#define MCKL_RANDOM_INTERNAL_PHILOX_CONSTANTS_HPP
 
 #include <mckl/random/internal/common.hpp>
 
@@ -116,4 +116,4 @@ class PhiloxConstants
 
 } // namespace mckl
 
-#endif // MCKL_RANDOM_INTERNAL_PHILOX_COSNTANTS_HPP
+#endif // MCKL_RANDOM_INTERNAL_PHILOX_CONSTANTS_HPP

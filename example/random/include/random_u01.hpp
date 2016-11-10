@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCK_EXAMPLE_RANDOM_U01_HPP
-#define MCK_EXAMPLE_RANDOM_U01_HPP
+#ifndef MCKL_EXAMPLE_RANDOM_U01_HPP
+#define MCKL_EXAMPLE_RANDOM_U01_HPP
 
 #include <mckl/random/philox.hpp>
 #include <mckl/random/u01.hpp>
@@ -76,7 +76,9 @@ inline std::string random_u01_maximum(RealType x)
     return ss.str();
 }
 
-struct RandomU01Range {
+class RandomU01Range
+{
+    public:
     bool pass_b;
     bool pass_l;
     bool pass_u;
@@ -87,7 +89,7 @@ struct RandomU01Range {
     std::string upper;
     double c1;
     double c2;
-}; // struct RandomU01Range
+}; // class RandomU01Range
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline RandomU01Range random_u01(std::size_t N, std::size_t M)
@@ -248,4 +250,4 @@ inline void random_u01(std::size_t N, std::size_t M)
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
-#endif // MCK_EXAMPLE_RANDOM_U01_HPP
+#endif // MCKL_EXAMPLE_RANDOM_U01_HPP

@@ -29,52 +29,52 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.3)
 
 ##############################################################################
 # Disable in source build
 ##############################################################################
 
-IF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-    MESSAGE(FATAL_ERROR "In-source builds not allowed")
-ENDIF(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "In-source builds not allowed")
+endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 
 ##############################################################################
 # Basics
 ##############################################################################
 
-PROJECT(MCKL C CXX)
-SET(MCKL_VERSION 0.2)
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+project(MCKL C CXX)
+set(MCKL_VERSION 0.2)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-SET (MCKL_GOOD_COMPILER TRUE)
-IF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
-    IF(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
-        SET(MCKL_GOOD_COMPILER FALSE)
-    ENDIF(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
-ENDIF (${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
+set(MCKL_GOOD_COMPILER TRUE)
+if(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
+    if(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
+        set(MCKL_GOOD_COMPILER FALSE)
+    endif(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
+endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
 
 ##############################################################################
 # Options
 ##############################################################################
 
-OPTION(MCKL_ENABLE_EXAMPLE "Enable building of example" ON)
+option(MCKL_ENABLE_EXAMPLE "Enable building of example" ON)
 
 ##############################################################################
 # Documentations
 ##############################################################################
 
-INCLUDE(FindDoxygen)
-IF(DOXYGEN_FOUND)
-    FILE(READ ${PROJECT_SOURCE_DIR}/README.md README)
-    FILE(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/Doxyfile.in
+include(FindDoxygen)
+if(DOXYGEN_FOUND)
+    file(READ ${PROJECT_SOURCE_DIR}/README.md README)
+    file(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
+    configure_file(${PROJECT_SOURCE_DIR}/config/Doxyfile.in
         ${PROJECT_BINARY_DIR}/config/Doxyfile)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/main.md.in
+    configure_file(${PROJECT_SOURCE_DIR}/config/main.md.in
         ${PROJECT_BINARY_DIR}/config/main.md)
-    CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/config/news.md.in
+    configure_file(${PROJECT_SOURCE_DIR}/config/news.md.in
         ${PROJECT_BINARY_DIR}/config/news.md)
-    ADD_CUSTOM_TARGET(doxygen
+    add_custom_target(doxygen
         DEPENDS
         ${PROJECT_BINARY_DIR}/config/Doxyfile
         ${PROJECT_BINARY_DIR}/config/main.md
@@ -82,16 +82,16 @@ IF(DOXYGEN_FOUND)
         COMMAND ${DOXYGEN_EXECUTABLE} config/Doxyfile
         COMMENT "Generating doxygen"
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-ENDIF(DOXYGEN_FOUND)
+endif(DOXYGEN_FOUND)
 
 ##############################################################################
 # Installation
 ##############################################################################
 
-IF(NOT DEFINED MCKL_INSTALL_INC_DIR)
+if(NOT DEFINED MCKL_INSTALL_INC_DIR)
     SET(MCKL_INSTALL_INC_DIR include)
-ENDIF(NOT DEFINED MCKL_INSTALL_INC_DIR)
-INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include/mckl
+endif(NOT DEFINED MCKL_INSTALL_INC_DIR)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/mckl
     DESTINATION ${MCKL_INSTALL_INC_DIR}/mckl
     PATTERN ".DS_Store" EXCLUDE PATTERN "*.swp" EXCLUDE)
 
@@ -99,29 +99,17 @@ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/include/mckl
 # Check features
 ##############################################################################
 
-IF(MCKL_ENABLE_EXAMPLE)
-    INCLUDE(MCKL)
-ELSE(MCKL_ENABLE_EXAMPLE)
-    RETURN()
-ENDIF(MCKL_ENABLE_EXAMPLE)
+if(MCKL_ENABLE_EXAMPLE)
+    include(MCKL)
+else(MCKL_ENABLE_EXAMPLE)
+    return()
+endif(MCKL_ENABLE_EXAMPLE)
 
 ##############################################################################
 # Example
 ##############################################################################
 
-IF(MCKL_ENABLE_EXAMPLE)
-    ADD_CUSTOM_TARGET(example ALL)
-    ADD_SUBDIRECTORY(example)
-ENDIF(MCKL_ENABLE_EXAMPLE)
-
-##############################################################################
-# Example
-##############################################################################
-
-MESSAGE(STATUS "=======================================================")
-IF (NOT MCKL_GOOD_COMPILER)
-    MESSAGE(STATUS "Some examples disabled due to known issues with compilers")
-    MESSAGE (STATUS
-        "C++ compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-    MESSAGE(STATUS "=======================================================")
-ENDIF (NOT MCKL_GOOD_COMPILER)
+if(MCKL_ENABLE_EXAMPLE)
+    add_custom_target(example ALL)
+    add_subdirectory(example)
+endif(MCKL_ENABLE_EXAMPLE)

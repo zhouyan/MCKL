@@ -52,7 +52,7 @@ template <typename UIntType, typename RealType, typename Lower, typename Upper,
     int = std::numeric_limits<UIntType>::digits>
 class U01AVX2Impl : public U01GenericImpl<UIntType, RealType, Lower, Upper>
 {
-}; // U01AVX2Impl
+}; // class U01AVX2Impl
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 class U01AVX2ImplBase

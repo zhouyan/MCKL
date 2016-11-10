@@ -42,23 +42,23 @@
 #
 # Random123_INC_PATH - The path CMake shall try to find headers first
 
-IF(DEFINED Random123_FOUND)
-    RETURN()
-ENDIF(DEFINED Random123_FOUND)
+if(DEFINED Random123_FOUND)
+    return()
+endif(DEFINED Random123_FOUND)
 
-IF(NOT DEFINED Random123_INCLUDE_DIR)
-    FIND_PATH(Random123_INCLUDE_DIR Random123/aes.h
+if(NOT DEFINED Random123_INCLUDE_DIR)
+    find_path(Random123_INCLUDE_DIR Random123/aes.h
         PATHS ${Random123_INC_PATH} ENV CPATH NO_DEFAULT_PATH)
-    FIND_PATH(Random123_INCLUDE_DIR Random123/aes.h)
-    IF(Random123_INCLUDE_DIR)
-        MESSAGE(STATUS "Found Random123 headers: ${Random123_INCLUDE_DIR}")
-    ELSE(Random123_INCLUDE_DIR)
-        MESSAGE(STATUS "NOT Found Random123 headers")
-    ENDIF(Random123_INCLUDE_DIR)
-ENDIF(NOT DEFINED Random123_INCLUDE_DIR)
+    find_path(Random123_INCLUDE_DIR Random123/aes.h)
+    if(Random123_INCLUDE_DIR)
+        message(STATUS "Found Random123 headers: ${Random123_INCLUDE_DIR}")
+    else(Random123_INCLUDE_DIR)
+        message(STATUS "NOT Found Random123 headers")
+    endif(Random123_INCLUDE_DIR)
+endif(NOT DEFINED Random123_INCLUDE_DIR)
 
-IF(Random123_INCLUDE_DIR)
-    SET(Random123_FOUND TRUE CACHE BOOL "Found Random123")
-ELSE(Random123_INCLUDE_DIR)
-    SET(Random123_FOUND FALSE CACHE BOOL "NOT Found Random123")
-ENDIF(Random123_INCLUDE_DIR)
+if(Random123_INCLUDE_DIR)
+    set(Random123_FOUND TRUE CACHE BOOL "Found Random123")
+else(Random123_INCLUDE_DIR)
+    set(Random123_FOUND FALSE CACHE BOOL "NOT Found Random123")
+endif(Random123_INCLUDE_DIR)

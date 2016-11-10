@@ -120,17 +120,17 @@ class ARSGeneratorAESNIImpl
         __m128i xmm0 =
             _mm_loadu_si128(reinterpret_cast<const __m128i *>(plain));
 
-        xmm0 = _mm_xor_si128(xmm0, xmmk);        // Round 0
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 1
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 1
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 2
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 2
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 3
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 3
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 4
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 4
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 5
-        xmm0 = _mm_aesenclast_si128(xmm0, xmmk); // Round 5
+        xmm0 = _mm_xor_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenclast_si128(xmm0, xmmk);
 
         _mm_storeu_si128(reinterpret_cast<__m128i *>(cipher), xmm0);
     }
@@ -156,17 +156,17 @@ class ARSGeneratorAESNIImpl
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
 
-        xmm0 = _mm_xor_si128(xmm0, xmmk);        // Round 0
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 1
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 1
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 2
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 2
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 3
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 3
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 4
-        xmm0 = _mm_aesenc_si128(xmm0, xmmk);     // Round 4
-        xmmk = _mm_add_epi64(xmmk, xmmw);        // Round 5
-        xmm0 = _mm_aesenclast_si128(xmm0, xmmk); // Round 5
+        xmm0 = _mm_xor_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenc_si128(xmm0, xmmk);
+        xmmk = _mm_add_epi64(xmmk, xmmw);
+        xmm0 = _mm_aesenclast_si128(xmm0, xmmk);
 
         _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
     }
@@ -214,59 +214,59 @@ class ARSGeneratorAESNIImpl
             __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
             xmmc = xmm7;
 
-            xmm0 = _mm_xor_si128(xmm0, xmmk0); // Round 0
-            xmm1 = _mm_xor_si128(xmm1, xmmk0); // Round 0
-            xmm2 = _mm_xor_si128(xmm2, xmmk0); // Round 0
-            xmm3 = _mm_xor_si128(xmm3, xmmk0); // Round 0
-            xmm4 = _mm_xor_si128(xmm4, xmmk0); // Round 0
-            xmm5 = _mm_xor_si128(xmm5, xmmk0); // Round 0
-            xmm6 = _mm_xor_si128(xmm6, xmmk0); // Round 0
-            xmm7 = _mm_xor_si128(xmm7, xmmk0); // Round 0
+            xmm0 = _mm_xor_si128(xmm0, xmmk0);
+            xmm1 = _mm_xor_si128(xmm1, xmmk0);
+            xmm2 = _mm_xor_si128(xmm2, xmmk0);
+            xmm3 = _mm_xor_si128(xmm3, xmmk0);
+            xmm4 = _mm_xor_si128(xmm4, xmmk0);
+            xmm5 = _mm_xor_si128(xmm5, xmmk0);
+            xmm6 = _mm_xor_si128(xmm6, xmmk0);
+            xmm7 = _mm_xor_si128(xmm7, xmmk0);
 
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk1); // Round 1
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk1); // Round 1
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk1); // Round 1
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk1); // Round 1
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk1); // Round 1
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk1); // Round 1
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk1); // Round 1
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk1); // Round 1
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk1);
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk1);
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk1);
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk1);
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk1);
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk1);
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk1);
 
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk2); // Round 2
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk2); // Round 2
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk2); // Round 2
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk2); // Round 2
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk2); // Round 2
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk2); // Round 2
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk2); // Round 2
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk2); // Round 2
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk2);
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk2);
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk2);
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk2);
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk2);
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk2);
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk2);
 
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk3); // Round 3
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk3); // Round 3
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk3); // Round 3
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk3); // Round 3
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk3); // Round 3
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk3); // Round 3
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk3); // Round 3
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk3); // Round 3
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk3);
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk3);
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk3);
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk3);
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk3);
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk3);
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk3);
 
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk4); // Round 4
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk4); // Round 4
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk4); // Round 4
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk4); // Round 4
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk4); // Round 4
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk4); // Round 4
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk4); // Round 4
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk4); // Round 4
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);
+            xmm1 = _mm_aesenc_si128(xmm1, xmmk4);
+            xmm2 = _mm_aesenc_si128(xmm2, xmmk4);
+            xmm3 = _mm_aesenc_si128(xmm3, xmmk4);
+            xmm4 = _mm_aesenc_si128(xmm4, xmmk4);
+            xmm5 = _mm_aesenc_si128(xmm5, xmmk4);
+            xmm6 = _mm_aesenc_si128(xmm6, xmmk4);
+            xmm7 = _mm_aesenc_si128(xmm7, xmmk4);
 
-            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5); // Round 5
-            xmm1 = _mm_aesenclast_si128(xmm1, xmmk5); // Round 5
-            xmm2 = _mm_aesenclast_si128(xmm2, xmmk5); // Round 5
-            xmm3 = _mm_aesenclast_si128(xmm3, xmmk5); // Round 5
-            xmm4 = _mm_aesenclast_si128(xmm4, xmmk5); // Round 5
-            xmm5 = _mm_aesenclast_si128(xmm5, xmmk5); // Round 5
-            xmm6 = _mm_aesenclast_si128(xmm6, xmmk5); // Round 5
-            xmm7 = _mm_aesenclast_si128(xmm7, xmmk5); // Round 5
+            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5);
+            xmm1 = _mm_aesenclast_si128(xmm1, xmmk5);
+            xmm2 = _mm_aesenclast_si128(xmm2, xmmk5);
+            xmm3 = _mm_aesenclast_si128(xmm3, xmmk5);
+            xmm4 = _mm_aesenclast_si128(xmm4, xmmk5);
+            xmm5 = _mm_aesenclast_si128(xmm5, xmmk5);
+            xmm6 = _mm_aesenclast_si128(xmm6, xmmk5);
+            xmm7 = _mm_aesenclast_si128(xmm7, xmmk5);
 
             _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 0), xmm0);
             _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 1), xmm1);
@@ -285,12 +285,12 @@ class ARSGeneratorAESNIImpl
             __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
             xmmc = xmm0;
 
-            xmm0 = _mm_xor_si128(xmm0, xmmk0);        // Round 0
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);     // Round 1
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);     // Round 2
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);     // Round 3
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);     // Round 4
-            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5); // Round 5
+            xmm0 = _mm_xor_si128(xmm0, xmmk0);
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);
+            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);
+            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5);
 
             _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
         }

@@ -47,7 +47,7 @@ class say
             sum += i;
         std::cout << sum << std::endl;
     }
-};
+}; // class say
 
 class sum
 {
@@ -71,7 +71,7 @@ class sum
 
     private:
     long res_;
-};
+}; // class sum
 
 int main()
 {

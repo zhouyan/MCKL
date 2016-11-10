@@ -29,12 +29,12 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample-utility CXX)
+project(MCKLExample-utility CXX)
 
-MCKL_ADD_EXAMPLE(utility)
+mckl_add_example(utility)
 
-MCKL_ADD_TEST(utility aligned_memory)
+mckl_add_test(utility aligned_memory)
 
-IF(HDF5_FOUND)
-    MCKL_ADD_TEST(utility hdf5)
-ENDIF(HDF5_FOUND)
+if(HDF5_FOUND)
+    mckl_add_test(utility hdf5)
+endif(HDF5_FOUND)

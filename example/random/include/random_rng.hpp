@@ -74,7 +74,7 @@ inline bool random_rng_k(const RNGType &)
 }
 
 #else // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_R123_RNG ||
-      // MCKL_EXAMPLE_RANDOM_MKL_RNG || MCKL_EXAMPLE_RANDOM_RDRAND_RNG
+// MCKL_EXAMPLE_RANDOM_MKL_RNG || MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
 template <typename RNGType>
 inline bool random_rng_k(const RNGType &, const std::string &filename)
@@ -220,11 +220,13 @@ inline bool random_rng_k(const mckl::Threefish1024Engine<ResultType> &rng)
 
 #endif // MCKL_EXAMPLE_RANDOM_THREEFRY_RNG
 
-struct RandomRNGPerf {
+class RandomRNGPerf
+{
+    public:
     bool pass;
     double c1;
     double c2;
-}; // struct RandomRNGPerf
+}; // class RandomRNGPerf
 
 template <typename RNGType>
 inline bool random_rng_d(std::size_t N, std::size_t M)

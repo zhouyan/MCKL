@@ -29,10 +29,10 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample-resample CXX)
+project(MCKLExample-resample CXX)
 
-MCKL_ADD_EXAMPLE(resample)
+mckl_add_example(resample)
 
-MCKL_ADD_TEST(resample index)
-MCKL_ADD_TEST(resample transform)
-MCKL_ADD_TEST(resample u01_sequence)
+mckl_add_test(resample index)
+mckl_add_test(resample transform)
+mckl_add_test(resample u01_sequence)

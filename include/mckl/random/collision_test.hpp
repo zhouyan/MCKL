@@ -123,7 +123,7 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
         else
             occurs.insert(u);
     }
-}; // CollisionTest
+}; // class CollisionTest
 
 } // namespace mckl
 

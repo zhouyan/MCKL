@@ -193,14 +193,14 @@ class Philox4x32GeneratorAVX2Impl
             __m256i ymmt6;
             __m256i ymmt7;
 
-            ymms0 = _mm256_shuffle_epi32(ymms0, 0xC6); // 3 0 1 2
-            ymms1 = _mm256_shuffle_epi32(ymms1, 0xC6); // 3 0 1 2
-            ymms2 = _mm256_shuffle_epi32(ymms2, 0xC6); // 3 0 1 2
-            ymms3 = _mm256_shuffle_epi32(ymms3, 0xC6); // 3 0 1 2
-            ymms4 = _mm256_shuffle_epi32(ymms4, 0xC6); // 3 0 1 2
-            ymms5 = _mm256_shuffle_epi32(ymms5, 0xC6); // 3 0 1 2
-            ymms6 = _mm256_shuffle_epi32(ymms6, 0xC6); // 3 0 1 2
-            ymms7 = _mm256_shuffle_epi32(ymms7, 0xC6); // 3 0 1 2
+            ymms0 = _mm256_shuffle_epi32(ymms0, 0xC6);
+            ymms1 = _mm256_shuffle_epi32(ymms1, 0xC6);
+            ymms2 = _mm256_shuffle_epi32(ymms2, 0xC6);
+            ymms3 = _mm256_shuffle_epi32(ymms3, 0xC6);
+            ymms4 = _mm256_shuffle_epi32(ymms4, 0xC6);
+            ymms5 = _mm256_shuffle_epi32(ymms5, 0xC6);
+            ymms6 = _mm256_shuffle_epi32(ymms6, 0xC6);
+            ymms7 = _mm256_shuffle_epi32(ymms7, 0xC6);
 
             MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk0, 0x93)
             MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk1, 0x93)

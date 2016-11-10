@@ -29,8 +29,8 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample-math CXX)
+project(MCKLExample-math CXX)
 
-MCKL_ADD_EXAMPLE(math)
+mckl_add_example(math)
 
-MCKL_ADD_TEST(math vmath)
+mckl_add_test(math vmath)

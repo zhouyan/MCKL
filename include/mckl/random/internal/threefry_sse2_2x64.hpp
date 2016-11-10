@@ -217,4 +217,4 @@ class Threefry2x64GeneratorSSE2Impl
 #endif
 #endif
 
-#endif // MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_4X64_HPP
+#endif // MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_2X64_HPP

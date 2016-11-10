@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_CONST_MATH_HPP
-#define MCKL_CONST_MATH_HPP
+#ifndef MCKL_INTERNAL_CONST_MATH_HPP
+#define MCKL_INTERNAL_CONST_MATH_HPP
 
 #include <mckl/internal/config.h>
 #include <mckl/internal/defines.hpp>
@@ -200,4 +200,4 @@ class Factorial<UIntType, 0>
 
 } // namespace mckl
 
-#endif // MCKL_CONST_MATH_HPP
+#endif // MCKL_INTERNAL_CONST_MATH_HPP

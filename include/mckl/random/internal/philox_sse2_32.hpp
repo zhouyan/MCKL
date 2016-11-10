@@ -247,13 +247,13 @@ template <typename T, typename Constants>
 class PhiloxGeneratorSSE2Impl32<T, 2, 10, Constants>
     : public Philox2x32GeneratorSSE2Impl<T, Constants>
 {
-}; // PhiloxGeneratorSSE2Impl32
+}; // class PhiloxGeneratorSSE2Impl32
 
 template <typename T, typename Constants>
 class PhiloxGeneratorSSE2Impl32<T, 4, 10, Constants>
     : public Philox4x32GeneratorSSE2Impl<T, Constants>
 {
-}; // PhiloxGeneratorSSE2Impl32
+}; // class PhiloxGeneratorSSE2Impl32
 
 } // namespace mckl::internal
 

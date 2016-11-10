@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_RESAMPLE_TRANSFROM_HPP
-#define MCKL_EXAMPLE_RESAMPLE_TRANSFROM_HPP
+#ifndef MCKL_EXAMPLE_RESAMPLE_TRANSFORM_HPP
+#define MCKL_EXAMPLE_RESAMPLE_TRANSFORM_HPP
 
 #include "resample_test.hpp"
 
@@ -129,4 +129,4 @@ inline void resample_trans_rep_index_test(
     std::cout << std::string(80, '-') << std::endl;
 }
 
-#endif // MCKL_EXAMPLE_RESAMPLE_TRANSFROM_HPP
+#endif // MCKL_EXAMPLE_RESAMPLE_TRANSFORM_HPP

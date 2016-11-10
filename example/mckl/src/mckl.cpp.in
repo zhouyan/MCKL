@@ -29,6 +29,6 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <@header_path@.hpp>
+#include <mckl/@header_path@.hpp>
 
 int main() {}

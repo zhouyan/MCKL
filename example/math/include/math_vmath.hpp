@@ -205,7 +205,9 @@ using FunctionA2R1D = void (*)(
         perf.push_back(result);                                               \
     }
 
-struct MathvMathPerf {
+class MathvMathPerf
+{
+    public:
     std::string name;
     float e1;
     float e2;
@@ -215,7 +217,7 @@ struct MathvMathPerf {
     double c2;
     double c3;
     double c4;
-}; // struct MathvMathPerf
+}; // class MathvMathPerf
 
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, acos, -1.0f, 1.0f, -1.0, 1.0)
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, asin, -1.0f, 1.0f, -1.0, 1.0)

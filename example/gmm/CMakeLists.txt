@@ -29,10 +29,10 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample-gmm CXX)
+project(MCKLExample-gmm CXX)
 
-MCKL_ADD_EXAMPLE(gmm)
+mckl_add_example(gmm)
 
-MCKL_ADD_TEST(gmm ps "OpenMP")
+mckl_add_test(gmm ps "OpenMP")
 
-MCKL_ADD_FILE(gmm gmm.data)
+mckl_add_file(gmm gmm.data)

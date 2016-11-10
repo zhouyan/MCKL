@@ -542,7 +542,7 @@ class GMMAlphaLinear
 
     private:
     std::size_t iter_num_;
-}; // GMMAlphaLinear
+}; // class GMMAlphaLinear
 
 class GMMAlphaPrior
 {

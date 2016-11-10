@@ -55,5 +55,4 @@
     MCKL_NOINLINE_CALL round<N + 0x10>(                                       \
         s, rk, std::integral_constant<bool, N + 0x10 < rounds_>());
 
-#endif // MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP
-
+#endif // MCKL_RANDOM_INTERNAL_AES_UNROLL_HPP

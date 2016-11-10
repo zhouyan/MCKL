@@ -40,14 +40,14 @@ class RandomSeedResultType
 {
     public:
     using type = std::array<T, K>;
-};
+}; // class RandomSeedResultType
 
 template <typename T>
 class RandomSeedResultType<T, 1>
 {
     public:
     using type = T;
-};
+}; // class RandomSeedResultType
 
 template <typename T>
 inline bool random_seed_unique(mckl::Vector<T> &set)

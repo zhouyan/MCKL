@@ -312,7 +312,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     /// ~~~{.cpp}
     /// auto stride = state.row_stride();
     /// auto data = state.row_data(i);
-    /// auto size = state.row_size(); // or state.dim();
+    /// auto size = state.row_size();
     /// for (j = 0; j != size; ++j, data += stride)
     ///     /* *data is the same as state(i, j) */;
     /// ~~~
@@ -337,7 +337,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     /// ~~~{.cpp}
     /// auto stride = state.col_stride();
     /// auto data = state.col_data(j);
-    /// auto size = state.col_size(); // or state.size();
+    /// auto size = state.col_size();
     /// for (i = 0; i != size; ++i, data += stride)
     ///     /* *data is the same as state(i, j); */;
     /// ~~~
@@ -581,7 +581,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     /// ~~~{.cpp}
     /// auto stride = state.row_stride();
     /// auto data = state.row_data(i);
-    /// auto size = state.row_size(); // or state.dim();
+    /// auto size = state.row_size();
     /// for (j = 0; j != size; ++j, data += stride)
     ///     /* *data is the same as state(i, j) */;
     /// ~~~
@@ -600,7 +600,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     /// ~~~{.cpp}
     /// auto stride = state.col_stride();
     /// auto data = state.col_data(j);
-    /// auto size = state.col_size(); // or state.size();
+    /// auto size = state.col_size();
     /// for (i = 0; i != size; ++i, data += stride)
     ///     /* *data is the same as state(i, j); */;
     /// ~~~

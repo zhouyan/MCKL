@@ -171,7 +171,7 @@ enum CBLAS_TRANSPOSE {
     CblasNoTrans = 111,
     CblasTrans = 112,
     CblasConjTrans = 113
-};
+}; // enum CBLAS_TRANSPOSE
 
 enum CBLAS_UPLO { CblasUpper = 121, CblasLower = 122 };
 

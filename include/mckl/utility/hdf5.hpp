@@ -480,16 +480,16 @@ inline void hdf5store(const std::vector<T, Alloc> &vector,
 /// ~~~{.cpp}
 /// double data[6] = {1, 2, 3, 4, 5, 6};
 ///
-/// // Store matrix
-/// // 1 2
-/// // 3 4
-/// // 5 6
+/// /* Store matrix
+///    1 2
+///    3 4
+///    5 6 */
 /// hdf5store_matrix<double>(RowMajor, 3, 2, data, "row.hdf5", "data");
 ///
-/// // Store matrix
-/// // 1 4
-/// // 2 5
-/// // 3 6
+/// /* Store matrix
+///    1 4
+///    2 5
+///    3 6 */
 /// hdf5store_matrix<double>(ColMajor, 3, 2, data, "col.hdf5", "data");
 /// ~~~
 /// When the results are read by other program, for example R, a transpose may

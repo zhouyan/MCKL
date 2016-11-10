@@ -165,4 +165,4 @@ class IncrementBlockSI128<T, 16, 1, 64>
 #endif
 #endif
 
-#endif // MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_4_HPP
+#endif // MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_8_HPP

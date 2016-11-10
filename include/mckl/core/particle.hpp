@@ -77,10 +77,10 @@ MCKL_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 /// \details
 /// This is the basic ParticleIndex available for any type of Particle. To
 /// extend it for type `T`. One can either specialize
-/// mckl::ParticleIndexBaseTypeTrait<T> or define a class template named
+/// ParticleIndexBaseTypeTrait<T> or define a class template named
 /// `particle_index_type` within `T` with the following minimum requirement.
 /// ~~~{.cpp}
-/// template <typename S> // S: StateType, such as StateMatrix<Dim, T>
+/// template <typename S>
 /// class particle_index_type
 /// {
 ///     public:

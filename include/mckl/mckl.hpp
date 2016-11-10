@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_HPP
-#define MCKL_HPP
+#ifndef MCKL_MCKL_HPP
+#define MCKL_MCKL_HPP
 
 /// \defgroup Config Configuration
 /// \brief Configuration macros and default values if undefined
@@ -167,4 +167,4 @@
 #include <mckl/smp.hpp>
 #include <mckl/utility.hpp>
 
-#endif // MCKL_HPP
+#endif // MCKL_MCKL_HPP

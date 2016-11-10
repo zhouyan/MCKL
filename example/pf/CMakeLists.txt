@@ -29,66 +29,66 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample-pf CXX)
+project(MCKLExample-pf CXX)
 
-MCKL_ADD_EXAMPLE(pf)
+mckl_add_example(pf)
 
-SET(PF_BACKEND BackendOMP BackendSEQ BackendSTD)
-IF(TBB_FOUND)
-    SET(PF_BACKEND ${PF_BACKEND} BackendTBB)
-ENDIF(TBB_FOUND)
+set(PF_BACKEND BackendOMP BackendSEQ BackendSTD)
+if(TBB_FOUND)
+    set(PF_BACKEND ${PF_BACKEND} BackendTBB)
+endif(TBB_FOUND)
 
-SET(PF_SCHEME Multinomial Stratified Systematic Residual ResidualStratified
+set(PF_SCHEME Multinomial Stratified Systematic Residual ResidualStratified
     ResidualSystematic)
 
-SET(PF_LAYOUT RowMajor ColMajor)
+set(PF_LAYOUT RowMajor ColMajor)
 
-SET(PF_RNGSET RNGSetVector)
-IF(TBB_FOUND)
-    SET(PF_RNGSET ${PF_RNGSET} RNGSetTBB RNGSetTBBKPI)
-ENDIF(TBB_FOUND)
+set(PF_RNGSET RNGSetVector)
+if(TBB_FOUND)
+    set(PF_RNGSET ${PF_RNGSET} RNGSetTBB RNGSetTBBKPI)
+endif(TBB_FOUND)
 
-MCKL_ADD_TEST(pf core  "OpenMP")
-MCKL_ADD_TEST(pf smp   "OpenMP")
-MCKL_ADD_TEST(pf truth "OpenMP")
+mckl_add_test(pf core  "OpenMP")
+mckl_add_test(pf smp   "OpenMP")
+mckl_add_test(pf truth "OpenMP")
 
-MCKL_ADD_FILE(pf pf.data)
-MCKL_ADD_FILE(pf pf.truth)
-MCKL_ADD_FILE(pf pf_core.R)
-MCKL_ADD_FILE(pf pf_cv.R)
+mckl_add_file(pf pf.data)
+mckl_add_file(pf pf.truth)
+mckl_add_file(pf pf_core.R)
+mckl_add_file(pf pf_cv.R)
 
-ADD_LIBRARY(libpf ${PROJECT_SOURCE_DIR}/src/pf.cpp)
-SET_TARGET_PROPERTIES(libpf PROPERTIES OUTPUT_NAME pf)
+add_library(libpf ${PROJECT_SOURCE_DIR}/src/pf.cpp)
+set_target_properties(libpf PROPERTIES OUTPUT_NAME pf)
 
-ADD_CUSTOM_TARGET(pf_cv)
-ADD_CUSTOM_TARGET(pf_cv-check)
-FOREACH(Backend ${PF_BACKEND})
-    FOREACH(Scheme ${PF_SCHEME})
-        FOREACH(Layout ${PF_LAYOUT})
-            FOREACH(RNGSet ${PF_RNGSET})
-                STRING(TOLOWER ${Backend} smp)
-                STRING(TOLOWER ${Scheme} res)
-                STRING(TOLOWER ${Layout} rc)
-                STRING(TOLOWER ${RNGSet} rs)
-                SET(config ${smp}_${res}_${rc}_${rs})
-                CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/pf_cv.cpp.in
+add_custom_target(pf_cv)
+add_custom_target(pf_cv-check)
+foreach(Backend ${PF_BACKEND})
+    foreach(Scheme ${PF_SCHEME})
+        foreach(Layout ${PF_LAYOUT})
+            foreach(RNGSet ${PF_RNGSET})
+                string(TOLOWER ${Backend} smp)
+                string(TOLOWER ${Scheme} res)
+                string(TOLOWER ${Layout} rc)
+                string(TOLOWER ${RNGSet} rs)
+                set(config ${smp}_${res}_${rc}_${rs})
+                configure_file(${PROJECT_SOURCE_DIR}/src/pf_cv.cpp.in
                     ${PROJECT_BINARY_DIR}/src/pf_cv_${config}.cpp)
-                MCKL_ADD_TEST(pf cv_${config} "BIN" "OpenMP")
-                TARGET_LINK_LIBRARIES(pf_cv_${config} libpf)
-                ADD_DEPENDENCIES(pf_cv pf_cv_${config})
-                ADD_DEPENDENCIES(pf_cv-check pf_cv_${config}-check)
-            ENDFOREACH(RNGSet ${PF_RNGSET})
-        ENDFOREACH(Layout ${PF_LAYOUT})
-    ENDFOREACH(Scheme ${PF_SCHEME})
-ENDFOREACH(Backend ${PF_BACKEND})
+                mckl_add_test(pf cv_${config} "BIN" "OpenMP")
+                target_link_libraries(pf_cv_${config} libpf)
+                add_dependencies(pf_cv pf_cv_${config})
+                add_dependencies(pf_cv-check pf_cv_${config}-check)
+            endforeach(RNGSet ${PF_RNGSET})
+        endforeach(Layout ${PF_LAYOUT})
+    endforeach(Scheme ${PF_SCHEME})
+endforeach(Backend ${PF_BACKEND})
 
-ADD_CUSTOM_TARGET(pf_core-pdf
+add_custom_target(pf_core-pdf
     DEPENDS pf-files pf_core-check
     COMMAND Rscript "${PROJECT_BINARY_DIR}/pf_core.R"
     COMMENT "Plotting pf_core-check results"
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
 
-ADD_CUSTOM_TARGET(pf_cv-pdf
+add_custom_target(pf_cv-pdf
     DEPENDS pf-files pf_cv-check
     COMMAND Rscript "${PROJECT_BINARY_DIR}/pf_cv.R"
     COMMENT "Plotting pf_cv-check results"
