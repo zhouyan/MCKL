@@ -121,11 +121,6 @@ ENDFUNCTION(MCKL_ADD_FILE)
 # Essential
 ##############################################################################
 
-SET(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
-    -D__STDC_CONSTANT_MACROS)
-
-ADD_DEFINITIONS(-D__STDC_CONSTANT_MACROS)
-
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
 
 ##############################################################################
