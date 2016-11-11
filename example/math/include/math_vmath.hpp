@@ -168,6 +168,10 @@ using FunctionA2R1D = void (*)(
                 mckl::div(K, rs1.data(), rs2.data(), rs2.data());             \
                 mckl::sub(K, rd1.data(), rd2.data(), rd1.data());             \
                 mckl::div(K, rd1.data(), rd2.data(), rd2.data());             \
+                mckl::abs(K, rs1.data(), rs1.data());                         \
+                mckl::abs(K, rs2.data(), rs2.data());                         \
+                mckl::abs(K, rd1.data(), rd1.data());                         \
+                mckl::abs(K, rd2.data(), rd2.data());                         \
                                                                               \
                 for (std::size_t j = 0; j != K; ++j)                          \
                     e1 = std::max(e1, rs1[j]);                                \
