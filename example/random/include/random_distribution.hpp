@@ -1693,6 +1693,8 @@ inline void random_distribution_perf_e(
 {
     mckl::sub(n, r1, r2, r1);
     mckl::div(n, r1, r2, r2);
+    mckl::abs(n, r1, r1);
+    mckl::abs(n, r2, r2);
     T f1 = 0;
     T f2 = 0;
     for (std::size_t i = 0; i != n; ++i)

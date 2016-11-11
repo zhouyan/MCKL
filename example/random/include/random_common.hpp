@@ -69,13 +69,13 @@ inline std::string random_typename<long double>()
 template <>
 inline std::string random_typename<mckl::Closed>()
 {
-    return "Closed";
+    return "c";
 }
 
 template <>
 inline std::string random_typename<mckl::Open>()
 {
-    return "Open";
+    return "o";
 }
 
 inline std::string random_pass(bool pass)

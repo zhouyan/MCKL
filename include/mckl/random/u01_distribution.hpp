@@ -114,46 +114,6 @@ using U01UIntType =
 
 #endif // MCKL_U01_USE_64BITS_DOUBLE
 
-template <std::size_t, typename RealType, typename UIntType>
-inline RealType u01_canonical_distribution_impl_trans(
-    const UIntType *, std::false_type)
-{
-    return 0;
-}
-
-template <std::size_t N, typename RealType, typename UIntType>
-inline RealType u01_canonical_distribution_impl_trans(
-    const UIntType *u, std::true_type)
-{
-    constexpr int W = std::numeric_limits<UIntType>::digits;
-    constexpr int M = std::numeric_limits<RealType>::digits;
-    constexpr int P = (M + W - 1) / W;
-    constexpr int Q = 1 > P ? 1 : P;
-
-    return static_cast<RealType>(u[N]) *
-        Pow2<RealType, -static_cast<int>((Q - N) * W)>::value +
-        u01_canonical_distribution_impl_trans<N + 1, RealType>(
-            u, std::integral_constant<bool, N + 1 < Q>());
-}
-
-template <typename UIntType, typename RealType, int W>
-inline void u01_canonical_distribution_impl_trans(std::size_t n,
-    const UIntType *u, RealType *r, std::integral_constant<int, W>)
-{
-    static_assert(std::numeric_limits<UIntType>::digits == W,
-        "**u01_canonical_distribution_avx2_impl_trans** used with unsigned "
-        "integer type with incorrect width");
-
-    constexpr int M = std::numeric_limits<RealType>::digits;
-    constexpr int P = (M + W - 1) / W;
-    constexpr int Q = 1 > P ? 1 : P;
-
-    for (std::size_t i = 0; i != n; ++i, u += Q) {
-        r[i] = u01_canonical_distribution_impl_trans<0, RealType>(
-            u, std::true_type());
-    }
-}
-
 template <std::size_t K, typename RealType, typename RNGType>
 inline void u01_canonical_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r)
@@ -167,9 +127,7 @@ inline void u01_canonical_distribution_impl(
 
     alignas(32) std::array<UIntType, K * Q> s;
     uniform_bits_distribution(rng, n * Q, s.data());
-    const UIntType *u = s.data();
-    u01_canonical_distribution_impl_trans(
-        n, u, r, std::integral_constant<int, W>());
+    u01_canonical<UIntType, RealType, Q>(n, s.data(), r);
 }
 
 MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_cc)
@@ -204,30 +162,31 @@ class U01CanonicalDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &)
     {
-        return generate<0>(rng, std::true_type());
-    }
-
-    template <std::size_t, typename RNGType>
-    result_type generate(RNGType &, std::false_type)
-    {
-        return 0;
-    }
-
-    template <std::size_t N, typename RNGType>
-    result_type generate(RNGType &rng, std::true_type)
-    {
         using UIntType = internal::U01UIntType<RNGType, RealType>;
-
-        UniformBitsDistribution<UIntType> ubits;
 
         constexpr int W = std::numeric_limits<UIntType>::digits;
         constexpr int M = std::numeric_limits<RealType>::digits;
-        constexpr int P = (W + M - 1) / W;
+        constexpr int P = (M + W - 1) / W;
         constexpr int Q = 1 > P ? 1 : P;
 
-        return static_cast<RealType>(ubits(rng)) *
-            internal::Pow2<RealType, -static_cast<int>((Q - N) * W)>::value +
-            generate<N + 1>(rng, std::integral_constant<bool, N + 1 < Q>());
+        std::array<UIntType, Q> u;
+        generate<0>(rng, u, std::true_type());
+
+        return u01_canonical<UIntType, RealType, Q>(u.data());
+    }
+
+    template <std::size_t, typename RNGType, typename UIntType, std::size_t Q>
+    void generate(RNGType &, std::array<UIntType, Q> &, std::false_type)
+    {
+    }
+
+    template <std::size_t N, typename RNGType, typename UIntType,
+        std::size_t Q>
+    void generate(RNGType &rng, std::array<UIntType, Q> &u, std::true_type)
+    {
+        UniformBitsDistribution<UIntType> ubits;
+        std::get<N>(u) = ubits(rng);
+        generate<N + 1>(rng, u, std::integral_constant<bool, N + 1 < Q>());
     }
 }; // class U01CanonicalDistribution
 

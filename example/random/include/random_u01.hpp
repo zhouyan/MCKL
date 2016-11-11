@@ -41,7 +41,7 @@ inline bool random_u01_check_lb(RealType x)
 {
     return std::is_same<Lower, mckl::Closed>::value ?
         mckl::internal::is_zero(x) :
-        !mckl::internal::is_zero(x);
+        x > 0;
 }
 
 template <typename Upper, typename RealType>
@@ -49,7 +49,7 @@ inline bool random_u01_check_ub(RealType x)
 {
     return std::is_same<Upper, mckl::Closed>::value ?
         mckl::internal::is_one(x) :
-        !mckl::internal::is_one(x);
+        x < 1;
 }
 
 template <typename RealType>
@@ -154,8 +154,8 @@ inline RandomU01Range random_u01(std::size_t N, std::size_t M)
             RealType ubi = *std::max_element(r1.begin(), r1.end());
 
             pass_b = pass_b && r2 == r1;
-            pass_l = pass_l && mckl::internal::is_equal(lb, lbi);
-            pass_u = pass_u && mckl::internal::is_equal(ub, ubi);
+            pass_l = pass_l && lbi >= lb;
+            pass_u = pass_u && ubi <= ub;
         }
         if (has_cycles) {
             c1 = std::min(c1, 1.0 * watch1.cycles() / n);
@@ -167,11 +167,109 @@ inline RandomU01Range random_u01(std::size_t N, std::size_t M)
     }
 
     std::stringstream ss;
-    ss << "u01<";
+    ss << "u01" + random_typename<Lower>() + random_typename<Upper>() + "<";
+    ss << std::setw(10) << std::left << random_typename<UIntType>() + ",";
+    ss << random_typename<RealType>() + ">";
+
+    RandomU01Range result;
+    result.pass_b = pass_b;
+    result.pass_l = pass_l;
+    result.pass_u = pass_u;
+    result.function = ss.str();
+    result.minimum = random_u01_minimum(lb);
+    result.maximum = random_u01_maximum(ub);
+    result.c1 = c1;
+    result.c2 = c2;
+
+    return result;
+}
+
+template <typename UIntType, typename RealType>
+inline RandomU01Range random_u01(std::size_t N, std::size_t M)
+{
+    constexpr int w = std::numeric_limits<UIntType>::digits;
+    constexpr int m = std::numeric_limits<RealType>::digits;
+    constexpr int p = (m + w - 1) / w;
+    constexpr int Q = 1 > p ? 1 : p;
+
+    mckl::Philox4x32Engine<UIntType> rng;
+    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+
+    mckl::Vector<RealType> r1(N);
+    mckl::Vector<RealType> r2(N);
+    mckl::Vector<UIntType> ru(N * Q);
+
+    std::fill_n(ru.begin(), Q, std::numeric_limits<UIntType>::min());
+    RealType lb = mckl::u01_canonical<UIntType, RealType, Q>(ru.data());
+
+    std::fill_n(ru.begin(), Q, std::numeric_limits<UIntType>::max());
+    RealType ub = mckl::u01_canonical<UIntType, RealType, Q>(ru.data());
+
+    bool pass_b = true;
+    bool pass_l = true;
+    bool pass_u = true;
+
+    bool has_cycles = mckl::StopWatch::has_cycles();
+
+    double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;
+    for (std::size_t k = 0; k != 10; ++k) {
+        std::size_t n = 0;
+        mckl::StopWatch watch1;
+        mckl::StopWatch watch2;
+        for (std::size_t i = 0; i != M; ++i) {
+            std::size_t K = rsize(rng);
+            r1.resize(K);
+            r2.resize(K);
+            ru.resize(K * Q);
+            n += K;
+
+            for (std::size_t j = 0; j != K * Q; ++j) {
+                UIntType u = rng();
+                switch (u % 3) {
+                    case 0:
+                        ru[j] = 0;
+                        break;
+                    case 1:
+                        ru[j] = std::numeric_limits<UIntType>::max();
+                        break;
+                    default:
+                        ru[j] = u;
+                }
+            }
+
+            watch1.start();
+            const UIntType *uptr = ru.data();
+            for (std::size_t j = 0; j != K; ++j, uptr += Q)
+                r1[j] = mckl::u01_canonical<UIntType, RealType, Q>(uptr);
+            watch1.stop();
+
+            watch2.start();
+            mckl::u01_canonical<UIntType, RealType, Q>(
+                K, ru.data(), r2.data());
+            watch2.stop();
+
+            RealType lbi = *std::min_element(r1.begin(), r1.end());
+            RealType ubi = *std::max_element(r1.begin(), r1.end());
+
+            pass_b = pass_b && r2 == r1;
+            pass_l = pass_l && lbi >= lb;
+            pass_u = pass_u && ubi <= ub;
+        }
+        if (has_cycles) {
+            c1 = std::min(c1, 1.0 * watch1.cycles() / n);
+            c2 = std::min(c2, 1.0 * watch2.cycles() / n);
+        } else {
+            c1 = std::max(c1, n / watch1.seconds() * 1e-6);
+            c2 = std::max(c2, n / watch2.seconds() * 1e-6);
+        }
+    }
+
+    std::stringstream ss;
+    ss << "u01_canonical<";
     ss << std::setw(10) << std::left << random_typename<UIntType>() + ",";
     ss << std::setw(13) << std::left << random_typename<RealType>() + ",";
-    ss << std::setw(8) << std::left << random_typename<Lower>() + ",";
-    ss << std::setw(8) << std::left << random_typename<Upper>() + ">";
+    ss << Q << ">";
 
     RandomU01Range result;
     result.pass_b = pass_b;
@@ -216,9 +314,36 @@ inline void random_u01(std::size_t N, std::size_t M, int nwid, int twid)
     }
 }
 
+inline void random_u01(std::size_t N, std::size_t M, int nwid, int twid)
+{
+    mckl::Vector<RandomU01Range> range;
+    range.push_back(random_u01<std::uint32_t, float>(N, M));
+    range.push_back(random_u01<std::uint64_t, float>(N, M));
+    range.push_back(random_u01<std::uint32_t, double>(N, M));
+    range.push_back(random_u01<std::uint64_t, double>(N, M));
+    range.push_back(random_u01<std::uint32_t, long double>(N, M));
+    range.push_back(random_u01<std::uint64_t, long double>(N, M));
+
+    for (std::size_t i = 0; i != range.size(); ++i) {
+        std::cout << std::setw(nwid) << std::left << range[i].function;
+        std::cout << std::setw(twid) << std::right << range[i].minimum;
+        std::cout << std::setw(twid) << std::right << range[i].maximum;
+        std::cout << std::setw(twid) << std::right << range[i].c1;
+        std::cout << std::setw(twid) << std::right << range[i].c2;
+        std::string pass;
+        pass += range[i].pass_b ? "-" : "*";
+        pass += range[i].pass_l ? "-" : "*";
+        pass += range[i].pass_u ? "-" : "*";
+        pass +=
+            random_pass(range[i].pass_b && range[i].pass_l && range[i].pass_u);
+        std::cout << std::setw(15) << std::right << pass;
+        std::cout << std::endl;
+    }
+}
+
 inline void random_u01(std::size_t N, std::size_t M)
 {
-    const int nwid = 50;
+    const int nwid = 40;
     const int twid = 15;
     const std::size_t lwid = nwid + twid * 4 + 15;
 
@@ -247,6 +372,8 @@ inline void random_u01(std::size_t N, std::size_t M)
     random_u01<mckl::Open, mckl::Closed>(N, M, nwid, twid);
     std::cout << std::string(lwid, '-') << std::endl;
     random_u01<mckl::Open, mckl::Open>(N, M, nwid, twid);
+    std::cout << std::string(lwid, '-') << std::endl;
+    random_u01(N, M, nwid, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
