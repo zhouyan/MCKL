@@ -33,6 +33,7 @@
 #define MCKL_RANDOM_INTERNAL_AES_AESNI_ARS_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/aes_aesni_common.hpp>
 #include <mckl/random/internal/aes_key_seq.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -110,7 +111,7 @@ class ARSGeneratorAESNIImpl
             static_cast<MCKL_INT64>(Constants::weyl::value[0]);
         constexpr MCKL_INT64 w1 =
             static_cast<MCKL_INT64>(Constants::weyl::value[1]);
-        __m128i xmmw = _mm_set_epi64x(w1, w0);
+        const __m128i xmmw = _mm_set_epi64x(w1, w0);
 
         auto &&key = ks.key();
         __m128i xmmk =
@@ -145,7 +146,7 @@ class ARSGeneratorAESNIImpl
             static_cast<MCKL_INT64>(Constants::weyl::value[0]);
         constexpr MCKL_INT64 w1 =
             static_cast<MCKL_INT64>(Constants::weyl::value[1]);
-        __m128i xmmw = _mm_set_epi64x(w1, w0);
+        const __m128i xmmw = _mm_set_epi64x(w1, w0);
 
         auto &&key = ks.key();
         __m128i xmmk =
@@ -171,142 +172,48 @@ class ARSGeneratorAESNIImpl
         _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
     }
 
+    MCKL_RANDOM_INTERNAL_AES_AESNI_EVAL
+
+    private:
     template <typename ResultType>
-    static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+    static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)
     {
-        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
-            MCKL_NOINLINE_CALL eval_overflow(ctr, n, r, ks);
-            return;
-        }
-
-        constexpr std::size_t N = 8;
-        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
+        constexpr std::size_t S = 8;
+        constexpr std::size_t N = S;
 
         constexpr MCKL_INT64 w0 =
             static_cast<MCKL_INT64>(Constants::weyl::value[0]);
         constexpr MCKL_INT64 w1 =
             static_cast<MCKL_INT64>(Constants::weyl::value[1]);
-        __m128i xmmw = _mm_set_epi64x(w1, w0);
+        const __m128i xmmw = _mm_set_epi64x(w1, w0);
 
         auto &&key = ks.key();
-        __m128i xmmk0 =
+        const __m128i xmmk0 =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(key)),
                 static_cast<MCKL_INT64>(std::get<0>(key)));
-        __m128i xmmk1 = _mm_add_epi64(xmmk0, xmmw);
-        __m128i xmmk2 = _mm_add_epi64(xmmk1, xmmw);
-        __m128i xmmk3 = _mm_add_epi64(xmmk2, xmmw);
-        __m128i xmmk4 = _mm_add_epi64(xmmk3, xmmw);
-        __m128i xmmk5 = _mm_add_epi64(xmmk4, xmmw);
+        const __m128i xmmk1 = _mm_add_epi64(xmmk0, xmmw);
+        const __m128i xmmk2 = _mm_add_epi64(xmmk1, xmmw);
+        const __m128i xmmk3 = _mm_add_epi64(xmmk2, xmmw);
+        const __m128i xmmk4 = _mm_add_epi64(xmmk3, xmmw);
+        const __m128i xmmk5 = _mm_add_epi64(xmmk4, xmmw);
 
         __m128i xmmc =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
+        ctr.front() += n;
 
-        while (n >= N) {
-            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
-            __m128i xmm1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
-            __m128i xmm2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
-            __m128i xmm3 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 4));
-            __m128i xmm4 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 5));
-            __m128i xmm5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 6));
-            __m128i xmm6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 7));
-            __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
-            xmmc = xmm7;
-
-            xmm0 = _mm_xor_si128(xmm0, xmmk0);
-            xmm1 = _mm_xor_si128(xmm1, xmmk0);
-            xmm2 = _mm_xor_si128(xmm2, xmmk0);
-            xmm3 = _mm_xor_si128(xmm3, xmmk0);
-            xmm4 = _mm_xor_si128(xmm4, xmmk0);
-            xmm5 = _mm_xor_si128(xmm5, xmmk0);
-            xmm6 = _mm_xor_si128(xmm6, xmmk0);
-            xmm7 = _mm_xor_si128(xmm7, xmmk0);
-
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk1);
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk1);
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk1);
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk1);
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk1);
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk1);
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk1);
-
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk2);
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk2);
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk2);
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk2);
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk2);
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk2);
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk2);
-
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk3);
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk3);
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk3);
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk3);
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk3);
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk3);
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk3);
-
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);
-            xmm1 = _mm_aesenc_si128(xmm1, xmmk4);
-            xmm2 = _mm_aesenc_si128(xmm2, xmmk4);
-            xmm3 = _mm_aesenc_si128(xmm3, xmmk4);
-            xmm4 = _mm_aesenc_si128(xmm4, xmmk4);
-            xmm5 = _mm_aesenc_si128(xmm5, xmmk4);
-            xmm6 = _mm_aesenc_si128(xmm6, xmmk4);
-            xmm7 = _mm_aesenc_si128(xmm7, xmmk4);
-
-            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5);
-            xmm1 = _mm_aesenclast_si128(xmm1, xmmk5);
-            xmm2 = _mm_aesenclast_si128(xmm2, xmmk5);
-            xmm3 = _mm_aesenclast_si128(xmm3, xmmk5);
-            xmm4 = _mm_aesenclast_si128(xmm4, xmmk5);
-            xmm5 = _mm_aesenclast_si128(xmm5, xmmk5);
-            xmm6 = _mm_aesenclast_si128(xmm6, xmmk5);
-            xmm7 = _mm_aesenclast_si128(xmm7, xmmk5);
-
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 0), xmm0);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 1), xmm1);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 2), xmm2);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 3), xmm3);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 4), xmm4);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 5), xmm5);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 6), xmm6);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + R * 7), xmm7);
-
-            n -= N;
-            r += N * R;
+        __m128i *rptr = reinterpret_cast<__m128i *>(r);
+        while (n != 0) {
+            MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_2_8(xmmc);
+            MCKL_RANDOM_INTERNAL_AES_AESNI_ENCFIRST(xmmk0)
+            MCKL_RANDOM_INTERNAL_AES_AESNI_ENC(xmmk1)
+            MCKL_RANDOM_INTERNAL_AES_AESNI_ENC(xmmk2)
+            MCKL_RANDOM_INTERNAL_AES_AESNI_ENC(xmmk3)
+            MCKL_RANDOM_INTERNAL_AES_AESNI_ENC(xmmk4)
+            MCKL_RANDOM_INTERNAL_AES_AESNI_ENCLAST(xmmk5)
+            MCKL_RANDOM_INTERNAL_AES_AESNI_STORE(n, N, rptr)
         }
-
-        for (std::size_t i = 0; i != n; ++i, r += R) {
-            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
-            xmmc = xmm0;
-
-            xmm0 = _mm_xor_si128(xmm0, xmmk0);
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk1);
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk2);
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk3);
-            xmm0 = _mm_aesenc_si128(xmm0, xmmk4);
-            xmm0 = _mm_aesenclast_si128(xmm0, xmmk5);
-
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r), xmm0);
-        }
-
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(ctr.data()), xmmc);
-    }
-
-    private:
-    template <typename ResultType>
-    MCKL_NOINLINE static void eval_overflow(std::array<std::uint64_t, 2> &ctr,
-        std::size_t n, ResultType *r, const KeySeqType &ks)
-    {
-        constexpr std::size_t R = sizeof(__m128i) / sizeof(ResultType);
-
-        for (std::size_t i = 0; i != n; ++i, r += R)
-            eval(ctr, r, ks);
     }
 }; // class ARSGeneratorAESNIImpl
 

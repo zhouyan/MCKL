@@ -33,6 +33,7 @@
 #define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/philox_avx2_32_common.hpp>
 #include <mckl/random/internal/philox_common.hpp>
 #include <mckl/random/internal/philox_constants.hpp>
 #include <mckl/random/internal/philox_generic_4x.hpp>
@@ -43,48 +44,6 @@
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 #endif
-
-#define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk, imm8)                \
-    ymmt0 = _mm256_mul_epu32(ymms0, ymmm);                                    \
-    ymmt1 = _mm256_mul_epu32(ymms1, ymmm);                                    \
-    ymmt2 = _mm256_mul_epu32(ymms2, ymmm);                                    \
-    ymmt3 = _mm256_mul_epu32(ymms3, ymmm);                                    \
-    ymmt4 = _mm256_mul_epu32(ymms4, ymmm);                                    \
-    ymmt5 = _mm256_mul_epu32(ymms5, ymmm);                                    \
-    ymmt6 = _mm256_mul_epu32(ymms6, ymmm);                                    \
-    ymmt7 = _mm256_mul_epu32(ymms7, ymmm);                                    \
-    ymms0 = _mm256_and_si256(ymms0, ymma);                                    \
-    ymms1 = _mm256_and_si256(ymms1, ymma);                                    \
-    ymms2 = _mm256_and_si256(ymms2, ymma);                                    \
-    ymms3 = _mm256_and_si256(ymms3, ymma);                                    \
-    ymms4 = _mm256_and_si256(ymms4, ymma);                                    \
-    ymms5 = _mm256_and_si256(ymms5, ymma);                                    \
-    ymms6 = _mm256_and_si256(ymms6, ymma);                                    \
-    ymms7 = _mm256_and_si256(ymms7, ymma);                                    \
-    ymms0 = _mm256_xor_si256(ymms0, ymmk);                                    \
-    ymms1 = _mm256_xor_si256(ymms1, ymmk);                                    \
-    ymms2 = _mm256_xor_si256(ymms2, ymmk);                                    \
-    ymms3 = _mm256_xor_si256(ymms3, ymmk);                                    \
-    ymms4 = _mm256_xor_si256(ymms4, ymmk);                                    \
-    ymms5 = _mm256_xor_si256(ymms5, ymmk);                                    \
-    ymms6 = _mm256_xor_si256(ymms6, ymmk);                                    \
-    ymms7 = _mm256_xor_si256(ymms7, ymmk);                                    \
-    ymms0 = _mm256_xor_si256(ymms0, ymmt0);                                   \
-    ymms1 = _mm256_xor_si256(ymms1, ymmt1);                                   \
-    ymms2 = _mm256_xor_si256(ymms2, ymmt2);                                   \
-    ymms3 = _mm256_xor_si256(ymms3, ymmt3);                                   \
-    ymms4 = _mm256_xor_si256(ymms4, ymmt4);                                   \
-    ymms5 = _mm256_xor_si256(ymms5, ymmt5);                                   \
-    ymms6 = _mm256_xor_si256(ymms6, ymmt6);                                   \
-    ymms7 = _mm256_xor_si256(ymms7, ymmt7);                                   \
-    ymms0 = _mm256_shuffle_epi32(ymms0, imm8);                                \
-    ymms1 = _mm256_shuffle_epi32(ymms1, imm8);                                \
-    ymms2 = _mm256_shuffle_epi32(ymms2, imm8);                                \
-    ymms3 = _mm256_shuffle_epi32(ymms3, imm8);                                \
-    ymms4 = _mm256_shuffle_epi32(ymms4, imm8);                                \
-    ymms5 = _mm256_shuffle_epi32(ymms5, imm8);                                \
-    ymms6 = _mm256_shuffle_epi32(ymms6, imm8);                                \
-    ymms7 = _mm256_shuffle_epi32(ymms7, imm8);
 
 namespace mckl
 {
@@ -120,114 +79,92 @@ class Philox4x32GeneratorAVX2Impl
     static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K / 2> &key)
     {
-        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
-            MCKL_NOINLINE_CALL Philox4xGeneratorGenericImpl<T,
-                Constants>::eval(ctr, n, r, key);
-            return;
-        }
-
-        constexpr std::size_t S = 8;
-        constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
-        constexpr std::size_t M = sizeof(__m256i) / sizeof(ResultType);
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        constexpr int m0 = static_cast<int>(Constants::multiplier::value[0]);
-        constexpr int m1 = static_cast<int>(Constants::multiplier::value[1]);
-        __m256i ymmm = _mm256_set_epi32(0, m1, 0, m0, 0, m1, 0, m0);
+        const std::size_t n0 =
+            static_cast<std::size_t>(std::min(static_cast<std::uint64_t>(n),
+                std::numeric_limits<std::uint64_t>::max() - ctr.front()));
 
-        constexpr int ma = static_cast<int>(0xFFFFFFFF);
-        __m256i ymma = _mm256_set_epi32(ma, 0, ma, 0, ma, 0, ma, 0);
+        eval_kernel(ctr, n0, r, key);
+        n -= n0;
+        r += n0 * R;
 
-        constexpr int w0 = static_cast<int>(Constants::weyl::value[0]);
-        constexpr int w1 = static_cast<int>(Constants::weyl::value[1]);
-        __m256i ymmw = _mm256_set_epi32(w1, 0, w0, 0, w1, 0, w0, 0);
+        if (n != 0) {
+            eval(ctr, r, key);
+            n -= 1;
+            r += R;
+        }
+
+        eval_kernel(ctr, n, r, key);
+    }
+
+    private:
+    template <typename ResultType>
+    static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K / 2> &key)
+    {
+        constexpr std::size_t S = 8;
+        constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
 
         const int k0 = static_cast<int>(std::get<0>(key));
         const int k1 = static_cast<int>(std::get<1>(key));
-        __m256i ymmk0 = _mm256_set_epi32(k1, 0, k0, 0, k1, 0, k0, 0);
-        __m256i ymmk1 = _mm256_add_epi32(ymmk0, ymmw);
-        __m256i ymmk2 = _mm256_add_epi32(ymmk1, ymmw);
-        __m256i ymmk3 = _mm256_add_epi32(ymmk2, ymmw);
-        __m256i ymmk4 = _mm256_add_epi32(ymmk3, ymmw);
-        __m256i ymmk5 = _mm256_add_epi32(ymmk4, ymmw);
-        __m256i ymmk6 = _mm256_add_epi32(ymmk5, ymmw);
-        __m256i ymmk7 = _mm256_add_epi32(ymmk6, ymmw);
-        __m256i ymmk8 = _mm256_add_epi32(ymmk7, ymmw);
-        __m256i ymmk9 = _mm256_add_epi32(ymmk8, ymmw);
+        const __m256i ymmk0 = _mm256_set_epi32(k1, 0, k0, 0, k1, 0, k0, 0);
 
         __m256i ymmc =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)),
                 static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
-        ctr.front() += n / N * N;
+        ctr.front() += n;
 
-        while (n >= N) {
-            __m256i ymms0 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x02, 0, 0x01));
-            __m256i ymms1 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x04, 0, 0x03));
-            __m256i ymms2 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x06, 0, 0x05));
-            __m256i ymms3 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x08, 0, 0x07));
-            __m256i ymms4 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0A, 0, 0x09));
-            __m256i ymms5 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0C, 0, 0x0B));
-            __m256i ymms6 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0E, 0, 0x0D));
-            __m256i ymms7 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x0F));
+        __m256i *rptr = reinterpret_cast<__m256i *>(r);
+        while (n != 0) {
+            MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_2_8(ymmc)
 
-            ymmc = _mm256_add_epi64(
-                ymmc, _mm256_set_epi64x(0, static_cast<MCKL_INT64>(N), 0,
-                          static_cast<MCKL_INT64>(N)));
+            ymm0 = _mm256_shuffle_epi32(ymm0, 0xC6);
+            ymm1 = _mm256_shuffle_epi32(ymm1, 0xC6);
+            ymm2 = _mm256_shuffle_epi32(ymm2, 0xC6);
+            ymm3 = _mm256_shuffle_epi32(ymm3, 0xC6);
+            ymm4 = _mm256_shuffle_epi32(ymm4, 0xC6);
+            ymm5 = _mm256_shuffle_epi32(ymm5, 0xC6);
+            ymm6 = _mm256_shuffle_epi32(ymm6, 0xC6);
+            ymm7 = _mm256_shuffle_epi32(ymm7, 0xC6);
 
-            __m256i ymmt0;
-            __m256i ymmt1;
-            __m256i ymmt2;
-            __m256i ymmt3;
-            __m256i ymmt4;
-            __m256i ymmt5;
-            __m256i ymmt6;
-            __m256i ymmt7;
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 0, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 1, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 2, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 3, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 4, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 5, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 6, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 7, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 8, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 9, 0xB1)
 
-            ymms0 = _mm256_shuffle_epi32(ymms0, 0xC6);
-            ymms1 = _mm256_shuffle_epi32(ymms1, 0xC6);
-            ymms2 = _mm256_shuffle_epi32(ymms2, 0xC6);
-            ymms3 = _mm256_shuffle_epi32(ymms3, 0xC6);
-            ymms4 = _mm256_shuffle_epi32(ymms4, 0xC6);
-            ymms5 = _mm256_shuffle_epi32(ymms5, 0xC6);
-            ymms6 = _mm256_shuffle_epi32(ymms6, 0xC6);
-            ymms7 = _mm256_shuffle_epi32(ymms7, 0xC6);
-
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk0, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk1, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk2, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk3, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk4, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk5, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk6, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk7, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk8, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_RBOX(ymmk9, 0xB1)
-
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 0), ymms0);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 1), ymms1);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 2), ymms2);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 3), ymms3);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 4), ymms4);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 5), ymms5);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 6), ymms6);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 7), ymms7);
-
-            n -= N;
-            r += N * R;
+            if (n >= N) {
+                n -= N;
+                _mm256_storeu_si256(rptr++, ymm0);
+                _mm256_storeu_si256(rptr++, ymm1);
+                _mm256_storeu_si256(rptr++, ymm2);
+                _mm256_storeu_si256(rptr++, ymm3);
+                _mm256_storeu_si256(rptr++, ymm4);
+                _mm256_storeu_si256(rptr++, ymm5);
+                _mm256_storeu_si256(rptr++, ymm6);
+                _mm256_storeu_si256(rptr++, ymm7);
+            } else {
+                std::array<__m256i, S> s;
+                std::get<0>(s) = ymm0;
+                std::get<1>(s) = ymm1;
+                std::get<2>(s) = ymm2;
+                std::get<3>(s) = ymm3;
+                std::get<4>(s) = ymm4;
+                std::get<5>(s) = ymm5;
+                std::get<6>(s) = ymm6;
+                std::get<7>(s) = ymm7;
+                std::memcpy(rptr, s.data(), n * sizeof(T) * K);
+                break;
+            }
         }
-
-        MCKL_NOINLINE_CALL Philox4xGeneratorGenericImpl<T, Constants>::eval(
-            ctr, n, r, key);
     }
 }; // class Philox4x32GeneratorAVX2Impl
 
