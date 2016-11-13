@@ -296,8 +296,7 @@ _philox2x32_avx2_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
-    shr rsp, 5
-    shl rsp, 5
+    and rsp, 0xFFFFFFFFFFFFFFE0
     sub rsp, 0x180
 
     vpbroadcastq ymm8, [rdi]
@@ -346,8 +345,7 @@ _philox4x32_avx2_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
-    shr rsp, 5
-    shl rsp, 5
+    and rsp, 0xFFFFFFFFFFFFFFE0
     sub rsp, 0x180
 
     vbroadcasti128 ymm8, [rdi]
