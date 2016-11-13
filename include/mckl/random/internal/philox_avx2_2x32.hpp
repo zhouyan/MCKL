@@ -45,6 +45,12 @@
 #endif
 #endif
 
+extern "C" {
+
+void philox2x32_avx2_kernel(void *, std::size_t, void *, void *);
+
+} // extern "C"
+
 namespace mckl
 {
 
@@ -103,6 +109,13 @@ class Philox2x32GeneratorAVX2Impl
     static void eval_kernel(std::array<std::uint64_t, 1> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K / 2> &key)
     {
+#if MCKL_USE_EXTERN_LIBRARY
+        constexpr T m0 = Constants::multiplier::value[0];
+        constexpr T w0 = Constants::weyl::value[0];
+
+        T mwk[6] = {m0, 0, 0, w0, 0, std::get<0>(key)};
+        philox2x32_avx2_kernel(ctr.data(), n, r, mwk);
+#else  // MCKL_USE_EXTERN_LIBRARY
         constexpr std::size_t S = 8;
         constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
 
@@ -152,6 +165,7 @@ class Philox2x32GeneratorAVX2Impl
                 break;
             }
         }
+#endif // MCKL_USE_EXTERN_LIBRARY
     }
 }; // class Philox2x32GeneratorAVX2Impl
 

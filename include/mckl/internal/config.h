@@ -105,6 +105,10 @@
 
 // Optional libraries
 
+#ifndef MCKL_USE_EXTERN_LIBRARY
+#define MCKL_USE_EXTERN_LIBRARY 0
+#endif
+
 #ifndef MCKL_HAS_OMP
 #ifdef _OPENMP
 #define MCKL_HAS_OMP 1

@@ -44,6 +44,12 @@
 #endif
 #endif
 
+extern "C" {
+
+void aes128_aesni_kernel(const void *, std::size_t, void *, const void *);
+
+} // extern "C"
+
 namespace mckl
 {
 
@@ -165,6 +171,9 @@ class AES128GeneratorAESNIImpl
     static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)
     {
+#if MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
+        aes128_aesni_kernel(ctr.data(), n, r, ks.get().data());
+#else // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
         constexpr std::size_t S = 8;
         constexpr std::size_t N = S;
 
@@ -191,6 +200,7 @@ class AES128GeneratorAESNIImpl
             MCKL_RANDOM_INTERNAL_AES_AESNI_ENCLAST(std::get<0xA>(rk))
             MCKL_RANDOM_INTERNAL_AES_AESNI_STORE(n, N, rptr);
         }
+#endif // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
     }
 }; // class AES128GeneratorAESNIImpl
 

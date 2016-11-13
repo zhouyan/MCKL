@@ -59,6 +59,7 @@ endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
 ##############################################################################
 
 option(MCKL_ENABLE_EXAMPLE "Enable building of example" ON)
+option(MCKL_ENABLE_LIBRARY "Enable building of library" ON)
 
 ##############################################################################
 # Documentations
@@ -104,6 +105,20 @@ if(MCKL_ENABLE_EXAMPLE)
 else(MCKL_ENABLE_EXAMPLE)
     return()
 endif(MCKL_ENABLE_EXAMPLE)
+
+##############################################################################
+# Library
+##############################################################################
+
+if (MCKL_ENABLE_LIBRARY AND AVX2_FOUND AND UNIX)
+    enable_language(ASM_NASM)
+    if (CMAKE_ASM_NASM_COMPILER_LOADED)
+        add_custom_target(lib ALL)
+        add_subdirectory(lib)
+        set(MCKL_LINK_LIBRARIES ${MCKL_LINK_LIBRARIES} libmckl)
+        add_definitions(-DMCKL_USE_EXTERN_LIBRARY=1)
+    endif (CMAKE_ASM_NASM_COMPILER_LOADED)
+endif (MCKL_ENABLE_LIBRARY AND AVX2_FOUND AND UNIX)
 
 ##############################################################################
 # Example
