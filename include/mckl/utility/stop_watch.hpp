@@ -42,7 +42,27 @@ namespace mckl
 namespace internal
 {
 
-#if MCKL_USE_RDTSCP
+#if MCKL_USE_RDPMC
+
+inline std::int64_t cycle_start()
+{
+#ifdef MCKL_MSVC
+    return static_cast<std::int64_t>(__readpmc(0x40000001));
+#else
+    return static_cast<std::int64_t>(__rdpmc(0x40000001));
+#endif
+}
+
+inline std::int64_t cycle_stop()
+{
+#ifdef MCKL_MSVC
+    return static_cast<std::int64_t>(__readpmc(0x40000001));
+#else
+    return static_cast<std::int64_t>(__rdpmc(0x40000001));
+#endif
+}
+
+#elif MCKL_USE_RDTSCP
 
 inline std::int64_t cycle_start()
 {
@@ -70,13 +90,13 @@ inline std::int64_t cycle_stop()
     return static_cast<std::int64_t>(__rdtsc());
 }
 
-#else // MCKL_USE_RDTSCP
+#else // MCKL_USE_RDPMC
 
 inline std::int64_t cycle_start() { return 0; }
 
 inline std::int64_t cycle_stop() { return 0; }
 
-#endif // MCKL_USe_RDTSCP
+#endif // MCKL_USe_RDPMC
 
 } // namespace mckl::internal
 
@@ -128,7 +148,7 @@ class StopWatchClockAdapter
     /// of accumulated cycles. Otherwise, it will always returns zero.
     static constexpr bool has_cycles()
     {
-#if MCKL_USE_RDTSCP || MCKL_USE_RDTSC
+#if MCKL_USE_RDPMC || MCKL_USE_RDTSCP || MCKL_USE_RDTSC
         return true;
 #else
         return false;
