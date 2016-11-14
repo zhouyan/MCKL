@@ -45,3 +45,4 @@ endif (APPLE)
 
 add_library(libmckl STATIC ${MCKL_LIB_SRC})
 set_target_properties(libmckl PROPERTIES OUTPUT_NAME mckl)
+add_dependencies(lib libmckl)
