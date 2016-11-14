@@ -328,7 +328,7 @@ philox2x32_avx2_generate:
 philox2x32_avx2_store1:
     mov r8, [rsp]
     mov [rdx], r8
-    dec rax
+    sub rax, 1
     add rsp, 0x08
     add rdx, 0x08
     test rax, rax
@@ -386,7 +386,7 @@ philox4x32_avx2_generate:
 philox4x32_avx2_store1:
     vmovdqa xmm0, [rsp]
     vmovdqu [rdx], xmm0
-    dec rax
+    sub rax, 1
     add rsp, 0x10
     add rdx, 0x10
     test rax, rax
