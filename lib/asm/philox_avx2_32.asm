@@ -53,23 +53,23 @@
 
 %macro mckl_philox_avx2_32_rk 0
     vmovdqa [rsp + 0x040], ymm0 ; round key 0
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x060], ymm0 ; round key 1
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x080], ymm0 ; round key 2
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x0A0], ymm0 ; round key 3
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x0C0], ymm0 ; round key 4
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x0E0], ymm0 ; round key 5
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x100], ymm0 ; round key 6
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x120], ymm0 ; round key 7
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x140], ymm0 ; round key 8
-    vpaddd ymm0, ymm1
+    vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x160], ymm0 ; round key 9
 %endmacro
 
@@ -79,35 +79,35 @@
     vpmuludq ymm11, ymm1, ymm9
     vpmuludq ymm12, ymm2, ymm9
     vpmuludq ymm13, ymm3, ymm9
-    vpand ymm0, ymm14
-    vpand ymm1, ymm14
-    vpand ymm2, ymm14
-    vpand ymm3, ymm14
-    vpxor ymm0, ymm15
-    vpxor ymm1, ymm15
-    vpxor ymm2, ymm15
-    vpxor ymm3, ymm15
-    vpxor ymm0, ymm10
-    vpxor ymm1, ymm11
-    vpxor ymm2, ymm12
-    vpxor ymm3, ymm13
+    vpand ymm0, ymm0, ymm14
+    vpand ymm1, ymm1, ymm14
+    vpand ymm2, ymm2, ymm14
+    vpand ymm3, ymm3, ymm14
+    vpxor ymm0, ymm0, ymm15
+    vpxor ymm1, ymm1, ymm15
+    vpxor ymm2, ymm2, ymm15
+    vpxor ymm3, ymm3, ymm15
+    vpxor ymm0, ymm0, ymm10
+    vpxor ymm1, ymm1, ymm11
+    vpxor ymm2, ymm2, ymm12
+    vpxor ymm3, ymm3, ymm13
 
     vpmuludq ymm10, ymm4, ymm9
     vpmuludq ymm11, ymm5, ymm9
     vpmuludq ymm12, ymm6, ymm9
     vpmuludq ymm13, ymm7, ymm9
-    vpand ymm4, ymm14
-    vpand ymm5, ymm14
-    vpand ymm6, ymm14
-    vpand ymm7, ymm14
-    vpxor ymm4, ymm15
-    vpxor ymm5, ymm15
-    vpxor ymm6, ymm15
-    vpxor ymm7, ymm15
-    vpxor ymm4, ymm10
-    vpxor ymm5, ymm11
-    vpxor ymm6, ymm12
-    vpxor ymm7, ymm13
+    vpand ymm4, ymm4, ymm14
+    vpand ymm5, ymm5, ymm14
+    vpand ymm6, ymm6, ymm14
+    vpand ymm7, ymm7, ymm14
+    vpxor ymm4, ymm4, ymm15
+    vpxor ymm5, ymm5, ymm15
+    vpxor ymm6, ymm6, ymm15
+    vpxor ymm7, ymm7, ymm15
+    vpxor ymm4, ymm4, ymm10
+    vpxor ymm5, ymm5, ymm11
+    vpxor ymm6, ymm6, ymm12
+    vpxor ymm7, ymm7, ymm13
 
     vpshufd ymm0, ymm0, %2
     vpshufd ymm1, ymm1, %2

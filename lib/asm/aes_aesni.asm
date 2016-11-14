@@ -92,36 +92,36 @@ mckl_%{1}_aesni_storen:
 %endmacro
 
 %macro mckl_aes_aesni_encfirst 1
-    vpxor xmm0, %1
-    vpxor xmm1, %1
-    vpxor xmm2, %1
-    vpxor xmm3, %1
-    vpxor xmm4, %1
-    vpxor xmm5, %1
-    vpxor xmm6, %1
-    vpxor xmm7, %1
+    vpxor xmm0, xmm0, %1
+    vpxor xmm1, xmm1, %1
+    vpxor xmm2, xmm2, %1
+    vpxor xmm3, xmm3, %1
+    vpxor xmm4, xmm4, %1
+    vpxor xmm5, xmm5, %1
+    vpxor xmm6, xmm6, %1
+    vpxor xmm7, xmm7, %1
 %endmacro
 
 %macro mckl_aes_aesni_enc 1
-    vaesenc xmm0, %1
-    vaesenc xmm1, %1
-    vaesenc xmm2, %1
-    vaesenc xmm3, %1
-    vaesenc xmm4, %1
-    vaesenc xmm5, %1
-    vaesenc xmm6, %1
-    vaesenc xmm7, %1
+    vaesenc xmm0, xmm0, %1
+    vaesenc xmm1, xmm1, %1
+    vaesenc xmm2, xmm2, %1
+    vaesenc xmm3, xmm3, %1
+    vaesenc xmm4, xmm4, %1
+    vaesenc xmm5, xmm5, %1
+    vaesenc xmm6, xmm6, %1
+    vaesenc xmm7, xmm7, %1
 %endmacro
 
 %macro mckl_aes_aesni_enclast 1
-    vaesenclast xmm0, %1
-    vaesenclast xmm1, %1
-    vaesenclast xmm2, %1
-    vaesenclast xmm3, %1
-    vaesenclast xmm4, %1
-    vaesenclast xmm5, %1
-    vaesenclast xmm6, %1
-    vaesenclast xmm7, %1
+    vaesenclast xmm0, xmm0, %1
+    vaesenclast xmm1, xmm1, %1
+    vaesenclast xmm2, xmm2, %1
+    vaesenclast xmm3, xmm3, %1
+    vaesenclast xmm4, xmm4, %1
+    vaesenclast xmm5, xmm5, %1
+    vaesenclast xmm6, xmm6, %1
+    vaesenclast xmm7, xmm7, %1
 %endmacro
 
 section .rodata
