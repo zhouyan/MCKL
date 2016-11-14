@@ -291,8 +291,8 @@ DD 0xFFFFFFFF
 
 section .text
 
-global _philox2x32_avx2_kernel
-_philox2x32_avx2_kernel:
+global philox2x32_avx2_kernel
+philox2x32_avx2_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -340,8 +340,8 @@ philox2x32_avx2_ret:
     pop rbp
     ret
 
-global _philox4x32_avx2_kernel
-_philox4x32_avx2_kernel:
+global philox4x32_avx2_kernel
+philox4x32_avx2_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi

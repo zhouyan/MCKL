@@ -173,8 +173,8 @@ DQ 0
 
 section .text
 
-global _aes128_aesni_kernel
-_aes128_aesni_kernel:
+global aes128_aesni_kernel
+aes128_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -229,8 +229,8 @@ aes128_aesni_ret:
     pop rbp
     ret
 
-global _aes192_aesni_kernel
-_aes192_aesni_kernel:
+global aes192_aesni_kernel
+aes192_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -293,8 +293,8 @@ aes192_aesni_ret:
     pop rbp
     ret
 
-global _aes256_aesni_kernel
-_aes256_aesni_kernel:
+global aes256_aesni_kernel
+aes256_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -365,8 +365,8 @@ aes256_aesni_ret:
     pop rbp
     ret
 
-global _ars_aesni_kernel
-_ars_aesni_kernel:
+global ars_aesni_kernel
+ars_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
