@@ -42,100 +42,41 @@ namespace mckl
 namespace internal
 {
 
-#ifdef MCKL_MSVC
+#if MCKL_USE_RDTSCP
 
-inline std::uint64_t cycle_start()
+inline std::int64_t cycle_start()
 {
-    return static_cast<std::uint64_t>(__rdtsc());
+    unsigned aux;
+
+    return static_cast<std::int64_t>(__rdtscp(&aux));
 }
 
-inline std::uint64_t cycle_stop()
+inline std::int64_t cycle_stop()
 {
-    return static_cast<std::uint64_t>(__rdtsc());
+    unsigned aux;
+
+    return static_cast<std::int64_t>(__rdtscp(&aux));
 }
 
 #elif MCKL_USE_RDTSC
 
-inline std::uint64_t cycle_start()
+inline std::int64_t cycle_start()
 {
-    unsigned hi = 0;
-    unsigned lo = 0;
-#if MCKL_HAS_X86_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
-    return (static_cast<std::uint64_t>(hi) << 32) + lo;
+    return static_cast<std::int64_t>(__rdtsc());
 }
 
-#if MCKL_USE_RDTSCP
-
-inline std::uint64_t cycle_stop()
+inline std::int64_t cycle_stop()
 {
-    unsigned hi = 0;
-    unsigned lo = 0;
-#if MCKL_HAS_X86_64
-    asm volatile(
-        "rdtscp\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        "cpuid\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "rdtscp\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        "cpuid\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
-    return (static_cast<std::uint64_t>(hi) << 32) + lo;
+    return static_cast<std::int64_t>(__rdtsc());
 }
 
 #else // MCKL_USE_RDTSCP
 
-inline std::uint64_t cycle_stop()
-{
-    unsigned hi = 0;
-    unsigned lo = 0;
-#if MCKL_HAS_X86_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        "cpuid\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        "cpuid\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
-    return (static_cast<std::uint64_t>(hi) << 32) + lo;
-}
+inline std::int64_t cycle_start() { return 0; }
 
-#endif // MCKL_USE_RDTSCP
+inline std::int64_t cycle_stop() { return 0; }
 
-#else // MCKL_USE_RDTSC
-
-inline std::uint64_t cycle_start() { return 0; }
-inline std::uint64_t cycle_stop() { return 0; }
-
-#endif // MCKL_USE_RDTSCP
+#endif // MCKL_USe_RDTSCP
 
 } // namespace mckl::internal
 
@@ -187,7 +128,7 @@ class StopWatchClockAdapter
     /// of accumulated cycles. Otherwise, it will always returns zero.
     static constexpr bool has_cycles()
     {
-#if MCKL_USE_RDTSC || defined(MCKL_MSVC)
+#if MCKL_USE_RDTSCP || MCKL_USE_RDTSC
         return true;
 #else
         return false;
@@ -226,7 +167,7 @@ class StopWatchClockAdapter
     /// before.
     bool stop()
     {
-        std::uint64_t c = internal::cycle_stop();
+        std::int64_t c = internal::cycle_stop();
         typename clock_type::time_point t = clock_type::now();
 
         if (!running_)
@@ -249,7 +190,7 @@ class StopWatchClockAdapter
     }
 
     /// \brief Return the accumulated cycles
-    std::uint64_t cycles() const { return cycles_; }
+    std::int64_t cycles() const { return cycles_; }
 
     /// \brief Return the accumulated elapsed time in its native format
     typename clock_type::duration const time() const { return time_; }
@@ -284,8 +225,8 @@ class StopWatchClockAdapter
     private:
     typename clock_type::duration time_;
     typename clock_type::time_point time_start_;
-    std::uint64_t cycles_;
-    std::uint64_t cycles_start_;
+    std::int64_t cycles_;
+    std::int64_t cycles_start_;
     bool running_;
 }; // class StopWatchClockAdapter
 
