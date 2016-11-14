@@ -44,57 +44,67 @@ namespace internal
 
 #if MCKL_USE_RDPMC
 
-inline std::int64_t cycle_start()
+inline std::uint64_t cycle_start()
 {
 #ifdef MCKL_MSVC
-    return static_cast<std::int64_t>(__readpmc(0x40000001));
+    return static_cast<std::uint64_t>(__readpmc(0x40000001));
 #else
-    return static_cast<std::int64_t>(__rdpmc(0x40000001));
+    unsigned a = 0;
+    unsigned d = 0;
+    unsigned c = 0x40000001;
+    __asm__ volatile("rdpmc" : "=a"(a), "=d"(d) : "c"(c));
+
+    return (static_cast<std::uint64_t>(d) << 32) + a;
 #endif
 }
 
-inline std::int64_t cycle_stop()
+inline std::uint64_t cycle_stop()
 {
 #ifdef MCKL_MSVC
-    return static_cast<std::int64_t>(__readpmc(0x40000001));
+    return static_cast<std::uint64_t>(__readpmc(0x40000001));
 #else
-    return static_cast<std::int64_t>(__rdpmc(0x40000001));
+    unsigned a = 0;
+    unsigned d = 0;
+    unsigned c = 0x40000001;
+    __asm__ volatile("rdpmc" : "=a"(a), "=d"(d) : "c"(c));
+
+    return (static_cast<std::uint64_t>(d) << 32) + a;
 #endif
 }
 
 #elif MCKL_USE_RDTSCP
 
-inline std::int64_t cycle_start()
+inline std::uint64_t cycle_start()
 {
     unsigned aux;
 
-    return static_cast<std::int64_t>(__rdtscp(&aux));
+    return static_cast<std::uint64_t>(__rdtscp(&aux));
 }
 
-inline std::int64_t cycle_stop()
+inline std::uint64_t cycle_stop()
 {
     unsigned aux;
 
-    return static_cast<std::int64_t>(__rdtscp(&aux));
+    return static_cast<std::uint64_t>(__rdtscp(&aux));
 }
 
 #elif MCKL_USE_RDTSC
 
-inline std::int64_t cycle_start()
+inline std::uint64_t cycle_start()
 {
-    return static_cast<std::int64_t>(__rdtsc());
+    return static_cast<std::uint64_t>(__rdtsc());
 }
 
-inline std::int64_t cycle_stop()
+inline std::uint64_t cycle_stop()
 {
-    return static_cast<std::int64_t>(__rdtsc());
+    return static_cast<std::uint64_t>(__rdtsc());
 }
 
 #else // MCKL_USE_RDPMC
 
-inline std::int64_t cycle_start() { return 0; }
+inline std::uint64_t cycle_start() { return 0; }
 
-inline std::int64_t cycle_stop() { return 0; }
+inline std::uint64_t cycle_stop() { return 0; }
 
 #endif // MCKL_USe_RDPMC
 
@@ -187,7 +197,7 @@ class StopWatchClockAdapter
     /// before.
     bool stop()
     {
-        std::int64_t c = internal::cycle_stop();
+        std::uint64_t c = internal::cycle_stop();
         typename clock_type::time_point t = clock_type::now();
 
         if (!running_)
@@ -210,7 +220,7 @@ class StopWatchClockAdapter
     }
 
     /// \brief Return the accumulated cycles
-    std::int64_t cycles() const { return cycles_; }
+    std::uint64_t cycles() const { return cycles_; }
 
     /// \brief Return the accumulated elapsed time in its native format
     typename clock_type::duration const time() const { return time_; }
@@ -245,8 +255,8 @@ class StopWatchClockAdapter
     private:
     typename clock_type::duration time_;
     typename clock_type::time_point time_start_;
-    std::int64_t cycles_;
-    std::int64_t cycles_start_;
+    std::uint64_t cycles_;
+    std::uint64_t cycles_start_;
     bool running_;
 }; // class StopWatchClockAdapter
 
