@@ -82,21 +82,12 @@ inline std::uint64_t cycle_start()
 #else // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
-#if MCKL_HAS_X86_64
     asm volatile(
         "cpuid\n\t"
         "rdtsc\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
+        : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
 #endif // MCKL_MSVC
 }
@@ -109,21 +100,12 @@ inline std::uint64_t cycle_stop()
 #else // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
-#if MCKL_HAS_X86_64
     asm volatile(
         "rdtscp\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
         "cpuid\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "rdtscp\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        "cpuid\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
+        : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
 #endif // MCKL_MSVC
 }
@@ -133,26 +115,16 @@ inline std::uint64_t cycle_stop()
 inline std::uint64_t cycle_start()
 {
 #ifdef MCKL_MSVC
-    unsigned aux;
-    return static_cast<std::uint64_t>(__rdtscp(&aux));
+    return static_cast<std::uint64_t>(__rdtsc());
 #else // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
-#if MCKL_HAS_X86_64
     asm volatile(
         "cpuid\n\t"
         "rdtsc\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "cpuid\n\t"
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
+        : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
 #endif // MCKL_MSVC
 }
@@ -160,26 +132,16 @@ inline std::uint64_t cycle_start()
 inline std::uint64_t cycle_stop()
 {
 #ifdef MCKL_MSVC
-    unsigned aux;
-    return static_cast<std::uint64_t>(__rdtscp(&aux));
+    return static_cast<std::uint64_t>(__rdtsc());
 #else // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
-#if MCKL_HAS_X86_64
     asm volatile(
         "rdtsc\n\t"
         "mov %%edx, %0\n\t"
         "mov %%eax, %1\n\t"
         "cpuid\n\t"
-        : "=r"(hi), "=r"(lo)::"%rax", "%rbx", "%rcx", "%rdx");
-#else // MCKL_HAS_X64_64
-    asm volatile(
-        "rdtsc\n\t"
-        "mov %%edx, %0\n\t"
-        "mov %%eax, %1\n\t"
-        "cpuid\n\t"
-        : "=r"(lo), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
-#endif // MCKL_HAS_X86_64
+        : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
 #endif // MCKL_MSVC
 }
