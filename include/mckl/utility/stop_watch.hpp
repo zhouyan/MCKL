@@ -190,7 +190,7 @@ inline std::uint64_t cycle_start() { return 0; }
 
 inline std::uint64_t cycle_stop() { return 0; }
 
-#endif // MCKL_USe_RDPMC
+#endif // MCKL_USE_RDPMC
 
 } // namespace mckl::internal
 

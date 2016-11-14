@@ -145,7 +145,7 @@
 #endif
 
 #ifndef MCKL_USE_RDPMC
-#define MCKL_USE_RDPMC MCKL_HAS_RDPMC
+#define MCKL_USE_RDPMC 0
 #endif
 
 #ifndef MCKL_USE_RDTSC
