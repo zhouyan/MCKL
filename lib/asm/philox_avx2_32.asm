@@ -119,8 +119,8 @@
     vpshufd ymm7, ymm7, %2
 %endmacro
 
-%macro philox_avx2_32_store 1
-    cmp rax, 64 >> %1
+%macro philox_avx2_32_store 2
+    cmp rax, %2
     jl philox%{1}x32_avx2_storen
 
     vmovdqu [rdx + 0x00], ymm0
@@ -131,7 +131,7 @@
     vmovdqu [rdx + 0xA0], ymm5
     vmovdqu [rdx + 0xC0], ymm6
     vmovdqu [rdx + 0xE0], ymm7
-    sub rax, 64 >> %1
+    sub rax, %2
     add rdx, 0x100
 
     test rax, rax
@@ -323,7 +323,7 @@ philox2x32_avx2_generate:
     philox_avx2_32_rbox 8, 0xB1
     philox_avx2_32_rbox 9, 0xB1
 
-    philox_avx2_32_store 2
+    philox_avx2_32_store 2, 32
 
 philox2x32_avx2_store1:
     mov r8, [rsp]
@@ -381,7 +381,7 @@ philox4x32_avx2_generate:
     philox_avx2_32_rbox 8, 0x93
     philox_avx2_32_rbox 9, 0xB1
 
-    philox_avx2_32_store 4
+    philox_avx2_32_store 4, 16
 
 philox4x32_avx2_store1:
     vmovdqa xmm0, [rsp]
