@@ -888,7 +888,7 @@ class MKLEngine
 
         const std::size_t remain = M_ - index_;
 
-        if (n < remain) {
+        if (n <= remain) {
             std::memcpy(r, result_.data() + index_, sizeof(result_type) * n);
             index_ += n;
             return;
@@ -899,14 +899,7 @@ class MKLEngine
         n -= remain;
         index_ = M_;
 
-        const std::size_t m = n / M_ * M_;
-        generate(m, r);
-        r += m;
-        n -= m;
-
-        generate();
-        std::memcpy(r, result_.data(), sizeof(result_type) * n);
-        index_ = static_cast<unsigned>(n);
+        generate(n, r);
     }
 
     /// \brief Discard the result

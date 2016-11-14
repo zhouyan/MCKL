@@ -143,7 +143,7 @@ class CounterEngine
     {
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
 
-        if (n < remain) {
+        if (n <= remain) {
             std::memcpy(r, result_.data() + index_, sizeof(result_type) * n);
             index_ += static_cast<unsigned>(n);
             return;
