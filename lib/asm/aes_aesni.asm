@@ -34,6 +34,8 @@
 ; rdx r
 ; rcx ks.get().data()/weyl:key
 
+%use smartalign
+
 %macro mckl_aes_aesni_increment 0
     vpaddq xmm0, xmm8, [rel inc0]
     vpaddq xmm1, xmm8, [rel inc1]
@@ -124,7 +126,7 @@ mckl_%{1}_aesni_storen:
     vaesenclast xmm7, xmm7, %1
 %endmacro
 
-section .rodata
+section .data
 
 align 16
 inc0:
@@ -201,6 +203,7 @@ mckl_aes128_aesni_kernel:
     vmovdqu xmm0, [rcx + 0xA0]
     vmovdqa [rsp + 0x40], xmm0 ; round key 0xA
 
+align 16
 mckl_aes128_aesni_generate:
     mckl_aes_aesni_increment
 
@@ -261,6 +264,7 @@ mckl_aes192_aesni_kernel:
     vmovdqu xmm0, [rcx + 0xC0]
     vmovdqa [rsp + 0x60], xmm0 ; round key 0xC
 
+align 16
 mckl_aes192_aesni_generate:
     mckl_aes_aesni_increment
 
@@ -329,6 +333,7 @@ mckl_aes256_aesni_kernel:
     vmovdqu xmm0, [rcx + 0xE0]
     vmovdqa [rsp + 0x80], xmm0 ; round key 0xE
 
+align 16
 mckl_aes256_aesni_generate:
     mckl_aes_aesni_increment
 
@@ -382,6 +387,7 @@ mckl_ars_aesni_kernel:
     vpaddq xmm14, xmm13, xmm9 ; round key 4
     vpaddq xmm15, xmm14, xmm9 ; round key 5
 
+align 16
 mckl_ars_aesni_generate:
     mckl_aes_aesni_increment
 

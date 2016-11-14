@@ -39,6 +39,8 @@
 ; ymm14 mask
 ; ymm15 round key
 
+%use smartalign
+
 %macro mckl_philox_avx2_32_increment 1
     vpaddq ymm0, ymm8, [rel inc%{1}0]
     vpaddq ymm1, ymm8, [rel inc%{1}1]
@@ -150,7 +152,7 @@ mckl_philox%{1}x32_avx2_storen:
     vmovdqa [rsp + 0xE0], ymm7
 %endmacro
 
-section .rodata
+section .data
 
 align 32
 inc20:
@@ -309,6 +311,7 @@ mckl_philox2x32_avx2_kernel:
 
     vmovdqa ymm14, [rel mask]
 
+align 16
 mckl_philox2x32_avx2_generate:
     mckl_philox_avx2_32_increment 2
 
@@ -325,6 +328,7 @@ mckl_philox2x32_avx2_generate:
 
     mckl_philox_avx2_32_store 2, 32
 
+align 16
 mckl_philox2x32_avx2_store1:
     mov r8, [rsp]
     mov [rdx], r8
@@ -358,6 +362,7 @@ mckl_philox4x32_avx2_kernel:
 
     vmovdqa ymm14, [rel mask]
 
+align 16
 mckl_philox4x32_avx2_generate:
     mckl_philox_avx2_32_increment 4
 
@@ -383,6 +388,7 @@ mckl_philox4x32_avx2_generate:
 
     mckl_philox_avx2_32_store 4, 16
 
+align 16
 mckl_philox4x32_avx2_store1:
     vmovdqa xmm0, [rsp]
     vmovdqu [rdx], xmm0
