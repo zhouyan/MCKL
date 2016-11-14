@@ -31,6 +31,8 @@
 
 project(MCKLLibrary C)
 
+include_directories(${PROJECT_SOURCE_DIR}/asm)
+
 set(MCKL_LIB_SRC ${MCKL_LIB_SRC}
     ${PROJECT_SOURCE_DIR}/asm/philox_avx2_32.asm)
 

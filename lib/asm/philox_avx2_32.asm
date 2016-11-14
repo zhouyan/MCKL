@@ -30,7 +30,7 @@
 ;;============================================================================
 
 ; rdi ctr.data()
-; rax n
+; rsi n
 ; rdx r
 ; rcx mul:weyl:key
 
@@ -39,21 +39,12 @@
 ; ymm14 mask
 ; ymm15 round key
 
-%use smartalign
+%include "/common.asm"
 
-%macro mckl_philox_avx2_32_increment 1
-    vpaddq ymm0, ymm8, [rel inc%{1}0]
-    vpaddq ymm1, ymm8, [rel inc%{1}1]
-    vpaddq ymm2, ymm8, [rel inc%{1}2]
-    vpaddq ymm3, ymm8, [rel inc%{1}3]
-    vpaddq ymm4, ymm8, [rel inc%{1}4]
-    vpaddq ymm5, ymm8, [rel inc%{1}5]
-    vpaddq ymm6, ymm8, [rel inc%{1}6]
-    vpaddq ymm7, ymm8, [rel inc%{1}7]
-    vpaddq ymm8, ymm8, [rel inc%{1}8]
-%endmacro
+global mckl_philox2x32_avx2_kernel
+global mckl_philox4x32_avx2_kernel
 
-%macro mckl_philox_avx2_32_rk 0
+%macro philox_avx2_32_rk 0
     vmovdqa [rsp + 0x040], ymm0 ; round key 0
     vpaddd ymm0, ymm0, ymm1
     vmovdqa [rsp + 0x060], ymm0 ; round key 1
@@ -75,7 +66,7 @@
     vmovdqa [rsp + 0x160], ymm0 ; round key 9
 %endmacro
 
-%macro mckl_philox_avx2_32_rbox 2
+%macro philox_avx2_32_rbox 2
     vmovdqa ymm15, [rsp + 0x40 + %1 * 0x20]
     vpmuludq ymm10, ymm0, ymm9
     vpmuludq ymm11, ymm1, ymm9
@@ -121,9 +112,9 @@
     vpshufd ymm7, ymm7, %2
 %endmacro
 
-%macro mckl_philox_avx2_32_store 2
-    cmp rax, %2
-    jl mckl_philox%{1}x32_avx2_storen
+%macro philox_avx2_32_store 1
+    cmp rsi, %1
+    jl .storen
 
     vmovdqu [rdx + 0x00], ymm0
     vmovdqu [rdx + 0x20], ymm1
@@ -133,15 +124,15 @@
     vmovdqu [rdx + 0xA0], ymm5
     vmovdqu [rdx + 0xC0], ymm6
     vmovdqu [rdx + 0xE0], ymm7
-    sub rax, %2
+    sub rsi, %1
     add rdx, 0x100
 
-    test rax, rax
-    jnz mckl_philox%{1}x32_avx2_generate
+    test rsi, rsi
+    jnz .generate
 
-mckl_philox%{1}x32_avx2_storen:
-    test rax, rax,
-    jz mckl_philox%{1}x32_avx2_ret
+.storen:
+    test rsi, rsi,
+    jz .return
     vmovdqa [rsp + 0x00], ymm0
     vmovdqa [rsp + 0x20], ymm1
     vmovdqa [rsp + 0x40], ymm2
@@ -155,133 +146,7 @@ mckl_philox%{1}x32_avx2_storen:
 section .data
 
 align 32
-inc20:
-DQ 0x01
-DQ 0x02
-DQ 0x03
-DQ 0x04
-
-align 32
-inc21:
-DQ 0x05
-DQ 0x06
-DQ 0x07
-DQ 0x08
-
-align 32
-inc22:
-DQ 0x09
-DQ 0x0A
-DQ 0x0B
-DQ 0x0C
-
-align 32
-inc23:
-DQ 0x0D
-DQ 0x0E
-DQ 0x0F
-DQ 0x10
-
-align 32
-inc24:
-DQ 0x11
-DQ 0x12
-DQ 0x13
-DQ 0x14
-
-align 32
-inc25:
-DQ 0x15
-DQ 0x16
-DQ 0x17
-DQ 0x18
-
-align 32
-inc26:
-DQ 0x19
-DQ 0x1A
-DQ 0x1B
-DQ 0x1C
-
-align 32
-inc27:
-DQ 0x1D
-DQ 0x1E
-DQ 0x1F
-DQ 0x20
-
-align 32
-inc28:
-DQ 0x20
-DQ 0x20
-DQ 0x20
-DQ 0x20
-
-align 32
-inc40:
-DQ 0x01
-DQ 0
-DQ 0x02
-DQ 0
-
-align 32
-inc41:
-DQ 0x03
-DQ 0
-DQ 0x04
-DQ 0
-
-align 32
-inc42:
-DQ 0x05
-DQ 0
-DQ 0x06
-DQ 0
-
-align 32
-inc43:
-DQ 0x07
-DQ 0
-DQ 0x08
-DQ 0
-
-align 32
-inc44:
-DQ 0x09
-DQ 0
-DQ 0x0A
-DQ 0
-
-align 32
-inc45:
-DQ 0x0B
-DQ 0
-DQ 0x0C
-DQ 0
-
-align 32
-inc46:
-DQ 0x0D
-DQ 0
-DQ 0x0E
-DQ 0
-
-align 32
-inc47:
-DQ 0x0F
-DQ 0
-DQ 0x10
-DQ 0
-
-align 32
-inc48:
-DQ 0x10
-DQ 0
-DQ 0x10
-DQ 0
-
-align 32
-mask:
+philox_avx2_32_mask:
 DD 0
 DD 0xFFFFFFFF
 DD 0
@@ -293,115 +158,94 @@ DD 0xFFFFFFFF
 
 section .text
 
-global mckl_philox2x32_avx2_kernel
 mckl_philox2x32_avx2_kernel:
-    push rbp
-    mov rbp, rsp
-    mov rax, rsi
-    and rsp, 0xFFFFFFFFFFFFFFE0
-    sub rsp, 0x180
+    prologue 5, 0x180
 
     vpbroadcastq ymm8, [rdi]
-    add [rdi], rax
+    add [rdi], rsi
 
     vpbroadcastq ymm9, [rcx]
     vpbroadcastq ymm1, [rcx + 0x08]
     vpbroadcastq ymm0, [rcx + 0x10]
-    mckl_philox_avx2_32_rk
+    philox_avx2_32_rk
 
-    vmovdqa ymm14, [rel mask]
+    vmovdqa ymm14, [rel philox_avx2_32_mask]
 
-align 16
-mckl_philox2x32_avx2_generate:
-    mckl_philox_avx2_32_increment 2
+    align 16
+    .generate:
+        increment_ymm_64_1
+        philox_avx2_32_rbox 0, 0xB1
+        philox_avx2_32_rbox 1, 0xB1
+        philox_avx2_32_rbox 2, 0xB1
+        philox_avx2_32_rbox 3, 0xB1
+        philox_avx2_32_rbox 4, 0xB1
+        philox_avx2_32_rbox 5, 0xB1
+        philox_avx2_32_rbox 6, 0xB1
+        philox_avx2_32_rbox 7, 0xB1
+        philox_avx2_32_rbox 8, 0xB1
+        philox_avx2_32_rbox 9, 0xB1
+        philox_avx2_32_store 32
 
-    mckl_philox_avx2_32_rbox 0, 0xB1
-    mckl_philox_avx2_32_rbox 1, 0xB1
-    mckl_philox_avx2_32_rbox 2, 0xB1
-    mckl_philox_avx2_32_rbox 3, 0xB1
-    mckl_philox_avx2_32_rbox 4, 0xB1
-    mckl_philox_avx2_32_rbox 5, 0xB1
-    mckl_philox_avx2_32_rbox 6, 0xB1
-    mckl_philox_avx2_32_rbox 7, 0xB1
-    mckl_philox_avx2_32_rbox 8, 0xB1
-    mckl_philox_avx2_32_rbox 9, 0xB1
+    align 16
+    .store1:
+        mov r8, [rsp]
+        mov [rdx], r8
+        sub rsi, 1
+        add rsp, 0x08
+        add rdx, 0x08
+        test rsi, rsi
+        jnz .store1
 
-    mckl_philox_avx2_32_store 2, 32
+    epilogue
+; mckl_philox2x32_avx2_kernel:
 
-align 16
-mckl_philox2x32_avx2_store1:
-    mov r8, [rsp]
-    mov [rdx], r8
-    sub rax, 1
-    add rsp, 0x08
-    add rdx, 0x08
-    test rax, rax
-    jnz mckl_philox2x32_avx2_store1
-
-mckl_philox2x32_avx2_ret:
-    vzeroupper
-    mov rsp, rbp
-    pop rbp
-    ret
-
-global mckl_philox4x32_avx2_kernel
 mckl_philox4x32_avx2_kernel:
-    push rbp
-    mov rbp, rsp
-    mov rax, rsi
-    and rsp, 0xFFFFFFFFFFFFFFE0
-    sub rsp, 0x180
+    prologue 5, 0x180
 
     vbroadcasti128 ymm8, [rdi]
-    add [rdi], rax
+    add [rdi], rsi
 
     vbroadcasti128 ymm9, [rcx]
     vbroadcasti128 ymm1, [rcx + 0x10]
     vbroadcasti128 ymm0, [rcx + 0x20]
-    mckl_philox_avx2_32_rk
+    philox_avx2_32_rk
 
-    vmovdqa ymm14, [rel mask]
+    vmovdqa ymm14, [rel philox_avx2_32_mask]
 
-align 16
-mckl_philox4x32_avx2_generate:
-    mckl_philox_avx2_32_increment 4
+    align 16
+    .generate:
+        increment_ymm_64_2
+        vpshufd ymm0, ymm0, 0xC6
+        vpshufd ymm1, ymm1, 0xC6
+        vpshufd ymm2, ymm2, 0xC6
+        vpshufd ymm3, ymm3, 0xC6
+        vpshufd ymm4, ymm4, 0xC6
+        vpshufd ymm5, ymm5, 0xC6
+        vpshufd ymm6, ymm6, 0xC6
+        vpshufd ymm7, ymm7, 0xC6
+        philox_avx2_32_rbox 0, 0x93
+        philox_avx2_32_rbox 1, 0x93
+        philox_avx2_32_rbox 2, 0x93
+        philox_avx2_32_rbox 3, 0x93
+        philox_avx2_32_rbox 4, 0x93
+        philox_avx2_32_rbox 5, 0x93
+        philox_avx2_32_rbox 6, 0x93
+        philox_avx2_32_rbox 7, 0x93
+        philox_avx2_32_rbox 8, 0x93
+        philox_avx2_32_rbox 9, 0xB1
+        philox_avx2_32_store 16
 
-    vpshufd ymm0, ymm0, 0xC6
-    vpshufd ymm1, ymm1, 0xC6
-    vpshufd ymm2, ymm2, 0xC6
-    vpshufd ymm3, ymm3, 0xC6
-    vpshufd ymm4, ymm4, 0xC6
-    vpshufd ymm5, ymm5, 0xC6
-    vpshufd ymm6, ymm6, 0xC6
-    vpshufd ymm7, ymm7, 0xC6
+    align 16
+    .store1:
+        vmovdqa xmm0, [rsp]
+        vmovdqu [rdx], xmm0
+        sub rsi, 1
+        add rsp, 0x10
+        add rdx, 0x10
+        test rsi, rsi
+        jnz .store1
 
-    mckl_philox_avx2_32_rbox 0, 0x93
-    mckl_philox_avx2_32_rbox 1, 0x93
-    mckl_philox_avx2_32_rbox 2, 0x93
-    mckl_philox_avx2_32_rbox 3, 0x93
-    mckl_philox_avx2_32_rbox 4, 0x93
-    mckl_philox_avx2_32_rbox 5, 0x93
-    mckl_philox_avx2_32_rbox 6, 0x93
-    mckl_philox_avx2_32_rbox 7, 0x93
-    mckl_philox_avx2_32_rbox 8, 0x93
-    mckl_philox_avx2_32_rbox 9, 0xB1
-
-    mckl_philox_avx2_32_store 4, 16
-
-align 16
-mckl_philox4x32_avx2_store1:
-    vmovdqa xmm0, [rsp]
-    vmovdqu [rdx], xmm0
-    sub rax, 1
-    add rsp, 0x10
-    add rdx, 0x10
-    test rax, rax
-    jnz mckl_philox4x32_avx2_store1
-
-mckl_philox4x32_avx2_ret:
-    vzeroupper
-    mov rsp, rbp
-    pop rbp
-    ret
+    epilogue
+; mckl_philox4x32_avx2_kernel:
 
 ; vim:ft=nasm
