@@ -39,5 +39,9 @@ if (AESNI_FOUND)
         ${PROJECT_SOURCE_DIR}/asm/aes_aesni.asm)
 endif (AESNI_FOUND)
 
+if (APPLE)
+    add_compile_options(--prefix _)
+endif (APPLE)
+
 add_library(libmckl STATIC ${MCKL_LIB_SRC})
 set_target_properties(libmckl PROPERTIES OUTPUT_NAME mckl)
