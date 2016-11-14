@@ -100,25 +100,24 @@ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/mckl
 # Check features
 ##############################################################################
 
-if(MCKL_ENABLE_EXAMPLE)
+if (MCKL_ENABLE_EXAMPLE OR MCKL_ENABLE_LIBRARY)
     include(MCKL)
-else(MCKL_ENABLE_EXAMPLE)
+else (MCKL_ENABLE_EXAMPLE OR MCKL_ENABLE_LIBRARY)
     return()
-endif(MCKL_ENABLE_EXAMPLE)
+endif (MCKL_ENABLE_EXAMPLE OR MCKL_ENABLE_LIBRARY)
 
 ##############################################################################
 # Library
 ##############################################################################
 
-if (MCKL_ENABLE_LIBRARY AND AVX2_FOUND AND UNIX)
-    enable_language(ASM_NASM)
-    if (CMAKE_ASM_NASM_COMPILER_LOADED)
+if (MCKL_ENABLE_LIBRARY)
+    if (CMAKE_ASM_NASM_COMPILER_LOADED AND AVX2_FOUND AND UNIX)
         add_custom_target(lib ALL)
         add_subdirectory(lib)
         set(MCKL_LINK_LIBRARIES ${MCKL_LINK_LIBRARIES} libmckl)
         add_definitions(-DMCKL_USE_EXTERN_LIBRARY=1)
-    endif (CMAKE_ASM_NASM_COMPILER_LOADED)
-endif (MCKL_ENABLE_LIBRARY AND AVX2_FOUND AND UNIX)
+    endif (CMAKE_ASM_NASM_COMPILER_LOADED AND AVX2_FOUND AND UNIX)
+endif (MCKL_ENABLE_LIBRARY)
 
 ##############################################################################
 # Example
