@@ -33,18 +33,21 @@ project(MCKLLibrary C)
 
 include_directories(${PROJECT_SOURCE_DIR}/asm)
 
-set(MCKL_LIB_SRC ${MCKL_LIB_SRC}
+set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
     ${PROJECT_SOURCE_DIR}/asm/philox_avx2_32.asm)
 
 if (AESNI_FOUND)
-    set(MCKL_LIB_SRC ${MCKL_LIB_SRC}
+    set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
         ${PROJECT_SOURCE_DIR}/asm/aes_aesni.asm)
 endif (AESNI_FOUND)
+
+set_source_files_properties(${MCKL_LIB_ASM} OBJECT_DEPENDS
+    ${PROJECT_SOURCE_DIR}/asm/common.asm)
 
 if (APPLE)
     add_compile_options(--prefix _)
 endif (APPLE)
 
-add_library(libmckl STATIC ${MCKL_LIB_SRC})
+add_library(libmckl STATIC ${MCKL_LIB_ASM})
 set_target_properties(libmckl PROPERTIES OUTPUT_NAME mckl)
 add_dependencies(lib libmckl)
