@@ -1,5 +1,5 @@
 ;;============================================================================
-;; MCKL/asm/lib/aes_aesni.asm
+;; MCKL/lib/asm/aes_aesni.asm
 ;;----------------------------------------------------------------------------
 ;; MCKL: Monte Carlo Kernel Library
 ;;----------------------------------------------------------------------------
@@ -34,7 +34,7 @@
 ; rdx r
 ; rcx ks.get().data()/weyl:key
 
-%macro aes_aesni_increment 0
+%macro mckl_aes_aesni_increment 0
     vpaddq xmm0, xmm8, [rel inc0]
     vpaddq xmm1, xmm8, [rel inc1]
     vpaddq xmm2, xmm8, [rel inc2]
@@ -46,9 +46,9 @@
     vpaddq xmm8, xmm8, [rel inc8]
 %endmacro
 
-%macro aes_aesni_store 1
+%macro mckl_aes_aesni_store 1
     cmp rax, 8
-    jl %{1}_aesni_storen
+    jl mckl_%{1}_aesni_storen
 
     vmovdqu [rdx + 0x00], xmm0
     vmovdqu [rdx + 0x10], xmm1
@@ -62,36 +62,36 @@
     add rdx, 0x80
 
     test rax, rax
-    jnz %{1}_aesni_generate
+    jnz mckl_%{1}_aesni_generate
 
-%{1}_aesni_storen:
+mckl_%{1}_aesni_storen:
     cmp rax, 1
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x00], xmm0
     cmp rax, 2
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x10], xmm1
     cmp rax, 3
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x20], xmm2
     cmp rax, 4
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x30], xmm3
     cmp rax, 5
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x40], xmm4
     cmp rax, 6
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x50], xmm5
     cmp rax, 7
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x60], xmm6
     cmp rax, 8
-    jl %{1}_aesni_ret
+    jl mckl_%{1}_aesni_ret
     vmovdqu [rdx + 0x70], xmm7
 %endmacro
 
-%macro aes_aesni_encfirst 1
+%macro mckl_aes_aesni_encfirst 1
     vpxor xmm0, %1
     vpxor xmm1, %1
     vpxor xmm2, %1
@@ -102,7 +102,7 @@
     vpxor xmm7, %1
 %endmacro
 
-%macro aes_aesni_enc 1
+%macro mckl_aes_aesni_enc 1
     vaesenc xmm0, %1
     vaesenc xmm1, %1
     vaesenc xmm2, %1
@@ -113,7 +113,7 @@
     vaesenc xmm7, %1
 %endmacro
 
-%macro aes_aesni_enclast 1
+%macro mckl_aes_aesni_enclast 1
     vaesenclast xmm0, %1
     vaesenclast xmm1, %1
     vaesenclast xmm2, %1
@@ -173,8 +173,8 @@ DQ 0
 
 section .text
 
-global aes128_aesni_kernel
-aes128_aesni_kernel:
+global mckl_aes128_aesni_kernel
+mckl_aes128_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -201,36 +201,36 @@ aes128_aesni_kernel:
     vmovdqu xmm0, [rcx + 0xA0]
     vmovdqa [rsp + 0x40], xmm0 ; round key 0xA
 
-aes128_aesni_generate:
-    aes_aesni_increment
+mckl_aes128_aesni_generate:
+    mckl_aes_aesni_increment
 
-    aes_aesni_encfirst xmm10
-    aes_aesni_enc xmm11
-    aes_aesni_enc xmm12
-    aes_aesni_enc xmm13
-    aes_aesni_enc xmm14
-    aes_aesni_enc xmm15
+    mckl_aes_aesni_encfirst xmm10
+    mckl_aes_aesni_enc xmm11
+    mckl_aes_aesni_enc xmm12
+    mckl_aes_aesni_enc xmm13
+    mckl_aes_aesni_enc xmm14
+    mckl_aes_aesni_enc xmm15
     vmovdqa xmm9, [rsp + 0x00]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x10]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x20]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x30]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x40]
-    aes_aesni_enclast xmm9
+    mckl_aes_aesni_enclast xmm9
 
-    aes_aesni_store aes128
+    mckl_aes_aesni_store aes128
 
-aes128_aesni_ret:
+mckl_aes128_aesni_ret:
     vzeroupper
     mov rsp, rbp
     pop rbp
     ret
 
-global aes192_aesni_kernel
-aes192_aesni_kernel:
+global mckl_aes192_aesni_kernel
+mckl_aes192_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -261,40 +261,40 @@ aes192_aesni_kernel:
     vmovdqu xmm0, [rcx + 0xC0]
     vmovdqa [rsp + 0x60], xmm0 ; round key 0xC
 
-aes192_aesni_generate:
-    aes_aesni_increment
+mckl_aes192_aesni_generate:
+    mckl_aes_aesni_increment
 
-    aes_aesni_encfirst xmm10
-    aes_aesni_enc xmm11
-    aes_aesni_enc xmm12
-    aes_aesni_enc xmm13
-    aes_aesni_enc xmm14
-    aes_aesni_enc xmm15
+    mckl_aes_aesni_encfirst xmm10
+    mckl_aes_aesni_enc xmm11
+    mckl_aes_aesni_enc xmm12
+    mckl_aes_aesni_enc xmm13
+    mckl_aes_aesni_enc xmm14
+    mckl_aes_aesni_enc xmm15
     vmovdqa xmm9, [rsp + 0x00]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x10]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x20]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x30]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x40]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x50]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x60]
-    aes_aesni_enclast xmm9
+    mckl_aes_aesni_enclast xmm9
 
-    aes_aesni_store aes192
+    mckl_aes_aesni_store aes192
 
-aes192_aesni_ret:
+mckl_aes192_aesni_ret:
     vzeroupper
     mov rsp, rbp
     pop rbp
     ret
 
-global aes256_aesni_kernel
-aes256_aesni_kernel:
+global mckl_aes256_aesni_kernel
+mckl_aes256_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -329,44 +329,44 @@ aes256_aesni_kernel:
     vmovdqu xmm0, [rcx + 0xE0]
     vmovdqa [rsp + 0x80], xmm0 ; round key 0xE
 
-aes256_aesni_generate:
-    aes_aesni_increment
+mckl_aes256_aesni_generate:
+    mckl_aes_aesni_increment
 
-    aes_aesni_encfirst xmm10
-    aes_aesni_enc xmm11
-    aes_aesni_enc xmm12
-    aes_aesni_enc xmm13
-    aes_aesni_enc xmm14
-    aes_aesni_enc xmm15
+    mckl_aes_aesni_encfirst xmm10
+    mckl_aes_aesni_enc xmm11
+    mckl_aes_aesni_enc xmm12
+    mckl_aes_aesni_enc xmm13
+    mckl_aes_aesni_enc xmm14
+    mckl_aes_aesni_enc xmm15
     vmovdqa xmm9, [rsp + 0x00]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x10]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x20]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x30]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x40]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x50]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x60]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x70]
-    aes_aesni_enc xmm9
+    mckl_aes_aesni_enc xmm9
     vmovdqa xmm9, [rsp + 0x80]
-    aes_aesni_enclast xmm9
+    mckl_aes_aesni_enclast xmm9
 
-    aes_aesni_store aes256
+    mckl_aes_aesni_store aes256
 
-aes256_aesni_ret:
+mckl_aes256_aesni_ret:
     vzeroupper
     mov rsp, rbp
     pop rbp
     ret
 
-global ars_aesni_kernel
-ars_aesni_kernel:
+global mckl_ars_aesni_kernel
+mckl_ars_aesni_kernel:
     push rbp
     mov rbp, rsp
     mov rax, rsi
@@ -382,19 +382,19 @@ ars_aesni_kernel:
     vpaddq xmm14, xmm13, xmm9 ; round key 4
     vpaddq xmm15, xmm14, xmm9 ; round key 5
 
-ars_aesni_generate:
-    aes_aesni_increment
+mckl_ars_aesni_generate:
+    mckl_aes_aesni_increment
 
-    aes_aesni_encfirst xmm10
-    aes_aesni_enc xmm11
-    aes_aesni_enc xmm12
-    aes_aesni_enc xmm13
-    aes_aesni_enc xmm14
-    aes_aesni_enclast xmm15
+    mckl_aes_aesni_encfirst xmm10
+    mckl_aes_aesni_enc xmm11
+    mckl_aes_aesni_enc xmm12
+    mckl_aes_aesni_enc xmm13
+    mckl_aes_aesni_enc xmm14
+    mckl_aes_aesni_enclast xmm15
 
-    aes_aesni_store ars
+    mckl_aes_aesni_store ars
 
-ars_aesni_ret:
+mckl_ars_aesni_ret:
     vzeroupper
     mov rsp, rbp
     pop rbp

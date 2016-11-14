@@ -46,7 +46,7 @@
 
 extern "C" {
 
-void aes128_aesni_kernel(const void *, std::size_t, void *, const void *);
+void mckl_aes128_aesni_kernel(const void *, std::size_t, void *, const void *);
 
 } // extern "C"
 
@@ -172,8 +172,8 @@ class AES128GeneratorAESNIImpl
         ResultType *r, const KeySeqType &ks)
     {
 #if MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
-        aes128_aesni_kernel(ctr.data(), n, r, ks.get().data());
-#else // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
+        mckl_aes128_aesni_kernel(ctr.data(), n, r, ks.get().data());
+#else  // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
         constexpr std::size_t S = 8;
         constexpr std::size_t N = S;
 
