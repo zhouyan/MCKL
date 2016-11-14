@@ -41,7 +41,7 @@ global mckl_aes192_aesni_kernel
 global mckl_aes256_aesni_kernel
 global mckl_ars_aesni_kernel
 
-%macro mckl_aes_aesni_encfirst 1
+%macro aes_aesni_encfirst 1
     vpxor xmm0, xmm0, %1
     vpxor xmm1, xmm1, %1
     vpxor xmm2, xmm2, %1
@@ -52,7 +52,7 @@ global mckl_ars_aesni_kernel
     vpxor xmm7, xmm7, %1
 %endmacro
 
-%macro mckl_aes_aesni_enc 1
+%macro aes_aesni_enc 1
     vaesenc xmm0, xmm0, %1
     vaesenc xmm1, xmm1, %1
     vaesenc xmm2, xmm2, %1
@@ -63,7 +63,7 @@ global mckl_ars_aesni_kernel
     vaesenc xmm7, xmm7, %1
 %endmacro
 
-%macro mckl_aes_aesni_enclast 1
+%macro aes_aesni_enclast 1
     vaesenclast xmm0, xmm0, %1
     vaesenclast xmm1, xmm1, %1
     vaesenclast xmm2, xmm2, %1
@@ -74,7 +74,7 @@ global mckl_ars_aesni_kernel
     vaesenclast xmm7, xmm7, %1
 %endmacro
 
-%macro mckl_aes_aesni_store 1
+%macro aes_aesni_store 1
     cmp rsi, 8
     jl .storen
 
@@ -145,23 +145,23 @@ mckl_aes128_aesni_kernel:
     align 16
     .generate:
         increment_xmm_64_2
-        mckl_aes_aesni_encfirst xmm10
-        mckl_aes_aesni_enc xmm11
-        mckl_aes_aesni_enc xmm12
-        mckl_aes_aesni_enc xmm13
-        mckl_aes_aesni_enc xmm14
-        mckl_aes_aesni_enc xmm15
+        aes_aesni_encfirst xmm10
+        aes_aesni_enc xmm11
+        aes_aesni_enc xmm12
+        aes_aesni_enc xmm13
+        aes_aesni_enc xmm14
+        aes_aesni_enc xmm15
         vmovdqa xmm9, [rsp + 0x00]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x10]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x20]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x30]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x40]
-        mckl_aes_aesni_enclast xmm9
-        mckl_aes_aesni_store aes128
+        aes_aesni_enclast xmm9
+        aes_aesni_store aes128
 
     epilogue
 ; mckl_aes128_aesni_kernel:
@@ -197,27 +197,27 @@ mckl_aes192_aesni_kernel:
     align 16
     .generate:
         increment_xmm_64_2
-        mckl_aes_aesni_encfirst xmm10
-        mckl_aes_aesni_enc xmm11
-        mckl_aes_aesni_enc xmm12
-        mckl_aes_aesni_enc xmm13
-        mckl_aes_aesni_enc xmm14
-        mckl_aes_aesni_enc xmm15
+        aes_aesni_encfirst xmm10
+        aes_aesni_enc xmm11
+        aes_aesni_enc xmm12
+        aes_aesni_enc xmm13
+        aes_aesni_enc xmm14
+        aes_aesni_enc xmm15
         vmovdqa xmm9, [rsp + 0x00]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x10]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x20]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x30]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x40]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x50]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x60]
-        mckl_aes_aesni_enclast xmm9
-        mckl_aes_aesni_store aes192
+        aes_aesni_enclast xmm9
+        aes_aesni_store aes192
 
     epilogue
 ; mckl_aes192_aesni_kernel:
@@ -257,31 +257,31 @@ mckl_aes256_aesni_kernel:
     align 16
     .generate:
         increment_xmm_64_2
-        mckl_aes_aesni_encfirst xmm10
-        mckl_aes_aesni_enc xmm11
-        mckl_aes_aesni_enc xmm12
-        mckl_aes_aesni_enc xmm13
-        mckl_aes_aesni_enc xmm14
-        mckl_aes_aesni_enc xmm15
+        aes_aesni_encfirst xmm10
+        aes_aesni_enc xmm11
+        aes_aesni_enc xmm12
+        aes_aesni_enc xmm13
+        aes_aesni_enc xmm14
+        aes_aesni_enc xmm15
         vmovdqa xmm9, [rsp + 0x00]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x10]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x20]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x30]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x40]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x50]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x60]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x70]
-        mckl_aes_aesni_enc xmm9
+        aes_aesni_enc xmm9
         vmovdqa xmm9, [rsp + 0x80]
-        mckl_aes_aesni_enclast xmm9
-        mckl_aes_aesni_store aes256
+        aes_aesni_enclast xmm9
+        aes_aesni_store aes256
 
     epilogue
 ; mckl_aes256_aesni_kernel:
@@ -304,13 +304,13 @@ mckl_ars_aesni_kernel:
     align 16
     .generate:
         increment_xmm_64_2
-        mckl_aes_aesni_encfirst xmm10
-        mckl_aes_aesni_enc xmm11
-        mckl_aes_aesni_enc xmm12
-        mckl_aes_aesni_enc xmm13
-        mckl_aes_aesni_enc xmm14
-        mckl_aes_aesni_enclast xmm15
-        mckl_aes_aesni_store ars
+        aes_aesni_encfirst xmm10
+        aes_aesni_enc xmm11
+        aes_aesni_enc xmm12
+        aes_aesni_enc xmm13
+        aes_aesni_enc xmm14
+        aes_aesni_enclast xmm15
+        aes_aesni_store ars
 
     epilogue
 ; mckl_ars_aesni_kernel:
