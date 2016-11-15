@@ -34,8 +34,12 @@
 %macro prologue 2
     push rbp
     mov rbp, rsp
-    and rsp, ((0xFFFFFFFFFFFFFFFF >> %1) << %1)
-    sub rsp, %2
+    %if %1 > 4
+        and rsp, ((0xFFFFFFFFFFFFFFFF >> %1) << %1)
+    %endif
+    %if %2 != 0
+        sub rsp, %2
+    %endif
 %endmacro
 
 %macro epilogue 0
