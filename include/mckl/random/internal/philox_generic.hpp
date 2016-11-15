@@ -45,7 +45,8 @@ namespace mckl
 namespace internal
 {
 
-template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
+    int = std::numeric_limits<T>::digits>
 class PhiloxGeneratorGenericImpl
 {
     public:
@@ -131,15 +132,27 @@ class PhiloxGeneratorGenericImpl
     }
 }; // class PhiloxGeneratorGenericImpl
 
-template <typename T, typename Constants>
-class PhiloxGeneratorGenericImpl<T, 2, 10, Constants>
+template <typename T, typename Constants, int D>
+class PhiloxGeneratorGenericImpl<T, 2, 10, Constants, D>
     : public Philox2xGeneratorGenericImpl<T, Constants>
 {
 }; // class PhiloxGeneratorGenericImpl
 
 template <typename T, typename Constants>
-class PhiloxGeneratorGenericImpl<T, 4, 10, Constants>
+class PhiloxGeneratorGenericImpl<T, 2, 10, Constants, 64>
+    : public Philox2x64GeneratorGenericImpl<T, Constants>
+{
+}; // class PhiloxGeneratorGenericImpl
+
+template <typename T, typename Constants, int D>
+class PhiloxGeneratorGenericImpl<T, 4, 10, Constants, D>
     : public Philox4xGeneratorGenericImpl<T, Constants>
+{
+}; // class PhiloxGeneratorGenericImpl
+
+template <typename T, typename Constants>
+class PhiloxGeneratorGenericImpl<T, 4, 10, Constants, 64>
+    : public Philox4x64GeneratorGenericImpl<T, Constants>
 {
 }; // class PhiloxGeneratorGenericImpl
 

@@ -47,7 +47,7 @@
 
 extern "C" {
 
-void mckl_philox4x32_avx2_kernel(void *, std::size_t, void *, void *);
+void mckl_philox4x32_avx2_kernel(void *, std::size_t, void *, const void *);
 
 } // extern "C"
 
@@ -115,7 +115,7 @@ class Philox4x32GeneratorAVX2Impl
         constexpr T w0 = Constants::weyl::value[0];
         constexpr T w1 = Constants::weyl::value[1];
 
-        T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0, std::get<0>(key), 0,
+        const T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0, std::get<0>(key), 0,
             std::get<1>(key)};
         mckl_philox4x32_avx2_kernel(ctr.data(), n, r, mwk);
 #else  // MCKL_USE_EXTERN_LIBRARY

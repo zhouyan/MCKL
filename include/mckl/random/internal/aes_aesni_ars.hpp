@@ -46,7 +46,7 @@
 
 extern "C" {
 
-void mckl_ars_aesni_kernel(const void *, std::size_t, void *, const void *);
+void mckl_ars_aesni_kernel(void *, std::size_t, void *, const void *);
 
 } // extern "C"
 
@@ -191,7 +191,7 @@ class ARSGeneratorAESNIImpl
 
         auto &&key = ks.key();
 
-        std::uint64_t wk[4] = {w0, w1,
+        const std::uint64_t wk[4] = {w0, w1,
             static_cast<std::uint64_t>(std::get<0>(key)) +
                 (static_cast<std::uint64_t>(std::get<1>(key)) << 32),
             static_cast<std::uint64_t>(std::get<2>(key)) +

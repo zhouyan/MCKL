@@ -175,16 +175,11 @@ mckl_philox2x32_avx2_kernel:
     align 16
     .generate:
         increment_ymm_64_1
-        philox_avx2_32_rbox 0, 0xB1
-        philox_avx2_32_rbox 1, 0xB1
-        philox_avx2_32_rbox 2, 0xB1
-        philox_avx2_32_rbox 3, 0xB1
-        philox_avx2_32_rbox 4, 0xB1
-        philox_avx2_32_rbox 5, 0xB1
-        philox_avx2_32_rbox 6, 0xB1
-        philox_avx2_32_rbox 7, 0xB1
-        philox_avx2_32_rbox 8, 0xB1
-        philox_avx2_32_rbox 9, 0xB1
+        %assign r 0
+        %rep 10
+            philox_avx2_32_rbox r, 0xB1
+            %assign r r + 1
+        %endrep
         philox_avx2_32_store 32
 
     align 16
@@ -225,15 +220,11 @@ mckl_philox4x32_avx2_kernel:
         vpshufd ymm5, ymm5, 0xC6
         vpshufd ymm6, ymm6, 0xC6
         vpshufd ymm7, ymm7, 0xC6
-        philox_avx2_32_rbox 0, 0x93
-        philox_avx2_32_rbox 1, 0x93
-        philox_avx2_32_rbox 2, 0x93
-        philox_avx2_32_rbox 3, 0x93
-        philox_avx2_32_rbox 4, 0x93
-        philox_avx2_32_rbox 5, 0x93
-        philox_avx2_32_rbox 6, 0x93
-        philox_avx2_32_rbox 7, 0x93
-        philox_avx2_32_rbox 8, 0x93
+        %assign r 0
+        %rep 9
+            philox_avx2_32_rbox r, 0x93
+            %assign r r + 1
+        %endrep
         philox_avx2_32_rbox 9, 0xB1
         philox_avx2_32_store 16
 

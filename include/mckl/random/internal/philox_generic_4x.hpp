@@ -78,6 +78,13 @@
     std::get<2>(buf.s) = s2;                                                  \
     std::get<3>(buf.s) = s3;
 
+extern "C" {
+
+void mckl_philox4x64_bmi2_kernel(void *, std::size_t, void *, const void *);
+
+} // extern "C"
+
+
 namespace mckl
 {
 
@@ -138,6 +145,80 @@ class Philox4xGeneratorGenericImpl
             eval(ctr, r, key);
     }
 }; // class Philox4xGeneratorGenericImpl
+
+template <typename T, typename Constants>
+class Philox4x64GeneratorGenericImpl
+{
+    static_assert(std::numeric_limits<T>::digits == 64,
+        "**Philox4x64GeneratorGenericImpl** used with T other than a 64-bit "
+        "unsigned integers");
+
+    static constexpr std::size_t K = 4;
+    static constexpr std::size_t Rounds = 10;
+
+    public:
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K / 2> &key)
+    {
+        alignas(32) union {
+            std::array<T, K> s;
+            std::array<char, sizeof(T) * K> r;
+        } buf;
+
+        std::memcpy(buf.s.data(), plain, sizeof(T) * K);
+        union_le<char>(buf.s);
+        MCKL_RANDOM_INTERNAL_PHILOX_GENERIC_4X_ROUND_10
+        union_le<T>(buf.r);
+        std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
+    }
+
+    template <typename ResultType>
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K / 2> &key)
+    {
+        alignas(32) union {
+            std::array<T, K> s;
+            Counter<T, K> c;
+            std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
+        } buf;
+
+        MCKL_INLINE_CALL increment(ctr);
+        buf.c = ctr;
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<typename Counter<T, K>::value_type>(buf.s);
+#endif
+        MCKL_RANDOM_INTERNAL_PHILOX_GENERIC_4X_ROUND_10
+#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
+        union_le<T>(buf.r);
+#endif
+        std::memcpy(r, buf.r.data(), sizeof(T) * K);
+    }
+
+#if MCKL_USE_BMI2
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K / 2> &key)
+    {
+        constexpr T w0 = Constants::weyl::value[0];
+        constexpr T w1 = Constants::weyl::value[1];
+        constexpr T m0 = Constants::multiplier::value[0];
+        constexpr T m1 = Constants::multiplier::value[1];
+
+        const T mwk[6] = {m0, m1, w0, w1, std::get<0>(key), std::get<1>(key)};
+        mckl_philox4x64_bmi2_kernel(ctr.data(), n, r, mwk);
+    }
+#else  // MCKL_USE_BMI2
+    template <typename ResultType>
+    MCKL_NOINLINE static void eval(Counter<T, K> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K / 2> &key)
+    {
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
+
+        for (std::size_t i = 0; i != n; ++i, r += R)
+            eval(ctr, r, key);
+    }
+#endif // MCKL_USE_BMI2
+};     // class Philox4x64GeneratorGenericImpl
 
 } // namespace mckl::internal
 

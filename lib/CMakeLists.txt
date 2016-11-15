@@ -41,6 +41,11 @@ if (AESNI_FOUND)
         ${PROJECT_SOURCE_DIR}/asm/aes_aesni.asm)
 endif (AESNI_FOUND)
 
+if (BMI2_FOUND)
+    set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
+        ${PROJECT_SOURCE_DIR}/asm/philox_bmi2_64.asm)
+endif (BMI2_FOUND)
+
 set_source_files_properties(${MCKL_LIB_ASM} OBJECT_DEPENDS
     ${PROJECT_SOURCE_DIR}/asm/common.asm)
 

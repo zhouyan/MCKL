@@ -46,7 +46,7 @@
 
 extern "C" {
 
-void mckl_aes128_aesni_kernel(const void *, std::size_t, void *, const void *);
+void mckl_aes128_aesni_kernel(void *, std::size_t, void *, const void *);
 
 } // extern "C"
 
