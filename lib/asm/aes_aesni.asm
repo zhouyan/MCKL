@@ -41,6 +41,25 @@ global mckl_aes192_aesni_kernel
 global mckl_aes256_aesni_kernel
 global mckl_ars_aesni_kernel
 
+%macro aes_aesni_prologue 1
+    prologue 4, (%1 + 4) * 0x10
+%endmacro
+
+%macro aes_aesni_round_key 1
+    vmovdqu xmm10, [rcx + 0x00]
+    vmovdqu xmm11, [rcx + 0x10]
+    vmovdqu xmm12, [rcx + 0x20]
+    vmovdqu xmm13, [rcx + 0x30]
+    vmovdqu xmm14, [rcx + 0x40]
+    vmovdqu xmm15, [rcx + 0x50]
+    %assign r 0
+    %rep %1 - 5
+        vmovdqu xmm0, [rcx + (r + 6) * 0x10]
+        vmovdqa [rsp + r * 0x10], xmm0
+    %assign r r + 1
+    %endrep
+%endmacro
+
 %macro aes_aesni_encfirst 1
     vpxor xmm0, xmm0, %1
     vpxor xmm1, xmm1, %1
@@ -74,244 +93,106 @@ global mckl_ars_aesni_kernel
     vaesenclast xmm7, xmm7, %1
 %endmacro
 
-%macro aes_aesni_store 1
-    cmp rsi, 8
-    jl .storen
+%macro aes_aesni_generate 1
+    vmovdqu xmm8, [rdi]
+    add [rdi], rsi
 
-    vmovdqu [rdx + 0x00], xmm0
-    vmovdqu [rdx + 0x10], xmm1
-    vmovdqu [rdx + 0x20], xmm2
-    vmovdqu [rdx + 0x30], xmm3
-    vmovdqu [rdx + 0x40], xmm4
-    vmovdqu [rdx + 0x50], xmm5
-    vmovdqu [rdx + 0x60], xmm6
-    vmovdqu [rdx + 0x70], xmm7
-    sub rsi, 8
-    add rdx, 0x80
+    align 16
+    .generate:
+        increment_xmm_64_2
+        aes_aesni_encfirst xmm10
+        aes_aesni_enc xmm11
+        aes_aesni_enc xmm12
+        aes_aesni_enc xmm13
+        aes_aesni_enc xmm14
+        %if %1 == 5
+            aes_aesni_enclast xmm15
+        %else
+            aes_aesni_enc xmm15
+            %assign r 0
+            %rep %1 - 6
+                vmovdqa xmm9, [rsp + r * 0x10]
+                aes_aesni_enc xmm9
+                %assign r r + 1
+            %endrep
+            vmovdqa xmm9, [rsp + (%1 - 6) * 0x10]
+            aes_aesni_enclast xmm9
+        %endif
 
-    test rsi, rsi
-    jnz .generate
+        cmp rsi, 8
+        jl .storen
 
-    .storen:
-        cmp rsi, 1
-        jl .return
         vmovdqu [rdx + 0x00], xmm0
-        cmp rsi, 2
-        jl .return
         vmovdqu [rdx + 0x10], xmm1
-        cmp rsi, 3
-        jl .return
         vmovdqu [rdx + 0x20], xmm2
-        cmp rsi, 4
-        jl .return
         vmovdqu [rdx + 0x30], xmm3
-        cmp rsi, 5
-        jl .return
         vmovdqu [rdx + 0x40], xmm4
-        cmp rsi, 6
-        jl .return
         vmovdqu [rdx + 0x50], xmm5
-        cmp rsi, 7
-        jl .return
         vmovdqu [rdx + 0x60], xmm6
+        vmovdqu [rdx + 0x70], xmm7
+        sub rsi, 8
+        add rdx, 0x80
+
+        test rsi, rsi
+        jnz .generate
+
+        .storen:
+            cmp rsi, 1
+            jl .return
+            vmovdqu [rdx + 0x00], xmm0
+            cmp rsi, 2
+            jl .return
+            vmovdqu [rdx + 0x10], xmm1
+            cmp rsi, 3
+            jl .return
+            vmovdqu [rdx + 0x20], xmm2
+            cmp rsi, 4
+            jl .return
+            vmovdqu [rdx + 0x30], xmm3
+            cmp rsi, 5
+            jl .return
+            vmovdqu [rdx + 0x40], xmm4
+            cmp rsi, 6
+            jl .return
+            vmovdqu [rdx + 0x50], xmm5
+            cmp rsi, 7
+            jl .return
+            vmovdqu [rdx + 0x60], xmm6
 %endmacro
 
 section .text
 
 mckl_aes128_aesni_kernel:
-    prologue 4, 0x50
-
-    vmovdqu xmm8, [rdi]
-    add [rdi], rsi
-
-    vmovdqu xmm10, [rcx + 0x00] ; round key 0x0
-    vmovdqu xmm11, [rcx + 0x10] ; round key 0x1
-    vmovdqu xmm12, [rcx + 0x20] ; round key 0x2
-    vmovdqu xmm13, [rcx + 0x30] ; round key 0x3
-    vmovdqu xmm14, [rcx + 0x40] ; round key 0x4
-    vmovdqu xmm15, [rcx + 0x50] ; round key 0x5
-
-    vmovdqu xmm0, [rcx + 0x60]
-    vmovdqa [rsp + 0x00], xmm0 ; round key 0x6
-    vmovdqu xmm0, [rcx + 0x70]
-    vmovdqa [rsp + 0x10], xmm0 ; round key 0x7
-    vmovdqu xmm0, [rcx + 0x80]
-    vmovdqa [rsp + 0x20], xmm0 ; round key 0x8
-    vmovdqu xmm0, [rcx + 0x90]
-    vmovdqa [rsp + 0x30], xmm0 ; round key 0x9
-    vmovdqu xmm0, [rcx + 0xA0]
-    vmovdqa [rsp + 0x40], xmm0 ; round key 0xA
-
-    align 16
-    .generate:
-        increment_xmm_64_2
-        aes_aesni_encfirst xmm10
-        aes_aesni_enc xmm11
-        aes_aesni_enc xmm12
-        aes_aesni_enc xmm13
-        aes_aesni_enc xmm14
-        aes_aesni_enc xmm15
-        vmovdqa xmm9, [rsp + 0x00]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x10]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x20]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x30]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x40]
-        aes_aesni_enclast xmm9
-        aes_aesni_store aes128
-
+    aes_aesni_prologue 10
+    aes_aesni_round_key 10
+    aes_aesni_generate 10
     epilogue
 ; mckl_aes128_aesni_kernel:
 
 mckl_aes192_aesni_kernel:
-    prologue 4, 0x70
-
-    vmovdqu xmm8, [rdi]
-    add [rdi], rsi
-
-    vmovdqu xmm10, [rcx + 0x00] ; round key 0x0
-    vmovdqu xmm11, [rcx + 0x10] ; round key 0x1
-    vmovdqu xmm12, [rcx + 0x20] ; round key 0x2
-    vmovdqu xmm13, [rcx + 0x30] ; round key 0x3
-    vmovdqu xmm14, [rcx + 0x40] ; round key 0x4
-    vmovdqu xmm15, [rcx + 0x50] ; round key 0x5
-
-    vmovdqu xmm0, [rcx + 0x60]
-    vmovdqa [rsp + 0x00], xmm0 ; round key 0x6
-    vmovdqu xmm0, [rcx + 0x70]
-    vmovdqa [rsp + 0x10], xmm0 ; round key 0x7
-    vmovdqu xmm0, [rcx + 0x80]
-    vmovdqa [rsp + 0x20], xmm0 ; round key 0x8
-    vmovdqu xmm0, [rcx + 0x90]
-    vmovdqa [rsp + 0x30], xmm0 ; round key 0x9
-    vmovdqu xmm0, [rcx + 0xA0]
-    vmovdqa [rsp + 0x40], xmm0 ; round key 0xA
-    vmovdqu xmm0, [rcx + 0xB0]
-    vmovdqa [rsp + 0x50], xmm0 ; round key 0xB
-    vmovdqu xmm0, [rcx + 0xC0]
-    vmovdqa [rsp + 0x60], xmm0 ; round key 0xC
-
-    align 16
-    .generate:
-        increment_xmm_64_2
-        aes_aesni_encfirst xmm10
-        aes_aesni_enc xmm11
-        aes_aesni_enc xmm12
-        aes_aesni_enc xmm13
-        aes_aesni_enc xmm14
-        aes_aesni_enc xmm15
-        vmovdqa xmm9, [rsp + 0x00]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x10]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x20]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x30]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x40]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x50]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x60]
-        aes_aesni_enclast xmm9
-        aes_aesni_store aes192
-
+    aes_aesni_prologue 12
+    aes_aesni_round_key 12
+    aes_aesni_generate 12
     epilogue
 ; mckl_aes192_aesni_kernel:
 
 mckl_aes256_aesni_kernel:
-    prologue 4, 0x90
-
-    vmovdqu xmm8, [rdi]
-    add [rdi], rsi
-
-    vmovdqu xmm10, [rcx + 0x00] ; round key 0x0
-    vmovdqu xmm11, [rcx + 0x10] ; round key 0x1
-    vmovdqu xmm12, [rcx + 0x20] ; round key 0x2
-    vmovdqu xmm13, [rcx + 0x30] ; round key 0x3
-    vmovdqu xmm14, [rcx + 0x40] ; round key 0x4
-    vmovdqu xmm15, [rcx + 0x50] ; round key 0x5
-
-    vmovdqu xmm0, [rcx + 0x60]
-    vmovdqa [rsp + 0x00], xmm0 ; round key 0x6
-    vmovdqu xmm0, [rcx + 0x70]
-    vmovdqa [rsp + 0x10], xmm0 ; round key 0x7
-    vmovdqu xmm0, [rcx + 0x80]
-    vmovdqa [rsp + 0x20], xmm0 ; round key 0x8
-    vmovdqu xmm0, [rcx + 0x90]
-    vmovdqa [rsp + 0x30], xmm0 ; round key 0x9
-    vmovdqu xmm0, [rcx + 0xA0]
-    vmovdqa [rsp + 0x40], xmm0 ; round key 0xA
-    vmovdqu xmm0, [rcx + 0xB0]
-    vmovdqa [rsp + 0x50], xmm0 ; round key 0xB
-    vmovdqu xmm0, [rcx + 0xC0]
-    vmovdqa [rsp + 0x60], xmm0 ; round key 0xC
-    vmovdqu xmm0, [rcx + 0xD0]
-    vmovdqa [rsp + 0x70], xmm0 ; round key 0xD
-    vmovdqu xmm0, [rcx + 0xE0]
-    vmovdqa [rsp + 0x80], xmm0 ; round key 0xE
-
-    align 16
-    .generate:
-        increment_xmm_64_2
-        aes_aesni_encfirst xmm10
-        aes_aesni_enc xmm11
-        aes_aesni_enc xmm12
-        aes_aesni_enc xmm13
-        aes_aesni_enc xmm14
-        aes_aesni_enc xmm15
-        vmovdqa xmm9, [rsp + 0x00]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x10]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x20]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x30]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x40]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x50]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x60]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x70]
-        aes_aesni_enc xmm9
-        vmovdqa xmm9, [rsp + 0x80]
-        aes_aesni_enclast xmm9
-        aes_aesni_store aes256
-
+    aes_aesni_prologue 14
+    aes_aesni_round_key 14
+    aes_aesni_generate 14
     epilogue
 ; mckl_aes256_aesni_kernel:
 
 mckl_ars_aesni_kernel:
-    prologue 4, 0x00
-
-    vmovdqu xmm8, [rdi]
-    add [rdi], rsi
-
-    vmovdqu xmm9,  [rcx + 0x00] ; wel constant
-    vmovdqu xmm10, [rcx + 0x10] ; round key 0
-
-    vpaddq xmm11, xmm10, xmm9 ; round key 1
-    vpaddq xmm12, xmm11, xmm9 ; round key 2
-    vpaddq xmm13, xmm12, xmm9 ; round key 3
-    vpaddq xmm14, xmm13, xmm9 ; round key 4
-    vpaddq xmm15, xmm14, xmm9 ; round key 5
-
-    align 16
-    .generate:
-        increment_xmm_64_2
-        aes_aesni_encfirst xmm10
-        aes_aesni_enc xmm11
-        aes_aesni_enc xmm12
-        aes_aesni_enc xmm13
-        aes_aesni_enc xmm14
-        aes_aesni_enclast xmm15
-        aes_aesni_store ars
-
+    aes_aesni_prologue 5
+    vmovdqu xmm9,  [rcx + 0x00]
+    vmovdqu xmm10, [rcx + 0x10]
+    vpaddq  xmm11, xmm10, xmm9
+    vpaddq  xmm12, xmm11, xmm9
+    vpaddq  xmm13, xmm12, xmm9
+    vpaddq  xmm14, xmm13, xmm9
+    vpaddq  xmm15, xmm14, xmm9
+    aes_aesni_generate 5
     epilogue
 ; mckl_ars_aesni_kernel:
 

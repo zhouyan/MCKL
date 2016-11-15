@@ -44,30 +44,30 @@
 global mckl_philox2x32_avx2_kernel
 global mckl_philox4x32_avx2_kernel
 
-%macro philox_avx2_32_rk 0
-    vmovdqa [rsp + 0x040], ymm0 ; round key 0
+%macro philox_avx2_32_round_key 0
+    vmovdqa [rsp + 0x000], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x060], ymm0 ; round key 1
+    vmovdqa [rsp + 0x020], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x080], ymm0 ; round key 2
+    vmovdqa [rsp + 0x040], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x0A0], ymm0 ; round key 3
+    vmovdqa [rsp + 0x060], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x0C0], ymm0 ; round key 4
+    vmovdqa [rsp + 0x080], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x0E0], ymm0 ; round key 5
+    vmovdqa [rsp + 0x0A0], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x100], ymm0 ; round key 6
+    vmovdqa [rsp + 0x0C0], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x120], ymm0 ; round key 7
+    vmovdqa [rsp + 0x0E0], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x140], ymm0 ; round key 8
+    vmovdqa [rsp + 0x100], ymm0
     vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x160], ymm0 ; round key 9
+    vmovdqa [rsp + 0x120], ymm0
 %endmacro
 
 %macro philox_avx2_32_rbox 2
-    vmovdqa ymm15, [rsp + 0x40 + %1 * 0x20]
+    vmovdqa ymm15, [rsp + %1 * 0x20]
     vpmuludq ymm10, ymm0, ymm9
     vpmuludq ymm11, ymm1, ymm9
     vpmuludq ymm12, ymm2, ymm9
@@ -159,15 +159,16 @@ DD 0xFFFFFFFF
 section .text
 
 mckl_philox2x32_avx2_kernel:
-    prologue 5, 0x180
+    prologue 5, 0x140
+
+    vpbroadcastq ymm1, [rcx + 0x08]
+    vpbroadcastq ymm0, [rcx + 0x10]
+    philox_avx2_32_round_key
 
     vpbroadcastq ymm8, [rdi]
     add [rdi], rsi
 
     vpbroadcastq ymm9, [rcx]
-    vpbroadcastq ymm1, [rcx + 0x08]
-    vpbroadcastq ymm0, [rcx + 0x10]
-    philox_avx2_32_rk
 
     vmovdqa ymm14, [rel philox_avx2_32_mask]
 
@@ -200,15 +201,16 @@ mckl_philox2x32_avx2_kernel:
 ; mckl_philox2x32_avx2_kernel:
 
 mckl_philox4x32_avx2_kernel:
-    prologue 5, 0x180
+    prologue 5, 0x140
+
+    vbroadcasti128 ymm1, [rcx + 0x10]
+    vbroadcasti128 ymm0, [rcx + 0x20]
+    philox_avx2_32_round_key
 
     vbroadcasti128 ymm8, [rdi]
     add [rdi], rsi
 
     vbroadcasti128 ymm9, [rcx]
-    vbroadcasti128 ymm1, [rcx + 0x10]
-    vbroadcasti128 ymm0, [rcx + 0x20]
-    philox_avx2_32_rk
 
     vmovdqa ymm14, [rel philox_avx2_32_mask]
 
