@@ -44,6 +44,7 @@
 
 %macro epilogue 0
     .return:
+        vzeroupper
         mov rsp, rbp
         pop rbp
         ret
