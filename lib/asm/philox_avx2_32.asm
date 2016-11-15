@@ -44,26 +44,123 @@
 global mckl_philox2x32_avx2_kernel
 global mckl_philox4x32_avx2_kernel
 
-%macro philox_avx2_32_round_key 0
-    vmovdqa [rsp + 0x000], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x020], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x040], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x060], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x080], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x0A0], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x0C0], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x0E0], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x100], ymm0
-    vpaddd ymm0, ymm0, ymm1
-    vmovdqa [rsp + 0x120], ymm0
+%macro philox_avx2_32_prologue 1
+    prologue 5, 0x20 * (10 + 9)
+%endmacro
+
+%macro philox_avx2_32_increment_data 1
+    %if %1 == 0x08
+        increment_ymm_64_1_data 0x20 * 10
+    %elif %1 == 0x10
+        increment_ymm_64_2_data 0x20 * 10
+    %else
+        %error
+    %endif
+%endmacro
+
+%macro philox_avx2_32_round_key 1
+    %if %1 == 0x08
+        vpbroadcastq ymm0, [rcx + 0x08]
+        vpbroadcastq ymm1, [rcx + 0x10]
+    %elif %1 == 0x10
+        vbroadcasti128 ymm0, [rcx + 0x10]
+        vbroadcasti128 ymm1, [rcx + 0x20]
+    %else
+        %error
+    %endif
+    vmovdqa [rsp], ymm1
+    %assign r 1
+    %rep 9
+        vpaddq ymm1, ymm1, ymm0
+        vmovdqa [rsp + r * 0x20], ymm1
+        %assign r r + 1
+    %endrep
+%endmacro
+
+%macro philox_avx2_32_generate 4
+    %if %1 == 0x08
+        vpbroadcastq ymm8, [rdi]
+        vpbroadcastq ymm9, [rcx]
+    %elif %1 == 0x10
+        vbroadcasti128 ymm8, [rdi]
+        vbroadcasti128 ymm9, [rcx]
+    %else
+        %error
+    %endif
+    add [rdi], rsi
+
+    vmovdqa ymm14, [rel philox_avx2_32_mask]
+
+    align 16
+    .generate:
+        %if %1 == 0x08
+            increment_ymm_64_1 0x20 * 10
+        %elif %1 == 0x10
+            increment_ymm_64_2 0x20 * 10
+        %else
+            %error
+        %endif
+        %if %2 != 0xE3
+            vpshufd ymm0, ymm0, 0xC6
+            vpshufd ymm1, ymm1, 0xC6
+            vpshufd ymm2, ymm2, 0xC6
+            vpshufd ymm3, ymm3, 0xC6
+            vpshufd ymm4, ymm4, 0xC6
+            vpshufd ymm5, ymm5, 0xC6
+            vpshufd ymm6, ymm6, 0xC6
+            vpshufd ymm7, ymm7, 0xC6
+        %endif
+        %assign r 0
+        %rep 9
+            philox_avx2_32_rbox r, %3
+            %assign r r + 1
+        %endrep
+        philox_avx2_32_rbox 9, %4
+
+        cmp rsi, 0x100 / %1
+        jl .storen
+
+        vmovdqu [rdx + 0x00], ymm0
+        vmovdqu [rdx + 0x20], ymm1
+        vmovdqu [rdx + 0x40], ymm2
+        vmovdqu [rdx + 0x60], ymm3
+        vmovdqu [rdx + 0x80], ymm4
+        vmovdqu [rdx + 0xA0], ymm5
+        vmovdqu [rdx + 0xC0], ymm6
+        vmovdqu [rdx + 0xE0], ymm7
+        sub rsi, 0x100 / %1
+        add rdx, 0x100
+
+        test rsi, rsi
+        jnz .generate
+
+        .storen:
+            test rsi, rsi,
+            jz .return
+            vmovdqa [rsp + 0x00], ymm0
+            vmovdqa [rsp + 0x20], ymm1
+            vmovdqa [rsp + 0x40], ymm2
+            vmovdqa [rsp + 0x60], ymm3
+            vmovdqa [rsp + 0x80], ymm4
+            vmovdqa [rsp + 0xA0], ymm5
+            vmovdqa [rsp + 0xC0], ymm6
+            vmovdqa [rsp + 0xE0], ymm7
+
+        .store1:
+            %if %1 == 0x08
+                mov rax, [rsp]
+                mov [rdx], rax
+            %elif %1 == 0x10
+                vmovdqa xmm0, [rsp]
+                vmovdqu [rdx], xmm0
+            %else
+                %error
+            %endif
+            sub rsi, 1
+            add rsp, %1
+            add rdx, %1
+            test rsi, rsi,
+            jnz .store1
 %endmacro
 
 %macro philox_avx2_32_rbox 2
@@ -112,37 +209,6 @@ global mckl_philox4x32_avx2_kernel
     vpshufd ymm7, ymm7, %2
 %endmacro
 
-%macro philox_avx2_32_store 1
-    cmp rsi, %1
-    jl .storen
-
-    vmovdqu [rdx + 0x00], ymm0
-    vmovdqu [rdx + 0x20], ymm1
-    vmovdqu [rdx + 0x40], ymm2
-    vmovdqu [rdx + 0x60], ymm3
-    vmovdqu [rdx + 0x80], ymm4
-    vmovdqu [rdx + 0xA0], ymm5
-    vmovdqu [rdx + 0xC0], ymm6
-    vmovdqu [rdx + 0xE0], ymm7
-    sub rsi, %1
-    add rdx, 0x100
-
-    test rsi, rsi
-    jnz .generate
-
-.storen:
-    test rsi, rsi,
-    jz .return
-    vmovdqa [rsp + 0x00], ymm0
-    vmovdqa [rsp + 0x20], ymm1
-    vmovdqa [rsp + 0x40], ymm2
-    vmovdqa [rsp + 0x60], ymm3
-    vmovdqa [rsp + 0x80], ymm4
-    vmovdqa [rsp + 0xA0], ymm5
-    vmovdqa [rsp + 0xC0], ymm6
-    vmovdqa [rsp + 0xE0], ymm7
-%endmacro
-
 section .data
 
 align 32
@@ -155,85 +221,18 @@ dq 0xFFFFFFFF00000000
 section .text
 
 mckl_philox2x32_avx2_kernel:
-    prologue 5, 0x140
-
-    vpbroadcastq ymm1, [rcx + 0x08]
-    vpbroadcastq ymm0, [rcx + 0x10]
-    philox_avx2_32_round_key
-
-    vpbroadcastq ymm8, [rdi]
-    add [rdi], rsi
-
-    vpbroadcastq ymm9, [rcx]
-
-    vmovdqa ymm14, [rel philox_avx2_32_mask]
-
-    align 16
-    .generate:
-        increment_ymm_64_1
-        %assign r 0
-        %rep 10
-            philox_avx2_32_rbox r, 0xB1
-            %assign r r + 1
-        %endrep
-        philox_avx2_32_store 32
-
-    align 16
-    .store1:
-        mov r8, [rsp]
-        mov [rdx], r8
-        sub rsi, 1
-        add rsp, 0x08
-        add rdx, 0x08
-        test rsi, rsi
-        jnz .store1
-
+    philox_avx2_32_prologue 0x08
+    philox_avx2_32_increment_data 0x08
+    philox_avx2_32_round_key 0x08
+    philox_avx2_32_generate 0x08, 0xE3, 0xB1, 0xB1
     epilogue
 ; mckl_philox2x32_avx2_kernel:
 
 mckl_philox4x32_avx2_kernel:
-    prologue 5, 0x140
-
-    vbroadcasti128 ymm1, [rcx + 0x10]
-    vbroadcasti128 ymm0, [rcx + 0x20]
-    philox_avx2_32_round_key
-
-    vbroadcasti128 ymm8, [rdi]
-    add [rdi], rsi
-
-    vbroadcasti128 ymm9, [rcx]
-
-    vmovdqa ymm14, [rel philox_avx2_32_mask]
-
-    align 16
-    .generate:
-        increment_ymm_64_2
-        vpshufd ymm0, ymm0, 0xC6
-        vpshufd ymm1, ymm1, 0xC6
-        vpshufd ymm2, ymm2, 0xC6
-        vpshufd ymm3, ymm3, 0xC6
-        vpshufd ymm4, ymm4, 0xC6
-        vpshufd ymm5, ymm5, 0xC6
-        vpshufd ymm6, ymm6, 0xC6
-        vpshufd ymm7, ymm7, 0xC6
-        %assign r 0
-        %rep 9
-            philox_avx2_32_rbox r, 0x93
-            %assign r r + 1
-        %endrep
-        philox_avx2_32_rbox 9, 0xB1
-        philox_avx2_32_store 16
-
-    align 16
-    .store1:
-        vmovdqa xmm0, [rsp]
-        vmovdqu [rdx], xmm0
-        sub rsi, 1
-        add rsp, 0x10
-        add rdx, 0x10
-        test rsi, rsi
-        jnz .store1
-
+    philox_avx2_32_prologue 0x10
+    philox_avx2_32_increment_data 0x10
+    philox_avx2_32_round_key 0x10
+    philox_avx2_32_generate 0x10, 0xC6, 0x93, 0xB1
     epilogue
 ; mckl_philox4x32_avx2_kernel:
 

@@ -60,6 +60,14 @@ global mckl_ars_aesni_kernel
     %endrep
 %endmacro
 
+%macro aes_aesni_increment_data 1
+    increment_xmm_64_2_data (%1 - 5) * 0x10
+%endmacro
+
+%macro aes_aesni_increment 1
+    increment_xmm_64_2 (%1 - 5) * 0x10
+%endmacro
+
 %macro aes_aesni_encfirst 1
     vpxor xmm0, xmm0, %1
     vpxor xmm1, xmm1, %1
@@ -99,7 +107,7 @@ global mckl_ars_aesni_kernel
 
     align 16
     .generate:
-        increment_xmm_64_2
+        aes_aesni_increment %1
         aes_aesni_encfirst xmm10
         aes_aesni_enc xmm11
         aes_aesni_enc xmm12
@@ -164,6 +172,7 @@ section .text
 
 mckl_aes128_aesni_kernel:
     aes_aesni_prologue 10
+    aes_aesni_increment_data 10
     aes_aesni_round_key 10
     aes_aesni_generate 10
     epilogue
@@ -171,6 +180,7 @@ mckl_aes128_aesni_kernel:
 
 mckl_aes192_aesni_kernel:
     aes_aesni_prologue 12
+    aes_aesni_increment_data 12
     aes_aesni_round_key 12
     aes_aesni_generate 12
     epilogue
@@ -178,6 +188,7 @@ mckl_aes192_aesni_kernel:
 
 mckl_aes256_aesni_kernel:
     aes_aesni_prologue 14
+    aes_aesni_increment_data 14
     aes_aesni_round_key 14
     aes_aesni_generate 14
     epilogue
@@ -185,6 +196,7 @@ mckl_aes256_aesni_kernel:
 
 mckl_ars_aesni_kernel:
     aes_aesni_prologue 5
+    aes_aesni_increment_data 5
     vmovdqu xmm9,  [rcx + 0x00]
     vmovdqu xmm10, [rcx + 0x10]
     vpaddq  xmm11, xmm10, xmm9
