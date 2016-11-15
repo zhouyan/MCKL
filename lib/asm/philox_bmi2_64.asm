@@ -125,6 +125,7 @@ mckl_philox2x64_bmi2_kernel:
         pop rbx
         pop r12
         ret
+; mckl_philox2x64_bmi2_kernel:
 
 mckl_philox4x64_bmi2_kernel:
     push r12
@@ -199,5 +200,6 @@ mckl_philox4x64_bmi2_kernel:
         pop r13
         pop r12
         ret
+; mckl_philox4x64_bmi2_kernel:
 
 ; vim:ft=nasm
