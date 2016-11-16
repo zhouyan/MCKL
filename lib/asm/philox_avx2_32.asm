@@ -131,14 +131,14 @@ global mckl_philox4x32_avx2_kernel
     .generate:
         increment_avx2_ymm ymm8, %1
         %if %2 != 0xE3
-            vpshufd ymm0, ymm0, 0xC6
-            vpshufd ymm1, ymm1, 0xC6
-            vpshufd ymm2, ymm2, 0xC6
-            vpshufd ymm3, ymm3, 0xC6
-            vpshufd ymm4, ymm4, 0xC6
-            vpshufd ymm5, ymm5, 0xC6
-            vpshufd ymm6, ymm6, 0xC6
-            vpshufd ymm7, ymm7, 0xC6
+            vpshufd ymm0, ymm0, %2
+            vpshufd ymm1, ymm1, %2
+            vpshufd ymm2, ymm2, %2
+            vpshufd ymm3, ymm3, %2
+            vpshufd ymm4, ymm4, %2
+            vpshufd ymm5, ymm5, %2
+            vpshufd ymm6, ymm6, %2
+            vpshufd ymm7, ymm7, %2
         %endif
         %assign r 0
         %rep 9
@@ -208,6 +208,7 @@ mckl_philox2x32_avx2_kernel:
     philox_avx2_32_prologue
     philox_avx2_32_round_key 0x08
     philox_avx2_32_generate 0x08, 0xE3, 0xB1, 0xB1
+    vzeroupper
     epilogue
 ; mckl_philox2x32_avx2_kernel:
 
@@ -215,6 +216,7 @@ mckl_philox4x32_avx2_kernel:
     philox_avx2_32_prologue
     philox_avx2_32_round_key 0x10
     philox_avx2_32_generate 0x10, 0xC6, 0x93, 0xB1
+    vzeroupper
     epilogue
 ; mckl_philox4x32_avx2_kernel:
 

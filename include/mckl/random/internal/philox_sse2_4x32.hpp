@@ -36,6 +36,7 @@
 #include <mckl/random/internal/philox_common.hpp>
 #include <mckl/random/internal/philox_constants.hpp>
 #include <mckl/random/internal/philox_generic_4x.hpp>
+#include <mckl/random/internal/philox_sse2_32_common.hpp>
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -44,47 +45,11 @@
 #endif
 #endif
 
-#define MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk, imm8)                \
-    xmmt0 = _mm_mul_epu32(xmms0, xmmm);                                       \
-    xmmt1 = _mm_mul_epu32(xmms1, xmmm);                                       \
-    xmmt2 = _mm_mul_epu32(xmms2, xmmm);                                       \
-    xmmt3 = _mm_mul_epu32(xmms3, xmmm);                                       \
-    xmmt4 = _mm_mul_epu32(xmms4, xmmm);                                       \
-    xmmt5 = _mm_mul_epu32(xmms5, xmmm);                                       \
-    xmmt6 = _mm_mul_epu32(xmms6, xmmm);                                       \
-    xmmt7 = _mm_mul_epu32(xmms7, xmmm);                                       \
-    xmms0 = _mm_and_si128(xmms0, xmma);                                       \
-    xmms1 = _mm_and_si128(xmms1, xmma);                                       \
-    xmms2 = _mm_and_si128(xmms2, xmma);                                       \
-    xmms3 = _mm_and_si128(xmms3, xmma);                                       \
-    xmms4 = _mm_and_si128(xmms4, xmma);                                       \
-    xmms5 = _mm_and_si128(xmms5, xmma);                                       \
-    xmms6 = _mm_and_si128(xmms6, xmma);                                       \
-    xmms7 = _mm_and_si128(xmms7, xmma);                                       \
-    xmms0 = _mm_xor_si128(xmms0, xmmk);                                       \
-    xmms1 = _mm_xor_si128(xmms1, xmmk);                                       \
-    xmms2 = _mm_xor_si128(xmms2, xmmk);                                       \
-    xmms3 = _mm_xor_si128(xmms3, xmmk);                                       \
-    xmms4 = _mm_xor_si128(xmms4, xmmk);                                       \
-    xmms5 = _mm_xor_si128(xmms5, xmmk);                                       \
-    xmms6 = _mm_xor_si128(xmms6, xmmk);                                       \
-    xmms7 = _mm_xor_si128(xmms7, xmmk);                                       \
-    xmms0 = _mm_xor_si128(xmms0, xmmt0);                                      \
-    xmms1 = _mm_xor_si128(xmms1, xmmt1);                                      \
-    xmms2 = _mm_xor_si128(xmms2, xmmt2);                                      \
-    xmms3 = _mm_xor_si128(xmms3, xmmt3);                                      \
-    xmms4 = _mm_xor_si128(xmms4, xmmt4);                                      \
-    xmms5 = _mm_xor_si128(xmms5, xmmt5);                                      \
-    xmms6 = _mm_xor_si128(xmms6, xmmt6);                                      \
-    xmms7 = _mm_xor_si128(xmms7, xmmt7);                                      \
-    xmms0 = _mm_shuffle_epi32(xmms0, imm8);                                   \
-    xmms1 = _mm_shuffle_epi32(xmms1, imm8);                                   \
-    xmms2 = _mm_shuffle_epi32(xmms2, imm8);                                   \
-    xmms3 = _mm_shuffle_epi32(xmms3, imm8);                                   \
-    xmms4 = _mm_shuffle_epi32(xmms4, imm8);                                   \
-    xmms5 = _mm_shuffle_epi32(xmms5, imm8);                                   \
-    xmms6 = _mm_shuffle_epi32(xmms6, imm8);                                   \
-    xmms7 = _mm_shuffle_epi32(xmms7, imm8);
+extern "C" {
+
+void mckl_philox4x32_sse2_kernel(void *, std::size_t, void *, const void *);
+
+} // extern "C"
 
 namespace mckl
 {
@@ -120,103 +85,101 @@ class Philox4x32GeneratorSSE2Impl
     static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K / 2> &key)
     {
-        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
-            MCKL_NOINLINE_CALL Philox4xGeneratorGenericImpl<T,
-                Constants>::eval(ctr, n, r, key);
-            return;
-        }
-
-        constexpr std::size_t S = 8;
-        constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
-        constexpr std::size_t M = sizeof(__m128i) / sizeof(ResultType);
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        constexpr int m0 = static_cast<int>(Constants::multiplier::value[0]);
-        constexpr int m1 = static_cast<int>(Constants::multiplier::value[1]);
-        __m128i xmmm = _mm_set_epi32(0, m1, 0, m0);
+        const std::size_t n0 =
+            static_cast<std::size_t>(std::min(static_cast<std::uint64_t>(n),
+                std::numeric_limits<std::uint64_t>::max() - ctr.front()));
 
-        constexpr int ma = static_cast<int>(0xFFFFFFFF);
-        __m128i xmma = _mm_set_epi32(ma, 0, ma, 0);
+        eval_kernel(ctr, n0, r, key);
+        n -= n0;
+        r += n0 * R;
 
-        constexpr int w0 = static_cast<int>(Constants::weyl::value[0]);
-        constexpr int w1 = static_cast<int>(Constants::weyl::value[1]);
-        __m128i xmmw = _mm_set_epi32(w1, 0, w0, 0);
+        if (n != 0) {
+            eval(ctr, r, key);
+            n -= 1;
+            r += R;
+        }
+
+        eval_kernel(ctr, n, r, key);
+    }
+
+    private:
+    template <typename ResultType>
+    static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K / 2> &key)
+    {
+#if MCKL_USE_EXTERN_LIBRARY
+        constexpr T m0 = Constants::multiplier::value[0];
+        constexpr T m1 = Constants::multiplier::value[1];
+        constexpr T w0 = Constants::weyl::value[0];
+        constexpr T w1 = Constants::weyl::value[1];
+
+        const T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0, std::get<0>(key), 0,
+            std::get<1>(key)};
+        mckl_philox4x32_sse2_kernel(ctr.data(), n, r, mwk);
+#else  // MCKL_USE_EXTERN_LIBRARY
+        constexpr std::size_t S = 8;
+        constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
 
         const int k0 = static_cast<int>(std::get<0>(key));
         const int k1 = static_cast<int>(std::get<1>(key));
-        __m128i xmmk0 = _mm_set_epi32(k1, 0, k0, 0);
-        __m128i xmmk1 = _mm_add_epi32(xmmk0, xmmw);
-        __m128i xmmk2 = _mm_add_epi32(xmmk1, xmmw);
-        __m128i xmmk3 = _mm_add_epi32(xmmk2, xmmw);
-        __m128i xmmk4 = _mm_add_epi32(xmmk3, xmmw);
-        __m128i xmmk5 = _mm_add_epi32(xmmk4, xmmw);
-        __m128i xmmk6 = _mm_add_epi32(xmmk5, xmmw);
-        __m128i xmmk7 = _mm_add_epi32(xmmk6, xmmw);
-        __m128i xmmk8 = _mm_add_epi32(xmmk7, xmmw);
-        __m128i xmmk9 = _mm_add_epi32(xmmk8, xmmw);
+        const __m128i xmmk0 = _mm_set_epi32(k1, 0, k0, 0);
 
         __m128i xmmc =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
-        ctr.front() += n / N * N;
+        ctr.front() += n;
 
-        while (n >= N) {
-            __m128i xmms0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
-            __m128i xmms1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
-            __m128i xmms2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
-            __m128i xmms3 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 4));
-            __m128i xmms4 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 5));
-            __m128i xmms5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 6));
-            __m128i xmms6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 7));
-            __m128i xmms7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
+        __m128i *rptr = reinterpret_cast<__m128i *>(r);
+        while (n != 0) {
+            MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_2_8(xmmc)
 
-            xmmc = _mm_add_epi64(
-                xmmc, _mm_set_epi64x(0, static_cast<MCKL_INT64>(N)));
+            xmm0 = _mm_shuffle_epi32(xmm0, 0xC6);
+            xmm1 = _mm_shuffle_epi32(xmm1, 0xC6);
+            xmm2 = _mm_shuffle_epi32(xmm2, 0xC6);
+            xmm3 = _mm_shuffle_epi32(xmm3, 0xC6);
+            xmm4 = _mm_shuffle_epi32(xmm4, 0xC6);
+            xmm5 = _mm_shuffle_epi32(xmm5, 0xC6);
+            xmm6 = _mm_shuffle_epi32(xmm6, 0xC6);
+            xmm7 = _mm_shuffle_epi32(xmm7, 0xC6);
 
-            __m128i xmmt0;
-            __m128i xmmt1;
-            __m128i xmmt2;
-            __m128i xmmt3;
-            __m128i xmmt4;
-            __m128i xmmt5;
-            __m128i xmmt6;
-            __m128i xmmt7;
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 0, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 1, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 2, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 3, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 4, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 5, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 6, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 7, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 8, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_32_RBOX(4, 9, 0xB1)
 
-            xmms0 = _mm_shuffle_epi32(xmms0, 0xC6);
-            xmms1 = _mm_shuffle_epi32(xmms1, 0xC6);
-            xmms2 = _mm_shuffle_epi32(xmms2, 0xC6);
-            xmms3 = _mm_shuffle_epi32(xmms3, 0xC6);
-            xmms4 = _mm_shuffle_epi32(xmms4, 0xC6);
-            xmms5 = _mm_shuffle_epi32(xmms5, 0xC6);
-            xmms6 = _mm_shuffle_epi32(xmms6, 0xC6);
-            xmms7 = _mm_shuffle_epi32(xmms7, 0xC6);
-
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk0, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk1, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk2, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk3, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk4, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk5, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk6, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk7, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk8, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_SSE2_4X32_RBOX(xmmk9, 0xB1)
-
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0), xmms0);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 1), xmms1);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 2), xmms2);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 3), xmms3);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 4), xmms4);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 5), xmms5);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 6), xmms6);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 7), xmms7);
-
-            n -= N;
-            r += N * R;
+            if (n >= N) {
+                n -= N;
+                _mm_storeu_si128(rptr++, xmm0);
+                _mm_storeu_si128(rptr++, xmm1);
+                _mm_storeu_si128(rptr++, xmm2);
+                _mm_storeu_si128(rptr++, xmm3);
+                _mm_storeu_si128(rptr++, xmm4);
+                _mm_storeu_si128(rptr++, xmm5);
+                _mm_storeu_si128(rptr++, xmm6);
+                _mm_storeu_si128(rptr++, xmm7);
+            } else {
+                std::array<__m128i, S> s;
+                std::get<0>(s) = xmm0;
+                std::get<1>(s) = xmm1;
+                std::get<2>(s) = xmm2;
+                std::get<3>(s) = xmm3;
+                std::get<4>(s) = xmm4;
+                std::get<5>(s) = xmm5;
+                std::get<6>(s) = xmm6;
+                std::get<7>(s) = xmm7;
+                std::memcpy(rptr, s.data(), n * sizeof(T) * K);
+                break;
+            }
         }
-
-        MCKL_NOINLINE_CALL Philox4xGeneratorGenericImpl<T, Constants>::eval(
-            ctr, n, r, key);
+#endif // MCKL_USE_EXTERN_LIBRARY
     }
 }; // class Philox4x32GeneratorSSE2Impl
 

@@ -292,6 +292,7 @@ mckl_aes128_aesni_avx2_kernel:
     aes_aesni_prologue 10
     aes_aesni_avx2_round_key 10
     aes_aesni_avx2_generate 10
+    vzeroupper
     epilogue
 ; mckl_aes128_aesni_avx2_kernel:
 
@@ -306,6 +307,7 @@ mckl_aes192_aesni_avx2_kernel:
     aes_aesni_prologue 12
     aes_aesni_avx2_round_key 12
     aes_aesni_avx2_generate 12
+    vzeroupper
     epilogue
 ; mckl_aes192_aesni_avx2_kernel:
 
@@ -320,6 +322,7 @@ mckl_aes256_aesni_avx2_kernel:
     aes_aesni_prologue 14
     aes_aesni_avx2_round_key 14
     aes_aesni_avx2_generate 14
+    vzeroupper
     epilogue
 ; mckl_aes256_aesni_avx2_kernel:
 
@@ -351,6 +354,7 @@ mckl_ars_aesni_avx2_kernel:
     vpaddq  xmm14, xmm13, xmm9
     vpaddq  xmm15, xmm14, xmm9
     aes_aesni_avx2_generate 5
+    vzeroupper
     epilogue
 ; mckl_ars_aesni_avx2_kernel:
 

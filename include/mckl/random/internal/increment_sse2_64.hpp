@@ -53,7 +53,7 @@
     __m128i xmm5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0x0C, 0x0B));           \
     __m128i xmm6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0x0E, 0x0D));           \
     __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0x10, 0x0F));           \
-    xmmc = xmm7;
+    xmmc = _mm_add_epi64(xmmc, _mm_set1_epi64x(0x10));
 
 #define MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_2_8(xmmc)                      \
     __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));                 \
