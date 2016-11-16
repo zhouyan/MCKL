@@ -46,7 +46,8 @@
 
 extern "C" {
 
-void mckl_aes256_aesni_kernel(void *, std::size_t, void *, const void *);
+void mckl_aes256_aesni_sse2_kernel(void *, std::size_t, void *, const void *);
+void mckl_aes256_aesni_avx2_kernel(void *, std::size_t, void *, const void *);
 
 } // extern "C"
 
@@ -211,9 +212,13 @@ class AES256GeneratorAESNIImpl
     static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)
     {
-#if MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
-        mckl_aes256_aesni_kernel(ctr.data(), n, r, ks.get().data());
-#else  // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
+#if MCKL_USE_EXTERN_LIBRARY
+#if MCKL_USE_AVX2
+        mckl_aes256_aesni_avx2_kernel(ctr.data(), n, r, ks.get().data());
+#else
+        mckl_aes256_aesni_sse2_kernel(ctr.data(), n, r, ks.get().data());
+#endif
+#else  // MCKL_USE_EXTERN_LIBRARY
         constexpr std::size_t S = 8;
         constexpr std::size_t N = S;
 
@@ -244,7 +249,7 @@ class AES256GeneratorAESNIImpl
             MCKL_RANDOM_INTERNAL_AES_AESNI_ENCLAST(std::get<0xE>(rk))
             MCKL_RANDOM_INTERNAL_AES_AESNI_STORE(n, N, rptr);
         }
-#endif // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2
+#endif // MCKL_USE_EXTERN_LIBRARY
     }
 }; // class AES256GeneratorAESNIImpl
 

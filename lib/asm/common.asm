@@ -46,7 +46,41 @@
         ret
 %endmacro
 
-%macro increment_xmm 2
+%macro increment_sse2_xmm 2
+    movdqa xmm0, %1
+    movdqa xmm1, %1
+    movdqa xmm2, %1
+    movdqa xmm3, %1
+    movdqa xmm4, %1
+    movdqa xmm5, %1
+    movdqa xmm6, %1
+    movdqa xmm7, %1
+    %if %2 == 0x08
+        paddq xmm0, [rel increment_xmm_data_1 + 0x00]
+        paddq xmm1, [rel increment_xmm_data_1 + 0x10]
+        paddq xmm2, [rel increment_xmm_data_1 + 0x20]
+        paddq xmm3, [rel increment_xmm_data_1 + 0x30]
+        paddq xmm4, [rel increment_xmm_data_1 + 0x40]
+        paddq xmm5, [rel increment_xmm_data_1 + 0x50]
+        paddq xmm6, [rel increment_xmm_data_1 + 0x60]
+        paddq xmm7, [rel increment_xmm_data_1 + 0x70]
+        paddq %1,   [rel increment_xmm_data_1 + 0x80]
+    %elif %2 == 0x10
+        paddq xmm0, [rel increment_xmm_data_2 + 0x00]
+        paddq xmm1, [rel increment_xmm_data_2 + 0x10]
+        paddq xmm2, [rel increment_xmm_data_2 + 0x20]
+        paddq xmm3, [rel increment_xmm_data_2 + 0x30]
+        paddq xmm4, [rel increment_xmm_data_2 + 0x40]
+        paddq xmm5, [rel increment_xmm_data_2 + 0x50]
+        paddq xmm6, [rel increment_xmm_data_2 + 0x60]
+        paddq xmm7, [rel increment_xmm_data_2 + 0x70]
+        paddq %1,   [rel increment_xmm_data_2 + 0x80]
+    %else
+        %error
+    %endif
+%endmacro
+
+%macro increment_avx2_xmm 2
     %if %2 == 0x08
         vpaddq xmm0, %1, [rel increment_xmm_data_1 + 0x00]
         vpaddq xmm1, %1, [rel increment_xmm_data_1 + 0x10]
@@ -72,7 +106,7 @@
     %endif
 %endmacro
 
-%macro increment_ymm 2
+%macro increment_avx2_ymm 2
     %if %2 == 0x08
         vpaddq ymm0, %1, [rel increment_ymm_data_1 + 0x000]
         vpaddq ymm1, %1, [rel increment_ymm_data_1 + 0x020]

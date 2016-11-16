@@ -129,7 +129,7 @@ global mckl_philox4x32_avx2_kernel
 
     align 16
     .generate:
-        increment_ymm ymm8, %1
+        increment_avx2_ymm ymm8, %1
         %if %2 != 0xE3
             vpshufd ymm0, ymm0, 0xC6
             vpshufd ymm1, ymm1, 0xC6
