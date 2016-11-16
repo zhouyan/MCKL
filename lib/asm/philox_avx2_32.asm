@@ -44,18 +44,8 @@
 global mckl_philox2x32_avx2_kernel
 global mckl_philox4x32_avx2_kernel
 
-%macro philox_avx2_32_prologue 1
-    prologue 5, 0x20 * (10 + 9)
-%endmacro
-
-%macro philox_avx2_32_increment_data 1
-    %if %1 == 0x08
-        increment_ymm_64_1_data 0x20 * 10
-    %elif %1 == 0x10
-        increment_ymm_64_2_data 0x20 * 10
-    %else
-        %error
-    %endif
+%macro philox_avx2_32_prologue 0
+    prologue 5, 0x140
 %endmacro
 
 %macro philox_avx2_32_round_key 1
@@ -77,6 +67,52 @@ global mckl_philox4x32_avx2_kernel
     %endrep
 %endmacro
 
+%macro philox_avx2_32_rbox 2
+    vmovdqa ymm15, [rsp + %1 * 0x20]
+    vpmuludq ymm10, ymm0, ymm9
+    vpmuludq ymm11, ymm1, ymm9
+    vpmuludq ymm12, ymm2, ymm9
+    vpmuludq ymm13, ymm3, ymm9
+    vpand ymm0, ymm0, ymm14
+    vpand ymm1, ymm1, ymm14
+    vpand ymm2, ymm2, ymm14
+    vpand ymm3, ymm3, ymm14
+    vpxor ymm0, ymm0, ymm15
+    vpxor ymm1, ymm1, ymm15
+    vpxor ymm2, ymm2, ymm15
+    vpxor ymm3, ymm3, ymm15
+    vpxor ymm0, ymm0, ymm10
+    vpxor ymm1, ymm1, ymm11
+    vpxor ymm2, ymm2, ymm12
+    vpxor ymm3, ymm3, ymm13
+
+    vpmuludq ymm10, ymm4, ymm9
+    vpmuludq ymm11, ymm5, ymm9
+    vpmuludq ymm12, ymm6, ymm9
+    vpmuludq ymm13, ymm7, ymm9
+    vpand ymm4, ymm4, ymm14
+    vpand ymm5, ymm5, ymm14
+    vpand ymm6, ymm6, ymm14
+    vpand ymm7, ymm7, ymm14
+    vpxor ymm4, ymm4, ymm15
+    vpxor ymm5, ymm5, ymm15
+    vpxor ymm6, ymm6, ymm15
+    vpxor ymm7, ymm7, ymm15
+    vpxor ymm4, ymm4, ymm10
+    vpxor ymm5, ymm5, ymm11
+    vpxor ymm6, ymm6, ymm12
+    vpxor ymm7, ymm7, ymm13
+
+    vpshufd ymm0, ymm0, %2
+    vpshufd ymm1, ymm1, %2
+    vpshufd ymm2, ymm2, %2
+    vpshufd ymm3, ymm3, %2
+    vpshufd ymm4, ymm4, %2
+    vpshufd ymm5, ymm5, %2
+    vpshufd ymm6, ymm6, %2
+    vpshufd ymm7, ymm7, %2
+%endmacro
+
 %macro philox_avx2_32_generate 4
     %if %1 == 0x08
         vpbroadcastq ymm8, [rdi]
@@ -93,13 +129,7 @@ global mckl_philox4x32_avx2_kernel
 
     align 16
     .generate:
-        %if %1 == 0x08
-            increment_ymm_64_1 0x20 * 10
-        %elif %1 == 0x10
-            increment_ymm_64_2 0x20 * 10
-        %else
-            %error
-        %endif
+        increment_ymm ymm8, %1
         %if %2 != 0xE3
             vpshufd ymm0, ymm0, 0xC6
             vpshufd ymm1, ymm1, 0xC6
@@ -163,52 +193,6 @@ global mckl_philox4x32_avx2_kernel
             jnz .store1
 %endmacro
 
-%macro philox_avx2_32_rbox 2
-    vmovdqa ymm15, [rsp + %1 * 0x20]
-    vpmuludq ymm10, ymm0, ymm9
-    vpmuludq ymm11, ymm1, ymm9
-    vpmuludq ymm12, ymm2, ymm9
-    vpmuludq ymm13, ymm3, ymm9
-    vpand ymm0, ymm0, ymm14
-    vpand ymm1, ymm1, ymm14
-    vpand ymm2, ymm2, ymm14
-    vpand ymm3, ymm3, ymm14
-    vpxor ymm0, ymm0, ymm15
-    vpxor ymm1, ymm1, ymm15
-    vpxor ymm2, ymm2, ymm15
-    vpxor ymm3, ymm3, ymm15
-    vpxor ymm0, ymm0, ymm10
-    vpxor ymm1, ymm1, ymm11
-    vpxor ymm2, ymm2, ymm12
-    vpxor ymm3, ymm3, ymm13
-
-    vpmuludq ymm10, ymm4, ymm9
-    vpmuludq ymm11, ymm5, ymm9
-    vpmuludq ymm12, ymm6, ymm9
-    vpmuludq ymm13, ymm7, ymm9
-    vpand ymm4, ymm4, ymm14
-    vpand ymm5, ymm5, ymm14
-    vpand ymm6, ymm6, ymm14
-    vpand ymm7, ymm7, ymm14
-    vpxor ymm4, ymm4, ymm15
-    vpxor ymm5, ymm5, ymm15
-    vpxor ymm6, ymm6, ymm15
-    vpxor ymm7, ymm7, ymm15
-    vpxor ymm4, ymm4, ymm10
-    vpxor ymm5, ymm5, ymm11
-    vpxor ymm6, ymm6, ymm12
-    vpxor ymm7, ymm7, ymm13
-
-    vpshufd ymm0, ymm0, %2
-    vpshufd ymm1, ymm1, %2
-    vpshufd ymm2, ymm2, %2
-    vpshufd ymm3, ymm3, %2
-    vpshufd ymm4, ymm4, %2
-    vpshufd ymm5, ymm5, %2
-    vpshufd ymm6, ymm6, %2
-    vpshufd ymm7, ymm7, %2
-%endmacro
-
 section .data
 
 align 32
@@ -221,16 +205,14 @@ dq 0xFFFFFFFF00000000
 section .text
 
 mckl_philox2x32_avx2_kernel:
-    philox_avx2_32_prologue 0x08
-    philox_avx2_32_increment_data 0x08
+    philox_avx2_32_prologue
     philox_avx2_32_round_key 0x08
     philox_avx2_32_generate 0x08, 0xE3, 0xB1, 0xB1
     epilogue
 ; mckl_philox2x32_avx2_kernel:
 
 mckl_philox4x32_avx2_kernel:
-    philox_avx2_32_prologue 0x10
-    philox_avx2_32_increment_data 0x10
+    philox_avx2_32_prologue
     philox_avx2_32_round_key 0x10
     philox_avx2_32_generate 0x10, 0xC6, 0x93, 0xB1
     epilogue

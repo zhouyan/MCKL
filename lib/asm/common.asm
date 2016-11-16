@@ -34,12 +34,8 @@
 %macro prologue 2
     push rbp
     mov rbp, rsp
-    %if %1 > 4
-        and rsp, ((0xFFFFFFFFFFFFFFFF >> %1) << %1)
-    %endif
-    %if %2 != 0
-        sub rsp, %2
-    %endif
+    and rsp, ((0xFFFFFFFFFFFFFFFF >> %1) << %1)
+    sub rsp, %2
 %endmacro
 
 %macro epilogue 0
@@ -50,276 +46,142 @@
         ret
 %endmacro
 
-%macro increment_xmm_64_2_data 1
-    vmovdqa xmm0, [rel increment_xmm_64_2_0]
-    vmovdqa xmm1, [rel increment_xmm_64_2_1]
-    vmovdqa xmm2, [rel increment_xmm_64_2_2]
-    vmovdqa xmm3, [rel increment_xmm_64_2_3]
-    vmovdqa xmm4, [rel increment_xmm_64_2_4]
-    vmovdqa xmm5, [rel increment_xmm_64_2_5]
-    vmovdqa xmm6, [rel increment_xmm_64_2_6]
-    vmovdqa xmm7, [rel increment_xmm_64_2_7]
-    vmovdqa xmm8, [rel increment_xmm_64_2_8]
-    vmovdqa [rsp + %1 + 0 * 0x10], xmm0
-    vmovdqa [rsp + %1 + 1 * 0x10], xmm1
-    vmovdqa [rsp + %1 + 2 * 0x10], xmm2
-    vmovdqa [rsp + %1 + 3 * 0x10], xmm3
-    vmovdqa [rsp + %1 + 4 * 0x10], xmm4
-    vmovdqa [rsp + %1 + 5 * 0x10], xmm5
-    vmovdqa [rsp + %1 + 6 * 0x10], xmm6
-    vmovdqa [rsp + %1 + 7 * 0x10], xmm7
-    vmovdqa [rsp + %1 + 8 * 0x10], xmm8
+%macro increment_xmm 2
+    %if %2 == 0x08
+        vpaddq xmm0, %1, [rel increment_xmm_data_1 + 0x00]
+        vpaddq xmm1, %1, [rel increment_xmm_data_1 + 0x10]
+        vpaddq xmm2, %1, [rel increment_xmm_data_1 + 0x20]
+        vpaddq xmm3, %1, [rel increment_xmm_data_1 + 0x30]
+        vpaddq xmm4, %1, [rel increment_xmm_data_1 + 0x40]
+        vpaddq xmm5, %1, [rel increment_xmm_data_1 + 0x50]
+        vpaddq xmm6, %1, [rel increment_xmm_data_1 + 0x60]
+        vpaddq xmm7, %1, [rel increment_xmm_data_1 + 0x70]
+        vpaddq %1,   %1, [rel increment_xmm_data_1 + 0x80]
+    %elif %2 == 0x10
+        vpaddq xmm0, %1, [rel increment_xmm_data_2 + 0x00]
+        vpaddq xmm1, %1, [rel increment_xmm_data_2 + 0x10]
+        vpaddq xmm2, %1, [rel increment_xmm_data_2 + 0x20]
+        vpaddq xmm3, %1, [rel increment_xmm_data_2 + 0x30]
+        vpaddq xmm4, %1, [rel increment_xmm_data_2 + 0x40]
+        vpaddq xmm5, %1, [rel increment_xmm_data_2 + 0x50]
+        vpaddq xmm6, %1, [rel increment_xmm_data_2 + 0x60]
+        vpaddq xmm7, %1, [rel increment_xmm_data_2 + 0x70]
+        vpaddq %1,   %1, [rel increment_xmm_data_2 + 0x80]
+    %else
+        %error
+    %endif
 %endmacro
 
-%macro increment_ymm_64_1_data 1
-    vmovdqa ymm0, [rel increment_ymm_64_1_0]
-    vmovdqa ymm1, [rel increment_ymm_64_1_1]
-    vmovdqa ymm2, [rel increment_ymm_64_1_2]
-    vmovdqa ymm3, [rel increment_ymm_64_1_3]
-    vmovdqa ymm4, [rel increment_ymm_64_1_4]
-    vmovdqa ymm5, [rel increment_ymm_64_1_5]
-    vmovdqa ymm6, [rel increment_ymm_64_1_6]
-    vmovdqa ymm7, [rel increment_ymm_64_1_7]
-    vmovdqa ymm8, [rel increment_ymm_64_1_8]
-    vmovdqa [rsp + %1 + 0 * 0x20], ymm0
-    vmovdqa [rsp + %1 + 1 * 0x20], ymm1
-    vmovdqa [rsp + %1 + 2 * 0x20], ymm2
-    vmovdqa [rsp + %1 + 3 * 0x20], ymm3
-    vmovdqa [rsp + %1 + 4 * 0x20], ymm4
-    vmovdqa [rsp + %1 + 5 * 0x20], ymm5
-    vmovdqa [rsp + %1 + 6 * 0x20], ymm6
-    vmovdqa [rsp + %1 + 7 * 0x20], ymm7
-    vmovdqa [rsp + %1 + 8 * 0x20], ymm8
-%endmacro
-
-%macro increment_ymm_64_2_data 1
-    vmovdqa ymm0, [rel increment_ymm_64_2_0]
-    vmovdqa ymm1, [rel increment_ymm_64_2_1]
-    vmovdqa ymm2, [rel increment_ymm_64_2_2]
-    vmovdqa ymm3, [rel increment_ymm_64_2_3]
-    vmovdqa ymm4, [rel increment_ymm_64_2_4]
-    vmovdqa ymm5, [rel increment_ymm_64_2_5]
-    vmovdqa ymm6, [rel increment_ymm_64_2_6]
-    vmovdqa ymm7, [rel increment_ymm_64_2_7]
-    vmovdqa ymm8, [rel increment_ymm_64_2_8]
-    vmovdqa [rsp + %1 + 0 * 0x20], ymm0
-    vmovdqa [rsp + %1 + 1 * 0x20], ymm1
-    vmovdqa [rsp + %1 + 2 * 0x20], ymm2
-    vmovdqa [rsp + %1 + 3 * 0x20], ymm3
-    vmovdqa [rsp + %1 + 4 * 0x20], ymm4
-    vmovdqa [rsp + %1 + 5 * 0x20], ymm5
-    vmovdqa [rsp + %1 + 6 * 0x20], ymm6
-    vmovdqa [rsp + %1 + 7 * 0x20], ymm7
-    vmovdqa [rsp + %1 + 8 * 0x20], ymm8
-%endmacro
-
-%macro increment_xmm_64_2 1
-    vpaddq xmm0, xmm8, [rsp + %1 + 0 * 0x10]
-    vpaddq xmm1, xmm8, [rsp + %1 + 1 * 0x10]
-    vpaddq xmm2, xmm8, [rsp + %1 + 2 * 0x10]
-    vpaddq xmm3, xmm8, [rsp + %1 + 3 * 0x10]
-    vpaddq xmm4, xmm8, [rsp + %1 + 4 * 0x10]
-    vpaddq xmm5, xmm8, [rsp + %1 + 5 * 0x10]
-    vpaddq xmm6, xmm8, [rsp + %1 + 6 * 0x10]
-    vpaddq xmm7, xmm8, [rsp + %1 + 7 * 0x10]
-    vpaddq xmm8, xmm8, [rsp + %1 + 8 * 0x10]
-%endmacro
-
-%macro increment_ymm_64_1 1
-    vpaddq ymm0, ymm8, [rsp + %1 + 0 * 0x20]
-    vpaddq ymm1, ymm8, [rsp + %1 + 1 * 0x20]
-    vpaddq ymm2, ymm8, [rsp + %1 + 2 * 0x20]
-    vpaddq ymm3, ymm8, [rsp + %1 + 3 * 0x20]
-    vpaddq ymm4, ymm8, [rsp + %1 + 4 * 0x20]
-    vpaddq ymm5, ymm8, [rsp + %1 + 5 * 0x20]
-    vpaddq ymm6, ymm8, [rsp + %1 + 6 * 0x20]
-    vpaddq ymm7, ymm8, [rsp + %1 + 7 * 0x20]
-    vpaddq ymm8, ymm8, [rsp + %1 + 8 * 0x20]
-%endmacro
-
-%macro increment_ymm_64_2 1
-    vpaddq ymm0, ymm8, [rsp + %1 + 0 * 0x20]
-    vpaddq ymm1, ymm8, [rsp + %1 + 1 * 0x20]
-    vpaddq ymm2, ymm8, [rsp + %1 + 2 * 0x20]
-    vpaddq ymm3, ymm8, [rsp + %1 + 3 * 0x20]
-    vpaddq ymm4, ymm8, [rsp + %1 + 4 * 0x20]
-    vpaddq ymm5, ymm8, [rsp + %1 + 5 * 0x20]
-    vpaddq ymm6, ymm8, [rsp + %1 + 6 * 0x20]
-    vpaddq ymm7, ymm8, [rsp + %1 + 7 * 0x20]
-    vpaddq ymm8, ymm8, [rsp + %1 + 8 * 0x20]
+%macro increment_ymm 2
+    %if %2 == 0x08
+        vpaddq ymm0, %1, [rel increment_ymm_data_1 + 0x000]
+        vpaddq ymm1, %1, [rel increment_ymm_data_1 + 0x020]
+        vpaddq ymm2, %1, [rel increment_ymm_data_1 + 0x040]
+        vpaddq ymm3, %1, [rel increment_ymm_data_1 + 0x060]
+        vpaddq ymm4, %1, [rel increment_ymm_data_1 + 0x080]
+        vpaddq ymm5, %1, [rel increment_ymm_data_1 + 0x0A0]
+        vpaddq ymm6, %1, [rel increment_ymm_data_1 + 0x0C0]
+        vpaddq ymm7, %1, [rel increment_ymm_data_1 + 0x0E0]
+        vpaddq %1,   %1, [rel increment_ymm_data_1 + 0x100]
+    %elif %2 == 0x10
+        vpaddq ymm0, %1, [rel increment_ymm_data_2 + 0x000]
+        vpaddq ymm1, %1, [rel increment_ymm_data_2 + 0x020]
+        vpaddq ymm2, %1, [rel increment_ymm_data_2 + 0x040]
+        vpaddq ymm3, %1, [rel increment_ymm_data_2 + 0x060]
+        vpaddq ymm4, %1, [rel increment_ymm_data_2 + 0x080]
+        vpaddq ymm5, %1, [rel increment_ymm_data_2 + 0x0A0]
+        vpaddq ymm6, %1, [rel increment_ymm_data_2 + 0x0C0]
+        vpaddq ymm7, %1, [rel increment_ymm_data_2 + 0x0E0]
+        vpaddq %1,   %1, [rel increment_ymm_data_2 + 0x100]
+    %elif %2 == 0x20
+        vpaddq ymm0, %1, [rel increment_ymm_data_4 + 0x000]
+        vpaddq ymm1, %1, [rel increment_ymm_data_4 + 0x020]
+        vpaddq ymm2, %1, [rel increment_ymm_data_4 + 0x040]
+        vpaddq ymm3, %1, [rel increment_ymm_data_4 + 0x060]
+        vpaddq ymm4, %1, [rel increment_ymm_data_4 + 0x080]
+        vpaddq ymm5, %1, [rel increment_ymm_data_4 + 0x0A0]
+        vpaddq ymm6, %1, [rel increment_ymm_data_4 + 0x0C0]
+        vpaddq ymm7, %1, [rel increment_ymm_data_4 + 0x0E0]
+        vpaddq %1,   %1, [rel increment_ymm_data_4 + 0x100]
+    %elif %2 == 0x40
+        vpaddq ymm0, %1, [rel increment_ymm_data_8 + 0x000]
+        vpaddq ymm2, %1, [rel increment_ymm_data_8 + 0x020]
+        vpaddq ymm4, %1, [rel increment_ymm_data_8 + 0x040]
+        vpaddq ymm6, %1, [rel increment_ymm_data_8 + 0x060]
+        vpaddq %1,   %1, [rel increment_ymm_data_8 + 0x080]
+    %else
+        %error
+    %endif
 %endmacro
 
 section .data
 
 align 16
-increment_xmm_64_2_0:
-dq 1
-dq 0
+increment_xmm_data_1:
+dq 0x01, 0x02
+dq 0x03, 0x04
+dq 0x05, 0x06
+dq 0x07, 0x08
+dq 0x09, 0x0A
+dq 0x0B, 0x0C
+dq 0x0D, 0x0E
+dq 0x0F, 0x10
+dq 0x10, 0x10
 
 align 16
-increment_xmm_64_2_1:
-dq 2
-dq 0
-
-align 16
-increment_xmm_64_2_2:
-dq 3
-dq 0
-
-align 16
-increment_xmm_64_2_3:
-dq 4
-dq 0
-
-align 16
-increment_xmm_64_2_4:
-dq 5
-dq 0
-
-align 16
-increment_xmm_64_2_5:
-dq 6
-dq 0
-
-align 16
-increment_xmm_64_2_6:
-dq 7
-dq 0
-
-align 16
-increment_xmm_64_2_7:
-dq 8
-dq 0
-
-align 16
-increment_xmm_64_2_8:
-dq 8
-dq 0
+increment_xmm_data_2:
+dq 0x01, 0x00
+dq 0x02, 0x00
+dq 0x03, 0x00
+dq 0x04, 0x00
+dq 0x05, 0x00
+dq 0x06, 0x00
+dq 0x07, 0x00
+dq 0x08, 0x00
+dq 0x08, 0x00
 
 align 32
-increment_ymm_64_1_0:
-dq 0x01
-dq 0x02
-dq 0x03
-dq 0x04
+increment_ymm_data_1:
+dq 0x01, 0x02, 0x03, 0x04
+dq 0x05, 0x06, 0x07, 0x08
+dq 0x09, 0x0A, 0x0B, 0x0C
+dq 0x0D, 0x0E, 0x0F, 0x10
+dq 0x11, 0x12, 0x13, 0x14
+dq 0x15, 0x16, 0x17, 0x18
+dq 0x19, 0x1A, 0x1B, 0x1C
+dq 0x1D, 0x1E, 0x1F, 0x20
+dq 0x20, 0x20, 0x20, 0x20
 
 align 32
-increment_ymm_64_1_1:
-dq 0x05
-dq 0x06
-dq 0x07
-dq 0x08
+increment_ymm_data_2:
+dq 0x01, 0x00, 0x02, 0x00
+dq 0x03, 0x00, 0x04, 0x00
+dq 0x05, 0x00, 0x06, 0x00
+dq 0x07, 0x00, 0x08, 0x00
+dq 0x09, 0x00, 0x0A, 0x00
+dq 0x0B, 0x00, 0x0C, 0x00
+dq 0x0D, 0x00, 0x0E, 0x00
+dq 0x0F, 0x00, 0x10, 0x00
+dq 0x10, 0x00, 0x10, 0x00
 
 align 32
-increment_ymm_64_1_2:
-dq 0x09
-dq 0x0A
-dq 0x0B
-dq 0x0C
+increment_ymm_data_4:
+dq 0x01, 0x00, 0x00, 0x00
+dq 0x02, 0x00, 0x00, 0x00
+dq 0x03, 0x00, 0x00, 0x00
+dq 0x04, 0x00, 0x00, 0x00
+dq 0x05, 0x00, 0x00, 0x00
+dq 0x06, 0x00, 0x00, 0x00
+dq 0x07, 0x00, 0x00, 0x00
+dq 0x08, 0x00, 0x00, 0x00
+dq 0x08, 0x00, 0x00, 0x00
 
 align 32
-increment_ymm_64_1_3:
-dq 0x0D
-dq 0x0E
-dq 0x0F
-dq 0x10
-
-align 32
-increment_ymm_64_1_4:
-dq 0x11
-dq 0x12
-dq 0x13
-dq 0x14
-
-align 32
-increment_ymm_64_1_5:
-dq 0x15
-dq 0x16
-dq 0x17
-dq 0x18
-
-align 32
-increment_ymm_64_1_6:
-dq 0x19
-dq 0x1A
-dq 0x1B
-dq 0x1C
-
-align 32
-increment_ymm_64_1_7:
-dq 0x1D
-dq 0x1E
-dq 0x1F
-dq 0x20
-
-align 32
-increment_ymm_64_1_8:
-dq 0x20
-dq 0x20
-dq 0x20
-dq 0x20
-
-align 32
-increment_ymm_64_2_0:
-dq 0x01
-dq 0
-dq 0x02
-dq 0
-
-align 32
-increment_ymm_64_2_1:
-dq 0x03
-dq 0
-dq 0x04
-dq 0
-
-align 32
-increment_ymm_64_2_2:
-dq 0x05
-dq 0
-dq 0x06
-dq 0
-
-align 32
-increment_ymm_64_2_3:
-dq 0x07
-dq 0
-dq 0x08
-dq 0
-
-align 32
-increment_ymm_64_2_4:
-dq 0x09
-dq 0
-dq 0x0A
-dq 0
-
-align 32
-increment_ymm_64_2_5:
-dq 0x0B
-dq 0
-dq 0x0C
-dq 0
-
-align 32
-increment_ymm_64_2_6:
-dq 0x0D
-dq 0
-dq 0x0E
-dq 0
-
-align 32
-increment_ymm_64_2_7:
-dq 0x0F
-dq 0
-dq 0x10
-dq 0
-
-align 32
-increment_ymm_64_2_8:
-dq 0x10
-dq 0
-dq 0x10
-dq 0
+increment_ymm_data_8:
+dq 0x01, 0x00, 0x00, 0x00
+dq 0x02, 0x00, 0x00, 0x00
+dq 0x03, 0x00, 0x00, 0x00
+dq 0x04, 0x00, 0x00, 0x00
+dq 0x04, 0x00, 0x00, 0x00
 
 ; vim:ft=nasm
