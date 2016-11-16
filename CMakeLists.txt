@@ -110,14 +110,12 @@ endif (MCKL_ENABLE_EXAMPLE OR MCKL_ENABLE_LIBRARY)
 # Library
 ##############################################################################
 
-if (MCKL_ENABLE_LIBRARY)
-    if (CMAKE_ASM_NASM_COMPILER_LOADED AND AVX2_FOUND AND UNIX)
-        add_custom_target(lib ALL)
-        add_subdirectory(lib)
-        set(MCKL_LINK_LIBRARIES ${MCKL_LINK_LIBRARIES} libmckl)
-        add_definitions(-DMCKL_USE_EXTERN_LIBRARY=1)
-    endif (CMAKE_ASM_NASM_COMPILER_LOADED AND AVX2_FOUND AND UNIX)
-endif (MCKL_ENABLE_LIBRARY)
+if (MCKL_ENABLE_LIBRARY AND CMAKE_ASM_NASM_COMPILER_LOADED AND UNIX)
+    add_custom_target(lib ALL)
+    add_subdirectory(lib)
+    set(MCKL_LINK_LIBRARIES ${MCKL_LINK_LIBRARIES} libmckl)
+    add_definitions(-DMCKL_USE_EXTERN_LIBRARY=1)
+endif (MCKL_ENABLE_LIBRARY AND CMAKE_ASM_NASM_COMPILER_LOADED AND UNIX)
 
 ##############################################################################
 # Example
