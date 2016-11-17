@@ -69,6 +69,7 @@ global mckl_philox4x32_avx2_kernel
 
 %macro philox_avx2_32_rbox 2
     vmovdqa ymm15, [rsp + %1 * 0x20]
+
     vpmuludq ymm10, ymm0, ymm9
     vpmuludq ymm11, ymm1, ymm9
     vpmuludq ymm12, ymm2, ymm9
