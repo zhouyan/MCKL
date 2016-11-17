@@ -41,7 +41,7 @@ function(MCKL_ADD_TEST_RNG testname)
             ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
         set_target_properties(librandom_${testname}
             PROPERTIES OUTPUT_NAME random_${testname})
-        target_link_libraries(librandom_${testname} libmckl)
+        target_link_libraries(librandom_${testname} ${MCKL_LINK_LIBRARIES})
     endif(EXISTS ${PROJECT_SOURCE_DIR}/src/random_${testname}.cpp)
     foreach(RNG ${MCKL_RNG})
         string(TOLOWER ${RNG} rng)
@@ -186,7 +186,8 @@ foreach(RNG ${MCKL_RNG})
             ${PROJECT_BINARY_DIR}/src/random_rng_u01_${rngname}.cpp)
         set_target_properties(librandom_rng_u01_${rngname}
             PROPERTIES OUTPUT_NAME random_rng_u01_${rngname})
-        target_link_libraries(librandom_rng_u01_${rngname} libmckl)
+        target_link_libraries(librandom_rng_u01_${rngname}
+            ${MCKL_LINK_LIBRARIES})
         add_dependencies(librandom_rng_u01 librandom_rng_u01_${rngname})
     endforeach(alg ${MCKL_RNG_${RNG}})
 endforeach(RNG ${MCKL_RNG})
