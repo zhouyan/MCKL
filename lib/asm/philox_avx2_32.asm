@@ -194,7 +194,7 @@ global mckl_philox4x32_avx2_kernel
             jnz .store1
 %endmacro
 
-section .data
+section .rodata
 
 align 32
 philox_avx2_32_mask:

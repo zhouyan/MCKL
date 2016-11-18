@@ -279,7 +279,7 @@ global mckl_ars_aesni_avx2_kernel
             vmovdqu [rdx + 0x60], xmm6
 %endmacro
 
-section .data
+section .rodata
 
 def_increment_xmm_data_2
 

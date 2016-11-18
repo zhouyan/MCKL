@@ -206,7 +206,7 @@ global mckl_philox4x32_sse2_kernel
             jnz .store1
 %endmacro
 
-section .data
+section .rodata
 
 align 16
 philox_sse2_32_mask:
