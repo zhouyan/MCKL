@@ -65,24 +65,24 @@
     __m256i ymm7 = _mm256_cvtepu32_epi64(_mm_loadu_si128(uptr++));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_STOREU_PS(r)                            \
-    _mm256_storeu_ps(r + 0x00, ymm0);                                         \
-    _mm256_storeu_ps(r + 0x08, ymm1);                                         \
-    _mm256_storeu_ps(r + 0x10, ymm2);                                         \
-    _mm256_storeu_ps(r + 0x18, ymm3);                                         \
-    _mm256_storeu_ps(r + 0x20, ymm4);                                         \
-    _mm256_storeu_ps(r + 0x28, ymm5);                                         \
-    _mm256_storeu_ps(r + 0x30, ymm6);                                         \
-    _mm256_storeu_ps(r + 0x38, ymm7);
+    _mm256_storeu_ps(r + 0x00, _mm256_castsi256_ps(ymm0));                    \
+    _mm256_storeu_ps(r + 0x08, _mm256_castsi256_ps(ymm1));                    \
+    _mm256_storeu_ps(r + 0x10, _mm256_castsi256_ps(ymm2));                    \
+    _mm256_storeu_ps(r + 0x18, _mm256_castsi256_ps(ymm3));                    \
+    _mm256_storeu_ps(r + 0x20, _mm256_castsi256_ps(ymm4));                    \
+    _mm256_storeu_ps(r + 0x28, _mm256_castsi256_ps(ymm5));                    \
+    _mm256_storeu_ps(r + 0x30, _mm256_castsi256_ps(ymm6));                    \
+    _mm256_storeu_ps(r + 0x38, _mm256_castsi256_ps(ymm7));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_STOREU_PD(r)                            \
-    _mm256_storeu_pd(r + 0x00, ymm0);                                         \
-    _mm256_storeu_pd(r + 0x04, ymm1);                                         \
-    _mm256_storeu_pd(r + 0x08, ymm2);                                         \
-    _mm256_storeu_pd(r + 0x0C, ymm3);                                         \
-    _mm256_storeu_pd(r + 0x10, ymm4);                                         \
-    _mm256_storeu_pd(r + 0x14, ymm5);                                         \
-    _mm256_storeu_pd(r + 0x18, ymm6);                                         \
-    _mm256_storeu_pd(r + 0x1C, ymm7);
+    _mm256_storeu_pd(r + 0x00, _mm256_castsi256_pd(ymm0));                    \
+    _mm256_storeu_pd(r + 0x04, _mm256_castsi256_pd(ymm1));                    \
+    _mm256_storeu_pd(r + 0x08, _mm256_castsi256_pd(ymm2));                    \
+    _mm256_storeu_pd(r + 0x0C, _mm256_castsi256_pd(ymm3));                    \
+    _mm256_storeu_pd(r + 0x10, _mm256_castsi256_pd(ymm4));                    \
+    _mm256_storeu_pd(r + 0x14, _mm256_castsi256_pd(ymm5));                    \
+    _mm256_storeu_pd(r + 0x18, _mm256_castsi256_pd(ymm6));                    \
+    _mm256_storeu_pd(r + 0x1C, _mm256_castsi256_pd(ymm7));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_AND1ADD_EPI32                           \
     const __m256i mask = _mm256_set1_epi32(1);                                \

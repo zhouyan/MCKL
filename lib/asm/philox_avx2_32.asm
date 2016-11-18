@@ -29,10 +29,10 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
+; rdi r
+; rsi ctr.data()
+; rdx mul:weyl:key
+; rcx n
 
 ; ymm8 counter
 ; ymm9 multiplier
@@ -46,15 +46,20 @@ global mckl_philox4x32_avx2_kernel
 
 %macro philox_avx2_32_prologue 0
     prologue 5, 0x140
+    mov rax, rsi
+    mov rsi, rdi
+    mov rdi, rdx
+    mov rdx, rcx
+    mov rcx, rax
 %endmacro
 
 %macro philox_avx2_32_round_key 1
     %if %1 == 0x08
-        vpbroadcastq ymm0, [rcx + 0x08]
-        vpbroadcastq ymm1, [rcx + 0x10]
+        vpbroadcastq ymm0, [rdx + 0x08]
+        vpbroadcastq ymm1, [rdx + 0x10]
     %elif %1 == 0x10
-        vbroadcasti128 ymm0, [rcx + 0x10]
-        vbroadcasti128 ymm1, [rcx + 0x20]
+        vbroadcasti128 ymm0, [rdx + 0x10]
+        vbroadcasti128 ymm1, [rdx + 0x20]
     %else
         %error
     %endif
@@ -116,15 +121,15 @@ global mckl_philox4x32_avx2_kernel
 
 %macro philox_avx2_32_generate 4
     %if %1 == 0x08
-        vpbroadcastq ymm8, [rdi]
-        vpbroadcastq ymm9, [rcx]
+        vpbroadcastq ymm8, [rsi]
+        vpbroadcastq ymm9, [rdx]
     %elif %1 == 0x10
-        vbroadcasti128 ymm8, [rdi]
-        vbroadcasti128 ymm9, [rcx]
+        vbroadcasti128 ymm8, [rsi]
+        vbroadcasti128 ymm9, [rdx]
     %else
         %error
     %endif
-    add [rdi], rsi
+    add [rsi], rcx
 
     vmovdqa ymm14, [rel philox_avx2_32_mask]
 
@@ -148,25 +153,25 @@ global mckl_philox4x32_avx2_kernel
         %endrep
         philox_avx2_32_rbox 9, %4
 
-        cmp rsi, 0x100 / %1
+        cmp rcx, 0x100 / %1
         jl .storen
 
-        vmovdqu [rdx + 0x00], ymm0
-        vmovdqu [rdx + 0x20], ymm1
-        vmovdqu [rdx + 0x40], ymm2
-        vmovdqu [rdx + 0x60], ymm3
-        vmovdqu [rdx + 0x80], ymm4
-        vmovdqu [rdx + 0xA0], ymm5
-        vmovdqu [rdx + 0xC0], ymm6
-        vmovdqu [rdx + 0xE0], ymm7
-        sub rsi, 0x100 / %1
-        add rdx, 0x100
+        vmovdqu [rdi + 0x00], ymm0
+        vmovdqu [rdi + 0x20], ymm1
+        vmovdqu [rdi + 0x40], ymm2
+        vmovdqu [rdi + 0x60], ymm3
+        vmovdqu [rdi + 0x80], ymm4
+        vmovdqu [rdi + 0xA0], ymm5
+        vmovdqu [rdi + 0xC0], ymm6
+        vmovdqu [rdi + 0xE0], ymm7
+        sub rcx, 0x100 / %1
+        add rdi, 0x100
 
-        test rsi, rsi
+        test rcx, rcx
         jnz .generate
 
         .storen:
-            test rsi, rsi,
+            test rcx, rcx,
             jz .return
             vmovdqa [rsp + 0x00], ymm0
             vmovdqa [rsp + 0x20], ymm1
@@ -176,22 +181,9 @@ global mckl_philox4x32_avx2_kernel
             vmovdqa [rsp + 0xA0], ymm5
             vmovdqa [rsp + 0xC0], ymm6
             vmovdqa [rsp + 0xE0], ymm7
-
-        .store1:
-            %if %1 == 0x08
-                mov rax, [rsp]
-                mov [rdx], rax
-            %elif %1 == 0x10
-                vmovdqa xmm0, [rsp]
-                vmovdqu [rdx], xmm0
-            %else
-                %error
-            %endif
-            sub rsi, 1
-            add rsp, %1
-            add rdx, %1
-            test rsi, rsi,
-            jnz .store1
+            mov rsi, rsp
+            imul rcx, %1 / 0x04
+            rep movsd
 %endmacro
 
 section .rodata
