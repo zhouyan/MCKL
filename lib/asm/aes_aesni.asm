@@ -46,7 +46,7 @@ global mckl_ars_aesni_sse2_kernel
 global mckl_ars_aesni_avx2_kernel
 
 %macro aes_aesni_prologue 1
-    prologue 4, 0x100
+    prologue 4, (%1 - 5) * 0x10
     mov rax, rsi
     mov rsi, rdi
     mov rdi, rdx
@@ -194,15 +194,16 @@ global mckl_ars_aesni_avx2_kernel
         jnz .generate
 
         .storen:
-            movdqa [rsp + 0x00], xmm0
-            movdqa [rsp + 0x10], xmm1
-            movdqa [rsp + 0x20], xmm2
-            movdqa [rsp + 0x30], xmm3
-            movdqa [rsp + 0x40], xmm4
-            movdqa [rsp + 0x50], xmm5
-            movdqa [rsp + 0x60], xmm6
-            movdqa [rsp + 0x70], xmm7
+            movdqa [rsp - 0x80], xmm0
+            movdqa [rsp - 0x70], xmm1
+            movdqa [rsp - 0x60], xmm2
+            movdqa [rsp - 0x50], xmm3
+            movdqa [rsp - 0x40], xmm4
+            movdqa [rsp - 0x30], xmm5
+            movdqa [rsp - 0x20], xmm6
+            movdqa [rsp - 0x10], xmm7
             mov rsi, rsp
+            sub rsi, 0x80
             imul rcx, 4
             rep movsd
 %endmacro
@@ -251,15 +252,16 @@ global mckl_ars_aesni_avx2_kernel
         jnz .generate
 
         .storen:
-            vmovdqa [rsp + 0x00], xmm0
-            vmovdqa [rsp + 0x10], xmm1
-            vmovdqa [rsp + 0x20], xmm2
-            vmovdqa [rsp + 0x30], xmm3
-            vmovdqa [rsp + 0x40], xmm4
-            vmovdqa [rsp + 0x50], xmm5
-            vmovdqa [rsp + 0x60], xmm6
-            vmovdqa [rsp + 0x70], xmm7
+            vmovdqa [rsp - 0x80], xmm0
+            vmovdqa [rsp - 0x70], xmm1
+            vmovdqa [rsp - 0x60], xmm2
+            vmovdqa [rsp - 0x50], xmm3
+            vmovdqa [rsp - 0x40], xmm4
+            vmovdqa [rsp - 0x30], xmm5
+            vmovdqa [rsp - 0x20], xmm6
+            vmovdqa [rsp - 0x10], xmm7
             mov rsi, rsp
+            sub rsi, 0x80
             imul rcx, 4
             rep movsd
 %endmacro
