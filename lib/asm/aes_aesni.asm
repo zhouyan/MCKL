@@ -29,10 +29,10 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx ks.get().data()/weyl:key
+; rdi r
+; rsi ctr.data()
+; rdx ks.get().data()/weyl:key
+; rcx n
 
 %include "/common.asm"
 
@@ -46,34 +46,34 @@ global mckl_ars_aesni_sse2_kernel
 global mckl_ars_aesni_avx2_kernel
 
 %macro aes_aesni_prologue 1
-    prologue 4, (%1 - 5) * 0x10
+    prologue 4, 0x100
 %endmacro
 
 %macro aes_aesni_sse2_round_key 1
-    movdqu xmm10, [rcx + 0x00]
-    movdqu xmm11, [rcx + 0x10]
-    movdqu xmm12, [rcx + 0x20]
-    movdqu xmm13, [rcx + 0x30]
-    movdqu xmm14, [rcx + 0x40]
-    movdqu xmm15, [rcx + 0x50]
+    movdqu xmm10, [rdx + 0x00]
+    movdqu xmm11, [rdx + 0x10]
+    movdqu xmm12, [rdx + 0x20]
+    movdqu xmm13, [rdx + 0x30]
+    movdqu xmm14, [rdx + 0x40]
+    movdqu xmm15, [rdx + 0x50]
     %assign r 0
     %rep %1 - 5
-        movdqu xmm0, [rcx + (r + 6) * 0x10]
+        movdqu xmm0, [rdx + (r + 6) * 0x10]
         movdqa [rsp + r * 0x10], xmm0
     %assign r r + 1
     %endrep
 %endmacro
 
 %macro aes_aesni_avx2_round_key 1
-    vmovdqu xmm10, [rcx + 0x00]
-    vmovdqu xmm11, [rcx + 0x10]
-    vmovdqu xmm12, [rcx + 0x20]
-    vmovdqu xmm13, [rcx + 0x30]
-    vmovdqu xmm14, [rcx + 0x40]
-    vmovdqu xmm15, [rcx + 0x50]
+    vmovdqu xmm10, [rdx + 0x00]
+    vmovdqu xmm11, [rdx + 0x10]
+    vmovdqu xmm12, [rdx + 0x20]
+    vmovdqu xmm13, [rdx + 0x30]
+    vmovdqu xmm14, [rdx + 0x40]
+    vmovdqu xmm15, [rdx + 0x50]
     %assign r 0
     %rep %1 - 5
-        vmovdqu xmm0, [rcx + (r + 6) * 0x10]
+        vmovdqu xmm0, [rdx + (r + 6) * 0x10]
         vmovdqa [rsp + r * 0x10], xmm0
     %assign r r + 1
     %endrep
@@ -146,8 +146,8 @@ global mckl_ars_aesni_avx2_kernel
 %endmacro
 
 %macro aes_aesni_sse2_generate 1
-    movdqu xmm8, [rdi]
-    add [rdi], rsi
+    movdqu xmm8, [rsi]
+    add [rsi], rcx
 
     align 16
     .generate:
@@ -171,50 +171,40 @@ global mckl_ars_aesni_avx2_kernel
             aes_aesni_sse2_enclast xmm9
         %endif
 
-        cmp rsi, 8
+        cmp rcx, 8
         jl .storen
 
-        movdqu [rdx + 0x00], xmm0
-        movdqu [rdx + 0x10], xmm1
-        movdqu [rdx + 0x20], xmm2
-        movdqu [rdx + 0x30], xmm3
-        movdqu [rdx + 0x40], xmm4
-        movdqu [rdx + 0x50], xmm5
-        movdqu [rdx + 0x60], xmm6
-        movdqu [rdx + 0x70], xmm7
-        sub rsi, 8
-        add rdx, 0x80
+        movdqu [rdi + 0x00], xmm0
+        movdqu [rdi + 0x10], xmm1
+        movdqu [rdi + 0x20], xmm2
+        movdqu [rdi + 0x30], xmm3
+        movdqu [rdi + 0x40], xmm4
+        movdqu [rdi + 0x50], xmm5
+        movdqu [rdi + 0x60], xmm6
+        movdqu [rdi + 0x70], xmm7
+        sub rcx, 8
+        add rdi, 0x80
 
-        test rsi, rsi
+        test rcx, rcx
         jnz .generate
 
         .storen:
-            cmp rsi, 1
-            jl .return
-            movdqu [rdx + 0x00], xmm0
-            cmp rsi, 2
-            jl .return
-            movdqu [rdx + 0x10], xmm1
-            cmp rsi, 3
-            jl .return
-            movdqu [rdx + 0x20], xmm2
-            cmp rsi, 4
-            jl .return
-            movdqu [rdx + 0x30], xmm3
-            cmp rsi, 5
-            jl .return
-            movdqu [rdx + 0x40], xmm4
-            cmp rsi, 6
-            jl .return
-            movdqu [rdx + 0x50], xmm5
-            cmp rsi, 7
-            jl .return
-            movdqu [rdx + 0x60], xmm6
+            movdqa [rsp + 0x00], xmm0
+            movdqa [rsp + 0x10], xmm1
+            movdqa [rsp + 0x20], xmm2
+            movdqa [rsp + 0x30], xmm3
+            movdqa [rsp + 0x40], xmm4
+            movdqa [rsp + 0x50], xmm5
+            movdqa [rsp + 0x60], xmm6
+            movdqa [rsp + 0x70], xmm7
+            mov rsi, rsp
+            imul rcx, 4
+            rep movsd
 %endmacro
 
 %macro aes_aesni_avx2_generate 1
-    vmovdqu xmm8, [rdi]
-    add [rdi], rsi
+    vmovdqu xmm8, [rsi]
+    add [rsi], rcx
 
     align 16
     .generate:
@@ -238,45 +228,35 @@ global mckl_ars_aesni_avx2_kernel
             aes_aesni_avx2_enclast xmm9
         %endif
 
-        cmp rsi, 8
+        cmp rcx, 8
         jl .storen
 
-        vmovdqu [rdx + 0x00], xmm0
-        vmovdqu [rdx + 0x10], xmm1
-        vmovdqu [rdx + 0x20], xmm2
-        vmovdqu [rdx + 0x30], xmm3
-        vmovdqu [rdx + 0x40], xmm4
-        vmovdqu [rdx + 0x50], xmm5
-        vmovdqu [rdx + 0x60], xmm6
-        vmovdqu [rdx + 0x70], xmm7
-        sub rsi, 8
-        add rdx, 0x80
+        vmovdqu [rdi + 0x00], xmm0
+        vmovdqu [rdi + 0x10], xmm1
+        vmovdqu [rdi + 0x20], xmm2
+        vmovdqu [rdi + 0x30], xmm3
+        vmovdqu [rdi + 0x40], xmm4
+        vmovdqu [rdi + 0x50], xmm5
+        vmovdqu [rdi + 0x60], xmm6
+        vmovdqu [rdi + 0x70], xmm7
+        sub rcx, 8
+        add rdi, 0x80
 
-        test rsi, rsi
+        test rcx, rcx
         jnz .generate
 
         .storen:
-            cmp rsi, 1
-            jl .return
-            vmovdqu [rdx + 0x00], xmm0
-            cmp rsi, 2
-            jl .return
-            vmovdqu [rdx + 0x10], xmm1
-            cmp rsi, 3
-            jl .return
-            vmovdqu [rdx + 0x20], xmm2
-            cmp rsi, 4
-            jl .return
-            vmovdqu [rdx + 0x30], xmm3
-            cmp rsi, 5
-            jl .return
-            vmovdqu [rdx + 0x40], xmm4
-            cmp rsi, 6
-            jl .return
-            vmovdqu [rdx + 0x50], xmm5
-            cmp rsi, 7
-            jl .return
-            vmovdqu [rdx + 0x60], xmm6
+            vmovdqa [rsp + 0x00], xmm0
+            vmovdqa [rsp + 0x10], xmm1
+            vmovdqa [rsp + 0x20], xmm2
+            vmovdqa [rsp + 0x30], xmm3
+            vmovdqa [rsp + 0x40], xmm4
+            vmovdqa [rsp + 0x50], xmm5
+            vmovdqa [rsp + 0x60], xmm6
+            vmovdqa [rsp + 0x70], xmm7
+            mov rsi, rsp
+            imul rcx, 4
+            rep movsd
 %endmacro
 
 section .rodata
@@ -332,8 +312,8 @@ mckl_aes256_aesni_avx2_kernel:
 
 mckl_ars_aesni_sse2_kernel:
     aes_aesni_prologue 5
-    movdqu xmm9,  [rcx + 0x00]
-    movdqu xmm10, [rcx + 0x10]
+    movdqu xmm9,  [rdx + 0x00]
+    movdqu xmm10, [rdx + 0x10]
     movdqa xmm11, xmm10
     paddq  xmm11, xmm9
     movdqa xmm12, xmm11
@@ -350,8 +330,8 @@ mckl_ars_aesni_sse2_kernel:
 
 mckl_ars_aesni_avx2_kernel:
     aes_aesni_prologue 5
-    vmovdqu xmm9,  [rcx + 0x00]
-    vmovdqu xmm10, [rcx + 0x10]
+    vmovdqu xmm9,  [rdx + 0x00]
+    vmovdqu xmm10, [rdx + 0x10]
     vpaddq  xmm11, xmm10, xmm9
     vpaddq  xmm12, xmm11, xmm9
     vpaddq  xmm13, xmm12, xmm9

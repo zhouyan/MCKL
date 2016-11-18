@@ -80,7 +80,7 @@
 
 extern "C" {
 
-void mckl_philox4x64_bmi2_kernel(void *, std::size_t, void *, const void *);
+void mckl_philox4x64_bmi2_kernel(void *, void *, const void *, std::size_t);
 
 } // extern "C"
 
@@ -205,7 +205,7 @@ class Philox4x64GeneratorGenericImpl
         constexpr T m1 = Constants::multiplier::value[1];
 
         const T mwk[6] = {m0, m1, w0, w1, std::get<0>(key), std::get<1>(key)};
-        mckl_philox4x64_bmi2_kernel(ctr.data(), n, r, mwk);
+        mckl_philox4x64_bmi2_kernel(r, ctr.data(), mwk, n);
     }
 #else  // MCKL_USE_BMI2
     template <typename ResultType>

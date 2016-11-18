@@ -29,10 +29,10 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
+; rdi r
+; rsi ctr.data()
+; rdx mul:weyl:key
+; rcx n
 
 ; xmm8 counter
 ; xmm9 multiplier
@@ -50,13 +50,13 @@ global mckl_philox4x32_sse2_kernel
 
 %macro philox_sse2_32_round_key 1
     %if %1 == 0x08
-        movq xmm0, [rcx + 0x08]
-        movq xmm1, [rcx + 0x10]
+        movq xmm0, [rdx + 0x08]
+        movq xmm1, [rdx + 0x10]
         pshufd xmm0, xmm0, 0x44
         pshufd xmm1, xmm1, 0x44
     %elif %1 == 0x10
-        movdqu xmm0, [rcx + 0x10]
-        movdqu xmm1, [rcx + 0x20]
+        movdqu xmm0, [rdx + 0x10]
+        movdqu xmm1, [rdx + 0x20]
     %else
         %error
     %endif
@@ -126,17 +126,17 @@ global mckl_philox4x32_sse2_kernel
 
 %macro philox_sse2_32_generate 4
     %if %1 == 0x08
-        movq xmm8, [rdi]
-        movq xmm9, [rcx]
+        movq xmm8, [rsi]
+        movq xmm9, [rdx]
         pshufd xmm8, xmm8, 0x44
         pshufd xmm9, xmm9, 0x44
     %elif %1 == 0x10
-        movdqu xmm8, [rdi]
-        movdqu xmm9, [rcx]
+        movdqu xmm8, [rsi]
+        movdqu xmm9, [rdx]
     %else
         %error
     %endif
-    add [rdi], rsi
+    add [rsi], rcx
 
     movdqa xmm14, [rel philox_sse2_32_mask]
 
@@ -160,25 +160,25 @@ global mckl_philox4x32_sse2_kernel
         %endrep
         philox_sse2_32_rbox 9, %4
 
-        cmp rsi, 0x80 / %1
+        cmp rcx, 0x80 / %1
         jl .storen
 
-        movdqu [rdx + 0x00], xmm0
-        movdqu [rdx + 0x10], xmm1
-        movdqu [rdx + 0x20], xmm2
-        movdqu [rdx + 0x30], xmm3
-        movdqu [rdx + 0x40], xmm4
-        movdqu [rdx + 0x50], xmm5
-        movdqu [rdx + 0x60], xmm6
-        movdqu [rdx + 0x70], xmm7
-        sub rsi, 0x80 / %1
-        add rdx, 0x80
+        movdqu [rdi + 0x00], xmm0
+        movdqu [rdi + 0x10], xmm1
+        movdqu [rdi + 0x20], xmm2
+        movdqu [rdi + 0x30], xmm3
+        movdqu [rdi + 0x40], xmm4
+        movdqu [rdi + 0x50], xmm5
+        movdqu [rdi + 0x60], xmm6
+        movdqu [rdi + 0x70], xmm7
+        sub rcx, 0x80 / %1
+        add rdi, 0x80
 
-        test rsi, rsi
+        test rcx, rcx
         jnz .generate
 
         .storen:
-            test rsi, rsi,
+            test rcx, rcx,
             jz .return
             movdqa [rsp + 0x00], xmm0
             movdqa [rsp + 0x10], xmm1
@@ -188,22 +188,9 @@ global mckl_philox4x32_sse2_kernel
             movdqa [rsp + 0x50], xmm5
             movdqa [rsp + 0x60], xmm6
             movdqa [rsp + 0x70], xmm7
-
-        .store1:
-            %if %1 == 0x08
-                mov rax, [rsp]
-                mov [rdx], rax
-            %elif %1 == 0x10
-                movdqa xmm0, [rsp]
-                movdqu [rdx], xmm0
-            %else
-                %error
-            %endif
-            sub rsi, 1
-            add rsp, %1
-            add rdx, %1
-            test rsi, rsi,
-            jnz .store1
+            mov rsi, rsp
+            imul rcx, %1 / 0x04
+            rep movsd
 %endmacro
 
 section .rodata

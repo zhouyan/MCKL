@@ -29,10 +29,10 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
+; rdi r
+; rsi ctr.data()
+; rdx mul:weyl:key
+; rcx n
 
 %include "/common.asm"
 
@@ -50,8 +50,8 @@ global mckl_philox4x64_bmi2_kernel
 %endmacro
 
 %macro philox4x64_bmi2_rbox 1
-    ; r8 multiplier[0]
-    ; r9 multiplier[1]
+    ; rsp[0xB0] multiplier[0]
+    ; rsp[0xB8] multiplier[1]
     ; r10 s0
     ; r11 s1
     ; r12 s2
@@ -60,11 +60,11 @@ global mckl_philox4x64_bmi2_kernel
     mov r15, r13 ; t3
     xor r14, [rsp + %1 * 0x10]
     xor r15, [rsp + %1 * 0x10 + 8]
-    mov rdi, r10
-    mov rdx, r8
+    mov r8, r10
+    mov rdx, [rsp + 0xB0]
     mulx r10, r11, r12 ; t2
-    mov rdx, r9
-    mulx r12, r13, rdi ; t0
+    mov rdx, [rsp + 0xB8]
+    mulx r12, r13, r8 ; t0
     xor r10, r14
     xor r12, r15
 %endmacro
@@ -76,17 +76,16 @@ mckl_philox2x64_bmi2_kernel:
     push rbx
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFFFFFFFFFFFFF0
     sub rsp, 0x50
 
-    test rsi, rsi
+    test rcx, rcx
     jz .return
 
-    mov rax, [rdi + 0] ; counter[0]
-    mov rbx, [rdi + 8] ; counter[1]
+    mov rax, [rsi + 0] ; counter[0]
+    mov rbx, [rsi + 8] ; counter[1]
 
-    mov r8, [rcx + 0x08] ; weyl
-    mov r9, [rcx + 0x10] ; key
+    mov r8, [rdx + 0x08] ; weyl
+    mov r9, [rdx + 0x10] ; key
     mov [rsp], r9
     %assign r 1
     %rep 9
@@ -95,9 +94,7 @@ mckl_philox2x64_bmi2_kernel:
         %assign r r + 1
     %endrep
 
-    mov r10, rdx
-    mov rdx, [rcx] ; multiplier
-    mov rcx, r10   ; r
+    mov rdx, [rdx] ; multiplier
 
     .generate:
         add rax, 1
@@ -109,15 +106,15 @@ mckl_philox2x64_bmi2_kernel:
             philox2x64_bmi2_rbox r
             %assign r r + 1
         %endrep
-        mov [rcx + 0], r10
-        mov [rcx + 8], r11
-        sub rsi, 1
-        add rcx, 0x10
-        test rsi, rsi
+        mov [rdi + 0], r10
+        mov [rdi + 8], r11
+        sub rcx, 1
+        add rdi, 0x10
+        test rcx, rcx
         jnz .generate
 
-    mov [rdi + 0], rax
-    mov [rdi + 8], rbx
+    mov [rsi + 0], rax
+    mov [rsi + 8], rbx
 
     .return:
         mov rsp, rbp
@@ -135,38 +132,35 @@ mckl_philox4x64_bmi2_kernel:
     push rbx
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFFFFFFFFFFFFF0
     sub rsp, 0xC0
 
-    test rsi, rsi
+    test rcx, rcx
     jz .return
 
-    mov rax, [rdi + 0] ; counter[0]
-    mov rbx, [rdi + 8] ; counter[1]
-    vmovdqu xmm0, [rdi + 0x10] ; counter[3:2]
-    vmovdqa [rsp + 0xA0], xmm0;
+    mov rax, [rsi + 0] ; counter[0]
+    mov rbx, [rsi + 8] ; counter[1]
+    vmovdqu xmm0, [rsi + 0x10] ; counter[3:2]
+    vmovdqu [rsp + 0xA0], xmm0;
 
-    vmovdqu xmm0, [rcx + 0x10]; weyl
-    vmovdqu xmm1, [rcx + 0x20]; key
-    vmovdqa [rsp], xmm1
+    mov r8, [rdx + 0] ; multiplier[0]
+    mov r9, [rdx + 8] ; multiplier[1]
+    mov [rsp + 0xB0], r8
+    mov [rsp + 0xB8], r9
+    vmovdqu xmm0, [rdx + 0x10]; weyl
+    vmovdqu xmm1, [rdx + 0x20]; key
+    vmovdqu [rsp], xmm1
     %assign r 1
     %rep 9
         vpaddq xmm1, xmm1, xmm0
-        vmovdqa [rsp + r * 0x10], xmm1
+        vmovdqu [rsp + r * 0x10], xmm1
         %assign r r + 1
     %endrep
 
-    mov r8, [rcx + 0] ; multiplier[0]
-    mov r9, [rcx + 8] ; multiplier[1]
-    mov rcx, rdx ; r
-    mov [rsp + 0xB0], rdi
-
     .generate:
-        xor rdx, rdx
         add rax, 1
         adc rbx, 0
-        adc [rsp + 0xA0], rdx
-        adc [rsp + 0xA8], rdx
+        adc qword [rsp + 0xA0], 0
+        adc qword [rsp + 0xA8], 0
         mov r10, rax ; s0
         mov r11, rbx ; s1
         mov r12, [rsp + 0xA0] ; s2
@@ -176,20 +170,19 @@ mckl_philox4x64_bmi2_kernel:
             philox4x64_bmi2_rbox r
             %assign r r + 1
         %endrep
-        mov [rcx + 0x00], r10
-        mov [rcx + 0x08], r11
-        mov [rcx + 0x10], r12
-        mov [rcx + 0x18], r13
-        sub rsi, 1
-        add rcx, 0x20
-        test rsi, rsi
+        mov [rdi + 0x00], r10
+        mov [rdi + 0x08], r11
+        mov [rdi + 0x10], r12
+        mov [rdi + 0x18], r13
+        sub rcx, 1
+        add rdi, 0x20
+        test rcx, rcx
         jnz .generate
 
-    mov rdi, [rsp + 0xB0];
-    mov [rdi + 0], rax
-    mov [rdi + 8], rbx
-    vmovdqa xmm0, [rsp + 0xA0]
-    vmovdqu [rdi + 0x10], xmm0
+    mov [rsi + 0], rax
+    mov [rsi + 8], rbx
+    vmovdqu xmm0, [rsp + 0xA0]
+    vmovdqu [rsi + 0x10], xmm0
 
     .return:
         mov rsp, rbp

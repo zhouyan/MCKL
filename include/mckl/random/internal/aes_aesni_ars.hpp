@@ -46,8 +46,8 @@
 
 extern "C" {
 
-void mckl_ars_aesni_sse2_kernel(void *, std::size_t, void *, const void *);
-void mckl_ars_aesni_avx2_kernel(void *, std::size_t, void *, const void *);
+void mckl_ars_aesni_sse2_kernel(void *, void *, const void *, std::size_t);
+void mckl_ars_aesni_avx2_kernel(void *, void *, const void *, std::size_t);
 
 } // extern "C"
 
@@ -198,9 +198,9 @@ class ARSGeneratorAESNIImpl
             static_cast<std::uint64_t>(std::get<2>(key)) +
                 (static_cast<std::uint64_t>(std::get<3>(key)) << 32)};
 #if MCKL_USE_AVX2
-        mckl_ars_aesni_avx2_kernel(ctr.data(), n, r, wk);
+        mckl_ars_aesni_avx2_kernel(r, ctr.data(), wk, n);
 #else
-        mckl_ars_aesni_sse2_kernel(ctr.data(), n, r, wk);
+        mckl_ars_aesni_sse2_kernel(r, ctr.data(), wk, n);
 #endif
 #else  // MCKL_USE_EXTERN_LIBRARY
         constexpr std::size_t S = 8;

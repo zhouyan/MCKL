@@ -47,7 +47,7 @@
 
 extern "C" {
 
-void mckl_philox4x32_sse2_kernel(void *, std::size_t, void *, const void *);
+void mckl_philox4x32_sse2_kernel(void *, void *, const void *, std::size_t);
 
 } // extern "C"
 
@@ -117,7 +117,7 @@ class Philox4x32GeneratorSSE2Impl
 
         const T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0, std::get<0>(key), 0,
             std::get<1>(key)};
-        mckl_philox4x32_sse2_kernel(ctr.data(), n, r, mwk);
+        mckl_philox4x32_sse2_kernel(r, ctr.data(), mwk, n);
 #else  // MCKL_USE_EXTERN_LIBRARY
         constexpr std::size_t S = 8;
         constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
