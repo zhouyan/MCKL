@@ -34,9 +34,11 @@ project(MCKLLibrary C)
 include_directories(${PROJECT_SOURCE_DIR}/asm)
 
 set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
-    ${PROJECT_SOURCE_DIR}/asm/aes_aesni.asm
+    ${PROJECT_SOURCE_DIR}/asm/aes_aesni_avx2.asm
+    ${PROJECT_SOURCE_DIR}/asm/aes_aesni_sse2.asm
     ${PROJECT_SOURCE_DIR}/asm/philox_avx2_32.asm
-    ${PROJECT_SOURCE_DIR}/asm/philox_bmi2_64.asm
+    ${PROJECT_SOURCE_DIR}/asm/philox_bmi2_2x64.asm
+    ${PROJECT_SOURCE_DIR}/asm/philox_bmi2_4x64.asm
     ${PROJECT_SOURCE_DIR}/asm/philox_sse2_32.asm)
 
 set_source_files_properties(${MCKL_LIB_ASM} OBJECT_DEPENDS

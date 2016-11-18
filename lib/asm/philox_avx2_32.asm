@@ -29,10 +29,10 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi r
-; rsi ctr.data()
-; rdx mul:weyl:key
-; rcx n
+; rdi ctr.data()
+; rsi n
+; rdx r
+; rcx mul:weyl:key
 
 ; ymm8 counter
 ; ymm9 multiplier
@@ -44,22 +44,35 @@
 global mckl_philox2x32_avx2_kernel
 global mckl_philox4x32_avx2_kernel
 
-%macro philox_avx2_32_prologue 0
+%macro philox_avx2_32_prologue 1
     prologue 5, 0x140
-    mov rax, rsi
-    mov rsi, rdi
-    mov rdi, rdx
-    mov rdx, rcx
-    mov rcx, rax
-%endmacro
 
-%macro philox_avx2_32_round_key 1
+    ; counter
     %if %1 == 0x08
-        vpbroadcastq ymm0, [rdx + 0x08]
-        vpbroadcastq ymm1, [rdx + 0x10]
+        vpbroadcastq ymm8, [rdi]
     %elif %1 == 0x10
-        vbroadcasti128 ymm0, [rdx + 0x10]
-        vbroadcasti128 ymm1, [rdx + 0x20]
+        vbroadcasti128 ymm8, [rdi]
+    %else
+        %error
+    %endif
+    add [rdi], rsi
+
+    ; multiplier
+    %if %1 == 0x08
+        vpbroadcastq ymm9, [rcx]
+    %elif %1 == 0x10
+        vbroadcasti128 ymm9, [rcx]
+    %else
+        %error
+    %endif
+
+    ; round key 0-9
+    %if %1 == 0x08
+        vpbroadcastq ymm0, [rcx + 0x08] ; weyl
+        vpbroadcastq ymm1, [rcx + 0x10] ; key
+    %elif %1 == 0x10
+        vbroadcasti128 ymm0, [rcx + 0x10] ; weyl
+        vbroadcasti128 ymm1, [rcx + 0x20] ; key
     %else
         %error
     %endif
@@ -70,10 +83,18 @@ global mckl_philox4x32_avx2_kernel
         vmovdqa [rsp + r * 0x20], ymm1
         %assign r r + 1
     %endrep
+
+    vmovdqa ymm14, [rel philox_avx2_32_mask]
+%endmacro
+
+%macro philox_avx2_32_epilogue 0
+    .return:
+        vzeroupper
+        epilogue
 %endmacro
 
 %macro philox_avx2_32_rbox 2
-    vmovdqa ymm15, [rsp + %1 * 0x20]
+    vmovdqa ymm15, [rsp + %1 * 0x20] ; round key
 
     vpmuludq ymm10, ymm0, ymm9
     vpmuludq ymm11, ymm1, ymm9
@@ -120,20 +141,6 @@ global mckl_philox4x32_avx2_kernel
 %endmacro
 
 %macro philox_avx2_32_generate 4
-    %if %1 == 0x08
-        vpbroadcastq ymm8, [rsi]
-        vpbroadcastq ymm9, [rdx]
-    %elif %1 == 0x10
-        vbroadcasti128 ymm8, [rsi]
-        vbroadcasti128 ymm9, [rdx]
-    %else
-        %error
-    %endif
-    add [rsi], rcx
-
-    vmovdqa ymm14, [rel philox_avx2_32_mask]
-
-    align 16
     .generate:
         increment_avx2_ymm ymm8, %1
         %if %2 != 0xE3
@@ -153,25 +160,25 @@ global mckl_philox4x32_avx2_kernel
         %endrep
         philox_avx2_32_rbox 9, %4
 
-        cmp rcx, 0x100 / %1
+        cmp rsi, 0x100 / %1
         jl .storen
 
-        vmovdqu [rdi + 0x00], ymm0
-        vmovdqu [rdi + 0x20], ymm1
-        vmovdqu [rdi + 0x40], ymm2
-        vmovdqu [rdi + 0x60], ymm3
-        vmovdqu [rdi + 0x80], ymm4
-        vmovdqu [rdi + 0xA0], ymm5
-        vmovdqu [rdi + 0xC0], ymm6
-        vmovdqu [rdi + 0xE0], ymm7
-        sub rcx, 0x100 / %1
-        add rdi, 0x100
+        vmovdqu [rdx + 0x00], ymm0
+        vmovdqu [rdx + 0x20], ymm1
+        vmovdqu [rdx + 0x40], ymm2
+        vmovdqu [rdx + 0x60], ymm3
+        vmovdqu [rdx + 0x80], ymm4
+        vmovdqu [rdx + 0xA0], ymm5
+        vmovdqu [rdx + 0xC0], ymm6
+        vmovdqu [rdx + 0xE0], ymm7
+        sub rsi, 0x100 / %1
+        add rdx, 0x100
 
-        test rcx, rcx
+        test rsi, rsi
         jnz .generate
 
         .storen:
-            test rcx, rcx,
+            test rsi, rsi,
             jz .return
             vmovdqa [rsp + 0x00], ymm0
             vmovdqa [rsp + 0x20], ymm1
@@ -181,9 +188,12 @@ global mckl_philox4x32_avx2_kernel
             vmovdqa [rsp + 0xA0], ymm5
             vmovdqa [rsp + 0xC0], ymm6
             vmovdqa [rsp + 0xE0], ymm7
+            mov rcx, rsi
+            imul rcx, %1 / 8
             mov rsi, rsp
-            imul rcx, %1 / 0x04
-            rep movsd
+            mov rdi, rdx
+            cld
+            rep movsq
 %endmacro
 
 section .rodata
@@ -201,19 +211,15 @@ def_increment_ymm_data_2
 section .text
 
 mckl_philox2x32_avx2_kernel:
-    philox_avx2_32_prologue
-    philox_avx2_32_round_key 0x08
+    philox_avx2_32_prologue 0x08
     philox_avx2_32_generate 0x08, 0xE3, 0xB1, 0xB1
-    vzeroupper
-    epilogue
+    philox_avx2_32_epilogue
 ; mckl_philox2x32_avx2_kernel:
 
 mckl_philox4x32_avx2_kernel:
-    philox_avx2_32_prologue
-    philox_avx2_32_round_key 0x10
+    philox_avx2_32_prologue 0x10
     philox_avx2_32_generate 0x10, 0xC6, 0x93, 0xB1
-    vzeroupper
-    epilogue
+    philox_avx2_32_epilogue
 ; mckl_philox4x32_avx2_kernel:
 
 ; vim:ft=nasm

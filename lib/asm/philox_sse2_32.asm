@@ -29,10 +29,10 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi r
-; rsi ctr.data()
-; rdx mul:weyl:key
-; rcx n
+; rdi ctr.data()
+; rsi n
+; rdx r
+; rcx mul:weyl:key
 
 ; xmm8 counter
 ; xmm9 multiplier
@@ -44,24 +44,39 @@
 global mckl_philox2x32_sse2_kernel
 global mckl_philox4x32_sse2_kernel
 
-%macro philox_sse2_32_prologue 0
+%macro philox_sse2_32_prologue 1
     prologue 4, 0xA0
-    mov rax, rsi
-    mov rsi, rdi
-    mov rdi, rdx
-    mov rdx, rcx
-    mov rcx, rax
-%endmacro
 
-%macro philox_sse2_32_round_key 1
+    ; counter
     %if %1 == 0x08
-        movq xmm0, [rdx + 0x08]
-        movq xmm1, [rdx + 0x10]
+        movq xmm8, [rdi]
+        pshufd xmm8, xmm8, 0x44
+    %elif %1 == 0x10
+        movdqu xmm8, [rdi]
+    %else
+        %error
+    %endif
+    add [rdi], rsi
+
+    ; multiplier
+    %if %1 == 0x08
+        movq xmm9, [rcx]
+        pshufd xmm9, xmm9, 0x44
+    %elif %1 == 0x10
+        movdqu xmm9, [rcx]
+    %else
+        %error
+    %endif
+
+    ; round key 0-9
+    %if %1 == 0x08
+        movq xmm0, [rcx + 0x08] ; weyl
+        movq xmm1, [rcx + 0x10] ; key
         pshufd xmm0, xmm0, 0x44
         pshufd xmm1, xmm1, 0x44
     %elif %1 == 0x10
-        movdqu xmm0, [rdx + 0x10]
-        movdqu xmm1, [rdx + 0x20]
+        movdqu xmm0, [rcx + 0x10] ; weyl
+        movdqu xmm1, [rcx + 0x20] ; key
     %else
         %error
     %endif
@@ -72,10 +87,17 @@ global mckl_philox4x32_sse2_kernel
         movdqa [rsp + r * 0x10], xmm1
         %assign r r + 1
     %endrep
+
+    movdqa xmm14, [rel philox_sse2_32_mask]
+%endmacro
+
+%macro philox_sse2_32_epilogue 0
+    .return:
+        epilogue
 %endmacro
 
 %macro philox_sse2_32_rbox 2
-    movdqa xmm15, [rsp + %1 * 0x10]
+    movdqa xmm15, [rsp + %1 * 0x10] ; round key
 
     movdqa xmm10, xmm0
     movdqa xmm11, xmm1
@@ -130,22 +152,6 @@ global mckl_philox4x32_sse2_kernel
 %endmacro
 
 %macro philox_sse2_32_generate 4
-    %if %1 == 0x08
-        movq xmm8, [rsi]
-        movq xmm9, [rdx]
-        pshufd xmm8, xmm8, 0x44
-        pshufd xmm9, xmm9, 0x44
-    %elif %1 == 0x10
-        movdqu xmm8, [rsi]
-        movdqu xmm9, [rdx]
-    %else
-        %error
-    %endif
-    add [rsi], rcx
-
-    movdqa xmm14, [rel philox_sse2_32_mask]
-
-    align 16
     .generate:
         increment_sse2_xmm xmm8, %1
         %if %2 != 0xE3
@@ -165,25 +171,25 @@ global mckl_philox4x32_sse2_kernel
         %endrep
         philox_sse2_32_rbox 9, %4
 
-        cmp rcx, 0x80 / %1
+        cmp rsi, 0x80 / %1
         jl .storen
 
-        movdqu [rdi + 0x00], xmm0
-        movdqu [rdi + 0x10], xmm1
-        movdqu [rdi + 0x20], xmm2
-        movdqu [rdi + 0x30], xmm3
-        movdqu [rdi + 0x40], xmm4
-        movdqu [rdi + 0x50], xmm5
-        movdqu [rdi + 0x60], xmm6
-        movdqu [rdi + 0x70], xmm7
-        sub rcx, 0x80 / %1
-        add rdi, 0x80
+        movdqu [rdx + 0x00], xmm0
+        movdqu [rdx + 0x10], xmm1
+        movdqu [rdx + 0x20], xmm2
+        movdqu [rdx + 0x30], xmm3
+        movdqu [rdx + 0x40], xmm4
+        movdqu [rdx + 0x50], xmm5
+        movdqu [rdx + 0x60], xmm6
+        movdqu [rdx + 0x70], xmm7
+        sub rsi, 0x80 / %1
+        add rdx, 0x80
 
-        test rcx, rcx
+        test rsi, rsi
         jnz .generate
 
         .storen:
-            test rcx, rcx,
+            test rsi, rsi,
             jz .return
             movdqa [rsp + 0x00], xmm0
             movdqa [rsp + 0x10], xmm1
@@ -193,9 +199,12 @@ global mckl_philox4x32_sse2_kernel
             movdqa [rsp + 0x50], xmm5
             movdqa [rsp + 0x60], xmm6
             movdqa [rsp + 0x70], xmm7
+            mov rcx, rsi
+            imul rcx, %1 / 8
             mov rsi, rsp
-            imul rcx, %1 / 0x04
-            rep movsd
+            mov rdi, rdx
+            cld
+            rep movsq
 %endmacro
 
 section .rodata
@@ -211,17 +220,15 @@ def_increment_xmm_data_2
 section .text
 
 mckl_philox2x32_sse2_kernel:
-    philox_sse2_32_prologue
-    philox_sse2_32_round_key 0x08
+    philox_sse2_32_prologue 0x08
     philox_sse2_32_generate 0x08, 0xE3, 0xB1, 0xB1
-    epilogue
+    philox_sse2_32_epilogue
 ; mckl_philox2x32_sse2_kernel:
 
 mckl_philox4x32_sse2_kernel:
-    philox_sse2_32_prologue
-    philox_sse2_32_round_key 0x10
+    philox_sse2_32_prologue 0x10
     philox_sse2_32_generate 0x10, 0xC6, 0x93, 0xB1
-    epilogue
+    philox_sse2_32_epilogue
 ; mckl_philox4x32_avx2_kernel:
 
 ; vim:ft=nasm

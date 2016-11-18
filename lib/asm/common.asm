@@ -39,10 +39,9 @@
 %endmacro
 
 %macro epilogue 0
-    .return:
-        mov rsp, rbp
-        pop rbp
-        ret
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro
 
 %macro increment_sse2_xmm 2
