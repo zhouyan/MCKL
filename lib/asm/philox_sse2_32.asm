@@ -213,6 +213,9 @@ philox_sse2_32_mask:
 dq 0xFFFFFFFF00000000
 dq 0xFFFFFFFF00000000
 
+def_increment_xmm_data_1
+def_increment_xmm_data_2
+
 section .text
 
 mckl_philox2x32_sse2_kernel:

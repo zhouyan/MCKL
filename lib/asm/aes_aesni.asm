@@ -279,6 +279,10 @@ global mckl_ars_aesni_avx2_kernel
             vmovdqu [rdx + 0x60], xmm6
 %endmacro
 
+section .data
+
+def_increment_xmm_data_2
+
 section .text
 
 mckl_aes128_aesni_sse2_kernel:

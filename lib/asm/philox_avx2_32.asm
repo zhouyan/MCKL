@@ -203,6 +203,9 @@ dq 0xFFFFFFFF00000000
 dq 0xFFFFFFFF00000000
 dq 0xFFFFFFFF00000000
 
+def_increment_ymm_data_1
+def_increment_ymm_data_2
+
 section .text
 
 mckl_philox2x32_avx2_kernel:
