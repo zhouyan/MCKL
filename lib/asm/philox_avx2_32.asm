@@ -84,7 +84,7 @@ global mckl_philox4x32_avx2_kernel
         %assign r r + 1
     %endrep
 
-    vmovdqa ymm14, [rel philox_avx2_32_mask]
+    vpbroadcastq ymm14, [rel philox_avx2_32_mask]
 %endmacro ; }}}
 
 %macro philox_avx2_32_epilogue 0 ; {{{
@@ -198,15 +198,11 @@ global mckl_philox4x32_avx2_kernel
 
 section .rodata
 
-align 32
-philox_avx2_32_mask:
-dq 0xFFFFFFFF00000000
-dq 0xFFFFFFFF00000000
-dq 0xFFFFFFFF00000000
-dq 0xFFFFFFFF00000000
-
 def_increment_ymm_data_1
 def_increment_ymm_data_2
+
+philox_avx2_32_mask:
+dq 0xFFFF_FFFF_0000_0000
 
 section .text
 

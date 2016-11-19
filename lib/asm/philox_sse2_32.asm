@@ -88,7 +88,8 @@ global mckl_philox4x32_sse2_kernel
         %assign r r + 1
     %endrep
 
-    movdqa xmm14, [rel philox_sse2_32_mask]
+    movq xmm14, [rel philox_sse2_32_mask]
+    pshufd xmm14, 0x44
 %endmacro ; }}}
 
 %macro philox_sse2_32_epilogue 0 ; {{{
@@ -209,13 +210,11 @@ global mckl_philox4x32_sse2_kernel
 
 section .rodata
 
-align 16
-philox_sse2_32_mask:
-dq 0xFFFFFFFF00000000
-dq 0xFFFFFFFF00000000
-
 def_increment_xmm_data_1
 def_increment_xmm_data_2
+
+philox_sse2_32_mask:
+dq 0xFFFF_FFFF_0000_0000
 
 section .text
 

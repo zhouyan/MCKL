@@ -34,7 +34,7 @@
 %macro prologue 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, ((0xFFFFFFFFFFFFFFFF >> %1) << %1)
+    and rsp, ((0xFFFF_FFFF_FFFF_FFFF >> %1) << %1)
     sub rsp, %2
 %endmacro ; }}}
 
