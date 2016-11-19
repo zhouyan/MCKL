@@ -44,7 +44,7 @@
 global mckl_philox2x32_avx2_kernel
 global mckl_philox4x32_avx2_kernel
 
-%macro philox_avx2_32_prologue 1
+%macro philox_avx2_32_prologue 1 ;{{{
     prologue 5, 0x140
 
     ; counter
@@ -85,15 +85,15 @@ global mckl_philox4x32_avx2_kernel
     %endrep
 
     vmovdqa ymm14, [rel philox_avx2_32_mask]
-%endmacro
+%endmacro ; }}}
 
-%macro philox_avx2_32_epilogue 0
+%macro philox_avx2_32_epilogue 0 ; {{{
     .return:
         vzeroupper
         epilogue
-%endmacro
+%endmacro ; }}}
 
-%macro philox_avx2_32_rbox 2
+%macro philox_avx2_32_rbox 2 ; {{{
     vmovdqa ymm15, [rsp + %1 * 0x20] ; round key
 
     vpmuludq ymm10, ymm0, ymm9
@@ -138,9 +138,9 @@ global mckl_philox4x32_avx2_kernel
     vpshufd ymm5, ymm5, %2
     vpshufd ymm6, ymm6, %2
     vpshufd ymm7, ymm7, %2
-%endmacro
+%endmacro ; }}}
 
-%macro philox_avx2_32_generate 4
+%macro philox_avx2_32_generate 4 ; {{{
     .generate:
         increment_avx2_ymm ymm8, %1
         %if %2 != 0xE3
@@ -194,7 +194,7 @@ global mckl_philox4x32_avx2_kernel
             mov rdi, rdx
             cld
             rep movsq
-%endmacro
+%endmacro ; }}}
 
 section .rodata
 

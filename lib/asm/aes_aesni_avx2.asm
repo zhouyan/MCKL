@@ -44,7 +44,7 @@ global mckl_aes192_aesni_avx2_kernel
 global mckl_aes256_aesni_avx2_kernel
 global mckl_ars_aesni_avx2_kernel
 
-%macro aes_aesni_avx2_prologue 1
+%macro aes_aesni_avx2_prologue 1 ; {{{
     prologue 4, (%1 - 5) * 0x10
 
     vmovdqu xmm8, [rdi]
@@ -74,15 +74,15 @@ global mckl_ars_aesni_avx2_kernel
             %endrep
         %endif
     %endif
-%endmacro
+%endmacro ; }}}
 
-%macro aes_aesni_avx2_epilogue 0
+%macro aes_aesni_avx2_epilogue 0 ; {{{
     .return:
         vzeroupper
         epilogue
-%endmacro
+%endmacro ; }}}
 
-%macro aes_aesni_avx2_encfirst 1
+%macro aes_aesni_avx2_encfirst 1 ; {{{
     vpxor xmm0, xmm0, %1
     vpxor xmm1, xmm1, %1
     vpxor xmm2, xmm2, %1
@@ -91,9 +91,9 @@ global mckl_ars_aesni_avx2_kernel
     vpxor xmm5, xmm5, %1
     vpxor xmm6, xmm6, %1
     vpxor xmm7, xmm7, %1
-%endmacro
+%endmacro ; }}}
 
-%macro aes_aesni_avx2_enc 1
+%macro aes_aesni_avx2_enc 1 ; {{{
     vaesenc xmm0, xmm0, %1
     vaesenc xmm1, xmm1, %1
     vaesenc xmm2, xmm2, %1
@@ -102,9 +102,9 @@ global mckl_ars_aesni_avx2_kernel
     vaesenc xmm5, xmm5, %1
     vaesenc xmm6, xmm6, %1
     vaesenc xmm7, xmm7, %1
-%endmacro
+%endmacro ; }}}
 
-%macro aes_aesni_avx2_enclast 1
+%macro aes_aesni_avx2_enclast 1 ; {{{
     vaesenclast xmm0, xmm0, %1
     vaesenclast xmm1, xmm1, %1
     vaesenclast xmm2, xmm2, %1
@@ -113,9 +113,9 @@ global mckl_ars_aesni_avx2_kernel
     vaesenclast xmm5, xmm5, %1
     vaesenclast xmm6, xmm6, %1
     vaesenclast xmm7, xmm7, %1
-%endmacro
+%endmacro ; }}}
 
-%macro aes_aesni_avx2_generate 1
+%macro aes_aesni_avx2_generate 1 ; {{{
     .generate:
         increment_avx2_xmm xmm8, 0x10
         aes_aesni_avx2_encfirst xmm10
@@ -168,7 +168,7 @@ global mckl_ars_aesni_avx2_kernel
             mov rdi, rdx
             cld
             rep movsq
-%endmacro
+%endmacro ; }}}
 
 section .rodata
 

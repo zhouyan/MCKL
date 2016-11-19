@@ -31,20 +31,20 @@
 
 %use smartalign
 
-%macro prologue 2
+%macro prologue 2 ; {{{
     push rbp
     mov rbp, rsp
     and rsp, ((0xFFFFFFFFFFFFFFFF >> %1) << %1)
     sub rsp, %2
-%endmacro
+%endmacro ; }}}
 
-%macro epilogue 0
+%macro epilogue 0 ; {{{
     mov rsp, rbp
     pop rbp
     ret
-%endmacro
+%endmacro ; }}}
 
-%macro increment_sse2_xmm 2
+%macro increment_sse2_xmm 2 ; {{{
     movdqa xmm0, %1
     movdqa xmm1, %1
     movdqa xmm2, %1
@@ -76,9 +76,9 @@
     %else
         %error
     %endif
-%endmacro
+%endmacro ; }}}
 
-%macro increment_avx2_xmm 2
+%macro increment_avx2_xmm 2 ; {{{
     %if %2 == 0x08
         vpaddq xmm0, %1, [rel increment_xmm_data_1 + 0x00]
         vpaddq xmm1, %1, [rel increment_xmm_data_1 + 0x10]
@@ -102,9 +102,9 @@
     %else
         %error
     %endif
-%endmacro
+%endmacro ; }}}
 
-%macro increment_avx2_ymm 2
+%macro increment_avx2_ymm 2 ; {{{
     %if %2 == 0x08
         vpaddq ymm0, %1, [rel increment_ymm_data_1 + 0x000]
         vpaddq ymm1, %1, [rel increment_ymm_data_1 + 0x020]
@@ -144,9 +144,9 @@
     %else
         %error
     %endif
-%endmacro
+%endmacro ; }}}
 
-%macro def_increment_xmm_data_1 0
+%macro def_increment_xmm_data_1 0 ; {{{
     align 16
     increment_xmm_data_1:
     dq 0x01, 0x02
@@ -158,9 +158,9 @@
     dq 0x0D, 0x0E
     dq 0x0F, 0x10
     dq 0x10, 0x10
-%endmacro
+%endmacro ; }}}
 
-%macro def_increment_xmm_data_2 0
+%macro def_increment_xmm_data_2 0 ; {{{
     align 16
     increment_xmm_data_2:
     dq 0x01, 0x00
@@ -172,9 +172,9 @@
     dq 0x07, 0x00
     dq 0x08, 0x00
     dq 0x08, 0x00
-%endmacro
+%endmacro ; }}}
 
-%macro def_increment_ymm_data_1 0
+%macro def_increment_ymm_data_1 0 ; {{{
     align 32
     increment_ymm_data_1:
     dq 0x01, 0x02, 0x03, 0x04
@@ -186,9 +186,9 @@
     dq 0x19, 0x1A, 0x1B, 0x1C
     dq 0x1D, 0x1E, 0x1F, 0x20
     dq 0x20, 0x20, 0x20, 0x20
-%endmacro
+%endmacro ; }}}
 
-%macro def_increment_ymm_data_2 0
+%macro def_increment_ymm_data_2 0 ; {{{
     align 32
     increment_ymm_data_2:
     dq 0x01, 0x00, 0x02, 0x00
@@ -200,9 +200,9 @@
     dq 0x0D, 0x00, 0x0E, 0x00
     dq 0x0F, 0x00, 0x10, 0x00
     dq 0x10, 0x00, 0x10, 0x00
-%endmacro
+%endmacro ; }}}
 
-%macro def_increment_ymm_data_4 0
+%macro def_increment_ymm_data_4 0 ; {{{
     align 32
     increment_ymm_data_4:
     dq 0x01, 0x00, 0x00, 0x00
@@ -214,9 +214,9 @@
     dq 0x07, 0x00, 0x00, 0x00
     dq 0x08, 0x00, 0x00, 0x00
     dq 0x08, 0x00, 0x00, 0x00
-%endmacro
+%endmacro ; }}}
 
-%macro def_increment_ymm_data_8 0
+%macro def_increment_ymm_data_8 0 ; {{{
     align 32
     increment_ymm_data_8:
     dq 0x01, 0x00, 0x00, 0x00
@@ -224,6 +224,6 @@
     dq 0x03, 0x00, 0x00, 0x00
     dq 0x04, 0x00, 0x00, 0x00
     dq 0x04, 0x00, 0x00, 0x00
-%endmacro
+%endmacro ; }}}
 
 ; vim:ft=nasm

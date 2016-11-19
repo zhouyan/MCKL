@@ -46,12 +46,12 @@
 
 global mckl_philox2x64_bmi2_kernel
 
-%macro philox2x64_bmi2_rbox 1
+%macro philox2x64_bmi2_rbox 1 ; {{{
     movq rax, %1
     xor rax, r11
     mulx r10, r11, r10
     xor r10, rax
-%endmacro
+%endmacro ; }}}
 
 section .text
 
