@@ -55,7 +55,7 @@ global mckl_philox2x64_bmi2_kernel
 
 section .text
 
-mckl_philox2x64_bmi2_kernel:
+mckl_philox2x64_bmi2_kernel: ; {{{
     prologue 0, 0
 
     test rsi, rsi
@@ -108,7 +108,7 @@ mckl_philox2x64_bmi2_kernel:
 
     .return:
         epilogue
-; mckl_philox2x64_bmi2_kernel:
+; mckl_philox2x64_bmi2_kernel: }}}
 
 ; vim:ft=nasm
 

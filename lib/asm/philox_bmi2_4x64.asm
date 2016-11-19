@@ -69,7 +69,7 @@ global mckl_philox4x64_bmi2_kernel
 
 section .text
 
-mckl_philox4x64_bmi2_kernel:
+mckl_philox4x64_bmi2_kernel: ; {{{
     prologue 0, 0
     push rbx
     push r12
@@ -143,6 +143,6 @@ mckl_philox4x64_bmi2_kernel:
         pop r12
         pop rbx
         epilogue
-; mckl_philox4x64_bmi2_kernel:
+; mckl_philox4x64_bmi2_kernel: }}}
 
 ; vim:ft=nasm
