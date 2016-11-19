@@ -84,7 +84,6 @@ void mckl_philox4x64_bmi2_kernel(void *, std::size_t, void *, const void *);
 
 } // extern "C"
 
-
 namespace mckl
 {
 

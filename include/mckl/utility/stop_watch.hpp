@@ -79,7 +79,7 @@ inline std::uint64_t cycle_start()
 #ifdef MCKL_MSVC
     unsigned aux;
     return static_cast<std::uint64_t>(__rdtscp(&aux));
-#else // MCKL_MSVC
+#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
@@ -97,7 +97,7 @@ inline std::uint64_t cycle_stop()
 #ifdef MCKL_MSVC
     unsigned aux;
     return static_cast<std::uint64_t>(__rdtscp(&aux));
-#else // MCKL_MSVC
+#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
@@ -116,7 +116,7 @@ inline std::uint64_t cycle_start()
 {
 #ifdef MCKL_MSVC
     return static_cast<std::uint64_t>(__rdtsc());
-#else // MCKL_MSVC
+#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
@@ -133,7 +133,7 @@ inline std::uint64_t cycle_stop()
 {
 #ifdef MCKL_MSVC
     return static_cast<std::uint64_t>(__rdtsc());
-#else // MCKL_MSVC
+#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
