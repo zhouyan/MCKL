@@ -116,6 +116,7 @@ global mckl_ars_aesni_avx2_kernel
 %endmacro ; }}}
 
 %macro aes_aesni_avx2_generate 1 ; {{{
+    align 16
     .generate:
         increment_avx2_xmm xmm8, 0x10
         aes_aesni_avx2_encfirst xmm10

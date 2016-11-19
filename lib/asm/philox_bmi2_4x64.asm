@@ -107,6 +107,7 @@ mckl_philox4x64_bmi2_kernel: ; {{{
     vpaddq xmm8, xmm7, xmm15
     vpaddq xmm9, xmm8, xmm15
 
+    align 16
     .generate:
         clc
         add r8, 1

@@ -120,6 +120,7 @@ global mckl_ars_aesni_sse2_kernel
 %endmacro ; }}}
 
 %macro aes_aesni_sse2_generate 1 ; {{{
+    align 16
     .generate:
         increment_sse2_xmm xmm8, 0x10
         aes_aesni_sse2_encfirst xmm10

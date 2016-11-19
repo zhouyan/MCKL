@@ -153,6 +153,7 @@ global mckl_philox4x32_sse2_kernel
 %endmacro ; }}}
 
 %macro philox_sse2_32_generate 4 ; {{{
+    align 16
     .generate:
         increment_sse2_xmm xmm8, %1
         %if %2 != 0xE3

@@ -141,6 +141,7 @@ global mckl_philox4x32_avx2_kernel
 %endmacro ; }}}
 
 %macro philox_avx2_32_generate 4 ; {{{
+    align 16
     .generate:
         increment_avx2_ymm ymm8, %1
         %if %2 != 0xE3
