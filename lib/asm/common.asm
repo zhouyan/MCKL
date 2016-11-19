@@ -29,8 +29,6 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-%use smartalign
-
 %macro prologue 2 ; {{{
     push rbp
     mov rbp, rsp
