@@ -89,7 +89,7 @@ global mckl_philox4x32_sse2_kernel
     %endrep
 
     movq xmm14, [rel philox_sse2_32_mask]
-    pshufd xmm14, 0x44
+    pshufd xmm14, xmm14, 0x44
 %endmacro ; }}}
 
 %macro philox_sse2_32_epilogue 0 ; {{{
