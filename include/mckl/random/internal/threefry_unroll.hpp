@@ -69,7 +69,7 @@
 #define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par)                 \
     MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x00, s, par)                    \
     MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x10, s, par)                    \
-    MCKL_NOINLINE_CALL round<N + 0x20>(                                       \
+    round<N + 0x20>(                                                          \
         s, par, std::integral_constant<bool, N + 0x20 <= Rounds>());
 
 #endif // MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP

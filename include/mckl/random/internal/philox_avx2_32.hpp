@@ -153,7 +153,7 @@ class PhiloxGeneratorAVX2Impl32
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_NOINLINE static void round(std::array<__m256i, S> &s,
+    static void round(std::array<__m256i, S> &s,
         const std::array<__m256i, Rounds> &rk, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk);

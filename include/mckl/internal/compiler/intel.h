@@ -135,8 +135,4 @@
 #define MCKL_INLINE_CALL _Pragma("forceinline recursive")
 #endif
 
-#ifndef MCKL_NOINLINE_CALL
-#define MCKL_NOINLINE_CALL _Pragma("noinline")
-#endif
-
 #endif // MCKL_INTERNAL_COMPILER_INTEL_H

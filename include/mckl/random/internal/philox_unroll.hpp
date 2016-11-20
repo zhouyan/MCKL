@@ -52,7 +52,6 @@
 
 #define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk)                    \
     MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(0x00, s, rk)                           \
-    MCKL_NOINLINE_CALL round<N + 0x10>(                                       \
-        s, rk, std::integral_constant<bool, N + 0x10 <= Rounds>());
+    round<N + 0x10>(s, rk, std::integral_constant<bool, N + 0x10 <= Rounds>());
 
 #endif // MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_HPP

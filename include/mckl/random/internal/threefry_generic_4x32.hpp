@@ -148,8 +148,8 @@ class Threefry4x32GeneratorGenericImpl
     }
 
     template <typename ResultType>
-    MCKL_NOINLINE static void eval(Counter<T, K> &ctr, std::size_t n,
-        ResultType *r, const std::array<T, K + 4> &par)
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K + 4> &par)
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 

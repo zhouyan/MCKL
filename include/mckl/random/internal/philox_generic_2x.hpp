@@ -123,8 +123,8 @@ class Philox2xGeneratorGenericImpl
     }
 
     template <typename ResultType>
-    MCKL_NOINLINE static void eval(Counter<T, K> &ctr, std::size_t n,
-        ResultType *r, const std::array<T, K / 2> &key)
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K / 2> &key)
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
@@ -194,8 +194,8 @@ class Philox2x64GeneratorGenericImpl
     }
 #else  // MCKL_USE_BMI2
     template <typename ResultType>
-    MCKL_NOINLINE static void eval(Counter<T, K> &ctr, std::size_t n,
-        ResultType *r, const std::array<T, K / 2> &key)
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K / 2> &key)
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 

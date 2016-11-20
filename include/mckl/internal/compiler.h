@@ -60,12 +60,4 @@
 #define MCKL_INLINE_CALL
 #endif
 
-#ifndef MCKL_NOINLINE
-#define MCKL_NOINLINE
-#endif
-
-#ifndef MCKL_NOINLINE_CALL
-#define MCKL_NOINLINE_CALL
-#endif
-
 #endif // MCKL_INTERNAL_COMPILER_HPP

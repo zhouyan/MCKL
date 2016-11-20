@@ -127,7 +127,7 @@ class AESGeneratorAESNIImpl
     }
 
     template <std::size_t N>
-    MCKL_NOINLINE static void round(
+    static void round(
         __m128i &s, const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N, s, rk);
@@ -140,7 +140,7 @@ class AESGeneratorAESNIImpl
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_NOINLINE static void round(std::array<__m128i, S> &s,
+    static void round(std::array<__m128i, S> &s,
         const std::array<__m128i, rounds_ + 1> &rk, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(N, s, rk);

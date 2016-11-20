@@ -144,23 +144,40 @@ class Threefry4x32GeneratorSSE2Impl
     static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K + 4> &par)
     {
-        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
-            MCKL_NOINLINE_CALL Threefry4x32GeneratorGenericImpl<T>::eval(
-                ctr, n, r, par);
-            return;
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
+
+        const std::size_t n0 =
+            static_cast<std::size_t>(std::min(static_cast<std::uint64_t>(n),
+                std::numeric_limits<std::uint64_t>::max() - ctr.front()));
+
+        eval_kernel(ctr, n0, r, par);
+        n -= n0;
+        r += n0 * R;
+
+        if (n != 0) {
+            eval(ctr, r, par);
+            n -= 1;
+            r += R;
         }
 
+        eval_kernel(ctr, n, r, par);
+    }
+
+    private:
+    template <typename ResultType>
+    static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K + 4> &par)
+    {
         constexpr std::size_t S = 8;
         constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
-        constexpr std::size_t M = sizeof(__m128i) / sizeof(ResultType);
-        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
         __m128i xmmc =
             _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
-        ctr.front() += n / N * N;
+        ctr.front() += n;
 
-        while (n >= N) {
+        __m128i *rptr = reinterpret_cast<__m128i *>(r);
+        while (n != 0) {
             __m128i xmms0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
             __m128i xmms1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
             __m128i xmms2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
@@ -239,21 +256,30 @@ class Threefry4x32GeneratorSSE2Impl
             xmms3 = xmms5;
             xmms5 = xmmt6;
 
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0), xmms0);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 1), xmms1);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 2), xmms2);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 3), xmms3);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 4), xmms4);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 5), xmms5);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 6), xmms6);
-            _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 7), xmms7);
-
-            n -= N;
-            r += N * R;
+            if (n >= N) {
+                n -= N;
+                _mm_storeu_si128(rptr++, xmms0);
+                _mm_storeu_si128(rptr++, xmms1);
+                _mm_storeu_si128(rptr++, xmms2);
+                _mm_storeu_si128(rptr++, xmms3);
+                _mm_storeu_si128(rptr++, xmms4);
+                _mm_storeu_si128(rptr++, xmms5);
+                _mm_storeu_si128(rptr++, xmms6);
+                _mm_storeu_si128(rptr++, xmms7);
+            } else {
+                std::array<__m128i, S> s;
+                std::get<0>(s) = xmms0;
+                std::get<1>(s) = xmms1;
+                std::get<2>(s) = xmms2;
+                std::get<3>(s) = xmms3;
+                std::get<4>(s) = xmms4;
+                std::get<5>(s) = xmms5;
+                std::get<6>(s) = xmms6;
+                std::get<7>(s) = xmms7;
+                std::memcpy(rptr, s.data(), n * sizeof(T) * K);
+                break;
+            }
         }
-
-        MCKL_NOINLINE_CALL Threefry4x32GeneratorGenericImpl<T>::eval(
-            ctr, n, r, par);
     }
 }; // class Threefry4x32GeneratorSSE2Impl
 

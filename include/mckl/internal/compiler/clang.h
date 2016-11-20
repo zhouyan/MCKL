@@ -140,8 +140,4 @@
 #define MCKL_INLINE __attribute__((always_inline, flatten))
 #endif
 
-#ifndef MCKL_NOINLINE
-#define MCKL_NOINLINE __attribute__((noinline))
-#endif
-
 #endif // MCKL_INTERNAL_COMPILER_CLANG_H

@@ -110,7 +110,7 @@ class ThreefryGeneratorGenericImpl
     }
 
     template <std::size_t N>
-    MCKL_NOINLINE static void round(
+    static void round(
         std::array<T, K> &s, const std::array<T, K + 4> &par, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par);

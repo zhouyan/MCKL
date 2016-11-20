@@ -182,195 +182,6 @@
     MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_RBOX(N * 8 + 8);                 \
     MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_KBOX(N * 8 + 8);
 
-#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_ROUND_20                     \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_KBOX(0);                         \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(0);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(1);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_4(2);
-
-#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_ROUND_80                     \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_KBOX(0);                         \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(0);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(1);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(2);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(3);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(4);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(5);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(6);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(7);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(8);                      \
-    MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(9);
-
-#define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_ROUND(L)                     \
-    constexpr std::size_t S = 16;                                             \
-    constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);          \
-    constexpr std::size_t M = sizeof(__m128i) / sizeof(ResultType);           \
-    constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);             \
-                                                                              \
-    __m128i xmmc0 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x1>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0x0>(ctr)));                     \
-    __m128i xmmc1 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x3>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0x2>(ctr)));                     \
-    __m128i xmmc2 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x5>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0x4>(ctr)));                     \
-    __m128i xmmc3 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x7>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0x6>(ctr)));                     \
-    __m128i xmmc4 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x9>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0x8>(ctr)));                     \
-    __m128i xmmc5 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xB>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0xA>(ctr)));                     \
-    __m128i xmmc6 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xD>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0xC>(ctr)));                     \
-    __m128i xmmc7 =                                                           \
-        _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xF>(ctr)),           \
-            static_cast<MCKL_INT64>(std::get<0xE>(ctr)));                     \
-                                                                              \
-    while (n >= N) {                                                          \
-        __m128i xmmt0 = _mm_add_epi64(xmmc0, _mm_set_epi64x(0, 1));           \
-        __m128i xmmt8 = _mm_add_epi64(xmmc0, _mm_set_epi64x(0, 2));           \
-        xmmc0 = xmmt8;                                                        \
-                                                                              \
-        __m128i xmmt1 = xmmc1;                                                \
-        __m128i xmmt2 = xmmc2;                                                \
-        __m128i xmmt3 = xmmc3;                                                \
-        __m128i xmmt4 = xmmc4;                                                \
-        __m128i xmmt5 = xmmc5;                                                \
-        __m128i xmmt6 = xmmc6;                                                \
-        __m128i xmmt7 = xmmc7;                                                \
-        __m128i xmmt9 = xmmc1;                                                \
-        __m128i xmmtA = xmmc2;                                                \
-        __m128i xmmtB = xmmc3;                                                \
-        __m128i xmmtC = xmmc4;                                                \
-        __m128i xmmtD = xmmc5;                                                \
-        __m128i xmmtE = xmmc6;                                                \
-        __m128i xmmtF = xmmc7;                                                \
-                                                                              \
-        __m128i xmms0;                                                        \
-        __m128i xmms1;                                                        \
-        __m128i xmms2;                                                        \
-        __m128i xmms3;                                                        \
-        __m128i xmms4;                                                        \
-        __m128i xmms5;                                                        \
-        __m128i xmms6;                                                        \
-        __m128i xmms7;                                                        \
-        __m128i xmms8;                                                        \
-        __m128i xmms9;                                                        \
-        __m128i xmmsA;                                                        \
-        __m128i xmmsB;                                                        \
-        __m128i xmmsC;                                                        \
-        __m128i xmmsD;                                                        \
-        __m128i xmmsE;                                                        \
-        __m128i xmmsF;                                                        \
-                                                                              \
-        xmms2 = xmmt2;                                                        \
-        xmmt2 = xmmt1;                                                        \
-        xmmt1 = xmmt8;                                                        \
-        xmmt8 = xmmt4;                                                        \
-        xmmt4 = xmms2;                                                        \
-                                                                              \
-        xmms6 = xmmt6;                                                        \
-        xmmt6 = xmmt3;                                                        \
-        xmmt3 = xmmt9;                                                        \
-        xmmt9 = xmmtC;                                                        \
-        xmmtC = xmms6;                                                        \
-                                                                              \
-        xmmsE = xmmtE;                                                        \
-        xmmtE = xmmt7;                                                        \
-        xmmt7 = xmmtB;                                                        \
-        xmmtB = xmmtD;                                                        \
-        xmmtD = xmmsE;                                                        \
-                                                                              \
-        xmms5 = xmmt5;                                                        \
-        xmmt5 = xmmtA;                                                        \
-        xmmtA = xmms5;                                                        \
-                                                                              \
-        xmms0 = _mm_unpacklo_epi64(xmmt0, xmmt1);                             \
-        xmms1 = _mm_unpackhi_epi64(xmmt0, xmmt1);                             \
-        xmms2 = _mm_unpacklo_epi64(xmmt2, xmmt3);                             \
-        xmms3 = _mm_unpackhi_epi64(xmmt2, xmmt3);                             \
-        xmms4 = _mm_unpacklo_epi64(xmmt4, xmmt5);                             \
-        xmms5 = _mm_unpackhi_epi64(xmmt4, xmmt5);                             \
-        xmms6 = _mm_unpacklo_epi64(xmmt6, xmmt7);                             \
-        xmms7 = _mm_unpackhi_epi64(xmmt6, xmmt7);                             \
-        xmms8 = _mm_unpacklo_epi64(xmmt8, xmmt9);                             \
-        xmms9 = _mm_unpackhi_epi64(xmmt8, xmmt9);                             \
-        xmmsA = _mm_unpacklo_epi64(xmmtA, xmmtB);                             \
-        xmmsB = _mm_unpackhi_epi64(xmmtA, xmmtB);                             \
-        xmmsC = _mm_unpacklo_epi64(xmmtC, xmmtD);                             \
-        xmmsD = _mm_unpackhi_epi64(xmmtC, xmmtD);                             \
-        xmmsE = _mm_unpacklo_epi64(xmmtE, xmmtF);                             \
-        xmmsF = _mm_unpackhi_epi64(xmmtE, xmmtF);                             \
-                                                                              \
-        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_ROUND_##L;                   \
-                                                                              \
-        xmmt0 = _mm_unpacklo_epi64(xmms0, xmms1);                             \
-        xmmt1 = _mm_unpackhi_epi64(xmms0, xmms1);                             \
-        xmmt2 = _mm_unpacklo_epi64(xmms2, xmms3);                             \
-        xmmt3 = _mm_unpackhi_epi64(xmms2, xmms3);                             \
-        xmmt4 = _mm_unpacklo_epi64(xmms4, xmms5);                             \
-        xmmt5 = _mm_unpackhi_epi64(xmms4, xmms5);                             \
-        xmmt6 = _mm_unpacklo_epi64(xmms6, xmms7);                             \
-        xmmt7 = _mm_unpackhi_epi64(xmms6, xmms7);                             \
-        xmmt8 = _mm_unpacklo_epi64(xmms8, xmms9);                             \
-        xmmt9 = _mm_unpackhi_epi64(xmms8, xmms9);                             \
-        xmmtA = _mm_unpacklo_epi64(xmmsA, xmmsB);                             \
-        xmmtB = _mm_unpackhi_epi64(xmmsA, xmmsB);                             \
-        xmmtC = _mm_unpacklo_epi64(xmmsC, xmmsD);                             \
-        xmmtD = _mm_unpackhi_epi64(xmmsC, xmmsD);                             \
-        xmmtE = _mm_unpacklo_epi64(xmmsE, xmmsF);                             \
-        xmmtF = _mm_unpackhi_epi64(xmmsE, xmmsF);                             \
-                                                                              \
-        xmms1 = xmmt1;                                                        \
-        xmmt1 = xmmt2;                                                        \
-        xmmt2 = xmmt4;                                                        \
-        xmmt4 = xmmt8;                                                        \
-        xmmt8 = xmms1;                                                        \
-                                                                              \
-        xmms3 = xmmt3;                                                        \
-        xmmt3 = xmmt6;                                                        \
-        xmmt6 = xmmtC;                                                        \
-        xmmtC = xmmt9;                                                        \
-        xmmt9 = xmms3;                                                        \
-                                                                              \
-        xmms7 = xmmt7;                                                        \
-        xmmt7 = xmmtE;                                                        \
-        xmmtE = xmmtD;                                                        \
-        xmmtD = xmmtB;                                                        \
-        xmmtB = xmms7;                                                        \
-                                                                              \
-        xmms5 = xmmt5;                                                        \
-        xmmt5 = xmmtA;                                                        \
-        xmmtA = xmms5;                                                        \
-                                                                              \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x0), xmmt0);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x1), xmmt1);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x2), xmmt2);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x3), xmmt3);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x4), xmmt4);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x5), xmmt5);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x6), xmmt6);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x7), xmmt7);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x8), xmmt8);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0x9), xmmt9);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0xA), xmmtA);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0xB), xmmtB);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0xC), xmmtC);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0xD), xmmtD);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0xE), xmmtE);    \
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(r + M * 0xF), xmmtF);    \
-                                                                              \
-        n -= N;                                                               \
-        r += N * R;                                                           \
-    }                                                                         \
-    _mm_storeu_si128(reinterpret_cast<__m128i *>(ctr.data()), xmmc0);
-
 namespace mckl
 {
 
@@ -406,14 +217,220 @@ class Threefry16x64GeneratorSSE2Impl
     static void eval(std::array<std::uint64_t, 16> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K + 4> &par)
     {
-        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
-            MCKL_NOINLINE_CALL Threefry16x64GeneratorGenericImpl<T>::eval(
-                ctr, n, r, par);
-            return;
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
+
+        const std::size_t n0 =
+            static_cast<std::size_t>(std::min(static_cast<std::uint64_t>(n),
+                std::numeric_limits<std::uint64_t>::max() - ctr.front()));
+
+        eval_kernel(ctr, n0, r, par);
+        n -= n0;
+        r += n0 * R;
+
+        if (n != 0) {
+            eval(ctr, r, par);
+            n -= 1;
+            r += R;
         }
-        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_ROUND(20)
-        MCKL_NOINLINE_CALL Threefry16x64GeneratorGenericImpl<T>::eval(
-            ctr, n, r, par);
+
+        eval_kernel(ctr, n, r, par);
+    }
+
+    private:
+    template <typename ResultType>
+    static void eval_kernel(std::array<std::uint64_t, 16> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K + 4> &par)
+    {
+        constexpr std::size_t S = 16;
+        constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
+
+        __m128i xmmc0 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x0>(ctr)));
+        __m128i xmmc1 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x3>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x2>(ctr)));
+        __m128i xmmc2 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x5>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x4>(ctr)));
+        __m128i xmmc3 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x7>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x6>(ctr)));
+        __m128i xmmc4 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x9>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x8>(ctr)));
+        __m128i xmmc5 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xB>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0xA>(ctr)));
+        __m128i xmmc6 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xD>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0xC>(ctr)));
+        __m128i xmmc7 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xF>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0xE>(ctr)));
+        ctr.front() += n;
+
+        __m128i *rptr = reinterpret_cast<__m128i *>(r);
+        while (n != 0) {
+            __m128i xmmt0 = _mm_add_epi64(xmmc0, _mm_set_epi64x(0, 1));
+            __m128i xmmt8 = _mm_add_epi64(xmmc0, _mm_set_epi64x(0, 2));
+            xmmc0 = xmmt8;
+
+            __m128i xmmt1 = xmmc1;
+            __m128i xmmt2 = xmmc2;
+            __m128i xmmt3 = xmmc3;
+            __m128i xmmt4 = xmmc4;
+            __m128i xmmt5 = xmmc5;
+            __m128i xmmt6 = xmmc6;
+            __m128i xmmt7 = xmmc7;
+            __m128i xmmt9 = xmmc1;
+            __m128i xmmtA = xmmc2;
+            __m128i xmmtB = xmmc3;
+            __m128i xmmtC = xmmc4;
+            __m128i xmmtD = xmmc5;
+            __m128i xmmtE = xmmc6;
+            __m128i xmmtF = xmmc7;
+
+            __m128i xmms0;
+            __m128i xmms1;
+            __m128i xmms2;
+            __m128i xmms3;
+            __m128i xmms4;
+            __m128i xmms5;
+            __m128i xmms6;
+            __m128i xmms7;
+            __m128i xmms8;
+            __m128i xmms9;
+            __m128i xmmsA;
+            __m128i xmmsB;
+            __m128i xmmsC;
+            __m128i xmmsD;
+            __m128i xmmsE;
+            __m128i xmmsF;
+
+            xmms2 = xmmt2;
+            xmmt2 = xmmt1;
+            xmmt1 = xmmt8;
+            xmmt8 = xmmt4;
+            xmmt4 = xmms2;
+
+            xmms6 = xmmt6;
+            xmmt6 = xmmt3;
+            xmmt3 = xmmt9;
+            xmmt9 = xmmtC;
+            xmmtC = xmms6;
+
+            xmmsE = xmmtE;
+            xmmtE = xmmt7;
+            xmmt7 = xmmtB;
+            xmmtB = xmmtD;
+            xmmtD = xmmsE;
+
+            xmms5 = xmmt5;
+            xmmt5 = xmmtA;
+            xmmtA = xmms5;
+
+            xmms0 = _mm_unpacklo_epi64(xmmt0, xmmt1);
+            xmms1 = _mm_unpackhi_epi64(xmmt0, xmmt1);
+            xmms2 = _mm_unpacklo_epi64(xmmt2, xmmt3);
+            xmms3 = _mm_unpackhi_epi64(xmmt2, xmmt3);
+            xmms4 = _mm_unpacklo_epi64(xmmt4, xmmt5);
+            xmms5 = _mm_unpackhi_epi64(xmmt4, xmmt5);
+            xmms6 = _mm_unpacklo_epi64(xmmt6, xmmt7);
+            xmms7 = _mm_unpackhi_epi64(xmmt6, xmmt7);
+            xmms8 = _mm_unpacklo_epi64(xmmt8, xmmt9);
+            xmms9 = _mm_unpackhi_epi64(xmmt8, xmmt9);
+            xmmsA = _mm_unpacklo_epi64(xmmtA, xmmtB);
+            xmmsB = _mm_unpackhi_epi64(xmmtA, xmmtB);
+            xmmsC = _mm_unpacklo_epi64(xmmtC, xmmtD);
+            xmmsD = _mm_unpackhi_epi64(xmmtC, xmmtD);
+            xmmsE = _mm_unpacklo_epi64(xmmtE, xmmtF);
+            xmmsF = _mm_unpackhi_epi64(xmmtE, xmmtF);
+
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_KBOX(0);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(0);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(1);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_4(2);
+
+            xmmt0 = _mm_unpacklo_epi64(xmms0, xmms1);
+            xmmt1 = _mm_unpackhi_epi64(xmms0, xmms1);
+            xmmt2 = _mm_unpacklo_epi64(xmms2, xmms3);
+            xmmt3 = _mm_unpackhi_epi64(xmms2, xmms3);
+            xmmt4 = _mm_unpacklo_epi64(xmms4, xmms5);
+            xmmt5 = _mm_unpackhi_epi64(xmms4, xmms5);
+            xmmt6 = _mm_unpacklo_epi64(xmms6, xmms7);
+            xmmt7 = _mm_unpackhi_epi64(xmms6, xmms7);
+            xmmt8 = _mm_unpacklo_epi64(xmms8, xmms9);
+            xmmt9 = _mm_unpackhi_epi64(xmms8, xmms9);
+            xmmtA = _mm_unpacklo_epi64(xmmsA, xmmsB);
+            xmmtB = _mm_unpackhi_epi64(xmmsA, xmmsB);
+            xmmtC = _mm_unpacklo_epi64(xmmsC, xmmsD);
+            xmmtD = _mm_unpackhi_epi64(xmmsC, xmmsD);
+            xmmtE = _mm_unpacklo_epi64(xmmsE, xmmsF);
+            xmmtF = _mm_unpackhi_epi64(xmmsE, xmmsF);
+
+            xmms1 = xmmt1;
+            xmmt1 = xmmt2;
+            xmmt2 = xmmt4;
+            xmmt4 = xmmt8;
+            xmmt8 = xmms1;
+
+            xmms3 = xmmt3;
+            xmmt3 = xmmt6;
+            xmmt6 = xmmtC;
+            xmmtC = xmmt9;
+            xmmt9 = xmms3;
+
+            xmms7 = xmmt7;
+            xmmt7 = xmmtE;
+            xmmtE = xmmtD;
+            xmmtD = xmmtB;
+            xmmtB = xmms7;
+
+            xmms5 = xmmt5;
+            xmmt5 = xmmtA;
+            xmmtA = xmms5;
+
+            if (n >= N) {
+                n -= N;
+                _mm_storeu_si128(rptr++, xmmt0);
+                _mm_storeu_si128(rptr++, xmmt1);
+                _mm_storeu_si128(rptr++, xmmt2);
+                _mm_storeu_si128(rptr++, xmmt3);
+                _mm_storeu_si128(rptr++, xmmt4);
+                _mm_storeu_si128(rptr++, xmmt5);
+                _mm_storeu_si128(rptr++, xmmt6);
+                _mm_storeu_si128(rptr++, xmmt7);
+                _mm_storeu_si128(rptr++, xmmt8);
+                _mm_storeu_si128(rptr++, xmmt9);
+                _mm_storeu_si128(rptr++, xmmtA);
+                _mm_storeu_si128(rptr++, xmmtB);
+                _mm_storeu_si128(rptr++, xmmtC);
+                _mm_storeu_si128(rptr++, xmmtD);
+                _mm_storeu_si128(rptr++, xmmtE);
+                _mm_storeu_si128(rptr++, xmmtF);
+            } else {
+                std::array<__m128i, S> s;
+                std::get<0x0>(s) = xmmt0;
+                std::get<0x1>(s) = xmmt1;
+                std::get<0x2>(s) = xmmt2;
+                std::get<0x3>(s) = xmmt3;
+                std::get<0x4>(s) = xmmt4;
+                std::get<0x5>(s) = xmmt5;
+                std::get<0x6>(s) = xmmt6;
+                std::get<0x7>(s) = xmmt7;
+                std::get<0x8>(s) = xmmt8;
+                std::get<0x9>(s) = xmmt9;
+                std::get<0xA>(s) = xmmtA;
+                std::get<0xB>(s) = xmmtB;
+                std::get<0xC>(s) = xmmtC;
+                std::get<0xD>(s) = xmmtD;
+                std::get<0xE>(s) = xmmtE;
+                std::get<0xF>(s) = xmmtF;
+                std::memcpy(rptr, s.data(), n * sizeof(T) * K);
+                break;
+            }
+        }
     }
 }; // class Threefry16x64GeneratorSSE2Impl
 
@@ -446,14 +463,227 @@ class Threefish1024GeneratorSSE2Impl
     static void eval(std::array<std::uint64_t, 16> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K + 4> &par)
     {
-        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
-            MCKL_NOINLINE_CALL Threefish1024GeneratorGenericImpl<T>::eval(
-                ctr, n, r, par);
-            return;
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
+
+        const std::size_t n0 =
+            static_cast<std::size_t>(std::min(static_cast<std::uint64_t>(n),
+                std::numeric_limits<std::uint64_t>::max() - ctr.front()));
+
+        eval_kernel(ctr, n0, r, par);
+        n -= n0;
+        r += n0 * R;
+
+        if (n != 0) {
+            eval(ctr, r, par);
+            n -= 1;
+            r += R;
         }
-        MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_ROUND(80)
-        MCKL_NOINLINE_CALL Threefish1024GeneratorGenericImpl<T>::eval(
-            ctr, n, r, par);
+
+        eval_kernel(ctr, n, r, par);
+    }
+
+    private:
+    template <typename ResultType>
+    static void eval_kernel(std::array<std::uint64_t, 16> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K + 4> &par)
+    {
+        constexpr std::size_t S = 16;
+        constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
+
+        __m128i xmmc0 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x0>(ctr)));
+        __m128i xmmc1 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x3>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x2>(ctr)));
+        __m128i xmmc2 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x5>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x4>(ctr)));
+        __m128i xmmc3 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x7>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x6>(ctr)));
+        __m128i xmmc4 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x9>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0x8>(ctr)));
+        __m128i xmmc5 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xB>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0xA>(ctr)));
+        __m128i xmmc6 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xD>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0xC>(ctr)));
+        __m128i xmmc7 =
+            _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0xF>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0xE>(ctr)));
+        ctr.front() += n;
+
+        __m128i *rptr = reinterpret_cast<__m128i *>(r);
+        while (n != 0) {
+            __m128i xmmt0 = _mm_add_epi64(xmmc0, _mm_set_epi64x(0, 1));
+            __m128i xmmt8 = _mm_add_epi64(xmmc0, _mm_set_epi64x(0, 2));
+            xmmc0 = xmmt8;
+
+            __m128i xmmt1 = xmmc1;
+            __m128i xmmt2 = xmmc2;
+            __m128i xmmt3 = xmmc3;
+            __m128i xmmt4 = xmmc4;
+            __m128i xmmt5 = xmmc5;
+            __m128i xmmt6 = xmmc6;
+            __m128i xmmt7 = xmmc7;
+            __m128i xmmt9 = xmmc1;
+            __m128i xmmtA = xmmc2;
+            __m128i xmmtB = xmmc3;
+            __m128i xmmtC = xmmc4;
+            __m128i xmmtD = xmmc5;
+            __m128i xmmtE = xmmc6;
+            __m128i xmmtF = xmmc7;
+
+            __m128i xmms0;
+            __m128i xmms1;
+            __m128i xmms2;
+            __m128i xmms3;
+            __m128i xmms4;
+            __m128i xmms5;
+            __m128i xmms6;
+            __m128i xmms7;
+            __m128i xmms8;
+            __m128i xmms9;
+            __m128i xmmsA;
+            __m128i xmmsB;
+            __m128i xmmsC;
+            __m128i xmmsD;
+            __m128i xmmsE;
+            __m128i xmmsF;
+
+            xmms2 = xmmt2;
+            xmmt2 = xmmt1;
+            xmmt1 = xmmt8;
+            xmmt8 = xmmt4;
+            xmmt4 = xmms2;
+
+            xmms6 = xmmt6;
+            xmmt6 = xmmt3;
+            xmmt3 = xmmt9;
+            xmmt9 = xmmtC;
+            xmmtC = xmms6;
+
+            xmmsE = xmmtE;
+            xmmtE = xmmt7;
+            xmmt7 = xmmtB;
+            xmmtB = xmmtD;
+            xmmtD = xmmsE;
+
+            xmms5 = xmmt5;
+            xmmt5 = xmmtA;
+            xmmtA = xmms5;
+
+            xmms0 = _mm_unpacklo_epi64(xmmt0, xmmt1);
+            xmms1 = _mm_unpackhi_epi64(xmmt0, xmmt1);
+            xmms2 = _mm_unpacklo_epi64(xmmt2, xmmt3);
+            xmms3 = _mm_unpackhi_epi64(xmmt2, xmmt3);
+            xmms4 = _mm_unpacklo_epi64(xmmt4, xmmt5);
+            xmms5 = _mm_unpackhi_epi64(xmmt4, xmmt5);
+            xmms6 = _mm_unpacklo_epi64(xmmt6, xmmt7);
+            xmms7 = _mm_unpackhi_epi64(xmmt6, xmmt7);
+            xmms8 = _mm_unpacklo_epi64(xmmt8, xmmt9);
+            xmms9 = _mm_unpackhi_epi64(xmmt8, xmmt9);
+            xmmsA = _mm_unpacklo_epi64(xmmtA, xmmtB);
+            xmmsB = _mm_unpackhi_epi64(xmmtA, xmmtB);
+            xmmsC = _mm_unpacklo_epi64(xmmtC, xmmtD);
+            xmmsD = _mm_unpackhi_epi64(xmmtC, xmmtD);
+            xmmsE = _mm_unpacklo_epi64(xmmtE, xmmtF);
+            xmmsF = _mm_unpackhi_epi64(xmmtE, xmmtF);
+
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_KBOX(0);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(0);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(1);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(2);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(3);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(4);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(5);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(6);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(7);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(8);
+            MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_16X64_CYCLE_8(9);
+
+            xmmt0 = _mm_unpacklo_epi64(xmms0, xmms1);
+            xmmt1 = _mm_unpackhi_epi64(xmms0, xmms1);
+            xmmt2 = _mm_unpacklo_epi64(xmms2, xmms3);
+            xmmt3 = _mm_unpackhi_epi64(xmms2, xmms3);
+            xmmt4 = _mm_unpacklo_epi64(xmms4, xmms5);
+            xmmt5 = _mm_unpackhi_epi64(xmms4, xmms5);
+            xmmt6 = _mm_unpacklo_epi64(xmms6, xmms7);
+            xmmt7 = _mm_unpackhi_epi64(xmms6, xmms7);
+            xmmt8 = _mm_unpacklo_epi64(xmms8, xmms9);
+            xmmt9 = _mm_unpackhi_epi64(xmms8, xmms9);
+            xmmtA = _mm_unpacklo_epi64(xmmsA, xmmsB);
+            xmmtB = _mm_unpackhi_epi64(xmmsA, xmmsB);
+            xmmtC = _mm_unpacklo_epi64(xmmsC, xmmsD);
+            xmmtD = _mm_unpackhi_epi64(xmmsC, xmmsD);
+            xmmtE = _mm_unpacklo_epi64(xmmsE, xmmsF);
+            xmmtF = _mm_unpackhi_epi64(xmmsE, xmmsF);
+
+            xmms1 = xmmt1;
+            xmmt1 = xmmt2;
+            xmmt2 = xmmt4;
+            xmmt4 = xmmt8;
+            xmmt8 = xmms1;
+
+            xmms3 = xmmt3;
+            xmmt3 = xmmt6;
+            xmmt6 = xmmtC;
+            xmmtC = xmmt9;
+            xmmt9 = xmms3;
+
+            xmms7 = xmmt7;
+            xmmt7 = xmmtE;
+            xmmtE = xmmtD;
+            xmmtD = xmmtB;
+            xmmtB = xmms7;
+
+            xmms5 = xmmt5;
+            xmmt5 = xmmtA;
+            xmmtA = xmms5;
+
+            if (n >= N) {
+                n -= N;
+                _mm_storeu_si128(rptr++, xmmt0);
+                _mm_storeu_si128(rptr++, xmmt1);
+                _mm_storeu_si128(rptr++, xmmt2);
+                _mm_storeu_si128(rptr++, xmmt3);
+                _mm_storeu_si128(rptr++, xmmt4);
+                _mm_storeu_si128(rptr++, xmmt5);
+                _mm_storeu_si128(rptr++, xmmt6);
+                _mm_storeu_si128(rptr++, xmmt7);
+                _mm_storeu_si128(rptr++, xmmt8);
+                _mm_storeu_si128(rptr++, xmmt9);
+                _mm_storeu_si128(rptr++, xmmtA);
+                _mm_storeu_si128(rptr++, xmmtB);
+                _mm_storeu_si128(rptr++, xmmtC);
+                _mm_storeu_si128(rptr++, xmmtD);
+                _mm_storeu_si128(rptr++, xmmtE);
+                _mm_storeu_si128(rptr++, xmmtF);
+            } else {
+                std::array<__m128i, S> s;
+                std::get<0x0>(s) = xmmt0;
+                std::get<0x1>(s) = xmmt1;
+                std::get<0x2>(s) = xmmt2;
+                std::get<0x3>(s) = xmmt3;
+                std::get<0x4>(s) = xmmt4;
+                std::get<0x5>(s) = xmmt5;
+                std::get<0x6>(s) = xmmt6;
+                std::get<0x7>(s) = xmmt7;
+                std::get<0x8>(s) = xmmt8;
+                std::get<0x9>(s) = xmmt9;
+                std::get<0xA>(s) = xmmtA;
+                std::get<0xB>(s) = xmmtB;
+                std::get<0xC>(s) = xmmtC;
+                std::get<0xD>(s) = xmmtD;
+                std::get<0xE>(s) = xmmtE;
+                std::get<0xF>(s) = xmmtF;
+                std::memcpy(rptr, s.data(), n * sizeof(T) * K);
+                break;
+            }
+        }
     }
 }; // class Threefish1024GeneratorSSE2Impl
 

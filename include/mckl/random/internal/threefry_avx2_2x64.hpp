@@ -139,25 +139,42 @@ class Threefry2x64GeneratorAVX2Impl
     static void eval(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K + 4> &par)
     {
-        if (ctr.front() >= std::numeric_limits<std::uint64_t>::max() - n) {
-            MCKL_NOINLINE_CALL Threefry2x64GeneratorGenericImpl<T>::eval(
-                ctr, n, r, par);
-            return;
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
+
+        const std::size_t n0 =
+            static_cast<std::size_t>(std::min(static_cast<std::uint64_t>(n),
+                std::numeric_limits<std::uint64_t>::max() - ctr.front()));
+
+        eval_kernel(ctr, n0, r, par);
+        n -= n0;
+        r += n0 * R;
+
+        if (n != 0) {
+            eval(ctr, r, par);
+            n -= 1;
+            r += R;
         }
 
+        eval_kernel(ctr, n, r, par);
+    }
+
+    private:
+    template <typename ResultType>
+    static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
+        ResultType *r, const std::array<T, K + 4> &par)
+    {
         constexpr std::size_t S = 8;
         constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
-        constexpr std::size_t M = sizeof(__m256i) / sizeof(ResultType);
-        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
         __m256i ymmc =
             _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)),
                 static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
-        ctr.front() += n / N * N;
+        ctr.front() += n;
 
-        while (n >= N) {
+        __m256i *rptr = reinterpret_cast<__m256i *>(r);
+        while (n != 0) {
             __m256i ymms0 =
                 _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x02, 0, 0x01));
             __m256i ymms1 =
@@ -247,21 +264,30 @@ class Threefry2x64GeneratorAVX2Impl
             ymms3 = ymms5;
             ymms5 = ymmt6;
 
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 0), ymms0);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 1), ymms1);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 2), ymms2);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 3), ymms3);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 4), ymms4);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 5), ymms5);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 6), ymms6);
-            _mm256_storeu_si256(reinterpret_cast<__m256i *>(r + M * 7), ymms7);
-
-            n -= N;
-            r += N * R;
+            if (n >= N) {
+                n -= N;
+                _mm256_storeu_si256(rptr++, ymms0);
+                _mm256_storeu_si256(rptr++, ymms1);
+                _mm256_storeu_si256(rptr++, ymms2);
+                _mm256_storeu_si256(rptr++, ymms3);
+                _mm256_storeu_si256(rptr++, ymms4);
+                _mm256_storeu_si256(rptr++, ymms5);
+                _mm256_storeu_si256(rptr++, ymms6);
+                _mm256_storeu_si256(rptr++, ymms7);
+            } else {
+                std::array<__m256i, S> s;
+                std::get<0>(s) = ymms0;
+                std::get<1>(s) = ymms1;
+                std::get<2>(s) = ymms2;
+                std::get<3>(s) = ymms3;
+                std::get<4>(s) = ymms4;
+                std::get<5>(s) = ymms5;
+                std::get<6>(s) = ymms6;
+                std::get<7>(s) = ymms7;
+                std::memcpy(rptr, s.data(), n * sizeof(T) * K);
+                break;
+            }
         }
-
-        MCKL_NOINLINE_CALL Threefry2x64GeneratorGenericImpl<T>::eval(
-            ctr, n, r, par);
     }
 }; // class Threefry2x64GeneratorAVX2Impl
 
