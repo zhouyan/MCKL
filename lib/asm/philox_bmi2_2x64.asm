@@ -63,7 +63,6 @@ mckl_philox2x64_bmi2_kernel: ; {{{
 
     mov r8, [rdi]     ; counter[0]
     mov r9, [rdi + 8] ; counter[1]
-    clc
     add [rdi], rsi
     adc qword [rdi + 8], 0
 
@@ -85,7 +84,6 @@ mckl_philox2x64_bmi2_kernel: ; {{{
 
     align 16
     .generate:
-        clc
         add r8, 1
         adc r9, 0
         mov r10, r8
