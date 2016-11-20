@@ -111,9 +111,11 @@ mckl_philox4x64_bmi2_kernel: ; {{{
     .generate:
         clc
         add r8, 1
+        jnc .round
         adc r9, 0
         adc r14, 0
         adc r15, 0
+    .round:
         mov r10, r8
         mov r11, r9
         mov r12, r14
