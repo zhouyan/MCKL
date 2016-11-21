@@ -312,6 +312,139 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 
 #endif // MCKL_USE_MKL_VML
 
+#if MCKL_USE_EXTERN_LIBRARY && MCKL_USE_FMA
+
+extern "C" {
+
+void mckl_fma_vvv_ps(
+    std::size_t, const float *, const float *, const float *, float *);
+
+void mckl_fma_vvs_ps(
+    std::size_t, const float *, const float *, float, float *);
+
+void mckl_fma_vsv_ps(
+    std::size_t, const float *, float, const float *, float *);
+
+void mckl_fma_svv_ps(
+    std::size_t, float, const float *, const float *, float *);
+
+void mckl_fma_ssv_ps(std::size_t, float, float, const float *, float *);
+
+void mckl_fma_svs_ps(std::size_t, float, const float *, float, float *);
+
+void mckl_fma_vss_ps(std::size_t, const float *, float, float, float *);
+
+void mckl_fma_vvv_pd(
+    std::size_t, const double *, const double *, const double *, double *);
+
+void mckl_fma_vvs_pd(
+    std::size_t, const double *, const double *, double, double *);
+
+void mckl_fma_vsv_pd(
+    std::size_t, const double *, double, const double *, double *);
+
+void mckl_fma_svv_pd(
+    std::size_t, double, const double *, const double *, double *);
+
+void mckl_fma_ssv_pd(std::size_t, double, double, const double *, double *);
+
+void mckl_fma_svs_pd(std::size_t, double, const double *, double, double *);
+
+void mckl_fma_vss_pd(std::size_t, const double *, double, double, double *);
+
+} // extern "C"
+
+namespace mckl
+{
+
+inline void fma(
+    std::size_t n, const float *a, const float *b, const float *c, float *y)
+{
+    mckl_fma_vvv_ps(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, const float *a, const float *b, float c, float *y)
+{
+    mckl_fma_vvs_ps(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, const float *a, float b, const float *c, float *y)
+{
+    mckl_fma_vsv_ps(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, float a, const float *b, const float *c, float *y)
+{
+    mckl_fma_svv_ps(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, float a, float b, const float *c, float *y)
+{
+    mckl_fma_ssv_ps(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, float a, const float *b, float c, float *y)
+{
+    mckl_fma_svs_ps(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, const float *a, float b, float c, float *y)
+{
+    mckl_fma_vss_ps(n, a, b, c, y);
+}
+
+inline void fma(std::size_t n, const double *a, const double *b,
+    const double *c, double *y)
+{
+    mckl_fma_vvv_pd(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, const double *a, const double *b, double c, double *y)
+{
+    mckl_fma_vvs_pd(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, const double *a, double b, const double *c, double *y)
+{
+    mckl_fma_vsv_pd(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, double a, const double *b, const double *c, double *y)
+{
+    mckl_fma_svv_pd(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, double a, double b, const double *c, double *y)
+{
+    mckl_fma_ssv_pd(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, double a, const double *b, double c, double *y)
+{
+    mckl_fma_svs_pd(n, a, b, c, y);
+}
+
+inline void fma(
+    std::size_t n, const double *a, double b, double c, double *y)
+{
+    mckl_fma_vss_pd(n, a, b, c, y);
+}
+
+} // namespace mckl
+
+#endif // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_FMA
+
 #define MCKL_DEFINE_MATH_VMATH_1(func, name)                                  \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, T *y)                         \
@@ -490,55 +623,26 @@ inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
 {
-    if (internal::is_zero(c)) {
-        mul(n, a, b, y);
-    } else {
 #if MCKL_USE_FMA
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = std::fma(a[i], b[i], c);
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::fma(a[i], b[i], c);
 #else
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = a[i] * b[i] + c;
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] * b[i] + c;
 #endif
-    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
 {
-    if (internal::is_one(b)) {
-        add(n, a, c, y);
-    } else {
 #if MCKL_USE_FMA
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = std::fma(a[i], b, c[i]);
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::fma(a[i], b, c[i]);
 #else
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = a[i] * b + c[i];
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] * b + c[i];
 #endif
-    }
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c\f$.
-template <typename T>
-inline void fma(std::size_t n, const T *a, T b, T c, T *y)
-{
-    if (internal::is_one(b) && internal::is_zero(c)) {
-        std::copy_n(a, n, y);
-    } else if (internal::is_one(b)) {
-        add(n, a, c, y);
-    } else if (internal::is_zero(c)) {
-        mul(n, a, b, y);
-    } else {
-#if MCKL_USE_FMA
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = std::fma(a[i], b, c);
-#else
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = a[i] * b + c;
-#endif
-    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c_i\f$.
@@ -548,9 +652,26 @@ inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
     if (internal::is_one(a)) {
         add(n, b, c, y);
     } else {
+#if MCKL_USE_FMA
+        for (std::size_t i = 0; i != n; ++i)
+            y[i] = std::fma(a, b[i], c[i]);
+#else
         for (std::size_t i = 0; i != n; ++i)
             y[i] = a * b[i] + c[i];
+#endif
     }
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b + c_i\f$.
+template <typename T>
+inline void fma(std::size_t n, T a, T b, const T *c, T *y)
+{
+#if MCKL_USE_FMA
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::fma(a, b, c[i]);
+#else
+    add(n, a * b, c, y);
+#endif
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c\f$.
@@ -560,16 +681,27 @@ inline void fma(std::size_t n, T a, const T *b, T c, T *y)
     if (internal::is_zero(c)) {
         mul(n, a, b, y);
     } else {
+#if MCKL_USE_FMA
+        for (std::size_t i = 0; i != n; ++i)
+            y[i] = std::fma(a, b[i], c);
+#else
         for (std::size_t i = 0; i != n; ++i)
             y[i] = a * b[i] + c;
+#endif
     }
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b + c_i\f$.
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c\f$.
 template <typename T>
-inline void fma(std::size_t n, T a, T b, const T *c, T *y)
+inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 {
-    add(n, a * b, c, y);
+#if MCKL_USE_FMA
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = std::fma(a[i], b, c);
+#else
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = a[i] * b + c;
+#endif
 }
 
 /// @} vArithmetic

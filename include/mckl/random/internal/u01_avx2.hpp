@@ -534,12 +534,12 @@
 #else // MCKL_USE_FMA
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_FMADD_PS(a, b)                          \
-    MCLK_RANDOM_INTERNAL_U01_AVX2_MUL_PS(a)                                   \
-    MCLK_RANDOM_INTERNAL_U01_AVX2_ADD_PS(b)
+    MCKL_RANDOM_INTERNAL_U01_AVX2_MUL_PS(a)                                   \
+    MCKL_RANDOM_INTERNAL_U01_AVX2_ADD_PS(b)
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_FMADD_PD(a, b)                          \
-    MCLK_RANDOM_INTERNAL_U01_AVX2_MUL_PD(a)                                   \
-    MCLK_RANDOM_INTERNAL_U01_AVX2_ADD_PD(b)
+    MCKL_RANDOM_INTERNAL_U01_AVX2_MUL_PD(a)                                   \
+    MCKL_RANDOM_INTERNAL_U01_AVX2_ADD_PD(b)
 
 #endif // MCKL_USE_FMA
 
