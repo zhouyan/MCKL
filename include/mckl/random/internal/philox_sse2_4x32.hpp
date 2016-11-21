@@ -133,7 +133,15 @@ class Philox4x32GeneratorSSE2Impl
 
         __m128i *rptr = reinterpret_cast<__m128i *>(r);
         while (n != 0) {
-            MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_2_8(xmmc)
+            __m128i xmm0 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 1));
+            __m128i xmm1 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 2));
+            __m128i xmm2 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 3));
+            __m128i xmm3 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 4));
+            __m128i xmm4 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 5));
+            __m128i xmm5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 6));
+            __m128i xmm6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 7));
+            __m128i xmm7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0, 8));
+            xmmc = xmm7;
 
             xmm0 = _mm_shuffle_epi32(xmm0, 0xC6);
             xmm1 = _mm_shuffle_epi32(xmm1, 0xC6);

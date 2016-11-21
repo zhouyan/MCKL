@@ -193,7 +193,7 @@ class Philox4x64GeneratorGenericImpl
         std::memcpy(r, buf.r.data(), sizeof(T) * K);
     }
 
-#if MCKL_USE_BMI2
+#if MCKL_USE_EXTERN_LIBRARY && MCKL_USE_BMI2
     template <typename ResultType>
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key)
@@ -206,7 +206,7 @@ class Philox4x64GeneratorGenericImpl
         const T mwk[6] = {m0, m1, w0, w1, std::get<0>(key), std::get<1>(key)};
         mckl_philox4x64_bmi2_kernel(ctr.data(), n, r, mwk);
     }
-#else  // MCKL_USE_BMI2
+#else  // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_BMI2
     template <typename ResultType>
     static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
         const std::array<T, K / 2> &key)
@@ -216,7 +216,7 @@ class Philox4x64GeneratorGenericImpl
         for (std::size_t i = 0; i != n; ++i, r += R)
             eval(ctr, r, key);
     }
-#endif // MCKL_USE_BMI2
+#endif // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_BMI2
 };     // class Philox4x64GeneratorGenericImpl
 
 } // namespace mckl::internal

@@ -191,10 +191,7 @@ class Threefry2x64GeneratorAVX2Impl
                 _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0E, 0, 0x0D));
             __m256i ymms7 =
                 _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x0F));
-
-            ymmc = _mm256_add_epi64(
-                ymmc, _mm256_set_epi64x(0, static_cast<MCKL_INT64>(N), 0,
-                          static_cast<MCKL_INT64>(N)));
+            ymmc = _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x10));
 
             __m256i ymmt0;
             __m256i ymmt1;
