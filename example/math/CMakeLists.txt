@@ -34,3 +34,4 @@ project(MCKLExample-math CXX)
 mckl_add_example(math)
 
 mckl_add_test(math vmath)
+mckl_add_test(math fma)
