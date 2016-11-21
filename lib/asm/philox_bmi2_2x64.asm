@@ -47,7 +47,7 @@
 global mckl_philox2x64_bmi2_kernel
 
 %macro philox2x64_bmi2_rbox 1 ; {{{
-    movq rax, %1
+    vmovq rax, %1
     xor rax, r11
     mulx r10, r11, r10
     xor r10, rax
@@ -70,8 +70,8 @@ mckl_philox2x64_bmi2_kernel: ; {{{
 
     mov rdx, [rcx] ; multiplier
 
-    movq xmm15, [rcx + 0x08] ; weyl
-    movq xmm0,  [rcx + 0x10] ; key
+    vmovq xmm15, [rcx + 0x08] ; weyl
+    vmovq xmm0,  [rcx + 0x10] ; key
     vpaddq xmm1, xmm0, xmm15
     vpaddq xmm2, xmm1, xmm15
     vpaddq xmm3, xmm2, xmm15
