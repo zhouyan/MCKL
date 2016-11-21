@@ -56,7 +56,7 @@ global mckl_philox2x64_bmi2_kernel
 section .text
 
 mckl_philox2x64_bmi2_kernel: ; {{{
-    prologue 0, 0
+    prologue
 
     test rsi, rsi
     jz .return

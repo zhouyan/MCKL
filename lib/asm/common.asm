@@ -29,6 +29,17 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
+%macro prologue 0 ; {{{
+    push rbp
+    mov rbp, rsp
+%endmacro ; }}}
+
+%macro prologue 1 ; {{{
+    push rbp
+    mov rbp, rsp
+    and rsp, ((0xFFFF_FFFF_FFFF_FFFF >> %1) << %1)
+%endmacro ; }}}
+
 %macro prologue 2 ; {{{
     push rbp
     mov rbp, rsp

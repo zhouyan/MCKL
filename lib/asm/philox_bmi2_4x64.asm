@@ -70,7 +70,7 @@ global mckl_philox4x64_bmi2_kernel
 section .text
 
 mckl_philox4x64_bmi2_kernel: ; {{{
-    prologue 0, 0
+    prologue
     push rbx
     push r12
     push r13

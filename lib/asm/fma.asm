@@ -84,7 +84,7 @@ global mckl_fma_vss_pd
 ; rcx c
 ; r8  y
 %macro fma_vvv 2 ; {{{
-    prologue 5, 0
+    prologue 5
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
@@ -128,7 +128,7 @@ global mckl_fma_vss_pd
 ; xmm0 c
 ; rcx  y
 %macro fma_vvs 2 ; {{{
-    prologue 5, 0
+    prologue 5
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
@@ -172,7 +172,7 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_vsv 2 ; {{{
-    prologue 5, 0
+    prologue 5
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
@@ -215,7 +215,7 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_svv 2 ; {{{
-    prologue 5, 0
+    prologue 5
 
     mov rax, rdi ; n
     mov r10, rsi ; b
@@ -258,7 +258,7 @@ global mckl_fma_vss_pd
 ; rsi  c
 ; rdx  y
 %macro fma_ssv 2 ; {{{
-    prologue 5, 0
+    prologue 5
 
     mov rax, rdi ; n
     mov r11, rsi ; c
@@ -298,7 +298,7 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_svs 2 ; {{{
-    prologue 5, 0
+    prologue 5
 
     mov rax, rdi ; n
     mov r10, rsi ; b
@@ -338,7 +338,7 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_vss 2 ; {{{
-    prologue 5, 0
+    prologue 5
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
