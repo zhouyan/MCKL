@@ -59,53 +59,92 @@ using FunctionA2R1S = void (*)(
 using FunctionA2R1D = void (*)(
     std::size_t, const double *, const double *, double *);
 
+using FunctionA3R1S = void (*)(
+    std::size_t, const float *, const float *, const float *, float *);
+
+using FunctionA3R1D = void (*)(
+    std::size_t, const double *, const double *, const double *, double *);
+
 #define MCKL_EXAMPLE_MATH_VMATH_RUN_A1R1(func)                                \
+    mckl::func<float>(K, as.data(), rs1.data());                              \
     watch1.start();                                                           \
     mckl::func<float>(K, as.data(), rs1.data());                              \
     watch1.stop();                                                            \
                                                                               \
+    mckl::func(K, as.data(), rs2.data());                                     \
     watch2.start();                                                           \
     mckl::func(K, as.data(), rs2.data());                                     \
     watch2.stop();                                                            \
                                                                               \
+    mckl::func<double>(K, ad.data(), rd1.data());                             \
     watch3.start();                                                           \
     mckl::func<double>(K, ad.data(), rd1.data());                             \
     watch3.stop();                                                            \
                                                                               \
+    mckl::func(K, ad.data(), rd2.data());                                     \
     watch4.start();                                                           \
     mckl::func(K, ad.data(), rd2.data());                                     \
     watch4.stop();
 
 #define MCKL_EXAMPLE_MATH_VMATH_RUN_A2R1(func)                                \
+    mckl::func<float>(K, as.data(), bs.data(), rs1.data());                   \
     watch1.start();                                                           \
     mckl::func<float>(K, as.data(), bs.data(), rs1.data());                   \
     watch1.stop();                                                            \
                                                                               \
+    mckl::func(K, as.data(), bs.data(), rs2.data());                          \
     watch2.start();                                                           \
     mckl::func(K, as.data(), bs.data(), rs2.data());                          \
     watch2.stop();                                                            \
                                                                               \
+    mckl::func<double>(K, ad.data(), bd.data(), rd1.data());                  \
     watch3.start();                                                           \
     mckl::func<double>(K, ad.data(), bd.data(), rd1.data());                  \
     watch3.stop();                                                            \
                                                                               \
+    mckl::func(K, ad.data(), bd.data(), rd2.data());                          \
     watch4.start();                                                           \
     mckl::func(K, ad.data(), bd.data(), rd2.data());                          \
     watch4.stop();
 
+#define MCKL_EXAMPLE_MATH_VMATH_RUN_A3R1(func)                                \
+    mckl::func<float>(K, as.data(), bs.data(), cs.data(), rs1.data());        \
+    watch1.start();                                                           \
+    mckl::func<float>(K, as.data(), bs.data(), cs.data(), rs1.data());        \
+    watch1.stop();                                                            \
+                                                                              \
+    mckl::func(K, as.data(), bs.data(), cs.data(), rs2.data());               \
+    watch2.start();                                                           \
+    mckl::func(K, as.data(), bs.data(), cs.data(), rs2.data());               \
+    watch2.stop();                                                            \
+                                                                              \
+    mckl::func<double>(K, ad.data(), bd.data(), cd.data(), rd1.data());       \
+    watch3.start();                                                           \
+    mckl::func<double>(K, ad.data(), bd.data(), cd.data(), rd1.data());       \
+    watch3.stop();                                                            \
+                                                                              \
+    mckl::func(K, ad.data(), bd.data(), cd.data(), rd2.data());               \
+    watch4.start();                                                           \
+    mckl::func(K, ad.data(), bd.data(), cd.data(), rd2.data());               \
+    watch4.stop();
+
 #define MCKL_EXAMPLE_MATH_VMATH_RUN_A1R2(func)                                \
+    mckl::func<float>(K, as.data(), rs1.data(), rs3.data());                  \
     watch1.start();                                                           \
     mckl::func<float>(K, as.data(), rs1.data(), rs3.data());                  \
     watch1.stop();                                                            \
                                                                               \
+    mckl::func(K, as.data(), rs2.data(), rs4.data());                         \
     watch2.start();                                                           \
     mckl::func(K, as.data(), rs2.data(), rs4.data());                         \
     watch2.stop();                                                            \
                                                                               \
+    mckl::func<double>(K, ad.data(), rd1.data(), rd3.data());                 \
     watch3.start();                                                           \
     mckl::func<double>(K, ad.data(), rd1.data(), rd3.data());                 \
     watch3.stop();                                                            \
                                                                               \
+    mckl::func(K, ad.data(), rd2.data(), rd4.data());                         \
     watch4.start();                                                           \
     mckl::func(K, ad.data(), rd2.data(), rd4.data());                         \
     watch4.stop();
@@ -121,8 +160,10 @@ using FunctionA2R1D = void (*)(
                                                                               \
         mckl::Vector<float> as(N);                                            \
         mckl::Vector<float> bs(N);                                            \
+        mckl::Vector<float> cs(N);                                            \
         mckl::Vector<double> ad(N);                                           \
         mckl::Vector<double> bd(N);                                           \
+        mckl::Vector<double> cd(N);                                           \
         mckl::Vector<float> rs1(N);                                           \
         mckl::Vector<float> rs2(N);                                           \
         mckl::Vector<float> rs3(N);                                           \
@@ -134,8 +175,12 @@ using FunctionA2R1D = void (*)(
                                                                               \
         std::fill(rs1.begin(), rs1.end(), 0);                                 \
         std::fill(rs2.begin(), rs2.end(), 0);                                 \
+        std::fill(rs3.begin(), rs3.end(), 0);                                 \
+        std::fill(rs4.begin(), rs4.end(), 0);                                 \
         std::fill(rd1.begin(), rd1.end(), 0);                                 \
         std::fill(rd2.begin(), rd2.end(), 0);                                 \
+        std::fill(rd3.begin(), rd3.end(), 0);                                 \
+        std::fill(rd4.begin(), rd4.end(), 0);                                 \
                                                                               \
         bool has_cycles = mckl::StopWatch::has_cycles();                      \
                                                                               \
@@ -159,8 +204,10 @@ using FunctionA2R1D = void (*)(
                                                                               \
                 mckl::rand(rng, unifs, K, as.data());                         \
                 mckl::rand(rng, unifs, K, bs.data());                         \
+                mckl::rand(rng, unifs, K, cs.data());                         \
                 mckl::rand(rng, unifd, K, ad.data());                         \
                 mckl::rand(rng, unifd, K, bd.data());                         \
+                mckl::rand(rng, unifd, K, cd.data());                         \
                                                                               \
                 MCKL_EXAMPLE_MATH_VMATH_RUN_##AR(func);                       \
                                                                               \
@@ -261,6 +308,7 @@ MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, div, 1e-4f, 1e4f, 1e-4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, mul, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, sqr, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, sub, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMATH(A3R1, fma, -1e4f, 1e4f, -1e4, 1e4)
 
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, ceil, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, floor, -1e4f, 1e4f, -1e4, 1e4)
@@ -288,6 +336,7 @@ inline void math_vmath(std::size_t N, std::size_t M)
     math_vmath_sub(N, M, perf);
     math_vmath_sqr(N, M, perf);
     math_vmath_mul(N, M, perf);
+    math_vmath_fma(N, M, perf);
     math_vmath_abs(N, M, perf);
 
     math_vmath_inv(N, M, perf);
