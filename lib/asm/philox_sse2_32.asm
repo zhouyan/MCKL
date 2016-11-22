@@ -191,7 +191,7 @@ global mckl_philox4x32_sse2_kernel
         jnz .generate
 
         .storen:
-            test rsi, rsi,
+            test rsi, rsi
             jz .return
             movdqa [rsp + 0x00], xmm0
             movdqa [rsp + 0x10], xmm1

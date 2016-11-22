@@ -44,44 +44,6 @@
 #endif
 #endif
 
-#define MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_1_8(ymmc)                      \
-    __m256i ymm0 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x04, 0x03, 0x02, 0x01));    \
-    __m256i ymm1 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x08, 0x07, 0x06, 0x05));    \
-    __m256i ymm2 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x0C, 0x0B, 0x0A, 0x09));    \
-    __m256i ymm3 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x10, 0x0F, 0x0E, 0x0D));    \
-    __m256i ymm4 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x14, 0x13, 0x12, 0x11));    \
-    __m256i ymm5 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x18, 0x17, 0x16, 0x15));    \
-    __m256i ymm6 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x1C, 0x1B, 0x1A, 0x19));    \
-    __m256i ymm7 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0x20, 0x1F, 0x1E, 0x1D));    \
-    ymmc = _mm256_add_epi64(ymmc, _mm256_set1_epi64x(0x20));
-
-#define MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_2_8(ymmc)                      \
-    __m256i ymm0 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x02, 0, 0x01));          \
-    __m256i ymm1 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x04, 0, 0x03));          \
-    __m256i ymm2 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x06, 0, 0x05));          \
-    __m256i ymm3 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x08, 0, 0x07));          \
-    __m256i ymm4 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0A, 0, 0x09));          \
-    __m256i ymm5 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0C, 0, 0x0B));          \
-    __m256i ymm6 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0E, 0, 0x0D));          \
-    __m256i ymm7 =                                                            \
-        _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x0F));          \
-    ymmc = _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x10));
-
 namespace mckl
 {
 

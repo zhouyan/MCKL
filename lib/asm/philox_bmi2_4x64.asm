@@ -52,14 +52,14 @@
 global mckl_philox4x64_bmi2_kernel
 
 %macro philox4x64_bmi2_rbox 1 ; {{{
-    movq rax, %1 ; k0
+    vmovq rax, %1 ; k0
     xor rax, r11 ; t1
-    movq rdx, xmm10 ; m2
+    vmovq rdx, xmm10 ; m2
     mulx rcx, r11, r12 ; t2
 
     vpextrq rbx, %1, 1 ; k1
     xor rbx, r13 ; t3
-    movq rdx, xmm11 ; m0
+    vmovq rdx, xmm11 ; m0
     mulx r12, r13, r10 ; t0
 
     mov r10, rcx

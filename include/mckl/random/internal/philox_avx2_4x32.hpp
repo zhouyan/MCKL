@@ -135,7 +135,23 @@ class Philox4x32GeneratorAVX2Impl
 
         __m256i *rptr = reinterpret_cast<__m256i *>(r);
         while (n != 0) {
-            MCKL_RANDOM_INTERNAL_INCREMENT_AVX2_64_2_8(ymmc)
+            __m256i ymm0 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x02, 0, 0x01));
+            __m256i ymm1 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x04, 0, 0x03));
+            __m256i ymm2 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x06, 0, 0x05));
+            __m256i ymm3 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x08, 0, 0x07));
+            __m256i ymm4 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0A, 0, 0x09));
+            __m256i ymm5 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0C, 0, 0x0B));
+            __m256i ymm6 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0E, 0, 0x0D));
+            __m256i ymm7 =
+                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x0F));
+            ymmc = _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x10));
 
             ymm0 = _mm256_shuffle_epi32(ymm0, 0xC6);
             ymm1 = _mm256_shuffle_epi32(ymm1, 0xC6);

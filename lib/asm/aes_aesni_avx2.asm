@@ -152,7 +152,7 @@ global mckl_ars_aesni_avx2_kernel
         jnz .generate
 
         .storen:
-            test rsi, rsi,
+            test rsi, rsi
             jz .return
             vmovdqa [rsp - 0x80], xmm0
             vmovdqa [rsp - 0x70], xmm1
@@ -163,7 +163,7 @@ global mckl_ars_aesni_avx2_kernel
             vmovdqa [rsp - 0x20], xmm6
             vmovdqa [rsp - 0x10], xmm7
             mov rcx, rsi
-            imul rcx, 2
+            shl rcx, 1
             mov rsi, rsp
             sub rsi, 0x80
             mov rdi, rdx

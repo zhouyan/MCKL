@@ -179,9 +179,7 @@ class Threefry2x32GeneratorSSE2Impl
             __m128i xmms5 = _mm_add_epi64(xmmc, _mm_set_epi64x(0x0C, 0x0B));
             __m128i xmms6 = _mm_add_epi64(xmmc, _mm_set_epi64x(0x0E, 0x0D));
             __m128i xmms7 = _mm_add_epi64(xmmc, _mm_set_epi64x(0x10, 0x0F));
-
-            xmmc = _mm_add_epi64(
-                xmmc, _mm_set1_epi64x(static_cast<MCKL_INT64>(N)));
+            xmmc = _mm_add_epi64(xmmc, _mm_set1_epi64x(0x10));
 
             __m128i xmmt0;
             __m128i xmmt1;

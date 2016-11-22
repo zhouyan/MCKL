@@ -179,7 +179,7 @@ global mckl_philox4x32_avx2_kernel
         jnz .generate
 
         .storen:
-            test rsi, rsi,
+            test rsi, rsi
             jz .return
             vmovdqa [rsp + 0x00], ymm0
             vmovdqa [rsp + 0x20], ymm1
