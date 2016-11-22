@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/math/CMakeLists.txt
+#  MCKL/cmake/FindAVX.cmake
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -29,12 +29,22 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLExample-math CXX)
+# Find AES-NI support
+#
+# The following variable is set
+#
+# AVX_FOUND - TRUE if AVX is found and work correctly
 
-mckl_add_example(math)
+if(DEFINED AVX_FOUND)
+    return()
+endif(DEFINED AVX_FOUND)
 
-mckl_add_test(math vmath)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindAVX.cpp AVX_TEST_SOURCE)
 
-if (AVX_FOUND AND FMA_FOUND)
-    mckl_add_test(math fma)
-endif (AVX_FOUND AND FMA_FOUND)
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("${AVX_TEST_SOURCE}" AVX_TEST)
+if(AVX_TEST)
+    set(AVX_FOUND TRUE CACHE BOOL "Found AVX support")
+else(AVX_TEST)
+    set(AVX_FOUND FALSE CACHE BOOL "NOT Found AVX support")
+endif(AVX_TEST)
