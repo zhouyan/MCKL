@@ -116,7 +116,7 @@ mckl_philox4x64_bmi2_kernel: ; {{{
         mov [rdi + 0x08], r11
         mov [rdi + 0x10], r12
         mov [rdi + 0x18], r13
-        sub rcx, 1
+        dec rcx
         add rdi, 0x20
         test rcx, rcx
         jnz .generate
