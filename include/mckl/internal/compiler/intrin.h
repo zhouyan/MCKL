@@ -81,7 +81,7 @@
 #endif
 
 #ifndef MCKL_HAS_RDPMC
-#define MCKL_HAS_RDPMC MCKL_HAS_X86
+#define MCKL_HAS_RDPMC 0
 #endif
 
 #ifndef MCKL_HAS_RDTSC
@@ -145,7 +145,7 @@
 #endif
 
 #ifndef MCKL_USE_RDPMC
-#define MCKL_USE_RDPMC 0
+#define MCKL_USE_RDPMC MCKL_HAS_RDPMC
 #endif
 
 #ifndef MCKL_USE_RDTSC
