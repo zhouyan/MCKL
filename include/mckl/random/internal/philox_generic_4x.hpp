@@ -78,12 +78,6 @@
     std::get<2>(buf.s) = s2;                                                  \
     std::get<3>(buf.s) = s3;
 
-extern "C" {
-
-void mckl_philox4x64_bmi2_kernel(void *, std::size_t, void *, const void *);
-
-} // extern "C"
-
 namespace mckl
 {
 

@@ -36,6 +36,9 @@
 
 #include <mckl/internal/compiler.h>
 
+// ASM library header file
+#include <mckl/mckl.h>
+
 // Assertion macros
 
 #ifndef MCKL_NO_RUNTIME_ASSERT

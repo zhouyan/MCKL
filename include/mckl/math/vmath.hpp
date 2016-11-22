@@ -314,46 +314,6 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 
 #if MCKL_USE_EXTERN_LIBRARY && MCKL_USE_FMA
 
-extern "C" {
-
-void mckl_fma_vvv_ps(
-    std::size_t, const float *, const float *, const float *, float *);
-
-void mckl_fma_vvs_ps(
-    std::size_t, const float *, const float *, float, float *);
-
-void mckl_fma_vsv_ps(
-    std::size_t, const float *, float, const float *, float *);
-
-void mckl_fma_svv_ps(
-    std::size_t, float, const float *, const float *, float *);
-
-void mckl_fma_ssv_ps(std::size_t, float, float, const float *, float *);
-
-void mckl_fma_svs_ps(std::size_t, float, const float *, float, float *);
-
-void mckl_fma_vss_ps(std::size_t, const float *, float, float, float *);
-
-void mckl_fma_vvv_pd(
-    std::size_t, const double *, const double *, const double *, double *);
-
-void mckl_fma_vvs_pd(
-    std::size_t, const double *, const double *, double, double *);
-
-void mckl_fma_vsv_pd(
-    std::size_t, const double *, double, const double *, double *);
-
-void mckl_fma_svv_pd(
-    std::size_t, double, const double *, const double *, double *);
-
-void mckl_fma_ssv_pd(std::size_t, double, double, const double *, double *);
-
-void mckl_fma_svs_pd(std::size_t, double, const double *, double, double *);
-
-void mckl_fma_vss_pd(std::size_t, const double *, double, double, double *);
-
-} // extern "C"
-
 namespace mckl
 {
 
@@ -381,20 +341,17 @@ inline void fma(
     mckl_fma_svv_ps(n, a, b, c, y);
 }
 
-inline void fma(
-    std::size_t n, float a, float b, const float *c, float *y)
+inline void fma(std::size_t n, float a, float b, const float *c, float *y)
 {
     mckl_fma_ssv_ps(n, a, b, c, y);
 }
 
-inline void fma(
-    std::size_t n, float a, const float *b, float c, float *y)
+inline void fma(std::size_t n, float a, const float *b, float c, float *y)
 {
     mckl_fma_svs_ps(n, a, b, c, y);
 }
 
-inline void fma(
-    std::size_t n, const float *a, float b, float c, float *y)
+inline void fma(std::size_t n, const float *a, float b, float c, float *y)
 {
     mckl_fma_vss_ps(n, a, b, c, y);
 }
@@ -423,20 +380,17 @@ inline void fma(
     mckl_fma_svv_pd(n, a, b, c, y);
 }
 
-inline void fma(
-    std::size_t n, double a, double b, const double *c, double *y)
+inline void fma(std::size_t n, double a, double b, const double *c, double *y)
 {
     mckl_fma_ssv_pd(n, a, b, c, y);
 }
 
-inline void fma(
-    std::size_t n, double a, const double *b, double c, double *y)
+inline void fma(std::size_t n, double a, const double *b, double c, double *y)
 {
     mckl_fma_svs_pd(n, a, b, c, y);
 }
 
-inline void fma(
-    std::size_t n, const double *a, double b, double c, double *y)
+inline void fma(std::size_t n, const double *a, double b, double c, double *y)
 {
     mckl_fma_vss_pd(n, a, b, c, y);
 }

@@ -134,22 +134,6 @@
         vpaddq ymm6, %1, [rel increment_ymm_data_2 + 0x0C0]
         vpaddq ymm7, %1, [rel increment_ymm_data_2 + 0x0E0]
         vpaddq %1,   %1, [rel increment_ymm_data_2 + 0x100]
-    %elif %2 == 0x20
-        vpaddq ymm0, %1, [rel increment_ymm_data_4 + 0x000]
-        vpaddq ymm1, %1, [rel increment_ymm_data_4 + 0x020]
-        vpaddq ymm2, %1, [rel increment_ymm_data_4 + 0x040]
-        vpaddq ymm3, %1, [rel increment_ymm_data_4 + 0x060]
-        vpaddq ymm4, %1, [rel increment_ymm_data_4 + 0x080]
-        vpaddq ymm5, %1, [rel increment_ymm_data_4 + 0x0A0]
-        vpaddq ymm6, %1, [rel increment_ymm_data_4 + 0x0C0]
-        vpaddq ymm7, %1, [rel increment_ymm_data_4 + 0x0E0]
-        vpaddq %1,   %1, [rel increment_ymm_data_4 + 0x100]
-    %elif %2 == 0x40
-        vpaddq ymm0, %1, [rel increment_ymm_data_8 + 0x000]
-        vpaddq ymm2, %1, [rel increment_ymm_data_8 + 0x020]
-        vpaddq ymm4, %1, [rel increment_ymm_data_8 + 0x040]
-        vpaddq ymm6, %1, [rel increment_ymm_data_8 + 0x060]
-        vpaddq %1,   %1, [rel increment_ymm_data_8 + 0x080]
     %else
         %error
     %endif
@@ -209,30 +193,6 @@
     dq 0x0D, 0x00, 0x0E, 0x00
     dq 0x0F, 0x00, 0x10, 0x00
     dq 0x10, 0x00, 0x10, 0x00
-%endmacro ; }}}
-
-%macro def_increment_ymm_data_4 0 ; {{{
-    align 32
-    increment_ymm_data_4:
-    dq 0x01, 0x00, 0x00, 0x00
-    dq 0x02, 0x00, 0x00, 0x00
-    dq 0x03, 0x00, 0x00, 0x00
-    dq 0x04, 0x00, 0x00, 0x00
-    dq 0x05, 0x00, 0x00, 0x00
-    dq 0x06, 0x00, 0x00, 0x00
-    dq 0x07, 0x00, 0x00, 0x00
-    dq 0x08, 0x00, 0x00, 0x00
-    dq 0x08, 0x00, 0x00, 0x00
-%endmacro ; }}}
-
-%macro def_increment_ymm_data_8 0 ; {{{
-    align 32
-    increment_ymm_data_8:
-    dq 0x01, 0x00, 0x00, 0x00
-    dq 0x02, 0x00, 0x00, 0x00
-    dq 0x03, 0x00, 0x00, 0x00
-    dq 0x04, 0x00, 0x00, 0x00
-    dq 0x04, 0x00, 0x00, 0x00
 %endmacro ; }}}
 
 ; vim:ft=nasm

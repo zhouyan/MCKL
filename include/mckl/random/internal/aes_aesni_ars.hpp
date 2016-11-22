@@ -44,13 +44,6 @@
 #endif
 #endif
 
-extern "C" {
-
-void mckl_ars_aesni_sse2_kernel(void *, std::size_t, void *, const void *);
-void mckl_ars_aesni_avx2_kernel(void *, std::size_t, void *, const void *);
-
-} // extern "C"
-
 namespace mckl
 {
 

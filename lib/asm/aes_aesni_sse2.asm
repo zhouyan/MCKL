@@ -45,7 +45,11 @@ global mckl_aes256_aesni_sse2_kernel
 global mckl_ars_aesni_sse2_kernel
 
 %macro aes_aesni_sse2_prologue 1 ; {{{
-    prologue 4, (%1 - 5) * 0x10
+    %if %1 < 13
+        prologue 4, 0x80
+    %else
+        prologue 4, (%1 - 5) * 0x10
+    %endif
 
     movdqu xmm8, [rdi]
     add [rdi], rsi
@@ -139,8 +143,7 @@ global mckl_ars_aesni_sse2_kernel
         aes_aesni_sse2_enclast xmm15
 
         cmp rsi, 8
-        jl .storen
-
+        jl .last
         movdqu [rdx + 0x00], xmm0
         movdqu [rdx + 0x10], xmm1
         movdqu [rdx + 0x20], xmm2
@@ -151,28 +154,26 @@ global mckl_ars_aesni_sse2_kernel
         movdqu [rdx + 0x70], xmm7
         sub rsi, 8
         add rdx, 0x80
-
         test rsi, rsi
         jnz .generate
 
-        .storen:
-            test rsi, rsi
-            jz .return
-            movdqa [rsp - 0x80], xmm0
-            movdqa [rsp - 0x70], xmm1
-            movdqa [rsp - 0x60], xmm2
-            movdqa [rsp - 0x50], xmm3
-            movdqa [rsp - 0x40], xmm4
-            movdqa [rsp - 0x30], xmm5
-            movdqa [rsp - 0x20], xmm6
-            movdqa [rsp - 0x10], xmm7
-            mov rcx, rsi
-            shl rcx, 1
-            mov rsi, rsp
-            sub rsi, 0x80
-            mov rdi, rdx
-            cld
-            rep movsq
+        .last:
+        test rsi, rsi
+        jz .return
+        movdqa [rsp + 0x00], xmm0
+        movdqa [rsp + 0x10], xmm1
+        movdqa [rsp + 0x20], xmm2
+        movdqa [rsp + 0x30], xmm3
+        movdqa [rsp + 0x40], xmm4
+        movdqa [rsp + 0x50], xmm5
+        movdqa [rsp + 0x60], xmm6
+        movdqa [rsp + 0x70], xmm7
+        mov rcx, rsi
+        shl rcx, 1
+        mov rsi, rsp
+        mov rdi, rdx
+        cld
+        rep movsq
 %endmacro ; }}}
 
 section .rodata

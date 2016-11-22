@@ -109,11 +109,11 @@ mckl_philox4x64_bmi2_kernel: ; {{{
     align 16
     .generate:
         add r8, 1
-        jnc .round
+        jnc .nocarry
         adc r9, 0
         adc r14, 0
         adc r15, 0
-    .round:
+        .nocarry:
         mov r10, r8
         mov r11, r9
         mov r12, r14
@@ -138,12 +138,12 @@ mckl_philox4x64_bmi2_kernel: ; {{{
         jnz .generate
 
     .return:
-        pop r15
-        pop r14
-        pop r13
-        pop r12
-        pop rbx
-        epilogue
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    epilogue
 ; mckl_philox4x64_bmi2_kernel: }}}
 
 ; vim:ft=nasm

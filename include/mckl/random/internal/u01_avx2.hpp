@@ -543,12 +543,6 @@
 
 #endif // MCKL_USE_FMA
 
-extern "C" {
-
-std::size_t mckl_u01_avx2_cc_u32_f32_kernel(std::size_t, const void *, void *);
-
-} // extern "C"
-
 namespace mckl
 {
 
