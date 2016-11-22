@@ -42,9 +42,6 @@ set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
     ${PROJECT_SOURCE_DIR}/asm/philox_bmi2_4x64.asm
     ${PROJECT_SOURCE_DIR}/asm/philox_sse2_32.asm)
 
-set_source_files_properties(${MCKL_LIB_ASM} OBJECT_DEPENDS
-    ${PROJECT_SOURCE_DIR}/asm/common.asm)
-
 if (APPLE)
     add_compile_options(--prefix _)
 endif (APPLE)

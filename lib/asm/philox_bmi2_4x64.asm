@@ -29,48 +29,33 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
-
-; r8  counter[0]
-; r9  counter[1]
-; r14 counter[2]
-; r15 counter[3]
-; r10 s0
-; r11 s1
-; r12 s2
-; r13 s3
-; rdi r
-; xmm10 multiplier[0]
-; xmm11 multiplier[1]
-; xmm0 - xmm9 round keys
-
-%include "/common.asm"
-
 global mckl_philox4x64_bmi2_kernel
 
 %macro philox4x64_bmi2_rbox 1 ; {{{
     vmovq rax, %1 ; k0
     xor rax, r11 ; t1
     vmovq rdx, xmm10 ; m2
-    mulx rcx, r11, r12 ; t2
+    mulx rsi, r11, r12 ; t2
 
     vpextrq rbx, %1, 1 ; k1
     xor rbx, r13 ; t3
     vmovq rdx, xmm11 ; m0
     mulx r12, r13, r10 ; t0
 
-    mov r10, rcx
+    mov r10, rsi
     xor r12, rbx
     xor r10, rax
 %endmacro ; }}}
 
 section .text
 
+; rdi r
+
+; rdi ctr.data()
+; rsi n
+; rdx r
+; rcx mul:weyl:key
 mckl_philox4x64_bmi2_kernel: ; {{{
-    prologue
     push rbx
     push r12
     push r13
@@ -89,24 +74,23 @@ mckl_philox4x64_bmi2_kernel: ; {{{
     adc qword [rdi + 0x10], 0
     adc qword [rdi + 0x18], 0
 
-    mov rdi, rdx ; r
+    vmovdqu xmm15, [rcx + 0x10] ; weyl
+    vmovdqu xmm0,  [rcx + 0x20] ; round_key[0]
+    vpaddq xmm1, xmm0, xmm15    ; round_key[1]
+    vpaddq xmm2, xmm1, xmm15    ; round_key[2]
+    vpaddq xmm3, xmm2, xmm15    ; round_key[3]
+    vpaddq xmm4, xmm3, xmm15    ; round_key[4]
+    vpaddq xmm5, xmm4, xmm15    ; round_key[5]
+    vpaddq xmm6, xmm5, xmm15    ; round_key[6]
+    vpaddq xmm7, xmm6, xmm15    ; round_key[7]
+    vpaddq xmm8, xmm7, xmm15    ; round_key[8]
+    vpaddq xmm9, xmm8, xmm15    ; round_key[9]
 
+    mov rdi, rdx ; r
     vmovdqu xmm10, [rcx]       ; multiplier[0]
     vpshufd xmm11, xmm10, 0x4E ; multiplier[1]
+    mov rcx, rsi ; n
 
-    vmovdqu xmm15, [rcx + 0x10]; weyl
-    vmovdqu xmm0,  [rcx + 0x20]; key
-    vpaddq xmm1, xmm0, xmm15
-    vpaddq xmm2, xmm1, xmm15
-    vpaddq xmm3, xmm2, xmm15
-    vpaddq xmm4, xmm3, xmm15
-    vpaddq xmm5, xmm4, xmm15
-    vpaddq xmm6, xmm5, xmm15
-    vpaddq xmm7, xmm6, xmm15
-    vpaddq xmm8, xmm7, xmm15
-    vpaddq xmm9, xmm8, xmm15
-
-    align 16
     .generate:
         add r8, 1
         jnc .nocarry
@@ -114,10 +98,10 @@ mckl_philox4x64_bmi2_kernel: ; {{{
         adc r14, 0
         adc r15, 0
         .nocarry:
-        mov r10, r8
-        mov r11, r9
-        mov r12, r14
-        mov r13, r15
+        mov r10, r8  ; s0
+        mov r11, r9  ; s1
+        mov r12, r14 ; s2
+        mov r13, r15 ; s3
         philox4x64_bmi2_rbox xmm0
         philox4x64_bmi2_rbox xmm1
         philox4x64_bmi2_rbox xmm2
@@ -132,18 +116,18 @@ mckl_philox4x64_bmi2_kernel: ; {{{
         mov [rdi + 0x08], r11
         mov [rdi + 0x10], r12
         mov [rdi + 0x18], r13
-        sub rsi, 1
+        sub rcx, 1
         add rdi, 0x20
-        test rsi, rsi
+        test rcx, rcx
         jnz .generate
 
     .return:
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop rbx
-    epilogue
+        pop r15
+        pop r14
+        pop r13
+        pop r12
+        pop rbx
+        ret
 ; mckl_philox4x64_bmi2_kernel: }}}
 
 ; vim:ft=nasm

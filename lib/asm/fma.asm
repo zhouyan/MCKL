@@ -29,9 +29,6 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-
-%include "/common.asm"
-
 global mckl_fma_vvv_ps
 global mckl_fma_vvs_ps
 global mckl_fma_vsv_ps
@@ -52,7 +49,7 @@ global mckl_fma_vss_pd
     mov rcx, %4
     mov rsi, %3
     mov rdi, rsp
-    sub rdi, 0x20
+    cld
     %if %1 == 4
         rep movsd
     %elif %1 == 8
@@ -60,15 +57,15 @@ global mckl_fma_vss_pd
     %else
         %error
     %endif
-    vmovaps %2, [rsp - 0x20]
+    vmovaps %2, [rsp]
 %endmacro ; }}}
 
 %macro partial_store 4 ; {{{
-    vmovaps [rsp - 0x20], %3
+    vmovaps [rsp], %3
     mov rcx, %4
     mov rsi, rsp
-    sub rsi, 0x20
     mov rdi, %2
+    cld
     %if %1 == 4
         rep movsd
     %elif %1 == 8
@@ -84,7 +81,10 @@ global mckl_fma_vss_pd
 ; rcx c
 ; r8  y
 %macro fma_vvv 2 ; {{{
-    prologue 5
+    push rbp
+    mov rbp, rsp
+    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    sub rsp, 0x20
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
@@ -94,7 +94,6 @@ global mckl_fma_vss_pd
     cmp rax, 0x20 / %1
     jl .partial
 
-    align 16
     .full:
         vmovups ymm2, [r9]
         vmovups ymm1, [r10]
@@ -119,7 +118,9 @@ global mckl_fma_vss_pd
         partial_store %1, r8, ymm2, rax
 
     .return:
-        epilogue
+        mov rsp, rbp
+        pop rbp
+        ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -128,7 +129,10 @@ global mckl_fma_vss_pd
 ; xmm0 c
 ; rcx  y
 %macro fma_vvs 2 ; {{{
-    prologue 5
+    push rbp
+    mov rbp, rsp
+    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    sub rsp, 0x20
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
@@ -140,7 +144,6 @@ global mckl_fma_vss_pd
     cmp rax, 0x20 / %1
     jl .partial
 
-    align 16
     .full:
         vmovups ymm2, [r9]
         vmovups ymm1, [r10]
@@ -163,7 +166,9 @@ global mckl_fma_vss_pd
         partial_store %1, r8, ymm2, rax
 
     .return:
-        epilogue
+        mov rsp, rbp
+        pop rbp
+        ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -172,7 +177,10 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_vsv 2 ; {{{
-    prologue 5
+    push rbp
+    mov rbp, rsp
+    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    sub rsp, 0x20
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
@@ -184,7 +192,6 @@ global mckl_fma_vss_pd
     cmp rax, 0x20 / %1
     jl .partial
 
-    align 16
     .full:
         vmovups ymm2, [r9]
         vmovups ymm3, [r11]
@@ -206,7 +213,9 @@ global mckl_fma_vss_pd
         partial_store %1, r8, ymm2, rax
 
     .return:
-        epilogue
+        mov rsp, rbp
+        pop rbp
+        ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -215,7 +224,10 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_svv 2 ; {{{
-    prologue 5
+    push rbp
+    mov rbp, rsp
+    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    sub rsp, 0x20
 
     mov rax, rdi ; n
     mov r10, rsi ; b
@@ -227,7 +239,6 @@ global mckl_fma_vss_pd
     cmp rax, 0x20 / %1
     jl .partial
 
-    align 16
     .full:
         vmovups ymm2, [r10]
         vmovups ymm3, [r11]
@@ -249,7 +260,9 @@ global mckl_fma_vss_pd
         partial_store %1, r8, ymm2, rax
 
     .return:
-        epilogue
+        mov rsp, rbp
+        pop rbp
+        ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -258,7 +271,10 @@ global mckl_fma_vss_pd
 ; rsi  c
 ; rdx  y
 %macro fma_ssv 2 ; {{{
-    prologue 5
+    push rbp
+    mov rbp, rsp
+    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    sub rsp, 0x20
 
     mov rax, rdi ; n
     mov r11, rsi ; c
@@ -270,7 +286,6 @@ global mckl_fma_vss_pd
     cmp rax, 0x20 / %1
     jl .partial
 
-    align 16
     .full:
         vmovups ymm2, [r11]
         vfmadd231p%2 ymm2, ymm3, ymm1
@@ -289,7 +304,9 @@ global mckl_fma_vss_pd
         partial_store %1, r8, ymm2, rax
 
     .return:
-        epilogue
+        mov rsp, rbp
+        pop rbp
+        ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -298,7 +315,10 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_svs 2 ; {{{
-    prologue 5
+    push rbp
+    mov rbp, rsp
+    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    sub rsp, 0x20
 
     mov rax, rdi ; n
     mov r10, rsi ; b
@@ -310,7 +330,6 @@ global mckl_fma_vss_pd
     cmp rax, 0x20 / %1
     jl .partial
 
-    align 16
     .full:
         vmovups ymm2, [r10]
         vfmadd213p%2 ymm2, ymm1, ymm3
@@ -329,7 +348,9 @@ global mckl_fma_vss_pd
         partial_store %1, r8, ymm2, rax
 
     .return:
-        epilogue
+        mov rsp, rbp
+        pop rbp
+        ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -338,7 +359,10 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_vss 2 ; {{{
-    prologue 5
+    push rbp
+    mov rbp, rsp
+    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    sub rsp, 0x20
 
     mov rax, rdi ; n
     mov r9,  rsi ; a
@@ -350,7 +374,6 @@ global mckl_fma_vss_pd
     cmp rax, 0x20 / %1
     jl .partial
 
-    align 16
     .full:
         vmovups ymm2, [r9]
         vfmadd213p%2 ymm2, ymm1, ymm3
@@ -369,7 +392,9 @@ global mckl_fma_vss_pd
         partial_store %1, r8, ymm2, rax
 
     .return:
-        epilogue
+        mov rsp, rbp
+        pop rbp
+        ret
 %endmacro ; }}}
 
 mckl_fma_vvv_ps: fma_vvv 4, s

@@ -29,21 +29,6 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
-
-; r8 counter[0]
-; r9 counter[1]
-; r10 s0
-; r11 s1
-; rdi r
-; rdx multiplier
-; xmm0 - xmm9 round keys
-
-%include "/common.asm"
-
 global mckl_philox2x64_bmi2_kernel
 
 %macro philox2x64_bmi2_rbox 1 ; {{{
@@ -55,9 +40,11 @@ global mckl_philox2x64_bmi2_kernel
 
 section .text
 
+; rdi ctr.data()
+; rsi n
+; rdx r
+; rcx mul:weyl:key
 mckl_philox2x64_bmi2_kernel: ; {{{
-    prologue
-
     test rsi, rsi
     jz .return
 
@@ -66,23 +53,22 @@ mckl_philox2x64_bmi2_kernel: ; {{{
     add [rdi], rsi
     adc qword [rdi + 8], 0
 
-    mov rdi, rdx ; r
-
-    mov rdx, [rcx] ; multiplier
-
     vmovq xmm15, [rcx + 0x08] ; weyl
-    vmovq xmm0,  [rcx + 0x10] ; key
-    vpaddq xmm1, xmm0, xmm15
-    vpaddq xmm2, xmm1, xmm15
-    vpaddq xmm3, xmm2, xmm15
-    vpaddq xmm4, xmm3, xmm15
-    vpaddq xmm5, xmm4, xmm15
-    vpaddq xmm6, xmm5, xmm15
-    vpaddq xmm7, xmm6, xmm15
-    vpaddq xmm8, xmm7, xmm15
-    vpaddq xmm9, xmm8, xmm15
+    vmovq xmm0,  [rcx + 0x10] ; round_key[0]
+    vpaddq xmm1, xmm0, xmm15  ; round_key[1]
+    vpaddq xmm2, xmm1, xmm15  ; round_key[2]
+    vpaddq xmm3, xmm2, xmm15  ; round_key[3]
+    vpaddq xmm4, xmm3, xmm15  ; round_key[4]
+    vpaddq xmm5, xmm4, xmm15  ; round_key[5]
+    vpaddq xmm6, xmm5, xmm15  ; round_key[6]
+    vpaddq xmm7, xmm6, xmm15  ; round_key[7]
+    vpaddq xmm8, xmm7, xmm15  ; round_key[8]
+    vpaddq xmm9, xmm8, xmm15  ; round_key[9]
 
-    align 16
+    mov rdi, rdx ; r
+    mov rdx, [rcx] ; multiplier
+    mov rcx, rsi ; n
+
     .generate:
         add r8, 1
         adc r9, 0
@@ -100,13 +86,13 @@ mckl_philox2x64_bmi2_kernel: ; {{{
         philox2x64_bmi2_rbox xmm9
         mov [rdi + 0], r10
         mov [rdi + 8], r11
-        sub rsi, 1
+        sub rcx, 1
         add rdi, 0x10
-        test rsi, rsi
+        test rcx, rcx
         jnz .generate
 
     .return:
-        epilogue
+        ret
 ; mckl_philox2x64_bmi2_kernel: }}}
 
 ; vim:ft=nasm
