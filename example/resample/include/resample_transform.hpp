@@ -91,7 +91,7 @@ inline void resample_trans_rep_index_test(
     std::cout << std::string(80, '-') << std::endl;
 
     mckl::RNG rng;
-    std::uniform_int_distribution<std::size_t> runif(N / 2, N * 2);
+    mckl::UniformIntDistribution<std::size_t> runif(N / 2, N * 2);
     mckl::Vector<double> w(N);
     mckl::Weight weight(N);
     mckl::Vector<std::size_t> rep(N);

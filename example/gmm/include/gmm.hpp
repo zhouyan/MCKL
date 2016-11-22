@@ -364,9 +364,9 @@ class GMMInit : public mckl::SamplerEvalSMP<GMM, GMMInit<Backend>, Backend>
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
 
-        std::normal_distribution<double> rmu(gmm.mu0(), gmm.sd0());
-        std::gamma_distribution<double> rlambda(gmm.shape0(), gmm.scale0());
-        std::gamma_distribution<double> rweight(1, 1);
+        mckl::NormalDistribution<double> rmu(gmm.mu0(), gmm.sd0());
+        mckl::GammaDistribution<double> rlambda(gmm.shape0(), gmm.scale0());
+        mckl::GammaDistribution<double> rweight(1, 1);
 
         double sum = 0;
         for (std::size_t i = 0; i != state.comp_num(); ++i) {
@@ -434,8 +434,8 @@ class GMMMoveMu : public mckl::SamplerEvalSMP<GMM, GMMMoveMu<Backend>, Backend>
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
 
-        std::normal_distribution<double> rmu(0, gmm.mu_sd());
-        std::uniform_real_distribution<double> runif(0, 1);
+        mckl::NormalDistribution<double> rmu(0, gmm.mu_sd());
+        mckl::UniformRealDistribution<double> runif(0, 1);
 
         double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
         state.save_old();
@@ -459,8 +459,8 @@ class GMMMoveLambda
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
 
-        std::lognormal_distribution<double> rlambda(0, gmm.lambda_sd());
-        std::uniform_real_distribution<double> runif(0, 1);
+        mckl::LognormalDistribution<double> rlambda(0, gmm.lambda_sd());
+        mckl::UniformRealDistribution<double> runif(0, 1);
 
         double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
         state.save_old();
@@ -484,8 +484,8 @@ class GMMMoveWeight
         const GMM &gmm = idx.particle().state();
         GMMState &state = idx(0);
 
-        std::normal_distribution<double> rweight(0, gmm.weight_sd());
-        std::uniform_real_distribution<double> runif(0, 1);
+        mckl::NormalDistribution<double> rweight(0, gmm.weight_sd());
+        mckl::UniformRealDistribution<double> runif(0, 1);
 
         double p = state.log_prior() + gmm.alpha() * state.log_likelihood();
         state.save_old();

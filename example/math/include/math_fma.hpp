@@ -33,6 +33,7 @@
 #define MCKL_EXAMPLE_MATH_FMA_HPP
 
 #include <mckl/math/vmath.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
@@ -50,7 +51,7 @@ using MCKLRNGType = mckl::Philox4x32;
     {                                                                         \
         mckl::UniformRealDistribution<float> unifs(-1e4f, 1e4f);              \
         mckl::UniformRealDistribution<double> unifd(-1e4, 1e4);               \
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);           \
+        mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
         MCKLRNGType rng;                                                      \
                                                                               \
         mckl::Vector<float> as(N);                                            \

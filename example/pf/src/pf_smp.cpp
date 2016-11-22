@@ -30,6 +30,7 @@
 //============================================================================
 
 #include <mckl/core.hpp>
+#include <mckl/random.hpp>
 #include <mckl/smp.hpp>
 
 using namespace mckl;
@@ -96,8 +97,8 @@ class PFInit : public SamplerEvalSMP<PF, PFInit>
     public:
     void eval_each(std::size_t, ParticleIndex<PF> idx)
     {
-        std::normal_distribution<double> rpos(0, 2);
-        std::normal_distribution<double> rvel(0, 1);
+        mckl::NormalDistribution<double> rpos(0, 2);
+        mckl::NormalDistribution<double> rvel(0, 1);
         auto &rng = idx.rng();
 
         idx.pos_x() = rpos(rng);
@@ -112,8 +113,8 @@ class PFMove : public SamplerEvalSMP<PF, PFMove>
     public:
     void eval_each(std::size_t, ParticleIndex<PF> idx)
     {
-        std::normal_distribution<double> rpos(0, std::sqrt(0.02));
-        std::normal_distribution<double> rvel(0, std::sqrt(0.001));
+        mckl::NormalDistribution<double> rpos(0, std::sqrt(0.02));
+        mckl::NormalDistribution<double> rvel(0, std::sqrt(0.001));
         auto &rng = idx.rng();
         const double delta = 0.1;
 

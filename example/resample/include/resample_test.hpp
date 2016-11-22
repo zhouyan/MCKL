@@ -35,6 +35,7 @@
 #include <mckl/core/state_matrix.hpp>
 #include <mckl/core/weight.hpp>
 #include <mckl/random/rng.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/resample.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
@@ -49,7 +50,7 @@ inline mckl::Vector<std::size_t> resample_size(
         return mckl::Vector<std::size_t>(dim + 1, N);
 
     mckl::Vector<std::size_t> size;
-    std::uniform_int_distribution<std::size_t> runif(N / 2, N * 2);
+    mckl::UniformIntDistribution<std::size_t> runif(N / 2, N * 2);
     for (std::size_t d = 0; d != dim; ++d)
         size.push_back(runif(rng));
     size.push_back(N);

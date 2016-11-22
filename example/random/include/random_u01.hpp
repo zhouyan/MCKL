@@ -34,6 +34,7 @@
 
 #include <mckl/random/philox.hpp>
 #include <mckl/random/u01.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include "random_common.hpp"
 
 template <typename Lower, typename RealType>
@@ -95,7 +96,7 @@ template <typename UIntType, typename RealType, typename Lower, typename Upper>
 inline RandomU01Range random_u01(std::size_t N, std::size_t M)
 {
     mckl::Philox4x32Engine<UIntType> rng;
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
 
     mckl::Vector<RealType> r1(N);
     mckl::Vector<RealType> r2(N);
@@ -193,7 +194,7 @@ inline RandomU01Range random_u01(std::size_t N, std::size_t M)
     constexpr int Q = 1 > p ? 1 : p;
 
     mckl::Philox4x32Engine<UIntType> rng;
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
 
     mckl::Vector<RealType> r1(N);
     mckl::Vector<RealType> r2(N);

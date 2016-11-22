@@ -34,6 +34,7 @@
 
 #include <mckl/math/vmath.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
 #if MCKL_HAS_AESNI
@@ -155,7 +156,7 @@ using FunctionA3R1D = void (*)(
     {                                                                         \
         mckl::UniformRealDistribution<float> unifs(ls, us);                   \
         mckl::UniformRealDistribution<double> unifd(ld, ud);                  \
-        std::uniform_int_distribution<std::size_t> rsize(N / 2, N);           \
+        mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
         MCKLRNGType rng;                                                      \
                                                                               \
         mckl::Vector<float> as(N);                                            \

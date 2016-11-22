@@ -30,6 +30,7 @@
 //============================================================================
 
 #include <mckl/core.hpp>
+#include <mckl/random.hpp>
 
 using namespace mckl;
 
@@ -92,8 +93,8 @@ class PF : public PFBase
 
 inline void PFInit(std::size_t, Particle<PF> &particle)
 {
-    std::normal_distribution<double> rpos(0, 2);
-    std::normal_distribution<double> rvel(0, 1);
+    mckl::NormalDistribution<double> rpos(0, 2);
+    mckl::NormalDistribution<double> rvel(0, 1);
     auto &rng = particle.rng();
 
     for (auto idx : particle) {
@@ -106,8 +107,8 @@ inline void PFInit(std::size_t, Particle<PF> &particle)
 
 inline void PFMove(std::size_t, Particle<PF> &particle)
 {
-    std::normal_distribution<double> rpos(0, std::sqrt(0.02));
-    std::normal_distribution<double> rvel(0, std::sqrt(0.001));
+    mckl::NormalDistribution<double> rpos(0, std::sqrt(0.02));
+    mckl::NormalDistribution<double> rvel(0, std::sqrt(0.001));
     auto &rng = particle.rng();
     const double delta = 0.1;
 

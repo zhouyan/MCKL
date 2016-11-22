@@ -62,6 +62,7 @@
 
 #include <mckl/random/u01_distribution.hpp>
 #include <mckl/random/uniform_bits_distribution.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include "random_common.hpp"
 
 #if MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_R123_RNG ||            \
@@ -233,7 +234,7 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
 {
     using result_type = typename RNGType::result_type;
 
-    std::uniform_int_distribution<std::size_t> rsize(0, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(0, N);
     mckl::UniformBitsDistribution<std::uint16_t> ubits16;
     mckl::UniformBitsDistribution<std::uint32_t> ubits32;
     mckl::UniformBitsDistribution<std::uint64_t> ubits64;
@@ -328,7 +329,7 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 
     RNGType rng;
     DistributionType dist;
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
     bool pass = true;
 
     RNGType rng1;

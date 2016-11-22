@@ -33,6 +33,7 @@
 #define MCKL_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
 
 #include <mckl/random/rng.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/utility/aligned_memory.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
@@ -56,7 +57,7 @@ inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
     mckl::StopWatch watch_vec;
     mckl::StopWatch watch_val;
     mckl::RNG rng;
-    std::uniform_int_distribution<std::size_t> runif(N / 2, N * 2);
+    mckl::UniformIntDistribution<std::size_t> runif(N / 2, N * 2);
 
     using Alloc = mckl::Allocator<T, Alignment, Memory>;
     using Vec = std::vector<T, Alloc>;

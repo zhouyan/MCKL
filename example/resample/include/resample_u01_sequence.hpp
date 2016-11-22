@@ -33,6 +33,7 @@
 #define MCKL_EXAMPLE_RESAMPLE_U01_SEQUENCE_HPP
 
 #include <mckl/random/rng.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/resample/u01_sequence.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
@@ -43,7 +44,7 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
     mckl::RNG rng;
     std::size_t num = 0;
     RealType error = 0;
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
     U01SeqType u01seq;
 
     mckl::RNG rng1;

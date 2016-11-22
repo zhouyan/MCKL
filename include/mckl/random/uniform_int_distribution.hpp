@@ -181,9 +181,13 @@ class UniformIntDistribution
     result_type generate(RNGType &rng, const param_type &param, std::true_type)
     {
         U01CODistribution<double> u01;
-        double ra = static_cast<double>(param.a());
-        double rb = static_cast<double>(param.b());
-        double u = ra + (rb - ra + const_one<double>()) * u01(rng);
+        const double ra = static_cast<double>(param.a());
+        const double rb = static_cast<double>(param.b());
+#if MCKL_USE_FMA
+        const double u = std::fma(rb - ra + const_one<double>(), u01(rng), ra);
+#else
+        const double u = ra + (rb - ra + const_one<double>()) * u01(rng);
+#endif
 
         return static_cast<result_type>(std::floor(u));
     }
