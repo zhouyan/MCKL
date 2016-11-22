@@ -80,7 +80,8 @@ global mckl_ars_aesni_avx2_kernel
     jz .return
 
     ; allocate stack space of max(8, rounds - 5) * 16 bytes
-    and rsp, 0xFFFF_FFFF_FFFF_FFF0
+    shr rsp, 4
+    shl rsp, 4
     %if %1 < 13
         sub rsp, 0x80
     %else

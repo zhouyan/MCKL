@@ -94,7 +94,6 @@ global mckl_philox4x32_sse2_kernel
 %macro philox_sse2_32_kernel 4 ; block size, permute constants {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFF0
     sub rsp, 0xA0
 
     ; load counter

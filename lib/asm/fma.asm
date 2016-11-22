@@ -57,11 +57,11 @@ global mckl_fma_vss_pd
     %else
         %error
     %endif
-    vmovaps %2, [rsp]
+    vmovups %2, [rsp]
 %endmacro ; }}}
 
 %macro partial_store 4 ; {{{
-    vmovaps [rsp], %3
+    vmovups [rsp], %3
     mov rcx, %4
     mov rsi, rsp
     mov rdi, %2
@@ -83,7 +83,6 @@ global mckl_fma_vss_pd
 %macro fma_vvv 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
     sub rsp, 0x20
 
     mov rax, rdi ; n
@@ -131,7 +130,6 @@ global mckl_fma_vss_pd
 %macro fma_vvs 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
     sub rsp, 0x20
 
     mov rax, rdi ; n
@@ -179,7 +177,6 @@ global mckl_fma_vss_pd
 %macro fma_vsv 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
     sub rsp, 0x20
 
     mov rax, rdi ; n
@@ -226,7 +223,6 @@ global mckl_fma_vss_pd
 %macro fma_svv 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
     sub rsp, 0x20
 
     mov rax, rdi ; n
@@ -273,7 +269,6 @@ global mckl_fma_vss_pd
 %macro fma_ssv 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
     sub rsp, 0x20
 
     mov rax, rdi ; n
@@ -317,7 +312,6 @@ global mckl_fma_vss_pd
 %macro fma_svs 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
     sub rsp, 0x20
 
     mov rax, rdi ; n
@@ -361,7 +355,6 @@ global mckl_fma_vss_pd
 %macro fma_vss 2 ; {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
     sub rsp, 0x20
 
     mov rax, rdi ; n

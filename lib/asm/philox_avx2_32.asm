@@ -86,7 +86,8 @@ global mckl_philox4x32_avx2_kernel
 %macro philox_avx2_32_kernel 4 ; block size, permute constants {{{
     push rbp
     mov rbp, rsp
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
+    shr rsp, 5
+    shl rsp, 5
     sub rsp, 0x140
 
     ; load counter
