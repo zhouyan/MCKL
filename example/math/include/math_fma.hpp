@@ -62,21 +62,8 @@ using MCKLRNGType = mckl::Philox4x32;
         mckl::Vector<double> cd(N);                                           \
         mckl::Vector<float> rs1(N);                                           \
         mckl::Vector<float> rs2(N);                                           \
-        mckl::Vector<float> rs3(N);                                           \
-        mckl::Vector<float> rs4(N);                                           \
         mckl::Vector<double> rd1(N);                                          \
         mckl::Vector<double> rd2(N);                                          \
-        mckl::Vector<double> rd3(N);                                          \
-        mckl::Vector<double> rd4(N);                                          \
-                                                                              \
-        std::fill(rs1.begin(), rs1.end(), 0);                                 \
-        std::fill(rs2.begin(), rs2.end(), 0);                                 \
-        std::fill(rs3.begin(), rs3.end(), 0);                                 \
-        std::fill(rs4.begin(), rs4.end(), 0);                                 \
-        std::fill(rd1.begin(), rd1.end(), 0);                                 \
-        std::fill(rd2.begin(), rd2.end(), 0);                                 \
-        std::fill(rd3.begin(), rd3.end(), 0);                                 \
-        std::fill(rd4.begin(), rd4.end(), 0);                                 \
                                                                               \
         bool has_cycles = mckl::StopWatch::has_cycles();                      \
                                                                               \
