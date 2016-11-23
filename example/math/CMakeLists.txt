@@ -35,6 +35,10 @@ mckl_add_example(math)
 
 mckl_add_test(math vmath)
 
-if (AVX_FOUND AND FMA_FOUND)
+if(AVX_FOUND AND FMA_FOUND)
     mckl_add_test(math fma)
-endif (AVX_FOUND AND FMA_FOUND)
+endif(AVX_FOUND AND FMA_FOUND)
+
+if(MCKL_ENABLE_LIBRARY AND CMAKE_ASM_NASM_COMPILER_LOADED AND UNIX)
+    mckl_add_test(math asm)
+endif(MCKL_ENABLE_LIBRARY AND CMAKE_ASM_NASM_COMPILER_LOADED AND UNIX)

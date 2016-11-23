@@ -144,8 +144,8 @@ inline void math_summary_av(mckl::Vector<MathPerf> perf)
         std::cout << std::setw(twid) << std::right << "ME/s (A)";
         std::cout << std::setw(twid) << std::right << "ME/s (V)";
     }
-    std::cout << std::setw(ewid) << std::right << "Err (S)";
-    std::cout << std::setw(ewid) << std::right << "Err (S)";
+    std::cout << std::setw(ewid) << std::right << "Err.Abs";
+    std::cout << std::setw(ewid) << std::right << "Err.Rel";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
