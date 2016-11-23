@@ -278,6 +278,16 @@ else(MKL_FOUND)
     endif(BLAS_FOUND)
 endif(MKL_FOUND)
 
+# Boost
+include(FindBoost)
+if(Boost_FOUND)
+    set(FEATURES ${FEATURES} "Boost")
+    set(MCKL_INCLUDE_DIRS ${MCKL_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
+    set(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_BOOST=1)
+else(Boost_FOUND)
+    set(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_BOOST=1)
+endif(Boost_FOUND)
+
 # Random123
 include(FindRandom123)
 if(Random123_FOUND)

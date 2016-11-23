@@ -38,6 +38,10 @@
 #include <mckl/random/uniform_real_distribution.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
+#if MCKL_HAS_BOOST
+#include <boost/math/special_functions/next.hpp>
+#endif
+
 class MathPerf
 {
     public:
@@ -57,26 +61,29 @@ class MathPerf
 template <typename T>
 inline void math_error(std::size_t n, const T *r1, const T *r2, T &e1, T &e2)
 {
-    mckl::Vector<T> v1(n);
-    mckl::Vector<T> v2(n);
-    T *const s1 = v1.data();
-    T *const s2 = v2.data();
-    mckl::sub(n, r1, r2, s1);
-    mckl::div(n, s1, r2, s2);
-    mckl::abs(n, s1, s1);
-    mckl::abs(n, s2, s2);
-
     T f1 = 0;
     for (std::size_t i = 0; i != n; ++i)
-        f1 = std::max(f1, s1[i]);
+        f1 = std::max(f1, std::abs(r1[i] - r2[i]));
 
     T f2 = 0;
+#if MCKL_HAS_BOOST
     for (std::size_t i = 0; i != n; ++i)
+        f2 = std::max(f2, boost::math::float_distance(r1[i], r2[i]));
+#else
+    for (std::size_t i = 0; i != n; ++i) {
         if (!mckl::internal::is_zero(r2[i]))
-            f2 = std::max(f2, s2[i]);
+            f2 = std::max(f2, std::abs((r1[i] - r2[i]) / r2[i]));
+        else if (!mckl::internal::is_zero(r1[i]))
+            f2 = std::max(f2, std::abs((r1[i] - r2[i]) / r1[i]));
+    }
+#endif
 
-    e1 = std::max(e1, f1 / std::numeric_limits<T>::epsilon());
-    e2 = std::max(e2, f2 / std::numeric_limits<T>::epsilon());
+    e1 = std::max(e1, f1);
+#if MCKL_HAS_BOOST
+    e2 = std::max(e2, f2);
+#else
+    e2 = std::max(e2, f2);
+#endif
 }
 
 inline void math_summary_sv(mckl::Vector<MathPerf> perf)
@@ -101,9 +108,17 @@ inline void math_summary_sv(mckl::Vector<MathPerf> perf)
         std::cout << std::setw(twid) << std::right << "ME/s (DV)";
     }
     std::cout << std::setw(ewid) << std::right << "Err.Abs (S)";
+#if MCKL_HAS_BOOST
+    std::cout << std::setw(ewid) << std::right << "Err.ULP (S)";
+#else
     std::cout << std::setw(ewid) << std::right << "Err.Rel (S)";
+#endif
     std::cout << std::setw(ewid) << std::right << "Err.Abs (D)";
+#if MCKL_HAS_BOOST
+    std::cout << std::setw(ewid) << std::right << "Err.ULP (D)";
+#else
     std::cout << std::setw(ewid) << std::right << "Err.Rel (D)";
+#endif
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
@@ -145,7 +160,11 @@ inline void math_summary_av(mckl::Vector<MathPerf> perf)
         std::cout << std::setw(twid) << std::right << "ME/s (V)";
     }
     std::cout << std::setw(ewid) << std::right << "Err.Abs";
+#if MCKL_HAS_BOOST
+    std::cout << std::setw(ewid) << std::right << "Err.ULP";
+#else
     std::cout << std::setw(ewid) << std::right << "Err.Rel";
+#endif
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
