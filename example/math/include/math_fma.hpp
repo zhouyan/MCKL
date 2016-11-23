@@ -32,27 +32,16 @@
 #ifndef MCKL_EXAMPLE_MATH_FMA_HPP
 #define MCKL_EXAMPLE_MATH_FMA_HPP
 
-#include <mckl/math/vmath.hpp>
-#include <mckl/random/uniform_int_distribution.hpp>
-#include <mckl/random/uniform_real_distribution.hpp>
-#include <mckl/utility/stop_watch.hpp>
-
-#if MCKL_HAS_AESNI
-#include <mckl/random/aes.hpp>
-using MCKLRNGType = mckl::ARS;
-#else
-#include <mckl/random/philox.hpp>
-using MCKLRNGType = mckl::Philox4x32;
-#endif
+#include "math_common.hpp"
 
 #define MCKL_EXAMPLE_DEFINE_MATH_FMA(par, pas, pbs, pcs, pad, pbd, pcd)       \
     inline void math_fma_##par(                                               \
-        std::size_t N, std::size_t M, mckl::Vector<MathFMAPerf> &perf)        \
+        std::size_t N, std::size_t M, mckl::Vector<MathPerf> &perf)           \
     {                                                                         \
         mckl::UniformRealDistribution<float> unifs(-1e4f, 1e4f);              \
         mckl::UniformRealDistribution<double> unifd(-1e4, 1e4);               \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
-        MCKLRNGType rng;                                                      \
+        mckl::RNG rng;                                                        \
                                                                               \
         mckl::Vector<float> as(N);                                            \
         mckl::Vector<float> bs(N);                                            \
@@ -113,23 +102,8 @@ using MCKLRNGType = mckl::Philox4x32;
                 mckl::fma(K, pad, pbd, pcd, rd2.data());                      \
                 watch4.stop();                                                \
                                                                               \
-                mckl::sub(K, rs1.data(), rs2.data(), rs1.data());             \
-                mckl::div(K, rs1.data(), rs2.data(), rs2.data());             \
-                mckl::sub(K, rd1.data(), rd2.data(), rd1.data());             \
-                mckl::div(K, rd1.data(), rd2.data(), rd2.data());             \
-                mckl::abs(K, rs1.data(), rs1.data());                         \
-                mckl::abs(K, rs2.data(), rs2.data());                         \
-                mckl::abs(K, rd1.data(), rd1.data());                         \
-                mckl::abs(K, rd2.data(), rd2.data());                         \
-                                                                              \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e1 = std::max(e1, rs1[j]);                                \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e2 = std::max(e2, rs2[j]);                                \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e3 = std::max(e3, rd1[j]);                                \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e4 = std::max(e4, rd2[j]);                                \
+                math_error(K, rs1.data(), rs2.data(), e1, e2);                \
+                math_error(K, rd1.data(), rd2.data(), e3, e4);                \
             }                                                                 \
             if (has_cycles) {                                                 \
                 c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
@@ -144,8 +118,8 @@ using MCKLRNGType = mckl::Philox4x32;
             }                                                                 \
         }                                                                     \
                                                                               \
-        MathFMAPerf result;                                                   \
-        result.param = #par;                                                  \
+        MathPerf result;                                                      \
+        result.name = "fma(" #par ")";                                        \
         result.e1 = e1 / std::numeric_limits<float>::epsilon();               \
         result.e2 = e2 / std::numeric_limits<float>::epsilon();               \
         result.e3 = e3 / std::numeric_limits<double>::epsilon();              \
@@ -157,20 +131,6 @@ using MCKLRNGType = mckl::Philox4x32;
                                                                               \
         perf.push_back(result);                                               \
     }
-
-class MathFMAPerf
-{
-    public:
-    std::string param;
-    float e1;
-    float e2;
-    double e3;
-    double e4;
-    double c1;
-    double c2;
-    double c3;
-    double c4;
-}; // class MathFMAPerf
 
 MCKL_EXAMPLE_DEFINE_MATH_FMA(
     vvv, as.data(), bs.data(), cs.data(), ad.data(), bd.data(), cd.data())
@@ -195,7 +155,8 @@ MCKL_EXAMPLE_DEFINE_MATH_FMA(
 
 inline void math_fma(std::size_t N, std::size_t M)
 {
-    mckl::Vector<MathFMAPerf> perf;
+    mckl::Vector<MathPerf> perf;
+
     math_fma_vvv(N, M, perf);
     math_fma_vvs(N, M, perf);
     math_fma_vsv(N, M, perf);
@@ -204,50 +165,7 @@ inline void math_fma(std::size_t N, std::size_t M)
     math_fma_svs(N, M, perf);
     math_fma_vss(N, M, perf);
 
-    const int nwid = 10;
-    const int twid = 10;
-    const int ewid = 15;
-    const std::size_t lwid = nwid + twid * 4 + ewid * 4;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-
-    std::cout << std::setw(nwid) << std::left << "Parameter";
-    if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(twid) << std::right << "cpE (S)";
-        std::cout << std::setw(twid) << std::right << "cpE (SV)";
-        std::cout << std::setw(twid) << std::right << "cpE (D)";
-        std::cout << std::setw(twid) << std::right << "cpE (DV)";
-    } else {
-        std::cout << std::setw(twid) << std::right << "ME/s (S)";
-        std::cout << std::setw(twid) << std::right << "ME/s (SV)";
-        std::cout << std::setw(twid) << std::right << "ME/s (D)";
-        std::cout << std::setw(twid) << std::right << "ME/s (DV)";
-    }
-    std::cout << std::setw(ewid) << std::right << "Err.Abs (S)";
-    std::cout << std::setw(ewid) << std::right << "Err.Rel (S)";
-    std::cout << std::setw(ewid) << std::right << "Err.Abs (D)";
-    std::cout << std::setw(ewid) << std::right << "Err.Rel (D)";
-    std::cout << std::endl;
-
-    std::cout << std::string(lwid, '-') << std::endl;
-
-    for (std::size_t i = 0; i != perf.size(); ++i) {
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << std::setw(nwid) << std::left << perf[i].param;
-        std::cout << std::setw(twid) << std::right << perf[i].c1;
-        std::cout << std::setw(twid) << std::right << perf[i].c2;
-        std::cout << std::setw(twid) << std::right << perf[i].c3;
-        std::cout << std::setw(twid) << std::right << perf[i].c4;
-        std::cout.unsetf(std::ios_base::floatfield);
-        std::cout << std::setprecision(2);
-        std::cout << std::setw(ewid) << std::right << perf[i].e1;
-        std::cout << std::setw(ewid) << std::right << perf[i].e2;
-        std::cout << std::setw(ewid) << std::right << perf[i].e3;
-        std::cout << std::setw(ewid) << std::right << perf[i].e4;
-        std::cout << std::endl;
-    }
-
-    std::cout << std::string(lwid, '-') << std::endl;
+    math_summary_sv(perf);
 }
 
 #endif // MCKL_EXAMPLE_MATH_FMA_HPP

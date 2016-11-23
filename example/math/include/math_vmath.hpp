@@ -32,39 +32,7 @@
 #ifndef MCKL_EXAMPLE_MATH_VMATH_HPP
 #define MCKL_EXAMPLE_MATH_VMATH_HPP
 
-#include <mckl/math/vmath.hpp>
-#include <mckl/random/uniform_real_distribution.hpp>
-#include <mckl/random/uniform_int_distribution.hpp>
-#include <mckl/utility/stop_watch.hpp>
-
-#if MCKL_HAS_AESNI
-#include <mckl/random/aes.hpp>
-using MCKLRNGType = mckl::ARS;
-#else
-#include <mckl/random/philox.hpp>
-using MCKLRNGType = mckl::Philox4x32;
-#endif
-
-using FunctionA1R1S = void (*)(std::size_t, const float *, float *);
-
-using FunctionA1R1D = void (*)(std::size_t, const double *, double *);
-
-using FunctionA1R2S = void (*)(std::size_t, const float *, float *, float *);
-
-using FunctionA1R2D = void (*)(
-    std::size_t, const double *, double *, double *);
-
-using FunctionA2R1S = void (*)(
-    std::size_t, const float *, const float *, float *);
-
-using FunctionA2R1D = void (*)(
-    std::size_t, const double *, const double *, double *);
-
-using FunctionA3R1S = void (*)(
-    std::size_t, const float *, const float *, const float *, float *);
-
-using FunctionA3R1D = void (*)(
-    std::size_t, const double *, const double *, const double *, double *);
+#include "math_common.hpp"
 
 #define MCKL_EXAMPLE_MATH_VMATH_RUN_A1R1(func)                                \
     mckl::func<float>(K, as.data(), rs1.data());                              \
@@ -152,12 +120,12 @@ using FunctionA3R1D = void (*)(
 
 #define MCKL_EXAMPLE_DEFINE_MATH_VMATH(AR, func, ls, us, ld, ud)              \
     inline void math_vmath_##func(                                            \
-        std::size_t N, std::size_t M, mckl::Vector<MathvMathPerf> &perf)      \
+        std::size_t N, std::size_t M, mckl::Vector<MathPerf> &perf)           \
     {                                                                         \
         mckl::UniformRealDistribution<float> unifs(ls, us);                   \
         mckl::UniformRealDistribution<double> unifd(ld, ud);                  \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
-        MCKLRNGType rng;                                                      \
+        mckl::RNG rng;                                                        \
                                                                               \
         mckl::Vector<float> as(N);                                            \
         mckl::Vector<float> bs(N);                                            \
@@ -193,33 +161,15 @@ using FunctionA3R1D = void (*)(
             for (std::size_t i = 0; i != M; ++i) {                            \
                 std::size_t K = rsize(rng);                                   \
                 n += K;                                                       \
-                                                                              \
                 mckl::rand(rng, unifs, K, as.data());                         \
                 mckl::rand(rng, unifs, K, bs.data());                         \
                 mckl::rand(rng, unifs, K, cs.data());                         \
                 mckl::rand(rng, unifd, K, ad.data());                         \
                 mckl::rand(rng, unifd, K, bd.data());                         \
                 mckl::rand(rng, unifd, K, cd.data());                         \
-                                                                              \
                 MCKL_EXAMPLE_MATH_VMATH_RUN_##AR(func);                       \
-                                                                              \
-                mckl::sub(K, rs1.data(), rs2.data(), rs1.data());             \
-                mckl::div(K, rs1.data(), rs2.data(), rs2.data());             \
-                mckl::sub(K, rd1.data(), rd2.data(), rd1.data());             \
-                mckl::div(K, rd1.data(), rd2.data(), rd2.data());             \
-                mckl::abs(K, rs1.data(), rs1.data());                         \
-                mckl::abs(K, rs2.data(), rs2.data());                         \
-                mckl::abs(K, rd1.data(), rd1.data());                         \
-                mckl::abs(K, rd2.data(), rd2.data());                         \
-                                                                              \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e1 = std::max(e1, rs1[j]);                                \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e2 = std::max(e2, rs2[j]);                                \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e3 = std::max(e3, rd1[j]);                                \
-                for (std::size_t j = 0; j != K; ++j)                          \
-                    e4 = std::max(e4, rd2[j]);                                \
+                math_error(K, rs1.data(), rs2.data(), e1, e2);                \
+                math_error(K, rd1.data(), rd2.data(), e3, e4);                \
             }                                                                 \
             if (has_cycles) {                                                 \
                 c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
@@ -234,12 +184,12 @@ using FunctionA3R1D = void (*)(
             }                                                                 \
         }                                                                     \
                                                                               \
-        MathvMathPerf result;                                                 \
+        MathPerf result;                                                      \
         result.name = #func;                                                  \
-        result.e1 = e1 / std::numeric_limits<float>::epsilon();               \
-        result.e2 = e2 / std::numeric_limits<float>::epsilon();               \
-        result.e3 = e3 / std::numeric_limits<double>::epsilon();              \
-        result.e4 = e4 / std::numeric_limits<double>::epsilon();              \
+        result.e1 = e1;                                                       \
+        result.e2 = e2;                                                       \
+        result.e3 = e3;                                                       \
+        result.e4 = e4;                                                       \
         result.c1 = c1;                                                       \
         result.c2 = c2;                                                       \
         result.c3 = c3;                                                       \
@@ -247,20 +197,6 @@ using FunctionA3R1D = void (*)(
                                                                               \
         perf.push_back(result);                                               \
     }
-
-class MathvMathPerf
-{
-    public:
-    std::string name;
-    float e1;
-    float e2;
-    double e3;
-    double e4;
-    double c1;
-    double c2;
-    double c3;
-    double c4;
-}; // class MathvMathPerf
 
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, acos, -1.0f, 1.0f, -1.0, 1.0)
 MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, asin, -1.0f, 1.0f, -1.0, 1.0)
@@ -323,7 +259,8 @@ MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, tgamma, 1e-4f, 35.0f, 1e-4, 171.0)
 
 inline void math_vmath(std::size_t N, std::size_t M)
 {
-    mckl::Vector<MathvMathPerf> perf;
+    mckl::Vector<MathPerf> perf;
+
     math_vmath_add(N, M, perf);
     math_vmath_sub(N, M, perf);
     math_vmath_sqr(N, M, perf);
@@ -380,50 +317,7 @@ inline void math_vmath(std::size_t N, std::size_t M)
     math_vmath_nearbyint(N, M, perf);
     math_vmath_rint(N, M, perf);
 
-    const int nwid = 10;
-    const int twid = 10;
-    const int ewid = 15;
-    const std::size_t lwid = nwid + twid * 4 + ewid * 4;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-
-    std::cout << std::setw(nwid) << std::left << "Function";
-    if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(twid) << std::right << "cpE (S)";
-        std::cout << std::setw(twid) << std::right << "cpE (SV)";
-        std::cout << std::setw(twid) << std::right << "cpE (D)";
-        std::cout << std::setw(twid) << std::right << "cpE (DV)";
-    } else {
-        std::cout << std::setw(twid) << std::right << "ME/s (S)";
-        std::cout << std::setw(twid) << std::right << "ME/s (SV)";
-        std::cout << std::setw(twid) << std::right << "ME/s (D)";
-        std::cout << std::setw(twid) << std::right << "ME/s (DV)";
-    }
-    std::cout << std::setw(ewid) << std::right << "Err.Abs (S)";
-    std::cout << std::setw(ewid) << std::right << "Err.Rel (S)";
-    std::cout << std::setw(ewid) << std::right << "Err.Abs (D)";
-    std::cout << std::setw(ewid) << std::right << "Err.Rel (D)";
-    std::cout << std::endl;
-
-    std::cout << std::string(lwid, '-') << std::endl;
-
-    for (std::size_t i = 0; i != perf.size(); ++i) {
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << std::setw(nwid) << std::left << perf[i].name;
-        std::cout << std::setw(twid) << std::right << perf[i].c1;
-        std::cout << std::setw(twid) << std::right << perf[i].c2;
-        std::cout << std::setw(twid) << std::right << perf[i].c3;
-        std::cout << std::setw(twid) << std::right << perf[i].c4;
-        std::cout.unsetf(std::ios_base::floatfield);
-        std::cout << std::setprecision(2);
-        std::cout << std::setw(ewid) << std::right << perf[i].e1;
-        std::cout << std::setw(ewid) << std::right << perf[i].e2;
-        std::cout << std::setw(ewid) << std::right << perf[i].e3;
-        std::cout << std::setw(ewid) << std::right << perf[i].e4;
-        std::cout << std::endl;
-    }
-
-    std::cout << std::string(lwid, '-') << std::endl;
+    math_summary_sv(perf);
 }
 
 #endif // MCKL_EXAMPLE_MATH_VMATH_HPP

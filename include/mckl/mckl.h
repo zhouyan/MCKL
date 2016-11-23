@@ -46,6 +46,27 @@ extern "C" {
 
 #endif // __cplusplus
 
+// exp.asm
+void mckl_exp_vv_pd(size_t, const double *, double *);
+
+// fma.asm
+void mckl_fma_vvv_ps(
+    size_t, const float *, const float *, const float *, float *);
+void mckl_fma_vvs_ps(size_t, const float *, const float *, float, float *);
+void mckl_fma_vsv_ps(size_t, const float *, float, const float *, float *);
+void mckl_fma_svv_ps(size_t, float, const float *, const float *, float *);
+void mckl_fma_ssv_ps(size_t, float, float, const float *, float *);
+void mckl_fma_svs_ps(size_t, float, const float *, float, float *);
+void mckl_fma_vss_ps(size_t, const float *, float, float, float *);
+void mckl_fma_vvv_pd(
+    size_t, const double *, const double *, const double *, double *);
+void mckl_fma_vvs_pd(size_t, const double *, const double *, double, double *);
+void mckl_fma_vsv_pd(size_t, const double *, double, const double *, double *);
+void mckl_fma_svv_pd(size_t, double, const double *, const double *, double *);
+void mckl_fma_ssv_pd(size_t, double, double, const double *, double *);
+void mckl_fma_svs_pd(size_t, double, const double *, double, double *);
+void mckl_fma_vss_pd(size_t, const double *, double, double, double *);
+
 // aes_aesni_sse2.asm
 void mckl_aes128_aesni_sse2_kernel(uint64_t *, size_t, void *, const void *);
 void mckl_aes192_aesni_sse2_kernel(uint64_t *, size_t, void *, const void *);
@@ -71,24 +92,6 @@ void mckl_philox2x64_bmi2_kernel(uint64_t *, size_t, void *, const void *);
 
 // philox_bmi2_4x64.asm
 void mckl_philox4x64_bmi2_kernel(uint64_t *, size_t, void *, const void *);
-
-// fma.asm
-void mckl_fma_vvv_ps(
-    size_t, const float *, const float *, const float *, float *);
-void mckl_fma_vvs_ps(size_t, const float *, const float *, float, float *);
-void mckl_fma_vsv_ps(size_t, const float *, float, const float *, float *);
-void mckl_fma_svv_ps(size_t, float, const float *, const float *, float *);
-void mckl_fma_ssv_ps(size_t, float, float, const float *, float *);
-void mckl_fma_svs_ps(size_t, float, const float *, float, float *);
-void mckl_fma_vss_ps(size_t, const float *, float, float, float *);
-void mckl_fma_vvv_pd(
-    size_t, const double *, const double *, const double *, double *);
-void mckl_fma_vvs_pd(size_t, const double *, const double *, double, double *);
-void mckl_fma_vsv_pd(size_t, const double *, double, const double *, double *);
-void mckl_fma_svv_pd(size_t, double, const double *, const double *, double *);
-void mckl_fma_ssv_pd(size_t, double, double, const double *, double *);
-void mckl_fma_svs_pd(size_t, double, const double *, double, double *);
-void mckl_fma_vss_pd(size_t, const double *, double, double, double *);
 
 #ifdef __cplusplus
 } // extern "C"
