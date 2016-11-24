@@ -473,7 +473,7 @@ inline T fma_impl(T a, T b, T c)
 #if MCKL_USE_FMA
     return std::fma(a, b, c);
 #else
-    return a * b + c
+    return a * b + c;
 #endif
 }
 

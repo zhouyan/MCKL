@@ -32,37 +32,29 @@
 #ifndef MCKL_EXAMPLE_MATH_ASM_HPP
 #define MCKL_EXAMPLE_MATH_ASM_HPP
 
+#ifdef __x86_64__
+#define MCKL_USE_RDPMC 1
+#endif
+
 #include "math_common.hpp"
 
-#define MCKL_EXAMPLE_MATH_ASM_RUN_A1R1(func)                                  \
-    mckl_##func##_vv_pd(K, a.data(), r1.data());                              \
-    watch1.start();                                                           \
-    mckl_##func##_vv_pd(K, a.data(), r1.data());                              \
-    watch1.stop();                                                            \
-                                                                              \
-    mckl::func(K, a.data(), r2.data());                                       \
-    watch2.start();                                                           \
-    mckl::func(K, a.data(), r2.data());                                       \
-    watch2.stop();
-
-#define MCKL_EXAMPLE_DEFINE_MATH_ASM(AR, func, lb, ub)                        \
+#define MCKL_EXAMPLE_DEFINE_MATH_ASM(func, wl, wu, lb, ub)                    \
     inline void math_asm_##func(                                              \
         std::size_t N, std::size_t M, mckl::Vector<MathPerf> &perf)           \
     {                                                                         \
-        mckl::UniformRealDistribution<double> unif(lb, ub);                   \
+        mckl::UniformRealDistribution<double> unif(wl, wu);                   \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
         mckl::RNG rng;                                                        \
                                                                               \
-        mckl::Vector<double> a(N);                                            \
-        mckl::Vector<double> b(N);                                            \
-        mckl::Vector<double> c(N);                                            \
-        mckl::Vector<double> r1(N);                                           \
-        mckl::Vector<double> r2(N);                                           \
-        mckl::Vector<double> r3(N);                                           \
-        mckl::Vector<double> r4(N);                                           \
+        mckl::Vector<double> ad(N);                                           \
+        mckl::Vector<double> rd(N);                                           \
+        mckl::Vector<long double> al(N);                                      \
+        mckl::Vector<long double> rl(N);                                      \
                                                                               \
         bool has_cycles = mckl::StopWatch::has_cycles();                      \
                                                                               \
+        double e1 = 0;                                                        \
+        double e2 = 0;                                                        \
         double e3 = 0;                                                        \
         double e4 = 0;                                                        \
         double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
@@ -74,11 +66,23 @@
             for (std::size_t i = 0; i != M; ++i) {                            \
                 std::size_t K = rsize(rng);                                   \
                 n += K;                                                       \
-                mckl::rand(rng, unif, K, a.data());                           \
-                mckl::rand(rng, unif, K, b.data());                           \
-                mckl::rand(rng, unif, K, c.data());                           \
-                MCKL_EXAMPLE_MATH_ASM_RUN_##AR(func);                         \
-                math_error(K, r1.data(), r2.data(), e3, e4);                  \
+                mckl::rand(rng, unif, K, ad.data());                          \
+                ad[0] = wl;                                                   \
+                ad[0] = ub;                                                   \
+                std::copy_n(ad.data(), K, al.data());                         \
+                mckl::func(K, al.data(), rl.data());                          \
+                                                                              \
+                mckl_##func##_vv_pd(K, ad.data(), rd.data());                 \
+                watch1.start();                                               \
+                mckl_##func##_vv_pd(K, ad.data(), rd.data());                 \
+                watch1.stop();                                                \
+                math_error(K, rd.data(), rl.data(), e1, e2);                  \
+                                                                              \
+                mckl::func(K, ad.data(), rd.data());                          \
+                watch2.start();                                               \
+                mckl::func(K, ad.data(), rd.data());                          \
+                watch2.stop();                                                \
+                math_error(K, rd.data(), rl.data(), e3, e4);                  \
             }                                                                 \
             if (has_cycles) {                                                 \
                 c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
@@ -91,17 +95,25 @@
                                                                               \
         MathPerf result;                                                      \
         result.name = #func;                                                  \
-        result.e3 = e3;                                                       \
+        result.e3 = e2;                                                       \
         result.e4 = e4;                                                       \
         result.c1 = c1;                                                       \
         result.c2 = c2;                                                       \
+        result.vd[0] = lb;                                                    \
+        result.vd[1] = ub;                                                    \
+        const double v[] = {lb, ub,                                           \
+            std::nextafter(lb, -mckl::const_inf<double>()),                   \
+            std::nextafter(ub, mckl::const_inf<double>()), -0.0, 0.0,         \
+            -mckl::const_inf<double>(), mckl::const_inf<double>(),            \
+            mckl::const_nan<double>()};                                       \
+        mckl_##func##_vv_pd(sizeof(v) / sizeof(double), v, result.vd + 2);    \
                                                                               \
         perf.push_back(result);                                               \
     }
 
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, exp, -707.0, 707.0)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, exp2, -1e3, 1e3)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, expm1, -500.0, 500.0)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(exp, -707, 707, -708.4, 709.8)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(exp2, -1022, 1022, -1022, 1022)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(expm1, -500, 500, -708.4, 709.8)
 
 inline void math_asm(std::size_t N, std::size_t M)
 {
@@ -111,7 +123,66 @@ inline void math_asm(std::size_t N, std::size_t M)
     math_asm_exp2(N, M, perf);
     math_asm_expm1(N, M, perf);
 
-    math_summary_av(perf);
+    const int nwid = 10;
+    const std::size_t lwid = nwid * 16;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "Function";
+    if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(nwid) << std::right << "cpE (A)";
+        std::cout << std::setw(nwid) << std::right << "cpE (V)";
+    } else {
+        std::cout << std::setw(nwid) << std::right << "ME/s (A)";
+        std::cout << std::setw(nwid) << std::right << "ME/s (V)";
+    }
+#if MCKL_HAS_BOOST
+    std::cout << std::setw(nwid) << std::right << "ULP (A)";
+    std::cout << std::setw(nwid) << std::right << "ULP (V)";
+#else
+    std::cout << std::setw(nwid) << std::right << "Err (A)";
+    std::cout << std::setw(nwid) << std::right << "Err (A)";
+#endif
+    std::cout << std::setw(nwid) << std::right << "LB";
+    std::cout << std::setw(nwid) << std::right << "UB";
+    std::cout << std::setw(nwid) << std::right << "a = LB";
+    std::cout << std::setw(nwid) << std::right << "a = UB";
+    std::cout << std::setw(nwid) << std::right << "a < LB";
+    std::cout << std::setw(nwid) << std::right << "a > UB";
+    std::cout << std::setw(nwid) << std::right << "a = -0.0";
+    std::cout << std::setw(nwid) << std::right << "a = 0.0";
+    std::cout << std::setw(nwid) << std::right << "a = -Inf";
+    std::cout << std::setw(nwid) << std::right << "a = Inf";
+    std::cout << std::setw(nwid) << std::right << "a = NaN";
+    std::cout << std::endl;
+
+    std::cout << std::string(lwid, '-') << std::endl;
+
+    for (std::size_t i = 0; i != perf.size(); ++i) {
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << std::setw(nwid) << std::left << perf[i].name;
+        std::cout << std::setw(nwid) << std::right << perf[i].c1;
+        std::cout << std::setw(nwid) << std::right << perf[i].c2;
+        std::cout.unsetf(std::ios_base::floatfield);
+        std::cout << std::setprecision(2);
+        std::cout << std::setw(nwid) << std::right << perf[i].e3;
+        std::cout << std::setw(nwid) << std::right << perf[i].e4;
+        std::cout << std::setprecision(6);
+        std::cout << std::setw(nwid) << std::right << perf[i].vd[0];
+        std::cout << std::setw(nwid) << std::right << perf[i].vd[1];
+        for (int j = 2; j != 11; ++j) {
+            double v = std::abs(perf[i].vd[j]);
+            bool positive = v > 0;
+            bool denormal = v < std::numeric_limits<double>::min();
+            std::stringstream ss;
+            ss << std::setprecision(2) << (positive && denormal ? '*' : ' ')
+               << perf[i].vd[j];
+            std::cout << std::setw(nwid) << std::right << ss.str();
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_MATH_ASM_HPP

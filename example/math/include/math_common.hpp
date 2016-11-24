@@ -39,6 +39,7 @@
 #include <mckl/utility/stop_watch.hpp>
 
 #if MCKL_HAS_BOOST
+#define BOOST_MATH_DOMAIN_ERROR_POLICY ignore_error
 #include <boost/math/special_functions/next.hpp>
 #endif
 
@@ -56,25 +57,32 @@ class MathPerf
     double c4;
     double c5;
     double c6;
+    float vs[12];
+    double vd[12];
 }; // class MathPerf
 
-template <typename T>
-inline void math_error(std::size_t n, const T *r1, const T *r2, T &e1, T &e2)
+template <typename T, typename U>
+inline void math_error(std::size_t n, const T *r1, const U *r2, T &e1, T &e2)
 {
     T f1 = 0;
     for (std::size_t i = 0; i != n; ++i)
-        f1 = std::max(f1, std::abs(r1[i] - r2[i]));
+        f1 = std::max(f1, std::abs(r1[i] - static_cast<T>(r2[i])));
 
     T f2 = 0;
 #if MCKL_HAS_BOOST
-    for (std::size_t i = 0; i != n; ++i)
-        f2 = std::max(f2, boost::math::float_distance(r1[i], r2[i]));
+    for (std::size_t i = 0; i != n; ++i) {
+        f2 = std::max(
+            f2, boost::math::float_distance(r1[i], static_cast<T>(r2[i])));
+    }
 #else
     for (std::size_t i = 0; i != n; ++i) {
-        if (!mckl::internal::is_zero(r2[i]))
-            f2 = std::max(f2, std::abs((r1[i] - r2[i]) / r2[i]));
-        else if (!mckl::internal::is_zero(r1[i]))
-            f2 = std::max(f2, std::abs((r1[i] - r2[i]) / r1[i]));
+        if (!mckl::internal::is_zero(static_cast<T>(r2[i]))) {
+            f2 = std::max(f2, std::abs((r1[i] - static_cast<T>(r2[i])) /
+                                  static_cast<T>(r2[i])));
+        } else if (!mckl::internal::is_zero(r1[i])) {
+            f2 = std::max(
+                f2, std::abs((r1[i] - static_cast<T>(r2[i])) / r1[i]));
+        }
     }
 #endif
 
@@ -134,48 +142,6 @@ inline void math_summary_sv(mckl::Vector<MathPerf> perf)
         std::cout << std::setprecision(2);
         std::cout << std::setw(ewid) << std::right << perf[i].e1;
         std::cout << std::setw(ewid) << std::right << perf[i].e2;
-        std::cout << std::setw(ewid) << std::right << perf[i].e3;
-        std::cout << std::setw(ewid) << std::right << perf[i].e4;
-        std::cout << std::endl;
-    }
-
-    std::cout << std::string(lwid, '-') << std::endl;
-}
-
-inline void math_summary_av(mckl::Vector<MathPerf> perf)
-{
-    const int nwid = 10;
-    const int twid = 10;
-    const int ewid = 15;
-    const std::size_t lwid = nwid + twid * 2 + ewid * 2;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-
-    std::cout << std::setw(nwid) << std::left << "Function";
-    if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(twid) << std::right << "cpE (A)";
-        std::cout << std::setw(twid) << std::right << "cpE (V)";
-    } else {
-        std::cout << std::setw(twid) << std::right << "ME/s (A)";
-        std::cout << std::setw(twid) << std::right << "ME/s (V)";
-    }
-    std::cout << std::setw(ewid) << std::right << "Err.Abs";
-#if MCKL_HAS_BOOST
-    std::cout << std::setw(ewid) << std::right << "Err.ULP";
-#else
-    std::cout << std::setw(ewid) << std::right << "Err.Rel";
-#endif
-    std::cout << std::endl;
-
-    std::cout << std::string(lwid, '-') << std::endl;
-
-    for (std::size_t i = 0; i != perf.size(); ++i) {
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << std::setw(nwid) << std::left << perf[i].name;
-        std::cout << std::setw(twid) << std::right << perf[i].c1;
-        std::cout << std::setw(twid) << std::right << perf[i].c2;
-        std::cout.unsetf(std::ios_base::floatfield);
-        std::cout << std::setprecision(2);
         std::cout << std::setw(ewid) << std::right << perf[i].e3;
         std::cout << std::setw(ewid) << std::right << perf[i].e4;
         std::cout << std::endl;
