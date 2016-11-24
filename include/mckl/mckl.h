@@ -48,11 +48,7 @@ extern "C" {
 
 // exp.asm
 void mckl_exp_vv_pd(size_t, const double *, double *);
-
-// exp2.asm
 void mckl_exp2_vv_pd(size_t, const double *, double *);
-
-// expm1.asm
 void mckl_expm1_vv_pd(size_t, const double *, double *);
 
 // fma.asm

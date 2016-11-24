@@ -30,22 +30,10 @@
 ;;============================================================================
 
 global mckl_exp_vv_pd
+global mckl_exp2_vv_pd
+global mckl_expm1_vv_pd
 
-%macro exp 1 ; implicit input ymm0 {{{
-    ; r = round(a / log(2))
-    vmulpd ymm14, ymm0, [rel exp_log2i]
-    vroundpd ymm14, ymm14, 0x8
-
-    ; x = a - r * log(2)
-    vmovapd ymm1, ymm0
-    vfnmadd231pd ymm1, ymm14, [rel exp_log2f]
-    vfnmadd231pd ymm1, ymm14, [rel exp_log2l]
-
-    ; s = 2^r
-    vaddpd ymm15, ymm14, [rel exp_bias]
-    vpsllq ymm15, 52
-
-    ; z13 = c13 * x^13 + ... + c2 * x^2 + x
+%macro exp_poly 0 ; {{{ implicity input ymm1, output ymm13, ymm1-ymm13 reserved
     vmulpd ymm2, ymm1, ymm1 ; x2 = x^2
     vmulpd ymm4, ymm2, ymm2 ; x4 = x^4
     vmulpd ymm8, ymm4, ymm4 ; x8 = x^8
@@ -67,6 +55,24 @@ global mckl_exp_vv_pd
     vfmadd213pd ymm7,  ymm4, ymm3  ; w7  = v7  * x^4 + v3
     vfmadd213pd ymm13, ymm4, ymm11 ; w13 = v13 * x^4 + v11
     vfmadd213pd ymm13, ymm8, ymm7  ; z13 = w13 * x^8 + w7
+%endmacro ; }}}
+
+%macro exp 1 ; {{{ implicit input ymm0
+    ; r = round(a / log(2))
+    vmulpd ymm14, ymm0, [rel exp_log2i]
+    vroundpd ymm14, ymm14, 0x8
+
+    ; x = a - r * log(2)
+    vmovapd ymm1, ymm0
+    vfnmadd231pd ymm1, ymm14, [rel exp_log2f]
+    vfnmadd231pd ymm1, ymm14, [rel exp_log2l]
+
+    ; s = 2^r
+    vaddpd ymm15, ymm14, [rel exp_bias]
+    vpsllq ymm15, 52
+
+    ; z13 = c13 * x^13 + ... + c2 * x^2 + x
+    exp_poly
 
     ; z13 = z13 * s + s
     vfmadd213pd ymm13, ymm15, ymm15
@@ -76,12 +82,98 @@ global mckl_exp_vv_pd
     vmovupd %1, ymm13
 %endmacro ; }}}
 
+%macro exp2 1 ; implicit input ymm0 {{{
+    ; r = round(a)
+    vroundpd ymm14, ymm0, 0x8
+
+    ; x = (a  - r) * log(2)
+    vsubpd ymm1, ymm0, ymm14
+    vmulpd ymm1, ymm1, [rel exp_log2d]
+
+    ; s = 2^r
+    vaddpd ymm15, ymm14, [rel exp_bias]
+    vpsllq ymm15, 52
+
+    ; z13 = c13 * x^13 + ... + c2 * x^2 + x
+    exp_poly
+
+    ; z13 = z13 * s + s
+    vfmadd213pd ymm13, ymm15, ymm15
+
+    ; FIXME overflow, underflow, infinity, NaN
+
+    vmovupd %1, ymm13
+%endmacro ; }}}
+
+%macro expm1 1 ; implicit input ymm0 {{{
+    ; r = round(a / log(2))
+    vmulpd ymm14, ymm0, [rel exp_log2i]
+    vroundpd ymm14, ymm14, 0x8
+
+    ; x = a - r * log(2)
+    vmovapd ymm1, ymm0
+    vfnmadd231pd ymm1, ymm14, [rel exp_log2f]
+    vfnmadd231pd ymm1, ymm14, [rel exp_log2l]
+
+    ; s = 2^r
+    vaddpd ymm15, ymm14, [rel exp_bias]
+    vpsllq ymm15, 52
+
+    ; z13 = c13 * x^13 + ... + c2 * x^2 + x
+    exp_poly
+
+    ; z13 = z13 * s + (s - 1)
+    vsubpd ymm14, ymm15, [rel exp_one]
+    vfmadd213pd ymm13, ymm15, ymm14
+
+    ; FIXME overflow, underflow, infinity, NaN
+
+    vmovupd %1, ymm13
+%endmacro ; }}}
+
+%macro exp_vv_pd 1 ; rdi:n, rsi:a, rdx:y {{{
+    cmp rdi, 4
+    jl .last
+
+    .loop:
+        vmovupd ymm0, [rsi]
+        %1 [rdx]
+        add rsi, 0x20
+        add rdx, 0x20
+        sub rdi, 4
+        cmp rdi, 4
+        jge .loop
+
+    .last:
+        test rdi, rdi
+        jz .return
+        mov rax, rdi
+        mov rcx, rdi
+        mov rdi, rsp
+        sub rdi, 0x28
+        cld
+        rep movsq
+        vmovupd ymm0, [rsp - 0x28]
+        %1 [rsp - 0x28]
+        mov rcx, rax
+        mov rsi, rsp
+        sub rsi, 0x28
+        mov rdi, rdx
+        cld
+        rep movsq
+
+    .return:
+        ret
+%endmacro ; }}} mckl_exp_vv_pd
+
 section .rodata
 
 align 32
 
+exp_one:   times 4 dq 0x3FF0000000000000 ; 1.0
 exp_bias:  times 4 dq 0x43300000000003FF ; 2^52 + 1023
 exp_log2f: times 4 dq 0x3FE62E4300000000 ; log(2.0f)
+exp_log2d: times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
 exp_log2l: times 4 dq 0xBE205C610CA80000 ; log(2.0l) - log(2.0f)
 exp_log2i: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 
@@ -100,42 +192,8 @@ exp_c13: times 4 dq 0x3DE6124613A86D09 ; 1 / 13!
 
 section .text
 
-; rdi n
-; rsi a
-; rdx y
-mckl_exp_vv_pd: ; {{{
-    cmp rdi, 4
-    jl .last
-
-    .loop:
-        vmovupd ymm0, [rsi]
-        exp [rdx]
-        add rsi, 0x20
-        add rdx, 0x20
-        sub rdi, 4
-        cmp rdi, 4
-        jge .loop
-
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi
-        mov rcx, rdi
-        mov rdi, rsp
-        sub rdi, 0x28
-        cld
-        rep movsq
-        vmovupd ymm0, [rsp - 0x28]
-        exp [rsp - 0x28]
-        mov rcx, rax
-        mov rsi, rsp
-        sub rsi, 0x28
-        mov rdi, rdx
-        cld
-        rep movsq
-
-    .return:
-        ret
-; }}} mckl_exp_vv_pd
+mckl_exp_vv_pd:   exp_vv_pd exp
+mckl_exp2_vv_pd:  exp_vv_pd exp2
+mckl_expm1_vv_pd: exp_vv_pd expm1
 
 ; vim:ft=nasm
