@@ -462,9 +462,19 @@ namespace internal
 {
 
 template <typename T>
-inline T mulbyconj(T a, T b)
+inline T mulbyconj_impl(T a, T b)
 {
     return a * std::conj(b);
+}
+
+template <typename T>
+inline T fma_impl(T a, T b, T c)
+{
+#if MCKL_USE_FMA
+    return std::fma(a, b, c);
+#else
+    return a * b + c
+#endif
 }
 
 } // namespace mckl::internal
@@ -509,13 +519,13 @@ MCKL_DEFINE_MATH_VMATH_BVS(*, mul)
 MCKL_DEFINE_MATH_VMATH_BSV(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}_i\f$
-MCKL_DEFINE_MATH_VMATH_2(internal::mulbyconj, mulbyconj)
+MCKL_DEFINE_MATH_VMATH_2(internal::mulbyconj_impl, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}\f$
-MCKL_DEFINE_MATH_VMATH_2VS(internal::mulbyconj, mulbyconj)
+MCKL_DEFINE_MATH_VMATH_2VS(internal::mulbyconj_impl, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a \bar{b}_i\f$
-MCKL_DEFINE_MATH_VMATH_2SV(internal::mulbyconj, mulbyconj)
+MCKL_DEFINE_MATH_VMATH_2SV(internal::mulbyconj_impl, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = \bar{a}_i\f$
 MCKL_DEFINE_MATH_VMATH_1(std::conj, conj)
@@ -550,112 +560,70 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
         for (std::size_t j = 0; j != k; ++j)
-            y[j] = beta_a * a[j] + mu_a;
+            y[j] = internal::fma_impl(beta_a, a[j], mu_a);
         for (std::size_t j = 0; j != k; ++j)
-            y[j] /= beta_b * b[j] + mu_b;
+            y[j] /= internal::fma_impl(beta_b, b[j], mu_b);
     }
     for (std::size_t i = 0; i != l; ++i)
-        y[i] = beta_a * a[i] + mu_a;
+        y[i] = internal::fma_impl(beta_a, a[i], mu_a);
     for (std::size_t i = 0; i != l; ++i)
-        y[i] /= beta_b * b[i] + mu_b;
+        y[i] /= internal::fma_impl(beta_b, b[i], mu_b);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
 {
-#if MCKL_USE_FMA
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b[i], c[i]);
-#else
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] * b[i] + c[i];
-#endif
+        y[i] = internal::fma_impl(a[i], b[i], c[i]);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
 {
-#if MCKL_USE_FMA
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b[i], c);
-#else
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] * b[i] + c;
-#endif
+        y[i] = internal::fma_impl(a[i], b[i], c);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
 {
-#if MCKL_USE_FMA
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b, c[i]);
-#else
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] * b + c[i];
-#endif
+        y[i] = internal::fma_impl(a[i], b, c[i]);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
 {
-    if (internal::is_one(a)) {
-        add(n, b, c, y);
-    } else {
-#if MCKL_USE_FMA
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = std::fma(a, b[i], c[i]);
-#else
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = a * b[i] + c[i];
-#endif
-    }
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = internal::fma_impl(a, b[i], c[i]);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b + c_i\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, T b, const T *c, T *y)
 {
-#if MCKL_USE_FMA
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a, b, c[i]);
-#else
-    add(n, a * b, c, y);
-#endif
+        y[i] = internal::fma_impl(a, b, c[i]);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c\f$.
 template <typename T>
 inline void fma(std::size_t n, T a, const T *b, T c, T *y)
 {
-    if (internal::is_zero(c)) {
-        mul(n, a, b, y);
-    } else {
-#if MCKL_USE_FMA
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = std::fma(a, b[i], c);
-#else
-        for (std::size_t i = 0; i != n; ++i)
-            y[i] = a * b[i] + c;
-#endif
-    }
+    for (std::size_t i = 0; i != n; ++i)
+        y[i] = internal::fma_impl(a, b[i], c);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c\f$.
 template <typename T>
 inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 {
-#if MCKL_USE_FMA
     for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b, c);
-#else
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = a[i] * b + c;
-#endif
+        y[i] = internal::fma_impl(a[i], b, c);
 }
 
 /// @} vArithmetic
