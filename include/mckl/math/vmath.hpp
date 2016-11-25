@@ -337,6 +337,13 @@ MCKL_DEFINE_MATH_VMATH_ASM_1(log)
 MCKL_DEFINE_MATH_VMATH_ASM_1(log2)
 MCKL_DEFINE_MATH_VMATH_ASM_1(log10)
 MCKL_DEFINE_MATH_VMATH_ASM_1(log1p)
+MCKL_DEFINE_MATH_VMATH_ASM_1(cos)
+MCKL_DEFINE_MATH_VMATH_ASM_1(sin)
+
+inline void sincos(std::size_t n, const double *a, double *y, double *z)
+{
+    ::mckl_vd_sincos(n, a, y, z);
+}
 
 } // namespace mckl
 
