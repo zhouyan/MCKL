@@ -33,7 +33,7 @@ project(MCKLExample-math CXX)
 
 mckl_add_example(math)
 
-mckl_add_test(math vmath)
+mckl_add_test(math vmf)
 
 if(AVX_FOUND AND FMA_FOUND)
     mckl_add_test(math fma)

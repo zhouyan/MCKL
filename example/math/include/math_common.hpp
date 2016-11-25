@@ -32,7 +32,7 @@
 #ifndef MCKL_EXAMPLE_MATH_COMMON_HPP
 #define MCKL_EXAMPLE_MATH_COMMON_HPP
 
-#include <mckl/math/vmath.hpp>
+#include <mckl/math.hpp>
 #include <mckl/random/rng.hpp>
 #include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>

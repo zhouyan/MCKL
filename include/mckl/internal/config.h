@@ -112,8 +112,8 @@
 #define MCKL_USE_ASM_LIBRARY 0
 #endif
 
-#ifndef MCKL_USE_ASM_VMATH
-#define MCKL_USE_ASM_VMATH 0
+#ifndef MCKL_USE_ASM_VMF
+#define MCKL_USE_ASM_VMF 0
 #endif
 
 #ifndef MCKL_HAS_OMP

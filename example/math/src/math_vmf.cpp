@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/math/src/math_vmath.cpp
+// MCKL/example/math/src/math_vmf.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "math_vmath.hpp"
+#include "math_vmf.hpp"
 
 int main(int argc, char **argv)
 {
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
         }
     }
 
-    math_vmath(N, M);
+    math_vmf(N, M);
 
     return 0;
 }

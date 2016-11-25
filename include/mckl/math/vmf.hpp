@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/math/vmath.hpp
+// MCKL/include/mckl/math/vmf.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_MATH_VMATH_HPP
-#define MCKL_MATH_VMATH_HPP
+#ifndef MCKL_MATH_VMF_HPP
+#define MCKL_MATH_VMF_HPP
 
 #include <mckl/internal/config.h>
 
@@ -47,7 +47,7 @@
 
 #include <mkl_vml.h>
 
-#define MCKL_DEFINE_MATH_VMATH_VML_1R(func, name)                             \
+#define MCKL_DEFINE_MATH_VMF_VML_1R(func, name)                               \
     inline void name(std::size_t n, const float *a, float *y)                 \
     {                                                                         \
         internal::size_check<MKL_INT>(n, #name);                              \
@@ -60,7 +60,7 @@
         ::vd##func(static_cast<MKL_INT>(n), a, y);                            \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_VML_1C(func, name)                             \
+#define MCKL_DEFINE_MATH_VMF_VML_1C(func, name)                               \
     inline void name(                                                         \
         std::size_t n, const std::complex<float> *a, std::complex<float> *y)  \
     {                                                                         \
@@ -79,7 +79,7 @@
             reinterpret_cast<::MKL_Complex16 *>(y));                          \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_VML_2R(func, name)                             \
+#define MCKL_DEFINE_MATH_VMF_VML_2R(func, name)                               \
     inline void name(std::size_t n, const float *a, const float *b, float *y) \
     {                                                                         \
         internal::size_check<MKL_INT>(n, #name);                              \
@@ -93,7 +93,7 @@
         ::vd##func(static_cast<MKL_INT>(n), a, b, y);                         \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_VML_2C(func, name)                             \
+#define MCKL_DEFINE_MATH_VMF_VML_2C(func, name)                               \
     inline void name(std::size_t n, const std::complex<float> *a,             \
         const std::complex<float> *b, std::complex<float> *y)                 \
     {                                                                         \
@@ -117,16 +117,16 @@
 namespace mckl
 {
 
-MCKL_DEFINE_MATH_VMATH_VML_2R(Add, add)
-MCKL_DEFINE_MATH_VMATH_VML_2C(Add, add)
-MCKL_DEFINE_MATH_VMATH_VML_2R(Sub, sub)
-MCKL_DEFINE_MATH_VMATH_VML_2C(Sub, sub)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Sqr, sqr)
-MCKL_DEFINE_MATH_VMATH_VML_2R(Mul, mul)
-MCKL_DEFINE_MATH_VMATH_VML_2C(Mul, mul)
-MCKL_DEFINE_MATH_VMATH_VML_2C(MulByConj, mulbyconj)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Conj, conj)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Abs, abs)
+MCKL_DEFINE_MATH_VMF_VML_2R(Add, add)
+MCKL_DEFINE_MATH_VMF_VML_2C(Add, add)
+MCKL_DEFINE_MATH_VMF_VML_2R(Sub, sub)
+MCKL_DEFINE_MATH_VMF_VML_2C(Sub, sub)
+MCKL_DEFINE_MATH_VMF_VML_1R(Sqr, sqr)
+MCKL_DEFINE_MATH_VMF_VML_2R(Mul, mul)
+MCKL_DEFINE_MATH_VMF_VML_2C(Mul, mul)
+MCKL_DEFINE_MATH_VMF_VML_2C(MulByConj, mulbyconj)
+MCKL_DEFINE_MATH_VMF_VML_1C(Conj, conj)
+MCKL_DEFINE_MATH_VMF_VML_1R(Abs, abs)
 
 inline void abs(std::size_t n, const std::complex<float> *a, float *y)
 {
@@ -172,18 +172,18 @@ inline void linear_frac(std::size_t n, const double *a, const double *b,
         static_cast<MKL_INT>(n), a, b, beta_a, beta_b, mu_a, mu_b, y);
 }
 
-MCKL_DEFINE_MATH_VMATH_VML_1R(Inv, inv)
-MCKL_DEFINE_MATH_VMATH_VML_2R(Div, div)
-MCKL_DEFINE_MATH_VMATH_VML_2C(Div, div)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Sqrt, sqrt)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Sqrt, sqrt)
-MCKL_DEFINE_MATH_VMATH_VML_1R(InvSqrt, invsqrt)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Cbrt, cbrt)
-MCKL_DEFINE_MATH_VMATH_VML_1R(InvCbrt, invcbrt)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Pow2o3, pow2o3)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Pow3o2, pow3o2)
-MCKL_DEFINE_MATH_VMATH_VML_2R(Pow, pow)
-MCKL_DEFINE_MATH_VMATH_VML_2C(Pow, pow)
+MCKL_DEFINE_MATH_VMF_VML_1R(Inv, inv)
+MCKL_DEFINE_MATH_VMF_VML_2R(Div, div)
+MCKL_DEFINE_MATH_VMF_VML_2C(Div, div)
+MCKL_DEFINE_MATH_VMF_VML_1R(Sqrt, sqrt)
+MCKL_DEFINE_MATH_VMF_VML_1C(Sqrt, sqrt)
+MCKL_DEFINE_MATH_VMF_VML_1R(InvSqrt, invsqrt)
+MCKL_DEFINE_MATH_VMF_VML_1R(Cbrt, cbrt)
+MCKL_DEFINE_MATH_VMF_VML_1R(InvCbrt, invcbrt)
+MCKL_DEFINE_MATH_VMF_VML_1R(Pow2o3, pow2o3)
+MCKL_DEFINE_MATH_VMF_VML_1R(Pow3o2, pow3o2)
+MCKL_DEFINE_MATH_VMF_VML_2R(Pow, pow)
+MCKL_DEFINE_MATH_VMF_VML_2C(Pow, pow)
 
 inline void pow(std::size_t n, const float *a, float b, float *y)
 {
@@ -217,21 +217,21 @@ inline void pow(std::size_t n, const std::complex<double> *a,
         reinterpret_cast<::MKL_Complex16 *>(y));
 }
 
-MCKL_DEFINE_MATH_VMATH_VML_2R(Hypot, hypot)
+MCKL_DEFINE_MATH_VMF_VML_2R(Hypot, hypot)
 
-MCKL_DEFINE_MATH_VMATH_VML_1R(Exp, exp)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Exp, exp)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Expm1, expm1)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Ln, log)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Ln, log)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Log10, log10)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Log10, log10)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Log1p, log1p)
+MCKL_DEFINE_MATH_VMF_VML_1R(Exp, exp)
+MCKL_DEFINE_MATH_VMF_VML_1C(Exp, exp)
+MCKL_DEFINE_MATH_VMF_VML_1R(Expm1, expm1)
+MCKL_DEFINE_MATH_VMF_VML_1R(Ln, log)
+MCKL_DEFINE_MATH_VMF_VML_1C(Ln, log)
+MCKL_DEFINE_MATH_VMF_VML_1R(Log10, log10)
+MCKL_DEFINE_MATH_VMF_VML_1C(Log10, log10)
+MCKL_DEFINE_MATH_VMF_VML_1R(Log1p, log1p)
 
-MCKL_DEFINE_MATH_VMATH_VML_1R(Cos, cos)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Cos, cos)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Sin, sin)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Sin, sin)
+MCKL_DEFINE_MATH_VMF_VML_1R(Cos, cos)
+MCKL_DEFINE_MATH_VMF_VML_1C(Cos, cos)
+MCKL_DEFINE_MATH_VMF_VML_1R(Sin, sin)
+MCKL_DEFINE_MATH_VMF_VML_1C(Sin, sin)
 
 inline void sincos(std::size_t n, const float *a, float *y, float *z)
 {
@@ -258,44 +258,44 @@ inline void cis(std::size_t n, const double *a, std::complex<double> *y)
         static_cast<MKL_INT>(n), a, reinterpret_cast<::MKL_Complex16 *>(y));
 }
 
-MCKL_DEFINE_MATH_VMATH_VML_1R(Tan, tan)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Tan, tan)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Acos, acos)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Acos, acos)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Asin, asin)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Asin, asin)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Atan, atan)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Atan, atan)
-MCKL_DEFINE_MATH_VMATH_VML_2R(Atan2, atan2)
+MCKL_DEFINE_MATH_VMF_VML_1R(Tan, tan)
+MCKL_DEFINE_MATH_VMF_VML_1C(Tan, tan)
+MCKL_DEFINE_MATH_VMF_VML_1R(Acos, acos)
+MCKL_DEFINE_MATH_VMF_VML_1C(Acos, acos)
+MCKL_DEFINE_MATH_VMF_VML_1R(Asin, asin)
+MCKL_DEFINE_MATH_VMF_VML_1C(Asin, asin)
+MCKL_DEFINE_MATH_VMF_VML_1R(Atan, atan)
+MCKL_DEFINE_MATH_VMF_VML_1C(Atan, atan)
+MCKL_DEFINE_MATH_VMF_VML_2R(Atan2, atan2)
 
-MCKL_DEFINE_MATH_VMATH_VML_1R(Cosh, cosh)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Cosh, cosh)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Sinh, sinh)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Sinh, sinh)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Tanh, tanh)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Tanh, tanh)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Acosh, acosh)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Acosh, acosh)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Asinh, asinh)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Asinh, asinh)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Atanh, atanh)
-MCKL_DEFINE_MATH_VMATH_VML_1C(Atanh, atanh)
+MCKL_DEFINE_MATH_VMF_VML_1R(Cosh, cosh)
+MCKL_DEFINE_MATH_VMF_VML_1C(Cosh, cosh)
+MCKL_DEFINE_MATH_VMF_VML_1R(Sinh, sinh)
+MCKL_DEFINE_MATH_VMF_VML_1C(Sinh, sinh)
+MCKL_DEFINE_MATH_VMF_VML_1R(Tanh, tanh)
+MCKL_DEFINE_MATH_VMF_VML_1C(Tanh, tanh)
+MCKL_DEFINE_MATH_VMF_VML_1R(Acosh, acosh)
+MCKL_DEFINE_MATH_VMF_VML_1C(Acosh, acosh)
+MCKL_DEFINE_MATH_VMF_VML_1R(Asinh, asinh)
+MCKL_DEFINE_MATH_VMF_VML_1C(Asinh, asinh)
+MCKL_DEFINE_MATH_VMF_VML_1R(Atanh, atanh)
+MCKL_DEFINE_MATH_VMF_VML_1C(Atanh, atanh)
 
-MCKL_DEFINE_MATH_VMATH_VML_1R(Erf, erf)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Erfc, erfc)
-MCKL_DEFINE_MATH_VMATH_VML_1R(CdfNorm, cdfnorm)
-MCKL_DEFINE_MATH_VMATH_VML_1R(ErfInv, erfinv)
-MCKL_DEFINE_MATH_VMATH_VML_1R(ErfcInv, erfcinv)
-MCKL_DEFINE_MATH_VMATH_VML_1R(CdfNormInv, cdfnorminv)
-MCKL_DEFINE_MATH_VMATH_VML_1R(LGamma, lgamma)
-MCKL_DEFINE_MATH_VMATH_VML_1R(TGamma, tgamma)
+MCKL_DEFINE_MATH_VMF_VML_1R(Erf, erf)
+MCKL_DEFINE_MATH_VMF_VML_1R(Erfc, erfc)
+MCKL_DEFINE_MATH_VMF_VML_1R(CdfNorm, cdfnorm)
+MCKL_DEFINE_MATH_VMF_VML_1R(ErfInv, erfinv)
+MCKL_DEFINE_MATH_VMF_VML_1R(ErfcInv, erfcinv)
+MCKL_DEFINE_MATH_VMF_VML_1R(CdfNormInv, cdfnorminv)
+MCKL_DEFINE_MATH_VMF_VML_1R(LGamma, lgamma)
+MCKL_DEFINE_MATH_VMF_VML_1R(TGamma, tgamma)
 
-MCKL_DEFINE_MATH_VMATH_VML_1R(Floor, floor)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Ceil, ceil)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Trunc, trunc)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Round, round)
-MCKL_DEFINE_MATH_VMATH_VML_1R(NearbyInt, nearbyint)
-MCKL_DEFINE_MATH_VMATH_VML_1R(Rint, rint)
+MCKL_DEFINE_MATH_VMF_VML_1R(Floor, floor)
+MCKL_DEFINE_MATH_VMF_VML_1R(Ceil, ceil)
+MCKL_DEFINE_MATH_VMF_VML_1R(Trunc, trunc)
+MCKL_DEFINE_MATH_VMF_VML_1R(Round, round)
+MCKL_DEFINE_MATH_VMF_VML_1R(NearbyInt, nearbyint)
+MCKL_DEFINE_MATH_VMF_VML_1R(Rint, rint)
 
 inline void modf(std::size_t n, const float *a, float *y, float *z)
 {
@@ -311,16 +311,15 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 
 } // namespace mckl
 
-#elif MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_VMATH && MCKL_USE_AVX2 &&          \
-    MCKL_USE_FMA
+#elif MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_VMF && MCKL_USE_AVX2 && MCKL_USE_FMA
 
-#define MCKL_DEFINE_MATH_VMATH_ASM_1(func)                                    \
+#define MCKL_DEFINE_MATH_VMF_ASM_1(func)                                      \
     inline void func(std::size_t n, const double *a, double *y)               \
     {                                                                         \
         ::mckl_vd_##func(n, a, y);                                            \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_ASM_2(func)                                    \
+#define MCKL_DEFINE_MATH_VMF_ASM_2(func)                                      \
     inline void func(                                                         \
         std::size_t n, const double *a, const double *b, double *y)           \
     {                                                                         \
@@ -330,25 +329,25 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 namespace mckl
 {
 
-MCKL_DEFINE_MATH_VMATH_ASM_1(sqrt)
+MCKL_DEFINE_MATH_VMF_ASM_1(sqrt)
 
-MCKL_DEFINE_MATH_VMATH_ASM_1(exp)
-MCKL_DEFINE_MATH_VMATH_ASM_1(exp2)
-MCKL_DEFINE_MATH_VMATH_ASM_1(expm1)
-MCKL_DEFINE_MATH_VMATH_ASM_1(log)
-MCKL_DEFINE_MATH_VMATH_ASM_1(log2)
-MCKL_DEFINE_MATH_VMATH_ASM_1(log10)
-MCKL_DEFINE_MATH_VMATH_ASM_1(log1p)
+MCKL_DEFINE_MATH_VMF_ASM_1(exp)
+MCKL_DEFINE_MATH_VMF_ASM_1(exp2)
+MCKL_DEFINE_MATH_VMF_ASM_1(expm1)
+MCKL_DEFINE_MATH_VMF_ASM_1(log)
+MCKL_DEFINE_MATH_VMF_ASM_1(log2)
+MCKL_DEFINE_MATH_VMF_ASM_1(log10)
+MCKL_DEFINE_MATH_VMF_ASM_1(log1p)
 
-MCKL_DEFINE_MATH_VMATH_ASM_1(cos)
-MCKL_DEFINE_MATH_VMATH_ASM_1(sin)
+MCKL_DEFINE_MATH_VMF_ASM_1(cos)
+MCKL_DEFINE_MATH_VMF_ASM_1(sin)
 
 inline void sincos(std::size_t n, const double *a, double *y, double *z)
 {
     ::mckl_vd_sincos(n, a, y, z);
 }
 
-MCKL_DEFINE_MATH_VMATH_ASM_1(tan)
+MCKL_DEFINE_MATH_VMF_ASM_1(tan)
 
 } // namespace mckl
 
@@ -441,7 +440,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
 
 #endif // MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2 && MCKL_USE_FMA
 
-#define MCKL_DEFINE_MATH_VMATH_1(func, name)                                  \
+#define MCKL_DEFINE_MATH_VMF_1(func, name)                                    \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, T *y)                         \
     {                                                                         \
@@ -449,7 +448,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
             y[i] = func(a[i]);                                                \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_2(func, name)                                  \
+#define MCKL_DEFINE_MATH_VMF_2(func, name)                                    \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, const T *b, T *y)             \
     {                                                                         \
@@ -457,7 +456,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
             y[i] = func(a[i], b[i]);                                          \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_2VS(func, name)                                \
+#define MCKL_DEFINE_MATH_VMF_2VS(func, name)                                  \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, T b, T *y)                    \
     {                                                                         \
@@ -465,7 +464,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
             y[i] = func(a[i], b);                                             \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_2SV(func, name)                                \
+#define MCKL_DEFINE_MATH_VMF_2SV(func, name)                                  \
     template <typename T>                                                     \
     inline void name(std::size_t n, T a, const T *b, T *y)                    \
     {                                                                         \
@@ -473,7 +472,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
             y[i] = func(a, b[i]);                                             \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_B(op, name)                                    \
+#define MCKL_DEFINE_MATH_VMF_B(op, name)                                      \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, const T *b, T *y)             \
     {                                                                         \
@@ -481,7 +480,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
             y[i] = a[i] op b[i];                                              \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_BVS(op, name)                                  \
+#define MCKL_DEFINE_MATH_VMF_BVS(op, name)                                    \
     template <typename T>                                                     \
     inline void name(std::size_t n, const T *a, T b, T *y)                    \
     {                                                                         \
@@ -489,7 +488,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
             y[i] = a[i] op b;                                                 \
     }
 
-#define MCKL_DEFINE_MATH_VMATH_BSV(op, name)                                  \
+#define MCKL_DEFINE_MATH_VMF_BSV(op, name)                                    \
     template <typename T>                                                     \
     inline void name(std::size_t n, T a, const T *b, T *y)                    \
     {                                                                         \
@@ -522,26 +521,26 @@ inline T fma_impl(T a, T b, T c)
 } // namespace mckl::internal
 
 /// \defgroup vArithmetic Arithmetic functions
-/// \ingroup vMath
+/// \ingroup VMF
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b_i\f$
-MCKL_DEFINE_MATH_VMATH_B(+, add)
+MCKL_DEFINE_MATH_VMF_B(+, add)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i + b\f$
-MCKL_DEFINE_MATH_VMATH_BVS(+, add)
+MCKL_DEFINE_MATH_VMF_BVS(+, add)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a + b_i\f$
-MCKL_DEFINE_MATH_VMATH_BSV(+, add)
+MCKL_DEFINE_MATH_VMF_BSV(+, add)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b_i\f$
-MCKL_DEFINE_MATH_VMATH_B(-, sub)
+MCKL_DEFINE_MATH_VMF_B(-, sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i - b\f$
-MCKL_DEFINE_MATH_VMATH_BVS(-, sub)
+MCKL_DEFINE_MATH_VMF_BVS(-, sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a - b_i\f$
-MCKL_DEFINE_MATH_VMATH_BSV(-, sub)
+MCKL_DEFINE_MATH_VMF_BSV(-, sub)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^2\f$
 template <typename T>
@@ -552,28 +551,28 @@ inline void sqr(std::size_t n, const T *a, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i\f$
-MCKL_DEFINE_MATH_VMATH_B(*, mul)
+MCKL_DEFINE_MATH_VMF_B(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b\f$
-MCKL_DEFINE_MATH_VMATH_BVS(*, mul)
+MCKL_DEFINE_MATH_VMF_BVS(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i\f$
-MCKL_DEFINE_MATH_VMATH_BSV(*, mul)
+MCKL_DEFINE_MATH_VMF_BSV(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}_i\f$
-MCKL_DEFINE_MATH_VMATH_2(internal::mulbyconj_impl, mulbyconj)
+MCKL_DEFINE_MATH_VMF_2(internal::mulbyconj_impl, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}\f$
-MCKL_DEFINE_MATH_VMATH_2VS(internal::mulbyconj_impl, mulbyconj)
+MCKL_DEFINE_MATH_VMF_2VS(internal::mulbyconj_impl, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a \bar{b}_i\f$
-MCKL_DEFINE_MATH_VMATH_2SV(internal::mulbyconj_impl, mulbyconj)
+MCKL_DEFINE_MATH_VMF_2SV(internal::mulbyconj_impl, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = \bar{a}_i\f$
-MCKL_DEFINE_MATH_VMATH_1(std::conj, conj)
+MCKL_DEFINE_MATH_VMF_1(std::conj, conj)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
-MCKL_DEFINE_MATH_VMATH_1(std::abs, abs)
+MCKL_DEFINE_MATH_VMF_1(std::abs, abs)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
 template <typename T>
@@ -671,7 +670,7 @@ inline void fma(std::size_t n, const T *a, T b, T c, T *y)
 /// @} vArithmetic
 
 /// \defgroup vPower Power root functions
-/// \ingroup vMath
+/// \ingroup VMF
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{-1}\f$
@@ -683,16 +682,16 @@ inline void inv(std::size_t n, const T *a, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
-MCKL_DEFINE_MATH_VMATH_B(/, div)
+MCKL_DEFINE_MATH_VMF_B(/, div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b\f$
-MCKL_DEFINE_MATH_VMATH_BVS(/, div)
+MCKL_DEFINE_MATH_VMF_BVS(/, div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a / b_i\f$
-MCKL_DEFINE_MATH_VMATH_BSV(/, div)
+MCKL_DEFINE_MATH_VMF_BSV(/, div)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i}\f$
-MCKL_DEFINE_MATH_VMATH_1(std::sqrt, sqrt)
+MCKL_DEFINE_MATH_VMF_1(std::sqrt, sqrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt{a_i}\f$
 template <typename T>
@@ -710,7 +709,7 @@ inline void invsqrt(std::size_t n, const T *a, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
-MCKL_DEFINE_MATH_VMATH_1(std::cbrt, cbrt)
+MCKL_DEFINE_MATH_VMF_1(std::cbrt, cbrt)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 1 / \sqrt[3]{a_i}\f$
 template <typename T>
@@ -760,61 +759,61 @@ inline void pow3o2(std::size_t n, const T *a, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{b_i}\f$
-MCKL_DEFINE_MATH_VMATH_2(std::pow, pow)
+MCKL_DEFINE_MATH_VMF_2(std::pow, pow)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^b\f$
-MCKL_DEFINE_MATH_VMATH_2VS(std::pow, pow)
+MCKL_DEFINE_MATH_VMF_2VS(std::pow, pow)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a^{b_i}\f$
-MCKL_DEFINE_MATH_VMATH_2SV(std::pow, pow)
+MCKL_DEFINE_MATH_VMF_2SV(std::pow, pow)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b_i^2}\f$
-MCKL_DEFINE_MATH_VMATH_2(std::hypot, hypot)
+MCKL_DEFINE_MATH_VMF_2(std::hypot, hypot)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a_i^2 + b^2}\f$
-MCKL_DEFINE_MATH_VMATH_2VS(std::hypot, hypot)
+MCKL_DEFINE_MATH_VMF_2VS(std::hypot, hypot)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt{a^2 + b_i^2}\f$
-MCKL_DEFINE_MATH_VMATH_2SV(std::hypot, hypot)
+MCKL_DEFINE_MATH_VMF_2SV(std::hypot, hypot)
 
 /// @} vPower
 
 /// \defgroup vExponential Exponential and logarithm functions
-/// \ingroup vMath
+/// \ingroup VMF
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i}\f$
-MCKL_DEFINE_MATH_VMATH_1(std::exp, exp)
+MCKL_DEFINE_MATH_VMF_1(std::exp, exp)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 2^{a_i}\f$
-MCKL_DEFINE_MATH_VMATH_1(std::exp2, exp2)
+MCKL_DEFINE_MATH_VMF_1(std::exp2, exp2)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
-MCKL_DEFINE_MATH_VMATH_1(std::expm1, expm1)
+MCKL_DEFINE_MATH_VMF_1(std::expm1, expm1)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::log, log)
+MCKL_DEFINE_MATH_VMF_1(std::log, log)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log_2(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::log2, log2)
+MCKL_DEFINE_MATH_VMF_1(std::log2, log2)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log_{10}(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::log10, log10)
+MCKL_DEFINE_MATH_VMF_1(std::log10, log10)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i + 1)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::log1p, log1p)
+MCKL_DEFINE_MATH_VMF_1(std::log1p, log1p)
 
 /// @} vExponential
 
 /// \defgroup vTrigonometric Trigonometric functions
-/// \ingroup vMath
+/// \ingroup VMF
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sin(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::cos, cos)
+MCKL_DEFINE_MATH_VMF_1(std::cos, cos)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cos(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::sin, sin)
+MCKL_DEFINE_MATH_VMF_1(std::sin, sin)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \sin(a_i), z_i = \cos(a_i)\f$
@@ -872,72 +871,72 @@ inline void cis(std::size_t n, const T *a, std::complex<T> *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::tan, tan)
+MCKL_DEFINE_MATH_VMF_1(std::tan, tan)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arccos(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::acos, acos)
+MCKL_DEFINE_MATH_VMF_1(std::acos, acos)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arcsin(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::asin, asin)
+MCKL_DEFINE_MATH_VMF_1(std::asin, asin)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::atan, atan)
+MCKL_DEFINE_MATH_VMF_1(std::atan, atan)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b_i)\f$ with
 /// signs to determine the quadrant
-MCKL_DEFINE_MATH_VMATH_2(std::atan2, atan2)
+MCKL_DEFINE_MATH_VMF_2(std::atan2, atan2)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b)\f$ with
 /// signs to determine the quadrant
-MCKL_DEFINE_MATH_VMATH_2VS(std::atan2, atan2)
+MCKL_DEFINE_MATH_VMF_2VS(std::atan2, atan2)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a / b_i)\f$ with
 /// signs to determine the quadrant
-MCKL_DEFINE_MATH_VMATH_2SV(std::atan2, atan2)
+MCKL_DEFINE_MATH_VMF_2SV(std::atan2, atan2)
 
 /// @} vTrigonometric
 
 /// \defgroup vHyperbolic Hyperbolic functions
-/// \ingroup vMath
+/// \ingroup VMF
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cosh(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::cosh, cosh)
+MCKL_DEFINE_MATH_VMF_1(std::cosh, cosh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sinh(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::sinh, sinh)
+MCKL_DEFINE_MATH_VMF_1(std::sinh, sinh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tanh(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::tanh, tanh)
+MCKL_DEFINE_MATH_VMF_1(std::tanh, tanh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\cosh(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::acosh, acosh)
+MCKL_DEFINE_MATH_VMF_1(std::acosh, acosh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\sinh(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::asinh, asinh)
+MCKL_DEFINE_MATH_VMF_1(std::asinh, asinh)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{arc}\tanh(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::atanh, atanh)
+MCKL_DEFINE_MATH_VMF_1(std::atanh, atanh)
 
 /// @} vHyperbolic
 
 /// \defgroup vSpecial Special functions
-/// \ingroup vMath
+/// \ingroup VMF
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{erf}(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::erf, erf)
+MCKL_DEFINE_MATH_VMF_1(std::erf, erf)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \mathrm{erfc}(a_i) = \mathrm{erfc}(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::erfc, erfc)
+MCKL_DEFINE_MATH_VMF_1(std::erfc, erfc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \mathrm{erf}^{-1}(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(mckl::erfinv, erfinv)
+MCKL_DEFINE_MATH_VMF_1(mckl::erfinv, erfinv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \mathrm{erfc}(a_i) = \mathrm{erfc}^{-1}(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(mckl::erfcinv, erfcinv)
+MCKL_DEFINE_MATH_VMF_1(mckl::erfcinv, erfcinv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = (1 + \mathrm{erfc}(a_i / \sqrt{2})) / 2\f$
@@ -976,38 +975,38 @@ inline void cdfnorminv(std::size_t n, const T *a, T *y)
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::lgamma, lgamma)
+MCKL_DEFINE_MATH_VMF_1(std::lgamma, lgamma)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \Gamma(a_i)\f$
-MCKL_DEFINE_MATH_VMATH_1(std::tgamma, tgamma)
+MCKL_DEFINE_MATH_VMF_1(std::tgamma, tgamma)
 
 /// @} vSpecial
 
 /// \defgroup vRounding Rounding functions
-/// \ingroup vMath
+/// \ingroup VMF
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \lfloor a_i \rfloor\f$
-MCKL_DEFINE_MATH_VMATH_1(std::floor, floor)
+MCKL_DEFINE_MATH_VMF_1(std::floor, floor)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \lceil a_i \rceil\f$
-MCKL_DEFINE_MATH_VMATH_1(std::ceil, ceil)
+MCKL_DEFINE_MATH_VMF_1(std::ceil, ceil)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
 /// \f$y_i = \mathrm{sgn}(a_i)\lfloor|a_i|\rfloor\f$
-MCKL_DEFINE_MATH_VMATH_1(std::trunc, trunc)
+MCKL_DEFINE_MATH_VMF_1(std::trunc, trunc)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute the nearest integers, rounding away
 /// from zero
-MCKL_DEFINE_MATH_VMATH_1(std::round, round)
+MCKL_DEFINE_MATH_VMF_1(std::round, round)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute the nearest integers, using the
 /// current rounding mode
-MCKL_DEFINE_MATH_VMATH_1(std::nearbyint, nearbyint)
+MCKL_DEFINE_MATH_VMF_1(std::nearbyint, nearbyint)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute the nearest integers, using the
 /// current rounding mode
-MCKL_DEFINE_MATH_VMATH_1(std::rint, rint)
+MCKL_DEFINE_MATH_VMF_1(std::rint, rint)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute the integeral and fraction parts
 template <typename T>
@@ -1021,4 +1020,4 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
 
 } // namespace mckl
 
-#endif // MCKL_MATH_VMATH_HPP
+#endif // MCKL_MATH_VMF_HPP

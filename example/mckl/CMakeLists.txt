@@ -77,7 +77,7 @@ mckl_add_test_header(math/beta      TRUE)
 mckl_add_test_header(math/constants TRUE)
 mckl_add_test_header(math/erf       TRUE)
 mckl_add_test_header(math/gamma     TRUE)
-mckl_add_test_header(math/vmath     TRUE)
+mckl_add_test_header(math/vmf       TRUE)
 
 mckl_add_test_header(random/internal/aes_aesni              ${AESNI_FOUND})
 mckl_add_test_header(random/internal/aes_aesni_aes128       ${AESNI_FOUND})

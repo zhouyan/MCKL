@@ -81,7 +81,7 @@
 /// \ingroup Math
 /// \brief Special functions
 
-/// \defgroup vMath Vectorized functions
+/// \defgroup VMF Vectorized functions
 /// \ingroup Math
 /// \brief Vectorized functions
 

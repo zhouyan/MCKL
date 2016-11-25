@@ -1996,16 +1996,16 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
     std::cout << std::setw(twid) << std::right << "MKL";
 #endif
-    std::cout << std::setw(10) << std::right << "vMath";
+    std::cout << std::setw(10) << std::right << "VMF";
     std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
 
 #if MCKL_USE_MKL_VML
-    std::string vmath = "VML";
+    std::string vmf = "VML";
 #else
-    std::string vmath = "C++";
+    std::string vmf = "VMF";
 #endif
 
     for (std::size_t i = 0; i != perf_p.size(); ++i) {
@@ -2016,7 +2016,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
         std::cout << std::setw(twid) << std::right << perf_p[i].c4;
 #endif
-        std::cout << std::setw(10) << std::right << vmath;
+        std::cout << std::setw(10) << std::right << vmf;
 
         std::stringstream ss;
         ss << "(";

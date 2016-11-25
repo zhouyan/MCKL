@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/math/include/math_vmath.hpp
+// MCKL/example/math/include/math_vmf.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,12 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_MATH_VMATH_HPP
-#define MCKL_EXAMPLE_MATH_VMATH_HPP
+#ifndef MCKL_EXAMPLE_MATH_VMF_HPP
+#define MCKL_EXAMPLE_MATH_VMF_HPP
 
 #include "math_common.hpp"
 
-#define MCKL_EXAMPLE_MATH_VMATH_RUN_A1R1(func)                                \
+#define MCKL_EXAMPLE_MATH_VMF_RUN_A1R1(func)                                  \
     mckl::func<float>(K, as.data(), rs1.data());                              \
     watch1.start();                                                           \
     mckl::func<float>(K, as.data(), rs1.data());                              \
@@ -55,7 +55,7 @@
     mckl::func(K, ad.data(), rd2.data());                                     \
     watch4.stop();
 
-#define MCKL_EXAMPLE_MATH_VMATH_RUN_A2R1(func)                                \
+#define MCKL_EXAMPLE_MATH_VMF_RUN_A2R1(func)                                  \
     mckl::func<float>(K, as.data(), bs.data(), rs1.data());                   \
     watch1.start();                                                           \
     mckl::func<float>(K, as.data(), bs.data(), rs1.data());                   \
@@ -76,7 +76,7 @@
     mckl::func(K, ad.data(), bd.data(), rd2.data());                          \
     watch4.stop();
 
-#define MCKL_EXAMPLE_MATH_VMATH_RUN_A3R1(func)                                \
+#define MCKL_EXAMPLE_MATH_VMF_RUN_A3R1(func)                                  \
     mckl::func<float>(K, as.data(), bs.data(), cs.data(), rs1.data());        \
     watch1.start();                                                           \
     mckl::func<float>(K, as.data(), bs.data(), cs.data(), rs1.data());        \
@@ -97,7 +97,7 @@
     mckl::func(K, ad.data(), bd.data(), cd.data(), rd2.data());               \
     watch4.stop();
 
-#define MCKL_EXAMPLE_MATH_VMATH_RUN_A1R2(func)                                \
+#define MCKL_EXAMPLE_MATH_VMF_RUN_A1R2(func)                                  \
     mckl::func<float>(K, as.data(), rs1.data(), rs3.data());                  \
     watch1.start();                                                           \
     mckl::func<float>(K, as.data(), rs1.data(), rs3.data());                  \
@@ -118,8 +118,8 @@
     mckl::func(K, ad.data(), rd2.data(), rd4.data());                         \
     watch4.stop();
 
-#define MCKL_EXAMPLE_DEFINE_MATH_VMATH(AR, func, ls, us, ld, ud)              \
-    inline void math_vmath_##func(                                            \
+#define MCKL_EXAMPLE_DEFINE_MATH_VMF(AR, func, ls, us, ld, ud)                \
+    inline void math_vmf_##func(                                              \
         std::size_t N, std::size_t M, mckl::Vector<MathPerf> &perf)           \
     {                                                                         \
         mckl::UniformRealDistribution<float> unifs(ls, us);                   \
@@ -167,7 +167,7 @@
                 mckl::rand(rng, unifd, K, ad.data());                         \
                 mckl::rand(rng, unifd, K, bd.data());                         \
                 mckl::rand(rng, unifd, K, cd.data());                         \
-                MCKL_EXAMPLE_MATH_VMATH_RUN_##AR(func);                       \
+                MCKL_EXAMPLE_MATH_VMF_RUN_##AR(func);                         \
                 math_error(K, rs1.data(), rs2.data(), e1, e2);                \
                 math_error(K, rd1.data(), rd2.data(), e3, e4);                \
             }                                                                 \
@@ -198,126 +198,125 @@
         perf.push_back(result);                                               \
     }
 
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, acos, -1.0f, 1.0f, -1.0, 1.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, asin, -1.0f, 1.0f, -1.0, 1.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, atan, -5.0f, 5.0f, -5.0, 5.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, atan2, -1e3f, 1e3f, -1e3, 1e3)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, cos, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, sin, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R2, sincos, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, tan, -1e3f, 1e3f, -1e3, 1e3)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, acos, -1.0f, 1.0f, -1.0, 1.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, asin, -1.0f, 1.0f, -1.0, 1.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, atan, -5.0f, 5.0f, -5.0, 5.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, atan2, -1e3f, 1e3f, -1e3, 1e3)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cos, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sin, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R2, sincos, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, tan, -1e3f, 1e3f, -1e3, 1e3)
 
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, acosh, 4.0f, 1e19f, 1.001, 1e154)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, asinh, 4.0f, 1e19f, 0.002, 1e154)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, atanh, 0.77f, 0.99999f, 0.005, 0.99999)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, cosh, -87.0f, 87.0f, -675.0, 675.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, sinh, -87.0f, 87.0f, -675.0, 675.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, tanh, -9.0f, 9.0f, -19.0, 19.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, acosh, 4.0f, 1e19f, 1.001, 1e154)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, asinh, 4.0f, 1e19f, 0.002, 1e154)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, atanh, 0.77f, 0.99999f, 0.005, 0.99999)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cosh, -87.0f, 87.0f, -675.0, 675.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sinh, -87.0f, 87.0f, -675.0, 675.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, tanh, -9.0f, 9.0f, -19.0, 19.0)
 
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, cbrt, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, hypot, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, inv, 1e-3f, 1e4f, 1e-3, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, invcbrt, 0.1f, 1e4f, 0.1, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, invsqrt, 0.1f, 1e4f, 0.1, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, pow, 0.1f, 10.0f, 5.0, 100.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, pow2o3, 0.1f, 1e4f, 0.1, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, pow3o2, 0.1f, 1e4f, 0.1, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, sqrt, 0.0f, 1e4f, 0.0, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cbrt, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, hypot, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, inv, 1e-3f, 1e4f, 1e-3, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, invcbrt, 0.1f, 1e4f, 0.1, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, invsqrt, 0.1f, 1e4f, 0.1, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, pow, 0.1f, 10.0f, 5.0, 100.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, pow2o3, 0.1f, 1e4f, 0.1, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, pow3o2, 0.1f, 1e4f, 0.1, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sqrt, 0.0f, 1e4f, 0.0, 1e4)
 
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, exp, -87.0f, 87.0f, -707.0, 707.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, expm1, -70.0f, 70.0f, -500.0, 500.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, log, 0.1f, 1e4, 0.1, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, log10, 0.1f, 1e4, 0.1, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, log1p, 1.0f, 999.0f, 1.0, 999.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, exp, -87.0f, 87.0f, -707.0, 707.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, expm1, -70.0f, 70.0f, -500.0, 500.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, log, 0.1f, 1e4, 0.1, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, log10, 0.1f, 1e4, 0.1, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, log1p, 1.0f, 999.0f, 1.0, 999.0)
 
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, abs, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, add, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, div, 1e-4f, 1e4f, 1e-4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, mul, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, sqr, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A2R1, sub, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A3R1, fma, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, abs, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, add, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, div, 1e-4f, 1e4f, 1e-4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, mul, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sqr, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, sub, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A3R1, fma, -1e4f, 1e4f, -1e4, 1e4)
 
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, ceil, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, floor, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R2, modf, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, nearbyint, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, rint, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, round, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, trunc, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, ceil, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, floor, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R2, modf, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, nearbyint, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, rint, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, round, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, trunc, -1e4f, 1e4f, -1e4, 1e4)
 
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, cdfnorm, -8.0f, 5.0f, -32.0, 8.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(
-    A1R1, cdfnorminv, 1e-5f, 0.99999f, 1e-5, 0.99999)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, erf, 1.0f, 4.0f, 0.5, 5.9)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, erfc, -3.0f, 9.0f, -5.0, 25.0)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cdfnorm, -8.0f, 5.0f, -32.0, 8.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cdfnorminv, 1e-5f, 0.99999f, 1e-5, 0.99999)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, erf, 1.0f, 4.0f, 0.5, 5.9)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, erfc, -3.0f, 9.0f, -5.0, 25.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(
     A1R1, erfinv, -0.99999f, 0.99999f, -0.99999, 0.99999)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, erfcinv, 1e-5f, 1.99999f, 1e-5, 1.99999)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, lgamma, 1e-5f, 1e3f, 1e-5, 1e3)
-MCKL_EXAMPLE_DEFINE_MATH_VMATH(A1R1, tgamma, 1e-4f, 35.0f, 1e-4, 171.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, erfcinv, 1e-5f, 1.99999f, 1e-5, 1.99999)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, lgamma, 1e-5f, 1e3f, 1e-5, 1e3)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, tgamma, 1e-4f, 35.0f, 1e-4, 171.0)
 
-inline void math_vmath(std::size_t N, std::size_t M)
+inline void math_vmf(std::size_t N, std::size_t M)
 {
     mckl::Vector<MathPerf> perf;
 
-    math_vmath_add(N, M, perf);
-    math_vmath_sub(N, M, perf);
-    math_vmath_sqr(N, M, perf);
-    math_vmath_mul(N, M, perf);
-    math_vmath_fma(N, M, perf);
-    math_vmath_abs(N, M, perf);
+    math_vmf_add(N, M, perf);
+    math_vmf_sub(N, M, perf);
+    math_vmf_sqr(N, M, perf);
+    math_vmf_mul(N, M, perf);
+    math_vmf_fma(N, M, perf);
+    math_vmf_abs(N, M, perf);
 
-    math_vmath_inv(N, M, perf);
-    math_vmath_div(N, M, perf);
-    math_vmath_sqrt(N, M, perf);
-    math_vmath_invsqrt(N, M, perf);
-    math_vmath_cbrt(N, M, perf);
-    math_vmath_invcbrt(N, M, perf);
-    math_vmath_pow2o3(N, M, perf);
-    math_vmath_pow3o2(N, M, perf);
-    math_vmath_pow(N, M, perf);
-    math_vmath_hypot(N, M, perf);
+    math_vmf_inv(N, M, perf);
+    math_vmf_div(N, M, perf);
+    math_vmf_sqrt(N, M, perf);
+    math_vmf_invsqrt(N, M, perf);
+    math_vmf_cbrt(N, M, perf);
+    math_vmf_invcbrt(N, M, perf);
+    math_vmf_pow2o3(N, M, perf);
+    math_vmf_pow3o2(N, M, perf);
+    math_vmf_pow(N, M, perf);
+    math_vmf_hypot(N, M, perf);
 
-    math_vmath_exp(N, M, perf);
-    math_vmath_expm1(N, M, perf);
-    math_vmath_log(N, M, perf);
-    math_vmath_log10(N, M, perf);
-    math_vmath_log1p(N, M, perf);
+    math_vmf_exp(N, M, perf);
+    math_vmf_expm1(N, M, perf);
+    math_vmf_log(N, M, perf);
+    math_vmf_log10(N, M, perf);
+    math_vmf_log1p(N, M, perf);
 
-    math_vmath_cos(N, M, perf);
-    math_vmath_sin(N, M, perf);
-    math_vmath_sincos(N, M, perf);
-    math_vmath_tan(N, M, perf);
-    math_vmath_acos(N, M, perf);
-    math_vmath_asin(N, M, perf);
-    math_vmath_atan(N, M, perf);
-    math_vmath_atan2(N, M, perf);
+    math_vmf_cos(N, M, perf);
+    math_vmf_sin(N, M, perf);
+    math_vmf_sincos(N, M, perf);
+    math_vmf_tan(N, M, perf);
+    math_vmf_acos(N, M, perf);
+    math_vmf_asin(N, M, perf);
+    math_vmf_atan(N, M, perf);
+    math_vmf_atan2(N, M, perf);
 
-    math_vmath_cosh(N, M, perf);
-    math_vmath_sinh(N, M, perf);
-    math_vmath_tanh(N, M, perf);
-    math_vmath_acosh(N, M, perf);
-    math_vmath_asinh(N, M, perf);
-    math_vmath_atanh(N, M, perf);
+    math_vmf_cosh(N, M, perf);
+    math_vmf_sinh(N, M, perf);
+    math_vmf_tanh(N, M, perf);
+    math_vmf_acosh(N, M, perf);
+    math_vmf_asinh(N, M, perf);
+    math_vmf_atanh(N, M, perf);
 
-    math_vmath_erf(N, M, perf);
-    math_vmath_erfc(N, M, perf);
-    math_vmath_cdfnorm(N, M, perf);
-    math_vmath_erfinv(N, M, perf);
-    math_vmath_erfcinv(N, M, perf);
-    math_vmath_cdfnorminv(N, M, perf);
-    math_vmath_lgamma(N, M, perf);
-    math_vmath_tgamma(N, M, perf);
+    math_vmf_erf(N, M, perf);
+    math_vmf_erfc(N, M, perf);
+    math_vmf_cdfnorm(N, M, perf);
+    math_vmf_erfinv(N, M, perf);
+    math_vmf_erfcinv(N, M, perf);
+    math_vmf_cdfnorminv(N, M, perf);
+    math_vmf_lgamma(N, M, perf);
+    math_vmf_tgamma(N, M, perf);
 
-    math_vmath_floor(N, M, perf);
-    math_vmath_ceil(N, M, perf);
-    math_vmath_trunc(N, M, perf);
-    math_vmath_round(N, M, perf);
-    math_vmath_nearbyint(N, M, perf);
-    math_vmath_rint(N, M, perf);
+    math_vmf_floor(N, M, perf);
+    math_vmf_ceil(N, M, perf);
+    math_vmf_trunc(N, M, perf);
+    math_vmf_round(N, M, perf);
+    math_vmf_nearbyint(N, M, perf);
+    math_vmf_rint(N, M, perf);
 
     math_summary_sv(perf);
 }
 
-#endif // MCKL_EXAMPLE_MATH_VMATH_HPP
+#endif // MCKL_EXAMPLE_MATH_VMF_HPP
