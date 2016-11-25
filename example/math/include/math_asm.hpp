@@ -32,10 +32,6 @@
 #ifndef MCKL_EXAMPLE_MATH_ASM_HPP
 #define MCKL_EXAMPLE_MATH_ASM_HPP
 
-#ifdef __x86_64__
-#define MCKL_USE_RDPMC 1
-#endif
-
 #include "math_common.hpp"
 
 #define MCKL_EXAMPLE_DEFINE_MATH_ASM(T, U, func, vfunc, wl, wu, lb, ub)       \
@@ -48,6 +44,7 @@
         mckl::Vector<T> a(N);                                                 \
         mckl::Vector<T> r1(N);                                                \
         mckl::Vector<T> r2(N);                                                \
+        mckl::Vector<T> r3(N);                                                \
         mckl::Vector<long double> al(N);                                      \
         mckl::Vector<long double> rl(N);                                      \
                                                                               \
@@ -55,38 +52,49 @@
                                                                               \
         T e1 = 0;                                                             \
         T e2 = 0;                                                             \
+        T e3 = 0;                                                             \
         double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
         double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
+        double c3 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
         for (std::size_t k = 0; k != 10; ++k) {                               \
             std::size_t n = 0;                                                \
             mckl::StopWatch watch1;                                           \
             mckl::StopWatch watch2;                                           \
+            mckl::StopWatch watch3;                                           \
             for (std::size_t i = 0; i != M; ++i) {                            \
                 std::size_t K = rsize(rng);                                   \
                 n += K;                                                       \
                 mckl::rand(rng, unif, K, a.data());                           \
                                                                               \
-                mckl_##vfunc(K, a.data(), r1.data());                         \
+                mckl::func<T>(K, a.data(), r1.data());                        \
                 watch1.start();                                               \
-                mckl_##vfunc(K, a.data(), r1.data());                         \
+                mckl::func<T>(K, a.data(), r2.data());                        \
                 watch1.stop();                                                \
                                                                               \
-                mckl::func(K, a.data(), r2.data());                           \
+                mckl_##vfunc(K, a.data(), r2.data());                         \
                 watch2.start();                                               \
-                mckl::func(K, a.data(), r2.data());                           \
+                mckl_##vfunc(K, a.data(), r2.data());                         \
                 watch2.stop();                                                \
+                                                                              \
+                mckl::func(K, a.data(), r3.data());                           \
+                watch3.start();                                               \
+                mckl::func(K, a.data(), r3.data());                           \
+                watch3.stop();                                                \
                                                                               \
                 std::copy_n(a.data(), K, al.data());                          \
                 mckl::func(K, al.data(), rl.data());                          \
                 math_error(K, r1.data(), rl.data(), e1);                      \
                 math_error(K, r2.data(), rl.data(), e2);                      \
+                math_error(K, r3.data(), rl.data(), e3);                      \
             }                                                                 \
             if (has_cycles) {                                                 \
                 c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
                 c2 = std::min(c2, 1.0 * watch2.cycles() / n);                 \
+                c3 = std::min(c3, 1.0 * watch3.cycles() / n);                 \
             } else {                                                          \
                 c1 = std::max(c1, n / watch1.seconds() * 1e-6);               \
                 c2 = std::max(c2, n / watch2.seconds() * 1e-6);               \
+                c3 = std::max(c3, n / watch3.seconds() * 1e-6);               \
             }                                                                 \
         }                                                                     \
         union {                                                               \
@@ -108,21 +116,23 @@
         std::copy_n(vf, vn, vl);                                              \
         mckl_##vfunc(vn, vf, vf);                                             \
         mckl::func(vn, vl, vl);                                               \
-        T e3 = 0;                                                             \
-        T e4 = 0;                                                             \
-        math_error(1, vf + 0, vl + 0, e3);                                    \
-        math_error(1, vf + 1, vl + 1, e4);                                    \
+        T el = 0;                                                             \
+        T eu = 0;                                                             \
+        math_error(1, vf + 0, vl + 0, el);                                    \
+        math_error(1, vf + 1, vl + 1, eu);                                    \
                                                                               \
         std::cout << std::fixed << std::setprecision(2);                      \
         std::cout << std::setw(nwid) << std::left << #func;                   \
         std::cout << std::setw(nwid) << std::right << c1;                     \
         std::cout << std::setw(nwid) << std::right << c2;                     \
+        std::cout << std::setw(nwid) << std::right << c3;                     \
         std::cout.unsetf(std::ios_base::floatfield);                          \
         std::cout << std::setprecision(2);                                    \
         std::cout << std::setw(nwid) << std::right << e1;                     \
         std::cout << std::setw(nwid) << std::right << e2;                     \
         std::cout << std::setw(nwid) << std::right << e3;                     \
-        std::cout << std::setw(nwid) << std::right << e4;                     \
+        std::cout << std::setw(nwid) << std::right << el;                     \
+        std::cout << std::setw(nwid) << std::right << eu;                     \
         for (int j = 2; j != vn; ++j) {                                       \
             T x = std::abs(vf[j]);                                            \
             bool positive = x > 0;                                            \
@@ -141,31 +151,42 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, exp2, vd_exp2, -1022, 1022,
     0xC08FF00000000000, 0x408FF80000000000)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, expm1, vd_expm1, -500, 500,
     0xC086232BDD7ABCD2, 0x40862B7D369A5AA7)
-// MCKL_EXAMPLE_DEFINE_MATH_ASM(log, 1.0, 1.1, 1.0, 1.1)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log, vd_log, 0.1, 1e4,
+    0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log2, vd_log2, 0.1, 1e4,
+    0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log10, vd_log10, 0.1, 1e4,
+    0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log1p, vd_log1p, 1.0, 1e4,
+    0xBFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
 
 inline void math_asm(std::size_t N, std::size_t M)
 {
     const int nwid = 10;
-    const std::size_t lwid = nwid * 14;
+    const std::size_t lwid = nwid * 16;
 
     std::cout << std::string(lwid, '=') << std::endl;
 
     std::cout << std::setw(nwid) << std::left << "Function";
     if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(nwid) << std::right << "cpE (S)";
         std::cout << std::setw(nwid) << std::right << "cpE (A)";
         std::cout << std::setw(nwid) << std::right << "cpE (V)";
     } else {
+        std::cout << std::setw(nwid) << std::right << "ME/s (S)";
         std::cout << std::setw(nwid) << std::right << "ME/s (A)";
         std::cout << std::setw(nwid) << std::right << "ME/s (V)";
     }
 #if MCKL_HAS_BOOST
+    std::cout << std::setw(nwid) << std::right << "ULP (S)";
     std::cout << std::setw(nwid) << std::right << "ULP (A)";
     std::cout << std::setw(nwid) << std::right << "ULP (V)";
     std::cout << std::setw(nwid) << std::right << "ULP (LB)";
     std::cout << std::setw(nwid) << std::right << "ULP (UB)";
 #else
+    std::cout << std::setw(nwid) << std::right << "Err (S)";
     std::cout << std::setw(nwid) << std::right << "Err (A)";
-    std::cout << std::setw(nwid) << std::right << "Err (A)";
+    std::cout << std::setw(nwid) << std::right << "Err (V)";
     std::cout << std::setw(nwid) << std::right << "Err (LB)";
     std::cout << std::setw(nwid) << std::right << "Err (UB)";
 #endif
@@ -183,7 +204,10 @@ inline void math_asm(std::size_t N, std::size_t M)
     math_asm_vd_exp(N, M, nwid);
     math_asm_vd_exp2(N, M, nwid);
     math_asm_vd_expm1(N, M, nwid);
-    // math_asm_log(N, M, nwid);
+    math_asm_vd_log(N, M, nwid);
+    math_asm_vd_log2(N, M, nwid);
+    math_asm_vd_log10(N, M, nwid);
+    math_asm_vd_log1p(N, M, nwid);
 
     std::cout << std::string(lwid, '-') << std::endl;
 }

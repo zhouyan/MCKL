@@ -35,6 +35,7 @@ include_directories(${PROJECT_SOURCE_DIR}/asm)
 
 set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
     ${PROJECT_SOURCE_DIR}/asm/exp.asm
+    ${PROJECT_SOURCE_DIR}/asm/log.asm
     ${PROJECT_SOURCE_DIR}/asm/fma.asm
     ${PROJECT_SOURCE_DIR}/asm/aes_aesni_avx2.asm
     ${PROJECT_SOURCE_DIR}/asm/aes_aesni_sse2.asm

@@ -33,9 +33,7 @@ global mckl_vd_exp
 global mckl_vd_exp2
 global mckl_vd_expm1
 
-; registers used:
-; ymm1-5, ymm7-9, ymm11, ymm13
-%macro poly 0 ; {{{ implicity input ymm1, output ymm13, ymm1-ymm13 reserved
+%macro poly 0 ; {{{ implicity input ymm1, output ymm13
     vmulpd ymm2, ymm1, ymm1 ; x2 = x^2
     vmulpd ymm4, ymm2, ymm2 ; x4 = x^4
     vmulpd ymm8, ymm4, ymm4 ; x8 = x^8
@@ -112,14 +110,14 @@ global mckl_vd_expm1
     vfmadd213pd ymm13, ymm1, ymm2
 %endmacro ; }}}
 
-%macro vd_exp 2
+%macro vd_exp 2 ; {{{
     %1
     vcmpltpd ymm1, ymm0, [rel %{1}_min_a]
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a]
     vblendvpd ymm13, ymm13, [rel %{1}_min_y], ymm1
     vblendvpd ymm13, ymm13, [rel %{1}_max_y], ymm2
     vmovupd %2, ymm13
-%endmacro
+%endmacro ; }}}
 
 %macro vd_exp 1 ; rdi:n, rsi:a, rdx:y {{{
     cmp rdi, 4
