@@ -114,10 +114,15 @@ global mckl_vd_expm1
     %1
     vcmpltpd ymm1, ymm0, [rel %{1}_min_a]
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a]
+    vpor ymm4, ymm1, ymm2
     vcmpneqpd ymm3, ymm0, ymm0
+    vpor ymm4, ymm3
+    vtestpd ymm4, ymm4
+    jz %%skip
     vblendvpd ymm13, ymm13, [rel %{1}_min_y], ymm1
     vblendvpd ymm13, ymm13, [rel %{1}_max_y], ymm2
     vblendvpd ymm13, ymm13, ymm0, ymm3
+    %%skip:
     vmovupd %2, ymm13
 %endmacro ; }}}
 

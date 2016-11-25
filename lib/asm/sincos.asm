@@ -102,20 +102,27 @@ global mckl_vd_sincos
     ; argument mask
     vcmpltpd ymm1, ymm0, [rel min_a]
     vcmpgtpd ymm2, ymm0, [rel max_a]
+    vpor ymm4, ymm1, ymm2
     vcmpneqpd ymm3, ymm0, ymm0
+    vpor ymm4, ymm4, ymm3
+    vtestpd ymm4, ymm4
 %endmacro ; }}}
 
 %macro sin 1 ; {{{
+    jz %%skip
     vblendvpd ymm13, ymm13, [rel min_y], ymm1
     vblendvpd ymm13, ymm13, [rel max_y], ymm2
     vblendvpd ymm13, ymm13, ymm0, ymm3
+    %%skip:
     vmovupd %1, ymm13
 %endmacro ; }}}
 
 %macro cos 1 ; {{{
+    jz %%skip
     vblendvpd ymm14, ymm14, [rel min_y], ymm1
     vblendvpd ymm14, ymm14, [rel max_y], ymm2
     vblendvpd ymm14, ymm14, ymm0, ymm3
+    %%skip:
     vmovupd %1, ymm14
 %endmacro ; }}}
 
