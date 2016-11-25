@@ -57,6 +57,11 @@ void mckl_vd_log2(size_t, const double *, double *);
 void mckl_vd_log10(size_t, const double *, double *);
 void mckl_vd_log1p(size_t, const double *, double *);
 
+// sincos.asm
+void mckl_vd_sin(size_t, const double *, double *);
+void mckl_vd_cos(size_t, const double *, double *);
+void mckl_vd_sincos(size_t, const double *, double *, double *);
+
 // fma.asm
 void mckl_fma_vvv_ps(
     size_t, const float *, const float *, const float *, float *);

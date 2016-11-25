@@ -185,18 +185,18 @@ log2hi:  times 4 dq 0x3FE62E42FEE00000
 log2lo:  times 4 dq 0x3DEA39EF35793C76
 log2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 
-c2:  times 4 dq 0x3FE0000000000000 ; 1 / 2!
-c3:  times 4 dq 0x3FC5555555555555 ; 1 / 3!
-c4:  times 4 dq 0x3FA5555555555555 ; 1 / 4!
-c5:  times 4 dq 0x3F81111111111111 ; 1 / 5!
-c6:  times 4 dq 0x3F56C16C16C16C17 ; 1 / 6!
-c7:  times 4 dq 0x3F2A01A01A01A01A ; 1 / 7!
-c8:  times 4 dq 0x3EFA01A01A01A01A ; 1 / 8!
-c9:  times 4 dq 0x3EC71DE3A556C734 ; 1 / 9!
-c10: times 4 dq 0x3E927E4FB7789F5C ; 1 / 10!
-c11: times 4 dq 0x3E5AE64567F544E4 ; 1 / 11!
-c12: times 4 dq 0x3E21EED8EFF8D898 ; 1 / 12!
-c13: times 4 dq 0x3DE6124613A86D09 ; 1 / 13!
+c2:  times 4 dq 0x3FE0000000000000
+c3:  times 4 dq 0x3FC5555555555555
+c4:  times 4 dq 0x3FA5555555555555
+c5:  times 4 dq 0x3F81111111111111
+c6:  times 4 dq 0x3F56C16C16C16C17
+c7:  times 4 dq 0x3F2A01A01A01A01A
+c8:  times 4 dq 0x3EFA01A01A01A01A
+c9:  times 4 dq 0x3EC71DE3A556C734
+c10: times 4 dq 0x3E927E4FB7789F5C
+c11: times 4 dq 0x3E5AE64567F544E4
+c12: times 4 dq 0x3E21EED8EFF8D898
+c13: times 4 dq 0x3DE6124613A86D09
 
 section .text
 

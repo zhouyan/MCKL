@@ -272,25 +272,21 @@ pow252 times 4 dq 0x4330000000000000 ; 2^52
 bias:  times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
 emask: times 4 dq 0x3FE0000000000000 ; exponent mask
 fmask: times 4 dq 0x000FFFFFFFFFFFFF ; fraction mask
-eone:  times 4 dq 0x0010000000000000 ; one at LSB of exponent
 
-half:     times 4 dq 0x3FE0000000000000 ; 0.5
 log2hi:   times 4 dq 0x3FE62E42FEE00000
 log2lo:   times 4 dq 0x3DEA39EF35793C76
 log2inv:  times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 log10_2:  times 4 dq 0x3FD34413509F79FF ; log10(2.0l)
 log10inv: times 4 dq 0x3FDBCB7B1526E50E ; 1.0l / log(10.0l)
-sqrt2:    times 4 dq 0x3FF6A09E667F3BCD ; sqrt(2.0l)
 sqrt2by2: times 4 dq 0x3FE6A09E667F3BCD ; sqrt(2.0l) / 2.0l
-sqrt2inv: times 4 dq 0x3FE6A09E667F3BCD ; 1.0l / sqrt(2.0l)
 
-c3:  times 4 dq 0x3FE5555555555593 ; 0x3FE0000000000000 ; 2 / 3
-c5:  times 4 dq 0x3FD999999997FA04 ; 0x3FC5555555555555 ; 2 / 5
-c7:  times 4 dq 0x3FD2492494229359 ; 0x3FA5555555555555 ; 2 / 7
-c9:  times 4 dq 0x3FCC71C51D8E78AF ; 0x3F81111111111111 ; 2 / 9
-c11: times 4 dq 0x3FC7466496CB03DE ; 0x3F56C16C16C16C17 ; 2 / 11
-c13: times 4 dq 0x3FC39A09D078C69F ; 0x3F2A01A01A01A01A ; 2 / 13
-c15: times 4 dq 0x3FC2F112DF3E5244 ; 0x3FC1111111111111 ; 2 / 15
+c3:  times 4 dq 0x3FE5555555555593
+c5:  times 4 dq 0x3FD999999997FA04
+c7:  times 4 dq 0x3FD2492494229359
+c9:  times 4 dq 0x3FCC71C51D8E78AF
+c11: times 4 dq 0x3FC7466496CB03DE
+c13: times 4 dq 0x3FC39A09D078C69F
+c15: times 4 dq 0x3FC2F112DF3E5244
 
 section .text
 

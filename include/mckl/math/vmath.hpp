@@ -39,6 +39,7 @@
 #include <mckl/math/erf.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <complex>
 
@@ -689,11 +690,11 @@ inline void invsqrt(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        inv(k, a, y);
-        sqrt(k, y, y);
+        inv<T>(k, a, y);
+        sqrt<T>(k, y, y);
     }
-    inv(l, a, y);
-    sqrt(l, y, y);
+    inv<T>(l, a, y);
+    sqrt<T>(l, y, y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sqrt[3]{a_i}\f$
@@ -707,11 +708,11 @@ inline void invcbrt(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        cbrt(k, a, y);
-        inv(k, y, y);
+        cbrt<T>(k, a, y);
+        inv<T>(k, y, y);
     }
-    cbrt(l, a, y);
-    inv(l, y, y);
+    cbrt<T>(l, a, y);
+    inv<T>(l, y, y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{2/3}\f$
@@ -722,11 +723,11 @@ inline void pow2o3(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        cbrt(k, a, y);
-        sqr(k, y, y);
+        cbrt<T>(k, a, y);
+        sqr<T>(k, y, y);
     }
-    cbrt(l, a, y);
-    sqr(l, y, y);
+    cbrt<T>(l, a, y);
+    sqr<T>(l, y, y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{3/2}\f$
@@ -737,11 +738,11 @@ inline void pow3o2(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        sqrt(k, a, y);
+        sqrt<T>(k, a, y);
         for (std::size_t j = 0; j != k; ++j)
             y[j] = y[j] * y[j] * y[j];
     }
-    sqrt(l, a, y);
+    sqrt<T>(l, a, y);
     for (std::size_t i = 0; i != l; ++i)
         y[i] = y[i] * y[i] * y[i];
 }
@@ -811,12 +812,28 @@ inline void sincos(std::size_t n, const T *a, T *y, T *z)
     const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
-        sin(k, a, y);
-        cos(k, a, z);
+
+    std::intptr_t vn = static_cast<std::intptr_t>(n);
+    std::intptr_t va = reinterpret_cast<std::intptr_t>(a);
+    std::intptr_t vy = reinterpret_cast<std::intptr_t>(y);
+    if (va - vy < vn || vy - va < vn) {
+        alignas(32) std::array<T, k> s;
+        for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
+            sin<T>(k, a, s.data());
+            cos<T>(k, a, z);
+            std::copy_n(s.data(), k, y);
+        }
+        sin<T>(l, a, s.data());
+        cos<T>(l, a, z);
+        std::copy_n(s.data(), l, y);
+    } else {
+        for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
+            sin<T>(k, a, y);
+            cos<T>(k, a, z);
+        }
+        sin<T>(l, a, y);
+        cos<T>(l, a, z);
     }
-    sin(l, a, y);
-    cos(l, a, z);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cos(a_i) + i\sin(a_i)\f$
@@ -829,13 +846,13 @@ inline void cis(std::size_t n, const T *a, std::complex<T> *y)
     alignas(32) T s[k];
     alignas(32) T c[k];
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        sincos(k, a, s, c);
+        sincos<T>(k, a, s, c);
         for (std::size_t j = 0; j != k; ++j) {
             y[j].real() = c[j];
             y[j].imag() = s[j];
         }
     }
-    sincos(l, a, s, c);
+    sincos<T>(l, a, s, c);
     for (std::size_t j = 0; j != l; ++j) {
         y[j].real() = c[j];
         y[j].imag() = s[j];
@@ -919,13 +936,13 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        mul(k, const_sqrt_1by2<T>(), a, y);
-        erf(k, y, y);
-        fma(k, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
+        mul<T>(k, const_sqrt_1by2<T>(), a, y);
+        erf<T>(k, y, y);
+        fma<T>(k, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
     }
-    mul(l, const_sqrt_1by2<T>(), a, y);
-    erf(l, y, y);
-    fma(l, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
+    mul<T>(l, const_sqrt_1by2<T>(), a, y);
+    erf<T>(l, y, y);
+    fma<T>(l, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -937,13 +954,13 @@ inline void cdfnorminv(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        fma(k, a, static_cast<T>(-2), static_cast<T>(2), y);
-        erfcinv(k, y, y);
-        mul(k, const_sqrt_2<T>(), y, y);
+        fma<T>(k, a, static_cast<T>(-2), static_cast<T>(2), y);
+        erfcinv<T>(k, y, y);
+        mul<T>(k, const_sqrt_2<T>(), y, y);
     }
-    fma(l, a, static_cast<T>(-2), static_cast<T>(2), y);
-    erfcinv(l, y, y);
-    mul(l, const_sqrt_2<T>(), y, y);
+    fma<T>(l, a, static_cast<T>(-2), static_cast<T>(2), y);
+    erfcinv<T>(l, y, y);
+    mul<T>(l, const_sqrt_2<T>(), y, y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \ln\Gamma(a_i)\f$

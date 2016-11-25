@@ -44,6 +44,7 @@
 #ifdef MCKL_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
+#pragma clang diagnostic ignored "-Wfloat-equal"
 #endif
 
 namespace mckl
@@ -129,21 +130,9 @@ inline void size_check(SizeType n, const char *f)
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 template <typename T>
-inline bool is_equal(const T &a, const T &b, std::true_type)
-{
-    return !(a < b || a > b);
-}
-
-template <typename T>
-inline bool is_equal(const T &a, const T &b, std::false_type)
-{
-    return a == b;
-}
-
-template <typename T>
 inline bool is_equal(const T &a, const T &b)
 {
-    return is_equal(a, b, std::is_floating_point<T>());
+    return a == b;
 }
 
 template <typename T>
