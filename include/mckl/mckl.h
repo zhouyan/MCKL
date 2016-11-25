@@ -46,6 +46,9 @@ extern "C" {
 
 #endif // __cplusplus
 
+// sqrt.asm
+void mckl_vd_sqrt(size_t, const double *, double *);
+
 // exp.asm
 void mckl_vd_exp(size_t, const double *, double *);
 void mckl_vd_exp2(size_t, const double *, double *);

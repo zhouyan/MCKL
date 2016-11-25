@@ -151,6 +151,9 @@
         std::cout << std::endl;                                               \
     }
 
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, sqrt, vd_sqrt, 0.1, 1e4,
+    0x0000000000000001, 0x7FEFFFFFFFFFFFFF)
+
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, exp, vd_exp, -707, 707,
     0xC086232BDD7ABCD2, 0x40862B7D369A5AA7)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, exp2, vd_exp2, -1022, 1022,
@@ -165,6 +168,7 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log10, vd_log10, 0.1, 1e4,
     0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log1p, vd_log1p, 1.0, 1e4,
     0xBFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
+
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, sin, vd_sin, -1e4, 1e4,
     0xC1D0000000000000, 0x41D0000000000000)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, cos, vd_cos, -1e4, 1e4,
@@ -338,6 +342,8 @@ inline void math_asm(std::size_t N, std::size_t M)
 
     std::cout << std::string(lwid, '-') << std::endl;
 
+    math_asm_vd_sqrt(N, M, nwid);
+
     math_asm_vd_exp(N, M, nwid);
     math_asm_vd_exp2(N, M, nwid);
     math_asm_vd_expm1(N, M, nwid);
@@ -345,6 +351,7 @@ inline void math_asm(std::size_t N, std::size_t M)
     math_asm_vd_log2(N, M, nwid);
     math_asm_vd_log10(N, M, nwid);
     math_asm_vd_log1p(N, M, nwid);
+
     math_asm_vd_sin(N, M, nwid);
     math_asm_vd_cos(N, M, nwid);
     math_asm_vd_sincos(N, M, nwid);
