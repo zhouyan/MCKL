@@ -179,7 +179,7 @@ class ARSGeneratorAESNIImpl
     static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)
     {
-#if MCKL_USE_EXTERN_LIBRARY
+#if MCKL_USE_ASM_LIBRARY
         constexpr std::uint64_t w0 = Constants::weyl::value[0];
         constexpr std::uint64_t w1 = Constants::weyl::value[1];
 
@@ -195,7 +195,7 @@ class ARSGeneratorAESNIImpl
 #else
         mckl_ars_aesni_sse2_kernel(ctr.data(), n, r, wk);
 #endif
-#else  // MCKL_USE_EXTERN_LIBRARY
+#else  // MCKL_USE_ASM_LIBRARY
         constexpr std::size_t S = 8;
         constexpr std::size_t N = S;
 
@@ -240,7 +240,7 @@ class ARSGeneratorAESNIImpl
             MCKL_RANDOM_INTERNAL_AES_AESNI_ENCLAST(xmmk5)
             MCKL_RANDOM_INTERNAL_AES_AESNI_STORE(n, N, rptr)
         }
-#endif // MCKL_USE_EXTERN_LIBRARY
+#endif // MCKL_USE_ASM_LIBRARY
     }
 }; // class ARSGeneratorAESNIImpl
 

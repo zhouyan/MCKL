@@ -233,13 +233,13 @@ class AES192GeneratorAESNIImpl
     static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)
     {
-#if MCKL_USE_EXTERN_LIBRARY
+#if MCKL_USE_ASM_LIBRARY
 #if MCKL_USE_AVX2
         mckl_aes192_aesni_avx2_kernel(ctr.data(), n, r, ks.get().data());
 #else
         mckl_aes192_aesni_sse2_kernel(ctr.data(), n, r, ks.get().data());
 #endif
-#else  // MCKL_USE_EXTERN_LIBRARY
+#else  // MCKL_USE_ASM_LIBRARY
         constexpr std::size_t S = 8;
         constexpr std::size_t N = S;
 
@@ -277,7 +277,7 @@ class AES192GeneratorAESNIImpl
             MCKL_RANDOM_INTERNAL_AES_AESNI_ENCLAST(std::get<0xC>(rk))
             MCKL_RANDOM_INTERNAL_AES_AESNI_STORE(n, N, rptr);
         }
-#endif // MCKL_USE_EXTERN_LIBRARY
+#endif // MCKL_USE_ASM_LIBRARY
     }
 }; // class AES192GeneratorAESNIImpl
 

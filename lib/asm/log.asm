@@ -192,10 +192,10 @@ global mckl_vd_log1p
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a]
     vcmpltpd ymm3, ymm0, [rel %{1}_nan_a]
     vcmpneqpd ymm4, ymm0, ymm0
-    vpor ymm3, ymm3, ymm4
     vblendvpd ymm15, ymm15, [rel %{1}_min_y], ymm1
     vblendvpd ymm15, ymm15, [rel %{1}_max_y], ymm2
     vblendvpd ymm15, ymm15, [rel %{1}_nan_y], ymm3
+    vblendvpd ymm15, ymm15, ymm0, ymm4
     vmovupd %2, ymm15
 %endmacro ; }}}
 

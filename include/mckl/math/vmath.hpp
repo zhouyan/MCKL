@@ -310,9 +310,38 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 
 } // namespace mckl
 
+#elif MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_VMATH && MCKL_USE_AVX2 &&          \
+    MCKL_USE_FMA
+
+#define MCKL_DEFINE_MATH_VMATH_ASM_1(func)                                    \
+    inline void func(std::size_t n, const double *a, double *y)               \
+    {                                                                         \
+        ::mckl_vd_##func(n, a, y);                                            \
+    }
+
+#define MCKL_DEFINE_MATH_VMATH_ASM_2(func)                                    \
+    inline void func(                                                         \
+        std::size_t n, const double *a, const double *b, double *y)           \
+    {                                                                         \
+        ::mckl_vd_##func(n, a, b, y);                                         \
+    }
+
+namespace mckl
+{
+
+MCKL_DEFINE_MATH_VMATH_ASM_1(exp)
+MCKL_DEFINE_MATH_VMATH_ASM_1(exp2)
+MCKL_DEFINE_MATH_VMATH_ASM_1(expm1)
+MCKL_DEFINE_MATH_VMATH_ASM_1(log)
+MCKL_DEFINE_MATH_VMATH_ASM_1(log2)
+MCKL_DEFINE_MATH_VMATH_ASM_1(log10)
+MCKL_DEFINE_MATH_VMATH_ASM_1(log1p)
+
+} // namespace mckl
+
 #endif // MCKL_USE_MKL_VML
 
-#if MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2 && MCKL_USE_FMA
+#if MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2 && MCKL_USE_FMA
 
 namespace mckl
 {
@@ -397,7 +426,7 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
 
 } // namespace mckl
 
-#endif // MCKL_USE_EXTERN_LIBRARY && MCKL_USE_AVX2 && MCKL_USE_FMA
+#endif // MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2 && MCKL_USE_FMA
 
 #define MCKL_DEFINE_MATH_VMATH_1(func, name)                                  \
     template <typename T>                                                     \
