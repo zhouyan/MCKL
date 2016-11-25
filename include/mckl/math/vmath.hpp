@@ -348,6 +348,8 @@ inline void sincos(std::size_t n, const double *a, double *y, double *z)
     ::mckl_vd_sincos(n, a, y, z);
 }
 
+MCKL_DEFINE_MATH_VMATH_ASM_1(tan)
+
 } // namespace mckl
 
 #endif // MCKL_USE_MKL_VML
