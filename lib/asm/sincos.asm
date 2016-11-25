@@ -102,8 +102,8 @@ global mckl_vd_sincos
     ; argument mask
     vcmpltpd ymm1, ymm0, [rel min_a]
     vcmpgtpd ymm2, ymm0, [rel max_a]
-    vpor ymm4, ymm1, ymm2
     vcmpneqpd ymm3, ymm0, ymm0
+    vpor ymm4, ymm1, ymm2
     vpor ymm4, ymm4, ymm3
     vtestpd ymm4, ymm4
 %endmacro ; }}}

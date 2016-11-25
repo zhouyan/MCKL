@@ -190,10 +190,10 @@ global mckl_vd_log1p
     %1
     vcmpltpd ymm1, ymm0, [rel %{1}_min_a]
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a]
-    vpor ymm5, ymm1, ymm2
     vcmpltpd ymm3, ymm0, [rel %{1}_nan_a]
-    vpor ymm5, ymm5, ymm3
     vcmpneqpd ymm4, ymm0, ymm0
+    vpor ymm5, ymm1, ymm2
+    vpor ymm5, ymm5, ymm3
     vpor ymm5, ymm5, ymm4
     vtestpd ymm5, ymm5
     jz %%skip
