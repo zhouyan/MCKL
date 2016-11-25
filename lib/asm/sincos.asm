@@ -32,8 +32,9 @@
 global mckl_vd_sin
 global mckl_vd_cos
 global mckl_vd_sincos
+global mckl_vd_tan
 
-%macro sincos 0 ; {{{ implicit input ymm0
+%macro sincos 1 ; {{{ implicit input ymm0
     ; b = abs(a)
     vpand ymm1, ymm0, [rel umask]
 
@@ -84,20 +85,30 @@ global mckl_vd_sincos
     ; swap S and C if k % 4 = 1 or 3
     vpmovsxdq ymm15, xmm15
     vpsllq ymm1, ymm15, 62
-    vblendvpd ymm3, ymm13, ymm14, ymm1
-    vblendvpd ymm4, ymm14, ymm13, ymm1
+    %if (%1 & 0x1) != 0 ; sin, sincos, tan
+        vblendvpd ymm3, ymm13, ymm14, ymm1
+    %endif
+    %if (%1 & 0x2) != 0 ; cos, sincos, tan
+        vblendvpd ymm4, ymm14, ymm13, ymm1
+    %endif
 
-    ; change signs of S
-    vpsllq ymm1, ymm15, 61
-    vpxor ymm1, ymm1, ymm0
-    vpand ymm1, ymm1, [rel smask]
-    vpxor ymm13, ymm3, ymm1
+    %if (%1 & 0x1) != 0 ; sin, sincos, tan
+        vpsllq ymm1, ymm15, 61
+        vpxor ymm1, ymm1, ymm0
+        vpand ymm1, ymm1, [rel smask]
+        vpxor ymm13, ymm3, ymm1
+    %endif
 
-    ; change signs of C
-    vpaddq ymm1, ymm15, [rel ltwo]
-    vpsllq ymm1, ymm1, 61
-    vpand ymm1, ymm1, [rel smask]
-    vpxor ymm14, ymm4, ymm1
+    %if (%1 & 0x2) != 0 ; cos, sincos, tan
+        vpaddq ymm1, ymm15, [rel ltwo]
+        vpsllq ymm1, ymm1, 61
+        vpand ymm1, ymm1, [rel smask]
+        vpxor ymm14, ymm4, ymm1
+    %endif
+
+    %if (%1 & 0x4) != 0 ; tan
+        vdivpd ymm12, ymm13, ymm14
+    %endif
 
     ; argument mask
     vcmpltpd ymm1, ymm0, [rel min_a]
@@ -126,26 +137,37 @@ global mckl_vd_sincos
     vmovupd %1, ymm14
 %endmacro ; }}}
 
+%macro tan 1 ; {{{
+    jz %%skip
+    vblendvpd ymm12, ymm12, [rel min_y], ymm1
+    vblendvpd ymm12, ymm12, [rel max_y], ymm2
+    vblendvpd ymm12, ymm12, ymm0, ymm3
+    %%skip:
+    vmovupd %1, ymm12
+%endmacro ; }}}
+
 %macro vd_sincos 1 ; rdi:n, rsi:a, rdx:y, rcx:z {{{
     cmp rdi, 4
     jl .last
 
     .loop:
         vmovupd ymm0, [rsi]
-        sincos
-        %if %1 == 0
+        sincos %1
+        %if %1 == 0x1
             sin [rdx]
-        %elif %1 == 1
+        %elif %1 == 0x2
             cos [rdx]
-        %elif %1 == 2
+        %elif %1 == 0x3
             sin [rdx]
             cos [rcx]
+        %elif %1 == 0x7
+            tan [rdx]
         %else
             %error
         %endif
         add rsi, 0x20
         add rdx, 0x20
-        %if %1 == 2
+        %if %1 == 0x3
             add rcx, 0x20
         %endif
         sub rdi, 4
@@ -163,14 +185,16 @@ global mckl_vd_sincos
         cld
         rep movsq
         vmovupd ymm0, [rsp - 0x28]
-        sincos
-        %if %1 == 0
+        sincos %1
+        %if %1 == 0x1
             sin [rsp - 0x28]
-        %elif %1 == 1
+        %elif %1 == 0x2
             cos [rsp - 0x28]
-        %elif %1 == 2
+        %elif %1 == 0x3
             sin [rsp - 0x28]
             cos [rsp - 0x48]
+        %elif %1 == 0x7
+            tan [rsp - 0x28]
         %else
             %error
         %endif
@@ -180,7 +204,7 @@ global mckl_vd_sincos
         mov rdi, rdx
         cld
         rep movsq
-        %if %1 == 2
+        %if %1 == 0x3
             mov rcx, rax
             mov rsi, rsp
             sub rsi, 0x48
@@ -232,8 +256,9 @@ c14: times 4 dq 0xBDA8FAE9BE8838D4
 
 section .text
 
-mckl_vd_sin:    vd_sincos 0
-mckl_vd_cos:    vd_sincos 1
-mckl_vd_sincos: vd_sincos 2
+mckl_vd_sin:    vd_sincos 0x1
+mckl_vd_cos:    vd_sincos 0x2
+mckl_vd_sincos: vd_sincos 0x3
+mckl_vd_tan:    vd_sincos 0x7
 
 ; vim:ft=nasm

@@ -173,6 +173,8 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, sin, vd_sin, -1e4, 1e4,
     0xC1D0000000000000, 0x41D0000000000000)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, cos, vd_cos, -1e4, 1e4,
     0xC1D0000000000000, 0x41D0000000000000)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, tan, vd_tan, -1e4, 1e4,
+    0xC1D0000000000000, 0x41D0000000000000)
 
 inline void math_asm_vd_sincos(std::size_t N, std::size_t M, int nwid)
 {
@@ -355,6 +357,7 @@ inline void math_asm(std::size_t N, std::size_t M)
     math_asm_vd_sin(N, M, nwid);
     math_asm_vd_cos(N, M, nwid);
     math_asm_vd_sincos(N, M, nwid);
+    math_asm_vd_tan(N, M, nwid);
 
     std::cout << std::string(lwid, '-') << std::endl;
 }
