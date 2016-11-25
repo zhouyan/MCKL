@@ -38,7 +38,7 @@
 
 #include "math_common.hpp"
 
-#define MCKL_EXAMPLE_DEFINE_MATH_ASM(T, func, vfunc, wl, wu, lb, ub)          \
+#define MCKL_EXAMPLE_DEFINE_MATH_ASM(T, U, func, vfunc, wl, wu, lb, ub)       \
     inline void math_asm_##vfunc(std::size_t N, std::size_t M, int nwid)      \
     {                                                                         \
         mckl::UniformRealDistribution<T> unif(wl, wu);                        \
@@ -65,8 +65,6 @@
                 std::size_t K = rsize(rng);                                   \
                 n += K;                                                       \
                 mckl::rand(rng, unif, K, a.data());                           \
-                a[0] = wl;                                                    \
-                a[1] = wu;                                                    \
                                                                               \
                 mckl_##vfunc(K, a.data(), r1.data());                         \
                 watch1.start();                                               \
@@ -91,12 +89,29 @@
                 c2 = std::max(c2, n / watch2.seconds() * 1e-6);               \
             }                                                                 \
         }                                                                     \
-                                                                              \
-        T v[] = {lb, ub, std::nextafter(lb, -mckl::const_inf<T>()),           \
-            std::nextafter(ub, mckl::const_inf<T>()), static_cast<T>(-0.0),   \
+        union {                                                               \
+            T lbf;                                                            \
+            U lbi;                                                            \
+        };                                                                    \
+        union {                                                               \
+            T ubf;                                                            \
+            U ubi;                                                            \
+        };                                                                    \
+        lbi = lb;                                                             \
+        ubi = ub;                                                             \
+        T vf[] = {lbf, ubf, std::nextafter(lbf, -mckl::const_inf<T>()),       \
+            std::nextafter(ubf, mckl::const_inf<T>()), static_cast<T>(-0.0),  \
             static_cast<T>(0.0), -mckl::const_inf<T>(), mckl::const_inf<T>(), \
             mckl::const_nan<T>()};                                            \
-        mckl_##vfunc(sizeof(v) / sizeof(T), v, v);                            \
+        const std::size_t vn = sizeof(vf) / sizeof(T);                        \
+        long double vl[vn];                                                   \
+        std::copy_n(vf, vn, vl);                                              \
+        mckl_##vfunc(vn, vf, vf);                                             \
+        mckl::func(vn, vl, vl);                                               \
+        T e3 = 0;                                                             \
+        T e4 = 0;                                                             \
+        math_error(1, vf + 0, vl + 0, e3);                                    \
+        math_error(1, vf + 1, vl + 1, e4);                                    \
                                                                               \
         std::cout << std::fixed << std::setprecision(2);                      \
         std::cout << std::setw(nwid) << std::left << #func;                   \
@@ -106,30 +121,32 @@
         std::cout << std::setprecision(2);                                    \
         std::cout << std::setw(nwid) << std::right << e1;                     \
         std::cout << std::setw(nwid) << std::right << e2;                     \
-        std::cout << std::setprecision(6);                                    \
-        std::cout << std::setw(nwid) << std::right << lb;                     \
-        std::cout << std::setw(nwid) << std::right << ub;                     \
-        for (int j = 2; j != 11; ++j) {                                       \
-            T x = std::abs(v[j]);                                             \
+        std::cout << std::setw(nwid) << std::right << e3;                     \
+        std::cout << std::setw(nwid) << std::right << e4;                     \
+        for (int j = 2; j != vn; ++j) {                                       \
+            T x = std::abs(vf[j]);                                            \
             bool positive = x > 0;                                            \
             bool denormal = x < std::numeric_limits<T>::min();                \
             std::stringstream ss;                                             \
             ss << std::setprecision(2) << (positive && denormal ? '*' : ' ')  \
-               << v[j];                                                       \
+               << vf[j];                                                      \
             std::cout << std::setw(nwid) << std::right << ss.str();           \
         }                                                                     \
         std::cout << std::endl;                                               \
     }
 
-MCKL_EXAMPLE_DEFINE_MATH_ASM(double, exp, vd_exp, -707, 707, -708.4, 709.8)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(double, exp2, vd_exp2, -1022, 1022, -1022, 1022)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(double, expm1, vd_expm1, -500, 500, -708.4, 709.8)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, exp, vd_exp, -707, 707,
+    0xC086232BDD7ABCD2, 0x40862B7D369A5AA7)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, exp2, vd_exp2, -1022, 1022,
+    0xC08FF00000000000, 0x408FF80000000000)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, expm1, vd_expm1, -500, 500,
+    0xC086232BDD7ABCD2, 0x40862B7D369A5AA7)
 // MCKL_EXAMPLE_DEFINE_MATH_ASM(log, 1.0, 1.1, 1.0, 1.1)
 
 inline void math_asm(std::size_t N, std::size_t M)
 {
     const int nwid = 10;
-    const std::size_t lwid = nwid * 16;
+    const std::size_t lwid = nwid * 14;
 
     std::cout << std::string(lwid, '=') << std::endl;
 
@@ -144,14 +161,14 @@ inline void math_asm(std::size_t N, std::size_t M)
 #if MCKL_HAS_BOOST
     std::cout << std::setw(nwid) << std::right << "ULP (A)";
     std::cout << std::setw(nwid) << std::right << "ULP (V)";
+    std::cout << std::setw(nwid) << std::right << "ULP (LB)";
+    std::cout << std::setw(nwid) << std::right << "ULP (UB)";
 #else
     std::cout << std::setw(nwid) << std::right << "Err (A)";
     std::cout << std::setw(nwid) << std::right << "Err (A)";
+    std::cout << std::setw(nwid) << std::right << "Err (LB)";
+    std::cout << std::setw(nwid) << std::right << "Err (UB)";
 #endif
-    std::cout << std::setw(nwid) << std::right << "LB";
-    std::cout << std::setw(nwid) << std::right << "UB";
-    std::cout << std::setw(nwid) << std::right << "a = LB";
-    std::cout << std::setw(nwid) << std::right << "a = UB";
     std::cout << std::setw(nwid) << std::right << "a < LB";
     std::cout << std::setw(nwid) << std::right << "a > UB";
     std::cout << std::setw(nwid) << std::right << "a = -0.0";
