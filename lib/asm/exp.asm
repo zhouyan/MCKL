@@ -29,9 +29,9 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-global mckl_exp_vv_pd
-global mckl_exp2_vv_pd
-global mckl_expm1_vv_pd
+global mckl_vd_exp
+global mckl_vd_exp2
+global mckl_vd_expm1
 
 %macro exp_poly 0 ; {{{ implicity input ymm1, output ymm13, ymm1-ymm13 reserved
     vmulpd ymm2, ymm1, ymm1 ; x2 = x^2
@@ -59,13 +59,13 @@ global mckl_expm1_vv_pd
 
 %macro exp 1 ; {{{ implicit input ymm0
     ; r = round(a / log(2))
-    vmulpd ymm15, ymm0, [rel exp_log2i]
+    vmulpd ymm15, ymm0, [rel exp_log2inv]
     vroundpd ymm15, ymm15, 0x8
 
     ; x = a - r * log(2)
     vmovapd ymm1, ymm0
-    vfnmadd231pd ymm1, ymm15, [rel exp_log2f]
-    vfnmadd231pd ymm1, ymm15, [rel exp_log2l]
+    vfnmadd231pd ymm1, ymm15, [rel exp_log2hi]
+    vfnmadd231pd ymm1, ymm15, [rel exp_log2lo]
 
     ; z13 = c13 * x^13 + ... + c2 * x^2 + x
     ; res = z13 * 2^r + 2^r
@@ -75,8 +75,8 @@ global mckl_expm1_vv_pd
     vfmadd213pd ymm13, ymm1, ymm1
 
     ; underflow and overflow
-    vcmppd ymm1, ymm0, [rel exp_min_a], 0x2
-    vcmppd ymm2, ymm0, [rel exp_max_a], 0xD
+    vcmpltpd ymm1, ymm0, [rel exp_min_a]
+    vcmpgtpd ymm2, ymm0, [rel exp_max_a]
     vblendvpd ymm13, ymm13, [rel exp_min_y], ymm1
     vblendvpd ymm13, ymm13, [rel exp_max_y], ymm2
 
@@ -89,7 +89,7 @@ global mckl_expm1_vv_pd
 
     ; x = (a  - r) * log(2)
     vsubpd ymm1, ymm0, ymm15
-    vmulpd ymm1, ymm1, [rel exp_log2d]
+    vmulpd ymm1, ymm1, [rel exp_log2]
 
     ; z13 = c13 * x^13 + ... + c2 * x^2 + x
     ; res = z13 * 2^r + 2^r
@@ -99,8 +99,8 @@ global mckl_expm1_vv_pd
     vfmadd213pd ymm13, ymm1, ymm1
 
     ; underflow and overflow
-    vcmppd ymm1, ymm0, [rel exp2_min_a], 0x2
-    vcmppd ymm2, ymm0, [rel exp2_max_a], 0xD
+    vcmpltpd ymm1, ymm0, [rel exp2_min_a]
+    vcmpgtpd ymm2, ymm0, [rel exp2_max_a]
     vblendvpd ymm13, ymm13, [rel exp2_min_y], ymm1
     vblendvpd ymm13, ymm13, [rel exp2_max_y], ymm2
 
@@ -109,13 +109,13 @@ global mckl_expm1_vv_pd
 
 %macro expm1 1 ; implicit input ymm0 {{{
     ; r = round(a / log(2))
-    vmulpd ymm15, ymm0, [rel exp_log2i]
+    vmulpd ymm15, ymm0, [rel exp_log2inv]
     vroundpd ymm15, ymm15, 0x8
 
     ; x = a - r * log(2)
     vmovapd ymm1, ymm0
-    vfnmadd231pd ymm1, ymm15, [rel exp_log2f]
-    vfnmadd231pd ymm1, ymm15, [rel exp_log2l]
+    vfnmadd231pd ymm1, ymm15, [rel exp_log2hi]
+    vfnmadd231pd ymm1, ymm15, [rel exp_log2lo]
 
     ; z13 = c13 * x^13 + ... + c2 * x^2 + x
     ; res = z13 * 2^r + (2^r - 1)
@@ -126,15 +126,15 @@ global mckl_expm1_vv_pd
     vfmadd213pd ymm13, ymm1, ymm2
 
     ; underflow and overflow
-    vcmppd ymm1, ymm0, [rel expm1_min_a], 0x2
-    vcmppd ymm2, ymm0, [rel expm1_max_a], 0xD
+    vcmpltpd ymm1, ymm0, [rel expm1_min_a]
+    vcmpgtpd ymm2, ymm0, [rel expm1_max_a]
     vblendvpd ymm13, ymm13, [rel expm1_min_y], ymm1
     vblendvpd ymm13, ymm13, [rel expm1_max_y], ymm2
 
     vmovupd %1, ymm13
 %endmacro ; }}}
 
-%macro exp_vv_pd 1 ; rdi:n, rsi:a, rdx:y {{{
+%macro vd_exp 1 ; rdi:n, rsi:a, rdx:y {{{
     cmp rdi, 4
     jl .last
 
@@ -167,35 +167,33 @@ global mckl_expm1_vv_pd
 
     .return:
         ret
-%endmacro ; }}} mckl_exp_vv_pd
+%endmacro ; }}}
 
 section .rodata
 
 align 32
 
-exp_min_a:   times 4 dq 0xC086233333333333 ; -708.4
-exp2_min_a:  times 4 dq 0xC08FF00000000000 ; -1022.0
+exp_min_a: times 4 dq 0xC086233333333333 ; -708.4
+exp_max_a: times 4 dq 0x40862E6666666666 ; 709.8
+exp_min_y: times 4 dq 0x0000000000000000 ; 0.0
+exp_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
+
+exp2_min_a: times 4 dq 0xC08FF00000000000 ; -1022.0
+exp2_max_a: times 4 dq 0x408FF00000000000 ; 1022.0
+exp2_min_y: times 4 dq 0x0000000000000000 ; 0.0
+exp2_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
+
 expm1_min_a: times 4 dq 0xC086233333333333 ; -708.4
-
-exp_max_a:   times 4 dq 0x40862E6666666666 ; 709.8
-exp2_max_a:  times 4 dq 0x408FF00000000000 ; 1022.0
 expm1_max_a: times 4 dq 0x40862E6666666666 ; 709.8
+expm1_min_y: times 4 dq 0xBFF0000000000000 ; -1.0
+expm1_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
 
-exp_min_y   : times 4 dq 0x0000000000000000 ; 0.0
-exp2_min_y  : times 4 dq 0x0000000000000000 ; 0.0
-expm1_min_y : times 4 dq 0xBFF0000000000000 ; -1.0
-
-exp_max_y   : times 4 dq 0x7FF0000000000000 ; HUGE_VAL
-exp2_max_y  : times 4 dq 0x7FF0000000000000 ; HUGE_VAL
-expm1_max_y : times 4 dq 0x7FF0000000000000 ; HUGE_VAL
-
-exp_abs:   times 4 dq 0xEFFFFFFFFFFFFFFF ; mask out sign bit
-exp_one:   times 4 dq 0x3FF0000000000000 ; 1.0
-exp_bias:  times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
-exp_log2f: times 4 dq 0x3FE62E4300000000 ; log(2.0f)
-exp_log2d: times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
-exp_log2l: times 4 dq 0xBE205C610CA80000 ; log(2.0l) - log(2.0f)
-exp_log2i: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
+exp_one:     times 4 dq 0x3FF0000000000000 ; 1.0
+exp_bias:    times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
+exp_log2:    times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
+exp_log2hi:  times 4 dq 0x3FE62E42FEE00000
+exp_log2lo:  times 4 dq 0x3DEA39EF35793C76
+exp_log2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 
 exp_c2:  times 4 dq 0x3FE0000000000000 ; 1 / 2!
 exp_c3:  times 4 dq 0x3FC5555555555555 ; 1 / 3!
@@ -212,8 +210,8 @@ exp_c13: times 4 dq 0x3DE6124613A86D09 ; 1 / 13!
 
 section .text
 
-mckl_exp_vv_pd:   exp_vv_pd exp
-mckl_exp2_vv_pd:  exp_vv_pd exp2
-mckl_expm1_vv_pd: exp_vv_pd expm1
+mckl_vd_exp:   vd_exp exp
+mckl_vd_exp2:  vd_exp exp2
+mckl_vd_expm1: vd_exp expm1
 
 ; vim:ft=nasm

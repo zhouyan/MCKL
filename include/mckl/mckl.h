@@ -47,15 +47,15 @@ extern "C" {
 #endif // __cplusplus
 
 // exp.asm
-void mckl_exp_vv_pd(size_t, const double *, double *);
-void mckl_exp2_vv_pd(size_t, const double *, double *);
-void mckl_expm1_vv_pd(size_t, const double *, double *);
+void mckl_vd_exp(size_t, const double *, double *);
+void mckl_vd_exp2(size_t, const double *, double *);
+void mckl_vd_expm1(size_t, const double *, double *);
 
 // log.asm
-void mckl_log_vv_pd(size_t, const double *, double *);
-void mckl_log2_vv_pd(size_t, const double *, double *);
-void mckl_log10_vv_pd(size_t, const double *, double *);
-void mckl_log1p_vv_pd(size_t, const double *, double *);
+void mckl_vd_log(size_t, const double *, double *);
+void mckl_vd_log2(size_t, const double *, double *);
+void mckl_vd_log10(size_t, const double *, double *);
+void mckl_vd_log1p(size_t, const double *, double *);
 
 // fma.asm
 void mckl_fma_vvv_ps(

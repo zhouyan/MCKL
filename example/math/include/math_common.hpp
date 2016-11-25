@@ -57,9 +57,28 @@ class MathPerf
     double c4;
     double c5;
     double c6;
-    float vs[12];
-    double vd[12];
 }; // class MathPerf
+
+template <typename T, typename U>
+inline void math_error(std::size_t n, const T *r1, const U *r2, T &e)
+{
+    mckl::Vector<T> s(n);
+    std::copy_n(r2, n, s.data());
+#if MCKL_HAS_BOOST
+    for (std::size_t i = 0; i != n; ++i)
+        s[i] = boost::math::float_distance(r1[i], s[i]);
+    mckl::abs(n, s.data(), s.data());
+    for (std::size_t i = 0; i != n; ++i)
+        e = std::max(e, s[i]);
+#else
+    for (std::size_t i = 0; i != n; ++i) {
+        if (!mckl::internal::is_zero(s[i]))
+            e = std::max(e, std::abs((r1[i] - s[i]) / s[i]));
+        else if (!mckl::internal::is_zero(r1[i]))
+            e = std::max(e, std::abs((r1[i] - s[i]) / r1[i]));
+    }
+#endif
+}
 
 template <typename T, typename U>
 inline void math_error(std::size_t n, const T *r1, const U *r2, T &e1, T &e2)
@@ -71,8 +90,8 @@ inline void math_error(std::size_t n, const T *r1, const U *r2, T &e1, T &e2)
     T f2 = 0;
 #if MCKL_HAS_BOOST
     for (std::size_t i = 0; i != n; ++i) {
-        f2 = std::max(
-            f2, boost::math::float_distance(r1[i], static_cast<T>(r2[i])));
+        f2 = std::max(f2, std::abs(boost::math::float_distance(
+                              r1[i], static_cast<T>(r2[i]))));
     }
 #else
     for (std::size_t i = 0; i != n; ++i) {
