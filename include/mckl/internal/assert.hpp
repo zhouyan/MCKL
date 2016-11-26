@@ -35,6 +35,7 @@
 #include <mckl/internal/config.h>
 
 #include <cassert>
+#include <cmath>
 #include <exception>
 #include <iostream>
 #include <limits>
@@ -129,47 +130,21 @@ inline void size_check(SizeType n, const char *f)
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 template <typename T>
-inline bool is_equal(const T &a, const T &b)
+inline bool is_equal(const T &a, const T &b, std::true_type)
+{
+    return !(std::isnan(a) || std::isnan(b) || a < b || a > b);
+}
+
+template <typename T>
+inline bool is_equal(const T &a, const T &b, std::false_type)
 {
     return a == b;
 }
 
-template <>
-inline bool is_equal<float>(const float &a, const float &b)
+template <typename T>
+inline bool is_equal(const T &a, const T &b)
 {
-    union {
-        float x;
-        std::uint32_t u;
-    };
-
-    union {
-        float y;
-        std::uint32_t v;
-    };
-
-    x = a;
-    y = b;
-
-    return (u == v) | ((u | v) == (1U << 31));
-}
-
-template <>
-inline bool is_equal<double>(const double &a, const double &b)
-{
-    union {
-        double x;
-        std::uint64_t u;
-    };
-
-    union {
-        double y;
-        std::uint64_t v;
-    };
-
-    x = a;
-    y = b;
-
-    return (u == v) | ((u | v) == (1ULL << 63));
+    return is_equal(a, b, std::is_floating_point<T>());
 }
 
 template <typename T>

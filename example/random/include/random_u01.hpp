@@ -69,7 +69,7 @@ template <typename RealType>
 inline std::string random_u01_maximum(RealType x)
 {
     std::stringstream ss;
-    if (mckl::internal::is_equal(x, static_cast<RealType>(1)))
+    if (mckl::internal::is_one(x))
         ss << 1;
     else
         ss << "1 - 2^" << std::log2(static_cast<RealType>(1) - x);
