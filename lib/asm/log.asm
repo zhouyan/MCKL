@@ -345,15 +345,6 @@ log1p_min_y: times 4 dq 0xFFF0000000000000 ; -HUGE_VAL
 log1p_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
 log1p_nan_y: times 4 dq 0x7FF8000000000000 ; NaN
 
-one:      times 4 dq 0x3FF0000000000000 ; 1.0
-two:      times 4 dq 0x4000000000000000 ; 2.0
-log2hi:   times 4 dq 0x3FE62E42FEE00000
-log2lo:   times 4 dq 0x3DEA39EF35793C76
-log2inv:  times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
-log10_2:  times 4 dq 0x3FD34413509F79FF ; log10(2.0l)
-log10inv: times 4 dq 0x3FDBCB7B1526E50E ; 1.0l / log(10.0l)
-sqrt2by2: times 4 dq 0x3FE6A09E667F3BCD ; sqrt(2.0l) / 2.0l
-
 c3:  times 4 dq 0x3FE5555555555593 ; rsp + 0x0C0
 c5:  times 4 dq 0x3FD999999997FA04 ; rsp + 0x0E0
 c7:  times 4 dq 0x3FD2492494229359 ; rsp + 0x100
@@ -362,10 +353,18 @@ c11: times 4 dq 0x3FC7466496CB03DE ; rsp + 0x140
 c13: times 4 dq 0x3FC39A09D078C69F ; rsp + 0x160
 c15: times 4 dq 0x3FC2F112DF3E5244 ; rsp + 0x180
 
-pow252 times 4 dq 0x4330000000000000 ; rsp + 0x1A0 2^52
-bias:  times 4 dq 0x43300000000003FF ; rsp + 0x1C0 2^52 + 1023.0
-fmask: times 4 dq 0x000FFFFFFFFFFFFF ; rsp + 0x1E0 fraction mask
-emask: times 4 dq 0x3FE0000000000000 ; rsp + 0x200 exponent mask
+pow252    times 4 dq 0x4330000000000000 ; rsp + 0x1A0 2^52
+bias:     times 4 dq 0x43300000000003FF ; rsp + 0x1C0 2^52 + 1023.0
+fmask:    times 4 dq 0x000FFFFFFFFFFFFF ; rsp + 0x1E0 fraction mask
+emask:    times 4 dq 0x3FE0000000000000 ; rsp + 0x200 exponent mask
+one:      times 4 dq 0x3FF0000000000000 ; 1.0
+two:      times 4 dq 0x4000000000000000 ; 2.0
+log2hi:   times 4 dq 0x3FE62E42FEE00000
+log2lo:   times 4 dq 0x3DEA39EF35793C76
+log2inv:  times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
+log10_2:  times 4 dq 0x3FD34413509F79FF ; log10(2.0l)
+log10inv: times 4 dq 0x3FDBCB7B1526E50E ; 1.0l / log(10.0l)
+sqrt2by2: times 4 dq 0x3FE6A09E667F3BCD ; sqrt(2.0l) / 2.0l
 
 section .text
 

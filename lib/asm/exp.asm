@@ -239,14 +239,6 @@ expm1_max_a: times 4 dq 0x40862B7D369A5AA7 ; 709.4361393031039
 expm1_min_y: times 4 dq 0xBFF0000000000000 ; -1.0
 expm1_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
 
-one:  times 4 dq 0x3FF0000000000000 ; 1.0
-bias: times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
-
-log2:    times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
-log2hi:  times 4 dq 0x3FE62E42FEE00000
-log2lo:  times 4 dq 0x3DEA39EF35793C76
-log2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
-
 c2:  times 4 dq 0x3FE0000000000000 ; rsp + 0x080
 c3:  times 4 dq 0x3FC5555555555555 ; rsp + 0x0A0
 c4:  times 4 dq 0x3FA5555555555555 ; rsp + 0x0C0
@@ -259,6 +251,13 @@ c10: times 4 dq 0x3E927E4FB7789F5C ; rsp + 0x180
 c11: times 4 dq 0x3E5AE64567F544E4 ; rsp + 0x1A0
 c12: times 4 dq 0x3E21EED8EFF8D898 ; rsp + 0x1C0
 c13: times 4 dq 0x3DE6124613A86D09 ; rsp + 0x1E0
+
+bias:    times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
+one:     times 4 dq 0x3FF0000000000000 ; 1.0
+log2:    times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
+log2hi:  times 4 dq 0x3FE62E42FEE00000
+log2lo:  times 4 dq 0x3DEA39EF35793C76
+log2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 
 section .text
 
