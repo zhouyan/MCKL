@@ -36,7 +36,7 @@
 
 #ifdef MCKL_INTEL
 #pragma warning(push)
-#pragma warning(disable : 2282)
+#pragma warning(disable : 2282) // unrecognized GCC pragma
 #endif
 
 #include <hdf5.h>
