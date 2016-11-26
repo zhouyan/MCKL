@@ -48,9 +48,9 @@ global mckl_vd_tan
 
     ; x = a - k * pi / 4
     vcvtdq2pd ymm2, xmm15
-    vfnmadd231pd ymm1, ymm2, [rel dp1]
-    vfnmadd231pd ymm1, ymm2, [rel dp2]
-    vfnmadd231pd ymm1, ymm2, [rel dp3]
+    vfnmadd231pd ymm1, ymm2, [rel pi4dp1]
+    vfnmadd231pd ymm1, ymm2, [rel pi4dp2]
+    vfnmadd231pd ymm1, ymm2, [rel pi4dp3]
 
     vmulpd ymm2, ymm1, ymm1 ; x2 = x^2
     vmulpd ymm3, ymm2, ymm1 ; x3 = x^3
@@ -234,9 +234,9 @@ lone:   times 4 dq 0x0000000000000001 ; 1
 ltwo:   times 4 dq 0x0000000000000002 ; 2
 umask:  times 4 dq 0x7FFFFFFFFFFFFFFF ; abs(x)  = x & umask
 smask:  times 4 dq 0x8000000000000000 ; sign(x) = x & smask
-dp1:    times 4 dq 7.853981554508209228515625E-1
-dp2:    times 4 dq 7.94662735614792836714E-9
-dp3:    times 4 dq 3.06161699786838294307E-17
+pi4dp1: times 4 dq 0x3FE921FB50000000
+pi4dp2: times 4 dq 0x3E4110B460000000
+pi4dp3: times 4 dq 0x3C81A62633145C07
 
 c3:  times 4 dq 0xBFC5555555555549
 c5:  times 4 dq 0x3F8111111110F8A6
