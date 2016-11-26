@@ -34,7 +34,7 @@ global mckl_vd_cos
 global mckl_vd_sincos
 global mckl_vd_tan
 
-%macro sincos 1 ; {{{ implicit input ymm0, output ymm13, ymm14, ymm15
+%macro sincos 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
     ; b = abs(a)
     vpand ymm1, ymm0, [rel pmask]
 
@@ -88,29 +88,29 @@ global mckl_vd_tan
     ; swap
     vpmovsxdq ymm11, xmm11
     vpsllq ymm1, ymm11, 62
-    %if (%1 & 0x1) != 0 ; sin(a)
-        vblendvpd ymm3, ymm13, ymm14, ymm1
-    %endif
-    %if (%1 & 0x2) != 0 ; cos(a)
-        vblendvpd ymm4, ymm14, ymm13, ymm1
-    %endif
+%if (%1 & 0x1) != 0 ; sin(a)
+    vblendvpd ymm3, ymm13, ymm14, ymm1
+%endif
+%if (%1 & 0x2) != 0 ; cos(a)
+    vblendvpd ymm4, ymm14, ymm13, ymm1
+%endif
 
     ; signs
-    %if (%1 & 0x1) != 0 ; sin(a)
-        vpsllq ymm1, ymm11, 61
-        vpxor ymm1, ymm1, ymm0
-        vpand ymm1, ymm1, [rel smask]
-        vpxor ymm13, ymm3, ymm1
-    %endif
-    %if (%1 & 0x2) != 0 ; cos(a)
-        vpaddq ymm1, ymm11, [rel dqtwo]
-        vpsllq ymm1, ymm1, 61
-        vpand ymm1, ymm1, [rel smask]
-        vpxor ymm14, ymm4, ymm1
-    %endif
-    %if (%1 & 0x4) != 0 ; tan(a)
-        vdivpd ymm15, ymm13, ymm14
-    %endif
+%if (%1 & 0x1) != 0 ; sin(a)
+    vpsllq ymm1, ymm11, 61
+    vpxor ymm1, ymm1, ymm0
+    vpand ymm1, ymm1, [rel smask]
+    vpxor ymm13, ymm3, ymm1
+%endif
+%if (%1 & 0x2) != 0 ; cos(a)
+    vpaddq ymm1, ymm11, [rel dqtwo]
+    vpsllq ymm1, ymm1, 61
+    vpand ymm1, ymm1, [rel smask]
+    vpxor ymm14, ymm4, ymm1
+%endif
+%if (%1 & 0x4) != 0 ; tan(a)
+    vdivpd ymm15, ymm13, ymm14
+%endif
 
     vcmpltpd ymm1, ymm0, [rel min_a]
     vcmpgtpd ymm2, ymm0, [rel max_a]
@@ -119,26 +119,34 @@ global mckl_vd_tan
     vpor ymm4, ymm4, ymm3
     vtestpd ymm4, ymm4
     jz %%skip
-    %if (%1 & 0x1) != 0 ; sin(a)
-        vblendvpd ymm13, ymm13, [rel min_y], ymm1
-        vblendvpd ymm13, ymm13, [rel max_y], ymm2
-        vblendvpd ymm13, ymm13, ymm0, ymm3
-    %endif
-    %if (%1 & 0x2) != 0 ; cos(a)
-        vblendvpd ymm14, ymm14, [rel min_y], ymm1
-        vblendvpd ymm14, ymm14, [rel max_y], ymm2
-        vblendvpd ymm14, ymm14, ymm0, ymm3
-    %if (%1 & 0x4) != 0 ; tan(a)
-    %endif
-        vblendvpd ymm15, ymm15, [rel min_y], ymm1
-        vblendvpd ymm15, ymm15, [rel max_y], ymm2
-        vblendvpd ymm15, ymm15, ymm0, ymm3
-    %endif
-    %%skip:
+%if (%1 & 0x1) != 0 ; sin(a)
+    vblendvpd ymm13, ymm13, [rel min_y], ymm1
+    vblendvpd ymm13, ymm13, [rel max_y], ymm2
+    vblendvpd ymm13, ymm13, ymm0, ymm3
+%endif
+%if (%1 & 0x2) != 0 ; cos(a)
+    vblendvpd ymm14, ymm14, [rel min_y], ymm1
+    vblendvpd ymm14, ymm14, [rel max_y], ymm2
+    vblendvpd ymm14, ymm14, ymm0, ymm3
+%if (%1 & 0x4) != 0 ; tan(a)
+%endif
+    vblendvpd ymm15, ymm15, [rel min_y], ymm1
+    vblendvpd ymm15, ymm15, [rel max_y], ymm2
+    vblendvpd ymm15, ymm15, ymm0, ymm3
+%endif
+%%skip:
 %endmacro ; }}}
 
+; rdi:n
+; rsi:a
+; rdx:y
+; rcx:z
+%macro kernel 1 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x40
+    cld
 
-%macro sincos_loop 1 ; rdi:n, rsi:a, rdx:y, rcx:z {{{
     test rdi, rdi
     jz .return
 
@@ -149,68 +157,66 @@ global mckl_vd_tan
     cmp rax, 4
     jl .last
 
-    .loop:
-        vmovupd ymm0, [r8]
-        sincos %1
-        %if %1 == 0x1 ; vd_sin
-            vmovupd [rdx], ymm13
-        %elif %1 == 0x2 ; vd_cos
-            vmovupd [rdx], ymm14
-        %elif %1 == 0x3 ; vd_sincos
-            vmovupd [rdx], ymm13
-            vmovupd [r9],  ymm14
-        %elif %1 == 0x7
-            vmovupd [rdx], ymm15
-        %else
-            %error
-        %endif
-        add r8, 0x20
-        add rdx, 0x20
-        %if %1 == 0x3 ; vd_sincos
-            add r9, 0x20
-        %endif
-        sub rax, 4
-        cmp rax, 4
-        jge .loop
+.loop: align 16
+    vmovupd ymm0, [r8]
+    sincos %1
+%if %1 == 0x1 ; vd_sin
+    vmovupd [rdx], ymm13
+%elif %1 == 0x2 ; vd_cos
+    vmovupd [rdx], ymm14
+%elif %1 == 0x3 ; vd_sincos
+    vmovupd [rdx], ymm13
+    vmovupd [r9],  ymm14
+%elif %1 == 0x7
+    vmovupd [rdx], ymm15
+%else
+    %error
+%endif
+    add r8, 0x20
+    add rdx, 0x20
+%if %1 == 0x3 ; vd_sincos
+    add r9, 0x20
+%endif
+    sub rax, 4
+    cmp rax, 4
+    jge .loop
 
-    .last:
-        test rax, rax
-        jz .return
-        cld
-        mov rcx, rax
-        mov rsi, r8
-        mov rdi, rsp
-        sub rdi, 0x28
-        rep movsq
-        vmovupd ymm0, [rsp - 0x28]
-        sincos %1
-        %if %1 == 0x1 ; vd_sin
-            vmovupd [rsp - 0x28], ymm13
-        %elif %1 == 0x2 ; vd_cos
-            vmovupd [rsp - 0x28], ymm14
-        %elif %1 == 0x3 ; vd_sincos
-            vmovupd [rsp - 0x28], ymm13
-            vmovupd [rsp - 0x48], ymm14
-        %elif %1 == 0x7
-            vmovupd [rsp - 0x28], ymm15
-        %else
-            %error
-        %endif
-        mov rcx, rax
-        mov rsi, rsp
-        sub rsi, 0x28
-        mov rdi, rdx
-        rep movsq
-        %if %1 == 0x3 ; vd_sincos
-            mov rcx, rax
-            mov rsi, rsp
-            sub rsi, 0x48
-            mov rdi, r9
-            rep movsq
-        %endif
+.last:
+    test rax, rax
+    jz .return
+    mov rcx, rax
+    mov rsi, r8
+    mov rdi, rsp
+    rep movsq
+    vmovupd ymm0, [rsp]
+    sincos %1
+%if %1 == 0x1 ; vd_sin
+    vmovupd [rsp], ymm13
+%elif %1 == 0x2 ; vd_cos
+    vmovupd [rsp], ymm14
+%elif %1 == 0x3 ; vd_sincos
+    vmovupd [rsp + 0x00], ymm13
+    vmovupd [rsp + 0x20], ymm14
+%elif %1 == 0x7
+    vmovupd [rsp], ymm15
+%else
+    %error
+%endif
+    mov rcx, rax
+    mov rsi, rsp
+    mov rdi, rdx
+    rep movsq
+%if %1 == 0x3 ; vd_sincos
+    mov rcx, rax
+    lea rsi, [rsp + 0x20]
+    mov rdi, r9
+    rep movsq
+%endif
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 section .rodata
@@ -250,9 +256,9 @@ pi4inv: times 4 dq 0x3FF45F306DC9C883 ; 4.0l / pi
 
 section .text
 
-mckl_vd_sin:    sincos_loop 0x1
-mckl_vd_cos:    sincos_loop 0x2
-mckl_vd_sincos: sincos_loop 0x3
-mckl_vd_tan:    sincos_loop 0x7
+mckl_vd_sin:    kernel 0x1
+mckl_vd_cos:    kernel 0x2
+mckl_vd_sincos: kernel 0x3
+mckl_vd_tan:    kernel 0x7
 
 ; vim:ft=nasm

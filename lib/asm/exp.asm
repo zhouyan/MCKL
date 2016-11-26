@@ -36,7 +36,8 @@ global mckl_vd_expm1
 ; register used as constants: ymm6, ymm8, ymm10, ymm12, ymm14
 ; register used as variables: ymm1-5, ymm7, ymm9, ymm11, ymm13, ymm15
 
-%macro exp_poly 0 ; {{{ implicity input ymm1, output ymm13
+; exp(x) - 1 = c13 * x^13 + ... + c2 * x^2 + x
+%macro expm1x 0 ; implicity input ymm1, output ymm13 {{{
     vmulpd ymm2, ymm1, ymm1 ; x^2
     vmulpd ymm4, ymm2, ymm2 ; x^4
 
@@ -72,7 +73,7 @@ global mckl_vd_expm1
     vmovapd ymm12, [rel bias]
 %endmacro ; }}}
 
-%macro exp_compute 0 ; {{{ implicit input ymm0, output ymm13
+%macro exp_compute 0 ; implicit input ymm0, output ymm13 {{{
     ; k = round(a / log(2))
     vmulpd ymm15, ymm0, ymm6
     vroundpd ymm15, ymm15, 0x8
@@ -82,8 +83,7 @@ global mckl_vd_expm1
     vfnmadd231pd ymm1, ymm15, ymm8
     vfnmadd231pd ymm1, ymm15, ymm10
 
-    ; R = exp(x) + 1 = c13 * x^13 + ... + c2 * x^2 + x
-    exp_poly
+    expm1x ; R = exp(x) - 1
 
     ; exp(a) = exp(x) * 2^k = R * 2^k + 2^k
     vaddpd ymm15, ymm15, ymm12
@@ -96,7 +96,7 @@ global mckl_vd_expm1
     vmovapd ymm8, [rel bias]
 %endmacro ; }}}
 
-%macro exp2_compute 0 ; {{{ implicit input ymm0, output ymm13
+%macro exp2_compute 0 ; implicit input ymm0, output ymm13 {{{
     ; k = round(a)
     vroundpd ymm15, ymm0, 0x8
 
@@ -104,8 +104,7 @@ global mckl_vd_expm1
     vsubpd ymm1, ymm0, ymm15
     vmulpd ymm1, ymm1, ymm6
 
-    ; R = exp(x) + 1 = c13 * x^13 + ... + c2 * x^2 + x
-    exp_poly
+    expm1x ; R = exp(x) - 1
 
     ; 2^a = exp(x) * 2^k = R * 2^k + 2^k
     vaddpd ymm15, ymm15, ymm8
@@ -121,7 +120,7 @@ global mckl_vd_expm1
     vmovapd ymm14, [rel one]
 %endmacro ; }}}
 
-%macro expm1_compute 0 ; {{{ implicit input ymm0, output ymm13
+%macro expm1_compute 0 ; implicit input ymm0, output ymm13 {{{
     ; k = round(a / log(2))
     vmulpd ymm15, ymm0, ymm6
     vroundpd ymm15, ymm15, 0x8
@@ -131,8 +130,7 @@ global mckl_vd_expm1
     vfnmadd231pd ymm1, ymm15, ymm8
     vfnmadd231pd ymm1, ymm15, ymm10
 
-    ; R = exp(x) + 1 = c13 * x^13 + ... + c2 * x^2 + x
-    exp_poly
+    expm1x ; R = exp(x) - 1
 
     ; exp(a) - 1 = exp(x) * 2^k - 1 = R * 2^k + (2^k - 1)
     vaddpd ymm15, ymm15, ymm12
@@ -141,7 +139,7 @@ global mckl_vd_expm1
     vfmadd213pd ymm13, ymm15, ymm11
 %endmacro ; }}}
 
-%macro exp_select 1 ; {{{ implicit input ymm0, ymm13, output ymm13
+%macro select 1 ; implicit input ymm0, ymm13, output ymm13 {{{
     vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
     vcmpneqpd ymm3, ymm0, ymm0        ; a != a
@@ -152,10 +150,18 @@ global mckl_vd_expm1
     vblendvpd ymm13, ymm13, [rel %{1}_min_y], ymm1 ; min_y
     vblendvpd ymm13, ymm13, [rel %{1}_max_y], ymm2 ; max_y
     vblendvpd ymm13, ymm13, ymm0, ymm3         ; a
-    %%skip:
+%%skip:
 %endmacro ; }}}
 
-%macro exp_loop 1 ; {{{ rdi:n, rsi:a, rdx:y
+; rdi:n
+; rsi:a
+; rdx:y
+%macro kernel 1 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     test rdi, rdi
     jz .return
 
@@ -167,38 +173,37 @@ global mckl_vd_expm1
     cmp rax, 4
     jl .last
 
-    .loop:
-        vmovupd ymm0, [r8]
-        %{1}_compute
-        exp_select %1
-        vmovupd [rdx], ymm13
-        add r8,  0x20
-        add rdx, 0x20
-        sub rax, 4
-        cmp rax, 4
-        jge .loop
+.loop: align 16
+    vmovupd ymm0, [r8]
+    %{1}_compute
+    select %1
+    vmovupd [rdx], ymm13
+    add r8,  0x20
+    add rdx, 0x20
+    sub rax, 4
+    cmp rax, 4
+    jge .loop
 
-    .last:
-        test rax, rax
-        jz .return
-        cld
-        mov rcx, rax
-        mov rsi, r8
-        mov rdi, rsp
-        sub rdi, 0x28
-        rep movsq
-        vmovupd ymm0, [rsp - 0x28]
-        %{1}_compute
-        exp_select %1
-        vmovupd [rsp - 0x28], ymm13
-        mov rcx, rax
-        mov rsi, rsp
-        sub rsi, 0x28
-        mov rdi, rdx
-        rep movsq
+.last:
+    test rax, rax
+    jz .return
+    mov rcx, rax
+    mov rsi, r8
+    mov rdi, rsp
+    rep movsq
+    vmovupd ymm0, [rsp]
+    %{1}_compute
+    select %1
+    vmovupd [rsp], ymm13
+    mov rcx, rax
+    mov rsi, rsp
+    mov rdi, rdx
+    rep movsq
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 section .rodata
@@ -242,8 +247,8 @@ log2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 
 section .text
 
-mckl_vd_exp:   exp_loop exp
-mckl_vd_exp2:  exp_loop exp2
-mckl_vd_expm1: exp_loop expm1
+mckl_vd_exp:   kernel exp
+mckl_vd_exp2:  kernel exp2
+mckl_vd_expm1: kernel expm1
 
 ; vim:ft=nasm

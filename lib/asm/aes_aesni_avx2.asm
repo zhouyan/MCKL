@@ -34,7 +34,7 @@ global mckl_aes192_aesni_avx2_kernel
 global mckl_aes256_aesni_avx2_kernel
 global mckl_ars_aesni_avx2_kernel
 
-%macro aes_aesni_avx2_encfirst 1 ; {{{
+%macro encfirst 1 ; {{{
     vpxor xmm0, xmm0, %1
     vpxor xmm1, xmm1, %1
     vpxor xmm2, xmm2, %1
@@ -45,7 +45,7 @@ global mckl_ars_aesni_avx2_kernel
     vpxor xmm7, xmm7, %1
 %endmacro ; }}}
 
-%macro aes_aesni_avx2_enc 1 ; {{{
+%macro enc 1 ; {{{
     vaesenc xmm0, xmm0, %1
     vaesenc xmm1, xmm1, %1
     vaesenc xmm2, xmm2, %1
@@ -56,7 +56,7 @@ global mckl_ars_aesni_avx2_kernel
     vaesenc xmm7, xmm7, %1
 %endmacro ; }}}
 
-%macro aes_aesni_avx2_enclast 1 ; {{{
+%macro enclast 1 ; {{{
     vaesenclast xmm0, xmm0, %1
     vaesenclast xmm1, xmm1, %1
     vaesenclast xmm2, xmm2, %1
@@ -67,134 +67,127 @@ global mckl_ars_aesni_avx2_kernel
     vaesenclast xmm7, xmm7, %1
 %endmacro ; }}}
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx ks.get().data()/weyl:key
-%macro aes_aesni_avx2_kernel 1 ; rounds {{{
+%macro generate 1 ; rounds {{{
+    vpaddq xmm0, xmm8, [rel increment + 0x00]
+    vpaddq xmm1, xmm8, [rel increment + 0x10]
+    vpaddq xmm2, xmm8, [rel increment + 0x20]
+    vpaddq xmm3, xmm8, [rel increment + 0x30]
+    vpaddq xmm4, xmm8, [rel increment + 0x40]
+    vpaddq xmm5, xmm8, [rel increment + 0x50]
+    vpaddq xmm6, xmm8, [rel increment + 0x60]
+    vpaddq xmm7, xmm8, [rel increment + 0x70]
+    vpaddq xmm8, xmm8, [rel increment + 0x80]
+    encfirst xmm10
+    enc xmm11
+    enc xmm12
+    enc xmm13
+    enc xmm14
+%if %1 > 5
+%assign r 0
+%rep  %1 - 5
+    vmovdqa xmm9, [rsp + r * 0x10]
+    enc xmm9
+%assign r r + 1
+%endrep
+%endif
+    enclast xmm15
+%endmacro ; }}}
+
+; rdi: ctr.data()
+; rsi: n
+; rdx: r
+; rcx: ks.get().data()/weyl:key
+%macro kernel 1 ; rounds {{{
     push rbp
     mov rbp, rsp
+%if %1 > 5
+    sub rsp, (%1 - 5) * 0x10
+%endif
+    cld
 
     ; early return
     test rsi, rsi
     jz .return
 
-    ; allocate stack space of max(8, rounds - 5) * 16 bytes
-    shr rsp, 4
-    shl rsp, 4
-    %if %1 < 13
-        sub rsp, 0x80
-    %else
-        sub rsp, (%1 - 5) * 0x10
-    %endif
+    ; parameter processing, leave rdi, rsi, rcx free for moving memory
+    mov rax, rsi ; n
+    mov r8,  rdi ; ctr
+    mov r9,  rcx ; key.get().data()/weyl:key
 
     ; load counter
-    vmovdqu xmm8, [rdi]
-    add [rdi], rsi
+    vmovdqu xmm8, [r8]
+    add [r8], rax
 
-    ; load/compute round keys
-    %if %1 == 5 ; ARS
-        vmovdqu xmm9,  [rcx + 0x00] ; weyl
-        vmovdqu xmm10, [rcx + 0x10] ; round_key[0]
-        vpaddq  xmm11, xmm10, xmm9  ; round_key[1]
-        vpaddq  xmm12, xmm11, xmm9  ; round_key[2]
-        vpaddq  xmm13, xmm12, xmm9  ; round_key[3]
-        vpaddq  xmm14, xmm13, xmm9  ; round_key[4]
-        vpaddq  xmm15, xmm14, xmm9  ; round_key[5]
-    %else ; AES
-        vmovdqu xmm10, [rcx + 0x00] ; round_key[0]
-        vmovdqu xmm11, [rcx + 0x10] ; round_key[1]
-        vmovdqu xmm12, [rcx + 0x20] ; round_key[2]
-        vmovdqu xmm13, [rcx + 0x30] ; round_key[3]
-        vmovdqu xmm14, [rcx + 0x40] ; round_key[4]
-        vmovdqu xmm15, [rcx + 0x50] ; round_key[5]
-        %if %1 > 5
-            %assign r 0
-            %rep %1 - 5
-                vmovdqa [rsp + r * 0x10], xmm15
-                vmovdqu xmm15, [rcx + (r + 6) * 0x10] ; round_key[r + 6]
-                %assign r r + 1
-            %endrep
-        %endif
-    %endif
+%if %1 == 5 ; ARS: load weyl and key, compute round_key
+    vmovdqu xmm9,  [r9 + 0x00] ; weyl
+    vmovdqu xmm10, [r9 + 0x10] ; round_key[0]
+    vpaddq  xmm11, xmm10, xmm9 ; round_key[1]
+    vpaddq  xmm12, xmm11, xmm9 ; round_key[2]
+    vpaddq  xmm13, xmm12, xmm9 ; round_key[3]
+    vpaddq  xmm14, xmm13, xmm9 ; round_key[4]
+    vpaddq  xmm15, xmm14, xmm9 ; round_key[5]
+%else ; AES: load round_key
+    vmovdqu xmm10, [r9 + 0x00] ; round_key[0]
+    vmovdqu xmm11, [r9 + 0x10] ; round_key[1]
+    vmovdqu xmm12, [r9 + 0x20] ; round_key[2]
+    vmovdqu xmm13, [r9 + 0x30] ; round_key[3]
+    vmovdqu xmm14, [r9 + 0x40] ; round_key[4]
+    vmovdqu xmm15, [r9 + %1 * 0x10] ; round_key[rounds]
+%if %1 > 5
+    mov rcx, (%1 - 5) * 2
+    lea rsi, [r9 + 0x50]
+    mov rdi, rsp
+    rep movsq
+%endif
+%endif
 
-    mov rcx, rsi ; n
-    mov rdi, rdx ; r
-
-    ; generate a new batch of 8 blocks
-    .generate:
-        vpaddq xmm0, xmm8, [rel aes_aesni_avx2_increment_data + 0x00]
-        vpaddq xmm1, xmm8, [rel aes_aesni_avx2_increment_data + 0x10]
-        vpaddq xmm2, xmm8, [rel aes_aesni_avx2_increment_data + 0x20]
-        vpaddq xmm3, xmm8, [rel aes_aesni_avx2_increment_data + 0x30]
-        vpaddq xmm4, xmm8, [rel aes_aesni_avx2_increment_data + 0x40]
-        vpaddq xmm5, xmm8, [rel aes_aesni_avx2_increment_data + 0x50]
-        vpaddq xmm6, xmm8, [rel aes_aesni_avx2_increment_data + 0x60]
-        vpaddq xmm7, xmm8, [rel aes_aesni_avx2_increment_data + 0x70]
-        vmovdqa xmm8, xmm7
-        aes_aesni_avx2_encfirst xmm10
-        aes_aesni_avx2_enc xmm11
-        aes_aesni_avx2_enc xmm12
-        aes_aesni_avx2_enc xmm13
-        aes_aesni_avx2_enc xmm14
-        %if %1 > 5
-            %assign r 0
-            %rep %1 - 5
-                vmovdqa xmm9, [rsp + r * 0x10]
-                aes_aesni_avx2_enc xmm9
-                %assign r r + 1
-            %endrep
-        %endif
-        aes_aesni_avx2_enclast xmm15
-
-    ; check if this is the last batch
-    cmp rcx, 8
+    cmp rax, 8
     jl .last
 
-    ; store the current batch directly to r
-    vmovdqu [rdi + 0x00], xmm0
-    vmovdqu [rdi + 0x10], xmm1
-    vmovdqu [rdi + 0x20], xmm2
-    vmovdqu [rdi + 0x30], xmm3
-    vmovdqu [rdi + 0x40], xmm4
-    vmovdqu [rdi + 0x50], xmm5
-    vmovdqu [rdi + 0x60], xmm6
-    vmovdqu [rdi + 0x70], xmm7
-    sub rcx, 8
-    add rdi, 0x80
+.loop: align 16
+    generate %1
+    vmovdqu [rdx + 0x00], xmm0
+    vmovdqu [rdx + 0x10], xmm1
+    vmovdqu [rdx + 0x20], xmm2
+    vmovdqu [rdx + 0x30], xmm3
+    vmovdqu [rdx + 0x40], xmm4
+    vmovdqu [rdx + 0x50], xmm5
+    vmovdqu [rdx + 0x60], xmm6
+    vmovdqu [rdx + 0x70], xmm7
+    add rdx, 0x80
+    sub rax, 8
+    cmp rax, 8
+    jge .loop
 
-    ; check if a new batch is needed
-    test rcx, rcx
-    jnz .generate
+.last:
+    test rax, rax
+    jz .return
+    generate %1
+    vmovdqa [rsp - 0x80], xmm0
+    vmovdqa [rsp - 0x70], xmm1
+    vmovdqa [rsp - 0x60], xmm2
+    vmovdqa [rsp - 0x50], xmm3
+    vmovdqa [rsp - 0x40], xmm4
+    vmovdqa [rsp - 0x30], xmm5
+    vmovdqa [rsp - 0x20], xmm6
+    vmovdqa [rsp - 0x10], xmm7
+    lea rcx, [rax + rax]
+    lea rsi, [rsp - 0x80]
+    mov rdi, rdx
+    rep movsq
 
-    ; store the last batch on the stack and then move to r
-    .last:
-        test rcx, rcx
-        jz .return
-        vmovdqa [rsp + 0x00], xmm0
-        vmovdqa [rsp + 0x10], xmm1
-        vmovdqa [rsp + 0x20], xmm2
-        vmovdqa [rsp + 0x30], xmm3
-        vmovdqa [rsp + 0x40], xmm4
-        vmovdqa [rsp + 0x50], xmm5
-        vmovdqa [rsp + 0x60], xmm6
-        vmovdqa [rsp + 0x70], xmm7
-        shl rcx, 1
-        mov rsi, rsp
-        cld
-        rep movsq
-
-    .return:
-        vzeroupper
-        mov rsp, rbp
-        pop rbp
-        ret
+.return:
+    vzeroupper
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 section .rodata
 
 align 16
-aes_aesni_avx2_increment_data:
+
+increment:
 dq 0x01, 0x00
 dq 0x02, 0x00
 dq 0x03, 0x00
@@ -207,9 +200,9 @@ dq 0x08, 0x00
 
 section .text
 
-mckl_aes128_aesni_avx2_kernel: aes_aesni_avx2_kernel 10
-mckl_aes192_aesni_avx2_kernel: aes_aesni_avx2_kernel 12
-mckl_aes256_aesni_avx2_kernel: aes_aesni_avx2_kernel 14
-mckl_ars_aesni_avx2_kernel:    aes_aesni_avx2_kernel 5
+mckl_aes128_aesni_avx2_kernel: kernel 10
+mckl_aes192_aesni_avx2_kernel: kernel 12
+mckl_aes256_aesni_avx2_kernel: kernel 14
+mckl_ars_aesni_avx2_kernel:    kernel 5
 
 ; vim:ft=nasm

@@ -37,7 +37,8 @@ global mckl_vd_log1p
 ; register used as constants: ymm6, ymm8-10, ymm12
 ; register used as variables: ymm1-5, ymm7, ymm11, ymm13-15
 
-%macro log_poly 0 ; {{{ implicity input ymm1, output ymm15
+; log(1 + f) = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
+%macro log1pf 0 ; implicity input ymm1, output ymm15 {{{
     vmulpd ymm2, ymm1, ymm1 ; x^2
     vmulpd ymm4, ymm2, ymm2 ; x^4
 
@@ -65,7 +66,7 @@ global mckl_vd_log1p
     vmovapd ymm12, [rel log2hi]
 %endmacro ; }}}
 
-%macro log_compute 0 ; {{{ implicit input ymm0, output ymm15
+%macro log_compute 0 ; implicit input ymm0, output ymm15 {{{
     ; k = exponent(a)
     vpsrlq ymm13, ymm0, 52
     vpor ymm13, ymm13, [rel pow252]
@@ -89,8 +90,7 @@ global mckl_vd_log1p
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
 
-    ; R = log(1 + f) = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
-    log_poly
+    log1pf ; R = log(1 + f)
 
     ; log(a) = k * log2 + log(1 + f)
     ;        = k * log2hi - ((x * (f - R) - k * log2lo) - f)
@@ -108,7 +108,7 @@ global mckl_vd_log1p
     vmovapd ymm10, [rel log2inv]
 %endmacro ; }}}
 
-%macro log2_compute 0 ; {{{ implicit input ymm0, output ymm15
+%macro log2_compute 0 ; implicit input ymm0, output ymm15 {{{
     ; k = exponent(a)
     vpsrlq ymm13, ymm0, 52
     vpor ymm13, ymm13, [rel pow252]
@@ -132,8 +132,7 @@ global mckl_vd_log1p
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
 
-    ; R = log(1 + f) = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
-    log_poly
+    log1pf; R = log(1 + f)
 
     ; log2(a) = k + log(1 + f) / log(2) = k + (f - x * (f - R)) * log2inv
     vsubpd ymm15, ymm14, ymm15
@@ -149,7 +148,7 @@ global mckl_vd_log1p
     vmovapd ymm12, [rel log10inv]
 %endmacro ; }}}
 
-%macro log10_compute 0 ; {{{ implicit input ymm0, output ymm15
+%macro log10_compute 0 ; implicit input ymm0, output ymm15 {{{
     ; k = exponent(a)
     vpsrlq ymm13, ymm0, 52
     vpor ymm13, ymm13, [rel pow252]
@@ -173,8 +172,7 @@ global mckl_vd_log1p
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
 
-    ; R = log(1 + f) = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
-    log_poly
+    log1pf; R = log(1 + f)
 
     ; log10 = k * log(10) / log(2) + log(1 + f) / log(1)
     ;       = k * log10_2 + (f - x * (f - R)) * log10inv
@@ -192,7 +190,7 @@ global mckl_vd_log1p
     vmovapd ymm12, [rel log2hi]
 %endmacro ; }}}
 
-%macro log1p_compute 0 ; {{{ implicit input ymm0, output ymm15
+%macro log1p_compute 0 ; implicit input ymm0, output ymm15 {{{
     ; b = a + 1
     vaddpd ymm1, ymm0, ymm8
 
@@ -219,8 +217,7 @@ global mckl_vd_log1p
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
 
-    ; R = log(1 + f) = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
-    log_poly
+    log1pf; R = log(1 + f)
 
     ; log(1 + a) = k * log2 + log(1 + f)
     ;            = k * log2hi - ((s * (f - R) - k * log2lo) - f)
@@ -231,7 +228,7 @@ global mckl_vd_log1p
     vfmsub231pd ymm15, ymm13, ymm12
 %endmacro ; }}}
 
-%macro log_select 1 ; {{{ implicit input ymm0, ymm15, output ymm15
+%macro select 1 ; implicit input ymm0, ymm15, output ymm15 {{{
     vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
     vcmpltpd ymm3, ymm0, [rel %{1}_nan_a] ; a < nan_a
@@ -245,10 +242,18 @@ global mckl_vd_log1p
     vblendvpd ymm15, ymm15, [rel %{1}_max_y], ymm2 ; max_y
     vblendvpd ymm15, ymm15, [rel %{1}_nan_y], ymm3 ; nan_y
     vblendvpd ymm15, ymm15, ymm0, ymm4         ; a
-    %%skip:
+%%skip:
 %endmacro ; }}}
 
-%macro log_loop 1 ; {{{ rdi:n, rsi:a, rdx:y
+; rdi:n
+; rsi:a
+; rdx:y
+%macro kernel 1 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     test rdi, rdi
     jz .return
 
@@ -260,38 +265,37 @@ global mckl_vd_log1p
     cmp rax, 4
     jl .last
 
-    .loop:
-        vmovupd ymm0, [r8]
-        %{1}_compute
-        log_select %1
-        vmovupd [rdx], ymm15
-        add r8,  0x20
-        add rdx, 0x20
-        sub rax, 4
-        cmp rax, 4
-        jge .loop
+.loop: align 16
+    vmovupd ymm0, [r8]
+    %{1}_compute
+    select %1
+    vmovupd [rdx], ymm15
+    add r8,  0x20
+    add rdx, 0x20
+    sub rax, 4
+    cmp rax, 4
+    jge .loop
 
-    .last:
-        test rax, rax
-        jz .return
-        cld
-        mov rcx, rax
-        mov rsi, r8
-        mov rdi, rsp
-        sub rdi, 0x28
-        rep movsq
-        vmovupd ymm0, [rsp - 0x28]
-        %{1}_compute
-        log_select %1
-        vmovupd [rsp - 0x28], ymm15
-        mov rcx, rax
-        mov rsi, rsp
-        sub rsi, 0x28
-        mov rdi, rdx
-        rep movsq
+.last:
+    test rax, rax
+    jz .return
+    mov rcx, rax
+    mov rsi, r8
+    mov rdi, rsp
+    rep movsq
+    vmovupd ymm0, [rsp]
+    %{1}_compute
+    select %1
+    vmovupd [rsp], ymm15
+    mov rcx, rax
+    mov rsi, rsp
+    mov rdi, rdx
+    rep movsq
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 section .rodata
@@ -350,9 +354,9 @@ sqrt2by2: times 4 dq 0x3FE6A09E667F3BCD ; sqrt(2.0l) / 2.0l
 
 section .text
 
-mckl_vd_log:   log_loop log
-mckl_vd_log2:  log_loop log2
-mckl_vd_log10: log_loop log10
-mckl_vd_log1p: log_loop log1p
+mckl_vd_log:   kernel log
+mckl_vd_log2:  kernel log2
+mckl_vd_log10: kernel log10
+mckl_vd_log1p: kernel log1p
 
 ; vim:ft=nasm

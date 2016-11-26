@@ -31,7 +31,7 @@
 
 global mckl_philox2x64_bmi2_kernel
 
-%macro philox2x64_bmi2_rbox 1 ; {{{
+%macro rbox 1 ; {{{
     vmovq rax, %1
     xor rax, r11
     mulx r10, r11, r10
@@ -40,10 +40,10 @@ global mckl_philox2x64_bmi2_kernel
 
 section .text
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
+; rdi: ctr.data()
+; rsi: n
+; rdx: r
+; rcx: mul:weyl:key
 mckl_philox2x64_bmi2_kernel: ; {{{
     test rsi, rsi
     jz .return
@@ -69,30 +69,30 @@ mckl_philox2x64_bmi2_kernel: ; {{{
     mov rdx, [rcx] ; multiplier
     mov rcx, rsi ; n
 
-    .generate:
-        add r8, 1
-        adc r9, 0
-        mov r10, r8
-        mov r11, r9
-        philox2x64_bmi2_rbox xmm0
-        philox2x64_bmi2_rbox xmm1
-        philox2x64_bmi2_rbox xmm2
-        philox2x64_bmi2_rbox xmm3
-        philox2x64_bmi2_rbox xmm4
-        philox2x64_bmi2_rbox xmm5
-        philox2x64_bmi2_rbox xmm6
-        philox2x64_bmi2_rbox xmm7
-        philox2x64_bmi2_rbox xmm8
-        philox2x64_bmi2_rbox xmm9
-        mov [rdi + 0], r10
-        mov [rdi + 8], r11
-        dec rcx
-        add rdi, 0x10
-        test rcx, rcx
-        jnz .generate
+.loop: align 16
+    add r8, 1
+    adc r9, 0
+    mov r10, r8
+    mov r11, r9
+    rbox xmm0
+    rbox xmm1
+    rbox xmm2
+    rbox xmm3
+    rbox xmm4
+    rbox xmm5
+    rbox xmm6
+    rbox xmm7
+    rbox xmm8
+    rbox xmm9
+    mov [rdi + 0], r10
+    mov [rdi + 8], r11
+    dec rcx
+    add rdi, 0x10
+    test rcx, rcx
+    jnz .loop
 
-    .return:
-        ret
-; mckl_philox2x64_bmi2_kernel: }}}
+.return:
+    ret
+; }}}
 
 ; vim:ft=nasm

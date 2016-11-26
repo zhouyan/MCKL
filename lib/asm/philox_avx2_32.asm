@@ -32,7 +32,7 @@
 global mckl_philox2x32_avx2_kernel
 global mckl_philox4x32_avx2_kernel
 
-%macro philox_avx2_32_rbox 2 ; {{{
+%macro rbox 2 ; {{{
     vmovdqa ymm15, [rsp + %1 * 0x20] ; round key
 
     vpmuludq ymm10, ymm0, ymm9
@@ -79,156 +79,166 @@ global mckl_philox4x32_avx2_kernel
     vpshufd ymm7, ymm7, %2
 %endmacro ; }}}
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
-%macro philox_avx2_32_kernel 4 ; block size, permute constants {{{
+%macro generate 4 ; block size, permute constants {{{
+%if %1 == 0x08 ; Philox2x32
+    vpaddq ymm0, ymm8, [rel increment2x32 + 0x000]
+    vpaddq ymm1, ymm8, [rel increment2x32 + 0x020]
+    vpaddq ymm2, ymm8, [rel increment2x32 + 0x040]
+    vpaddq ymm3, ymm8, [rel increment2x32 + 0x060]
+    vpaddq ymm4, ymm8, [rel increment2x32 + 0x080]
+    vpaddq ymm5, ymm8, [rel increment2x32 + 0x0A0]
+    vpaddq ymm6, ymm8, [rel increment2x32 + 0x0C0]
+    vpaddq ymm7, ymm8, [rel increment2x32 + 0x0E0]
+    vpaddq ymm8, ymm8, [rel increment2x32 + 0x100]
+%elif %1 == 0x10 ; Philox4x32
+    vpaddq ymm0, ymm8, [rel increment4x32 + 0x000]
+    vpaddq ymm1, ymm8, [rel increment4x32 + 0x020]
+    vpaddq ymm2, ymm8, [rel increment4x32 + 0x040]
+    vpaddq ymm3, ymm8, [rel increment4x32 + 0x060]
+    vpaddq ymm4, ymm8, [rel increment4x32 + 0x080]
+    vpaddq ymm5, ymm8, [rel increment4x32 + 0x0A0]
+    vpaddq ymm6, ymm8, [rel increment4x32 + 0x0C0]
+    vpaddq ymm7, ymm8, [rel increment4x32 + 0x0E0]
+    vpaddq ymm8, ymm8, [rel increment4x32 + 0x100]
+%else
+    %error
+%endif
+%if %2 != 0xE3
+    vpshufd ymm0, ymm0, %2
+    vpshufd ymm1, ymm1, %2
+    vpshufd ymm2, ymm2, %2
+    vpshufd ymm3, ymm3, %2
+    vpshufd ymm4, ymm4, %2
+    vpshufd ymm5, ymm5, %2
+    vpshufd ymm6, ymm6, %2
+    vpshufd ymm7, ymm7, %2
+%endif
+    rbox 0, %3
+    rbox 1, %3
+    rbox 2, %3
+    rbox 3, %3
+    rbox 4, %3
+    rbox 5, %3
+    rbox 6, %3
+    rbox 7, %3
+    rbox 8, %3
+    rbox 9, %4
+%endmacro ; }}}
+
+; rdi: ctr.data()
+; rsi: n
+; rdx: r
+; rcx: mul:weyl:key
+%macro kernel 4 ; block size, permute constants {{{
     push rbp
     mov rbp, rsp
     shr rsp, 5
     shl rsp, 5
-    sub rsp, 0x140
+    sub rsp, 0x140 ; 10 round keys
+    cld
+
+    ; early return
+    test rsi, rsi
+    jz .return
+
+    ; parameter processing, leave rdi, rsi, rcx free for moving memory
+    mov rax, rsi ; n
+    mov r8,  rdi ; ctr
+    mov r9,  rcx ; mul:wey:key
 
     ; load counter
-    %if %1 == 0x08
-        vpbroadcastq ymm8, [rdi]
-    %elif %1 == 0x10
-        vbroadcasti128 ymm8, [rdi]
-    %else
-        %error
-    %endif
-    add [rdi], rsi
+%if %1 == 0x08 ; Philox2x32
+    vpbroadcastq ymm8, [r8]
+%elif %1 == 0x10 ; Philox4x32
+    vbroadcasti128 ymm8, [r8]
+%else
+    %error
+%endif
+    add [r8], rax
 
     ; load multiplier
-    %if %1 == 0x08
-        vpbroadcastq ymm9, [rcx]
-    %elif %1 == 0x10
-        vbroadcasti128 ymm9, [rcx]
-    %else
-        %error
-    %endif
-
-    ; compute round keys
-    %if %1 == 0x08
-        vpbroadcastq ymm0, [rcx + 0x08] ; weyl
-        vpbroadcastq ymm1, [rcx + 0x10] ; key
-    %elif %1 == 0x10
-        vbroadcasti128 ymm0, [rcx + 0x10] ; weyl
-        vbroadcasti128 ymm1, [rcx + 0x20] ; key
-    %else
-        %error
-    %endif
-    vmovdqa [rsp], ymm1
-    %assign r 1
-    %rep 9
-        vpaddq ymm1, ymm1, ymm0
-        vmovdqa [rsp + r * 0x20], ymm1
-        %assign r r + 1
-    %endrep
+%if %1 == 0x08 ; Philox2x32
+    vpbroadcastq ymm9, [r9]
+%elif %1 == 0x10 ; Philox4x32
+    vbroadcasti128 ymm9, [r9]
+%else
+    %error
+%endif
 
     ; load mask
-    vpbroadcastq ymm14, [rel philox_avx2_32_mask]
+    vmovdqa ymm14, [rel mask]
 
-    mov rcx, rsi ; n
-    mov rdi, rdx ; r
+    ; compute round keys and store to stack
+%if %1 == 0x08 ; Philox2x32
+    vpbroadcastq ymm0, [r9 + 0x08] ; weyl
+    vpbroadcastq ymm1, [r9 + 0x10] ; key
+%elif %1 == 0x10 ; Philox4x32
+    vbroadcasti128 ymm0, [r9 + 0x10] ; weyl
+    vbroadcasti128 ymm1, [r9 + 0x20] ; key
+%else
+    %error
+%endif
+    vmovdqa [rsp], ymm1
+%assign r 1
+%rep 9
+    vpaddq ymm1, ymm1, ymm0
+    vmovdqa [rsp + r * 0x20], ymm1
+%assign r r + 1
+%endrep
 
-    ; generate a new batch of (0x100 / %1) blocks
-    .generate:
-        %if %1 == 0x08
-            vpaddq ymm0, ymm8, [rel philox2x32_avx2_increment + 0x000]
-            vpaddq ymm1, ymm8, [rel philox2x32_avx2_increment + 0x020]
-            vpaddq ymm2, ymm8, [rel philox2x32_avx2_increment + 0x040]
-            vpaddq ymm3, ymm8, [rel philox2x32_avx2_increment + 0x060]
-            vpaddq ymm4, ymm8, [rel philox2x32_avx2_increment + 0x080]
-            vpaddq ymm5, ymm8, [rel philox2x32_avx2_increment + 0x0A0]
-            vpaddq ymm6, ymm8, [rel philox2x32_avx2_increment + 0x0C0]
-            vpaddq ymm7, ymm8, [rel philox2x32_avx2_increment + 0x0E0]
-            vpaddq ymm8, ymm8, [rel philox2x32_avx2_increment + 0x100]
-        %elif %1 == 0x10
-            vpaddq ymm0, ymm8, [rel philox4x32_avx2_increment + 0x000]
-            vpaddq ymm1, ymm8, [rel philox4x32_avx2_increment + 0x020]
-            vpaddq ymm2, ymm8, [rel philox4x32_avx2_increment + 0x040]
-            vpaddq ymm3, ymm8, [rel philox4x32_avx2_increment + 0x060]
-            vpaddq ymm4, ymm8, [rel philox4x32_avx2_increment + 0x080]
-            vpaddq ymm5, ymm8, [rel philox4x32_avx2_increment + 0x0A0]
-            vpaddq ymm6, ymm8, [rel philox4x32_avx2_increment + 0x0C0]
-            vpaddq ymm7, ymm8, [rel philox4x32_avx2_increment + 0x0E0]
-            vpaddq ymm8, ymm8, [rel philox4x32_avx2_increment + 0x100]
-        %else
-            %error
-        %endif
-        %if %2 != 0xE3
-            vpshufd ymm0, ymm0, %2
-            vpshufd ymm1, ymm1, %2
-            vpshufd ymm2, ymm2, %2
-            vpshufd ymm3, ymm3, %2
-            vpshufd ymm4, ymm4, %2
-            vpshufd ymm5, ymm5, %2
-            vpshufd ymm6, ymm6, %2
-            vpshufd ymm7, ymm7, %2
-        %endif
-        %assign r 0
-        %rep 9
-            philox_avx2_32_rbox r, %3
-            %assign r r + 1
-        %endrep
-        philox_avx2_32_rbox 9, %4
-
-    ; check if this is the last batch
-    cmp rcx, 0x100 / %1
+    cmp rax, 0x100 / %1
     jl .last
 
-    ; store the current batch directly to r
-    vmovdqu [rdi + 0x00], ymm0
-    vmovdqu [rdi + 0x20], ymm1
-    vmovdqu [rdi + 0x40], ymm2
-    vmovdqu [rdi + 0x60], ymm3
-    vmovdqu [rdi + 0x80], ymm4
-    vmovdqu [rdi + 0xA0], ymm5
-    vmovdqu [rdi + 0xC0], ymm6
-    vmovdqu [rdi + 0xE0], ymm7
-    sub rcx, 0x100 / %1
-    add rdi, 0x100
+.loop: align 16
+    generate %1, %2, %3, %4
+    vmovdqu [rdx + 0x00], ymm0
+    vmovdqu [rdx + 0x20], ymm1
+    vmovdqu [rdx + 0x40], ymm2
+    vmovdqu [rdx + 0x60], ymm3
+    vmovdqu [rdx + 0x80], ymm4
+    vmovdqu [rdx + 0xA0], ymm5
+    vmovdqu [rdx + 0xC0], ymm6
+    vmovdqu [rdx + 0xE0], ymm7
+    add rdx, 0x100
+    sub rax, 0x100 / %1
+    cmp rax, 0x100 / %1
+    jge .loop
 
-    ; check if a new batch is needed
-    test rcx, rcx
-    jnz .generate
+.last:
+    test rax, rax
+    jz .return
+    generate %1, %2, %3, %4
+    vmovdqa [rsp + 0x00], ymm0
+    vmovdqa [rsp + 0x20], ymm1
+    vmovdqa [rsp + 0x40], ymm2
+    vmovdqa [rsp + 0x60], ymm3
+    vmovdqa [rsp + 0x80], ymm4
+    vmovdqa [rsp + 0xA0], ymm5
+    vmovdqa [rsp + 0xC0], ymm6
+    vmovdqa [rsp + 0xE0], ymm7
+%if %1 == 0x08 ; Philox2x32
+    mov rcx, rax
+%elif %1 == 0x10 ; Philox4x32
+    lea rcx, [rax + rax]
+%else
+    %error
+%endif
+    mov rsi, rsp
+    mov rdi, rdx
+    rep movsq
 
-    ; store the last batch on the stack and then move to r
-    .last:
-        test rcx, rcx
-        jz .return
-        vmovdqa [rsp + 0x00], ymm0
-        vmovdqa [rsp + 0x20], ymm1
-        vmovdqa [rsp + 0x40], ymm2
-        vmovdqa [rsp + 0x60], ymm3
-        vmovdqa [rsp + 0x80], ymm4
-        vmovdqa [rsp + 0xA0], ymm5
-        vmovdqa [rsp + 0xC0], ymm6
-        vmovdqa [rsp + 0xE0], ymm7
-        %if %1 == 0x08
-            ; do nothing
-        %elif %1 == 0x10
-            shl rcx, 1
-        %else
-            %error
-        %endif
-        mov rsi, rsp
-        cld
-        rep movsq
-
-    .return:
-        vzeroupper
-        mov rsp, rbp
-        pop rbp
-        ret
+.return:
+    vzeroupper
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 section .rodata
 
 align 32
-philox2x32_avx2_increment:
+
+increment2x32:
 dq 0x01, 0x02, 0x03, 0x04
 dq 0x05, 0x06, 0x07, 0x08
 dq 0x09, 0x0A, 0x0B, 0x0C
@@ -239,8 +249,7 @@ dq 0x19, 0x1A, 0x1B, 0x1C
 dq 0x1D, 0x1E, 0x1F, 0x20
 dq 0x20, 0x20, 0x20, 0x20
 
-align 32
-philox4x32_avx2_increment:
+increment4x32:
 dq 0x01, 0x00, 0x02, 0x00
 dq 0x03, 0x00, 0x04, 0x00
 dq 0x05, 0x00, 0x06, 0x00
@@ -251,12 +260,11 @@ dq 0x0D, 0x00, 0x0E, 0x00
 dq 0x0F, 0x00, 0x10, 0x00
 dq 0x10, 0x00, 0x10, 0x00
 
-philox_avx2_32_mask:
-dq 0xFFFF_FFFF_0000_0000
+mask: times 4 dq 0xFFFF_FFFF_0000_0000
 
 section .text
 
-mckl_philox2x32_avx2_kernel: philox_avx2_32_kernel 0x08, 0xE3, 0xB1, 0xB1
-mckl_philox4x32_avx2_kernel: philox_avx2_32_kernel 0x10, 0xC6, 0x93, 0xB1
+mckl_philox2x32_avx2_kernel: kernel 0x08, 0xE3, 0xB1, 0xB1
+mckl_philox4x32_avx2_kernel: kernel 0x10, 0xC6, 0x93, 0xB1
 
 ; vim:ft=nasm

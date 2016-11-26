@@ -49,32 +49,28 @@ global mckl_fma_vss_pd
     mov rcx, %4
     mov rsi, %3
     mov rdi, rsp
-    sub rdi, 0x28
-    cld
-    %if %1 == 4
-        rep movsd
-    %elif %1 == 8
-        rep movsq
-    %else
-        %error
-    %endif
-    vmovups %2, [rsp - 0x28]
+%if %1 == 4
+    rep movsd
+%elif %1 == 8
+    rep movsq
+%else
+    %error
+%endif
+vmovups %2, [rsp]
 %endmacro ; }}}
 
 %macro partial_store 4 ; {{{
-    vmovups [rsp - 0x28], %3
+    vmovups [rsp], %3
     mov rcx, %4
     mov rsi, rsp
-    sub rsi, 0x28
     mov rdi, %2
-    cld
-    %if %1 == 4
-        rep movsd
-    %elif %1 == 8
-        rep movsq
-    %else
-        %error
-    %endif
+%if %1 == 4
+    rep movsd
+%elif %1 == 8
+    rep movsq
+%else
+    %error
+%endif
 %endmacro ; }}}
 
 ; rdi n
@@ -83,36 +79,43 @@ global mckl_fma_vss_pd
 ; rcx c
 ; r8  y
 %macro fma_vvv 2 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     cmp rdi, 0x20 / %1
     jl .last
 
-    .loop:
-        vmovups ymm2, [rsi]
-        vmovups ymm1, [rdx]
-        vfmadd213p%2 ymm2, ymm1, [rcx]
-        vmovups [r8], ymm2
-        add rsi, 0x20
-        add rdx, 0x20
-        add rcx, 0x20
-        add r8,  0x20
-        sub rdi, 0x20 / %1
-        cmp rdi, 0x20 / %1
-        jge .loop
+.loop: align 16
+    vmovups ymm2, [rsi]
+    vmovups ymm1, [rdx]
+    vfmadd213p%2 ymm2, ymm1, [rcx]
+    vmovups [r8], ymm2
+    add rsi, 0x20
+    add rdx, 0x20
+    add rcx, 0x20
+    add r8,  0x20
+    sub rdi, 0x20 / %1
+    cmp rdi, 0x20 / %1
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi ; n
-        mov r9,  rsi ; a
-        mov r10, rcx ; c
-        partial_load %1, ymm2, r9,  rax
-        partial_load %1, ymm1, rdx, rax
-        partial_load %1, ymm3, r10, rax
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        partial_store %1, r8, ymm2, rax
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi ; n
+    mov r9,  rsi ; a
+    mov r10, rcx ; c
+    partial_load %1, ymm2, r9,  rax
+    partial_load %1, ymm1, rdx, rax
+    partial_load %1, ymm3, r10, rax
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    partial_store %1, r8, ymm2, rax
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -121,36 +124,43 @@ global mckl_fma_vss_pd
 ; xmm0 c
 ; rcx  y
 %macro fma_vvs 2 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     vbroadcasts%2 ymm3, xmm0 ; c
 
     cmp rdi, 0x20 / %1
     jl .last
 
-    .loop:
-        vmovups ymm2, [rsi]
-        vmovups ymm1, [rdx]
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        vmovups [rcx], ymm2
-        add rsi, 0x20
-        add rdx, 0x20
-        add rcx, 0x20
-        sub rdi, 0x20 / %1
-        cmp rdi, 0x20 / %1
-        jge .loop
+.loop: align 16
+    vmovups ymm2, [rsi]
+    vmovups ymm1, [rdx]
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    vmovups [rcx], ymm2
+    add rsi, 0x20
+    add rdx, 0x20
+    add rcx, 0x20
+    sub rdi, 0x20 / %1
+    cmp rdi, 0x20 / %1
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi ; n
-        mov r8,  rsi ; a
-        mov r9,  rcx ; y
-        partial_load %1, ymm2, r8,  rax
-        partial_load %1, ymm1, rdx, rax
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        partial_store %1, r9, ymm2, rax
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi ; n
+    mov r8,  rsi ; a
+    mov r9,  rcx ; y
+    partial_load %1, ymm2, r8,  rax
+    partial_load %1, ymm1, rdx, rax
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    partial_store %1, r9, ymm2, rax
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -159,36 +169,43 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_vsv 2 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     vbroadcasts%2 ymm1, xmm0 ; b
 
     cmp rdi, 0x20 / %1
     jl .last
 
-    .loop:
-        vmovups ymm2, [rsi]
-        vmovups ymm3, [rdx]
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        vmovups [rcx], ymm2
-        add rsi, 0x20
-        add rdx, 0x20
-        add rcx, 0x20
-        sub rdi, 0x20 / %1
-        cmp rdi, 0x20 / %1
-        jge .loop
+.loop: align 16
+    vmovups ymm2, [rsi]
+    vmovups ymm3, [rdx]
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    vmovups [rcx], ymm2
+    add rsi, 0x20
+    add rdx, 0x20
+    add rcx, 0x20
+    sub rdi, 0x20 / %1
+    cmp rdi, 0x20 / %1
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi ; n
-        mov r8,  rsi ; a
-        mov r9,  rcx ; y
-        partial_load %1, ymm2, r8,  rax
-        partial_load %1, ymm3, rdx, rax
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        partial_store %1, r9, ymm2, rax
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi ; n
+    mov r8,  rsi ; a
+    mov r9,  rcx ; y
+    partial_load %1, ymm2, r8,  rax
+    partial_load %1, ymm3, rdx, rax
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    partial_store %1, r9, ymm2, rax
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -197,36 +214,43 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_svv 2 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     vbroadcasts%2 ymm1, xmm0 ; a
 
     cmp rdi, 0x20 / %1
     jl .last
 
-    .loop:
-        vmovups ymm2, [rsi]
-        vmovups ymm3, [rdx]
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        vmovups [rcx], ymm2
-        add rsi,  0x20
-        add rdx, 0x20
-        add rcx, 0x20
-        sub rdi, 0x20 / %1
-        cmp rdi, 0x20 / %1
-        jge .loop
+.loop: align 16
+    vmovups ymm2, [rsi]
+    vmovups ymm3, [rdx]
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    vmovups [rcx], ymm2
+    add rsi,  0x20
+    add rdx, 0x20
+    add rcx, 0x20
+    sub rdi, 0x20 / %1
+    cmp rdi, 0x20 / %1
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi ; n
-        mov r8,  rsi ; b
-        mov r9,  rcx ; y
-        partial_load %1, ymm2, r8,  rax
-        partial_load %1, ymm3, rdx, rax
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        partial_store %1, r9, ymm2, rax
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi ; n
+    mov r8,  rsi ; b
+    mov r9,  rcx ; y
+    partial_load %1, ymm2, r8,  rax
+    partial_load %1, ymm3, rdx, rax
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    partial_store %1, r9, ymm2, rax
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -235,33 +259,40 @@ global mckl_fma_vss_pd
 ; rsi  c
 ; rdx  y
 %macro fma_ssv 2 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     vbroadcasts%2 ymm3, xmm0 ; a
     vbroadcasts%2 ymm1, xmm1 ; b
 
     cmp rdi, 0x20 / %1
     jl .last
 
-    .loop:
-        vmovups ymm2, [rsi]
-        vfmadd231p%2 ymm2, ymm3, ymm1
-        vmovups [rdx], ymm2
-        add rsi, 0x20
-        add rdx, 0x20
-        sub rdi, 0x20 / %1
-        cmp rdi, 0x20 / %1
-        jge .loop
+.loop: align 16
+    vmovups ymm2, [rsi]
+    vfmadd231p%2 ymm2, ymm3, ymm1
+    vmovups [rdx], ymm2
+    add rsi, 0x20
+    add rdx, 0x20
+    sub rdi, 0x20 / %1
+    cmp rdi, 0x20 / %1
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi ; n
-        mov r8,  rsi ; c
-        partial_load %1, ymm2, r8, rax
-        vfmadd231p%2 ymm2, ymm3, ymm1
-        partial_store %1, rdx, ymm2, rax
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi ; n
+    mov r8,  rsi ; c
+    partial_load %1, ymm2, r8, rax
+    vfmadd231p%2 ymm2, ymm3, ymm1
+    partial_store %1, rdx, ymm2, rax
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -270,33 +301,40 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_svs 2 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     vbroadcasts%2 ymm3, xmm1 ; c
     vbroadcasts%2 ymm1, xmm0 ; a
 
     cmp rdi, 0x20 / %1
     jl .last
 
-    .loop:
-        vmovups ymm2, [rsi]
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        vmovups [rdx], ymm2
-        add rsi,  0x20
-        add rdx, 0x20
-        sub rdi, 0x20 / %1
-        cmp rdi, 0x20 / %1
-        jge .loop
+.loop: align 16
+    vmovups ymm2, [rsi]
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    vmovups [rdx], ymm2
+    add rsi,  0x20
+    add rdx, 0x20
+    sub rdi, 0x20 / %1
+    cmp rdi, 0x20 / %1
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi ; n
-        mov r8,  rsi ; b
-        partial_load %1, ymm2, r8, rax
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        partial_store %1, rdx, ymm2, rax
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi ; n
+    mov r8,  rsi ; b
+    partial_load %1, ymm2, r8, rax
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    partial_store %1, rdx, ymm2, rax
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 ; rdi  n
@@ -305,33 +343,40 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_vss 2 ; {{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     vbroadcasts%2 ymm3, xmm1 ; c
     vbroadcasts%2 ymm1, xmm0 ; b
 
     cmp rdi, 0x20 / %1
     jl .last
 
-    .loop:
-        vmovups ymm2, [rsi]
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        vmovups [rdx], ymm2
-        add rsi, 0x20
-        add rdx, 0x20
-        sub rdi, 0x20 / %1
-        cmp rdi, 0x20 / %1
-        jge .loop
+.loop: align 16
+    vmovups ymm2, [rsi]
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    vmovups [rdx], ymm2
+    add rsi, 0x20
+    add rdx, 0x20
+    sub rdi, 0x20 / %1
+    cmp rdi, 0x20 / %1
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi ; n
-        mov r8,  rsi ; a
-        partial_load %1, ymm2, r8, rax
-        vfmadd213p%2 ymm2, ymm1, ymm3
-        partial_store %1, rdx, ymm2, rax
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi ; n
+    mov r8,  rsi ; a
+    partial_load %1, ymm2, r8, rax
+    vfmadd213p%2 ymm2, ymm1, ymm3
+    partial_store %1, rdx, ymm2, rax
 
-    .return:
-        ret
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
 %endmacro ; }}}
 
 mckl_fma_vvv_ps: fma_vvv 4, s

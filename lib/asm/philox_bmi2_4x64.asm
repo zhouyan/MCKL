@@ -31,7 +31,7 @@
 
 global mckl_philox4x64_bmi2_kernel
 
-%macro philox4x64_bmi2_rbox 1 ; {{{
+%macro rbox 1 ; {{{
     vmovq rax, %1 ; k0
     xor rax, r11 ; t1
     vmovq rdx, xmm10 ; m2
@@ -49,12 +49,10 @@ global mckl_philox4x64_bmi2_kernel
 
 section .text
 
-; rdi r
-
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx mul:weyl:key
+; rdi: ctr.data()
+; rsi: n
+; rdx: r
+; rcx: mul:weyl:key
 mckl_philox4x64_bmi2_kernel: ; {{{
     push rbx
     push r12
@@ -91,43 +89,43 @@ mckl_philox4x64_bmi2_kernel: ; {{{
     vpshufd xmm11, xmm10, 0x4E ; multiplier[1]
     mov rcx, rsi ; n
 
-    .generate:
-        add r8, 1
-        jnc .nocarry
-        adc r9, 0
-        adc r14, 0
-        adc r15, 0
-        .nocarry:
-        mov r10, r8  ; s0
-        mov r11, r9  ; s1
-        mov r12, r14 ; s2
-        mov r13, r15 ; s3
-        philox4x64_bmi2_rbox xmm0
-        philox4x64_bmi2_rbox xmm1
-        philox4x64_bmi2_rbox xmm2
-        philox4x64_bmi2_rbox xmm3
-        philox4x64_bmi2_rbox xmm4
-        philox4x64_bmi2_rbox xmm5
-        philox4x64_bmi2_rbox xmm6
-        philox4x64_bmi2_rbox xmm7
-        philox4x64_bmi2_rbox xmm8
-        philox4x64_bmi2_rbox xmm9
-        mov [rdi + 0x00], r10
-        mov [rdi + 0x08], r11
-        mov [rdi + 0x10], r12
-        mov [rdi + 0x18], r13
-        dec rcx
-        add rdi, 0x20
-        test rcx, rcx
-        jnz .generate
+.loop: align 16
+    add r8, 1
+    jnc .skip
+    adc r9, 0
+    adc r14, 0
+    adc r15, 0
+    .skip:
+    mov r10, r8  ; s0
+    mov r11, r9  ; s1
+    mov r12, r14 ; s2
+    mov r13, r15 ; s3
+    rbox xmm0
+    rbox xmm1
+    rbox xmm2
+    rbox xmm3
+    rbox xmm4
+    rbox xmm5
+    rbox xmm6
+    rbox xmm7
+    rbox xmm8
+    rbox xmm9
+    mov [rdi + 0x00], r10
+    mov [rdi + 0x08], r11
+    mov [rdi + 0x10], r12
+    mov [rdi + 0x18], r13
+    dec rcx
+    add rdi, 0x20
+    test rcx, rcx
+    jnz .loop
 
-    .return:
-        pop r15
-        pop r14
-        pop r13
-        pop r12
-        pop rbx
-        ret
-; mckl_philox4x64_bmi2_kernel: }}}
+.return:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    ret
+; }}}
 
 ; vim:ft=nasm

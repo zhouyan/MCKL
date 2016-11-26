@@ -33,41 +33,47 @@ global mckl_vd_sqrt
 
 section .text
 
-mckl_vd_sqrt: ; rdi:n, rsi:a, rdx:y {{{
+; rdi:n
+; rsi:a
+; rdx:y
+mckl_vd_sqrt: ;{{{
+    push rbp
+    mov rbp, rsp
+    sub rsp, 0x20
+    cld
+
     cmp rdi, 4
     jl .last
 
-    .loop:
-        vmovupd ymm0, [rsi]
-        vsqrtpd ymm0, ymm0
-        vmovupd [rdx], ymm0
-        add rsi, 0x20
-        add rdx, 0x20
-        sub rdi, 4
-        cmp rdi, 4
-        jge .loop
+.loop: align 16
+    vmovupd ymm0, [rsi]
+    vsqrtpd ymm0, ymm0
+    vmovupd [rdx], ymm0
+    add rsi, 0x20
+    add rdx, 0x20
+    sub rdi, 4
+    cmp rdi, 4
+    jge .loop
 
-    .last:
-        test rdi, rdi
-        jz .return
-        mov rax, rdi
-        mov rcx, rdi
-        mov rdi, rsp
-        sub rdi, 0x28
-        cld
-        rep movsq
-        vmovupd ymm0, [rsp - 0x28]
-        vsqrtpd ymm0, ymm0
-        vmovupd [rsp - 0x28], ymm0
-        mov rcx, rax
-        mov rsi, rsp
-        sub rsi, 0x28
-        mov rdi, rdx
-        cld
-        rep movsq
+.last:
+    test rdi, rdi
+    jz .return
+    mov rax, rdi
+    mov rcx, rdi
+    mov rdi, rsp
+    rep movsq
+    vmovupd ymm0, [rsp]
+    vsqrtpd ymm0, ymm0
+    vmovupd [rsp], ymm0
+    mov rcx, rax
+    mov rsi, rsp
+    mov rdi, rdx
+    rep movsq
 
-    .return:
-        ret
-; }}} mckl_vd_sqrt
+.return:
+    mov rsp, rbp
+    pop rbp
+    ret
+; }}}
 
 ; vim:ft=nasm
