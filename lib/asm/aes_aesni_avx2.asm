@@ -165,11 +165,12 @@ global mckl_ars_aesni_avx2_kernel
 
     ; check if a new batch is needed
     test rcx, rcx
-    jz .return
-    jmp .generate
+    jnz .generate
 
     ; store the last batch on the stack and then move to r
     .last:
+        test rcx, rcx
+        jz .return
         vmovdqa [rsp + 0x00], xmm0
         vmovdqa [rsp + 0x10], xmm1
         vmovdqa [rsp + 0x20], xmm2

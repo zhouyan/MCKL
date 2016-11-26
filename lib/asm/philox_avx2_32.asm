@@ -193,11 +193,12 @@ global mckl_philox4x32_avx2_kernel
 
     ; check if a new batch is needed
     test rcx, rcx
-    jz .return
-    jmp .generate
+    jnz .generate
 
     ; store the last batch on the stack and then move to r
     .last:
+        test rcx, rcx
+        jz .return
         vmovdqa [rsp + 0x00], ymm0
         vmovdqa [rsp + 0x20], ymm1
         vmovdqa [rsp + 0x40], ymm2
