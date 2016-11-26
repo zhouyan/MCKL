@@ -59,28 +59,28 @@ global mckl_vd_tan
     vmulpd ymm8, ymm4, ymm4 ; x8 = x^8
 
     ; S = c13 * x^13 + ... + c3 * x^3 + x
-    vmovapd ymm5,  [rel c5]
-    vmovapd ymm9,  [rel c9]
     vmovapd ymm13, [rel c13]
-    vfmadd213pd ymm5,  ymm2, [rel c3]  ; u5  = c5  * x^2 + c3
-    vfmadd213pd ymm9,  ymm2, [rel c7]  ; u9  = c9  * x^2 + c7
+    vmovapd ymm9,  [rel c9]
+    vmovapd ymm5,  [rel c5]
     vfmadd213pd ymm13, ymm2, [rel c11] ; u13 = c13 * x^2 + c11
-    vfmadd213pd ymm5,  ymm3, ymm1 ; v5  = u5  * x^3 + x
+    vfmadd213pd ymm9,  ymm2, [rel c7]  ; u9  = c9  * x^2 + c7
+    vfmadd213pd ymm5,  ymm2, [rel c3]  ; u5  = c5  * x^2 + c3
     vfmadd213pd ymm13, ymm4, ymm9 ; v13 = u13 * x^4 + u9
+    vfmadd213pd ymm5,  ymm3, ymm1 ; v5  = u5  * x^3 + x
     vfmadd213pd ymm13, ymm7, ymm5 ; z13 = v13 * x^7 + v5
 
     ; C = c14 * x^14 + ... + c2 * x^2 + 1
-    vmovapd ymm5,  [rel c2]
-    vmovapd ymm6,  [rel c6]
-    vmovapd ymm10, [rel c10]
     vmovapd ymm14, [rel c14]
-    vfmadd213pd ymm5,  ymm2, [rel c0]  ; u5  = c2  * x^2 + c0
-    vfmadd213pd ymm6,  ymm2, [rel c4]  ; u6  = c6  * x^2 + c4
-    vfmadd213pd ymm10, ymm2, [rel c8]  ; u10 = c10 * x^2 + c8
+    vmovapd ymm10, [rel c10]
+    vmovapd ymm6,  [rel c6]
+    vmovapd ymm5,  [rel c2]
     vfmadd213pd ymm14, ymm2, [rel c12] ; u14 = c14 * x^2 + c12
-    vfmadd213pd ymm6,  ymm4, ymm5  ; v6  = u6  * x^4 + u5
+    vfmadd213pd ymm10, ymm2, [rel c8]  ; u10 = c10 * x^2 + c8
+    vfmadd213pd ymm6,  ymm2, [rel c4]  ; u6  = c6  * x^2 + c4
+    vfmadd213pd ymm5,  ymm2, [rel c0]  ; u5  = c2  * x^2 + c0
     vfmadd213pd ymm14, ymm4, ymm10 ; v14 = u14 * x^4 + u10
-    vfmadd213pd ymm14, ymm8, ymm6 ; z14 = v14 * x^8 + v6
+    vfmadd213pd ymm6,  ymm4, ymm5  ; v6  = u6  * x^4 + u5
+    vfmadd213pd ymm14, ymm8, ymm6  ; z14 = v14 * x^8 + v6
 
     ; swap S and C if k % 4 = 1 or 3
     vpmovsxdq ymm15, xmm15
@@ -245,8 +245,8 @@ c9:  times 4 dq 0x3EC71DE357B1FE7D
 c11: times 4 dq 0xBE5AE5E68A2B9CEB
 c13: times 4 dq 0x3DE5D93A5ACFD57C
 
-c0:  times 4 dq 0x3FF0000000000000 ; 1.0
-c2:  times 4 dq 0xBFE0000000000000 ; -0.5
+c0:  times 4 dq 0x3FF0000000000000
+c2:  times 4 dq 0xBFE0000000000000
 c4:  times 4 dq 0x3FA555555555554C
 c6:  times 4 dq 0xBF56C16C16C15177
 c8:  times 4 dq 0x3EFA01A019CB1590
