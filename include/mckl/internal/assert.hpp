@@ -44,7 +44,6 @@
 #ifdef MCKL_CLANG
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wweak-vtables"
-#pragma clang diagnostic ignored "-Wfloat-equal"
 #endif
 
 namespace mckl
@@ -133,6 +132,44 @@ template <typename T>
 inline bool is_equal(const T &a, const T &b)
 {
     return a == b;
+}
+
+template <>
+inline bool is_equal<float>(const float &a, const float &b)
+{
+    union {
+        float x;
+        std::uint32_t u;
+    };
+
+    union {
+        float y;
+        std::uint32_t v;
+    };
+
+    x = a;
+    y = b;
+
+    return (u == v) | ((u | v) == (1U << 31));
+}
+
+template <>
+inline bool is_equal<double>(const double &a, const double &b)
+{
+    union {
+        double x;
+        std::uint64_t u;
+    };
+
+    union {
+        double y;
+        std::uint64_t v;
+    };
+
+    x = a;
+    y = b;
+
+    return (u == v) | ((u | v) == (1ULL << 63));
 }
 
 template <typename T>
