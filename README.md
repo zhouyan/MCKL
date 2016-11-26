@@ -26,6 +26,39 @@ Notably, [HDF5][hdf5], [TBB][tbb], [OpenMP][omp] and [MKL][mkl]. One can tell
 the library that these optional features are available by defining
 configuration macros such as `-DMCKL_HAS_HDF5=1` during compilation.
 
+# Optional runtime library
+
+In addition to the header-only library, one can optionally build and use a
+runtime library. To build the library, one need a recent version of
+[NASM][NASM] assembler and the [CMake][CMake] program. The library is only
+supported on x86-64 CPUs and 64-bit Unix-alike systems.
+
+To build and install the library,
+```
+cd /path/to/mckl/source
+mkdir -p build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/prefix/to/install/directory
+make lib
+make install
+```
+To use and link to the library in a user program, say `prog.cpp`,
+```
+c++ -DMCKL_USE_ASM_LIB=1 -o prog prog.cpp -lmckl
+```
+
+The runtime library provides optimized implementation of selected RNGs
+Performance of the header-only implementation might vary considerably depending
+on the compiler. Though even the worst case, the performance is still better
+than most alternatives, the best performance of some RNGs can provide best
+performance regardless of the choice of compiler.
+
+Further, one can define a configuration macro `MCKL_USE_ASM_VMF` to a non-zero
+value, to use an assembly implementation of selected vectorized math functions
+when MKL VML is unavailable. This feature is highly experimental. These
+functions are fast, but have slightly lower accuracy for some values of input
+than the standard library or MKL VML in high accuracy mode.
+
 # Compiler support
 
 This library makes heavy use of some template metaprogramming techniques. It
@@ -40,14 +73,14 @@ required with thread-local storage as an exception.
 # Examples
 
 Examples are in the `example` subdirectory, to build them,
-~~~sh
+```
 export CXXFLAGS="-std=c++11"
-cd /path_to_MCKL_source
-mkdir build
+cd /path/to/mckl/source
+mkdir -p build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make example
-~~~
+```
 Some examples may only be built if optional dependencies are present.
 
 # License
@@ -56,9 +89,10 @@ The MCKL library is distributed with a 2-clause BSD license which can be found
 in the `LICENSE` file distributed with the source.
 
 [clang]: http://clang.llvm.org
-[cmake]: http://www.cmake.org
+[CMake]: http://www.cmake.org
 [doxygen]: http://www.stack.nl/~dimitri/doxygen
 [gcc]: http://gcc.gnu.org
+[NASM]: http://nasm.us
 [hdf5]: http://www.hdfgroup.org
 [icpc]: http://software.intel.com/en-us/intel-compilers
 [mkl]: https://software.intel.com/en-us/intel-mkl

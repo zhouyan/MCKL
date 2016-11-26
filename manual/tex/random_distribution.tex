@@ -55,8 +55,9 @@ The third and the fourth are the vectorized performance,
 rand(rng, rnorm_mckl, n, r.data());
 \end{verbatim}
 The difference is that we first test the performance without the \mkl \vml
-library and then with it. For all the four above, the \rng is |Philox4x32|
-(section~\ref{sub:Philox}) on Nehalem and |ARS| on Haswell.
+library and then with it. On Haswell, when \mkl \vml is not used, the assembly
+implementation of selected functions are used. For all the four above, the \rng
+is |Philox4x32| (section~\ref{sub:Philox}) on Nehalem and |ARS| on Haswell.
 (section~\ref{sub:AES-NI instructions based RNG}). The last is when there are
 \mkl routines for generating random variates from the distribution, either
 directly or indirectly. In this case, we use the \rng |MKL_PHILOX4X32X10| on
@@ -70,7 +71,7 @@ elements $n$ chosen randomly between 5,000 and 10,000. The total number of
 cycles of the 100 simulations are recorded, and then divided by the total
 number of elements generated. This gives the performance measurement in \cpe.
 This experiment is repeated ten times, and the best results are shown. The five
-cases are labeled ``\std'', ``\mckl'', ``\batch'', ``\vml'' and ``\mkl'',
+cases are labeled ``\std'', ``\mckl'', ``\vmf'', ``\vml'' and ``\mkl'',
 respectively, in tables below.
 
 \perftable{distribution}{u01}{standard uniform distributions}{%
