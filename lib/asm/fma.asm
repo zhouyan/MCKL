@@ -121,10 +121,11 @@ global mckl_fma_vss_pd
 ; xmm0 c
 ; rcx  y
 %macro fma_vvs 2 ; {{{
+    vbroadcasts%2 ymm3, xmm0 ; c
+
     cmp rdi, 0x20 / %1
     jl .last
 
-    vbroadcasts%2 ymm3, xmm0 ; c
     .loop:
         vmovups ymm2, [rsi]
         vmovups ymm1, [rdx]
@@ -158,10 +159,11 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_vsv 2 ; {{{
+    vbroadcasts%2 ymm1, xmm0 ; b
+
     cmp rdi, 0x20 / %1
     jl .last
 
-    vbroadcasts%2 ymm1, xmm0 ; b
     .loop:
         vmovups ymm2, [rsi]
         vmovups ymm3, [rdx]
@@ -195,10 +197,11 @@ global mckl_fma_vss_pd
 ; rdx  c
 ; rcx  y
 %macro fma_svv 2 ; {{{
+    vbroadcasts%2 ymm1, xmm0 ; a
+
     cmp rdi, 0x20 / %1
     jl .last
 
-    vbroadcasts%2 ymm1, xmm0 ; a
     .loop:
         vmovups ymm2, [rsi]
         vmovups ymm3, [rdx]
@@ -232,11 +235,12 @@ global mckl_fma_vss_pd
 ; rsi  c
 ; rdx  y
 %macro fma_ssv 2 ; {{{
+    vbroadcasts%2 ymm3, xmm0 ; a
+    vbroadcasts%2 ymm1, xmm1 ; b
+
     cmp rdi, 0x20 / %1
     jl .last
 
-    vbroadcasts%2 ymm3, xmm0 ; a
-    vbroadcasts%2 ymm1, xmm1 ; b
     .loop:
         vmovups ymm2, [rsi]
         vfmadd231p%2 ymm2, ymm3, ymm1
@@ -266,11 +270,12 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_svs 2 ; {{{
+    vbroadcasts%2 ymm3, xmm1 ; c
+    vbroadcasts%2 ymm1, xmm0 ; a
+
     cmp rdi, 0x20 / %1
     jl .last
 
-    vbroadcasts%2 ymm3, xmm1 ; c
-    vbroadcasts%2 ymm1, xmm0 ; a
     .loop:
         vmovups ymm2, [rsi]
         vfmadd213p%2 ymm2, ymm1, ymm3
@@ -300,11 +305,12 @@ global mckl_fma_vss_pd
 ; xmm1 c
 ; rdx  y
 %macro fma_vss 2 ; {{{
+    vbroadcasts%2 ymm3, xmm1 ; c
+    vbroadcasts%2 ymm1, xmm0 ; b
+
     cmp rdi, 0x20 / %1
     jl .last
 
-    vbroadcasts%2 ymm3, xmm1 ; c
-    vbroadcasts%2 ymm1, xmm0 ; b
     .loop:
         vmovups ymm2, [rsi]
         vfmadd213p%2 ymm2, ymm1, ymm3
