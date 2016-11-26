@@ -39,7 +39,7 @@
     {                                                                         \
         mckl::UniformRealDistribution<T> unif(wl, wu);                        \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
-        mckl::RNG rng;                                                        \
+        mckl::RNG_64 rng;                                                     \
                                                                               \
         mckl::Vector<T> a(N);                                                 \
         mckl::Vector<T> r1(N);                                                \
@@ -174,7 +174,7 @@ inline void math_asm_vd_sincos(std::size_t N, std::size_t M, int nwid)
 {
     mckl::UniformRealDistribution<double> unif(-1e4, 1e4);
     mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
-    mckl::RNG rng;
+    mckl::RNG_64 rng;
 
     mckl::Vector<double> a(N);
     mckl::Vector<double> r1(N);

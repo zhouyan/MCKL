@@ -35,10 +35,10 @@ mckl_add_example(math)
 
 mckl_add_test(math vmf)
 
-if(AVX_FOUND AND FMA_FOUND)
+if(AVX2_FOUND AND FMA_FOUND)
     mckl_add_test(math fma)
-endif(AVX_FOUND AND FMA_FOUND)
+    if(MCKL_ENABLE_LIBRARY)
+        mckl_add_test(math asm)
+    endif(MCKL_ENABLE_LIBRARY)
+endif(AVX2_FOUND AND FMA_FOUND)
 
-if(MCKL_ENABLE_LIBRARY)
-    mckl_add_test(math asm)
-endif(MCKL_ENABLE_LIBRARY)

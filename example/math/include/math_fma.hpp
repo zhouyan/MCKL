@@ -41,7 +41,7 @@
         mckl::UniformRealDistribution<float> unifs(-1e4f, 1e4f);              \
         mckl::UniformRealDistribution<double> unifd(-1e4, 1e4);               \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
-        mckl::RNG rng;                                                        \
+        mckl::RNG_64 rng;                                                     \
                                                                               \
         mckl::Vector<float> as(N);                                            \
         mckl::Vector<float> bs(N);                                            \
