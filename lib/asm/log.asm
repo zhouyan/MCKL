@@ -41,14 +41,14 @@ global mckl_vd_log1p
     vmulpd ymm2, ymm1, ymm1 ; x^2
     vmulpd ymm4, ymm2, ymm2 ; x^4
 
-    vmovapd ymm15, [rsp + 0x180]
-    vmovapd ymm11, [rsp + 0x140]
-    vmovapd ymm7,  [rsp + 0x100]
+    vmovapd ymm15, [rel c15]
+    vmovapd ymm11, [rel c11]
+    vmovapd ymm7,  [rel c7]
 
-    vfmadd213pd ymm15, ymm2, [rsp + 0x160] ; u15 = c15 * x^2 + c13
-    vfmadd213pd ymm11, ymm2, [rsp + 0x120] ; u11 = c11 * x^2 + c9
-    vfmadd213pd ymm7,  ymm2, [rsp + 0x0E0] ; u7  = c7  * x^2 + c5
-    vmulpd      ymm3,  ymm2, [rsp + 0x0C0] ; u3  = c3  * x^2
+    vfmadd213pd ymm15, ymm2, [rel c13] ; u15 = c15 * x^2 + c13
+    vfmadd213pd ymm11, ymm2, [rel c9]  ; u11 = c11 * x^2 + c9
+    vfmadd213pd ymm7,  ymm2, [rel c5]  ; u7  = c7  * x^2 + c5
+    vmulpd      ymm3,  ymm2, [rel c3]  ; u3  = c3  * x^2
 
     vfmadd213pd ymm15, ymm4, ymm11 ; v15 = u15 * x^4 + u11
     vfmadd213pd ymm7,  ymm4, ymm3  ; v7  = u7  * x^4 + u3
@@ -68,12 +68,12 @@ global mckl_vd_log1p
 %macro log_compute 0 ; {{{ implicit input ymm0, output ymm15
     ; k = exponent(a)
     vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [rsp + 0x1A0]
-    vsubpd ymm13, ymm13, [rsp + 0x1C0]
+    vpor ymm13, ymm13, [rel pow252]
+    vsubpd ymm13, ymm13, [rel bias]
 
     ; 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [rsp + 0x1E0]
-    vpor ymm14, ymm14, [rsp + 0x200]
+    vpand ymm14, ymm0, [rel fmask]
+    vpor ymm14, ymm14, [rel emask]
 
     ; 1 + f > sqrt(2) / 2
     vcmpgtpd ymm1, ymm14, ymm6
@@ -111,12 +111,12 @@ global mckl_vd_log1p
 %macro log2_compute 0 ; {{{ implicit input ymm0, output ymm15
     ; k = exponent(a)
     vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [rsp + 0x1A0]
-    vsubpd ymm13, ymm13, [rsp + 0x1C0]
+    vpor ymm13, ymm13, [rel pow252]
+    vsubpd ymm13, ymm13, [rel bias]
 
     ; 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [rsp + 0x1E0]
-    vpor ymm14, ymm14, [rsp + 0x200]
+    vpand ymm14, ymm0, [rel fmask]
+    vpor ymm14, ymm14, [rel emask]
 
     ; 1 + f > sqrt(2) / 2
     vcmpgtpd ymm1, ymm14, ymm6
@@ -152,12 +152,12 @@ global mckl_vd_log1p
 %macro log10_compute 0 ; {{{ implicit input ymm0, output ymm15
     ; k = exponent(a)
     vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [rsp + 0x1A0]
-    vsubpd ymm13, ymm13, [rsp + 0x1C0]
+    vpor ymm13, ymm13, [rel pow252]
+    vsubpd ymm13, ymm13, [rel bias]
 
     ; 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [rsp + 0x1E0]
-    vpor ymm14, ymm14, [rsp + 0x200]
+    vpand ymm14, ymm0, [rel fmask]
+    vpor ymm14, ymm14, [rel emask]
 
     ; 1 + f > sqrt(2) / 2
     vcmpgtpd ymm1, ymm14, ymm6
@@ -198,12 +198,12 @@ global mckl_vd_log1p
 
     ; k = exponent(b)
     vpsrlq ymm13, ymm1, 52
-    vpor ymm13, ymm13, [rsp + 0x1A0]
-    vsubpd ymm13, ymm13, [rsp + 0x1C0]
+    vpor ymm13, ymm13, [rel pow252]
+    vsubpd ymm13, ymm13, [rel bias]
 
     ; 1 + f = 0.5 * fraction(b)
-    vpand ymm14, ymm1, [rsp + 0x1E0]
-    vpor ymm14, ymm14, [rsp + 0x200]
+    vpand ymm14, ymm1, [rel fmask]
+    vpor ymm14, ymm14, [rel emask]
 
     ; 1 + f > sqrt(2) / 2
     vcmpgtpd ymm1, ymm14, ymm6
@@ -231,47 +231,29 @@ global mckl_vd_log1p
     vfmsub231pd ymm15, ymm13, ymm12
 %endmacro ; }}}
 
-%macro log_select 0 ; {{{ implicit input ymm0, ymm15, output ymm15
-    vcmpltpd ymm1, ymm0, [rsp + 0x00] ; a < min_a
-    vcmpgtpd ymm2, ymm0, [rsp + 0x20] ; a > max_a
-    vcmpltpd ymm3, ymm0, [rsp + 0x40] ; a < nan_a
+%macro log_select 1 ; {{{ implicit input ymm0, ymm15, output ymm15
+    vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
+    vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
+    vcmpltpd ymm3, ymm0, [rel %{1}_nan_a] ; a < nan_a
     vcmpneqpd ymm4, ymm0, ymm0        ; a != a
     vpor ymm5, ymm1, ymm2
     vpor ymm5, ymm5, ymm3
     vpor ymm5, ymm5, ymm4
     vtestpd ymm5, ymm5
     jz %%skip
-    vblendvpd ymm15, ymm15, [rsp + 0x60], ymm1 ; min_y
-    vblendvpd ymm15, ymm15, [rsp + 0x80], ymm2 ; max_y
-    vblendvpd ymm15, ymm15, [rsp + 0xA0], ymm3 ; nan_y
+    vblendvpd ymm15, ymm15, [rel %{1}_min_y], ymm1 ; min_y
+    vblendvpd ymm15, ymm15, [rel %{1}_max_y], ymm2 ; max_y
+    vblendvpd ymm15, ymm15, [rel %{1}_nan_y], ymm3 ; nan_y
     vblendvpd ymm15, ymm15, ymm0, ymm4         ; a
     %%skip:
 %endmacro ; }}}
 
 %macro log_loop 1 ; {{{ rdi:n, rsi:a, rdx:y
-    push rbp
-    mov rbp, rsp
-
     test rdi, rdi
     jz .return
 
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
-    sub rsp, 0x220
-
-    cld
     mov rax, rdi
-    mov rdi, rsp
-    mov r8, rsi
-
-    ; min_a, max_a, nan_a, min_y, max_y, nan_y
-    mov rcx, 24
-    lea rsi, [rel %{1}_min_a]
-    rep movsq
-
-    ; c3-c15, pow252, bias, emask, fmask
-    mov rcx, 44
-    lea rsi, [rel c3]
-    rep movsq
+    mov r8,  rsi
 
     %{1}_constants
 
@@ -281,7 +263,7 @@ global mckl_vd_log1p
     .loop:
         vmovupd ymm0, [r8]
         %{1}_compute
-        log_select
+        log_select %1
         vmovupd [rdx], ymm15
         add r8,  0x20
         add rdx, 0x20
@@ -292,24 +274,23 @@ global mckl_vd_log1p
     .last:
         test rax, rax
         jz .return
+        cld
         mov rcx, rax
         mov rsi, r8
         mov rdi, rsp
-        sub rdi, 0x20
+        sub rdi, 0x28
         rep movsq
-        vmovapd ymm0, [rsp - 0x20]
+        vmovupd ymm0, [rsp - 0x28]
         %{1}_compute
-        log_select
-        vmovapd [rsp - 0x20], ymm15
+        log_select %1
+        vmovupd [rsp - 0x28], ymm15
         mov rcx, rax
         mov rsi, rsp
-        sub rsi, 0x20
+        sub rsi, 0x28
         mov rdi, rdx
         rep movsq
 
     .return:
-        mov rsp, rbp
-        pop rbp
         ret
 %endmacro ; }}}
 
@@ -338,25 +319,26 @@ log10_min_y: times 4 dq 0xFFF0000000000000 ; -HUGE_VAL
 log10_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
 log10_nan_y: times 4 dq 0x7FF8000000000000 ; NaN
 
-log1p_min_a: times 4 dq 0xBFEFFFFFFFFFFFFF ; nextafter(-1.0, 0.0)
+log1p_min_a: times 4 dq 0xBFF0000000000000 ; -1.0
 log1p_max_a: times 4 dq 0x7FEFFFFFFFFFFFFF ; DBL_MAX
 log1p_nan_a: times 4 dq 0xBFF0000000000000 ; -1.0
 log1p_min_y: times 4 dq 0xFFF0000000000000 ; -HUGE_VAL
 log1p_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
 log1p_nan_y: times 4 dq 0x7FF8000000000000 ; NaN
 
-c3:  times 4 dq 0x3FE5555555555593 ; rsp + 0x0C0
-c5:  times 4 dq 0x3FD999999997FA04 ; rsp + 0x0E0
-c7:  times 4 dq 0x3FD2492494229359 ; rsp + 0x100
-c9:  times 4 dq 0x3FCC71C51D8E78AF ; rsp + 0x120
-c11: times 4 dq 0x3FC7466496CB03DE ; rsp + 0x140
-c13: times 4 dq 0x3FC39A09D078C69F ; rsp + 0x160
-c15: times 4 dq 0x3FC2F112DF3E5244 ; rsp + 0x180
+c3:  times 4 dq 0x3FE5555555555593
+c5:  times 4 dq 0x3FD999999997FA04
+c7:  times 4 dq 0x3FD2492494229359
+c9:  times 4 dq 0x3FCC71C51D8E78AF
+c11: times 4 dq 0x3FC7466496CB03DE
+c13: times 4 dq 0x3FC39A09D078C69F
+c15: times 4 dq 0x3FC2F112DF3E5244
 
-pow252    times 4 dq 0x4330000000000000 ; rsp + 0x1A0 2^52
-bias:     times 4 dq 0x43300000000003FF ; rsp + 0x1C0 2^52 + 1023.0
-fmask:    times 4 dq 0x000FFFFFFFFFFFFF ; rsp + 0x1E0 fraction mask
-emask:    times 4 dq 0x3FE0000000000000 ; rsp + 0x200 exponent mask
+pow252: times 4 dq 0x4330000000000000 ; 2^52
+bias:   times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
+fmask:  times 4 dq 0x000FFFFFFFFFFFFF ; fraction mask
+emask:  times 4 dq 0x3FE0000000000000 ; exponent mask
+
 one:      times 4 dq 0x3FF0000000000000 ; 1.0
 two:      times 4 dq 0x4000000000000000 ; 2.0
 log2hi:   times 4 dq 0x3FE62E42FEE00000

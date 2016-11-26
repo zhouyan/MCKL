@@ -117,10 +117,6 @@
         std::copy_n(vf, vn, vl);                                              \
         mckl_##vfunc(vn, vf, vf);                                             \
         mckl::func(vn, vl, vl);                                               \
-        T el = 0;                                                             \
-        T eu = 0;                                                             \
-        math_error(1, vf + 0, vl + 0, el);                                    \
-        math_error(1, vf + 1, vl + 1, eu);                                    \
                                                                               \
         std::cout << std::fixed << std::setprecision(2);                      \
         std::cout << std::setw(nwid) << std::left << #func;                   \
@@ -132,9 +128,7 @@
         std::cout << std::setw(nwid) << std::right << e1;                     \
         std::cout << std::setw(nwid) << std::right << e2;                     \
         std::cout << std::setw(nwid) << std::right << e3;                     \
-        std::cout << std::setw(nwid) << std::right << el;                     \
-        std::cout << std::setw(nwid) << std::right << eu;                     \
-        for (int j = 2; j != vn; ++j) {                                       \
+        for (int j = 0; j != vn; ++j) {                                       \
             union {                                                           \
                 T x;                                                          \
                 U y;                                                          \
@@ -167,7 +161,7 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log2, vd_log2, 0.1, 1e4,
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log10, vd_log10, 0.1, 1e4,
     0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log1p, vd_log1p, 1.0, 1e4,
-    0xBFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
+    0xBFF0000000000000, 0x7FEFFFFFFFFFFFFF)
 
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, sin, vd_sin, -1e4, 1e4,
     0xC1D0000000000000, 0x41D0000000000000)
@@ -267,12 +261,6 @@ inline void math_asm_vd_sincos(std::size_t N, std::size_t M, int nwid)
     std::copy_n(vf, vn, vl);
     mckl_vd_sincos(vn, vf, vf, wf);
     mckl::sincos(vn, vl, vl, wl);
-    double el = 0;
-    double eu = 0;
-    math_error(1, vf + 0, vl + 0, el);
-    math_error(1, wf + 0, wl + 0, el);
-    math_error(1, vf + 1, vl + 1, eu);
-    math_error(1, wf + 1, wl + 1, eu);
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::setw(nwid) << std::left << "sincos";
@@ -284,9 +272,7 @@ inline void math_asm_vd_sincos(std::size_t N, std::size_t M, int nwid)
     std::cout << std::setw(nwid) << std::right << e1;
     std::cout << std::setw(nwid) << std::right << e2;
     std::cout << std::setw(nwid) << std::right << e3;
-    std::cout << std::setw(nwid) << std::right << el;
-    std::cout << std::setw(nwid) << std::right << eu;
-    for (int j = 2; j != vn; ++j) {
+    for (int j = 0; j != vn; ++j) {
         union {
             double x;
             std::uint64_t y;
@@ -324,15 +310,13 @@ inline void math_asm(std::size_t N, std::size_t M)
     std::cout << std::setw(nwid) << std::right << "ULP (S)";
     std::cout << std::setw(nwid) << std::right << "ULP (A)";
     std::cout << std::setw(nwid) << std::right << "ULP (V)";
-    std::cout << std::setw(nwid) << std::right << "ULP (LB)";
-    std::cout << std::setw(nwid) << std::right << "ULP (UB)";
 #else
     std::cout << std::setw(nwid) << std::right << "Err (S)";
     std::cout << std::setw(nwid) << std::right << "Err (A)";
     std::cout << std::setw(nwid) << std::right << "Err (V)";
-    std::cout << std::setw(nwid) << std::right << "Err (LB)";
-    std::cout << std::setw(nwid) << std::right << "Err (UB)";
 #endif
+    std::cout << std::setw(nwid) << std::right << "a = LB";
+    std::cout << std::setw(nwid) << std::right << "a = UB";
     std::cout << std::setw(nwid) << std::right << "a < LB";
     std::cout << std::setw(nwid) << std::right << "a > UB";
     std::cout << std::setw(nwid) << std::right << "a = -0.0";

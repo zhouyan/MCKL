@@ -40,19 +40,19 @@ global mckl_vd_expm1
     vmulpd ymm2, ymm1, ymm1 ; x^2
     vmulpd ymm4, ymm2, ymm2 ; x^4
 
-    vmovapd ymm13, [rsp + 0x1E0] ; c13
-    vmovapd ymm11, [rsp + 0x1A0] ; c11
-    vmovapd ymm9,  [rsp + 0x160] ; c9
-    vmovapd ymm7,  [rsp + 0x120] ; c7
-    vmovapd ymm5,  [rsp + 0x0E0] ; c5
-    vmovapd ymm3,  [rsp + 0x0A0] ; c3
+    vmovapd ymm13, [rel c13]
+    vmovapd ymm11, [rel c11]
+    vmovapd ymm9,  [rel c9]
+    vmovapd ymm7,  [rel c7]
+    vmovapd ymm5,  [rel c5]
+    vmovapd ymm3,  [rel c3]
 
-    vfmadd213pd ymm13, ymm1, [rsp + 0x1C0] ; u13 = c13 * x + c12
-    vfmadd213pd ymm11, ymm1, [rsp + 0x180] ; u11 = c11 * x + c10
-    vfmadd213pd ymm9,  ymm1, [rsp + 0x140] ; u9  = c9  * x + c8
-    vfmadd213pd ymm7,  ymm1, [rsp + 0x100] ; u7  = c7  * x + c6
-    vfmadd213pd ymm5,  ymm1, [rsp + 0x0C0] ; u5  = c5  * x + c4
-    vfmadd213pd ymm3,  ymm1, [rsp + 0x080] ; u3  = c3  * x + c2
+    vfmadd213pd ymm13, ymm1, [rel c12] ; u13 = c13 * x + c12
+    vfmadd213pd ymm11, ymm1, [rel c10] ; u11 = c11 * x + c10
+    vfmadd213pd ymm9,  ymm1, [rel c8]  ; u9  = c9  * x + c8
+    vfmadd213pd ymm7,  ymm1, [rel c6]  ; u7  = c7  * x + c6
+    vfmadd213pd ymm5,  ymm1, [rel c4]  ; u5  = c5  * x + c4
+    vfmadd213pd ymm3,  ymm1, [rel c2]  ; u3  = c3  * x + c2
 
     vfmadd213pd ymm13, ymm2, ymm11 ; v13 = u13 * x^2 + u11
     vfmadd213pd ymm9,  ymm2, ymm7  ; v9  = u9  * x^2 + u7
@@ -141,44 +141,26 @@ global mckl_vd_expm1
     vfmadd213pd ymm13, ymm15, ymm11
 %endmacro ; }}}
 
-%macro exp_select 0 ; {{{ implicit input ymm0, ymm13, output ymm13
-    vcmpltpd ymm1, ymm0, [rsp + 0x00] ; a < min_a
-    vcmpgtpd ymm2, ymm0, [rsp + 0x20] ; a > max_a
+%macro exp_select 1 ; {{{ implicit input ymm0, ymm13, output ymm13
+    vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
+    vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
     vcmpneqpd ymm3, ymm0, ymm0        ; a != a
     vpor ymm4, ymm1, ymm2
     vpor ymm4, ymm4, ymm3
     vtestpd ymm4, ymm4
     jz %%skip
-    vblendvpd ymm13, ymm13, [rsp + 0x40], ymm1 ; min_y
-    vblendvpd ymm13, ymm13, [rsp + 0x60], ymm2 ; max_y
+    vblendvpd ymm13, ymm13, [rel %{1}_min_y], ymm1 ; min_y
+    vblendvpd ymm13, ymm13, [rel %{1}_max_y], ymm2 ; max_y
     vblendvpd ymm13, ymm13, ymm0, ymm3         ; a
     %%skip:
 %endmacro ; }}}
 
 %macro exp_loop 1 ; {{{ rdi:n, rsi:a, rdx:y
-    push rbp
-    mov rbp, rsp
-
     test rdi, rdi
     jz .return
 
-    and rsp, 0xFFFF_FFFF_FFFF_FFE0
-    sub rsp, 0x200
-
-    cld
     mov rax, rdi
-    mov rdi, rsp
-    mov r8, rsi
-
-    ; min_a, max_a, min_y, max_y
-    mov rcx, 16
-    lea rsi, [rel %{1}_min_a]
-    rep movsq
-
-    ; c2 - c13
-    mov rcx, 48
-    lea rsi, [rel c2]
-    rep movsq
+    mov r8,  rsi
 
     %{1}_constants
 
@@ -188,7 +170,7 @@ global mckl_vd_expm1
     .loop:
         vmovupd ymm0, [r8]
         %{1}_compute
-        exp_select
+        exp_select %1
         vmovupd [rdx], ymm13
         add r8,  0x20
         add rdx, 0x20
@@ -199,24 +181,23 @@ global mckl_vd_expm1
     .last:
         test rax, rax
         jz .return
+        cld
         mov rcx, rax
         mov rsi, r8
         mov rdi, rsp
-        sub rdi, 0x20
+        sub rdi, 0x28
         rep movsq
-        vmovapd ymm0, [rsp - 0x20]
+        vmovupd ymm0, [rsp - 0x28]
         %{1}_compute
-        exp_select
-        vmovapd [rsp - 0x20], ymm13
+        exp_select %1
+        vmovupd [rsp - 0x28], ymm13
         mov rcx, rax
         mov rsi, rsp
-        sub rsi, 0x20
+        sub rsi, 0x28
         mov rdi, rdx
         rep movsq
 
     .return:
-        mov rsp, rbp
-        pop rbp
         ret
 %endmacro ; }}}
 
@@ -239,18 +220,18 @@ expm1_max_a: times 4 dq 0x40862B7D369A5AA7 ; 709.4361393031039
 expm1_min_y: times 4 dq 0xBFF0000000000000 ; -1.0
 expm1_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
 
-c2:  times 4 dq 0x3FE0000000000000 ; rsp + 0x080
-c3:  times 4 dq 0x3FC5555555555555 ; rsp + 0x0A0
-c4:  times 4 dq 0x3FA5555555555555 ; rsp + 0x0C0
-c5:  times 4 dq 0x3F81111111111111 ; rsp + 0x0E0
-c6:  times 4 dq 0x3F56C16C16C16C17 ; rsp + 0x100
-c7:  times 4 dq 0x3F2A01A01A01A01A ; rsp + 0x120
-c8:  times 4 dq 0x3EFA01A01A01A01A ; rsp + 0x140
-c9:  times 4 dq 0x3EC71DE3A556C734 ; rsp + 0x160
-c10: times 4 dq 0x3E927E4FB7789F5C ; rsp + 0x180
-c11: times 4 dq 0x3E5AE64567F544E4 ; rsp + 0x1A0
-c12: times 4 dq 0x3E21EED8EFF8D898 ; rsp + 0x1C0
-c13: times 4 dq 0x3DE6124613A86D09 ; rsp + 0x1E0
+c2:  times 4 dq 0x3FE0000000000000
+c3:  times 4 dq 0x3FC5555555555555
+c4:  times 4 dq 0x3FA5555555555555
+c5:  times 4 dq 0x3F81111111111111
+c6:  times 4 dq 0x3F56C16C16C16C17
+c7:  times 4 dq 0x3F2A01A01A01A01A
+c8:  times 4 dq 0x3EFA01A01A01A01A
+c9:  times 4 dq 0x3EC71DE3A556C734
+c10: times 4 dq 0x3E927E4FB7789F5C
+c11: times 4 dq 0x3E5AE64567F544E4
+c12: times 4 dq 0x3E21EED8EFF8D898
+c13: times 4 dq 0x3DE6124613A86D09
 
 bias:    times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
 one:     times 4 dq 0x3FF0000000000000 ; 1.0
