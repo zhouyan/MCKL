@@ -88,27 +88,27 @@ global mckl_vd_tan
     ; swap
     vpmovsxdq ymm11, xmm11
     vpsllq ymm1, ymm11, 62
-%if (%1 & 0x1) != 0 ; sin(a)
+%if %1 & 0x1 ; sin(a)
     vblendvpd ymm3, ymm13, ymm14, ymm1
 %endif
-%if (%1 & 0x2) != 0 ; cos(a)
+%if %1 & 0x2 ; cos(a)
     vblendvpd ymm4, ymm14, ymm13, ymm1
 %endif
 
     ; signs
-%if (%1 & 0x1) != 0 ; sin(a)
+%if %1 & 0x1 ; sin(a)
     vpsllq ymm1, ymm11, 61
     vpxor ymm1, ymm1, ymm0
     vpand ymm1, ymm1, [rel smask]
     vpxor ymm13, ymm3, ymm1
 %endif
-%if (%1 & 0x2) != 0 ; cos(a)
+%if %1 & 0x2 ; cos(a)
     vpaddq ymm1, ymm11, [rel dqtwo]
     vpsllq ymm1, ymm1, 61
     vpand ymm1, ymm1, [rel smask]
     vpxor ymm14, ymm4, ymm1
 %endif
-%if (%1 & 0x4) != 0 ; tan(a)
+%if %1 & 0x4 ; tan(a)
     vdivpd ymm15, ymm13, ymm14
 %endif
 
@@ -119,16 +119,16 @@ global mckl_vd_tan
     vpor ymm4, ymm4, ymm3
     vtestpd ymm4, ymm4
     jz %%skip
-%if (%1 & 0x1) != 0 ; sin(a)
+%if %1 & 0x1 ; sin(a)
     vblendvpd ymm13, ymm13, [rel min_y], ymm1
     vblendvpd ymm13, ymm13, [rel max_y], ymm2
     vblendvpd ymm13, ymm13, ymm0, ymm3
 %endif
-%if (%1 & 0x2) != 0 ; cos(a)
+%if %1 & 0x2 ; cos(a)
     vblendvpd ymm14, ymm14, [rel min_y], ymm1
     vblendvpd ymm14, ymm14, [rel max_y], ymm2
     vblendvpd ymm14, ymm14, ymm0, ymm3
-%if (%1 & 0x4) != 0 ; tan(a)
+%if %1 & 0x4 ; tan(a)
 %endif
     vblendvpd ymm15, ymm15, [rel min_y], ymm1
     vblendvpd ymm15, ymm15, [rel max_y], ymm2
@@ -144,7 +144,11 @@ global mckl_vd_tan
 %macro kernel 1 ; {{{
     push rbp
     mov rbp, rsp
+%if %1 == 0x3
     sub rsp, 0x40
+%else
+    sub rsp, 0x20
+%endif
     cld
 
     test rdi, rdi
@@ -223,8 +227,8 @@ section .rodata
 
 align 32
 
-min_a: times 4 dq 0xC1D0000000000000 ; -2^30
-max_a: times 4 dq 0x41D0000000000000 ; 2^30
+min_a: times 4 dq 0xC1D921FB5411E920 ; -1686629712.279854
+max_a: times 4 dq 0x41D921FB5411E920 ; 1686629712.279854
 min_y: times 4 dq 0x7FF8000000000000 ; NaN
 max_y: times 4 dq 0x7FF8000000000000 ; NaN
 
