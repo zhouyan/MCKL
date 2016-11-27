@@ -59,9 +59,6 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log_constants 0 ; {{{
-    vmovapd ymm6,  [rel sqrt2by2]
-    vmovapd ymm8,  [rel one]
-    vmovapd ymm9,  [rel two]
     vmovapd ymm10, [rel log2lo]
     vmovapd ymm12, [rel log2hi]
 %endmacro ; }}}
@@ -102,9 +99,6 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log2_constants 0 ; {{{
-    vmovapd ymm6,  [rel sqrt2by2]
-    vmovapd ymm8,  [rel one]
-    vmovapd ymm9,  [rel two]
     vmovapd ymm10, [rel log2inv]
 %endmacro ; }}}
 
@@ -141,9 +135,6 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log10_constants 0 ; {{{
-    vmovapd ymm6,  [rel sqrt2by2]
-    vmovapd ymm8,  [rel one]
-    vmovapd ymm9,  [rel two]
     vmovapd ymm10, [rel log10_2]
     vmovapd ymm12, [rel log10inv]
 %endmacro ; }}}
@@ -183,9 +174,6 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log1p_constants 0 ; {{{
-    vmovapd ymm6,  [rel sqrt2by2]
-    vmovapd ymm8,  [rel one]
-    vmovapd ymm9,  [rel two]
     vmovapd ymm10, [rel log2lo]
     vmovapd ymm12, [rel log2hi]
 %endmacro ; }}}
@@ -259,11 +247,18 @@ global mckl_vd_log1p
 
     mov rax, rdi
     mov r8,  rsi
+    mov r9,  rax
 
+    shr rax, 2
+    and r9,  0x3
+
+    vmovapd ymm6,  [rel sqrt2by2]
+    vmovapd ymm8,  [rel one]
+    vmovapd ymm9,  [rel two]
     %{1}_constants
 
-    cmp rax, 4
-    jl .last
+    test rax, rax
+    jz .last
 
 .loop: align 16
     vmovupd ymm0, [r8]
@@ -272,14 +267,13 @@ global mckl_vd_log1p
     vmovupd [rdx], ymm15
     add r8,  0x20
     add rdx, 0x20
-    sub rax, 4
-    cmp rax, 4
-    jge .loop
+    dec rax
+    jnz .loop
 
 .last:
-    test rax, rax
+    test r9, r9
     jz .return
-    mov rcx, rax
+    mov rcx, r9
     mov rsi, r8
     mov rdi, rsp
     rep movsq
@@ -287,7 +281,7 @@ global mckl_vd_log1p
     %{1}_compute
     select %1
     vmovupd [rsp], ymm15
-    mov rcx, rax
+    mov rcx, r9
     mov rsi, rsp
     mov rdi, rdx
     rep movsq

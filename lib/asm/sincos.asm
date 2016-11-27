@@ -55,12 +55,6 @@ global mckl_vd_tan
     ; sin(x) = c13 * x^13 + ... + c3 * x^3 + x
     ; cos(x) = c14 * x^14 + ... + c2 * x^2 + 1
 
-    vmulpd ymm2, ymm1, ymm1 ; x2 = x^2
-    vmulpd ymm3, ymm2, ymm1 ; x3 = x^3
-    vmulpd ymm4, ymm2, ymm2 ; x4 = x^4
-    vmulpd ymm7, ymm4, ymm3 ; x7 = x^7
-    vmulpd ymm8, ymm4, ymm4 ; x8 = x^8
-
     vmovapd ymm14, [rel c14]
     vmovapd ymm13, [rel c13]
     vmovapd ymm10, [rel c10]
@@ -68,6 +62,12 @@ global mckl_vd_tan
     vmovapd ymm6,  [rel c6]
     vmovapd ymm5,  [rel c5]
     vmovapd ymm12, [rel c2]
+
+    vmulpd ymm2, ymm1, ymm1 ; x2 = x^2
+    vmulpd ymm3, ymm2, ymm1 ; x3 = x^3
+    vmulpd ymm4, ymm2, ymm2 ; x4 = x^4
+    vmulpd ymm7, ymm4, ymm3 ; x7 = x^7
+    vmulpd ymm8, ymm4, ymm4 ; x8 = x^8
 
     vfmadd213pd ymm14, ymm2, [rel c12] ; u14 = c14 * x^2 + c12
     vfmadd213pd ymm13, ymm2, [rel c11] ; u13 = c13 * x^2 + c11
@@ -156,10 +156,14 @@ global mckl_vd_tan
 
     mov rax, rdi
     mov r8,  rsi
-    mov r9,  rcx
+    mov r9,  rax
+    mov r10, rcx
 
-    cmp rax, 4
-    jl .last
+    shr rax, 2
+    and r9,  0x3
+
+    test rax, rax
+    jz .last
 
 .loop: align 16
     vmovupd ymm0, [r8]
@@ -170,25 +174,24 @@ global mckl_vd_tan
     vmovupd [rdx], ymm14
 %elif %1 == 0x3 ; vd_sincos
     vmovupd [rdx], ymm13
-    vmovupd [r9],  ymm14
+    vmovupd [r10], ymm14
 %elif %1 == 0x7
     vmovupd [rdx], ymm15
 %else
     %error
 %endif
-    add r8, 0x20
+    add r8,  0x20
     add rdx, 0x20
 %if %1 == 0x3 ; vd_sincos
-    add r9, 0x20
+    add r10, 0x20
 %endif
-    sub rax, 4
-    cmp rax, 4
-    jge .loop
+    dec rax
+    jnz .loop
 
 .last:
-    test rax, rax
+    test r9, r9
     jz .return
-    mov rcx, rax
+    mov rcx, r9
     mov rsi, r8
     mov rdi, rsp
     rep movsq
@@ -206,14 +209,14 @@ global mckl_vd_tan
 %else
     %error
 %endif
-    mov rcx, rax
+    mov rcx, r9
     mov rsi, rsp
     mov rdi, rdx
     rep movsq
 %if %1 == 0x3 ; vd_sincos
-    mov rcx, rax
+    mov rcx, r9
     lea rsi, [rsp + 0x20]
-    mov rdi, r9
+    mov rdi, r10
     rep movsq
 %endif
 
