@@ -37,151 +37,8 @@ global mckl_vd_log1p
 ; register used as constants: ymm6, ymm8-10, ymm12
 ; register used as variables: ymm1-5, ymm7, ymm11, ymm13-15
 
-; log(1 + f) = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
+; log(1 + f) * (f + 2) / f - 2 = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
 %macro log1pf 0 ; implicity input ymm1, output ymm15 {{{
-    vmulpd ymm2, ymm1, ymm1 ; x^2
-    vmulpd ymm4, ymm2, ymm2 ; x^4
-
-    vmovapd ymm15, [rel c15]
-    vmovapd ymm11, [rel c11]
-    vmovapd ymm7,  [rel c7]
-
-    vfmadd213pd ymm15, ymm2, [rel c13] ; u15 = c15 * x^2 + c13
-    vfmadd213pd ymm11, ymm2, [rel c9]  ; u11 = c11 * x^2 + c9
-    vfmadd213pd ymm7,  ymm2, [rel c5]  ; u7  = c7  * x^2 + c5
-    vmulpd      ymm3,  ymm2, [rel c3]  ; u3  = c3  * x^2
-
-    vfmadd213pd ymm15, ymm4, ymm11 ; v15 = u15 * x^4 + u11
-    vfmadd213pd ymm7,  ymm4, ymm3  ; v7  = u7  * x^4 + u3
-
-    vmulpd ymm4, ymm4, ymm4
-    vfmadd213pd ymm15, ymm4, ymm7 ; z15 = v15 * x^8 + v7
-%endmacro ; }}}
-
-%macro log_constants 0 ; {{{
-    vmovapd ymm10, [rel log2lo]
-    vmovapd ymm12, [rel log2hi]
-%endmacro ; }}}
-
-%macro log_compute 0 ; implicit input ymm0, output ymm15 {{{
-    ; k = exponent(a)
-    vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [rel pow252]
-    vsubpd ymm13, ymm13, [rel bias]
-
-    ; 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [rel fmask]
-    vpor ymm14, ymm14, [rel emask]
-
-    ; 1 + f > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm14, ymm6
-    vaddpd ymm3, ymm13, ymm8
-    vaddpd ymm4, ymm14, ymm14
-    vblendvpd ymm13, ymm13, ymm3, ymm1
-    vblendvpd ymm14, ymm4, ymm14, ymm1
-
-    ; f = a - 1
-    vsubpd ymm14, ymm14, ymm8
-
-    ; x = f / (2 + f)
-    vaddpd ymm1, ymm14, ymm9
-    vdivpd ymm1, ymm14, ymm1
-
-    log1pf ; R = log(1 + f)
-
-    ; log(a) = k * log2 + log(1 + f)
-    ;        = k * log2hi - ((x * (f - R) - k * log2lo) - f)
-    vsubpd ymm15, ymm14, ymm15
-    vmulpd ymm2, ymm13, ymm10
-    vfmsub213pd ymm15, ymm1, ymm2
-    vsubpd ymm15, ymm15, ymm14
-    vfmsub231pd ymm15, ymm13, ymm12
-%endmacro ; }}}
-
-%macro log2_constants 0 ; {{{
-    vmovapd ymm10, [rel log2inv]
-%endmacro ; }}}
-
-%macro log2_compute 0 ; implicit input ymm0, output ymm15 {{{
-    ; k = exponent(a)
-    vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [rel pow252]
-    vsubpd ymm13, ymm13, [rel bias]
-
-    ; 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [rel fmask]
-    vpor ymm14, ymm14, [rel emask]
-
-    ; 1 + f > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm14, ymm6
-    vaddpd ymm3, ymm13, ymm8
-    vaddpd ymm4, ymm14, ymm14
-    vblendvpd ymm13, ymm13, ymm3, ymm1
-    vblendvpd ymm14, ymm4, ymm14, ymm1
-
-    ; f = a - 1
-    vsubpd ymm14, ymm14, ymm8
-
-    ; x = f / (2 + f)
-    vaddpd ymm1, ymm14, ymm9
-    vdivpd ymm1, ymm14, ymm1
-
-    log1pf; R = log(1 + f)
-
-    ; log2(a) = k + log(1 + f) / log(2) = k + (f - x * (f - R)) * log2inv
-    vsubpd ymm15, ymm14, ymm15
-    vfnmadd213pd ymm15, ymm1, ymm14
-    vfmadd132pd ymm15, ymm13, ymm10
-%endmacro ; }}}
-
-%macro log10_constants 0 ; {{{
-    vmovapd ymm10, [rel log10_2]
-    vmovapd ymm12, [rel log10inv]
-%endmacro ; }}}
-
-%macro log10_compute 0 ; implicit input ymm0, output ymm15 {{{
-    ; k = exponent(a)
-    vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [rel pow252]
-    vsubpd ymm13, ymm13, [rel bias]
-
-    ; 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [rel fmask]
-    vpor ymm14, ymm14, [rel emask]
-
-    ; 1 + f > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm14, ymm6
-    vaddpd ymm3, ymm13, ymm8
-    vaddpd ymm4, ymm14, ymm14
-    vblendvpd ymm13, ymm13, ymm3, ymm1
-    vblendvpd ymm14, ymm4, ymm14, ymm1
-
-    ; f = a - 1
-    vsubpd ymm14, ymm14, ymm8
-
-    ; x = f / (2 + f)
-    vaddpd ymm1, ymm14, ymm9
-    vdivpd ymm1, ymm14, ymm1
-
-    log1pf; R = log(1 + f)
-
-    ; log10 = k * log(10) / log(2) + log(1 + f) / log(1)
-    ;       = k * log10_2 + (f - x * (f - R)) * log10inv
-    vsubpd ymm15, ymm14, ymm15
-    vfnmadd213pd ymm15, ymm1, ymm14
-    vmulpd ymm13, ymm13, ymm10
-    vfmadd132pd ymm15, ymm13, ymm12
-%endmacro ; }}}
-
-%macro log1p_constants 0 ; {{{
-    vmovapd ymm10, [rel log2lo]
-    vmovapd ymm12, [rel log2hi]
-%endmacro ; }}}
-
-%macro log1p_compute 0 ; implicit input ymm0, output ymm15 {{{
-    ; b = a + 1
-    vaddpd ymm1, ymm0, ymm8
-
     ; k = exponent(b)
     vpsrlq ymm13, ymm1, 52
     vpor ymm13, ymm13, [rel pow252]
@@ -201,9 +58,89 @@ global mckl_vd_log1p
     ; f = a - 1
     vsubpd ymm14, ymm14, ymm8
 
-    ; x = f / (2 + f)
+    ; x = f / (f + 2)
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
+
+    vmovapd ymm15, [rel c15]
+    vmovapd ymm11, [rel c11]
+    vmovapd ymm7,  [rel c7]
+
+    vmulpd ymm2, ymm1, ymm1 ; x^2
+    vmulpd ymm4, ymm2, ymm2 ; x^4
+
+    vfmadd213pd ymm15, ymm2, [rel c13] ; u15 = c15 * x^2 + c13
+    vfmadd213pd ymm11, ymm2, [rel c9]  ; u11 = c11 * x^2 + c9
+    vfmadd213pd ymm7,  ymm2, [rel c5]  ; u7  = c7  * x^2 + c5
+    vmulpd      ymm3,  ymm2, [rel c3]  ; u3  = c3  * x^2
+
+    vfmadd213pd ymm15, ymm4, ymm11 ; v15 = u15 * x^4 + u11
+    vfmadd213pd ymm7,  ymm4, ymm3  ; v7  = u7  * x^4 + u3
+
+    vmulpd ymm4, ymm4, ymm4
+    vfmadd213pd ymm15, ymm4, ymm7 ; z15 = v15 * x^8 + v7
+%endmacro ; }}}
+
+%macro log_constants 0 ; {{{
+    vmovapd ymm10, [rel log2lo]
+    vmovapd ymm12, [rel log2hi]
+%endmacro ; }}}
+
+%macro log_compute 0 ; implicit input ymm0, output ymm15 {{{
+    vmovapd ymm1, ymm0
+
+    log1pf ; R = log(1 + f)
+
+    ; log(a) = k * log2 + log(1 + f)
+    ;        = k * log2hi - ((x * (f - R) - k * log2lo) - f)
+    vsubpd ymm15, ymm14, ymm15
+    vmulpd ymm2, ymm13, ymm10
+    vfmsub213pd ymm15, ymm1, ymm2
+    vsubpd ymm15, ymm15, ymm14
+    vfmsub231pd ymm15, ymm13, ymm12
+%endmacro ; }}}
+
+%macro log2_constants 0 ; {{{
+    vmovapd ymm10, [rel log2inv]
+%endmacro ; }}}
+
+%macro log2_compute 0 ; implicit input ymm0, output ymm15 {{{
+    vmovapd ymm1, ymm0
+
+    log1pf; R = log(1 + f)
+
+    ; log2(a) = k + log(1 + f) / log(2) = k + (f - x * (f - R)) * log2inv
+    vsubpd ymm15, ymm14, ymm15
+    vfnmadd213pd ymm15, ymm1, ymm14
+    vfmadd132pd ymm15, ymm13, ymm10
+%endmacro ; }}}
+
+%macro log10_constants 0 ; {{{
+    vmovapd ymm10, [rel log10_2]
+    vmovapd ymm12, [rel log10inv]
+%endmacro ; }}}
+
+%macro log10_compute 0 ; implicit input ymm0, output ymm15 {{{
+    vmovapd ymm1, ymm0
+
+    log1pf; R = log(1 + f)
+
+    ; log10 = k * log(10) / log(2) + log(1 + f) / log(1)
+    ;       = k * log10_2 + (f - x * (f - R)) * log10inv
+    vsubpd ymm15, ymm14, ymm15
+    vfnmadd213pd ymm15, ymm1, ymm14
+    vmulpd ymm13, ymm13, ymm10
+    vfmadd132pd ymm15, ymm13, ymm12
+%endmacro ; }}}
+
+%macro log1p_constants 0 ; {{{
+    vmovapd ymm10, [rel log2lo]
+    vmovapd ymm12, [rel log2hi]
+%endmacro ; }}}
+
+%macro log1p_compute 0 ; implicit input ymm0, output ymm15 {{{
+    ; b = a + 1
+    vaddpd ymm1, ymm0, ymm8
 
     log1pf; R = log(1 + f)
 
