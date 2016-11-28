@@ -37,7 +37,7 @@ global mckl_vd_tan
 %macro sincos 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
     ; b = abs(a)
     vpand ymm1, ymm0, [rel pmask]
-    vcmpltpd ymm2, ymm1, [rel nan_a]
+    vcmpgtpd ymm2, ymm1, [rel nan_a]
     vblendvpd ymm0, ymm0, [rel nan_y], ymm2
 
     ; n = trunc(4 * b / pi)
