@@ -65,8 +65,12 @@ inline void math_error(std::size_t n, const T *r1, const U *r2, T &e)
     mckl::Vector<T> s(n);
     std::copy_n(r2, n, s.data());
 #if MCKL_HAS_BOOST
-    for (std::size_t i = 0; i != n; ++i)
-        s[i] = boost::math::float_distance(r1[i], s[i]);
+    for (std::size_t i = 0; i != n; ++i) {
+        if (!std::isfinite(r1[i]))
+            s[i] = r1[i];
+        else if (std::isfinite(s[i]))
+            s[i] = boost::math::float_distance(r1[i], s[i]);
+    }
     mckl::abs(n, s.data(), s.data());
     for (std::size_t i = 0; i != n; ++i)
         e = std::max(e, s[i]);

@@ -38,7 +38,25 @@ global mckl_vd_tan
     ; b = abs(a)
     vpand ymm1, ymm0, [rel pmask]
     vcmpgtpd ymm2, ymm1, [rel nan_a]
+    vcmpgtpd ymm5, ymm1, [rel max_a]
     vblendvpd ymm0, ymm0, [rel nan_y], ymm2
+    vtestpd ymm5, ymm5
+    jz %%inrange
+
+    ; reduce ymm1 to around 2^57 if ymm1 > 2^57
+    vpand ymm2, ymm1, [rel max253]
+    vcmpgtpd ymm3, ymm1, [rel pow253]
+    vblendvpd ymm1, ymm1, ymm2, ymm3
+
+    ; reduce ymm1 to ymm1 - k * 2 * pi if ymm1 > max_a
+    vsubpd ymm4, ymm1, [rel max_a]
+    vmulpd ymm4, ymm4, [rel pi2inv]
+    vroundpd ymm4, ymm4, 0xA
+    vmovapd ymm2, ymm1
+    vfnmadd231pd ymm2, ymm4, [rel pi2]
+    vblendvpd ymm1, ymm1, ymm2, ymm5
+
+    %%inrange:
 
     ; n = trunc(4 * b / pi)
     vmulpd ymm11, ymm1, [rel pi4inv]
@@ -222,7 +240,8 @@ section .rodata
 
 align 32
 
-nan_a: times 4 dq 0x41D921FB5411E920 ; 1686629712.279854
+nan_a: times 4 dq 0x7FEFFFFFFFFFFFFF ; DBL_MAX
+max_a: times 4 dq 0x41D921FB5411E920 ; 1686629712.279854
 nan_y: times 4 dq 0x7FF8000000000000 ; NaN
 
 c0:  times 4 dq 0x3FF0000000000000
@@ -250,6 +269,10 @@ pi4dp1: times 4 dq 0x3FE921FB50000000
 pi4dp2: times 4 dq 0x3E4110B460000000
 pi4dp3: times 4 dq 0x3C81A62633145C07
 pi4inv: times 4 dq 0x3FF45F306DC9C883 ; 4.0l / pi
+pi2:    times 4 dq 0x401921FB54442D18 ; 2 * pi
+pi2inv: times 4 dq 0x3FC45F306DC9C883 ; 1.0l / (2 * pi)
+pow253: times 4 dq 0x4340000000000000 ; 2^53
+max253: times 4 dq 0x434FFFFFFFFFFFFF ; 2^53 * 1.1...1b
 
 section .text
 

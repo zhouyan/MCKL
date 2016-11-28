@@ -164,11 +164,11 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, log1p, vd_log1p, 1.0, 1e4,
     0xBFF0000000000000, 0x7FEFFFFFFFFFFFFF)
 
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, sin, vd_sin, -1e4, 1e4,
-    0xC1D921FB5411E920, 0x41D921FB5411E920)
+    0xFFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, cos, vd_cos, -1e4, 1e4,
-    0xC1D921FB5411E920, 0x41D921FB5411E920)
+    0xFFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
 MCKL_EXAMPLE_DEFINE_MATH_ASM(double, std::uint64_t, tan, vd_tan, -1e4, 1e4,
-    0xC1D921FB5411E920, 0x41D921FB5411E920)
+    0xFFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
 
 inline void math_asm_vd_sincos(std::size_t N, std::size_t M, int nwid)
 {
@@ -248,8 +248,8 @@ inline void math_asm_vd_sincos(std::size_t N, std::size_t M, int nwid)
         double ubf;
         std::uint64_t ubi;
     };
-    lbi = 0xC1D921FB5411E920;
-    ubi = 0x41D921FB5411E920;
+    lbi = 0xFFEFFFFFFFFFFFFF;
+    ubi = 0x7FEFFFFFFFFFFFFF;
     double vf[] = {lbf, ubf, std::nextafter(lbf, -mckl::const_inf<double>()),
         std::nextafter(ubf, mckl::const_inf<double>()), -0.0, 0.0,
         -mckl::const_inf<double>(), mckl::const_inf<double>(),
