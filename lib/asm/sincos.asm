@@ -112,27 +112,27 @@ global mckl_vd_tan
     vdivpd ymm15, ymm13, ymm14
 %endif
 
-    vcmpltpd ymm1, ymm0, [rel min_a]
-    vcmpgtpd ymm2, ymm0, [rel max_a]
-    vcmpneqpd ymm3, ymm0, ymm0
+    vcmpltpd ymm1, ymm0, [rel min_a] ; a < min_a
+    vcmpgtpd ymm2, ymm0, [rel max_a] ; a > max_a
+    vcmpneqpd ymm3, ymm0, ymm0       ; a != a
     vpor ymm4, ymm1, ymm2
     vpor ymm4, ymm4, ymm3
     vtestpd ymm4, ymm4
     jz %%skip
 %if %1 & 0x1 ; sin(a)
-    vblendvpd ymm13, ymm13, [rel min_y], ymm1
-    vblendvpd ymm13, ymm13, [rel max_y], ymm2
-    vblendvpd ymm13, ymm13, ymm0, ymm3
+    vblendvpd ymm13, ymm13, [rel min_y], ymm1 ; min_y
+    vblendvpd ymm13, ymm13, [rel max_y], ymm2 ; max_y
+    vblendvpd ymm13, ymm13, ymm0, ymm3        ; a
 %endif
 %if %1 & 0x2 ; cos(a)
-    vblendvpd ymm14, ymm14, [rel min_y], ymm1
-    vblendvpd ymm14, ymm14, [rel max_y], ymm2
-    vblendvpd ymm14, ymm14, ymm0, ymm3
+    vblendvpd ymm14, ymm14, [rel min_y], ymm1 ; min_y
+    vblendvpd ymm14, ymm14, [rel max_y], ymm2 ; max_y
+    vblendvpd ymm14, ymm14, ymm0, ymm3        ; a != a
 %if %1 & 0x4 ; tan(a)
 %endif
-    vblendvpd ymm15, ymm15, [rel min_y], ymm1
-    vblendvpd ymm15, ymm15, [rel max_y], ymm2
-    vblendvpd ymm15, ymm15, ymm0, ymm3
+    vblendvpd ymm15, ymm15, [rel min_y], ymm1 ; min_y
+    vblendvpd ymm15, ymm15, [rel max_y], ymm2 ; max_y
+    vblendvpd ymm15, ymm15, ymm0, ymm3        ; a != a
 %endif
 %%skip:
 %endmacro ; }}}

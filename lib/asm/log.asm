@@ -157,7 +157,7 @@ global mckl_vd_log1p
     vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
     vcmpltpd ymm3, ymm0, [rel %{1}_nan_a] ; a < nan_a
-    vcmpneqpd ymm4, ymm0, ymm0        ; a != a
+    vcmpneqpd ymm4, ymm0, ymm0            ; a != a
     vpor ymm5, ymm1, ymm2
     vpor ymm5, ymm5, ymm3
     vpor ymm5, ymm5, ymm4
@@ -166,7 +166,7 @@ global mckl_vd_log1p
     vblendvpd ymm15, ymm15, [rel %{1}_min_y], ymm1 ; min_y
     vblendvpd ymm15, ymm15, [rel %{1}_max_y], ymm2 ; max_y
     vblendvpd ymm15, ymm15, [rel %{1}_nan_y], ymm3 ; nan_y
-    vblendvpd ymm15, ymm15, ymm0, ymm4         ; a
+    vblendvpd ymm15, ymm15, ymm0, ymm4             ; a
 %%skip:
 %endmacro ; }}}
 

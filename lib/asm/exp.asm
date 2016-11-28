@@ -69,6 +69,7 @@ global mckl_vd_expm1
     vmulpd ymm4, ymm4, ymm2 ; x^6
     vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
     vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
+
     vfmadd213pd ymm13, ymm4, ymm5 ; z13 = w13 * x^6 + w5
 
     vpor ymm4, ymm1, ymm2
@@ -139,7 +140,7 @@ global mckl_vd_expm1
     jz %%skip
     vblendvpd ymm13, ymm13, [rel %{1}_min_y], ymm1 ; min_y
     vblendvpd ymm13, ymm13, [rel %{1}_max_y], ymm2 ; max_y
-    vblendvpd ymm13, ymm13, ymm0, ymm3         ; a
+    vblendvpd ymm13, ymm13, ymm0, ymm3             ; a
 %%skip:
 %endmacro ; }}}
 
