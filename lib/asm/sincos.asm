@@ -37,6 +37,8 @@ global mckl_vd_tan
 %macro sincos 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
     ; b = abs(a)
     vpand ymm1, ymm0, [rel pmask]
+    vcmpltpd ymm2, ymm1, [rel nan_a]
+    vblendvpd ymm0, ymm0, [rel nan_y], ymm2
 
     ; n = trunc(4 * b / pi)
     vmulpd ymm11, ymm1, [rel pi4inv]
@@ -112,27 +114,17 @@ global mckl_vd_tan
     vdivpd ymm15, ymm13, ymm14
 %endif
 
-    vcmpltpd ymm1, ymm0, [rel min_a] ; a < min_a
-    vcmpgtpd ymm2, ymm0, [rel max_a] ; a > max_a
-    vcmpneqpd ymm3, ymm0, ymm0       ; a != a
-    vpor ymm4, ymm1, ymm2
-    vpor ymm4, ymm4, ymm3
-    vtestpd ymm4, ymm4
+    vcmpneqpd ymm1, ymm0, ymm0 ; a != a
+    vtestpd ymm1, ymm1
     jz %%skip
 %if %1 & 0x1 ; sin(a)
-    vblendvpd ymm13, ymm13, [rel min_y], ymm1 ; min_y
-    vblendvpd ymm13, ymm13, [rel max_y], ymm2 ; max_y
-    vblendvpd ymm13, ymm13, ymm0, ymm3        ; a
+    vblendvpd ymm13, ymm13, ymm0, ymm1
 %endif
 %if %1 & 0x2 ; cos(a)
-    vblendvpd ymm14, ymm14, [rel min_y], ymm1 ; min_y
-    vblendvpd ymm14, ymm14, [rel max_y], ymm2 ; max_y
-    vblendvpd ymm14, ymm14, ymm0, ymm3        ; a != a
+    vblendvpd ymm14, ymm14, ymm0, ymm1
 %if %1 & 0x4 ; tan(a)
 %endif
-    vblendvpd ymm15, ymm15, [rel min_y], ymm1 ; min_y
-    vblendvpd ymm15, ymm15, [rel max_y], ymm2 ; max_y
-    vblendvpd ymm15, ymm15, ymm0, ymm3        ; a != a
+    vblendvpd ymm15, ymm15, ymm0, ymm1
 %endif
 %%skip:
 %endmacro ; }}}
@@ -230,10 +222,8 @@ section .rodata
 
 align 32
 
-min_a: times 4 dq 0xC1D921FB5411E920 ; -1686629712.279854
-max_a: times 4 dq 0x41D921FB5411E920 ; 1686629712.279854
-min_y: times 4 dq 0x7FF8000000000000 ; NaN
-max_y: times 4 dq 0x7FF8000000000000 ; NaN
+nan_a: times 4 dq 0x41D921FB5411E920 ; 1686629712.279854
+nan_y: times 4 dq 0x7FF8000000000000 ; NaN
 
 c0:  times 4 dq 0x3FF0000000000000
 c1:  times 4 dq 0xBFE0000000000000
