@@ -41,8 +41,8 @@ endif(DEFINED AESNI_FOUND)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/FindAESNI.cpp AESNI_TEST_SOURCE)
 
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles("${AESNI_TEST_SOURCE}" AESNI_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${AESNI_TEST_SOURCE}" AESNI_TEST)
 if(AESNI_TEST)
     set(AESNI_FOUND TRUE CACHE BOOL "Found AES-NI support")
 else(AESNI_TEST)

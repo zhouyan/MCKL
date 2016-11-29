@@ -30,7 +30,6 @@
 //============================================================================
 
 #include <cassert>
-#include <cstdint>
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -40,10 +39,16 @@
 
 int main()
 {
-    const __m256d ma = _mm256_set1_pd(1.0);
-    const __m256d mb = _mm256_set1_pd(0.1);
-    const __m256d mc = _mm256_set1_pd(1.1);
-    __m256d md = _mm256_fmadd_pd(ma, mb, mc);
+    __m256d ymm0 = _mm256_set_pd(3, 2, 1, 0);
+    __m256d ymm1 = _mm256_set_pd(3, 2, 1, 0);
+    __m256d ymm2 = _mm256_set_pd(3, 2, 1, 0);
+    ymm0 = _mm256_fmadd_pd(ymm0, ymm1, ymm2);
+    double y[4];
+    _mm256_storeu_pd(y, ymm0);
+    assert(y[0] == 0);
+    assert(y[1] == 2);
+    assert(y[2] == 6);
+    assert(y[3] == 12);
 
     return 0;
 }

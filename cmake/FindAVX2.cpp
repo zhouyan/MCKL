@@ -42,6 +42,12 @@ int main()
 {
     __m256i ymm = _mm256_set_epi64x(3, 2, 1, 0);
     ymm = _mm256_add_epi64(ymm, ymm);
+    std::uint64_t y[4];
+    _mm256_storeu_si256(reinterpret_cast<__m256i *>(y), ymm);
+    assert(y[0] == 0);
+    assert(y[1] == 2);
+    assert(y[2] == 4);
+    assert(y[3] == 6);
 
     return 0;
 }

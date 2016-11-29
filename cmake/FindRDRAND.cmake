@@ -41,8 +41,8 @@ endif(DEFINED RDRAND_FOUND)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/FindRDRAND.cpp RDRAND_TEST_SOURCE)
 
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles("${RDRAND_TEST_SOURCE}" RDRAND_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${RDRAND_TEST_SOURCE}" RDRAND_TEST)
 if(RDRAND_TEST)
     set(RDRAND_FOUND TRUE CACHE BOOL "Found RDRAND support")
 else(RDRAND_TEST)

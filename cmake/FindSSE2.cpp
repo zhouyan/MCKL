@@ -41,10 +41,11 @@
 int main()
 {
     __m128i xmm = _mm_set_epi64x(1, 0);
+    xmm = _mm_add_epi64(xmm, xmm);
     std::int64_t x[2];
     _mm_storeu_si128(reinterpret_cast<__m128i *>(x), xmm);
     assert(x[0] == 0);
-    assert(x[1] == 1);
+    assert(x[1] == 2);
 
     return 0;
 }

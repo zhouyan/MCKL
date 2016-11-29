@@ -41,8 +41,8 @@ endif(DEFINED AVX2_FOUND)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/FindAVX2.cpp AVX2_TEST_SOURCE)
 
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles("${AVX2_TEST_SOURCE}" AVX2_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${AVX2_TEST_SOURCE}" AVX2_TEST)
 if(AVX2_TEST)
     set(AVX2_FOUND TRUE CACHE BOOL "Found AVX2 support")
 else(AVX2_TEST)

@@ -41,8 +41,8 @@ endif(DEFINED SSE2_FOUND)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/FindSSE2.cpp SSE2_TEST_SOURCE)
 
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles("${SSE2_TEST_SOURCE}" SSE2_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${SSE2_TEST_SOURCE}" SSE2_TEST)
 if(SSE2_TEST)
     set(SSE2_FOUND TRUE CACHE BOOL "Found SSE2 support")
 else(SSE2_TEST)

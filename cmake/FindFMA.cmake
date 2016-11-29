@@ -41,8 +41,8 @@ endif(DEFINED FMA_FOUND)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/FindFMA.cpp FMA_TEST_SOURCE)
 
-include(CheckCXXSourceCompiles)
-check_cxx_source_compiles("${FMA_TEST_SOURCE}" FMA_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${FMA_TEST_SOURCE}" FMA_TEST)
 if(FMA_TEST)
     set(FMA_FOUND TRUE CACHE BOOL "Found FMA support")
 else(FMA_TEST)

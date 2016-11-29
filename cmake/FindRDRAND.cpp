@@ -29,6 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <cassert>
+
 #include <immintrin.h>
 
 int main()
@@ -37,6 +39,7 @@ int main()
     unsigned r32;
     _rdrand16_step(&r16);
     _rdrand32_step(&r32);
+    assert(r16 != r32);
 
     return 0;
 }
