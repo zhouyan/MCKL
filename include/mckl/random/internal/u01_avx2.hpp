@@ -44,14 +44,14 @@
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_LOADU_SI256(u)                          \
     const __m256i *uptr = reinterpret_cast<const __m256i *>(u);               \
-    __m256i ymm0 = _mm256_lddqu_si256(uptr++);                                \
-    __m256i ymm1 = _mm256_lddqu_si256(uptr++);                                \
-    __m256i ymm2 = _mm256_lddqu_si256(uptr++);                                \
-    __m256i ymm3 = _mm256_lddqu_si256(uptr++);                                \
-    __m256i ymm4 = _mm256_lddqu_si256(uptr++);                                \
-    __m256i ymm5 = _mm256_lddqu_si256(uptr++);                                \
-    __m256i ymm6 = _mm256_lddqu_si256(uptr++);                                \
-    __m256i ymm7 = _mm256_lddqu_si256(uptr++);
+    __m256i ymm0 = _mm256_loadu_si256(uptr++);                                \
+    __m256i ymm1 = _mm256_loadu_si256(uptr++);                                \
+    __m256i ymm2 = _mm256_loadu_si256(uptr++);                                \
+    __m256i ymm3 = _mm256_loadu_si256(uptr++);                                \
+    __m256i ymm4 = _mm256_loadu_si256(uptr++);                                \
+    __m256i ymm5 = _mm256_loadu_si256(uptr++);                                \
+    __m256i ymm6 = _mm256_loadu_si256(uptr++);                                \
+    __m256i ymm7 = _mm256_loadu_si256(uptr++);
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_LOADU_SI256_CVTEPU32_EPI64(u)           \
     const __m128i *uptr = reinterpret_cast<const __m128i *>(u);               \
