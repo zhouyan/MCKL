@@ -111,8 +111,8 @@ endif(MCKL_ENABLE_EXAMPLE OR MCKL_ENABLE_LIBRARY)
 ##############################################################################
 
 if(MCKL_ENABLE_LIBRARY AND CMAKE_ASM_NASM_COMPILER_LOADED AND UNIX)
-    add_custom_target(lib ALL)
-    add_subdirectory(lib)
+    add_custom_target(lib)
+    add_subdirectory(lib EXCLUDE_FROM_ALL)
     set(MCKL_LINK_LIBRARIES ${MCKL_LINK_LIBRARIES} libmckl)
     add_definitions(-DMCKL_USE_ASM_LIBRARY=1)
     add_definitions(-DMCKL_USE_ASM_VMF=1)
@@ -126,6 +126,6 @@ endif(MCKL_ENABLE_LIBRARY AND CMAKE_ASM_NASM_COMPILER_LOADED AND UNIX)
 ##############################################################################
 
 if(MCKL_ENABLE_EXAMPLE)
-    add_custom_target(example ALL)
-    add_subdirectory(example)
+    add_custom_target(example)
+    add_subdirectory(example EXCLUDE_FROM_ALL)
 endif(MCKL_ENABLE_EXAMPLE)

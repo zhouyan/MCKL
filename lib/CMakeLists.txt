@@ -53,3 +53,8 @@ endif (APPLE)
 add_library(libmckl STATIC ${MCKL_LIB_ASM})
 set_target_properties(libmckl PROPERTIES OUTPUT_NAME mckl)
 add_dependencies(lib libmckl)
+
+if(NOT DEFINED MCKL_INSTALL_LIB_DIR)
+    SET(MCKL_INSTALL_LIB_DIR lib)
+endif(NOT DEFINED MCKL_INSTALL_LIB_DIR)
+install(TARGETS libmckl DESTINATION ${MCKL_INSTALL_LIB_DIR})
