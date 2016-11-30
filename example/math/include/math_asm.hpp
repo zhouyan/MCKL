@@ -43,7 +43,12 @@
     mckl::func(K, a.data(), y2.data());                                       \
     watch2.start();                                                           \
     mckl::func(K, a.data(), y2.data());                                       \
-    watch2.stop();
+    watch2.stop();                                                            \
+                                                                              \
+    std::copy_n(a.data(), K, al.data());                                      \
+    mckl::func(K, al.data(), yl.data());                                      \
+    math_error(K, y1.data(), yl.data(), e1);                                  \
+    math_error(K, y2.data(), yl.data(), e2);
 
 #define MCKL_EXAMPLE_MATH_ASM_RUN_A1R2(func, vfunc)                           \
     mckl_##vfunc(K, a.data(), y1.data(), z1.data());                          \
@@ -54,18 +59,20 @@
     mckl::func(K, a.data(), y2.data(), z2.data());                            \
     watch2.start();                                                           \
     mckl::func(K, a.data(), y2.data(), z2.data());                            \
-    watch2.stop();
+    watch2.stop();                                                            \
+                                                                              \
+    std::copy_n(a.data(), K, al.data());                                      \
+    mckl::func(K, al.data(), yl.data(), zl.data());                           \
+    math_error(K, y1.data(), yl.data(), e1);                                  \
+    math_error(K, z1.data(), zl.data(), e1);                                  \
+    math_error(K, y2.data(), yl.data(), e2);                                  \
+    math_error(K, z2.data(), zl.data(), e2);
 
-#define MCKL_EXAMPLE_MATH_ASM_RUNL_A1R1(func)                                 \
-    mckl::func(K, al.data(), yl.data());
-
-#define MCKL_EXAMPLE_MATH_ASM_RUNL_A1R2(func)                                 \
-    mckl::func(K, al.data(), yl.data(), zl.data());
-
-#define MCKL_EXAMPLE_DEFINE_MATH_ASM(AR, T, U, func, vfunc, wl, wu, lb, ub)   \
-    inline void math_asm_##vfunc(std::size_t N, std::size_t M, int nwid)      \
+#define MCKL_EXAMPLE_DEFINE_MATH_ASM(AR, T, func, vfunc)                      \
+    inline void math_asm_##vfunc(                                             \
+        std::size_t N, std::size_t M, int nwid, int twid, T lb, T ub)         \
     {                                                                         \
-        mckl::UniformRealDistribution<T> unif(wl, wu);                        \
+        mckl::UniformRealDistribution<T> unif(lb, ub);                        \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
         mckl::RNG_64 rng;                                                     \
                                                                               \
@@ -74,14 +81,14 @@
         mckl::Vector<T> y2(N);                                                \
         mckl::Vector<T> z1(N);                                                \
         mckl::Vector<T> z2(N);                                                \
-        std::fill(y1.begin(), y1.end(), 0);                                   \
-        std::fill(y2.begin(), y2.end(), 0);                                   \
-        std::fill(z1.begin(), z1.end(), 0);                                   \
-        std::fill(z2.begin(), z2.end(), 0);                                   \
+        mckl::Vector<long double> al(N);                                      \
+        mckl::Vector<long double> yl(N);                                      \
+        mckl::Vector<long double> zl(N);                                      \
                                                                               \
         bool has_cycles = mckl::StopWatch::has_cycles();                      \
                                                                               \
-        T e = 0;                                                              \
+        T e1 = 0;                                                             \
+        T e2 = 0;                                                             \
         double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
         double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
         for (std::size_t k = 0; k != 10; ++k) {                               \
@@ -93,8 +100,6 @@
                 n += K;                                                       \
                 mckl::rand(rng, unif, K, a.data());                           \
                 MCKL_EXAMPLE_MATH_ASM_RUN_##AR(func, vfunc);                  \
-                math_error(K, y1.data(), y2.data(), e);                       \
-                math_error(K, z1.data(), z2.data(), e);                       \
             }                                                                 \
             if (has_cycles) {                                                 \
                 c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
@@ -105,128 +110,185 @@
             }                                                                 \
         }                                                                     \
                                                                               \
-        union {                                                               \
-            T lbf;                                                            \
-            U lbi;                                                            \
-        };                                                                    \
-        union {                                                               \
-            T ubf;                                                            \
-            U ubi;                                                            \
-        };                                                                    \
-        lbi = lb;                                                             \
-        ubi = ub;                                                             \
-        mckl::StopWatch watch1;                                               \
-        mckl::StopWatch watch2;                                               \
-        std::size_t K = 0;                                                    \
-        a[K++] = lbf;                                                         \
-        a[K++] = ubf;                                                         \
-        a[K++] = std::nextafter(lbf, -mckl::const_inf<T>());                  \
-        a[K++] = std::nextafter(ubf, mckl::const_inf<T>());                   \
-        a[K++] = -0.0;                                                        \
-        a[K++] = 0.0;                                                         \
-        a[K++] = -mckl::const_inf<T>();                                       \
-        a[K++] = mckl::const_inf<T>();                                        \
-        a[K++] = mckl::const_nan<T>();                                        \
-        MCKL_EXAMPLE_MATH_ASM_RUN_##AR(func, vfunc);                          \
-                                                                              \
-        std::cout << std::fixed << std::setprecision(2);                      \
+        std::cout.unsetf(std::ios_base::floatfield);                          \
+        std::cout << std::setprecision(5);                                    \
         std::cout << std::setw(nwid) << std::left << #func;                   \
-        std::cout << std::setw(nwid) << std::right << c1;                     \
-        std::cout << std::setw(nwid) << std::right << c2;                     \
+        std::cout << std::setw(nwid) << std::right;                           \
+        math_val(lb, std::cout);                                              \
+        std::cout << std::setw(nwid) << std::right;                           \
+        math_val(ub, std::cout);                                              \
+        std::cout.unsetf(std::ios_base::floatfield);                          \
+        std::cout << std::fixed << std::setprecision(2);                      \
+        std::cout << std::setw(twid) << std::right << c1;                     \
+        std::cout << std::setw(twid) << std::right << c2;                     \
         std::cout.unsetf(std::ios_base::floatfield);                          \
         std::cout << std::setprecision(2);                                    \
-        std::cout << std::setw(nwid) << std::right << e;                      \
-        for (std::size_t j = 0; j != K; ++j) {                                \
-            union {                                                           \
-                T t;                                                          \
-                U u;                                                          \
-            };                                                                \
-            t = std::abs(y1[j]);                                              \
-            bool positive = t > 0;                                            \
-            bool denormal = t < std::numeric_limits<T>::min();                \
-            std::stringstream ss;                                             \
-            ss << std::setprecision(2);                                       \
-            ss << (positive && denormal ? '*' : ' ');                         \
-            ss << y1[j];                                                      \
-            std::cout << std::setw(nwid) << std::right << ss.str();           \
-        }                                                                     \
+        std::cout << std::setw(twid) << std::right << e1;                     \
+        std::cout << std::setw(twid) << std::right << e2;                     \
         std::cout << std::endl;                                               \
     }
 
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, sqrt, vd_sqrt, 0.1,
-    1e4, 0x0000000000000001, 0x7FEFFFFFFFFFFFFF)
-
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, exp, vd_exp, -707,
-    707, 0xC086232BDD7ABCD2, 0x40862B7D369A5AA7)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, exp2, vd_exp2, -1022,
-    1022, 0xC08FF00000000000, 0x408FF80000000000)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, expm1, vd_expm1,
-    -500, 500, 0xC086232BDD7ABCD2, 0x40862B7D369A5AA7)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, log, vd_log, 0.1,
-    1e4, 0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, log2, vd_log2, 0.1,
-    1e4, 0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, log10, vd_log10, 0.1,
-    1e4, 0x0010000000000000, 0x7FEFFFFFFFFFFFFF)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, log1p, vd_log1p, 1.0,
-    1e4, 0xBFF0000000000000, 0x7FEFFFFFFFFFFFFF)
-
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, sin, vd_sin, -1e4,
-    1e4, 0xFFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, cos, vd_cos, -1e4,
-    1e4, 0xFFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R2, double, std::uint64_t, sincos, vd_sincos,
-    -1e4, 1e4, 0xFFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, std::uint64_t, tan, vd_tan, -1e4,
-    1e4, 0xFFEFFFFFFFFFFFFF, 0x7FEFFFFFFFFFFFFF)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, sqrt, vd_sqrt)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, exp, vd_exp)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, exp2, vd_exp2)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, expm1, vd_expm1)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log, vd_log)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log2, vd_log2)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log10, vd_log10)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log1p, vd_log1p)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, sin, vd_sin)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, cos, vd_cos)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R2, double, sincos, vd_sincos)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, tan, vd_tan)
 
 inline void math_asm(std::size_t N, std::size_t M)
 {
-    const int nwid = 9;
-    const std::size_t lwid = nwid * 13;
+    const int nwid = 15;
+    const int twid = 10;
+    const std::size_t lwid = nwid * 3 + twid * 4;
 
     std::cout << std::string(lwid, '=') << std::endl;
 
     std::cout << std::setw(nwid) << std::left << "Function";
-    if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(nwid) << std::right << "cpE (A)";
-        std::cout << std::setw(nwid) << std::right << "cpE (V)";
-    } else {
-        std::cout << std::setw(nwid) << std::right << "ME/s (A)";
-        std::cout << std::setw(nwid) << std::right << "ME/s (V)";
-    }
-#if MCKL_HAS_BOOST
-    std::cout << std::setw(nwid) << std::right << "ULP";
-#else
-    std::cout << std::setw(nwid) << std::right << "Err";
-#endif
     std::cout << std::setw(nwid) << std::right << "LB";
     std::cout << std::setw(nwid) << std::right << "UB";
-    std::cout << std::setw(nwid) << std::right << "< LB";
-    std::cout << std::setw(nwid) << std::right << "> UB";
-    std::cout << std::setw(nwid) << std::right << "-0.0";
-    std::cout << std::setw(nwid) << std::right << "0.0";
-    std::cout << std::setw(nwid) << std::right << "-Inf";
-    std::cout << std::setw(nwid) << std::right << "Inf";
-    std::cout << std::setw(nwid) << std::right << "NaN";
+    if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(twid) << std::right << "cpE (A)";
+        std::cout << std::setw(twid) << std::right << "cpE (V)";
+    } else {
+        std::cout << std::setw(twid) << std::right << "ME/s (A)";
+        std::cout << std::setw(twid) << std::right << "ME/s (V)";
+    }
+#if MCKL_HAS_BOOST
+    std::cout << std::setw(twid) << std::right << "ULP (A)";
+    std::cout << std::setw(twid) << std::right << "ULP (V)";
+#else
+    std::cout << std::setw(twid) << std::right << "Err (A)";
+    std::cout << std::setw(twid) << std::right << "Err (V)";
+#endif
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_sqrt(N, M, nwid, twid, 0.1, 1e4);
+    math_asm_vd_sqrt(N, M, nwid, twid, DBL_MIN, 0.1);
+    math_asm_vd_sqrt(N, M, nwid, twid, 0.1, 1e0);
+    math_asm_vd_sqrt(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_sqrt(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_sqrt(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_sqrt(N, M, nwid, twid, 1e3, 1e4);
 
-    math_asm_vd_sqrt(N, M, nwid);
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_exp(N, M, nwid, twid, -707, 707);
+    math_asm_vd_exp(N, M, nwid, twid, -708.39, -707);
+    math_asm_vd_exp(N, M, nwid, twid, -707, -500);
+    math_asm_vd_exp(N, M, nwid, twid, -500, -1);
+    math_asm_vd_exp(N, M, nwid, twid, -1, -DBL_MIN);
+    math_asm_vd_exp(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
+    math_asm_vd_exp(N, M, nwid, twid, DBL_MIN, 1);
+    math_asm_vd_exp(N, M, nwid, twid, 1, 500);
+    math_asm_vd_exp(N, M, nwid, twid, 500, 707);
+    math_asm_vd_exp(N, M, nwid, twid, 707, 709.43);
 
-    math_asm_vd_exp(N, M, nwid);
-    math_asm_vd_exp2(N, M, nwid);
-    math_asm_vd_expm1(N, M, nwid);
-    math_asm_vd_log(N, M, nwid);
-    math_asm_vd_log2(N, M, nwid);
-    math_asm_vd_log10(N, M, nwid);
-    math_asm_vd_log1p(N, M, nwid);
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_exp2(N, M, nwid, twid, -1022, 1022);
+    math_asm_vd_exp2(N, M, nwid, twid, -1022, -1000);
+    math_asm_vd_exp2(N, M, nwid, twid, -1000, -500);
+    math_asm_vd_exp2(N, M, nwid, twid, -500, -1);
+    math_asm_vd_exp2(N, M, nwid, twid, -1, -DBL_MIN);
+    math_asm_vd_exp2(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
+    math_asm_vd_exp2(N, M, nwid, twid, DBL_MIN, 1);
+    math_asm_vd_exp2(N, M, nwid, twid, 1, 500);
+    math_asm_vd_exp2(N, M, nwid, twid, 500, 1000);
+    math_asm_vd_exp2(N, M, nwid, twid, 1000, 1022);
 
-    math_asm_vd_sin(N, M, nwid);
-    math_asm_vd_cos(N, M, nwid);
-    math_asm_vd_sincos(N, M, nwid);
-    math_asm_vd_tan(N, M, nwid);
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_expm1(N, M, nwid, twid, -500, 500);
+    math_asm_vd_expm1(N, M, nwid, twid, -708.39, -707);
+    math_asm_vd_expm1(N, M, nwid, twid, -707, -500);
+    math_asm_vd_expm1(N, M, nwid, twid, -500, -1);
+    math_asm_vd_expm1(N, M, nwid, twid, -1, -DBL_MIN);
+    math_asm_vd_expm1(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
+    math_asm_vd_expm1(N, M, nwid, twid, DBL_MIN, 1);
+    math_asm_vd_expm1(N, M, nwid, twid, 1, 500);
+    math_asm_vd_expm1(N, M, nwid, twid, 500, 707);
+    math_asm_vd_expm1(N, M, nwid, twid, 707, 709.43);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_log(N, M, nwid, twid, 0.1, 1e4);
+    math_asm_vd_log(N, M, nwid, twid, 0, DBL_MIN);
+    math_asm_vd_log(N, M, nwid, twid, DBL_MIN, 0.1);
+    math_asm_vd_log(N, M, nwid, twid, 0.1, 1e0);
+    math_asm_vd_log(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_log(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_log(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_log(N, M, nwid, twid, 1e3, 1e4);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_log2(N, M, nwid, twid, 0.1, 1e4);
+    math_asm_vd_log2(N, M, nwid, twid, 0, DBL_MIN);
+    math_asm_vd_log2(N, M, nwid, twid, DBL_MIN, 0.1);
+    math_asm_vd_log2(N, M, nwid, twid, 0.1, 1e0);
+    math_asm_vd_log2(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_log2(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_log2(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_log2(N, M, nwid, twid, 1e3, 1e4);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_log10(N, M, nwid, twid, 0.1, 1e4);
+    math_asm_vd_log10(N, M, nwid, twid, 0, DBL_MIN);
+    math_asm_vd_log10(N, M, nwid, twid, DBL_MIN, 0.1);
+    math_asm_vd_log10(N, M, nwid, twid, 0.1, 1e0);
+    math_asm_vd_log10(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_log10(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_log10(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_log10(N, M, nwid, twid, 1e3, 1e4);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_log1p(N, M, nwid, twid, 0.1, 1e4);
+    math_asm_vd_log1p(N, M, nwid, twid, -1, -DBL_MIN);
+    math_asm_vd_log1p(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
+    math_asm_vd_log1p(N, M, nwid, twid, DBL_MIN, 0.1);
+    math_asm_vd_log1p(N, M, nwid, twid, 0.1, 1e0);
+    math_asm_vd_log1p(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_log1p(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_log1p(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_log1p(N, M, nwid, twid, 1e3, 1e4);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_sin(N, M, nwid, twid, -1e4, 1e4);
+    math_asm_vd_sin(N, M, nwid, twid, 0, DBL_MIN);
+    math_asm_vd_sin(N, M, nwid, twid, DBL_MIN, 1);
+    math_asm_vd_sin(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_sin(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_sin(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_sin(N, M, nwid, twid, 1e3, 1e4);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_cos(N, M, nwid, twid, -1e4, 1e4);
+    math_asm_vd_cos(N, M, nwid, twid, 0, DBL_MIN);
+    math_asm_vd_cos(N, M, nwid, twid, DBL_MIN, 1);
+    math_asm_vd_cos(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_cos(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_cos(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_cos(N, M, nwid, twid, 1e3, 1e4);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_sincos(N, M, nwid, twid, -1e4, 1e4);
+    math_asm_vd_sincos(N, M, nwid, twid, 0, DBL_MIN);
+    math_asm_vd_sincos(N, M, nwid, twid, DBL_MIN, 1);
+    math_asm_vd_sincos(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_sincos(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_sincos(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_sincos(N, M, nwid, twid, 1e3, 1e4);
+
+    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm_vd_tan(N, M, nwid, twid, -1e4, 1e4);
+    math_asm_vd_tan(N, M, nwid, twid, 0, DBL_MIN);
+    math_asm_vd_tan(N, M, nwid, twid, DBL_MIN, 1);
+    math_asm_vd_tan(N, M, nwid, twid, 1e0, 1e1);
+    math_asm_vd_tan(N, M, nwid, twid, 1e1, 1e2);
+    math_asm_vd_tan(N, M, nwid, twid, 1e2, 1e3);
+    math_asm_vd_tan(N, M, nwid, twid, 1e3, 1e4);
 
     std::cout << std::string(lwid, '-') << std::endl;
 }

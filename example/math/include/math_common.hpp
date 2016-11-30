@@ -59,62 +59,80 @@ class MathPerf
     double c6;
 }; // class MathPerf
 
+template <typename T, typename CharT, typename Traits>
+inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
+{
+    std::string prefix;
+    if (std::is_same<T, float>::value)
+        prefix = "FLT_";
+    if (std::is_same<T, double>::value)
+        prefix = "DBL_";
+    if (std::is_same<T, long double>::value)
+        prefix = "LDBL_";
+
+    if (mckl::internal::is_equal(x, std::numeric_limits<T>::min()))
+        os << prefix + "MIN";
+    else if (mckl::internal::is_equal(x, -std::numeric_limits<T>::min()))
+        os << "-" + prefix + "MIN";
+    else if (mckl::internal::is_equal(x, std::numeric_limits<T>::max()))
+        os << prefix + "MAX";
+    else if (mckl::internal::is_equal(x, -std::numeric_limits<T>::max()))
+        os << "-" + prefix + "MAX";
+    else if (mckl::internal::is_equal(x, std::numeric_limits<T>::epsilon()))
+        os << prefix + "EPSILON";
+    else if (mckl::internal::is_equal(x, -std::numeric_limits<T>::epsilon()))
+        os << "-" + prefix + "EPSILON";
+    else
+        os << x;
+}
+
+template <typename T>
+inline T math_error(T a, T b)
+{
+    if (std::isnan(a))
+        return a;
+    if (std::isnan(b))
+        return b;
+    if (!std::isfinite(a) && !std::isfinite(b)) {
+        if (a < 0 && b < 0)
+            return 0;
+        if (a > 0 && b > 0)
+            return 0;
+        return std::abs(a);
+    }
+#if MCKL_HAS_BOOST
+    return std::abs(boost::math::float_distance(a, b));
+#else
+    if (mckl::internal::is_zero(a) && mckl::internal::is_zero(b))
+        return 0;
+    return std::abs((a - b) / b);
+#endif
+}
+
 template <typename T, typename U>
 inline void math_error(std::size_t n, const T *r1, const U *r2, T &e)
 {
     mckl::Vector<T> s(n);
     std::copy_n(r2, n, s.data());
-#if MCKL_HAS_BOOST
-    for (std::size_t i = 0; i != n; ++i) {
-        if (!std::isfinite(r1[i]))
-            s[i] = r1[i];
-        else if (std::isfinite(s[i]))
-            s[i] = boost::math::float_distance(r1[i], s[i]);
-    }
-    mckl::abs(n, s.data(), s.data());
+    T f = 0;
     for (std::size_t i = 0; i != n; ++i)
-        e = std::max(e, s[i]);
-#else
-    for (std::size_t i = 0; i != n; ++i) {
-        if (!mckl::internal::is_zero(s[i]))
-            e = std::max(e, std::abs((r1[i] - s[i]) / s[i]));
-        else if (!mckl::internal::is_zero(r1[i]))
-            e = std::max(e, std::abs((r1[i] - s[i]) / r1[i]));
-    }
-#endif
+        f = std::max(f, math_error(r1[i], s[i]));
+    e = std::max(e, f);
 }
 
 template <typename T, typename U>
 inline void math_error(std::size_t n, const T *r1, const U *r2, T &e1, T &e2)
 {
     T f1 = 0;
+    T f2 = 0;
+    mckl::Vector<T> s(n);
+    std::copy_n(r2, n, s.data());
     for (std::size_t i = 0; i != n; ++i)
         f1 = std::max(f1, std::abs(r1[i] - static_cast<T>(r2[i])));
-
-    T f2 = 0;
-#if MCKL_HAS_BOOST
-    for (std::size_t i = 0; i != n; ++i) {
-        f2 = std::max(f2, std::abs(boost::math::float_distance(
-                              r1[i], static_cast<T>(r2[i]))));
-    }
-#else
-    for (std::size_t i = 0; i != n; ++i) {
-        if (!mckl::internal::is_zero(static_cast<T>(r2[i]))) {
-            f2 = std::max(f2, std::abs((r1[i] - static_cast<T>(r2[i])) /
-                                  static_cast<T>(r2[i])));
-        } else if (!mckl::internal::is_zero(r1[i])) {
-            f2 = std::max(
-                f2, std::abs((r1[i] - static_cast<T>(r2[i])) / r1[i]));
-        }
-    }
-#endif
-
+    for (std::size_t i = 0; i != n; ++i)
+        f2 = std::max(f2, math_error(r1[i], s[i]));
     e1 = std::max(e1, f1);
-#if MCKL_HAS_BOOST
     e2 = std::max(e2, f2);
-#else
-    e2 = std::max(e2, f2);
-#endif
 }
 
 inline void math_summary_sv(mckl::Vector<MathPerf> perf)

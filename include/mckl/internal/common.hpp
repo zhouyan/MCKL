@@ -71,6 +71,7 @@
 #include <utility>
 
 // Numeric limits
+#include <cfloat>
 #include <climits>
 #include <cstdint>
 #include <limits>
