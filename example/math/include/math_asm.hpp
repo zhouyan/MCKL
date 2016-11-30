@@ -32,8 +32,6 @@
 #ifndef MCKL_EXAMPLE_MATH_ASM_HPP
 #define MCKL_EXAMPLE_MATH_ASM_HPP
 
-#define MCKL_USE_RDPMC 1
-
 #include "math_common.hpp"
 
 #define MCKL_EXAMPLE_MATH_ASM_RUN_A1R1(T, func, vfunc)                        \

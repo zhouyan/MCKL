@@ -48,7 +48,48 @@ default rel
 %endmacro ; }}}
 
 ; log(1 + f) * (f + 2) / f - 2 = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
-%macro log1pf 0 ; implicity input ymm1, output ymm15 {{{
+%macro log1pf 3 ; implicity input ymm1, output ymm15 {{{
+    vcmpltpd ymm11, ymm0, %1
+    vcmpgtpd ymm15, ymm0, %2
+    vxorpd ymm13, ymm13, ymm13 ; k = 0
+%if %3 == 0
+    vaddpd ymm1, ymm0, ymm8 ; b = a + 1
+    vmovapd ymm14, ymm0     ; f = a;
+%elif %3 == 1
+    vmovapd ymm1, ymm0       ; b = a
+    vsubpd ymm14, ymm0, ymm8 ; f = a - 1;
+%else
+    %error
+%endif
+    vorpd ymm11, ymm11, ymm15
+    vtestpd ymm11, ymm11
+    jz %%skip
+
+    ; k = exponent(b)
+    vpsrlq ymm2, ymm1, 52
+    vorpd ymm2, ymm2, [emask0]
+    vsubpd ymm3, ymm2, [emask1] ; exponent(b)
+
+    ; fraction(b) / 2
+    vandpd ymm1, ymm1, [fmask0]
+    vorpd ymm4, ymm1, [fmask1] ; fraction(b) / 2
+
+    ; fraction(b) > sqrt(2)
+    vcmpgtpd ymm1, ymm4, ymm6
+    vandpd ymm5, ymm1, ymm8
+    vandnpd ymm7, ymm1, ymm4
+    vaddpd ymm3, ymm3, ymm5
+    vaddpd ymm4, ymm4, ymm7
+
+    ; f = fraction(b) - 1
+    vsubpd ymm4, ymm4, ymm8
+
+    ; skip reduction if ymm0 in range
+    vblendvpd ymm13, ymm13, ymm3, ymm11
+    vblendvpd ymm14, ymm14, ymm4, ymm11
+
+%%skip:
+
     ; x = f / (f + 2)
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
@@ -58,12 +99,12 @@ default rel
     vmovapd ymm7,  [c7]
 
     vmulpd ymm2, ymm1, ymm1 ; x^2
+    vmulpd ymm3, ymm2, [c3] ; u3  = c3  * x^2
     vmulpd ymm4, ymm2, ymm2 ; x^4
 
     vfmadd213pd ymm15, ymm2, [c13] ; u15 = c15 * x^2 + c13
     vfmadd213pd ymm11, ymm2, [c9]  ; u11 = c11 * x^2 + c9
     vfmadd213pd ymm7,  ymm2, [c5]  ; u7  = c7  * x^2 + c5
-    vmulpd      ymm3,  ymm2, [c3]  ; u3  = c3  * x^2
 
     vfmadd213pd ymm15, ymm4, ymm11 ; v15 = u15 * x^4 + u11
     vfmadd213pd ymm7,  ymm4, ymm3  ; v7  = u7  * x^4 + u3
@@ -76,7 +117,7 @@ default rel
     vcmpltpd ymm1, ymm0, [%{1}_min_a] ; a < min_a
     vcmpgtpd ymm2, ymm0, [%{1}_max_a] ; a > max_a
     vcmpltpd ymm3, ymm0, [%{1}_nan_a] ; a < nan_a
-    vcmpneqpd ymm4, ymm0, ymm0            ; a != a
+    vcmpneqpd ymm4, ymm0, ymm0        ; a != a
     vpor ymm5, ymm1, ymm2
     vpor ymm5, ymm5, ymm3
     vpor ymm5, ymm5, ymm4
@@ -85,47 +126,24 @@ default rel
     vblendvpd ymm15, ymm15, [%{1}_min_y], ymm1 ; min_y
     vblendvpd ymm15, ymm15, [%{1}_max_y], ymm2 ; max_y
     vblendvpd ymm15, ymm15, [%{1}_nan_y], ymm3 ; nan_y
-    vblendvpd ymm15, ymm15, ymm0, ymm4             ; a
+    vblendvpd ymm15, ymm15, ymm0, ymm4         ; a
 %%skip:
 %endmacro ; }}}
 
 %macro log_constants 0 ; {{{
     log1pf_constants
-    vmovapd ymm10, [log2lo]
-    vmovapd ymm12, [log2hi]
+    vmovapd ymm10, [ln2]
 %endmacro ; }}}
 
 %macro log 2 ; {{{
     vmovupd ymm0, %2
 
-    ; k = exponent(a)
-    vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [pow252]
-    vsubpd ymm13, ymm13, [bias]
+    log1pf ymm6, [sqrt2], 1 ; log(1 + f) = f - x * (f - R)
 
-    ; x = 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [fmask]
-    vpor ymm14, ymm14, [emask]
-
-    ; x > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm14, ymm6
-    vaddpd ymm3, ymm13, ymm8
-    vaddpd ymm4, ymm14, ymm14
-    vblendvpd ymm13, ymm13, ymm3, ymm1
-    vblendvpd ymm14, ymm4, ymm14, ymm1
-
-    ; f = x - 1
-    vsubpd ymm14, ymm14, ymm8
-
-    log1pf ; R = log(1 + f)
-
-    ; log(a) = k * log2 + log(1 + f)
-    ;        = k * log2hi - ((x * (f - R) - k * log2lo) - f)
+    ; log(a) = k * log(2) + log(1 + f)
     vsubpd ymm15, ymm14, ymm15
-    vmulpd ymm2, ymm13, ymm10
-    vfmsub213pd ymm15, ymm1, ymm2
-    vsubpd ymm15, ymm15, ymm14
-    vfmsub231pd ymm15, ymm13, ymm12
+    vfnmadd213pd ymm15, ymm1, ymm14
+    vfmadd231pd ymm15, ymm13, ymm10
 
     select log
     vmovupd %1, ymm15
@@ -133,37 +151,18 @@ default rel
 
 %macro log2_constants 0 ; {{{
     log1pf_constants
-    vmovapd ymm10, [log2inv]
+    vmovapd ymm10, [ln2inv]
 %endmacro ; }}}
 
 %macro log2 2 ; {{{
     vmovupd ymm0, %2
 
-    ; k = exponent(a)
-    vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [pow252]
-    vsubpd ymm13, ymm13, [bias]
+    log1pf ymm6, [sqrt2], 1 ; log(1 + f) = f - x * (f - R)
 
-    ; x = 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [fmask]
-    vpor ymm14, ymm14, [emask]
-
-    ; x > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm14, ymm6
-    vaddpd ymm3, ymm13, ymm8
-    vaddpd ymm4, ymm14, ymm14
-    vblendvpd ymm13, ymm13, ymm3, ymm1
-    vblendvpd ymm14, ymm4, ymm14, ymm1
-
-    ; f = x - 1
-    vsubpd ymm14, ymm14, ymm8
-
-    log1pf; R = log(1 + f)
-
-    ; log2(a) = k + log(1 + f) / log(2) = k + (f - x * (f - R)) * log2inv
+    ; log2(a) = k + log(1 + f) / log(2)
     vsubpd ymm15, ymm14, ymm15
     vfnmadd213pd ymm15, ymm1, ymm14
-    vfmadd132pd ymm15, ymm13, ymm10
+    vfmadd213pd ymm15, ymm10, ymm13
 
     select log2
     vmovupd %1, ymm15
@@ -171,40 +170,20 @@ default rel
 
 %macro log10_constants 0 ; {{{
     log1pf_constants
-    vmovapd ymm10, [log10_2]
-    vmovapd ymm12, [log10inv]
+    vmovapd ymm10, [ln10_2]
+    vmovapd ymm12, [ln10inv]
 %endmacro ; }}}
 
 %macro log10 2 ; {{{
     vmovupd ymm0, %2
 
-    ; k = exponent(a)
-    vpsrlq ymm13, ymm0, 52
-    vpor ymm13, ymm13, [pow252]
-    vsubpd ymm13, ymm13, [bias]
+    log1pf ymm6, [sqrt2], 1 ; log(1 + f) = f - x * (f - R)
 
-    ; x = 1 + f = 0.5 * fraction(a)
-    vpand ymm14, ymm0, [fmask]
-    vpor ymm14, ymm14, [emask]
-
-    ; x > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm14, ymm6
-    vaddpd ymm3, ymm13, ymm8
-    vaddpd ymm4, ymm14, ymm14
-    vblendvpd ymm13, ymm13, ymm3, ymm1
-    vblendvpd ymm14, ymm4, ymm14, ymm1
-
-    ; f = x - 1
-    vsubpd ymm14, ymm14, ymm8
-
-    log1pf; R = log(1 + f)
-
-    ; log10 = k * log(10) / log(2) + log(1 + f) / log(1)
-    ;       = k * log10_2 + (f - x * (f - R)) * log10inv
+    ; log10(a) = k * log(10) / log(2) + log(1 + f) / log(10)
     vsubpd ymm15, ymm14, ymm15
     vfnmadd213pd ymm15, ymm1, ymm14
     vmulpd ymm13, ymm13, ymm10
-    vfmadd132pd ymm15, ymm13, ymm12
+    vfmadd213pd ymm15, ymm12, ymm13
 
     select log
     vmovupd %1, ymm15
@@ -212,57 +191,18 @@ default rel
 
 %macro log1p_constants 0 ; {{{
     log1pf_constants
-    vmovapd ymm10, [log2lo]
-    vmovapd ymm12, [log2hi]
+    vmovapd ymm10, [ln2]
 %endmacro ; }}}
 
 %macro log1p 2 ; {{{
     vmovupd ymm0, %2
 
-    vcmpgtpd ymm11, ymm0, [rel sqrt2m1]
-    vcmpltpd ymm15, ymm0, [rel sqrt2m2]
-    vpxor ymm13, ymm13, ymm13 ; k = 0
-    vmovapd ymm14, ymm0       ; f = x
-    vpor ymm11, ymm11, ymm15  ; x > sqrt(2) - 1 || x < sqrt(2) / 2 - 1
-    vtestpd ymm11, ymm11
-    jz %%skip ; sqrt(2) / 2 - 1 <= x <= sqrt(2) - 1
-
-    ; b = 1 + a
-    vaddpd ymm1, ymm0, ymm8
-
-    ; k = exponent(b)
-    vpsrlq ymm3, ymm1, 52
-    vpor ymm3, ymm3, [pow252]
-    vsubpd ymm3, ymm3, [bias]
-
-    ; x = 1 + f = 0.5 * fraction(b)
-    vpand ymm4, ymm1, [fmask]
-    vpor ymm4, ymm4, [emask]
-
-    ; x > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm4, ymm6
-    vaddpd ymm5, ymm3, ymm8
-    vaddpd ymm7, ymm4, ymm4
-    vblendvpd ymm3, ymm3, ymm5, ymm1
-    vblendvpd ymm4, ymm7, ymm4, ymm1
-
-    ; f = x - 1
-    vsubpd ymm4, ymm4, ymm8
-
-    vblendvpd ymm13, ymm13, ymm3, ymm11
-    vblendvpd ymm14, ymm14, ymm4, ymm11
-
-%%skip:
-
-    log1pf; R = log(1 + f)
+    log1pf [sqrt2m2], [sqrt2m1], 0 ; log(1 + f) = f - x * (f - R)
 
     ; log(1 + a) = k * log2 + log(1 + f)
-    ;            = k * log2hi - ((s * (f - R) - k * log2lo) - f)
     vsubpd ymm15, ymm14, ymm15
-    vmulpd ymm2, ymm13, ymm10
-    vfmsub213pd ymm15, ymm1, ymm2
-    vsubpd ymm15, ymm15, ymm14
-    vfmsub231pd ymm15, ymm13, ymm12
+    vfnmadd213pd ymm15, ymm1, ymm14
+    vfmadd231pd ymm15, ymm13, ymm10
 
     select log1p
     vmovupd %1, ymm15
@@ -308,18 +248,18 @@ c11: times 4 dq 0x3FC7466496CB03DE
 c13: times 4 dq 0x3FC39A09D078C69F
 c15: times 4 dq 0x3FC2F112DF3E5244
 
-pow252: times 4 dq 0x4330000000000000 ; 2^52
-bias:   times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
-fmask:  times 4 dq 0x000FFFFFFFFFFFFF ; fraction mask
-emask:  times 4 dq 0x3FE0000000000000 ; exponent mask
+emask0: times 4 dq 0x4330000000000000 ; 2^52
+emask1: times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
+fmask0: times 4 dq 0x000FFFFFFFFFFFFF ; fraction mask
+fmask1: times 4 dq 0x3FE0000000000000 ; fraction(a) / 2
 
 one:      times 4 dq 0x3FF0000000000000 ; 1.0
 two:      times 4 dq 0x4000000000000000 ; 2.0
-log2hi:   times 4 dq 0x3FE62E42FEE00000
-log2lo:   times 4 dq 0x3DEA39EF35793C76
-log2inv:  times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
-log10_2:  times 4 dq 0x3FD34413509F79FF ; log10(2.0l)
-log10inv: times 4 dq 0x3FDBCB7B1526E50E ; 1.0l / log(10.0l)
+ln2:      times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
+ln2inv:   times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
+ln10_2:   times 4 dq 0x3FD34413509F79FF ; log10(2.0l)
+ln10inv:  times 4 dq 0x3FDBCB7B1526E50E ; 1.0l / log(10.0l)
+sqrt2:    times 4 dq 0x3FF6A09E667F3BCD ; sqrt(2.0l)
 sqrt2by2: times 4 dq 0x3FE6A09E667F3BCD ; sqrt(2.0l) / 2.0l
 sqrt2m1:  times 4 dq 0x3FDA827999FCEF32 ; sqrt(2.0l) - 1.0l
 sqrt2m2:  times 4 dq 0xBFD2BEC333018867 ; sqrt(2.0l) / 2.0l - 1.0l

@@ -90,10 +90,10 @@ vmovups %2, [rsp]
     jl .last
 
 .loop: align 16
-    vmovups ymm2, [rsi]
-    vmovups ymm1, [rdx]
-    vfmadd213p%2 ymm2, ymm1, [rcx]
-    vmovups [r8], ymm2
+    vmovups ymm1, [rsi]
+    vmovups ymm2, [rdx]
+    vfmadd213p%2 ymm1, ymm2, [rcx]
+    vmovups [r8], ymm1
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
@@ -108,11 +108,11 @@ vmovups %2, [rsp]
     mov rax, rdi ; n
     mov r9,  rsi ; a
     mov r10, rcx ; c
-    partial_load %1, ymm2, r9,  rax
-    partial_load %1, ymm1, rdx, rax
+    partial_load %1, ymm1, r9,  rax
+    partial_load %1, ymm2, rdx, rax
     partial_load %1, ymm3, r10, rax
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    partial_store %1, r8, ymm2, rax
+    vfmadd213p%2 ymm1, ymm2, ymm3
+    partial_store %1, r8, ymm1, rax
 
 .return:
     mov rsp, rbp
@@ -137,10 +137,10 @@ vmovups %2, [rsp]
     jl .last
 
 .loop: align 16
-    vmovups ymm2, [rsi]
-    vmovups ymm1, [rdx]
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    vmovups [rcx], ymm2
+    vmovups ymm1, [rsi]
+    vmovups ymm2, [rdx]
+    vfmadd213p%2 ymm1, ymm2, ymm3
+    vmovups [rcx], ymm1
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
@@ -154,10 +154,10 @@ vmovups %2, [rsp]
     mov rax, rdi ; n
     mov r8,  rsi ; a
     mov r9,  rcx ; y
-    partial_load %1, ymm2, r8,  rax
-    partial_load %1, ymm1, rdx, rax
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    partial_store %1, r9, ymm2, rax
+    partial_load %1, ymm1, r8,  rax
+    partial_load %1, ymm2, rdx, rax
+    vfmadd213p%2 ymm1, ymm2, ymm3
+    partial_store %1, r9, ymm1, rax
 
 .return:
     mov rsp, rbp
@@ -176,16 +176,16 @@ vmovups %2, [rsp]
     sub rsp, 0x20
     cld
 
-    vbroadcasts%2 ymm1, xmm0 ; b
+    vbroadcasts%2 ymm2, xmm0 ; b
 
     cmp rdi, 0x20 / %1
     jl .last
 
 .loop: align 16
-    vmovups ymm2, [rsi]
+    vmovups ymm1, [rsi]
     vmovups ymm3, [rdx]
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    vmovups [rcx], ymm2
+    vfmadd213p%2 ymm1, ymm2, ymm3
+    vmovups [rcx], ymm1
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
@@ -199,10 +199,10 @@ vmovups %2, [rsp]
     mov rax, rdi ; n
     mov r8,  rsi ; a
     mov r9,  rcx ; y
-    partial_load %1, ymm2, r8,  rax
+    partial_load %1, ymm1, r8,  rax
     partial_load %1, ymm3, rdx, rax
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    partial_store %1, r9, ymm2, rax
+    vfmadd213p%2 ymm1, ymm2, ymm3
+    partial_store %1, r9, ymm1, rax
 
 .return:
     mov rsp, rbp
@@ -350,16 +350,16 @@ vmovups %2, [rsp]
     sub rsp, 0x20
     cld
 
+    vbroadcasts%2 ymm2, xmm0 ; b
     vbroadcasts%2 ymm3, xmm1 ; c
-    vbroadcasts%2 ymm1, xmm0 ; b
 
     cmp rdi, 0x20 / %1
     jl .last
 
 .loop: align 16
-    vmovups ymm2, [rsi]
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    vmovups [rdx], ymm2
+    vmovups ymm1, [rsi]
+    vfmadd213p%2 ymm1, ymm2, ymm3
+    vmovups [rdx], ymm1
     add rsi, 0x20
     add rdx, 0x20
     sub rdi, 0x20 / %1
@@ -371,9 +371,9 @@ vmovups %2, [rsp]
     jz .return
     mov rax, rdi ; n
     mov r8,  rsi ; a
-    partial_load %1, ymm2, r8, rax
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    partial_store %1, rdx, ymm2, rax
+    partial_load %1, ymm1, r8, rax
+    vfmadd213p%2 ymm1, ymm2, ymm3
+    partial_store %1, rdx, ymm1, rax
 
 .return:
     mov rsp, rbp
