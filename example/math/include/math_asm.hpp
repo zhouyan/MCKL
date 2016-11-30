@@ -36,39 +36,52 @@
 
 #include "math_common.hpp"
 
-#define MCKL_EXAMPLE_MATH_ASM_RUN_A1R1(func, vfunc)                           \
-    mckl_##vfunc(K, a.data(), y1.data());                                     \
+#define MCKL_EXAMPLE_MATH_ASM_RUN_A1R1(T, func, vfunc)                        \
+    mckl::func<T>(K, a.data(), y1.data());                                    \
     watch1.start();                                                           \
-    mckl_##vfunc(K, a.data(), y1.data());                                     \
+    mckl::func<T>(K, a.data(), y1.data());                                    \
     watch1.stop();                                                            \
                                                                               \
     mckl::func(K, a.data(), y2.data());                                       \
     watch2.start();                                                           \
     mckl::func(K, a.data(), y2.data());                                       \
     watch2.stop();                                                            \
+                                                                              \
+    mckl_##vfunc(K, a.data(), y3.data());                                     \
+    watch3.start();                                                           \
+    mckl_##vfunc(K, a.data(), y3.data());                                     \
+    watch3.stop();                                                            \
                                                                               \
     std::copy_n(a.data(), K, al.data());                                      \
     mckl::func(K, al.data(), yl.data());                                      \
     math_error(K, y1.data(), yl.data(), e1);                                  \
-    math_error(K, y2.data(), yl.data(), e2);
+    math_error(K, y2.data(), yl.data(), e2);                                  \
+    math_error(K, y3.data(), yl.data(), e3);
 
-#define MCKL_EXAMPLE_MATH_ASM_RUN_A1R2(func, vfunc)                           \
-    mckl_##vfunc(K, a.data(), y1.data(), z1.data());                          \
+#define MCKL_EXAMPLE_MATH_ASM_RUN_A1R2(T, func, vfunc)                        \
+    mckl::func<T>(K, a.data(), y1.data(), z1.data());                         \
     watch1.start();                                                           \
-    mckl_##vfunc(K, a.data(), y1.data(), z1.data());                          \
+    mckl::func<T>(K, a.data(), y1.data(), z1.data());                         \
     watch1.stop();                                                            \
                                                                               \
     mckl::func(K, a.data(), y2.data(), z2.data());                            \
     watch2.start();                                                           \
     mckl::func(K, a.data(), y2.data(), z2.data());                            \
     watch2.stop();                                                            \
+                                                                              \
+    mckl_##vfunc(K, a.data(), y3.data(), z3.data());                          \
+    watch3.start();                                                           \
+    mckl_##vfunc(K, a.data(), y3.data(), z3.data());                          \
+    watch3.stop();                                                            \
                                                                               \
     std::copy_n(a.data(), K, al.data());                                      \
     mckl::func(K, al.data(), yl.data(), zl.data());                           \
     math_error(K, y1.data(), yl.data(), e1);                                  \
     math_error(K, z1.data(), zl.data(), e1);                                  \
     math_error(K, y2.data(), yl.data(), e2);                                  \
-    math_error(K, z2.data(), zl.data(), e2);
+    math_error(K, z2.data(), zl.data(), e2);                                  \
+    math_error(K, y3.data(), yl.data(), e3);                                  \
+    math_error(K, z3.data(), zl.data(), e3);
 
 #define MCKL_EXAMPLE_DEFINE_MATH_ASM(AR, T, func, vfunc)                      \
     inline void math_asm_##vfunc(                                             \
@@ -81,8 +94,10 @@
         mckl::Vector<T> a(N);                                                 \
         mckl::Vector<T> y1(N);                                                \
         mckl::Vector<T> y2(N);                                                \
+        mckl::Vector<T> y3(N);                                                \
         mckl::Vector<T> z1(N);                                                \
         mckl::Vector<T> z2(N);                                                \
+        mckl::Vector<T> z3(N);                                                \
         mckl::Vector<long double> al(N);                                      \
         mckl::Vector<long double> yl(N);                                      \
         mckl::Vector<long double> zl(N);                                      \
@@ -91,24 +106,29 @@
                                                                               \
         T e1 = 0;                                                             \
         T e2 = 0;                                                             \
+        T e3 = 0;                                                             \
         double c1 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
         double c2 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
+        double c3 = has_cycles ? std::numeric_limits<double>::max() : 0.0;    \
         for (std::size_t k = 0; k != 10; ++k) {                               \
             std::size_t n = 0;                                                \
             mckl::StopWatch watch1;                                           \
             mckl::StopWatch watch2;                                           \
+            mckl::StopWatch watch3;                                           \
             for (std::size_t i = 0; i != M; ++i) {                            \
                 std::size_t K = rsize(rng);                                   \
                 n += K;                                                       \
                 mckl::rand(rng, unif, K, a.data());                           \
-                MCKL_EXAMPLE_MATH_ASM_RUN_##AR(func, vfunc);                  \
+                MCKL_EXAMPLE_MATH_ASM_RUN_##AR(T, func, vfunc);               \
             }                                                                 \
             if (has_cycles) {                                                 \
                 c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
                 c2 = std::min(c2, 1.0 * watch2.cycles() / n);                 \
+                c3 = std::min(c3, 1.0 * watch3.cycles() / n);                 \
             } else {                                                          \
                 c1 = std::max(c1, n / watch1.seconds() * 1e-6);               \
                 c2 = std::max(c2, n / watch2.seconds() * 1e-6);               \
+                c3 = std::max(c3, n / watch3.seconds() * 1e-6);               \
             }                                                                 \
         }                                                                     \
                                                                               \
@@ -123,10 +143,12 @@
         std::cout << std::fixed << std::setprecision(2);                      \
         std::cout << std::setw(twid) << std::right << c1;                     \
         std::cout << std::setw(twid) << std::right << c2;                     \
+        std::cout << std::setw(twid) << std::right << c3;                     \
         std::cout.unsetf(std::ios_base::floatfield);                          \
         std::cout << std::setprecision(2);                                    \
         std::cout << std::setw(twid) << std::right << e1;                     \
         std::cout << std::setw(twid) << std::right << e2;                     \
+        std::cout << std::setw(twid) << std::right << e3;                     \
         std::cout << std::endl;                                               \
     }
 
@@ -136,7 +158,7 @@ inline void math_asm(std::size_t N, std::size_t M, Test &&test,
 {
     const int nwid = 15;
     const int twid = 10;
-    const std::size_t lwid = nwid * 3 + twid * 4;
+    const std::size_t lwid = nwid * 3 + twid * 6;
 
     std::cout << std::string(lwid, '=') << std::endl;
 
@@ -144,18 +166,22 @@ inline void math_asm(std::size_t N, std::size_t M, Test &&test,
     std::cout << std::setw(nwid) << std::right << "LB";
     std::cout << std::setw(nwid) << std::right << "UB";
     if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(twid) << std::right << "cpE (A)";
+        std::cout << std::setw(twid) << std::right << "cpE (S)";
         std::cout << std::setw(twid) << std::right << "cpE (V)";
+        std::cout << std::setw(twid) << std::right << "cpE (A)";
     } else {
-        std::cout << std::setw(twid) << std::right << "ME/s (A)";
+        std::cout << std::setw(twid) << std::right << "ME/s (S)";
         std::cout << std::setw(twid) << std::right << "ME/s (V)";
+        std::cout << std::setw(twid) << std::right << "ME/s (A)";
     }
 #if MCKL_HAS_BOOST
-    std::cout << std::setw(twid) << std::right << "ULP (A)";
+    std::cout << std::setw(twid) << std::right << "ULP (S)";
     std::cout << std::setw(twid) << std::right << "ULP (V)";
+    std::cout << std::setw(twid) << std::right << "ULP (A)";
 #else
-    std::cout << std::setw(twid) << std::right << "Err (A)";
+    std::cout << std::setw(twid) << std::right << "Err (S)";
     std::cout << std::setw(twid) << std::right << "Err (V)";
+    std::cout << std::setw(twid) << std::right << "Err (A)";
 #endif
     std::cout << std::endl;
 

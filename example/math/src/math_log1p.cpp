@@ -37,7 +37,8 @@ int main(int argc, char **argv)
 {
     mckl::Vector<std::pair<double, double>> bounds;
     bounds.push_back(std::make_pair(0.1, 1e4));
-    bounds.push_back(std::make_pair(-1, -DBL_MIN));
+    bounds.push_back(std::make_pair(-1, -0.1));
+    bounds.push_back(std::make_pair(-0.1, -DBL_MIN));
     bounds.push_back(std::make_pair(-DBL_MIN, DBL_MIN));
     bounds.push_back(std::make_pair(DBL_MIN, 0.1));
     bounds.push_back(std::make_pair(0.1, 1e0));

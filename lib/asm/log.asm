@@ -49,25 +49,6 @@ default rel
 
 ; log(1 + f) * (f + 2) / f - 2 = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
 %macro log1pf 0 ; implicity input ymm1, output ymm15 {{{
-    ; k = exponent(b)
-    vpsrlq ymm13, ymm1, 52
-    vpor ymm13, ymm13, [pow252]
-    vsubpd ymm13, ymm13, [bias]
-
-    ; 1 + f = 0.5 * fraction(b)
-    vpand ymm14, ymm1, [fmask]
-    vpor ymm14, ymm14, [emask]
-
-    ; 1 + f > sqrt(2) / 2
-    vcmpgtpd ymm1, ymm14, ymm6
-    vaddpd ymm3, ymm13, ymm8
-    vaddpd ymm4, ymm14, ymm14
-    vblendvpd ymm13, ymm13, ymm3, ymm1
-    vblendvpd ymm14, ymm4, ymm14, ymm1
-
-    ; f = a - 1
-    vsubpd ymm14, ymm14, ymm8
-
     ; x = f / (f + 2)
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
@@ -116,7 +97,25 @@ default rel
 
 %macro log 2 ; {{{
     vmovupd ymm0, %2
-    vmovapd ymm1, ymm0
+
+    ; k = exponent(a)
+    vpsrlq ymm13, ymm0, 52
+    vpor ymm13, ymm13, [pow252]
+    vsubpd ymm13, ymm13, [bias]
+
+    ; x = 1 + f = 0.5 * fraction(a)
+    vpand ymm14, ymm0, [fmask]
+    vpor ymm14, ymm14, [emask]
+
+    ; x > sqrt(2) / 2
+    vcmpgtpd ymm1, ymm14, ymm6
+    vaddpd ymm3, ymm13, ymm8
+    vaddpd ymm4, ymm14, ymm14
+    vblendvpd ymm13, ymm13, ymm3, ymm1
+    vblendvpd ymm14, ymm4, ymm14, ymm1
+
+    ; f = x - 1
+    vsubpd ymm14, ymm14, ymm8
 
     log1pf ; R = log(1 + f)
 
@@ -139,7 +138,25 @@ default rel
 
 %macro log2 2 ; {{{
     vmovupd ymm0, %2
-    vmovapd ymm1, ymm0
+
+    ; k = exponent(a)
+    vpsrlq ymm13, ymm0, 52
+    vpor ymm13, ymm13, [pow252]
+    vsubpd ymm13, ymm13, [bias]
+
+    ; x = 1 + f = 0.5 * fraction(a)
+    vpand ymm14, ymm0, [fmask]
+    vpor ymm14, ymm14, [emask]
+
+    ; x > sqrt(2) / 2
+    vcmpgtpd ymm1, ymm14, ymm6
+    vaddpd ymm3, ymm13, ymm8
+    vaddpd ymm4, ymm14, ymm14
+    vblendvpd ymm13, ymm13, ymm3, ymm1
+    vblendvpd ymm14, ymm4, ymm14, ymm1
+
+    ; f = x - 1
+    vsubpd ymm14, ymm14, ymm8
 
     log1pf; R = log(1 + f)
 
@@ -160,7 +177,25 @@ default rel
 
 %macro log10 2 ; {{{
     vmovupd ymm0, %2
-    vmovapd ymm1, ymm0
+
+    ; k = exponent(a)
+    vpsrlq ymm13, ymm0, 52
+    vpor ymm13, ymm13, [pow252]
+    vsubpd ymm13, ymm13, [bias]
+
+    ; x = 1 + f = 0.5 * fraction(a)
+    vpand ymm14, ymm0, [fmask]
+    vpor ymm14, ymm14, [emask]
+
+    ; x > sqrt(2) / 2
+    vcmpgtpd ymm1, ymm14, ymm6
+    vaddpd ymm3, ymm13, ymm8
+    vaddpd ymm4, ymm14, ymm14
+    vblendvpd ymm13, ymm13, ymm3, ymm1
+    vblendvpd ymm14, ymm4, ymm14, ymm1
+
+    ; f = x - 1
+    vsubpd ymm14, ymm14, ymm8
 
     log1pf; R = log(1 + f)
 
@@ -184,8 +219,40 @@ default rel
 %macro log1p 2 ; {{{
     vmovupd ymm0, %2
 
-    ; b = a + 1
+    vcmpgtpd ymm11, ymm0, [rel sqrt2m1]
+    vcmpltpd ymm15, ymm0, [rel sqrt2m2]
+    vpxor ymm13, ymm13, ymm13 ; k = 0
+    vmovapd ymm14, ymm0       ; f = x
+    vpor ymm11, ymm11, ymm15  ; x > sqrt(2) - 1 || x < sqrt(2) / 2 - 1
+    vtestpd ymm11, ymm11
+    jz %%skip ; sqrt(2) / 2 - 1 <= x <= sqrt(2) - 1
+
+    ; b = 1 + a
     vaddpd ymm1, ymm0, ymm8
+
+    ; k = exponent(b)
+    vpsrlq ymm3, ymm1, 52
+    vpor ymm3, ymm3, [pow252]
+    vsubpd ymm3, ymm3, [bias]
+
+    ; x = 1 + f = 0.5 * fraction(b)
+    vpand ymm4, ymm1, [fmask]
+    vpor ymm4, ymm4, [emask]
+
+    ; x > sqrt(2) / 2
+    vcmpgtpd ymm1, ymm4, ymm6
+    vaddpd ymm5, ymm3, ymm8
+    vaddpd ymm7, ymm4, ymm4
+    vblendvpd ymm3, ymm3, ymm5, ymm1
+    vblendvpd ymm4, ymm7, ymm4, ymm1
+
+    ; f = x - 1
+    vsubpd ymm4, ymm4, ymm8
+
+    vblendvpd ymm13, ymm13, ymm3, ymm11
+    vblendvpd ymm14, ymm14, ymm4, ymm11
+
+%%skip:
 
     log1pf; R = log(1 + f)
 
@@ -254,6 +321,8 @@ log2inv:  times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 log10_2:  times 4 dq 0x3FD34413509F79FF ; log10(2.0l)
 log10inv: times 4 dq 0x3FDBCB7B1526E50E ; 1.0l / log(10.0l)
 sqrt2by2: times 4 dq 0x3FE6A09E667F3BCD ; sqrt(2.0l) / 2.0l
+sqrt2m1:  times 4 dq 0x3FDA827999FCEF32 ; sqrt(2.0l) - 1.0l
+sqrt2m2:  times 4 dq 0xBFD2BEC333018867 ; sqrt(2.0l) / 2.0l - 1.0l
 
 section .text
 
