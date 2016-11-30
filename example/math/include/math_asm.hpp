@@ -128,20 +128,9 @@
         std::cout << std::endl;                                               \
     }
 
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, sqrt, vd_sqrt)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, exp, vd_exp)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, exp2, vd_exp2)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, expm1, vd_expm1)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log, vd_log)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log2, vd_log2)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log10, vd_log10)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log1p, vd_log1p)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, sin, vd_sin)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, cos, vd_cos)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R2, double, sincos, vd_sincos)
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, tan, vd_tan)
-
-inline void math_asm(std::size_t N, std::size_t M)
+template <typename Test, typename T>
+inline void math_asm(std::size_t N, std::size_t M, Test &&test,
+    const mckl::Vector<std::pair<T, T>> &bounds)
 {
     const int nwid = 15;
     const int twid = 10;
@@ -169,128 +158,39 @@ inline void math_asm(std::size_t N, std::size_t M)
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_sqrt(N, M, nwid, twid, 0.1, 1e4);
-    math_asm_vd_sqrt(N, M, nwid, twid, DBL_MIN, 0.1);
-    math_asm_vd_sqrt(N, M, nwid, twid, 0.1, 1e0);
-    math_asm_vd_sqrt(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_sqrt(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_sqrt(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_sqrt(N, M, nwid, twid, 1e3, 1e4);
-
+    for (auto &bd : bounds)
+        test(N, M, nwid, twid, bd.first, bd.second);
     std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_exp(N, M, nwid, twid, -707, 707);
-    math_asm_vd_exp(N, M, nwid, twid, -708.39, -707);
-    math_asm_vd_exp(N, M, nwid, twid, -707, -500);
-    math_asm_vd_exp(N, M, nwid, twid, -500, -1);
-    math_asm_vd_exp(N, M, nwid, twid, -1, -DBL_MIN);
-    math_asm_vd_exp(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
-    math_asm_vd_exp(N, M, nwid, twid, DBL_MIN, 1);
-    math_asm_vd_exp(N, M, nwid, twid, 1, 500);
-    math_asm_vd_exp(N, M, nwid, twid, 500, 707);
-    math_asm_vd_exp(N, M, nwid, twid, 707, 709.43);
+}
 
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_exp2(N, M, nwid, twid, -1022, 1022);
-    math_asm_vd_exp2(N, M, nwid, twid, -1022, -1000);
-    math_asm_vd_exp2(N, M, nwid, twid, -1000, -500);
-    math_asm_vd_exp2(N, M, nwid, twid, -500, -1);
-    math_asm_vd_exp2(N, M, nwid, twid, -1, -DBL_MIN);
-    math_asm_vd_exp2(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
-    math_asm_vd_exp2(N, M, nwid, twid, DBL_MIN, 1);
-    math_asm_vd_exp2(N, M, nwid, twid, 1, 500);
-    math_asm_vd_exp2(N, M, nwid, twid, 500, 1000);
-    math_asm_vd_exp2(N, M, nwid, twid, 1000, 1022);
+template <typename Test, typename T>
+inline void math_asm(int argc, char **argv, Test &&test,
+    const mckl::Vector<std::pair<T, T>> &bounds)
+{
+    --argc;
+    ++argv;
 
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_expm1(N, M, nwid, twid, -500, 500);
-    math_asm_vd_expm1(N, M, nwid, twid, -708.39, -707);
-    math_asm_vd_expm1(N, M, nwid, twid, -707, -500);
-    math_asm_vd_expm1(N, M, nwid, twid, -500, -1);
-    math_asm_vd_expm1(N, M, nwid, twid, -1, -DBL_MIN);
-    math_asm_vd_expm1(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
-    math_asm_vd_expm1(N, M, nwid, twid, DBL_MIN, 1);
-    math_asm_vd_expm1(N, M, nwid, twid, 1, 500);
-    math_asm_vd_expm1(N, M, nwid, twid, 500, 707);
-    math_asm_vd_expm1(N, M, nwid, twid, 707, 709.43);
+    std::size_t N = 10000;
+    if (argc > 0) {
+        std::size_t n = static_cast<std::size_t>(std::atoi(*argv));
+        if (n != 0) {
+            N = n;
+            --argc;
+            ++argv;
+        }
+    }
 
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_log(N, M, nwid, twid, 0.1, 1e4);
-    math_asm_vd_log(N, M, nwid, twid, 0, DBL_MIN);
-    math_asm_vd_log(N, M, nwid, twid, DBL_MIN, 0.1);
-    math_asm_vd_log(N, M, nwid, twid, 0.1, 1e0);
-    math_asm_vd_log(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_log(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_log(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_log(N, M, nwid, twid, 1e3, 1e4);
+    std::size_t M = 1000;
+    if (argc > 0) {
+        std::size_t m = static_cast<std::size_t>(std::atoi(*argv));
+        if (m != 0) {
+            M = m;
+            --argc;
+            ++argv;
+        }
+    }
 
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_log2(N, M, nwid, twid, 0.1, 1e4);
-    math_asm_vd_log2(N, M, nwid, twid, 0, DBL_MIN);
-    math_asm_vd_log2(N, M, nwid, twid, DBL_MIN, 0.1);
-    math_asm_vd_log2(N, M, nwid, twid, 0.1, 1e0);
-    math_asm_vd_log2(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_log2(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_log2(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_log2(N, M, nwid, twid, 1e3, 1e4);
-
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_log10(N, M, nwid, twid, 0.1, 1e4);
-    math_asm_vd_log10(N, M, nwid, twid, 0, DBL_MIN);
-    math_asm_vd_log10(N, M, nwid, twid, DBL_MIN, 0.1);
-    math_asm_vd_log10(N, M, nwid, twid, 0.1, 1e0);
-    math_asm_vd_log10(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_log10(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_log10(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_log10(N, M, nwid, twid, 1e3, 1e4);
-
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_log1p(N, M, nwid, twid, 0.1, 1e4);
-    math_asm_vd_log1p(N, M, nwid, twid, -1, -DBL_MIN);
-    math_asm_vd_log1p(N, M, nwid, twid, -DBL_MIN, DBL_MIN);
-    math_asm_vd_log1p(N, M, nwid, twid, DBL_MIN, 0.1);
-    math_asm_vd_log1p(N, M, nwid, twid, 0.1, 1e0);
-    math_asm_vd_log1p(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_log1p(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_log1p(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_log1p(N, M, nwid, twid, 1e3, 1e4);
-
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_sin(N, M, nwid, twid, -1e4, 1e4);
-    math_asm_vd_sin(N, M, nwid, twid, 0, DBL_MIN);
-    math_asm_vd_sin(N, M, nwid, twid, DBL_MIN, 1);
-    math_asm_vd_sin(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_sin(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_sin(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_sin(N, M, nwid, twid, 1e3, 1e4);
-
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_cos(N, M, nwid, twid, -1e4, 1e4);
-    math_asm_vd_cos(N, M, nwid, twid, 0, DBL_MIN);
-    math_asm_vd_cos(N, M, nwid, twid, DBL_MIN, 1);
-    math_asm_vd_cos(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_cos(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_cos(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_cos(N, M, nwid, twid, 1e3, 1e4);
-
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_sincos(N, M, nwid, twid, -1e4, 1e4);
-    math_asm_vd_sincos(N, M, nwid, twid, 0, DBL_MIN);
-    math_asm_vd_sincos(N, M, nwid, twid, DBL_MIN, 1);
-    math_asm_vd_sincos(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_sincos(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_sincos(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_sincos(N, M, nwid, twid, 1e3, 1e4);
-
-    std::cout << std::string(lwid, '-') << std::endl;
-    math_asm_vd_tan(N, M, nwid, twid, -1e4, 1e4);
-    math_asm_vd_tan(N, M, nwid, twid, 0, DBL_MIN);
-    math_asm_vd_tan(N, M, nwid, twid, DBL_MIN, 1);
-    math_asm_vd_tan(N, M, nwid, twid, 1e0, 1e1);
-    math_asm_vd_tan(N, M, nwid, twid, 1e1, 1e2);
-    math_asm_vd_tan(N, M, nwid, twid, 1e2, 1e3);
-    math_asm_vd_tan(N, M, nwid, twid, 1e3, 1e4);
-
-    std::cout << std::string(lwid, '-') << std::endl;
+    math_asm(N, M, std::forward<Test>(test), bounds);
 }
 
 #endif // MCKL_EXAMPLE_MATH_ASM_HPP

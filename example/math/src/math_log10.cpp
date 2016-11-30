@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/math/src/math_asm.cpp
+// MCKL/example/math/src/math_log10.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -31,32 +31,20 @@
 
 #include "math_asm.hpp"
 
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log10, vd_log10)
+
 int main(int argc, char **argv)
 {
-    --argc;
-    ++argv;
-
-    std::size_t N = 10000;
-    if (argc > 0) {
-        std::size_t n = static_cast<std::size_t>(std::atoi(*argv));
-        if (n != 0) {
-            N = n;
-            --argc;
-            ++argv;
-        }
-    }
-
-    std::size_t M = 100;
-    if (argc > 0) {
-        std::size_t m = static_cast<std::size_t>(std::atoi(*argv));
-        if (m != 0) {
-            M = m;
-            --argc;
-            ++argv;
-        }
-    }
-
-    math_asm(N, M);
+    mckl::Vector<std::pair<double, double>> bounds;
+    bounds.push_back(std::make_pair(0.1, 1e4));
+    bounds.push_back(std::make_pair(0, DBL_MIN));
+    bounds.push_back(std::make_pair(DBL_MIN, 0.1));
+    bounds.push_back(std::make_pair(0.1, 1e0));
+    bounds.push_back(std::make_pair(1e0, 1e1));
+    bounds.push_back(std::make_pair(1e1, 1e2));
+    bounds.push_back(std::make_pair(1e2, 1e3));
+    bounds.push_back(std::make_pair(1e3, 1e4));
+    math_asm(argc, argv, math_asm_vd_log10, bounds);
 
     return 0;
 }
