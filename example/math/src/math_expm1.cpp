@@ -40,9 +40,13 @@ int main(int argc, char **argv)
     bounds.push_back(std::make_pair(-708.39, -707));
     bounds.push_back(std::make_pair(-707, -500));
     bounds.push_back(std::make_pair(-500, -1));
-    bounds.push_back(std::make_pair(-1, -DBL_MIN));
+    bounds.push_back(std::make_pair(-1, -0.694));
+    bounds.push_back(std::make_pair(-0.694, -0.346));
+    bounds.push_back(std::make_pair(-0.346, -DBL_MIN));
     bounds.push_back(std::make_pair(-DBL_MIN, DBL_MIN));
-    bounds.push_back(std::make_pair(DBL_MIN, 1));
+    bounds.push_back(std::make_pair(DBL_MIN, 0.346));
+    bounds.push_back(std::make_pair(0.346, 0.694));
+    bounds.push_back(std::make_pair(0.694, 1));
     bounds.push_back(std::make_pair(1, 500));
     bounds.push_back(std::make_pair(500, 707));
     bounds.push_back(std::make_pair(707, 709.43));

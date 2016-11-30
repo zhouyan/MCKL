@@ -41,9 +41,9 @@ default rel
 ; register used as variables: ymm1-5, ymm7, ymm9, ymm11, ymm13, ymm15
 
 %macro expm1x_constants 0 ; {{{
-    vmovapd ymm6,  [log2inv]
-    vmovapd ymm8,  [log2hi]
-    vmovapd ymm10, [log2lo]
+    vmovapd ymm6,  [ln2inv]
+    vmovapd ymm8,  [ln2hi]
+    vmovapd ymm10, [ln2lo]
     vmovapd ymm12, [bias]
 %endmacro ; }}}
 
@@ -112,7 +112,7 @@ default rel
     vfnmadd231pd ymm1, ymm15, ymm8
     vfnmadd231pd ymm1, ymm15, ymm10
 
-    expm1x exp ; R = exp(x) - 1
+    expm1x exp ; exp(x) = R + 1
 
     ; exp(a) = exp(x) * 2^k = R * 2^k + 2^k
     vfmadd213pd ymm13, ymm15, ymm15
@@ -123,7 +123,7 @@ default rel
 
 %macro exp2_constants 0 ; {{{
     expm1x_constants
-    vmovapd ymm14, [log2]
+    vmovapd ymm14, [ln2]
 %endmacro ; }}}
 
 %macro exp2 2 ; {{{
@@ -136,7 +136,7 @@ default rel
     vsubpd ymm1, ymm0, ymm15
     vmulpd ymm1, ymm1, ymm14
 
-    expm1x exp2 ; R = exp(x) - 1
+    expm1x exp2 ; exp(x) = R + 1
 
     ; 2^a = exp(x) * 2^k = R * 2^k + 2^k
     vfmadd213pd ymm13, ymm15, ymm15
@@ -147,26 +147,43 @@ default rel
 
 %macro expm1_constants 0 ; {{{
     expm1x_constants
-    vmovapd ymm14, [one]
 %endmacro ; }}}
 
 %macro expm1 2 ; {{{
     vmovupd ymm0, %2
+
+    ; log(2) <= abs(a) <= log(2)
+    vxorpd ymm15, ymm15, ymm15 ; k = 0
+    vmulpd ymm1, ymm0, [half]  ; x = 0.5 * a
+    vandpd ymm2, ymm0, [pmask] ; abs(a)
+    vcmpltpd ymm14, ymm2, [ln2by2] ; abs(a) < log(2) / 2
+    vcmpgtpd ymm13, ymm2, [ln2]    ; abs(a) > log(2)
+    vorpd ymm14, ymm14, ymm13 ; abs(a) < log(2) / 2 || abs(a) > log(2)
+    vtestpd ymm14, ymm14 ; log(2) / 2 <= abs(a) <= log(2)
+    jz %%skip
 
     ; k = round(a / log(2))
     vmulpd ymm15, ymm0, ymm6
     vroundpd ymm15, ymm15, 0x8
 
     ; x = a - k * log(2)
-    vmovapd ymm1, ymm0
-    vfnmadd231pd ymm1, ymm15, ymm8
-    vfnmadd231pd ymm1, ymm15, ymm10
+    vmovapd ymm2, ymm0
+    vfnmadd231pd ymm2, ymm15, ymm8
+    vfnmadd231pd ymm2, ymm15, ymm10
 
-    expm1x expm1 ; R = exp(x) - 1
+    vblendvpd ymm1, ymm1, ymm2, ymm14
+
+%%skip:
+
+    expm1x expm1 ; exp(x) = R + 1
 
     ; exp(a) - 1 = exp(x) * 2^k - 1 = R * 2^k + (2^k - 1)
-    vsubpd ymm11, ymm15, ymm14
-    vfmadd213pd ymm13, ymm15, ymm11
+    vsubpd ymm5, ymm15, [one] ; 2^k - 1
+    vaddpd ymm7, ymm13, ymm13 ; 2 * R
+    vmovapd ymm11, ymm13
+    vfmadd213pd ymm13, ymm15, ymm5 ; R * 2^k + (2^k - 1)
+    vfmadd213pd ymm11, ymm11, ymm7 ; R * R + 2 * R
+    vblendvpd ymm13, ymm11, ymm13, ymm14
 
     select expm1
     vmovupd %1, ymm13
@@ -206,10 +223,13 @@ c13: times 4 dq 0x3DE6124613A86D09
 
 bias:    times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
 one:     times 4 dq 0x3FF0000000000000 ; 1.0
-log2:    times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
-log2hi:  times 4 dq 0x3FE62E42FEE00000
-log2lo:  times 4 dq 0x3DEA39EF35793C76
-log2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
+half:    times 4 dq 0x3FE0000000000000 ; 0.5
+pmask:   times 4 dq 0x7FFFFFFFFFFFFFFF ; abs(x) = x & pmask
+ln2:     times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
+ln2hi:   times 4 dq 0x3FE62E42FEE00000
+ln2lo:   times 4 dq 0x3DEA39EF35793C76
+ln2inv:  times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
+ln2by2:  times 4 dq 0x3FD62E42FEFA39EF ; log(2.0l) / 2.0l
 
 section .text
 
