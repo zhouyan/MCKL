@@ -29,53 +29,24 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
+%include "/math.asm"
+
 global mckl_vd_sqrt
 
 default rel
 
+%macro sqrt_constants 0
+    ; do nothing
+%endmacro
+
+%macro sqrt 2 ; {{{
+    vmovupd ymm0, %2
+    vsqrtpd ymm0, ymm0
+    vmovupd %1, ymm0
+%endmacro ; }}}
+
 section .text
 
-; rdi:n
-; rsi:a
-; rdx:y
-mckl_vd_sqrt: ;{{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
-
-    cmp rdi, 4
-    jl .last
-
-.loop: align 16
-    vmovupd ymm0, [rsi]
-    vsqrtpd ymm0, ymm0
-    vmovupd [rdx], ymm0
-    add rsi, 0x20
-    add rdx, 0x20
-    sub rdi, 4
-    cmp rdi, 4
-    jge .loop
-
-.last:
-    test rdi, rdi
-    jz .return
-    mov rax, rdi
-    mov rcx, rdi
-    mov rdi, rsp
-    rep movsq
-    vmovupd ymm0, [rsp]
-    vsqrtpd ymm0, ymm0
-    vmovupd [rsp], ymm0
-    mov rcx, rax
-    mov rsi, rsp
-    mov rdi, rdx
-    rep movsq
-
-.return:
-    mov rsp, rbp
-    pop rbp
-    ret
-; }}}
+mckl_vd_sqrt: math_kernel_a1r1 8, sqrt
 
 ; vim:ft=nasm

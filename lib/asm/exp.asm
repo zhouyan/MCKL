@@ -29,6 +29,8 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
+%include "/math.asm"
+
 global mckl_vd_exp
 global mckl_vd_exp2
 global mckl_vd_expm1
@@ -37,6 +39,13 @@ default rel
 
 ; register used as constants: ymm6, ymm8, ymm10, ymm12, ymm14
 ; register used as variables: ymm1-5, ymm7, ymm9, ymm11, ymm13, ymm15
+
+%macro expm1x_constants 0 ; {{{
+    vmovapd ymm6,  [log2inv]
+    vmovapd ymm8,  [log2hi]
+    vmovapd ymm10, [log2lo]
+    vmovapd ymm12, [bias]
+%endmacro ; }}}
 
 ; exp(x) - 1 = c13 * x^13 + ... + c2 * x^2 + x
 %macro expm1x 1 ; implicity input ymm1, ymm15, output ymm1-4, ymm13, ymm15 {{{
@@ -78,11 +87,22 @@ default rel
     vpor ymm4, ymm4, ymm3
 %endmacro ; }}}
 
-%macro exp_constants 0 ; {{{
-    ; no additional constants
+%macro select 1 ; implicit input ymm1-4, ymm13, output ymm13 {{{
+    vtestpd ymm4, ymm4
+    jz %%skip
+    vblendvpd ymm13, ymm13, [%{1}_min_y], ymm1 ; min_y
+    vblendvpd ymm13, ymm13, [%{1}_max_y], ymm2 ; max_y
+    vblendvpd ymm13, ymm13, ymm0, ymm3         ; a
+%%skip:
 %endmacro ; }}}
 
-%macro exp_compute 0 ; implicit input ymm0, output ymm1-4, ymm13 {{{
+%macro exp_constants 0 ; {{{
+    expm1x_constants
+%endmacro ; }}}
+
+%macro exp 2 ; {{{
+    vmovupd ymm0, %2
+
     ; k = round(a / log(2))
     vmulpd ymm15, ymm0, ymm6
     vroundpd ymm15, ymm15, 0x8
@@ -96,13 +116,19 @@ default rel
 
     ; exp(a) = exp(x) * 2^k = R * 2^k + 2^k
     vfmadd213pd ymm13, ymm15, ymm15
+
+    select exp
+    vmovupd %1, ymm13
 %endmacro ; }}}
 
 %macro exp2_constants 0 ; {{{
+    expm1x_constants
     vmovapd ymm14, [log2]
 %endmacro ; }}}
 
-%macro exp2_compute 0 ; implicit input ymm0, output ymm1-4, ymm13 {{{
+%macro exp2 2 ; {{{
+    vmovupd ymm0, %2
+
     ; k = round(a)
     vroundpd ymm15, ymm0, 0x8
 
@@ -114,13 +140,19 @@ default rel
 
     ; 2^a = exp(x) * 2^k = R * 2^k + 2^k
     vfmadd213pd ymm13, ymm15, ymm15
+
+    select exp2
+    vmovupd %1, ymm13
 %endmacro ; }}}
 
 %macro expm1_constants 0 ; {{{
+    expm1x_constants
     vmovapd ymm14, [one]
 %endmacro ; }}}
 
-%macro expm1_compute 0 ; implicit input ymm0, output ymm1-4, ymm13 {{{
+%macro expm1 2 ; {{{
+    vmovupd ymm0, %2
+
     ; k = round(a / log(2))
     vmulpd ymm15, ymm0, ymm6
     vroundpd ymm15, ymm15, 0x8
@@ -135,72 +167,9 @@ default rel
     ; exp(a) - 1 = exp(x) * 2^k - 1 = R * 2^k + (2^k - 1)
     vsubpd ymm11, ymm15, ymm14
     vfmadd213pd ymm13, ymm15, ymm11
-%endmacro ; }}}
 
-%macro select 1 ; implicit input ymm1-4, ymm13, output ymm13 {{{
-    vtestpd ymm4, ymm4
-    jz %%skip
-    vblendvpd ymm13, ymm13, [%{1}_min_y], ymm1 ; min_y
-    vblendvpd ymm13, ymm13, [%{1}_max_y], ymm2 ; max_y
-    vblendvpd ymm13, ymm13, ymm0, ymm3             ; a
-%%skip:
-%endmacro ; }}}
-
-; rdi:n
-; rsi:a
-; rdx:y
-%macro kernel 1 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
-
-    mov rax, rdi
-    mov r8,  rsi
-    mov r9,  rax
-
-    shr rax, 2
-    and r9,  0x3
-
-    vmovapd ymm6,  [log2inv]
-    vmovapd ymm8,  [log2hi]
-    vmovapd ymm10, [log2lo]
-    vmovapd ymm12, [bias]
-    %{1}_constants
-
-    test rax, rax
-    jz .last
-
-.loop: align 16
-    vmovupd ymm0, [r8]
-    %{1}_compute
-    select %1
-    vmovupd [rdx], ymm13
-    add r8,  0x20
-    add rdx, 0x20
-    dec rax
-    jnz .loop
-
-.last:
-    test r9, r9
-    jz .return
-    mov rcx, r9
-    mov rsi, r8
-    mov rdi, rsp
-    rep movsq
-    vmovupd ymm0, [rsp]
-    %{1}_compute
-    select %1
-    vmovupd [rsp], ymm13
-    mov rcx, r9
-    mov rsi, rsp
-    mov rdi, rdx
-    rep movsq
-
-.return:
-    mov rsp, rbp
-    pop rbp
-    ret
+    select expm1
+    vmovupd %1, ymm13
 %endmacro ; }}}
 
 section .rodata
@@ -244,8 +213,8 @@ log2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
 
 section .text
 
-mckl_vd_exp:   kernel exp
-mckl_vd_exp2:  kernel exp2
-mckl_vd_expm1: kernel expm1
+mckl_vd_exp:   math_kernel_a1r1 8, exp
+mckl_vd_exp2:  math_kernel_a1r1 8, exp2
+mckl_vd_expm1: math_kernel_a1r1 8, expm1
 
 ; vim:ft=nasm

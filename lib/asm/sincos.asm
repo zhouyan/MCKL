@@ -29,6 +29,8 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
+%include "/math.asm"
+
 global mckl_vd_sin
 global mckl_vd_cos
 global mckl_vd_sincos
@@ -36,7 +38,7 @@ global mckl_vd_tan
 
 default rel
 
-%macro sincos 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
+%macro sincostan 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
     ; b = abs(a)
     vpand ymm1, ymm0, [pmask]
     vcmpgtpd ymm2, ymm1, [nan_a]
@@ -110,21 +112,21 @@ default rel
     ; swap
     vpmovsxdq ymm11, xmm11
     vpsllq ymm1, ymm11, 62
-%if %1 & 0x1 ; sin(a)
+%if %1 & 0x5 ; sin(a), tan(a)
     vblendvpd ymm3, ymm13, ymm14, ymm1
 %endif
-%if %1 & 0x2 ; cos(a)
+%if %1 & 0x6 ; cos(a), tan(a)
     vblendvpd ymm4, ymm14, ymm13, ymm1
 %endif
 
     ; signs
-%if %1 & 0x1 ; sin(a)
+%if %1 & 0x5 ; sin(a), tan(a)
     vpsllq ymm1, ymm11, 61
     vpxor ymm1, ymm1, ymm0
     vpand ymm1, ymm1, [smask]
     vpxor ymm13, ymm3, ymm1
 %endif
-%if %1 & 0x2 ; cos(a)
+%if %1 & 0x6 ; cos(a), tan(a)
     vpaddq ymm1, ymm11, [dqtwo]
     vpsllq ymm1, ymm1, 61
     vpand ymm1, ymm1, [smask]
@@ -142,100 +144,52 @@ default rel
 %endif
 %if %1 & 0x2 ; cos(a)
     vblendvpd ymm14, ymm14, ymm0, ymm1
-%if %1 & 0x4 ; tan(a)
 %endif
+%if %1 & 0x4 ; tan(a)
     vblendvpd ymm15, ymm15, ymm0, ymm1
 %endif
 %%skip:
 %endmacro ; }}}
 
-; rdi:n
-; rsi:a
-; rdx:y
-; rcx:z
-%macro kernel 1 ; {{{
-    push rbp
-    mov rbp, rsp
-%if %1 == 0x3
-    sub rsp, 0x40
-%else
-    sub rsp, 0x20
-%endif
-    cld
+%macro sin_constants 0 ; {{{
+    ; do nothing
+%endmacro ; }}}
 
-    test rdi, rdi
-    jz .return
+%macro cos_constants 0 ; {{{
+    ; do nothing
+%endmacro ; }}}
 
-    mov rax, rdi
-    mov r8,  rsi
-    mov r9,  rax
-    mov r10, rcx
+%macro sincos_constants 0 ; {{{
+    ; do nothing
+%endmacro ; }}}
 
-    shr rax, 2
-    and r9,  0x3
+%macro tan_constants 0 ; {{{
+    ; do nothing
+%endmacro ; }}}
 
-    test rax, rax
-    jz .last
+%macro sin 2 ; {{{
+    vmovupd ymm0, %2
+    sincostan 0x1
+    vmovupd %1, ymm13
+%endmacro ; }}}
 
-.loop: align 16
-    vmovupd ymm0, [r8]
-    sincos %1
-%if %1 == 0x1 ; vd_sin
-    vmovupd [rdx], ymm13
-%elif %1 == 0x2 ; vd_cos
-    vmovupd [rdx], ymm14
-%elif %1 == 0x3 ; vd_sincos
-    vmovupd [rdx], ymm13
-    vmovupd [r10], ymm14
-%elif %1 == 0x7
-    vmovupd [rdx], ymm15
-%else
-    %error
-%endif
-    add r8,  0x20
-    add rdx, 0x20
-%if %1 == 0x3 ; vd_sincos
-    add r10, 0x20
-%endif
-    dec rax
-    jnz .loop
+%macro cos 2 ; {{{
+    vmovupd ymm0, %2
+    sincostan 0x2
+    vmovupd %1, ymm14
+%endmacro ; }}}
 
-.last:
-    test r9, r9
-    jz .return
-    mov rcx, r9
-    mov rsi, r8
-    mov rdi, rsp
-    rep movsq
-    vmovupd ymm0, [rsp]
-    sincos %1
-%if %1 == 0x1 ; vd_sin
-    vmovupd [rsp], ymm13
-%elif %1 == 0x2 ; vd_cos
-    vmovupd [rsp], ymm14
-%elif %1 == 0x3 ; vd_sincos
-    vmovupd [rsp + 0x00], ymm13
-    vmovupd [rsp + 0x20], ymm14
-%elif %1 == 0x7
-    vmovupd [rsp], ymm15
-%else
-    %error
-%endif
-    mov rcx, r9
-    mov rsi, rsp
-    mov rdi, rdx
-    rep movsq
-%if %1 == 0x3 ; vd_sincos
-    mov rcx, r9
-    lea rsi, [rsp + 0x20]
-    mov rdi, r10
-    rep movsq
-%endif
+%macro sincos 3 ; {{{
+    vmovupd ymm0, %3
+    sincostan 0x3
+    vmovupd %1, ymm13
+    vmovupd %2, ymm14
+%endmacro ; }}}
 
-.return:
-    mov rsp, rbp
-    pop rbp
-    ret
+%macro tan 2 ; {{{
+    vmovupd ymm0, %2
+    sincostan 0x4
+    vmovupd %1, ymm15
 %endmacro ; }}}
 
 section .rodata
@@ -278,9 +232,9 @@ max253: times 4 dq 0x434FFFFFFFFFFFFF ; 2^53 * 1.1...1b
 
 section .text
 
-mckl_vd_sin:    kernel 0x1
-mckl_vd_cos:    kernel 0x2
-mckl_vd_sincos: kernel 0x3
-mckl_vd_tan:    kernel 0x7
+mckl_vd_sin:    math_kernel_a1r1 8, sin
+mckl_vd_cos:    math_kernel_a1r1 8, cos
+mckl_vd_sincos: math_kernel_a1r2 8, sincos
+mckl_vd_tan:    math_kernel_a1r1 8, tan
 
 ; vim:ft=nasm
