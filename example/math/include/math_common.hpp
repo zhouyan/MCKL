@@ -90,9 +90,9 @@ template <typename T>
 inline T math_error(T a, T b)
 {
     if (std::isnan(a))
-        return a;
+        return std::abs(a);
     if (std::isnan(b))
-        return b;
+        return std::abs(b);
     if (!std::isfinite(a) && !std::isfinite(b)) {
         if (a < 0 && b < 0)
             return 0;
@@ -100,6 +100,10 @@ inline T math_error(T a, T b)
             return 0;
         return std::abs(a);
     }
+    if (!std::isfinite(a))
+        return std::abs(a);
+    if (!std::isfinite(b))
+        return std::abs(b);
 #if MCKL_HAS_BOOST
     return std::abs(boost::math::float_distance(a, b));
 #else
