@@ -32,6 +32,8 @@
 global mckl_philox2x32_avx2_kernel
 global mckl_philox4x32_avx2_kernel
 
+default rel
+
 %macro rbox 2 ; {{{
     vmovdqa ymm15, [rsp + %1 * 0x20] ; round key
 
@@ -81,25 +83,25 @@ global mckl_philox4x32_avx2_kernel
 
 %macro generate 4 ; block size, permute constants {{{
 %if %1 == 0x08 ; Philox2x32
-    vpaddq ymm0, ymm8, [rel increment2x32 + 0x000]
-    vpaddq ymm1, ymm8, [rel increment2x32 + 0x020]
-    vpaddq ymm2, ymm8, [rel increment2x32 + 0x040]
-    vpaddq ymm3, ymm8, [rel increment2x32 + 0x060]
-    vpaddq ymm4, ymm8, [rel increment2x32 + 0x080]
-    vpaddq ymm5, ymm8, [rel increment2x32 + 0x0A0]
-    vpaddq ymm6, ymm8, [rel increment2x32 + 0x0C0]
-    vpaddq ymm7, ymm8, [rel increment2x32 + 0x0E0]
-    vpaddq ymm8, ymm8, [rel increment2x32 + 0x100]
+    vpaddq ymm0, ymm8, [increment2x32 + 0x000]
+    vpaddq ymm1, ymm8, [increment2x32 + 0x020]
+    vpaddq ymm2, ymm8, [increment2x32 + 0x040]
+    vpaddq ymm3, ymm8, [increment2x32 + 0x060]
+    vpaddq ymm4, ymm8, [increment2x32 + 0x080]
+    vpaddq ymm5, ymm8, [increment2x32 + 0x0A0]
+    vpaddq ymm6, ymm8, [increment2x32 + 0x0C0]
+    vpaddq ymm7, ymm8, [increment2x32 + 0x0E0]
+    vpaddq ymm8, ymm8, [increment2x32 + 0x100]
 %elif %1 == 0x10 ; Philox4x32
-    vpaddq ymm0, ymm8, [rel increment4x32 + 0x000]
-    vpaddq ymm1, ymm8, [rel increment4x32 + 0x020]
-    vpaddq ymm2, ymm8, [rel increment4x32 + 0x040]
-    vpaddq ymm3, ymm8, [rel increment4x32 + 0x060]
-    vpaddq ymm4, ymm8, [rel increment4x32 + 0x080]
-    vpaddq ymm5, ymm8, [rel increment4x32 + 0x0A0]
-    vpaddq ymm6, ymm8, [rel increment4x32 + 0x0C0]
-    vpaddq ymm7, ymm8, [rel increment4x32 + 0x0E0]
-    vpaddq ymm8, ymm8, [rel increment4x32 + 0x100]
+    vpaddq ymm0, ymm8, [increment4x32 + 0x000]
+    vpaddq ymm1, ymm8, [increment4x32 + 0x020]
+    vpaddq ymm2, ymm8, [increment4x32 + 0x040]
+    vpaddq ymm3, ymm8, [increment4x32 + 0x060]
+    vpaddq ymm4, ymm8, [increment4x32 + 0x080]
+    vpaddq ymm5, ymm8, [increment4x32 + 0x0A0]
+    vpaddq ymm6, ymm8, [increment4x32 + 0x0C0]
+    vpaddq ymm7, ymm8, [increment4x32 + 0x0E0]
+    vpaddq ymm8, ymm8, [increment4x32 + 0x100]
 %else
     %error
 %endif
@@ -166,7 +168,7 @@ global mckl_philox4x32_avx2_kernel
 %endif
 
     ; load mask
-    vmovdqa ymm14, [rel mask]
+    vmovdqa ymm14, [mask]
 
     ; compute round keys and store to stack
 %if %1 == 0x08 ; Philox2x32

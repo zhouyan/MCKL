@@ -34,54 +34,56 @@ global mckl_vd_cos
 global mckl_vd_sincos
 global mckl_vd_tan
 
+default rel
+
 %macro sincos 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
     ; b = abs(a)
-    vpand ymm1, ymm0, [rel pmask]
-    vcmpgtpd ymm2, ymm1, [rel nan_a]
-    vcmpgtpd ymm5, ymm1, [rel max_a]
-    vblendvpd ymm0, ymm0, [rel nan_y], ymm2
+    vpand ymm1, ymm0, [pmask]
+    vcmpgtpd ymm2, ymm1, [nan_a]
+    vcmpgtpd ymm5, ymm1, [max_a]
+    vblendvpd ymm0, ymm0, [nan_y], ymm2
     vtestpd ymm5, ymm5
     jz %%inrange
 
     ; reduce ymm1 to around 2^57 if ymm1 > 2^57
-    vpand ymm2, ymm1, [rel max253]
-    vcmpgtpd ymm3, ymm1, [rel pow253]
+    vpand ymm2, ymm1, [max253]
+    vcmpgtpd ymm3, ymm1, [pow253]
     vblendvpd ymm1, ymm1, ymm2, ymm3
 
     ; reduce ymm1 to ymm1 - k * 2 * pi if ymm1 > max_a
-    vsubpd ymm4, ymm1, [rel max_a]
-    vmulpd ymm4, ymm4, [rel pi2inv]
+    vsubpd ymm4, ymm1, [max_a]
+    vmulpd ymm4, ymm4, [pi2inv]
     vroundpd ymm4, ymm4, 0xA
     vmovapd ymm2, ymm1
-    vfnmadd231pd ymm2, ymm4, [rel pi2]
+    vfnmadd231pd ymm2, ymm4, [pi2]
     vblendvpd ymm1, ymm1, ymm2, ymm5
 
     %%inrange:
 
     ; n = trunc(4 * b / pi)
-    vmulpd ymm11, ymm1, [rel pi4inv]
+    vmulpd ymm11, ymm1, [pi4inv]
     vcvttpd2dq xmm11, ymm11
 
     ; k = floor((n + 1) / 2) * 2
-    vpaddd xmm11, xmm11, [rel ddone]
-    vpand xmm11, xmm11, [rel ddmask]
+    vpaddd xmm11, xmm11, [ddone]
+    vpand xmm11, xmm11, [ddmask]
 
     ; x = a - k * pi / 4
     vcvtdq2pd ymm2, xmm11
-    vfnmadd231pd ymm1, ymm2, [rel pi4dp1]
-    vfnmadd231pd ymm1, ymm2, [rel pi4dp2]
-    vfnmadd231pd ymm1, ymm2, [rel pi4dp3]
+    vfnmadd231pd ymm1, ymm2, [pi4dp1]
+    vfnmadd231pd ymm1, ymm2, [pi4dp2]
+    vfnmadd231pd ymm1, ymm2, [pi4dp3]
 
     ; sin(x) = c13 * x^13 + ... + c3 * x^3 + x
     ; cos(x) = c14 * x^14 + ... + c2 * x^2 + 1
 
-    vmovapd ymm14, [rel c14]
-    vmovapd ymm13, [rel c13]
-    vmovapd ymm10, [rel c10]
-    vmovapd ymm9,  [rel c9]
-    vmovapd ymm6,  [rel c6]
-    vmovapd ymm5,  [rel c5]
-    vmovapd ymm12, [rel c2]
+    vmovapd ymm14, [c14]
+    vmovapd ymm13, [c13]
+    vmovapd ymm10, [c10]
+    vmovapd ymm9,  [c9]
+    vmovapd ymm6,  [c6]
+    vmovapd ymm5,  [c5]
+    vmovapd ymm12, [c2]
 
     vmulpd ymm2, ymm1, ymm1 ; x2 = x^2
     vmulpd ymm3, ymm2, ymm1 ; x3 = x^3
@@ -89,13 +91,13 @@ global mckl_vd_tan
     vmulpd ymm7, ymm4, ymm3 ; x7 = x^7
     vmulpd ymm8, ymm4, ymm4 ; x8 = x^8
 
-    vfmadd213pd ymm14, ymm2, [rel c12] ; u14 = c14 * x^2 + c12
-    vfmadd213pd ymm13, ymm2, [rel c11] ; u13 = c13 * x^2 + c11
-    vfmadd213pd ymm10, ymm2, [rel c8]  ; u10 = c10 * x^2 + c8
-    vfmadd213pd ymm9,  ymm2, [rel c7]  ; u9  = c9  * x^2 + c7
-    vfmadd213pd ymm6,  ymm2, [rel c4]  ; u6  = c6  * x^2 + c4
-    vfmadd213pd ymm5,  ymm2, [rel c3]  ; u5  = c5  * x^2 + c3
-    vfmadd213pd ymm12, ymm2, [rel c0]  ; u5  = c2  * x^2 + c0
+    vfmadd213pd ymm14, ymm2, [c12] ; u14 = c14 * x^2 + c12
+    vfmadd213pd ymm13, ymm2, [c11] ; u13 = c13 * x^2 + c11
+    vfmadd213pd ymm10, ymm2, [c8]  ; u10 = c10 * x^2 + c8
+    vfmadd213pd ymm9,  ymm2, [c7]  ; u9  = c9  * x^2 + c7
+    vfmadd213pd ymm6,  ymm2, [c4]  ; u6  = c6  * x^2 + c4
+    vfmadd213pd ymm5,  ymm2, [c3]  ; u5  = c5  * x^2 + c3
+    vfmadd213pd ymm12, ymm2, [c0]  ; u5  = c2  * x^2 + c0
 
     vfmadd213pd ymm14, ymm4, ymm10 ; v14 = u14 * x^4 + u10
     vfmadd213pd ymm13, ymm4, ymm9  ; v13 = u13 * x^4 + u9
@@ -119,13 +121,13 @@ global mckl_vd_tan
 %if %1 & 0x1 ; sin(a)
     vpsllq ymm1, ymm11, 61
     vpxor ymm1, ymm1, ymm0
-    vpand ymm1, ymm1, [rel smask]
+    vpand ymm1, ymm1, [smask]
     vpxor ymm13, ymm3, ymm1
 %endif
 %if %1 & 0x2 ; cos(a)
-    vpaddq ymm1, ymm11, [rel dqtwo]
+    vpaddq ymm1, ymm11, [dqtwo]
     vpsllq ymm1, ymm1, 61
-    vpand ymm1, ymm1, [rel smask]
+    vpand ymm1, ymm1, [smask]
     vpxor ymm14, ymm4, ymm1
 %endif
 %if %1 & 0x4 ; tan(a)

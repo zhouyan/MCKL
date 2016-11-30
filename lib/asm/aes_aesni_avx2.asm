@@ -34,6 +34,8 @@ global mckl_aes192_aesni_avx2_kernel
 global mckl_aes256_aesni_avx2_kernel
 global mckl_ars_aesni_avx2_kernel
 
+default rel
+
 %macro encfirst 1 ; {{{
     vpxor xmm0, xmm0, %1
     vpxor xmm1, xmm1, %1
@@ -68,15 +70,15 @@ global mckl_ars_aesni_avx2_kernel
 %endmacro ; }}}
 
 %macro generate 1 ; rounds {{{
-    vpaddq xmm0, xmm8, [rel increment + 0x00]
-    vpaddq xmm1, xmm8, [rel increment + 0x10]
-    vpaddq xmm2, xmm8, [rel increment + 0x20]
-    vpaddq xmm3, xmm8, [rel increment + 0x30]
-    vpaddq xmm4, xmm8, [rel increment + 0x40]
-    vpaddq xmm5, xmm8, [rel increment + 0x50]
-    vpaddq xmm6, xmm8, [rel increment + 0x60]
-    vpaddq xmm7, xmm8, [rel increment + 0x70]
-    vpaddq xmm8, xmm8, [rel increment + 0x80]
+    vpaddq xmm0, xmm8, [increment + 0x00]
+    vpaddq xmm1, xmm8, [increment + 0x10]
+    vpaddq xmm2, xmm8, [increment + 0x20]
+    vpaddq xmm3, xmm8, [increment + 0x30]
+    vpaddq xmm4, xmm8, [increment + 0x40]
+    vpaddq xmm5, xmm8, [increment + 0x50]
+    vpaddq xmm6, xmm8, [increment + 0x60]
+    vpaddq xmm7, xmm8, [increment + 0x70]
+    vpaddq xmm8, xmm8, [increment + 0x80]
     encfirst xmm10
     enc xmm11
     enc xmm12

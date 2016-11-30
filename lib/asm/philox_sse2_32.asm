@@ -32,6 +32,8 @@
 global mckl_philox2x32_sse2_kernel
 global mckl_philox4x32_sse2_kernel
 
+default rel
+
 %macro rbox 2 ; {{{
     movdqa xmm15, [rsp + %1 * 0x10] ; round key
 
@@ -97,25 +99,25 @@ global mckl_philox4x32_sse2_kernel
     movdqa xmm6, xmm8
     movdqa xmm7, xmm8
 %if %1 == 0x08 ; Philox2x32
-    paddq xmm0, [rel increment2x32 + 0x00]
-    paddq xmm1, [rel increment2x32 + 0x10]
-    paddq xmm2, [rel increment2x32 + 0x20]
-    paddq xmm3, [rel increment2x32 + 0x30]
-    paddq xmm4, [rel increment2x32 + 0x40]
-    paddq xmm5, [rel increment2x32 + 0x50]
-    paddq xmm6, [rel increment2x32 + 0x60]
-    paddq xmm7, [rel increment2x32 + 0x70]
-    paddq xmm8, [rel increment2x32 + 0x80]
+    paddq xmm0, [increment2x32 + 0x00]
+    paddq xmm1, [increment2x32 + 0x10]
+    paddq xmm2, [increment2x32 + 0x20]
+    paddq xmm3, [increment2x32 + 0x30]
+    paddq xmm4, [increment2x32 + 0x40]
+    paddq xmm5, [increment2x32 + 0x50]
+    paddq xmm6, [increment2x32 + 0x60]
+    paddq xmm7, [increment2x32 + 0x70]
+    paddq xmm8, [increment2x32 + 0x80]
 %elif %1 == 0x10 ; Philox4x32
-    paddq xmm0, [rel increment4x32 + 0x00]
-    paddq xmm1, [rel increment4x32 + 0x10]
-    paddq xmm2, [rel increment4x32 + 0x20]
-    paddq xmm3, [rel increment4x32 + 0x30]
-    paddq xmm4, [rel increment4x32 + 0x40]
-    paddq xmm5, [rel increment4x32 + 0x50]
-    paddq xmm6, [rel increment4x32 + 0x60]
-    paddq xmm7, [rel increment4x32 + 0x70]
-    paddq xmm8, [rel increment4x32 + 0x80]
+    paddq xmm0, [increment4x32 + 0x00]
+    paddq xmm1, [increment4x32 + 0x10]
+    paddq xmm2, [increment4x32 + 0x20]
+    paddq xmm3, [increment4x32 + 0x30]
+    paddq xmm4, [increment4x32 + 0x40]
+    paddq xmm5, [increment4x32 + 0x50]
+    paddq xmm6, [increment4x32 + 0x60]
+    paddq xmm7, [increment4x32 + 0x70]
+    paddq xmm8, [increment4x32 + 0x80]
 %else
     %error
 %endif
@@ -182,7 +184,7 @@ global mckl_philox4x32_sse2_kernel
 %endif
 
     ; load mask
-    movdqa xmm14, [rel mask]
+    movdqa xmm14, [mask]
 
     ; compute round keys and store to stack
 %if %1 == 0x08

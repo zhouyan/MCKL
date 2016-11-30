@@ -31,6 +31,8 @@
 
 global mckl_philox4x64_bmi2_kernel
 
+default rel
+
 %macro rbox 1 ; {{{
     vmovq rax, %1 ; k0
     xor rax, r11 ; t1

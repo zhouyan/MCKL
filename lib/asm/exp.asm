@@ -33,27 +33,29 @@ global mckl_vd_exp
 global mckl_vd_exp2
 global mckl_vd_expm1
 
+default rel
+
 ; register used as constants: ymm6, ymm8, ymm10, ymm12, ymm14
 ; register used as variables: ymm1-5, ymm7, ymm9, ymm11, ymm13, ymm15
 
 ; exp(x) - 1 = c13 * x^13 + ... + c2 * x^2 + x
 %macro expm1x 1 ; implicity input ymm1, ymm15, output ymm1-4, ymm13, ymm15 {{{
-    vmovapd ymm13, [rel c13]
-    vmovapd ymm11, [rel c11]
-    vmovapd ymm9,  [rel c9]
-    vmovapd ymm7,  [rel c7]
-    vmovapd ymm5,  [rel c5]
-    vmovapd ymm3,  [rel c3]
+    vmovapd ymm13, [c13]
+    vmovapd ymm11, [c11]
+    vmovapd ymm9,  [c9]
+    vmovapd ymm7,  [c7]
+    vmovapd ymm5,  [c5]
+    vmovapd ymm3,  [c3]
 
     vmulpd ymm2, ymm1, ymm1 ; x^2
     vmulpd ymm4, ymm2, ymm2 ; x^4
 
-    vfmadd213pd ymm13, ymm1, [rel c12] ; u13 = c13 * x + c12
-    vfmadd213pd ymm11, ymm1, [rel c10] ; u11 = c11 * x + c10
-    vfmadd213pd ymm9,  ymm1, [rel c8]  ; u9  = c9  * x + c8
-    vfmadd213pd ymm7,  ymm1, [rel c6]  ; u7  = c7  * x + c6
-    vfmadd213pd ymm5,  ymm1, [rel c4]  ; u5  = c5  * x + c4
-    vfmadd213pd ymm3,  ymm1, [rel c2]  ; u3  = c3  * x + c2
+    vfmadd213pd ymm13, ymm1, [c12] ; u13 = c13 * x + c12
+    vfmadd213pd ymm11, ymm1, [c10] ; u11 = c11 * x + c10
+    vfmadd213pd ymm9,  ymm1, [c8]  ; u9  = c9  * x + c8
+    vfmadd213pd ymm7,  ymm1, [c6]  ; u7  = c7  * x + c6
+    vfmadd213pd ymm5,  ymm1, [c4]  ; u5  = c5  * x + c4
+    vfmadd213pd ymm3,  ymm1, [c2]  ; u3  = c3  * x + c2
 
     vfmadd213pd ymm13, ymm2, ymm11 ; v13 = u13 * x^2 + u11
     vfmadd213pd ymm9,  ymm2, ymm7  ; v9  = u9  * x^2 + u7
@@ -67,8 +69,8 @@ global mckl_vd_expm1
     vfmadd213pd ymm5,  ymm2, ymm1 ; w5  = v5  * x^2 + x
 
     vmulpd ymm4, ymm4, ymm2 ; x^6
-    vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
-    vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
+    vcmpltpd ymm1, ymm0, [%{1}_min_a] ; a < min_a
+    vcmpgtpd ymm2, ymm0, [%{1}_max_a] ; a > max_a
 
     vfmadd213pd ymm13, ymm4, ymm5 ; z13 = w13 * x^6 + w5
 
@@ -97,7 +99,7 @@ global mckl_vd_expm1
 %endmacro ; }}}
 
 %macro exp2_constants 0 ; {{{
-    vmovapd ymm14, [rel log2]
+    vmovapd ymm14, [log2]
 %endmacro ; }}}
 
 %macro exp2_compute 0 ; implicit input ymm0, output ymm1-4, ymm13 {{{
@@ -115,7 +117,7 @@ global mckl_vd_expm1
 %endmacro ; }}}
 
 %macro expm1_constants 0 ; {{{
-    vmovapd ymm14, [rel one]
+    vmovapd ymm14, [one]
 %endmacro ; }}}
 
 %macro expm1_compute 0 ; implicit input ymm0, output ymm1-4, ymm13 {{{
@@ -138,8 +140,8 @@ global mckl_vd_expm1
 %macro select 1 ; implicit input ymm1-4, ymm13, output ymm13 {{{
     vtestpd ymm4, ymm4
     jz %%skip
-    vblendvpd ymm13, ymm13, [rel %{1}_min_y], ymm1 ; min_y
-    vblendvpd ymm13, ymm13, [rel %{1}_max_y], ymm2 ; max_y
+    vblendvpd ymm13, ymm13, [%{1}_min_y], ymm1 ; min_y
+    vblendvpd ymm13, ymm13, [%{1}_max_y], ymm2 ; max_y
     vblendvpd ymm13, ymm13, ymm0, ymm3             ; a
 %%skip:
 %endmacro ; }}}
@@ -160,10 +162,10 @@ global mckl_vd_expm1
     shr rax, 2
     and r9,  0x3
 
-    vmovapd ymm6,  [rel log2inv]
-    vmovapd ymm8,  [rel log2hi]
-    vmovapd ymm10, [rel log2lo]
-    vmovapd ymm12, [rel bias]
+    vmovapd ymm6,  [log2inv]
+    vmovapd ymm8,  [log2hi]
+    vmovapd ymm10, [log2lo]
+    vmovapd ymm12, [bias]
     %{1}_constants
 
     test rax, rax

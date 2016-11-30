@@ -34,6 +34,8 @@ global mckl_vd_log2
 global mckl_vd_log10
 global mckl_vd_log1p
 
+default rel
+
 ; register used as constants: ymm6, ymm8-10, ymm12
 ; register used as variables: ymm1-5, ymm7, ymm11, ymm13-15
 
@@ -41,12 +43,12 @@ global mckl_vd_log1p
 %macro log1pf 0 ; implicity input ymm1, output ymm15 {{{
     ; k = exponent(b)
     vpsrlq ymm13, ymm1, 52
-    vpor ymm13, ymm13, [rel pow252]
-    vsubpd ymm13, ymm13, [rel bias]
+    vpor ymm13, ymm13, [pow252]
+    vsubpd ymm13, ymm13, [bias]
 
     ; 1 + f = 0.5 * fraction(b)
-    vpand ymm14, ymm1, [rel fmask]
-    vpor ymm14, ymm14, [rel emask]
+    vpand ymm14, ymm1, [fmask]
+    vpor ymm14, ymm14, [emask]
 
     ; 1 + f > sqrt(2) / 2
     vcmpgtpd ymm1, ymm14, ymm6
@@ -62,17 +64,17 @@ global mckl_vd_log1p
     vaddpd ymm1, ymm14, ymm9
     vdivpd ymm1, ymm14, ymm1
 
-    vmovapd ymm15, [rel c15]
-    vmovapd ymm11, [rel c11]
-    vmovapd ymm7,  [rel c7]
+    vmovapd ymm15, [c15]
+    vmovapd ymm11, [c11]
+    vmovapd ymm7,  [c7]
 
     vmulpd ymm2, ymm1, ymm1 ; x^2
     vmulpd ymm4, ymm2, ymm2 ; x^4
 
-    vfmadd213pd ymm15, ymm2, [rel c13] ; u15 = c15 * x^2 + c13
-    vfmadd213pd ymm11, ymm2, [rel c9]  ; u11 = c11 * x^2 + c9
-    vfmadd213pd ymm7,  ymm2, [rel c5]  ; u7  = c7  * x^2 + c5
-    vmulpd      ymm3,  ymm2, [rel c3]  ; u3  = c3  * x^2
+    vfmadd213pd ymm15, ymm2, [c13] ; u15 = c15 * x^2 + c13
+    vfmadd213pd ymm11, ymm2, [c9]  ; u11 = c11 * x^2 + c9
+    vfmadd213pd ymm7,  ymm2, [c5]  ; u7  = c7  * x^2 + c5
+    vmulpd      ymm3,  ymm2, [c3]  ; u3  = c3  * x^2
 
     vfmadd213pd ymm15, ymm4, ymm11 ; v15 = u15 * x^4 + u11
     vfmadd213pd ymm7,  ymm4, ymm3  ; v7  = u7  * x^4 + u3
@@ -82,8 +84,8 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log_constants 0 ; {{{
-    vmovapd ymm10, [rel log2lo]
-    vmovapd ymm12, [rel log2hi]
+    vmovapd ymm10, [log2lo]
+    vmovapd ymm12, [log2hi]
 %endmacro ; }}}
 
 %macro log_compute 0 ; implicit input ymm0, output ymm15 {{{
@@ -101,7 +103,7 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log2_constants 0 ; {{{
-    vmovapd ymm10, [rel log2inv]
+    vmovapd ymm10, [log2inv]
 %endmacro ; }}}
 
 %macro log2_compute 0 ; implicit input ymm0, output ymm15 {{{
@@ -116,8 +118,8 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log10_constants 0 ; {{{
-    vmovapd ymm10, [rel log10_2]
-    vmovapd ymm12, [rel log10inv]
+    vmovapd ymm10, [log10_2]
+    vmovapd ymm12, [log10inv]
 %endmacro ; }}}
 
 %macro log10_compute 0 ; implicit input ymm0, output ymm15 {{{
@@ -134,8 +136,8 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro log1p_constants 0 ; {{{
-    vmovapd ymm10, [rel log2lo]
-    vmovapd ymm12, [rel log2hi]
+    vmovapd ymm10, [log2lo]
+    vmovapd ymm12, [log2hi]
 %endmacro ; }}}
 
 %macro log1p_compute 0 ; implicit input ymm0, output ymm15 {{{
@@ -154,18 +156,18 @@ global mckl_vd_log1p
 %endmacro ; }}}
 
 %macro select 1 ; implicit input ymm0, ymm15, output ymm15 {{{
-    vcmpltpd ymm1, ymm0, [rel %{1}_min_a] ; a < min_a
-    vcmpgtpd ymm2, ymm0, [rel %{1}_max_a] ; a > max_a
-    vcmpltpd ymm3, ymm0, [rel %{1}_nan_a] ; a < nan_a
+    vcmpltpd ymm1, ymm0, [%{1}_min_a] ; a < min_a
+    vcmpgtpd ymm2, ymm0, [%{1}_max_a] ; a > max_a
+    vcmpltpd ymm3, ymm0, [%{1}_nan_a] ; a < nan_a
     vcmpneqpd ymm4, ymm0, ymm0            ; a != a
     vpor ymm5, ymm1, ymm2
     vpor ymm5, ymm5, ymm3
     vpor ymm5, ymm5, ymm4
     vtestpd ymm5, ymm5
     jz %%skip
-    vblendvpd ymm15, ymm15, [rel %{1}_min_y], ymm1 ; min_y
-    vblendvpd ymm15, ymm15, [rel %{1}_max_y], ymm2 ; max_y
-    vblendvpd ymm15, ymm15, [rel %{1}_nan_y], ymm3 ; nan_y
+    vblendvpd ymm15, ymm15, [%{1}_min_y], ymm1 ; min_y
+    vblendvpd ymm15, ymm15, [%{1}_max_y], ymm2 ; max_y
+    vblendvpd ymm15, ymm15, [%{1}_nan_y], ymm3 ; nan_y
     vblendvpd ymm15, ymm15, ymm0, ymm4             ; a
 %%skip:
 %endmacro ; }}}

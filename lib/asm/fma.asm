@@ -45,6 +45,8 @@ global mckl_fma_ssv_pd
 global mckl_fma_svs_pd
 global mckl_fma_vss_pd
 
+default rel
+
 %macro partial_load 4 ; {{{
     mov rcx, %4
     mov rsi, %3

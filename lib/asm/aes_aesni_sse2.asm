@@ -34,6 +34,8 @@ global mckl_aes192_aesni_sse2_kernel
 global mckl_aes256_aesni_sse2_kernel
 global mckl_ars_aesni_sse2_kernel
 
+default rel
+
 %macro encfirst 1 ; {{{
     pxor xmm0, %1
     pxor xmm1, %1
@@ -76,15 +78,15 @@ global mckl_ars_aesni_sse2_kernel
     movdqa xmm5, xmm8
     movdqa xmm6, xmm8
     movdqa xmm7, xmm8
-    paddq xmm0, [rel increment + 0x00]
-    paddq xmm1, [rel increment + 0x10]
-    paddq xmm2, [rel increment + 0x20]
-    paddq xmm3, [rel increment + 0x30]
-    paddq xmm4, [rel increment + 0x40]
-    paddq xmm5, [rel increment + 0x50]
-    paddq xmm6, [rel increment + 0x60]
-    paddq xmm7, [rel increment + 0x70]
-    paddq xmm8, [rel increment + 0x80]
+    paddq xmm0, [increment + 0x00]
+    paddq xmm1, [increment + 0x10]
+    paddq xmm2, [increment + 0x20]
+    paddq xmm3, [increment + 0x30]
+    paddq xmm4, [increment + 0x40]
+    paddq xmm5, [increment + 0x50]
+    paddq xmm6, [increment + 0x60]
+    paddq xmm7, [increment + 0x70]
+    paddq xmm8, [increment + 0x80]
     encfirst xmm10
     enc xmm11
     enc xmm12

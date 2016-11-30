@@ -31,6 +31,8 @@
 
 global mckl_vd_sqrt
 
+default rel
+
 section .text
 
 ; rdi:n
