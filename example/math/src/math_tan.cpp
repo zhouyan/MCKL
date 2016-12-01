@@ -35,6 +35,7 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, tan, vd_tan)
 
 int main(int argc, char **argv)
 {
+    math_asm_vd_tan_check(0xFFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
     mckl::Vector<std::pair<double, double>> bounds;
     bounds.push_back(std::make_pair(-1e4, 1e4));
     bounds.push_back(std::make_pair(0, DBL_MIN));

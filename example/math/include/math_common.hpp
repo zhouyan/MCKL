@@ -82,17 +82,35 @@ inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
         os << prefix + "EPSILON";
     else if (mckl::internal::is_equal(x, -std::numeric_limits<T>::epsilon()))
         os << "-" + prefix + "EPSILON";
+    else if (!std::isnormal(x) && std::isfinite(x) && std::abs(x) > 0)
+        os << (x > 0 ? "< " : "> ") + prefix + "MIN";
     else
         os << x;
 }
 
-template <typename T>
-inline T math_error(T a, T b)
+template <typename T, typename U>
+inline T math_error(T a, U r)
 {
+    T b = static_cast<T>(r);
+
+    if (!std::isnormal(a) && std::isfinite(a))
+        a = 0;
+    if (!std::isnormal(b) && std::isfinite(b))
+        b = 0;
+
+    if (std::isfinite(a) && std::isfinite(b)) {
+#if MCKL_HAS_BOOST
+        return std::abs(boost::math::float_distance(a, b));
+#else
+        return std::abs((a - b) / b);
+#endif
+    }
+
     if (std::isnan(a))
         return std::abs(a);
     if (std::isnan(b))
         return std::abs(b);
+
     if (!std::isfinite(a) && !std::isfinite(b)) {
         if (a < 0 && b < 0)
             return 0;
@@ -100,17 +118,13 @@ inline T math_error(T a, T b)
             return 0;
         return std::abs(a);
     }
+
     if (!std::isfinite(a))
         return std::abs(a);
     if (!std::isfinite(b))
         return std::abs(b);
-#if MCKL_HAS_BOOST
-    return std::abs(boost::math::float_distance(a, b));
-#else
-    if (mckl::internal::is_zero(a) && mckl::internal::is_zero(b))
-        return 0;
-    return std::abs((a - b) / b);
-#endif
+
+    return 0;
 }
 
 template <typename T, typename U>

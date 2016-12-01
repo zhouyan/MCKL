@@ -35,6 +35,7 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, exp2, vd_exp2)
 
 int main(int argc, char **argv)
 {
+    math_asm_vd_exp2_check(0xC08FF00000000000ULL, 0x408FF80000000000ULL);
     mckl::Vector<std::pair<double, double>> bounds;
     bounds.push_back(std::make_pair(-1022, 1022));
     bounds.push_back(std::make_pair(-1022, -1000));

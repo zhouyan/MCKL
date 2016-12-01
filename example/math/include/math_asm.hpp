@@ -82,6 +82,105 @@
     math_error(K, z3.data(), zl.data(), e3);
 
 #define MCKL_EXAMPLE_DEFINE_MATH_ASM(AR, T, func, vfunc)                      \
+    template <typename U>                                                     \
+    inline void math_asm_##vfunc##_check(U lb, U ub)                          \
+    {                                                                         \
+        union {                                                               \
+            T x;                                                              \
+            U u;                                                              \
+        };                                                                    \
+                                                                              \
+        union {                                                               \
+            T y;                                                              \
+            U v;                                                              \
+        };                                                                    \
+                                                                              \
+        u = lb;                                                               \
+        v = ub;                                                               \
+                                                                              \
+        mckl::Vector<T> a;                                                    \
+        a.push_back(std::nextafter(x, -mckl::const_inf<T>()));                \
+        a.push_back(x);                                                       \
+        a.push_back(std::nextafter(x, mckl::const_inf<T>()));                 \
+        a.push_back(std::nextafter(y, -mckl::const_inf<T>()));                \
+        a.push_back(y);                                                       \
+        a.push_back(std::nextafter(y, mckl::const_inf<T>()));                 \
+        a.push_back(-mckl::const_zero<T>());                                  \
+        a.push_back(mckl::const_zero<T>());                                   \
+        a.push_back(-mckl::const_inf<T>());                                   \
+        a.push_back(mckl::const_inf<T>());                                    \
+        a.push_back(mckl::const_nan<T>());                                    \
+                                                                              \
+        mckl::Vector<std::string> s;                                          \
+        s.push_back("a < Lower bound");                                       \
+        s.push_back("a = Lower bound");                                       \
+        s.push_back("a > Lower bound");                                       \
+        s.push_back("a < Upper bound");                                       \
+        s.push_back("a = Upper bound");                                       \
+        s.push_back("a > Upper bound");                                       \
+        s.push_back("a = -0.0");                                              \
+        s.push_back("a = +0.0");                                              \
+        s.push_back("a = -inf");                                              \
+        s.push_back("a = +inf");                                              \
+        s.push_back("a =  nan");                                              \
+                                                                              \
+        const std::size_t K = a.size();                                       \
+                                                                              \
+        mckl::Vector<T> y1(K);                                                \
+        mckl::Vector<T> y2(K);                                                \
+        mckl::Vector<T> y3(K);                                                \
+        mckl::Vector<T> z1(K);                                                \
+        mckl::Vector<T> z2(K);                                                \
+        mckl::Vector<T> z3(K);                                                \
+        mckl::Vector<long double> al(K);                                      \
+        mckl::Vector<long double> yl(K);                                      \
+        mckl::Vector<long double> zl(K);                                      \
+                                                                              \
+        mckl::StopWatch watch1;                                               \
+        mckl::StopWatch watch2;                                               \
+        mckl::StopWatch watch3;                                               \
+        T e1 = 0;                                                             \
+        T e2 = 0;                                                             \
+        T e3 = 0;                                                             \
+                                                                              \
+        MCKL_EXAMPLE_MATH_ASM_RUN_##AR(T, func, vfunc);                       \
+                                                                              \
+        const int nwid = 15;                                                  \
+        const int twid = 12;                                                  \
+        const std::size_t lwid = nwid + twid * 6;                             \
+        std::cout << std::string(lwid, '=') << std::endl;                     \
+        std::cout << std::setw(nwid) << std::left << #func;                   \
+        std::cout << std::setw(twid) << std::right << "Val (S)";              \
+        std::cout << std::setw(twid) << std::right << "Val (V)";              \
+        std::cout << std::setw(twid) << std::right << "Val (A)";              \
+        std::cout << std::setw(twid) << std::right << "ULP (S)";              \
+        std::cout << std::setw(twid) << std::right << "ULP (V)";              \
+        std::cout << std::setw(twid) << std::right << "ULP (A)";              \
+        std::cout << std::endl;                                               \
+        std::cout << std::string(lwid, '-') << std::endl;                     \
+        for (std::size_t i = 0; i != K; ++i) {                                \
+            std::cout.unsetf(std::ios_base::floatfield);                      \
+            std::cout << std::setprecision(3);                                \
+            std::cout << std::setw(nwid) << std::left << s[i];                \
+            std::cout << std::setw(twid) << std::right;                       \
+            math_val(y1[i], std::cout);                                       \
+            std::cout << std::setw(twid) << std::right;                       \
+            math_val(y2[i], std::cout);                                       \
+            std::cout << std::setw(twid) << std::right;                       \
+            math_val(y3[i], std::cout);                                       \
+            std::cout.unsetf(std::ios_base::floatfield);                      \
+            std::cout << std::setprecision(2);                                \
+            std::cout << std::setw(twid) << std::right                        \
+                      << math_error(y1[i], yl[i]);                            \
+            std::cout << std::setw(twid) << std::right                        \
+                      << math_error(y2[i], yl[i]);                            \
+            std::cout << std::setw(twid) << std::right                        \
+                      << math_error(y3[i], yl[i]);                            \
+            std::cout << std::endl;                                           \
+        }                                                                     \
+        std::cout << std::string(lwid, '-') << std::endl;                     \
+    }                                                                         \
+                                                                              \
     inline void math_asm_##vfunc(                                             \
         std::size_t N, std::size_t M, int nwid, int twid, T lb, T ub)         \
     {                                                                         \
@@ -132,7 +231,7 @@
                                                                               \
         std::cout.unsetf(std::ios_base::floatfield);                          \
         std::cout << std::setprecision(5);                                    \
-        std::cout << std::setw(nwid) << std::left << #func;                   \
+        std::cout << std::setw(nwid) << std::left << #vfunc;                  \
         std::cout << std::setw(nwid) << std::right;                           \
         math_val(lb, std::cout);                                              \
         std::cout << std::setw(nwid) << std::right;                           \
@@ -206,7 +305,7 @@ inline void math_asm(int argc, char **argv, Test &&test,
         }
     }
 
-    std::size_t M = 1000;
+    std::size_t M = 100;
     if (argc > 0) {
         std::size_t m = static_cast<std::size_t>(std::atoi(*argv));
         if (m != 0) {
