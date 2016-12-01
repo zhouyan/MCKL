@@ -163,6 +163,8 @@ inline T math_error(T a, U r)
 #endif
     }
 
+    if (std::isnan(a) && std::isnan(b))
+        return 0;
     if (std::isnan(a))
         return std::abs(a);
     if (std::isnan(b))
@@ -175,7 +177,6 @@ inline T math_error(T a, U r)
             return 0;
         return std::abs(a);
     }
-
     if (!std::isfinite(a))
         return std::abs(a);
     if (!std::isfinite(b))

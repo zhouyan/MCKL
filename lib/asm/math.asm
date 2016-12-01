@@ -37,6 +37,9 @@
     mov rbp, rsp
     sub rsp, 0x20
 
+    test rdi, rdi
+    jz .return
+
     mov rax, rdi
 %if %1 == 4
     shr rdi, 3
@@ -54,7 +57,7 @@
     jz .last
 
 .loop: align 16
-    %{2} [rdx], [rsi]
+    %2 [rdx], [rsi]
     add rsi, 0x20
     add rdx, 0x20
     dec rdi
@@ -73,7 +76,7 @@
     %error
 %endif
     vmovups ymm0, [rsp]
-    %{2} ymm0, ymm0
+    %2 ymm0, ymm0
     vmovups [rsp], ymm0
     mov rcx, rax
     mov rsi, rsp
@@ -101,6 +104,9 @@
     mov rbp, rsp
     sub rsp, 0x40
 
+    test rdi, rdi
+    jz .return
+
     mov rax, rdi
 %if %1 == 4
     shr rdi, 3
@@ -118,7 +124,7 @@
     jz .last
 
 .loop: align 16
-    %{2} [rdx], [rcx], [rsi]
+    %2 [rdx], [rcx], [rsi]
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
@@ -139,7 +145,7 @@
     %error
 %endif
     vmovups ymm0, [rsp]
-    %{2} ymm0, ymm1, ymm0
+    %2 ymm0, ymm1, ymm0
     vmovups [rsp + 0x00], ymm0
     vmovups [rsp + 0x20], ymm1
     mov rcx, rax

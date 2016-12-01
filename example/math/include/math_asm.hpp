@@ -35,45 +35,39 @@
 #include "math_common.hpp"
 
 #define MCKL_EXAMPLE_MATH_ASM_RUN_A1R1(T, func, vfunc)                        \
-    std::copy_n(a.data(), K, y1.data());                                      \
     watch1.start();                                                           \
-    mckl::func<T>(K, y1.data(), y1.data());                                   \
+    mckl::func<T>(K, a.data(), y1.data());                                    \
     watch1.stop();                                                            \
                                                                               \
-    std::copy_n(a.data(), K, y2.data());                                      \
     watch2.start();                                                           \
-    mckl::func(K, y2.data(), y2.data());                                      \
+    mckl::func(K, a.data(), y2.data());                                       \
     watch2.stop();                                                            \
                                                                               \
-    std::copy_n(a.data(), K, y3.data());                                      \
     watch3.start();                                                           \
-    mckl_##vfunc(K, y3.data(), y3.data());                                    \
+    mckl_##vfunc(K, a.data(), y3.data());                                     \
     watch3.stop();                                                            \
                                                                               \
-    std::copy_n(a.data(), K, yl.data());                                      \
-    mckl::func(K, yl.data(), yl.data());                                      \
+    std::copy_n(a.data(), K, al.data());                                      \
+    mckl::func(K, al.data(), yl.data());                                      \
     math_error(K, y1.data(), yl.data(), e1);                                  \
     math_error(K, y2.data(), yl.data(), e2);                                  \
     math_error(K, y3.data(), yl.data(), e3);
 
 #define MCKL_EXAMPLE_MATH_ASM_RUN_A1R2(T, func, vfunc)                        \
-    std::copy_n(a.data(), K, y1.data());                                      \
     watch1.start();                                                           \
-    mckl::func<T>(K, y1.data(), y1.data(), z1.data());                        \
+    mckl::func<T>(K, a.data(), y1.data(), z1.data());                         \
     watch1.stop();                                                            \
                                                                               \
-    std::copy_n(a.data(), K, y2.data());                                      \
     watch2.start();                                                           \
-    mckl::func(K, y2.data(), y2.data(), z2.data());                           \
+    mckl::func(K, a.data(), y2.data(), z2.data());                            \
     watch2.stop();                                                            \
                                                                               \
-    std::copy_n(a.data(), K, y3.data());                                      \
     watch3.start();                                                           \
-    mckl_##vfunc(K, y3.data(), y3.data(), z3.data());                         \
+    mckl_##vfunc(K, a.data(), y3.data(), z3.data());                          \
     watch3.stop();                                                            \
                                                                               \
-    std::copy_n(a.data(), K, yl.data());                                      \
-    mckl::func(K, yl.data(), yl.data(), zl.data());                           \
+    std::copy_n(a.data(), K, al.data());                                      \
+    mckl::func(K, al.data(), yl.data(), zl.data());                           \
     math_error(K, y1.data(), yl.data(), e1);                                  \
     math_error(K, z1.data(), zl.data(), e1);                                  \
     math_error(K, y2.data(), yl.data(), e2);                                  \
