@@ -35,18 +35,20 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log1p, vd_log1p)
 
 int main(int argc, char **argv)
 {
-    math_asm_vd_log1p_check(0xBFF0000000000000ULL, 0x7FEFFFFFFFFFFFFFULL);
-    mckl::Vector<std::pair<double, double>> bounds;
-    bounds.push_back(std::make_pair(0.1, 1e4));
-    bounds.push_back(std::make_pair(-1, -0.1));
-    bounds.push_back(std::make_pair(-0.1, -DBL_MIN));
-    bounds.push_back(std::make_pair(-DBL_MIN, DBL_MIN));
-    bounds.push_back(std::make_pair(DBL_MIN, 0.1));
-    bounds.push_back(std::make_pair(0.1, 1e0));
-    bounds.push_back(std::make_pair(1e0, 1e1));
-    bounds.push_back(std::make_pair(1e1, 1e2));
-    bounds.push_back(std::make_pair(1e2, 1e3));
-    bounds.push_back(std::make_pair(1e3, 1e4));
+    math_asm_vd_log1p_check(0xBFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
+
+    const double sqrt2m2 = static_cast<double>(std::sqrt(2.0l) / 2.0l - 1.0l);
+    const double sqrt2m1 = static_cast<double>(std::sqrt(2.0l) - 1.0l);
+    mckl::Vector<MathBound<double>> bounds;
+    bounds.push_back(MathBound<double>(-1, sqrt2m2, "", "sqrt(2) / 2 - 1"));
+    bounds.push_back(MathBound<double>(sqrt2m2, -DBL_MIN, "sqrt(2) / 2 - 1"));
+    bounds.push_back(MathBound<double>(-DBL_MIN, DBL_MIN));
+    bounds.push_back(MathBound<double>(DBL_MIN, sqrt2m1, "", "sqrt(2) - 1"));
+    bounds.push_back(MathBound<double>(sqrt2m1, 1e0, "sqrt(2) - 1"));
+    bounds.push_back(MathBound<double>(1e0, 1e1));
+    bounds.push_back(MathBound<double>(1e1, 1e2));
+    bounds.push_back(MathBound<double>(1e2, 1e3));
+    bounds.push_back(MathBound<double>(1e3, 1e4));
     math_asm(argc, argv, math_asm_vd_log1p, bounds);
 
     return 0;

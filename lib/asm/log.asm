@@ -233,7 +233,7 @@ log10_min_y: times 4 dq 0xFFF0000000000000 ; -HUGE_VAL
 log10_max_y: times 4 dq 0x7FF0000000000000 ; HUGE_VAL
 log10_nan_y: times 4 dq 0x7FF8000000000000 ; NaN
 
-log1p_min_a: times 4 dq 0xBFF0000000000000 ; -1.0
+log1p_min_a: times 4 dq 0xBFEFFFFFFFFFFFFF ; nextafter(-1.0, 0.0)
 log1p_max_a: times 4 dq 0x7FEFFFFFFFFFFFFF ; DBL_MAX
 log1p_nan_a: times 4 dq 0xBFF0000000000000 ; -1.0
 log1p_min_y: times 4 dq 0xFFF0000000000000 ; -HUGE_VAL

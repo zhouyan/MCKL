@@ -35,15 +35,17 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, sqrt, vd_sqrt)
 
 int main(int argc, char **argv)
 {
-    mckl::Vector<std::pair<double, double>> bounds;
-    bounds.push_back(std::make_pair(0.1, 1e4));
-    bounds.push_back(std::make_pair(0, DBL_MIN));
-    bounds.push_back(std::make_pair(DBL_MIN, 0.1));
-    bounds.push_back(std::make_pair(0.1, 1e0));
-    bounds.push_back(std::make_pair(1e0, 1e1));
-    bounds.push_back(std::make_pair(1e1, 1e2));
-    bounds.push_back(std::make_pair(1e2, 1e3));
-    bounds.push_back(std::make_pair(1e3, 1e4));
+    math_asm_vd_sqrt_check(0xFFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
+
+    mckl::Vector<MathBound<double>> bounds;
+    bounds.push_back(MathBound<double>(0.1, 1e4));
+    bounds.push_back(MathBound<double>(0, DBL_MIN));
+    bounds.push_back(MathBound<double>(DBL_MIN, 0.1));
+    bounds.push_back(MathBound<double>(0.1, 1e0));
+    bounds.push_back(MathBound<double>(1e0, 1e1));
+    bounds.push_back(MathBound<double>(1e1, 1e2));
+    bounds.push_back(MathBound<double>(1e2, 1e3));
+    bounds.push_back(MathBound<double>(1e3, 1e4));
     math_asm(argc, argv, math_asm_vd_sqrt, bounds);
 
     return 0;

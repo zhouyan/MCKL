@@ -105,23 +105,46 @@
         a.push_back(std::nextafter(y, -mckl::const_inf<T>()));                \
         a.push_back(y);                                                       \
         a.push_back(std::nextafter(y, mckl::const_inf<T>()));                 \
+        a.push_back(-std::numeric_limits<T>::min());                          \
+        a.push_back(std::numeric_limits<T>::min());                           \
+        a.push_back(-std::numeric_limits<T>::min() / 2);                      \
+        a.push_back(std::numeric_limits<T>::min() / 2);                       \
+        a.push_back(-std::numeric_limits<T>::max());                          \
+        a.push_back(std::numeric_limits<T>::max());                           \
+        a.push_back(-std::numeric_limits<T>::max() / 2);                      \
+        a.push_back(std::numeric_limits<T>::max() / 2);                       \
         a.push_back(-mckl::const_zero<T>());                                  \
         a.push_back(mckl::const_zero<T>());                                   \
         a.push_back(-mckl::const_inf<T>());                                   \
         a.push_back(mckl::const_inf<T>());                                    \
         a.push_back(mckl::const_nan<T>());                                    \
                                                                               \
+        std::string prefix;                                                   \
+        if (std::is_same<T, float>::value)                                    \
+            prefix = "FLT_";                                                  \
+        if (std::is_same<T, double>::value)                                   \
+            prefix = "DBL_";                                                  \
+        if (std::is_same<T, long double>::value)                              \
+            prefix = "LDBL_";                                                 \
         mckl::Vector<std::string> s;                                          \
-        s.push_back("a < Lower bound");                                       \
+        s.push_back("a = Lower bound - delta");                               \
         s.push_back("a = Lower bound");                                       \
-        s.push_back("a > Lower bound");                                       \
-        s.push_back("a < Upper bound");                                       \
+        s.push_back("a = Lower bound + delta");                               \
+        s.push_back("a = Upper bound - delta");                               \
         s.push_back("a = Upper bound");                                       \
-        s.push_back("a > Upper bound");                                       \
+        s.push_back("a = Upper bound + delta");                               \
+        s.push_back("a =   -1 " + prefix + "MIN");                            \
+        s.push_back("a =    1 " + prefix + "MIN");                            \
+        s.push_back("a = -0.5 " + prefix + "MIN");                            \
+        s.push_back("a =  0.5 " + prefix + "MIN");                            \
+        s.push_back("a =   -1 " + prefix + "MAX");                            \
+        s.push_back("a =    1 " + prefix + "MAX");                            \
+        s.push_back("a = -0.5 " + prefix + "MAX");                            \
+        s.push_back("a =  0.5 " + prefix + "MAX");                            \
         s.push_back("a = -0.0");                                              \
-        s.push_back("a = +0.0");                                              \
+        s.push_back("a =  0.0");                                              \
         s.push_back("a = -inf");                                              \
-        s.push_back("a = +inf");                                              \
+        s.push_back("a =  inf");                                              \
         s.push_back("a =  nan");                                              \
                                                                               \
         const std::size_t K = a.size();                                       \
@@ -145,28 +168,29 @@
                                                                               \
         MCKL_EXAMPLE_MATH_ASM_RUN_##AR(T, func, vfunc);                       \
                                                                               \
-        const int nwid = 15;                                                  \
-        const int twid = 12;                                                  \
-        const std::size_t lwid = nwid + twid * 6;                             \
+        const int nwid = 30;                                                  \
+        const int swid = 15;                                                  \
+        const int twid = 10;                                                  \
+        const std::size_t lwid = nwid + swid * 3 + twid * 3;                  \
         std::cout << std::string(lwid, '=') << std::endl;                     \
         std::cout << std::setw(nwid) << std::left << #func;                   \
-        std::cout << std::setw(twid) << std::right << "Val (S)";              \
-        std::cout << std::setw(twid) << std::right << "Val (V)";              \
-        std::cout << std::setw(twid) << std::right << "Val (A)";              \
-        std::cout << std::setw(twid) << std::right << "ULP (S)";              \
-        std::cout << std::setw(twid) << std::right << "ULP (V)";              \
-        std::cout << std::setw(twid) << std::right << "ULP (A)";              \
+        std::cout << std::setw(swid) << std::right << "Val (S)";              \
+        std::cout << std::setw(swid) << std::right << "Val (V)";              \
+        std::cout << std::setw(swid) << std::right << "Val (A)";              \
+        std::cout << std::setw(twid) << std::right << math_error() + " (S)";  \
+        std::cout << std::setw(twid) << std::right << math_error() + " (V)";  \
+        std::cout << std::setw(twid) << std::right << math_error() + " (A)";  \
         std::cout << std::endl;                                               \
         std::cout << std::string(lwid, '-') << std::endl;                     \
         for (std::size_t i = 0; i != K; ++i) {                                \
             std::cout.unsetf(std::ios_base::floatfield);                      \
             std::cout << std::setprecision(3);                                \
             std::cout << std::setw(nwid) << std::left << s[i];                \
-            std::cout << std::setw(twid) << std::right;                       \
+            std::cout << std::setw(swid) << std::right;                       \
             math_val(y1[i], std::cout);                                       \
-            std::cout << std::setw(twid) << std::right;                       \
+            std::cout << std::setw(swid) << std::right;                       \
             math_val(y2[i], std::cout);                                       \
-            std::cout << std::setw(twid) << std::right;                       \
+            std::cout << std::setw(swid) << std::right;                       \
             math_val(y3[i], std::cout);                                       \
             std::cout.unsetf(std::ios_base::floatfield);                      \
             std::cout << std::setprecision(2);                                \
@@ -181,10 +205,10 @@
         std::cout << std::string(lwid, '-') << std::endl;                     \
     }                                                                         \
                                                                               \
-    inline void math_asm_##vfunc(                                             \
-        std::size_t N, std::size_t M, int nwid, int twid, T lb, T ub)         \
+    inline void math_asm_##vfunc(std::size_t N, std::size_t M, int nwid,      \
+        int twid, const MathBound<T> &bound)                                  \
     {                                                                         \
-        mckl::UniformRealDistribution<T> unif(lb, ub);                        \
+        mckl::UniformRealDistribution<T> unif(bound.lb(), bound.ub());        \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
         mckl::RNG_64 rng;                                                     \
                                                                               \
@@ -229,13 +253,16 @@
             }                                                                 \
         }                                                                     \
                                                                               \
-        std::cout.unsetf(std::ios_base::floatfield);                          \
-        std::cout << std::setprecision(5);                                    \
+        std::stringstream ss;                                                 \
+        ss << std::setprecision(5);                                           \
+        ss << "[";                                                            \
+        bound.lbs(ss);                                                        \
+        ss << ", ";                                                           \
+        bound.ubs(ss);                                                        \
+        ss << ")";                                                            \
         std::cout << std::setw(nwid) << std::left << #vfunc;                  \
+        std::cout << std::setw(nwid * 2) << std::left << ss.str();            \
         std::cout << std::setw(nwid) << std::right;                           \
-        math_val(lb, std::cout);                                              \
-        std::cout << std::setw(nwid) << std::right;                           \
-        math_val(ub, std::cout);                                              \
         std::cout.unsetf(std::ios_base::floatfield);                          \
         std::cout << std::fixed << std::setprecision(2);                      \
         std::cout << std::setw(twid) << std::right << c1;                     \
@@ -249,9 +276,47 @@
         std::cout << std::endl;                                               \
     }
 
+template <typename T>
+class MathBound
+{
+    public:
+    MathBound(T lb, T ub, const std::string &lbs = std::string(),
+        const std::string &ubs = std::string())
+        : lb_(lb), ub_(ub), lbs_(lbs), ubs_(ubs)
+    {
+    }
+
+    T lb() const { return lb_; }
+    T ub() const { return ub_; }
+
+    template <typename CharT, typename Traits>
+    void lbs(std::basic_ostream<CharT, Traits> &os) const
+    {
+        if (lbs_.empty())
+            math_val(lb_, os);
+        else
+            os << lbs_;
+    }
+
+    template <typename CharT, typename Traits>
+    void ubs(std::basic_ostream<CharT, Traits> &os) const
+    {
+        if (ubs_.empty())
+            math_val(ub_, os);
+        else
+            os << ubs_;
+    }
+
+    private:
+    T lb_;
+    T ub_;
+    std::string lbs_;
+    std::string ubs_;
+}; // class MathBound
+
 template <typename Test, typename T>
 inline void math_asm(std::size_t N, std::size_t M, Test &&test,
-    const mckl::Vector<std::pair<T, T>> &bounds)
+    const mckl::Vector<MathBound<T>> &bounds)
 {
     const int nwid = 15;
     const int twid = 10;
@@ -260,8 +325,7 @@ inline void math_asm(std::size_t N, std::size_t M, Test &&test,
     std::cout << std::string(lwid, '=') << std::endl;
 
     std::cout << std::setw(nwid) << std::left << "Function";
-    std::cout << std::setw(nwid) << std::right << "LB";
-    std::cout << std::setw(nwid) << std::right << "UB";
+    std::cout << std::setw(nwid * 2) << std::left << "Range";
     if (mckl::StopWatch::has_cycles()) {
         std::cout << std::setw(twid) << std::right << "cpE (S)";
         std::cout << std::setw(twid) << std::right << "cpE (V)";
@@ -271,26 +335,20 @@ inline void math_asm(std::size_t N, std::size_t M, Test &&test,
         std::cout << std::setw(twid) << std::right << "ME/s (V)";
         std::cout << std::setw(twid) << std::right << "ME/s (A)";
     }
-#if MCKL_HAS_BOOST
-    std::cout << std::setw(twid) << std::right << "ULP (S)";
-    std::cout << std::setw(twid) << std::right << "ULP (V)";
-    std::cout << std::setw(twid) << std::right << "ULP (A)";
-#else
-    std::cout << std::setw(twid) << std::right << "Err (S)";
-    std::cout << std::setw(twid) << std::right << "Err (V)";
-    std::cout << std::setw(twid) << std::right << "Err (A)";
-#endif
+    std::cout << std::setw(twid) << std::right << math_error() + " (S)";
+    std::cout << std::setw(twid) << std::right << math_error() + " (V)";
+    std::cout << std::setw(twid) << std::right << math_error() + " (A)";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
     for (auto &bd : bounds)
-        test(N, M, nwid, twid, bd.first, bd.second);
+        test(N, M, nwid, twid, bd);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
 template <typename Test, typename T>
 inline void math_asm(int argc, char **argv, Test &&test,
-    const mckl::Vector<std::pair<T, T>> &bounds)
+    const mckl::Vector<MathBound<T>> &bounds)
 {
     --argc;
     ++argv;

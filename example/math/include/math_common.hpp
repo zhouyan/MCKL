@@ -70,33 +70,90 @@ inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
     if (std::is_same<T, long double>::value)
         prefix = "LDBL_";
 
-    if (mckl::internal::is_equal(x, std::numeric_limits<T>::min()))
-        os << prefix + "MIN";
-    else if (mckl::internal::is_equal(x, -std::numeric_limits<T>::min()))
-        os << "-" + prefix + "MIN";
-    else if (mckl::internal::is_equal(x, std::numeric_limits<T>::max()))
-        os << prefix + "MAX";
-    else if (mckl::internal::is_equal(x, -std::numeric_limits<T>::max()))
-        os << "-" + prefix + "MAX";
-    else if (mckl::internal::is_equal(x, std::numeric_limits<T>::epsilon()))
-        os << prefix + "EPSILON";
-    else if (mckl::internal::is_equal(x, -std::numeric_limits<T>::epsilon()))
-        os << "-" + prefix + "EPSILON";
-    else if (!std::isnormal(x) && std::isfinite(x) && std::abs(x) > 0)
-        os << (x > 0 ? "< " : "> ") + prefix + "MIN";
-    else
+    if (!std::isfinite(x)) {
         os << x;
+        return;
+    }
+
+    if (mckl::internal::is_zero(x)) {
+        os << x;
+        return;
+    }
+
+    constexpr T fmin = std::numeric_limits<T>::min();
+    constexpr T fmax = std::numeric_limits<T>::max();
+    constexpr T feps = std::numeric_limits<T>::epsilon();
+
+    if (mckl::internal::is_equal(x, -fmin)) {
+        os << "-" + prefix + "MIN";
+        return;
+    }
+
+    if (mckl::internal::is_equal(x, fmin)) {
+        os << prefix + "MIN";
+        return;
+    }
+
+    if (mckl::internal::is_equal(x, -fmax)) {
+        os << "-" + prefix + "MAX";
+        return;
+    }
+
+    if (mckl::internal::is_equal(x, fmax)) {
+        os << prefix + "MAX";
+        return;
+    }
+
+    if (mckl::internal::is_equal(x, -feps)) {
+        os << "-" + prefix + "EPS";
+        return;
+    }
+
+    if (mckl::internal::is_equal(x, feps)) {
+        os << prefix + "EPS";
+        return;
+    }
+
+    const T nmin = x / fmin;
+    const T nmax = x / fmax;
+    const T neps = x / feps;
+
+    std::stringstream ss;
+    ss << std::setprecision(2);
+    if (std::abs(nmin) > 0.1 && std::abs(nmin) < 10) {
+        ss << nmin << ' ' << prefix << "MIN";
+        os << ss.str();
+        return;
+    }
+
+    if (std::abs(nmax) > 0.1) {
+        ss << nmax << ' ' << prefix << "max";
+        os << ss.str();
+        return;
+    }
+
+    if (std::abs(neps) > 0.1 && std::abs(neps) < 10) {
+        ss << neps << ' ' << prefix << "eps";
+        os << ss.str();
+        return;
+    }
+
+    os << x;
+}
+
+inline std::string math_error()
+{
+#if MCKL_HAS_BOOST
+    return "ULP";
+#else
+    return "Err.Rel";
+#endif
 }
 
 template <typename T, typename U>
 inline T math_error(T a, U r)
 {
     T b = static_cast<T>(r);
-
-    if (!std::isnormal(a) && std::isfinite(a))
-        a = 0;
-    if (!std::isnormal(b) && std::isfinite(b))
-        b = 0;
 
     if (std::isfinite(a) && std::isfinite(b)) {
 #if MCKL_HAS_BOOST
@@ -175,17 +232,9 @@ inline void math_summary_sv(mckl::Vector<MathPerf> perf)
         std::cout << std::setw(twid) << std::right << "ME/s (DV)";
     }
     std::cout << std::setw(ewid) << std::right << "Err.Abs (S)";
-#if MCKL_HAS_BOOST
-    std::cout << std::setw(ewid) << std::right << "Err.ULP (S)";
-#else
-    std::cout << std::setw(ewid) << std::right << "Err.Rel (S)";
-#endif
+    std::cout << std::setw(ewid) << std::right << math_error() + " (S)";
     std::cout << std::setw(ewid) << std::right << "Err.Abs (D)";
-#if MCKL_HAS_BOOST
-    std::cout << std::setw(ewid) << std::right << "Err.ULP (D)";
-#else
-    std::cout << std::setw(ewid) << std::right << "Err.Rel (D)";
-#endif
+    std::cout << std::setw(ewid) << std::right << math_error() + " (D)";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;

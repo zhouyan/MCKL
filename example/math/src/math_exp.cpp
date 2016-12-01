@@ -36,17 +36,27 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, exp, vd_exp)
 int main(int argc, char **argv)
 {
     math_asm_vd_exp_check(0xC086232BDD7ABCD2ULL, 0x40862B7D369A5AA7ULL);
-    mckl::Vector<std::pair<double, double>> bounds;
-    bounds.push_back(std::make_pair(-707, 707));
-    bounds.push_back(std::make_pair(-708.39, -707));
-    bounds.push_back(std::make_pair(-707, -500));
-    bounds.push_back(std::make_pair(-500, -1));
-    bounds.push_back(std::make_pair(-1, -DBL_MIN));
-    bounds.push_back(std::make_pair(-DBL_MIN, DBL_MIN));
-    bounds.push_back(std::make_pair(DBL_MIN, 1));
-    bounds.push_back(std::make_pair(1, 500));
-    bounds.push_back(std::make_pair(500, 707));
-    bounds.push_back(std::make_pair(707, 709.43));
+
+    union {
+        std::uint64_t u;
+        double lower;
+    };
+    u = 0xC086232BDD7ABCD2ULL;
+    union {
+        std::uint64_t v;
+        double upper;
+    };
+    v = 0x40862B7D369A5AA7ULL;
+    mckl::Vector<MathBound<double>> bounds;
+    bounds.push_back(MathBound<double>(lower, -707));
+    bounds.push_back(MathBound<double>(-707, -500));
+    bounds.push_back(MathBound<double>(-500, -1));
+    bounds.push_back(MathBound<double>(-1, -DBL_MIN));
+    bounds.push_back(MathBound<double>(-DBL_MIN, DBL_MIN));
+    bounds.push_back(MathBound<double>(DBL_MIN, 1));
+    bounds.push_back(MathBound<double>(1, 500));
+    bounds.push_back(MathBound<double>(500, 707));
+    bounds.push_back(MathBound<double>(707, upper));
     math_asm(argc, argv, math_asm_vd_exp, bounds);
 
     return 0;

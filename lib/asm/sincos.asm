@@ -47,7 +47,7 @@ default rel
     vtestpd ymm5, ymm5
     jz %%inrange
 
-    ; reduce ymm1 to around 2^57 if ymm1 > 2^57
+    ; reduce ymm1 to around 2^53 if ymm1 > 2^53
     vpand ymm2, ymm1, [max253]
     vcmpgtpd ymm3, ymm1, [pow253]
     vblendvpd ymm1, ymm1, ymm2, ymm3

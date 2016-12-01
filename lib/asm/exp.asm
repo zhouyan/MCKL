@@ -152,7 +152,7 @@ default rel
 %macro expm1 2 ; {{{
     vmovupd ymm0, %2
 
-    ; log(2) <= abs(a) <= log(2)
+    ; log(2) / 2 <= abs(a) <= log(2)
     vxorpd ymm15, ymm15, ymm15 ; k = 0
     vmulpd ymm1, ymm0, [half]  ; x = 0.5 * a
     vandpd ymm2, ymm0, [pmask] ; abs(a)

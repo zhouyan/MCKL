@@ -36,14 +36,18 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, tan, vd_tan)
 int main(int argc, char **argv)
 {
     math_asm_vd_tan_check(0xFFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
-    mckl::Vector<std::pair<double, double>> bounds;
-    bounds.push_back(std::make_pair(-1e4, 1e4));
-    bounds.push_back(std::make_pair(0, DBL_MIN));
-    bounds.push_back(std::make_pair(DBL_MIN, 1));
-    bounds.push_back(std::make_pair(1e0, 1e1));
-    bounds.push_back(std::make_pair(1e1, 1e2));
-    bounds.push_back(std::make_pair(1e2, 1e3));
-    bounds.push_back(std::make_pair(1e3, 1e4));
+
+    union {
+        std::uint64_t u;
+        double upper;
+    };
+    u = 0x41D921FB5411E920ULL;
+    mckl::Vector<MathBound<double>> bounds;
+    bounds.push_back(MathBound<double>(-upper, -1));
+    bounds.push_back(MathBound<double>(-1, -DBL_MIN));
+    bounds.push_back(MathBound<double>(-DBL_MIN, DBL_MIN));
+    bounds.push_back(MathBound<double>(DBL_MIN, 1));
+    bounds.push_back(MathBound<double>(1, upper));
     math_asm(argc, argv, math_asm_vd_tan, bounds);
 
     return 0;
