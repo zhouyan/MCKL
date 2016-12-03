@@ -62,12 +62,12 @@ than the standard library or MKL VML in high accuracy mode.
 # Compiler support
 
 This library makes heavy use of some template metaprogramming techniques. It
-requires a C++11 standard conforming compiler.
+requires a C++14 standard conforming compiler.
 
 This library has been regularly tested with recent [Clang][clang], [GCC][gcc]
-and [Intel C++ Compiler][icpc] in C++11 mode.
+and [Intel C++ Compiler][icpc] in C++14 mode.
 
-Other compilers might work but are not tested. Complete C++11 implementation is
+Other compilers might work but are not tested. Complete C++14 implementation is
 required with thread-local storage as an exception.
 
 # Examples

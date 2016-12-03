@@ -776,7 +776,7 @@ class MKLUniformBits<BRNG, 64>
 
 } // namespace mckl::internal
 
-/// \brief MKL RNG C++11 engine
+/// \brief Use MKL BRNG as RNG engine
 /// \ingroup MKL
 ///
 /// \tparam BRNG A MKL BRNG. It need to support either `viRngUniformBits32` or
@@ -1231,7 +1231,7 @@ inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 
 } // namespace mckl::internal
 
-/// \brief Register a C++11 RNG as MKL BRNG
+/// \brief Register an RNG as MKL BRNG
 /// \ingroup MKL
 ///
 /// \details

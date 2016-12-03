@@ -183,7 +183,7 @@ class StopWatchGuard
     watch_type &watch_;
 }; // class StopWatchGuard
 
-/// \brief StopWatch as an adapter of C++11 clock
+/// \brief StopWatch as an adapter of C++ standard library compatible clock
 /// \ingroup StopWatch
 template <typename ClockType = std::chrono::high_resolution_clock>
 class StopWatchClockAdapter

@@ -195,15 +195,15 @@ class RDRANDEngine
     }
 }; // class RDRANDEngine
 
-/// \brief C++11 Engine using 16-bit RDRAND instruction
+/// \brief RNG Engine using 16-bit RDRAND instruction
 /// \ingroup RDRAND
 using RDRAND16 = RDRANDEngine<std::uint16_t>;
 
-/// \brief C++11 Engine using 32-bit RDRAND instruction
+/// \brief RNG Engine using 32-bit RDRAND instruction
 /// \ingroup RDRAND
 using RDRAND32 = RDRANDEngine<std::uint32_t>;
 
-/// \brief C++11 Engine using 64-bit RDRAND instruction
+/// \brief RNG Engine using 64-bit RDRAND instruction
 /// \ingroup RDRAND
 using RDRAND64 = RDRANDEngine<std::uint64_t>;
 
