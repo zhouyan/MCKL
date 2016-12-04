@@ -243,11 +243,11 @@ class PFCVMove<Backend, mckl::ColMajor, RNGSetType>
     void eval_range(std::size_t, const mckl::ParticleRange<T> &range)
     {
         pf_move_range(range.begin().rng(), range.size(),
-            range.particle().state().col_data(0) + range.first(),
-            range.particle().state().col_data(1) + range.first(),
-            range.particle().state().col_data(2) + range.first(),
-            range.particle().state().col_data(3) + range.first(),
-            w_.data() + range.first(), v_.data() + range.first());
+            range.particle().state().col_data(0) + range.ibegin(),
+            range.particle().state().col_data(1) + range.ibegin(),
+            range.particle().state().col_data(2) + range.ibegin(),
+            range.particle().state().col_data(3) + range.ibegin(),
+            w_.data() + range.ibegin(), v_.data() + range.ibegin());
     }
 
     void eval_first(std::size_t, mckl::Particle<T> &particle)

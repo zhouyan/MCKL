@@ -284,47 +284,70 @@ class ParticleRange
     using particle_type = Particle<T>;
     using size_type = typename particle_type::size_type;
 
-    ParticleRange(size_type first, size_type last, particle_type *pptr,
+    /// \brief Construct a new particle range
+    ///
+    /// \param ibegin Integral index of the first particle
+    /// \param iend Integral index of one pass the last particle
+    /// \param pptr A pointer to the Particle system
+    /// \param grainsize The grain size. A particle range is dvisible if its
+    /// size is larger thant he grainsize.
+    ParticleRange(size_type ibegin, size_type iend, particle_type *pptr,
         size_type grainsize = 1)
-        : pptr_(pptr), first_(first), last_(last), grainsize_(grainsize)
+        : pptr_(pptr), ibegin_(ibegin), iend_(iend), grainsize_(grainsize)
     {
-        runtime_assert(!internal::is_negative(first) && first < last &&
-                last <= pptr->size() && grainsize > 0,
+        runtime_assert(!internal::is_negative(ibegin) && ibegin < iend &&
+                iend <= pptr->size() && grainsize > 0,
             "**ParticleRange** constructed with invalid arguments");
     }
 
     template <typename SplitType>
     ParticleRange(ParticleRange<T> &other, SplitType)
         : pptr_(other.pptr_)
-        , first_((other.first_ + other.last_) / 2)
-        , last_(other.last_)
+        , ibegin_((other.ibegin_ + other.iend_) / 2)
+        , iend_(other.iend_)
         , grainsize_(other.grainsize_)
     {
-        other.last_ = first_;
+        other.iend_ = ibegin_;
     }
 
+    /// \brief Get a reference to the particle system
     particle_type &particle() const { return *pptr_; }
 
+    /// \brief Get a pointer to the particle system
     particle_type *particle_ptr() const { return pptr_; }
 
-    size_type size() const { return last_ - first_; }
+    /// \brief The size of this range
+    size_type size() const { return iend_ - ibegin_; }
 
-    size_type first() const { return first_; }
+    /// \brief Integral index of the first particle
+    size_type ibegin() const { return ibegin_; }
 
-    size_type last() const { return last_; }
+    /// \brief Integral index of one pass the last particle
+    size_type iend() const { return iend_; }
 
-    ParticleIndex<T> begin() const { return pptr_->index(first_); }
+    /// \brief Alias to `ibegin`
+    [[deprecated]] size_type first() const { return ibegin(); }
 
-    ParticleIndex<T> end() const { return pptr_->index(last_); }
+    /// \brief Alias to `iend`
+    [[deprecated]] size_type last() const { return iend(); }
 
-    bool empty() const { return first_ == last_; }
+    /// \brief Get a `ParticleIndex<T>` object for the first particle in range
+    ParticleIndex<T> begin() const { return pptr_->operator[](ibegin_); }
 
+    /// \brief Get a `ParticleIndex<T>` object for one pass the last particle
+    /// in range
+    ParticleIndex<T> end() const { return pptr_->operator[](iend_); }
+
+    /// \brief If the range is empty
+    bool empty() const { return ibegin_ == iend_; }
+
+    /// \brief If the range can be divided into two sub-ranges.
     bool is_divisible() const { return size() > grainsize_; }
 
     private:
     particle_type *pptr_;
-    size_type first_;
-    size_type last_;
+    size_type ibegin_;
+    size_type iend_;
     size_type grainsize_;
 }; // class ParticleRange
 
@@ -453,20 +476,37 @@ class Particle
     /// \brief Get the (sequential) RNG used stream for resampling
     const rng_type &rng() const { return rng_; }
 
-    /// \brief Get a ParticleIndex<T> object
-    ParticleIndex<T> index(size_type i) { return ParticleIndex<T>(i, this); }
+    /// \brief Get a ParticleIndex<T> object for the i-th particle
+    ParticleIndex<T> operator[](size_type i)
+    {
+        return ParticleIndex<T>(i, this);
+    }
+
+    /// \brief Get a ParticleIndex<T> object for the i-th particle
+    ParticleIndex<T> operator()(size_type i) { return operator[](i); }
+
+    /// \brief Get a ParticleIndex<T> object for the i-th particle
+    ParticleIndex<T> at(size_type i)
+    {
+        runtime_assert(i <= size(), "**Particle::at** index out of range");
+
+        return operator[](i);
+    }
+
+    /// \brief Alias to `operator[]`
+    ParticleIndex<T> index(size_type i) { return operator[](i); }
 
     /// \brief Get a ParticleIndex<T> object for the first particle
-    ParticleIndex<T> begin() { return index(0); }
+    ParticleIndex<T> begin() { return operator[](0); }
 
     /// \brief Get a ParticleIndex<T> object for one pass the last particle
-    ParticleIndex<T> end() { return index(size_); }
+    ParticleIndex<T> end() { return operator[](size_); }
 
     /// \brief Get a ParticleRange<T> object of a given range
     ParticleRange<T> range(
-        size_type first, size_type last, size_type grainsize = 1)
+        size_type ibegin, size_type iend, size_type grainsize = 1)
     {
-        return ParticleRange<T>(first, last, this, grainsize);
+        return ParticleRange<T>(ibegin, iend, this, grainsize);
     }
 
     /// \brief Get a ParticleRange<T> object of all particles
