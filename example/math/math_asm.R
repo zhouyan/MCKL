@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/math/CMakeLists.txt
+#  MCKL/example/math/math_asm.R
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -29,31 +29,27 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLExample-math CXX)
+suppressPackageStartupMessages(library(ggplot2))
 
-mckl_add_example(math)
+theme_set(theme_bw())
+pdf("math_asm.pdf", width = 14.4, height = 9)
 
-mckl_add_test(math vmf)
+functions <- c("exp", "exp2", "expm1", "log", "log2", "log10", "log1p", "sin",
+    "cos", "sincos", "tan")
 
-if(AVX2_FOUND AND FMA_FOUND)
-    mckl_add_test(math fma)
-    if(MCKL_ENABLE_LIBRARY)
-        add_custom_target(math_asm)
-        add_custom_target(math_asm-check)
-        set(MATH_ASM_FUNCTIONS sqrt exp exp2 expm1 log log2 log10 log1p sin cos
-            sincos tan)
-        foreach(f ${MATH_ASM_FUNCTIONS})
-            mckl_add_test(math ${f})
-            add_dependencies(math_asm math_${f})
-            add_dependencies(math_asm-check math_${f}-check)
-        endforeach(f ${MATH_ASM_FUNCTIONS})
-    endif(MCKL_ENABLE_LIBRARY)
-endif(AVX2_FOUND AND FMA_FOUND)
+for (f in functions) {
+    dat <- read.table(paste0("math_", f, ".txt"), header = TRUE)
+    dat$Range <- factor(dat$Range, ordered = TRUE, levels = unique(dat$Range))
+    plt <- ggplot(dat)
+    plt <- plt + aes(x = N, y = cpE)
+    plt <- plt + aes(group = Library, color = Library)
+    plt <- plt + geom_line()
+    plt <- plt + geom_point()
+    plt <- plt + scale_x_log10()
+    plt <- plt + scale_y_log10()
+    plt <- plt + facet_wrap(~Range, scale = "free_y")
+    plt <- plt + ggtitle(f)
+    print(plt)
+}
 
-mckl_add_file(math math_asm.R)
-
-add_custom_target(math_asm-pdf
-    DEPENDS math-files math_asm-check
-    COMMAND Rscript "${PROJECT_BINARY_DIR}/math_asm.R"
-    COMMENT "Plotting math_asm-check results"
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+gc <- dev.off()

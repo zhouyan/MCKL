@@ -35,7 +35,7 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, cos, vd_cos)
 
 int main(int argc, char **argv)
 {
-    math_asm_vd_cos_check(0xFFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
+    math_asm_vd_cos_check(0xC1D921FB5411E920ULL, 0x41D921FB5411E920ULL);
 
     union {
         std::uint64_t u;

@@ -35,38 +35,58 @@
 %macro math_kernel_a1r1 2 ; function, operand size {{{
     push rbp
     mov rbp, rsp
+    shr rsp, 5
+    shl rsp, 5
     sub rsp, 0x20
+    mov rax, rdi
 
-    test rdi, rdi
+    cmp rdi, 0x2000 / %1
+    jg .skip
+
+    sub rsp, 0x2000
+    mov rcx, rax
+    lea rdi, [rsp + 0x20]
+%if %1 == 4
+    rep movsd
+%elif %1 == 8
+    rep movsq
+%else
+    %error
+%endif
+    lea rsi, [rsp + 0x20]
+
+.skip:
+
+    test rax, rax
     jz .return
 
-    mov rax, rdi
+    mov r8, rax
 %if %1 == 4
-    shr rdi, 3
-    and rax, 0x7
+    shr rax, 3
+    and r8,  0x7
 %elif %1 == 8
-    shr rdi, 2
-    and rax, 0x3
+    shr rax, 2
+    and r8,  0x3
 %else
     %error
 %endif
 
     %{2}_constants
 
-    test rdi, rdi
+    test rax, rax
     jz .last
 
 .loop: align 16
     %2 [rdx], [rsi]
     add rsi, 0x20
     add rdx, 0x20
-    dec rdi
+    dec rax
     jnz .loop
 
 .last:
-    test rax, rax
+    test r8, r8
     jz .return
-    mov rcx, rax
+    mov rcx, r8
     mov rdi, rsp
 %if %1 == 4
     rep movsd
@@ -75,10 +95,10 @@
 %else
     %error
 %endif
-    vmovups ymm0, [rsp]
+    vmovaps ymm0, [rsp]
     %2 ymm0, ymm0
-    vmovups [rsp], ymm0
-    mov rcx, rax
+    vmovaps [rsp], ymm0
+    mov rcx, r8
     mov rsi, rsp
     mov rdi, rdx
 %if %1 == 4

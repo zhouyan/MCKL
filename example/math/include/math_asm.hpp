@@ -200,7 +200,7 @@
     }                                                                         \
                                                                               \
     inline void math_asm_##vfunc(std::size_t N, std::size_t M, int nwid,      \
-        int twid, const MathBound<T> &bound)                                  \
+        int twid, const MathBound<T> &bound, std::ofstream &os, bool print)   \
     {                                                                         \
         mckl::UniformRealDistribution<T> unif(bound.lb(), bound.ub());        \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
@@ -254,20 +254,28 @@
         ss << ", ";                                                           \
         bound.ubs(ss);                                                        \
         ss << ")";                                                            \
-        std::cout << std::setw(nwid) << std::left << #vfunc;                  \
-        std::cout << std::setw(nwid * 2) << std::left << ss.str();            \
-        std::cout << std::setw(nwid) << std::right;                           \
-        std::cout.unsetf(std::ios_base::floatfield);                          \
-        std::cout << std::fixed << std::setprecision(2);                      \
-        std::cout << std::setw(twid) << std::right << c1;                     \
-        std::cout << std::setw(twid) << std::right << c2;                     \
-        std::cout << std::setw(twid) << std::right << c3;                     \
-        std::cout.unsetf(std::ios_base::floatfield);                          \
-        std::cout << std::setprecision(2);                                    \
-        std::cout << std::setw(twid) << std::right << e1;                     \
-        std::cout << std::setw(twid) << std::right << e2;                     \
-        std::cout << std::setw(twid) << std::right << e3;                     \
-        std::cout << std::endl;                                               \
+        os << #func << '\t' << N << '\t' << '"' << ss.str() << '"' << '\t'    \
+           << "STD\t" << c1 << '\n';                                          \
+        os << #func << '\t' << N << '\t' << '"' << ss.str() << '"' << '\t'    \
+           << "MKL\t" << c2 << '\n';                                          \
+        os << #func << '\t' << N << '\t' << '"' << ss.str() << '"' << '\t'    \
+           << "MCKL\t" << c3 << '\n';                                         \
+        if (print) {                                                          \
+            std::cout << std::setw(nwid) << std::left << #vfunc;              \
+            std::cout << std::setw(nwid * 2) << std::left << ss.str();        \
+            std::cout << std::setw(nwid) << std::right;                       \
+            std::cout.unsetf(std::ios_base::floatfield);                      \
+            std::cout << std::fixed << std::setprecision(2);                  \
+            std::cout << std::setw(twid) << std::right << c1;                 \
+            std::cout << std::setw(twid) << std::right << c2;                 \
+            std::cout << std::setw(twid) << std::right << c3;                 \
+            std::cout.unsetf(std::ios_base::floatfield);                      \
+            std::cout << std::setprecision(2);                                \
+            std::cout << std::setw(twid) << std::right << e1;                 \
+            std::cout << std::setw(twid) << std::right << e2;                 \
+            std::cout << std::setw(twid) << std::right << e3;                 \
+            std::cout << std::endl;                                           \
+        }                                                                     \
     }
 
 template <typename T>
@@ -310,40 +318,48 @@ class MathBound
 
 template <typename Test, typename T>
 inline void math_asm(std::size_t N, std::size_t M, Test &&test,
-    const mckl::Vector<MathBound<T>> &bounds)
+    const mckl::Vector<MathBound<T>> &bounds, std::ofstream &os, bool print)
 {
     const int nwid = 15;
     const int twid = 10;
     const std::size_t lwid = nwid * 3 + twid * 6;
 
-    std::cout << std::string(lwid, '=') << std::endl;
+    if (print) {
+        std::cout << std::string(lwid, '=') << std::endl;
 
-    std::cout << std::setw(nwid) << std::left << "Function";
-    std::cout << std::setw(nwid * 2) << std::left << "Range";
-    if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(twid) << std::right << "cpE (S)";
-        std::cout << std::setw(twid) << std::right << "cpE (V)";
-        std::cout << std::setw(twid) << std::right << "cpE (A)";
-    } else {
-        std::cout << std::setw(twid) << std::right << "ME/s (S)";
-        std::cout << std::setw(twid) << std::right << "ME/s (V)";
-        std::cout << std::setw(twid) << std::right << "ME/s (A)";
+        std::cout << std::setw(nwid) << std::left << "Function";
+        std::cout << std::setw(nwid * 2) << std::left << "Range";
+        if (mckl::StopWatch::has_cycles()) {
+            std::cout << std::setw(twid) << std::right << "cpE (S)";
+            std::cout << std::setw(twid) << std::right << "cpE (V)";
+            std::cout << std::setw(twid) << std::right << "cpE (A)";
+        } else {
+            std::cout << std::setw(twid) << std::right << "ME/s (S)";
+            std::cout << std::setw(twid) << std::right << "ME/s (V)";
+            std::cout << std::setw(twid) << std::right << "ME/s (A)";
+        }
+        std::cout << std::setw(twid) << std::right << math_error() + " (S)";
+        std::cout << std::setw(twid) << std::right << math_error() + " (V)";
+        std::cout << std::setw(twid) << std::right << math_error() + " (A)";
+        std::cout << std::endl;
+
+        std::cout << std::string(lwid, '-') << std::endl;
     }
-    std::cout << std::setw(twid) << std::right << math_error() + " (S)";
-    std::cout << std::setw(twid) << std::right << math_error() + " (V)";
-    std::cout << std::setw(twid) << std::right << math_error() + " (A)";
-    std::cout << std::endl;
 
-    std::cout << std::string(lwid, '-') << std::endl;
     for (auto &bd : bounds)
-        test(N, M, nwid, twid, bd);
-    std::cout << std::string(lwid, '-') << std::endl;
+        test(N, M, nwid, twid, bd, os, print);
+
+    if (print)
+        std::cout << std::string(lwid, '-') << std::endl;
 }
 
 template <typename Test, typename T>
 inline void math_asm(int argc, char **argv, Test &&test,
     const mckl::Vector<MathBound<T>> &bounds)
 {
+    std::ofstream os(*argv + std::string(".txt"));
+    os << "Function\tN\tRange\tLibrary\tcpE\n";
+
     --argc;
     ++argv;
 
@@ -367,7 +383,14 @@ inline void math_asm(int argc, char **argv, Test &&test,
         }
     }
 
-    math_asm(N, M, std::forward<Test>(test), bounds);
+    std::size_t K = 128;
+    while (K < N) {
+        math_asm(K, M, std::forward<Test>(test), bounds, os, false);
+        K *= 2;
+    }
+    math_asm(N, M, std::forward<Test>(test), bounds, os, true);
+
+    os.close();
 }
 
 #endif // MCKL_EXAMPLE_MATH_ASM_HPP
