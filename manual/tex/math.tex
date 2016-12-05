@@ -180,16 +180,22 @@ functions.
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{add(n, a, b, y)}       & $y = a + b$           & Real, Complex \\
-    \texttt{sub(n, a, b, y)}       & $y = a - b$           & Real, Complex \\
-    \texttt{sqr(n, a, y)}          & $y = a^2$             & Real          \\
-    \texttt{mul(n, a, b, y)}       & $y = ab$              & Real, Complex \\
-    \texttt{mulbyconj(n, a, b, y)} & $y = a\bar{b}$        & Complex       \\
-    \texttt{conj(n, a, y)}         & $y = \bar{a}$         & Complex       \\
-    \texttt{abs(n, a, y)}          & $y = \Abs{a}$         & Real, Complex \\
-    \texttt{arg(n, a, y)}          & $y = \mathrm{arg}(a)$ & Complex       \\
-    \texttt{muladd(n, a, b, c, y)} & $y = ab + c$          & Real, Complex \\
-    \texttt{fma(n, a, b, c, y)}    & $y = ab + c$          & Real          \\
+    \texttt{add(n, a, b, y)}        & $y = a + b$           & Real, Complex \\
+    \texttt{sub(n, a, b, y)}        & $y = a - b$           & Real, Complex \\
+    \texttt{sqr(n, a, y)}           & $y = a^2$             & Real          \\
+    \texttt{mul(n, a, b, y)}        & $y = ab$              & Real, Complex \\
+    \texttt{mulbyconj(n, a, b, y)}  & $y = a\bar{b}$        & Complex       \\
+    \texttt{conj(n, a, y)}          & $y = \bar{a}$         & Complex       \\
+    \texttt{abs(n, a, y)}           & $y = \Abs{a}$         & Real, Complex \\
+    \texttt{arg(n, a, y)}           & $y = \mathrm{arg}(a)$ & Complex       \\
+    \texttt{muladd(n, a, b, c, y)}  & $y = ab + c$          & Real, Complex \\
+    \texttt{mulsub(n, a, b, c, y)}  & $y = ab - c$          & Real, Complex \\
+    \texttt{nmuladd(n, a, b, c, y)} & $y = -ab + c$         & Real, Complex \\
+    \texttt{nmulsub(n, a, b, c, y)} & $y = -ab - c$         & Real, Complex \\
+    \texttt{fmadd(n, a, b, c, y)}   & $y = ab + c$ (fused)  & Real          \\
+    \texttt{fmsub(n, a, b, c, y)}   & $y = ab - c$ (fused)  & Real          \\
+    \texttt{fnmadd(n, a, b, c, y)}  & $y = -ab + c$ (fused) & Real          \\
+    \texttt{fnmsub(n, a, b, c, y)}  & $y = -ab - c$ (fused) & Real          \\
     \bottomrule
   \end{tabularx}
   \caption{Arithmetic functions}
@@ -313,28 +319,35 @@ functions.
 \section{Fused multiplication and addition}
 \label{sec:Fused multiplication and addition}
 
-The |muladd| and |fma| functions in the last section differs in that |fma|
+The |muladd| and |fmadd| functions in the last section differs in that |fmadd|
 always does fused multiplication and addition through |std::fma| while |muladd|
-only does so when hardware support for \fma3 is detected. Also |muladd|
-supports complex numbers as input while |fma| does not. However, the compiler
-may or may not be able to make use the hardware support. And it may not
-vectorize the loop as most modern \cpp compilers would do for simpler
-operations such as addition and multiplication. When software implementation of
-|std::fma| is used, it will be much slower than using a multiplication and an
-addition. In this case, there are assembly implementations that take advantage
-of the hardware support for |float| and |double| precision. To enable this
-feature, one need to build and link to the runtime library
-(see~ref{sec:Optional runtime library}). One also need to set the configuration
-macro |MCKL_USE_ASM_LIB| to true. In addition, this feature is only enabled for
-platforms with \fma3 instruction set support. The library detects the
-availability of these instructions through compiler pre-defined macros. If this
-mechanism is not adequate, one can manually enable or disable them through the
-configuration macro |MCKL_HAS_FMA|. Note that, when the compiler is able to
-generate vectorized loop for |std::fma|, the assembly library may or may not
-outperform the compiler generated binary. If the compiler generated binary is
-preferred but the runtime library is also enabled for its other features, then
-one can define the configuration macro |MCKL_USE_ASM_FMA| to false to disable
-this feature.
+use one multiplication and one addition. Also |muladd| supports complex numbers
+as input while |fmadd| does not. However, the compiler may or may not be able
+to make use the hardware \fma support. And it may not vectorize the loop in
+|fmadd| etc., as most modern \cpp compilers would do for simpler operations
+such as addition and multiplication.
+
+When software implementation of |std::fma| is used, it will be much slower than
+using one multiplication and one addition. In this case, there are assembly
+implementations that take advantage of the hardware support for |float| and
+|double| precision. To enable this feature, one need to build and link to the
+runtime library (see section~\ref{sec:Optional runtime library}). One also need
+to set the configuration macro |MCKL_USE_ASM_LIB| to true. In addition, this
+feature is only enabled for platforms with \fma{}3 instruction set support.
+
+The library detects the availability of these instructions through compiler
+pre-defined macros. If this mechanism is not adequate, one can manually enable
+or disable them through the configuration macro |MCKL_HAS_FMA|. Note that, when
+the compiler is able to generate vectorized loop for |std::fma|, the assembly
+library may or may not outperform the compiler generated binary. If the
+compiler generated binary is preferred but the runtime library is also enabled
+for its other features, then one can define the configuration macro
+|MCKL_USE_ASM_FMA| to false to disable this feature.
+
+The same principles also applies to other related functions such as |mulsub|
+and |fmsub|. Last but not least, when the runtime library is used, it also
+replace |float| and |double| precisions of |muladd|, etc., with their
+corresponding fused version, which is faster and more accurate.
 
 \section{Experimental vectorized implementation}
 \label{sec:Experimental vectorized implementation}
@@ -343,9 +356,9 @@ Optionally, one can enable an experimental implementation of a few selected
 functions, listed in table~\ref{tab:Functions with experimental vectorized
   implementation}, to enhance their performance of |double| precision. To
 enable this feature, one need to build and link to the runtime library
-(see~\ref{sec:Optional runtime library}). One also need to set the
+(see section~\ref{sec:Optional runtime library}). One also need to set the
 configuration macros |MCKL_USE_ASM_LIB| and |MCKL_USE_ASM_VMF| to true. In
-addition, this feature is only enabled for platforms with \avx2 and \fma3
+addition, this feature is only enabled for platforms with \avx{}2 and \fma{}3
 instruction sets support. The library detects the availability of these
 instructions through compiler pre-defined macros. If this mechanism is not
 adequate, one can manually enable or disable them through the configuration
@@ -354,14 +367,13 @@ macros, |MCKL_HAS_AVX2| and |MCKL_HAS_FMA|, respectively.
 \subsection{Caveats}
 \label{sub:Caveats}
 
+The three exponential functions have slightly reduced upper bounds of ranges.
 The four trigonometric functions have reduced ranges. They only give meaningful
 results for input $\Abs{a} < A$ where $A \approx 2^{30.5}$. For finite values
 with larger magnitudes, finite results will be given but the accuracy
-degenerate quickly. For $A < \Abs{a} < 2^{43}$, there are about three accurate
-decimal digits. For values with even larger magnitudes, the results are
-useless.
-
-The three exponential functions have slightly reduced upper bounds of ranges.
+degenerate quickly. For $A < \Abs{a} < 2^{43}$, there are at least three
+accurate decimal digits. For values with even larger magnitudes, the results
+are useless.
 
 \subsection{Subnormal numbers}
 \label{sub:Subnormal numbers}
@@ -382,12 +394,13 @@ treatment of subnormal numbers as described above.
 
 These functions have reduced accuracy compared to the standard library.
 Reputable implementations of math functions usually give results with error
-bounded by $1\ulp$. Some of these functions, especially the trigonometric
+bounded by 1~\ulp. Some of these functions, especially the trigonometric
 functions, give considerably larger errors. Tables~\ref{tab:Measured accuracy
   of vectorized implementation of exp} to~\ref{tab:Measured accuracy of
   vectorized implementation of tan} give the measured upper bounds of errors
-and the intervals on which they are measured. In the tables, $\delta$ denotes
-the smallest normal |double| precision floating numbers.
+and the intervals on which they are measured. The measurement was done by
+generating one billion random inputs. In the tables, $\delta$ denotes the
+smallest normal |double| precision floating numbers.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LL}
@@ -596,11 +609,11 @@ the smallest normal |double| precision floating numbers.
     \toprule
     Range & Error (\ulp) \\
     \midrule
-    $[-1.7\times10^9, -1)$ & $2$ \\
-    $[-1, -\delta)$        & $2$ \\
+    $[-1.7\times10^9, -1)$ & $4$ \\
+    $[-1, -\delta)$        & $4$ \\
     $[-\delta, \delta)$    & $0$ \\
-    $[\delta, 1)$          & $2$ \\
-    $[1, 1.7\times10^9)$   & $2$ \\
+    $[\delta, 1)$          & $4$ \\
+    $[1, 1.7\times10^9)$   & $4$ \\
     \bottomrule
   \end{tabularx}
   \caption{Measured accuracy of vectorized implementation of \texttt{tan}}

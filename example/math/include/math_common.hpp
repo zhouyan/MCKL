@@ -159,7 +159,10 @@ inline T math_error(T a, U r)
 #if MCKL_HAS_BOOST
         return std::abs(boost::math::float_distance(a, b));
 #else
-        return std::abs((a - b) / b);
+        T err_abs = std::abs(a - b);
+        T err_rel = std::abs(err_abs / b);
+
+        return std::min(err_abs, err_rel);
 #endif
     }
 
@@ -209,54 +212,6 @@ inline void math_error(std::size_t n, const T *r1, const U *r2, T &e1, T &e2)
         f2 = std::max(f2, math_error(r1[i], s[i]));
     e1 = std::max(e1, f1);
     e2 = std::max(e2, f2);
-}
-
-inline void math_summary_sv(mckl::Vector<MathPerf> perf)
-{
-    const int nwid = 10;
-    const int twid = 10;
-    const int ewid = 15;
-    const std::size_t lwid = nwid + twid * 4 + ewid * 4;
-
-    std::cout << std::string(lwid, '=') << std::endl;
-
-    std::cout << std::setw(nwid) << std::left << "Function";
-    if (mckl::StopWatch::has_cycles()) {
-        std::cout << std::setw(twid) << std::right << "cpE (S)";
-        std::cout << std::setw(twid) << std::right << "cpE (SV)";
-        std::cout << std::setw(twid) << std::right << "cpE (D)";
-        std::cout << std::setw(twid) << std::right << "cpE (DV)";
-    } else {
-        std::cout << std::setw(twid) << std::right << "ME/s (S)";
-        std::cout << std::setw(twid) << std::right << "ME/s (SV)";
-        std::cout << std::setw(twid) << std::right << "ME/s (D)";
-        std::cout << std::setw(twid) << std::right << "ME/s (DV)";
-    }
-    std::cout << std::setw(ewid) << std::right << "Err.Abs (S)";
-    std::cout << std::setw(ewid) << std::right << math_error() + " (S)";
-    std::cout << std::setw(ewid) << std::right << "Err.Abs (D)";
-    std::cout << std::setw(ewid) << std::right << math_error() + " (D)";
-    std::cout << std::endl;
-
-    std::cout << std::string(lwid, '-') << std::endl;
-
-    for (std::size_t i = 0; i != perf.size(); ++i) {
-        std::cout << std::fixed << std::setprecision(2);
-        std::cout << std::setw(nwid) << std::left << perf[i].name;
-        std::cout << std::setw(twid) << std::right << perf[i].c1;
-        std::cout << std::setw(twid) << std::right << perf[i].c2;
-        std::cout << std::setw(twid) << std::right << perf[i].c3;
-        std::cout << std::setw(twid) << std::right << perf[i].c4;
-        std::cout.unsetf(std::ios_base::floatfield);
-        std::cout << std::setprecision(2);
-        std::cout << std::setw(ewid) << std::right << perf[i].e1;
-        std::cout << std::setw(ewid) << std::right << perf[i].e2;
-        std::cout << std::setw(ewid) << std::right << perf[i].e3;
-        std::cout << std::setw(ewid) << std::right << perf[i].e4;
-        std::cout << std::endl;
-    }
-
-    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_MATH_COMMON_HPP

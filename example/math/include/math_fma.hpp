@@ -34,11 +34,11 @@
 
 #include "math_common.hpp"
 
-#define MCKL_EXAMPLE_DEFINE_MATH_FMA(par, pas, pbs, pcs, pad, pbd, pcd)       \
-    inline void math_fma_##par(                                               \
+#define MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(func, ffunc, par, pa, pb, pc)     \
+    inline void math_##func##_##par(                                          \
         std::size_t N, std::size_t M, mckl::Vector<MathPerf> &perf)           \
     {                                                                         \
-        mckl::UniformRealDistribution<float> unifs(-1e4f, 1e4f);              \
+        mckl::UniformRealDistribution<float> unifs(-1e4, 1e4);                \
         mckl::UniformRealDistribution<double> unifd(-1e4, 1e4);               \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
         mckl::RNG_64 rng;                                                     \
@@ -51,8 +51,10 @@
         mckl::Vector<double> cd(N);                                           \
         mckl::Vector<float> rs1(N);                                           \
         mckl::Vector<float> rs2(N);                                           \
+        mckl::Vector<float> rs3(N);                                           \
         mckl::Vector<double> rd1(N);                                          \
         mckl::Vector<double> rd2(N);                                          \
+        mckl::Vector<double> rd3(N);                                          \
                                                                               \
         bool has_cycles = mckl::StopWatch::has_cycles();                      \
                                                                               \
@@ -83,23 +85,28 @@
                 mckl::rand(rng, unifd, K, cd.data());                         \
                                                                               \
                 watch1.start();                                               \
-                mckl::fma<float>(K, pas, pbs, pcs, rs1.data());               \
+                mckl::func<float>(K, as pa, bs pb, cs pc, rs1.data());        \
                 watch1.stop();                                                \
                                                                               \
                 watch2.start();                                               \
-                mckl::fma(K, pas, pbs, pcs, rs2.data());                      \
+                mckl::func(K, as pa, bs pb, cs pc, rs2.data());               \
                 watch2.stop();                                                \
                                                                               \
                 watch3.start();                                               \
-                mckl::fma<double>(K, pad, pbd, pcd, rd1.data());              \
+                mckl::func<double>(K, ad pa, bd pb, cd pc, rd1.data());       \
                 watch3.stop();                                                \
                                                                               \
                 watch4.start();                                               \
-                mckl::fma(K, pad, pbd, pcd, rd2.data());                      \
+                mckl::func(K, ad pa, bd pb, cd pc, rd2.data());               \
                 watch4.stop();                                                \
                                                                               \
-                math_error(K, rs1.data(), rs2.data(), e1, e2);                \
-                math_error(K, rd1.data(), rd2.data(), e3, e4);                \
+                mckl::ffunc<float>(K, as pa, bs pb, cs pc, rs3.data());       \
+                math_error(K, rs1.data(), rs3.data(), e1);                    \
+                math_error(K, rs2.data(), rs3.data(), e2);                    \
+                                                                              \
+                mckl::ffunc<double>(K, ad pa, bd pb, cd pc, rd3.data());      \
+                math_error(K, rd1.data(), rd3.data(), e3);                    \
+                math_error(K, rd2.data(), rd3.data(), e4);                    \
             }                                                                 \
             if (has_cycles) {                                                 \
                 c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
@@ -115,11 +122,11 @@
         }                                                                     \
                                                                               \
         MathPerf result;                                                      \
-        result.name = "fma(" #par ")";                                        \
-        result.e1 = e1 / std::numeric_limits<float>::epsilon();               \
-        result.e2 = e2 / std::numeric_limits<float>::epsilon();               \
-        result.e3 = e3 / std::numeric_limits<double>::epsilon();              \
-        result.e4 = e4 / std::numeric_limits<double>::epsilon();              \
+        result.name = #func "(" #par ")";                                     \
+        result.e1 = e1;                                                       \
+        result.e2 = e2;                                                       \
+        result.e3 = e3;                                                       \
+        result.e4 = e4;                                                       \
         result.c1 = c1;                                                       \
         result.c2 = c2;                                                       \
         result.c3 = c3;                                                       \
@@ -128,40 +135,94 @@
         perf.push_back(result);                                               \
     }
 
-MCKL_EXAMPLE_DEFINE_MATH_FMA(
-    vvv, as.data(), bs.data(), cs.data(), ad.data(), bd.data(), cd.data())
+#define MCKL_EXAMPLE_DEFINE_MATH_FMA(func, ffunc)                             \
+    MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(                                      \
+        func, ffunc, vvv, .data(), .data(), .data())                          \
+    MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(                                      \
+        func, ffunc, vvs, .data(), .data(), [0])                              \
+    MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(                                      \
+        func, ffunc, vsv, .data(), [0], .data())                              \
+    MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(                                      \
+        func, ffunc, svv, [0], .data(), .data())                              \
+    MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(func, ffunc, ssv, [0], [0], .data())  \
+    MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(func, ffunc, svs, [0], .data(), [0])  \
+    MCKL_EXAMPLE_DEFINE_MATH_FMA_PARAMS(func, ffunc, vss, .data(), [0], [0])
 
-MCKL_EXAMPLE_DEFINE_MATH_FMA(
-    vvs, as.data(), bs.data(), *cs.data(), ad.data(), bd.data(), *cd.data())
+#define MCKL_EXAMPLE_MATH_FMA(func)                                           \
+    math_##func##_vvv(N, M, perf);                                            \
+    math_##func##_vvs(N, M, perf);                                            \
+    math_##func##_vsv(N, M, perf);                                            \
+    math_##func##_svv(N, M, perf);                                            \
+    math_##func##_ssv(N, M, perf);                                            \
+    math_##func##_svs(N, M, perf);                                            \
+    math_##func##_vss(N, M, perf);
 
-MCKL_EXAMPLE_DEFINE_MATH_FMA(
-    vsv, as.data(), *bs.data(), cs.data(), ad.data(), *bd.data(), cd.data())
-
-MCKL_EXAMPLE_DEFINE_MATH_FMA(
-    svv, *as.data(), bs.data(), cs.data(), *ad.data(), bd.data(), cd.data())
-
-MCKL_EXAMPLE_DEFINE_MATH_FMA(
-    ssv, *as.data(), *bs.data(), cs.data(), *ad.data(), *bd.data(), cd.data())
-
-MCKL_EXAMPLE_DEFINE_MATH_FMA(
-    svs, *as.data(), bs.data(), *cs.data(), *ad.data(), bd.data(), *cd.data())
-
-MCKL_EXAMPLE_DEFINE_MATH_FMA(
-    vss, as.data(), *bs.data(), *cs.data(), ad.data(), *bd.data(), *cd.data())
+MCKL_EXAMPLE_DEFINE_MATH_FMA(muladd, fmadd)
+MCKL_EXAMPLE_DEFINE_MATH_FMA(mulsub, fmsub)
+MCKL_EXAMPLE_DEFINE_MATH_FMA(nmuladd, fnmadd)
+MCKL_EXAMPLE_DEFINE_MATH_FMA(nmulsub, fnmsub)
+MCKL_EXAMPLE_DEFINE_MATH_FMA(fmadd, fmadd)
+MCKL_EXAMPLE_DEFINE_MATH_FMA(fmsub, fmsub)
+MCKL_EXAMPLE_DEFINE_MATH_FMA(fnmadd, fnmadd)
+MCKL_EXAMPLE_DEFINE_MATH_FMA(fnmsub, fnmsub)
 
 inline void math_fma(std::size_t N, std::size_t M)
 {
     mckl::Vector<MathPerf> perf;
 
-    math_fma_vvv(N, M, perf);
-    math_fma_vvs(N, M, perf);
-    math_fma_vsv(N, M, perf);
-    math_fma_svv(N, M, perf);
-    math_fma_ssv(N, M, perf);
-    math_fma_svs(N, M, perf);
-    math_fma_vss(N, M, perf);
+    MCKL_EXAMPLE_MATH_FMA(muladd)
+    MCKL_EXAMPLE_MATH_FMA(mulsub)
+    MCKL_EXAMPLE_MATH_FMA(nmuladd)
+    MCKL_EXAMPLE_MATH_FMA(nmulsub)
+    MCKL_EXAMPLE_MATH_FMA(fmadd)
+    MCKL_EXAMPLE_MATH_FMA(fmsub)
+    MCKL_EXAMPLE_MATH_FMA(fnmadd)
+    MCKL_EXAMPLE_MATH_FMA(fnmsub)
 
-    math_summary_sv(perf);
+    const int nwid = 15;
+    const int twid = 10;
+    const int ewid = 15;
+    const std::size_t lwid = nwid + twid * 4 + ewid * 4;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "Function";
+    if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(twid) << std::right << "cpE (S)";
+        std::cout << std::setw(twid) << std::right << "cpE (SV)";
+        std::cout << std::setw(twid) << std::right << "cpE (D)";
+        std::cout << std::setw(twid) << std::right << "cpE (DV)";
+    } else {
+        std::cout << std::setw(twid) << std::right << "ME/s (S)";
+        std::cout << std::setw(twid) << std::right << "ME/s (SV)";
+        std::cout << std::setw(twid) << std::right << "ME/s (D)";
+        std::cout << std::setw(twid) << std::right << "ME/s (DV)";
+    }
+    std::cout << std::setw(ewid) << std::right << math_error() + " (S)";
+    std::cout << std::setw(ewid) << std::right << math_error() + " (SV)";
+    std::cout << std::setw(ewid) << std::right << math_error() + " (D)";
+    std::cout << std::setw(ewid) << std::right << math_error() + " (DV)";
+    std::cout << std::endl;
+
+    std::cout << std::string(lwid, '-') << std::endl;
+
+    for (std::size_t i = 0; i != perf.size(); ++i) {
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << std::setw(nwid) << std::left << perf[i].name;
+        std::cout << std::setw(twid) << std::right << perf[i].c1;
+        std::cout << std::setw(twid) << std::right << perf[i].c2;
+        std::cout << std::setw(twid) << std::right << perf[i].c3;
+        std::cout << std::setw(twid) << std::right << perf[i].c4;
+        std::cout.unsetf(std::ios_base::floatfield);
+        std::cout << std::setprecision(2);
+        std::cout << std::setw(ewid) << std::right << perf[i].e1;
+        std::cout << std::setw(ewid) << std::right << perf[i].e2;
+        std::cout << std::setw(ewid) << std::right << perf[i].e3;
+        std::cout << std::setw(ewid) << std::right << perf[i].e4;
+        std::cout << std::endl;
+    }
+
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_MATH_FMA_HPP

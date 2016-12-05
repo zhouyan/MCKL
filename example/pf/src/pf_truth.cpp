@@ -109,11 +109,11 @@ inline void PFMove(std::size_t, Particle<PF> &particle)
     const auto tempa = particle.state().tempa();
 
     mckl::rand(rng, rpos, N, tempa);
-    mckl::fma(N, delta, vel_x, tempa, tempa);
+    mckl::muladd(N, delta, vel_x, tempa, tempa);
     mckl::add(N, pos_x, tempa, pos_x);
 
     mckl::rand(rng, rpos, N, tempa);
-    mckl::fma(N, delta, vel_y, tempa, tempa);
+    mckl::muladd(N, delta, vel_y, tempa, tempa);
     mckl::add(N, pos_y, tempa, pos_y);
 
     mckl::rand(rng, rvel, N, particle.state().tempa());

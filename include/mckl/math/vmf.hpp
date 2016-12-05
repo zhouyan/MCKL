@@ -355,164 +355,103 @@ MCKL_DEFINE_MATH_VMF_ASM_1(tan)
 
 #if MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_FMA
 
+#define MCKL_DEFINE_MATH_FMA_FMA(op, name)                                    \
+    inline void name(std::size_t n, const float *a, const float *b,           \
+        const float *c, float *y)                                             \
+    {                                                                         \
+        ::mckl_##op##_vvv_ps(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, const float *a, const float *b, float c, float *y)     \
+    {                                                                         \
+        ::mckl_##op##_vvs_ps(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, const float *a, float b, const float *c, float *y)     \
+    {                                                                         \
+        ::mckl_##op##_vsv_ps(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, float a, const float *b, const float *c, float *y)     \
+    {                                                                         \
+        ::mckl_##op##_svv_ps(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, float a, float b, const float *c, float *y)            \
+    {                                                                         \
+        ::mckl_##op##_ssv_ps(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, float a, const float *b, float c, float *y)            \
+    {                                                                         \
+        ::mckl_##op##_svs_ps(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, const float *a, float b, float c, float *y)            \
+    {                                                                         \
+        ::mckl_##op##_vss_ps(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(std::size_t n, const double *a, const double *b,         \
+        const double *c, double *y)                                           \
+    {                                                                         \
+        ::mckl_##op##_vvv_pd(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, const double *a, const double *b, double c, double *y) \
+    {                                                                         \
+        ::mckl_##op##_vvs_pd(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, const double *a, double b, const double *c, double *y) \
+    {                                                                         \
+        ::mckl_##op##_vsv_pd(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, double a, const double *b, const double *c, double *y) \
+    {                                                                         \
+        ::mckl_##op##_svv_pd(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, double a, double b, const double *c, double *y)        \
+    {                                                                         \
+        ::mckl_##op##_ssv_pd(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, double a, const double *b, double c, double *y)        \
+    {                                                                         \
+        ::mckl_##op##_svs_pd(n, a, b, c, y);                                  \
+    }                                                                         \
+                                                                              \
+    inline void name(                                                         \
+        std::size_t n, const double *a, double b, double c, double *y)        \
+    {                                                                         \
+        ::mckl_##op##_vss_pd(n, a, b, c, y);                                  \
+    }
+
 namespace mckl
 {
 
-inline void muladd(
-    std::size_t n, const float *a, const float *b, const float *c, float *y)
-{
-    mckl_fma_vvv_ps(n, a, b, c, y);
-}
+MCKL_DEFINE_MATH_FMA_FMA(fmadd, muladd)
+MCKL_DEFINE_MATH_FMA_FMA(fmsub, mulsub)
+MCKL_DEFINE_MATH_FMA_FMA(fnmadd, nmuladd)
+MCKL_DEFINE_MATH_FMA_FMA(fnmsub, nmulsub)
 
-inline void muladd(
-    std::size_t n, const float *a, const float *b, float c, float *y)
-{
-    mckl_fma_vvs_ps(n, a, b, c, y);
-}
-
-inline void muladd(
-    std::size_t n, const float *a, float b, const float *c, float *y)
-{
-    mckl_fma_vsv_ps(n, a, b, c, y);
-}
-
-inline void muladd(
-    std::size_t n, float a, const float *b, const float *c, float *y)
-{
-    mckl_fma_svv_ps(n, a, b, c, y);
-}
-
-inline void muladd(std::size_t n, float a, float b, const float *c, float *y)
-{
-    mckl_fma_ssv_ps(n, a, b, c, y);
-}
-
-inline void muladd(std::size_t n, float a, const float *b, float c, float *y)
-{
-    mckl_fma_svs_ps(n, a, b, c, y);
-}
-
-inline void muladd(std::size_t n, const float *a, float b, float c, float *y)
-{
-    mckl_fma_vss_ps(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, const double *a, const double *b,
-    const double *c, double *y)
-{
-    mckl_fma_vvv_pd(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, const double *a, const double *b, double c, double *y)
-{
-    mckl_fma_vvs_pd(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, const double *a, double b, const double *c, double *y)
-{
-    mckl_fma_vsv_pd(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, double a, const double *b, const double *c, double *y)
-{
-    mckl_fma_svv_pd(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, double a, double b, const double *c, double *y)
-{
-    mckl_fma_ssv_pd(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, double a, const double *b, double c, double *y)
-{
-    mckl_fma_svs_pd(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, const double *a, double b, double c, double *y)
-{
-    mckl_fma_vss_pd(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, const float *a, const float *b, const float *c, float *y)
-{
-    mckl_fma_vvv_ps(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, const float *a, const float *b, float c, float *y)
-{
-    mckl_fma_vvs_ps(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, const float *a, float b, const float *c, float *y)
-{
-    mckl_fma_vsv_ps(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, float a, const float *b, const float *c, float *y)
-{
-    mckl_fma_svv_ps(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, float a, float b, const float *c, float *y)
-{
-    mckl_fma_ssv_ps(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, float a, const float *b, float c, float *y)
-{
-    mckl_fma_svs_ps(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, const float *a, float b, float c, float *y)
-{
-    mckl_fma_vss_ps(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, const double *a, const double *b,
-    const double *c, double *y)
-{
-    mckl_fma_vvv_pd(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, const double *a, const double *b, double c, double *y)
-{
-    mckl_fma_vvs_pd(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, const double *a, double b, const double *c, double *y)
-{
-    mckl_fma_vsv_pd(n, a, b, c, y);
-}
-
-inline void fma(
-    std::size_t n, double a, const double *b, const double *c, double *y)
-{
-    mckl_fma_svv_pd(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, double a, double b, const double *c, double *y)
-{
-    mckl_fma_ssv_pd(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, double a, const double *b, double c, double *y)
-{
-    mckl_fma_svs_pd(n, a, b, c, y);
-}
-
-inline void fma(std::size_t n, const double *a, double b, double c, double *y)
-{
-    mckl_fma_vss_pd(n, a, b, c, y);
-}
+MCKL_DEFINE_MATH_FMA_FMA(fmadd, fmadd)
+MCKL_DEFINE_MATH_FMA_FMA(fmsub, fmsub)
+MCKL_DEFINE_MATH_FMA_FMA(fnmadd, fnmadd)
+MCKL_DEFINE_MATH_FMA_FMA(fnmsub, fnmsub)
 
 } // namespace mckl
 
@@ -574,6 +513,57 @@ inline void fma(std::size_t n, const double *a, double b, double c, double *y)
             y[i] = a op b[i];                                                 \
     }
 
+#define MCKL_DEFINE_MATH_VMF_FMA(op, name, attr)                              \
+    template <typename T>                                                     \
+    attr inline void name(                                                    \
+        std::size_t n, const T *a, const T *b, const T *c, T *y)              \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = op(a[i], b[i], c[i]);                                      \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    attr inline void name(std::size_t n, const T *a, const T *b, T c, T *y)   \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = op(a[i], b[i], c);                                         \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    attr inline void name(std::size_t n, const T *a, T b, const T *c, T *y)   \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = op(a[i], b, c[i]);                                         \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    attr inline void name(std::size_t n, T a, const T *b, const T *c, T *y)   \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = op(a, b[i], c[i]);                                         \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    attr inline void name(std::size_t n, T a, T b, const T *c, T *y)          \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = op(a, b, c[i]);                                            \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    attr inline void name(std::size_t n, T a, const T *b, T c, T *y)          \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = op(a, b[i], c);                                            \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    attr inline void name(std::size_t n, const T *a, T b, T c, T *y)          \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i)                                  \
+            y[i] = op(a[i], b, c);                                            \
+    }
+
 namespace mckl
 {
 
@@ -589,11 +579,49 @@ inline T mulbyconj_impl(T a, T b)
 template <typename T>
 inline T muladd_impl(T a, T b, T c)
 {
-#if MCKL_USE_FMA
-    return std::fma(a, b, c);
-#else
     return a * b + c;
-#endif
+}
+
+template <typename T>
+inline T mulsub_impl(T a, T b, T c)
+{
+    return a * b - c;
+}
+
+template <typename T>
+inline T nmuladd_impl(T a, T b, T c)
+{
+    return -(a * b) + c;
+}
+
+template <typename T>
+inline T nmulsub_impl(T a, T b, T c)
+{
+    return -(a * b + c);
+}
+
+template <typename T>
+inline T fmadd_impl(T a, T b, T c)
+{
+    return std::fma(a, b, c);
+}
+
+template <typename T>
+inline T fmsub_impl(T a, T b, T c)
+{
+    return std::fma(a, b, -c);
+}
+
+template <typename T>
+inline T fnmadd_impl(T a, T b, T c)
+{
+    return -std::fma(a, b, -c);
+}
+
+template <typename T>
+inline T fnmsub_impl(T a, T b, T c)
+{
+    return -std::fma(a, b, c);
 }
 
 } // namespace mckl::internal
@@ -689,117 +717,32 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
         y[i] /= internal::muladd_impl(beta_b, b[i], mu_b);
 }
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c_i\f$.
-template <typename T>
-inline void muladd(std::size_t n, const T *a, const T *b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = internal::muladd_impl(a[i], b[i], c[i]);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::muladd_impl, fma, [[deprecated]])
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c\f$.
-template <typename T>
-inline void muladd(std::size_t n, const T *a, const T *b, T c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = internal::muladd_impl(a[i], b[i], c);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::muladd_impl, muladd, )
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c_i\f$.
-template <typename T>
-inline void muladd(std::size_t n, const T *a, T b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = internal::muladd_impl(a[i], b, c[i]);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i - c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::mulsub_impl, mulsub, )
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c_i\f$.
-template <typename T>
-inline void muladd(std::size_t n, T a, const T *b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = internal::muladd_impl(a, b[i], c[i]);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i + c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::nmuladd_impl, nmuladd, )
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b + c_i\f$.
-template <typename T>
-inline void muladd(std::size_t n, T a, T b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = internal::muladd_impl(a, b, c[i]);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i - c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::nmulsub_impl, nmulsub, )
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c\f$.
-template <typename T>
-inline void muladd(std::size_t n, T a, const T *b, T c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = internal::muladd_impl(a, b[i], c);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::fmadd_impl, fmadd, )
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c\f$.
-template <typename T>
-inline void muladd(std::size_t n, const T *a, T b, T c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = internal::muladd_impl(a[i], b, c);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i - c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::fmsub_impl, fmsub, )
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c_i\f$.
-template <typename T>
-inline void fma(std::size_t n, const T *a, const T *b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b[i], c[i]);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i + c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::fnmadd_impl, fnmadd, )
 
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i + c\f$.
-template <typename T>
-inline void fma(std::size_t n, const T *a, const T *b, T c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b[i], c);
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c_i\f$.
-template <typename T>
-inline void fma(std::size_t n, const T *a, T b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b, c[i]);
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c_i\f$.
-template <typename T>
-inline void fma(std::size_t n, T a, const T *b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a, b[i], c[i]);
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b + c_i\f$.
-template <typename T>
-inline void fma(std::size_t n, T a, T b, const T *c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a, b, c[i]);
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i + c\f$.
-template <typename T>
-inline void fma(std::size_t n, T a, const T *b, T c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a, b[i], c);
-}
-
-/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b + c\f$.
-template <typename T>
-inline void fma(std::size_t n, const T *a, T b, T c, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = std::fma(a[i], b, c);
-}
+/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i - c_i\f$
+MCKL_DEFINE_MATH_VMF_FMA(internal::fnmsub_impl, fnmsub, )
 
 /// @} vArithmetic
 
@@ -1083,11 +1026,11 @@ inline void cdfnorm(std::size_t n, const T *a, T *y)
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
         mul<T>(k, const_sqrt_1by2<T>(), a, y);
         erf<T>(k, y, y);
-        fma<T>(k, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
+        muladd<T>(k, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
     }
     mul<T>(l, const_sqrt_1by2<T>(), a, y);
     erf<T>(l, y, y);
-    fma<T>(l, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
+    muladd<T>(l, y, static_cast<T>(0.5), static_cast<T>(0.5), y);
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -1099,11 +1042,11 @@ inline void cdfnorminv(std::size_t n, const T *a, T *y)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        fma<T>(k, a, static_cast<T>(-2), static_cast<T>(2), y);
+        muladd<T>(k, a, static_cast<T>(-2), static_cast<T>(2), y);
         erfcinv<T>(k, y, y);
         mul<T>(k, const_sqrt_2<T>(), y, y);
     }
-    fma<T>(l, a, static_cast<T>(-2), static_cast<T>(2), y);
+    muladd<T>(l, a, static_cast<T>(-2), static_cast<T>(2), y);
     erfcinv<T>(l, y, y);
     mul<T>(l, const_sqrt_2<T>(), y, y);
 }

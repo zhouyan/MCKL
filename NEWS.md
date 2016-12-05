@@ -1,13 +1,13 @@
 * Require C++14
 
 * `Particle::index` renamed to `at` and `operator[]`. The old member function
-  is marked `[[deprecated]]` and will be removed in future releases.
+  is marked `[[deprecated]]` and will be removed in the next major releases.
 
 * `StateMatrix::particle_index_type` gain a new member `operator[]`.
 
 * `ParticleRange::first` renamed to `ibegin`, `ParticleRange::last` renamed to
   `iend`. The old member functions are marked `[[deprecated]]` and will be
-  removed in future releases.
+  removed in the next major releases.
 
 * New assembly implementation of RNGs: `ARS`, `AES128`, `AES192`, `AES256`,
   `Philox2x32` and `Philox4x32`, and their 64-bit versions. They provide
@@ -20,6 +20,7 @@
   number generating and situations where a couple ULP errors are non-critical.
   See README for information of how to use them.
 
-* New `muladd` vector math functions. `fma` now always does fused
-  multiplication-addition, as its name advertise. `muladd` only does so when
-  hardware support is detected.
+* New `muladd`, `fmadd` and related vector math functions. The former only does
+  fused operation when FMA3 is supported and the assembly library is used. The
+  later always does fused operation. The old `fma` functions are marked
+  `[[deprecated]]` and will be removed in the next major release.

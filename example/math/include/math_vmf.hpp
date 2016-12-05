@@ -76,27 +76,6 @@
     mckl::func(K, ad.data(), bd.data(), rd2.data());                          \
     watch4.stop();
 
-#define MCKL_EXAMPLE_MATH_VMF_RUN_A3R1(func)                                  \
-    mckl::func<float>(K, as.data(), bs.data(), cs.data(), rs1.data());        \
-    watch1.start();                                                           \
-    mckl::func<float>(K, as.data(), bs.data(), cs.data(), rs1.data());        \
-    watch1.stop();                                                            \
-                                                                              \
-    mckl::func(K, as.data(), bs.data(), cs.data(), rs2.data());               \
-    watch2.start();                                                           \
-    mckl::func(K, as.data(), bs.data(), cs.data(), rs2.data());               \
-    watch2.stop();                                                            \
-                                                                              \
-    mckl::func<double>(K, ad.data(), bd.data(), cd.data(), rd1.data());       \
-    watch3.start();                                                           \
-    mckl::func<double>(K, ad.data(), bd.data(), cd.data(), rd1.data());       \
-    watch3.stop();                                                            \
-                                                                              \
-    mckl::func(K, ad.data(), bd.data(), cd.data(), rd2.data());               \
-    watch4.start();                                                           \
-    mckl::func(K, ad.data(), bd.data(), cd.data(), rd2.data());               \
-    watch4.stop();
-
 #define MCKL_EXAMPLE_MATH_VMF_RUN_A1R2(func)                                  \
     mckl::func<float>(K, as.data(), rs1.data(), rs3.data());                  \
     watch1.start();                                                           \
@@ -236,7 +215,6 @@ MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, div, 1e-4f, 1e4f, 1e-4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, mul, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sqr, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, sub, -1e4f, 1e4f, -1e4, 1e4)
-MCKL_EXAMPLE_DEFINE_MATH_VMF(A3R1, fma, -1e4f, 1e4f, -1e4, 1e4)
 
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, ceil, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, floor, -1e4f, 1e4f, -1e4, 1e4)
@@ -264,7 +242,6 @@ inline void math_vmf(std::size_t N, std::size_t M)
     math_vmf_sub(N, M, perf);
     math_vmf_sqr(N, M, perf);
     math_vmf_mul(N, M, perf);
-    math_vmf_fma(N, M, perf);
     math_vmf_abs(N, M, perf);
 
     math_vmf_inv(N, M, perf);
@@ -316,7 +293,50 @@ inline void math_vmf(std::size_t N, std::size_t M)
     math_vmf_nearbyint(N, M, perf);
     math_vmf_rint(N, M, perf);
 
-    math_summary_sv(perf);
+    const int nwid = 10;
+    const int twid = 10;
+    const int ewid = 15;
+    const std::size_t lwid = nwid + twid * 4 + ewid * 4;
+
+    std::cout << std::string(lwid, '=') << std::endl;
+
+    std::cout << std::setw(nwid) << std::left << "Function";
+    if (mckl::StopWatch::has_cycles()) {
+        std::cout << std::setw(twid) << std::right << "cpE (S)";
+        std::cout << std::setw(twid) << std::right << "cpE (SV)";
+        std::cout << std::setw(twid) << std::right << "cpE (D)";
+        std::cout << std::setw(twid) << std::right << "cpE (DV)";
+    } else {
+        std::cout << std::setw(twid) << std::right << "ME/s (S)";
+        std::cout << std::setw(twid) << std::right << "ME/s (SV)";
+        std::cout << std::setw(twid) << std::right << "ME/s (D)";
+        std::cout << std::setw(twid) << std::right << "ME/s (DV)";
+    }
+    std::cout << std::setw(ewid) << std::right << "Err.Abs (S)";
+    std::cout << std::setw(ewid) << std::right << math_error() + " (S)";
+    std::cout << std::setw(ewid) << std::right << "Err.Abs (D)";
+    std::cout << std::setw(ewid) << std::right << math_error() + " (D)";
+    std::cout << std::endl;
+
+    std::cout << std::string(lwid, '-') << std::endl;
+
+    for (std::size_t i = 0; i != perf.size(); ++i) {
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << std::setw(nwid) << std::left << perf[i].name;
+        std::cout << std::setw(twid) << std::right << perf[i].c1;
+        std::cout << std::setw(twid) << std::right << perf[i].c2;
+        std::cout << std::setw(twid) << std::right << perf[i].c3;
+        std::cout << std::setw(twid) << std::right << perf[i].c4;
+        std::cout.unsetf(std::ios_base::floatfield);
+        std::cout << std::setprecision(2);
+        std::cout << std::setw(ewid) << std::right << perf[i].e1;
+        std::cout << std::setw(ewid) << std::right << perf[i].e2;
+        std::cout << std::setw(ewid) << std::right << perf[i].e3;
+        std::cout << std::setw(ewid) << std::right << perf[i].e4;
+        std::cout << std::endl;
+    }
+
+    std::cout << std::string(lwid, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_MATH_VMF_HPP

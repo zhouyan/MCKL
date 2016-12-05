@@ -88,8 +88,8 @@ void pf_move_range(mckl::RNG &rng, std::size_t n, double *pos_x, double *pos_y,
     normal_pos(rng, n, v);
     mckl::add(n, w, pos_x, pos_x);
     mckl::add(n, v, pos_y, pos_y);
-    mckl::fma(n, delta, vel_x, pos_x, pos_x);
-    mckl::fma(n, delta, vel_y, pos_y, pos_y);
+    mckl::muladd(n, delta, vel_x, pos_x, pos_x);
+    mckl::muladd(n, delta, vel_y, pos_y, pos_y);
     normal_vel(rng, n, w);
     normal_vel(rng, n, v);
     mckl::add(n, w, vel_x, vel_x);

@@ -29,21 +29,65 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
-global mckl_fma_vvv_ps
-global mckl_fma_vvs_ps
-global mckl_fma_vsv_ps
-global mckl_fma_svv_ps
-global mckl_fma_ssv_ps
-global mckl_fma_svs_ps
-global mckl_fma_vss_ps
+global mckl_fmadd_vvv_ps
+global mckl_fmadd_vvs_ps
+global mckl_fmadd_vsv_ps
+global mckl_fmadd_svv_ps
+global mckl_fmadd_ssv_ps
+global mckl_fmadd_svs_ps
+global mckl_fmadd_vss_ps
+global mckl_fmadd_vvv_pd
+global mckl_fmadd_vvs_pd
+global mckl_fmadd_vsv_pd
+global mckl_fmadd_svv_pd
+global mckl_fmadd_ssv_pd
+global mckl_fmadd_svs_pd
+global mckl_fmadd_vss_pd
 
-global mckl_fma_vvv_pd
-global mckl_fma_vvs_pd
-global mckl_fma_vsv_pd
-global mckl_fma_svv_pd
-global mckl_fma_ssv_pd
-global mckl_fma_svs_pd
-global mckl_fma_vss_pd
+global mckl_fmsub_vvv_ps
+global mckl_fmsub_vvs_ps
+global mckl_fmsub_vsv_ps
+global mckl_fmsub_svv_ps
+global mckl_fmsub_ssv_ps
+global mckl_fmsub_svs_ps
+global mckl_fmsub_vss_ps
+global mckl_fmsub_vvv_pd
+global mckl_fmsub_vvs_pd
+global mckl_fmsub_vsv_pd
+global mckl_fmsub_svv_pd
+global mckl_fmsub_ssv_pd
+global mckl_fmsub_svs_pd
+global mckl_fmsub_vss_pd
+
+global mckl_fnmadd_vvv_ps
+global mckl_fnmadd_vvs_ps
+global mckl_fnmadd_vsv_ps
+global mckl_fnmadd_svv_ps
+global mckl_fnmadd_ssv_ps
+global mckl_fnmadd_svs_ps
+global mckl_fnmadd_vss_ps
+global mckl_fnmadd_vvv_pd
+global mckl_fnmadd_vvs_pd
+global mckl_fnmadd_vsv_pd
+global mckl_fnmadd_svv_pd
+global mckl_fnmadd_ssv_pd
+global mckl_fnmadd_svs_pd
+global mckl_fnmadd_vss_pd
+
+global mckl_fnmsub_vvv_ps
+global mckl_fnmsub_vvs_ps
+global mckl_fnmsub_vsv_ps
+global mckl_fnmsub_svv_ps
+global mckl_fnmsub_ssv_ps
+global mckl_fnmsub_svs_ps
+global mckl_fnmsub_vss_ps
+global mckl_fnmsub_vvv_pd
+global mckl_fnmsub_vvs_pd
+global mckl_fnmsub_vsv_pd
+global mckl_fnmsub_svv_pd
+global mckl_fnmsub_ssv_pd
+global mckl_fnmsub_svs_pd
+global mckl_fnmsub_vss_pd
 
 default rel
 
@@ -52,7 +96,7 @@ default rel
 ; rdx:b
 ; rcx:c
 ; r8:y
-%macro fma_vvv 2 ; {{{
+%macro fma_vvv 3 ; {{{
     test rdi, rdi
     jz .return
 
@@ -66,7 +110,7 @@ default rel
 .loop: align 16
     vmovups ymm0, [rsi]
     vmovups ymm1, [rdx]
-    vfmadd213p%2 ymm0, ymm1, [rcx]
+    v%{3}213p%2 ymm0, ymm1, [rcx]
     vmovups [r8], ymm0
     add rsi, 0x20
     add rdx, 0x20
@@ -85,14 +129,14 @@ default rel
     vmaskmovps ymm0, ymm3, [rsi]
     vmaskmovps ymm1, ymm3, [rdx]
     vmaskmovps ymm2, ymm3, [rcx]
-    vfmadd213p%2 ymm0, ymm1, ymm2
+    v%{3}213p%2 ymm0, ymm1, ymm2
     vmaskmovps [r8], ymm3, ymm0
 
 .return:
     ret
 %endmacro ; }}}
 
-%macro fma2 6 ; {{{
+%macro fma2 7 ; {{{
     test rdi, rdi
     jz .return
 
@@ -108,8 +152,8 @@ default rel
 .loop: align 16
     vmovups ymm1, [rsi]
     vmovups ymm2, [rdx]
-    vfmadd%{3}p%2 %4, %5, %6
-    vmovups [rcx], %4
+    v%{3}%{4}p%2 %5, %6, %7
+    vmovups [rcx], %5
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
@@ -125,8 +169,8 @@ default rel
     vmovaps ymm3, [rax]
     vmaskmovps ymm1, ymm3, [rsi]
     vmaskmovps ymm2, ymm3, [rdx]
-    vfmadd%{3}p%2 %4, %5, %6
-    vmaskmovps [rcx], ymm3, %4
+    v%{3}%{4}p%2 %5, %6, %7
+    vmaskmovps [rcx], ymm3, %5
 
 .return:
     ret
@@ -137,8 +181,8 @@ default rel
 ; rdx:b  -> ymm2
 ; xmm0:c -> ymm0
 ; rcx:y
-%macro fma_vvs 2 ; {{{
-    fma2 %1, %2, 213, ymm1, ymm2, ymm0
+%macro fma_vvs 3 ; {{{
+    fma2 %1, %2, %3, 213, ymm1, ymm2, ymm0
 %endmacro ; }}}
 
 ; rdi:n
@@ -146,8 +190,8 @@ default rel
 ; xmm0:b -> ymm0
 ; rdx:c  -> ymm2
 ; rcx:y
-%macro fma_vsv 2 ; {{{
-    fma2 %1, %2, 213, ymm1, ymm0, ymm2
+%macro fma_vsv 3 ; {{{
+    fma2 %1, %2, %3, 213, ymm1, ymm0, ymm2
 %endmacro ; }}}
 
 ; rdi:n
@@ -155,11 +199,11 @@ default rel
 ; rsi:b  -> ymm1
 ; rdx:c  -> ymm2
 ; rcx:y
-%macro fma_svv 2 ; {{{
-    fma2 %1, %2, 213, ymm1, ymm0, ymm2
+%macro fma_svv 3 ; {{{
+    fma2 %1, %2, %3, 213, ymm1, ymm0, ymm2
 %endmacro ; }}}
 
-%macro fma3 6 ; {{{
+%macro fma3 7 ; {{{
     test rdi, rdi
     jz .return
 
@@ -175,8 +219,8 @@ default rel
 
 .loop: align 16
     vmovups ymm2, [rsi]
-    vfmadd%{3}p%2 %4, %5, %6
-    vmovups [rdx], %4
+    v%{3}%{4}p%2 %5, %6, %7
+    vmovups [rdx], %5
     add rsi, 0x20
     add rdx, 0x20
     sub rdi, 0x20 / %1
@@ -190,8 +234,8 @@ default rel
     add rax, rdi
     vmovaps ymm3, [rax]
     vmaskmovps ymm2, ymm3, [rsi]
-    vfmadd%{3}p%2 %4, %5, %6
-    vmaskmovps [rdx], ymm3, %4
+    v%{3}%{4}p%2 %5, %6, %7
+    vmaskmovps [rdx], ymm3, %5
 
 .return:
     ret
@@ -202,8 +246,8 @@ default rel
 ; xmm1:b -> ymm1
 ; rsi:c  -> ymm2
 ; rdx:y
-%macro fma_ssv 2 ; {{{
-    fma3 %1, %2, 231, ymm2, ymm0, ymm1
+%macro fma_ssv 3 ; {{{
+    fma3 %1, %2, %3, 231, ymm2, ymm0, ymm1
 %endmacro ; }}}
 
 ; rdi:n
@@ -211,8 +255,8 @@ default rel
 ; rsi:b  -> ymm2
 ; xmm1:c -> ymm1
 ; rdx:y
-%macro fma_svs 2 ; {{{
-    fma3 %1, %2, 213, ymm2, ymm0, ymm1
+%macro fma_svs 3 ; {{{
+    fma3 %1, %2, %3, 213, ymm2, ymm0, ymm1
 %endmacro ; }}}
 
 ; rdi:n
@@ -220,8 +264,8 @@ default rel
 ; xmm0:b -> ymm0
 ; xmm1:c -> ymm1
 ; rdx:y
-%macro fma_vss 2 ; {{{
-    fma3 %1, %2, 213, ymm2, ymm0, ymm1
+%macro fma_vss 3 ; {{{
+    fma3 %1, %2, %3, 213, ymm2, ymm0, ymm1
 %endmacro ; }}}
 
 section .rodata
@@ -246,20 +290,64 @@ dq ~0, ~0, ~0,  0
 
 section .text
 
-mckl_fma_vvv_ps: fma_vvv 4, s
-mckl_fma_vvs_ps: fma_vvs 4, s
-mckl_fma_vsv_ps: fma_vsv 4, s
-mckl_fma_svv_ps: fma_svv 4, s
-mckl_fma_ssv_ps: fma_ssv 4, s
-mckl_fma_svs_ps: fma_svs 4, s
-mckl_fma_vss_ps: fma_vss 4, s
+mckl_fmadd_vvv_ps: fma_vvv 4, s, fmadd
+mckl_fmadd_vvs_ps: fma_vvs 4, s, fmadd
+mckl_fmadd_vsv_ps: fma_vsv 4, s, fmadd
+mckl_fmadd_svv_ps: fma_svv 4, s, fmadd
+mckl_fmadd_ssv_ps: fma_ssv 4, s, fmadd
+mckl_fmadd_svs_ps: fma_svs 4, s, fmadd
+mckl_fmadd_vss_ps: fma_vss 4, s, fmadd
+mckl_fmadd_vvv_pd: fma_vvv 8, d, fmadd
+mckl_fmadd_vvs_pd: fma_vvs 8, d, fmadd
+mckl_fmadd_vsv_pd: fma_vsv 8, d, fmadd
+mckl_fmadd_svv_pd: fma_svv 8, d, fmadd
+mckl_fmadd_ssv_pd: fma_ssv 8, d, fmadd
+mckl_fmadd_svs_pd: fma_svs 8, d, fmadd
+mckl_fmadd_vss_pd: fma_vss 8, d, fmadd
 
-mckl_fma_vvv_pd: fma_vvv 8, d
-mckl_fma_vvs_pd: fma_vvs 8, d
-mckl_fma_vsv_pd: fma_vsv 8, d
-mckl_fma_svv_pd: fma_svv 8, d
-mckl_fma_ssv_pd: fma_ssv 8, d
-mckl_fma_svs_pd: fma_svs 8, d
-mckl_fma_vss_pd: fma_vss 8, d
+mckl_fmsub_vvv_ps: fma_vvv 4, s, fmsub
+mckl_fmsub_vvs_ps: fma_vvs 4, s, fmsub
+mckl_fmsub_vsv_ps: fma_vsv 4, s, fmsub
+mckl_fmsub_svv_ps: fma_svv 4, s, fmsub
+mckl_fmsub_ssv_ps: fma_ssv 4, s, fmsub
+mckl_fmsub_svs_ps: fma_svs 4, s, fmsub
+mckl_fmsub_vss_ps: fma_vss 4, s, fmsub
+mckl_fmsub_vvv_pd: fma_vvv 8, d, fmsub
+mckl_fmsub_vvs_pd: fma_vvs 8, d, fmsub
+mckl_fmsub_vsv_pd: fma_vsv 8, d, fmsub
+mckl_fmsub_svv_pd: fma_svv 8, d, fmsub
+mckl_fmsub_ssv_pd: fma_ssv 8, d, fmsub
+mckl_fmsub_svs_pd: fma_svs 8, d, fmsub
+mckl_fmsub_vss_pd: fma_vss 8, d, fmsub
+
+mckl_fnmadd_vvv_ps: fma_vvv 4, s, fnmadd
+mckl_fnmadd_vvs_ps: fma_vvs 4, s, fnmadd
+mckl_fnmadd_vsv_ps: fma_vsv 4, s, fnmadd
+mckl_fnmadd_svv_ps: fma_svv 4, s, fnmadd
+mckl_fnmadd_ssv_ps: fma_ssv 4, s, fnmadd
+mckl_fnmadd_svs_ps: fma_svs 4, s, fnmadd
+mckl_fnmadd_vss_ps: fma_vss 4, s, fnmadd
+mckl_fnmadd_vvv_pd: fma_vvv 8, d, fnmadd
+mckl_fnmadd_vvs_pd: fma_vvs 8, d, fnmadd
+mckl_fnmadd_vsv_pd: fma_vsv 8, d, fnmadd
+mckl_fnmadd_svv_pd: fma_svv 8, d, fnmadd
+mckl_fnmadd_ssv_pd: fma_ssv 8, d, fnmadd
+mckl_fnmadd_svs_pd: fma_svs 8, d, fnmadd
+mckl_fnmadd_vss_pd: fma_vss 8, d, fnmadd
+
+mckl_fnmsub_vvv_ps: fma_vvv 4, s, fnmsub
+mckl_fnmsub_vvs_ps: fma_vvs 4, s, fnmsub
+mckl_fnmsub_vsv_ps: fma_vsv 4, s, fnmsub
+mckl_fnmsub_svv_ps: fma_svv 4, s, fnmsub
+mckl_fnmsub_ssv_ps: fma_ssv 4, s, fnmsub
+mckl_fnmsub_svs_ps: fma_svs 4, s, fnmsub
+mckl_fnmsub_vss_ps: fma_vss 4, s, fnmsub
+mckl_fnmsub_vvv_pd: fma_vvv 8, d, fnmsub
+mckl_fnmsub_vvs_pd: fma_vvs 8, d, fnmsub
+mckl_fnmsub_vsv_pd: fma_vsv 8, d, fnmsub
+mckl_fnmsub_svv_pd: fma_svv 8, d, fnmsub
+mckl_fnmsub_ssv_pd: fma_ssv 8, d, fnmsub
+mckl_fnmsub_svs_pd: fma_svs 8, d, fnmsub
+mckl_fnmsub_vss_pd: fma_vss 8, d, fnmsub
 
 ; vim:ft=nasm
