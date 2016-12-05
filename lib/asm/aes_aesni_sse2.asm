@@ -103,10 +103,10 @@ default rel
     enclast xmm15
 %endmacro ; }}}
 
-; rdi ctr.data()
-; rsi n
-; rdx r
-; rcx ks.get().data()/weyl:key
+; rdi:ctr.data()
+; rsi:n
+; rdx:r
+; rcx:ks.get().data()/weyl:key
 %macro kernel 1 ; rounds {{{
     push rbp
     mov rbp, rsp

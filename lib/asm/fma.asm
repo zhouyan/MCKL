@@ -47,339 +47,204 @@ global mckl_fma_vss_pd
 
 default rel
 
-%macro partial_load 4 ; {{{
-    mov rcx, %4
-    mov rsi, %3
-    mov rdi, rsp
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
-vmovups %2, [rsp]
-%endmacro ; }}}
-
-%macro partial_store 4 ; {{{
-    vmovups [rsp], %3
-    mov rcx, %4
-    mov rsi, rsp
-    mov rdi, %2
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
-%endmacro ; }}}
-
-; rdi n
-; rsi a
-; rdx b
-; rcx c
-; r8  y
+; rdi:n
+; rsi:a
+; rdx:b
+; rcx:c
+; r8:y
 %macro fma_vvv 2 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
+    test rdi, rdi
+    jz .return
 
-    cmp rdi, 0x20 / %1
-    jl .last
+    mov rax, rdi
+    and rax, (0x20 / %1) - 1
+    sub rdi, rax
+
+    test rdi, rdi
+    jz .last
 
 .loop: align 16
-    vmovups ymm1, [rsi]
-    vmovups ymm2, [rdx]
-    vfmadd213p%2 ymm1, ymm2, [rcx]
-    vmovups [r8], ymm1
+    vmovups ymm0, [rsi]
+    vmovups ymm1, [rdx]
+    vfmadd213p%2 ymm0, ymm1, [rcx]
+    vmovups [r8], ymm0
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
     add r8,  0x20
     sub rdi, 0x20 / %1
-    cmp rdi, 0x20 / %1
-    jge .loop
+    jnz .loop
 
 .last:
-    test rdi, rdi
+    test rax, rax
     jz .return
-    mov rax, rdi ; n
-    mov r9,  rsi ; a
-    mov r10, rcx ; c
-    partial_load %1, ymm1, r9,  rax
-    partial_load %1, ymm2, rdx, rax
-    partial_load %1, ymm3, r10, rax
-    vfmadd213p%2 ymm1, ymm2, ymm3
-    partial_store %1, r8, ymm1, rax
+    lea rdi, [mask%1]
+    shl rax, 5
+    add rax, rdi
+    vmovaps ymm3, [rax]
+    vmaskmovps ymm0, ymm3, [rsi]
+    vmaskmovps ymm1, ymm3, [rdx]
+    vmaskmovps ymm2, ymm3, [rcx]
+    vfmadd213p%2 ymm0, ymm1, ymm2
+    vmaskmovps [r8], ymm3, ymm0
 
 .return:
-    mov rsp, rbp
-    pop rbp
     ret
 %endmacro ; }}}
 
-; rdi  n
-; rsi  a
-; rdx  b
-; xmm0 c
-; rcx  y
-%macro fma_vvs 2 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
+%macro fma2 6 ; {{{
+    test rdi, rdi
+    jz .return
 
-    vbroadcasts%2 ymm3, xmm0 ; c
+    vbroadcasts%2 ymm0, xmm0
 
-    cmp rdi, 0x20 / %1
-    jl .last
+    mov rax, rdi
+    and rax, (0x20 / %1) - 1
+    sub rdi, rax
+
+    test rdi, rdi
+    jz .last
 
 .loop: align 16
     vmovups ymm1, [rsi]
     vmovups ymm2, [rdx]
-    vfmadd213p%2 ymm1, ymm2, ymm3
-    vmovups [rcx], ymm1
+    vfmadd%{3}p%2 %4, %5, %6
+    vmovups [rcx], %4
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
     sub rdi, 0x20 / %1
-    cmp rdi, 0x20 / %1
-    jge .loop
+    jnz .loop
 
 .last:
-    test rdi, rdi
+    test rax, rax
     jz .return
-    mov rax, rdi ; n
-    mov r8,  rsi ; a
-    mov r9,  rcx ; y
-    partial_load %1, ymm1, r8,  rax
-    partial_load %1, ymm2, rdx, rax
-    vfmadd213p%2 ymm1, ymm2, ymm3
-    partial_store %1, r9, ymm1, rax
+    lea rdi, [mask%1]
+    shl rax, 5
+    add rax, rdi
+    vmovaps ymm3, [rax]
+    vmaskmovps ymm1, ymm3, [rsi]
+    vmaskmovps ymm2, ymm3, [rdx]
+    vfmadd%{3}p%2 %4, %5, %6
+    vmaskmovps [rcx], ymm3, %4
 
 .return:
-    mov rsp, rbp
-    pop rbp
     ret
 %endmacro ; }}}
 
-; rdi  n
-; rsi  a
-; xmm0 b
-; rdx  c
-; rcx  y
+; rdi:n
+; rsi:a  -> ymm1
+; rdx:b  -> ymm2
+; xmm0:c -> ymm0
+; rcx:y
+%macro fma_vvs 2 ; {{{
+    fma2 %1, %2, 213, ymm1, ymm2, ymm0
+%endmacro ; }}}
+
+; rdi:n
+; rsi:a  -> ymm1
+; xmm0:b -> ymm0
+; rdx:c  -> ymm2
+; rcx:y
 %macro fma_vsv 2 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
-
-    vbroadcasts%2 ymm2, xmm0 ; b
-
-    cmp rdi, 0x20 / %1
-    jl .last
-
-.loop: align 16
-    vmovups ymm1, [rsi]
-    vmovups ymm3, [rdx]
-    vfmadd213p%2 ymm1, ymm2, ymm3
-    vmovups [rcx], ymm1
-    add rsi, 0x20
-    add rdx, 0x20
-    add rcx, 0x20
-    sub rdi, 0x20 / %1
-    cmp rdi, 0x20 / %1
-    jge .loop
-
-.last:
-    test rdi, rdi
-    jz .return
-    mov rax, rdi ; n
-    mov r8,  rsi ; a
-    mov r9,  rcx ; y
-    partial_load %1, ymm1, r8,  rax
-    partial_load %1, ymm3, rdx, rax
-    vfmadd213p%2 ymm1, ymm2, ymm3
-    partial_store %1, r9, ymm1, rax
-
-.return:
-    mov rsp, rbp
-    pop rbp
-    ret
+    fma2 %1, %2, 213, ymm1, ymm0, ymm2
 %endmacro ; }}}
 
-; rdi  n
-; xmm0 a
-; rsi  b
-; rdx  c
-; rcx  y
+; rdi:n
+; xmm0:a -> ymm0
+; rsi:b  -> ymm1
+; rdx:c  -> ymm2
+; rcx:y
 %macro fma_svv 2 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
+    fma2 %1, %2, 213, ymm1, ymm0, ymm2
+%endmacro ; }}}
 
-    vbroadcasts%2 ymm1, xmm0 ; a
+%macro fma3 6 ; {{{
+    test rdi, rdi
+    jz .return
 
-    cmp rdi, 0x20 / %1
-    jl .last
+    vbroadcasts%2 ymm0, xmm0
+    vbroadcasts%2 ymm1, xmm1
+
+    mov rax, rdi
+    and rax, (0x20 / %1) - 1
+    sub rdi, rax
+
+    test rdi, rdi
+    jz .last
 
 .loop: align 16
     vmovups ymm2, [rsi]
-    vmovups ymm3, [rdx]
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    vmovups [rcx], ymm2
-    add rsi,  0x20
+    vfmadd%{3}p%2 %4, %5, %6
+    vmovups [rdx], %4
+    add rsi, 0x20
     add rdx, 0x20
-    add rcx, 0x20
     sub rdi, 0x20 / %1
-    cmp rdi, 0x20 / %1
-    jge .loop
+    jnz .loop
 
 .last:
-    test rdi, rdi
+    test rax, rax
     jz .return
-    mov rax, rdi ; n
-    mov r8,  rsi ; b
-    mov r9,  rcx ; y
-    partial_load %1, ymm2, r8,  rax
-    partial_load %1, ymm3, rdx, rax
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    partial_store %1, r9, ymm2, rax
+    lea rdi, [mask%1]
+    shl rax, 5
+    add rax, rdi
+    vmovaps ymm3, [rax]
+    vmaskmovps ymm2, ymm3, [rsi]
+    vfmadd%{3}p%2 %4, %5, %6
+    vmaskmovps [rdx], ymm3, %4
 
 .return:
-    mov rsp, rbp
-    pop rbp
     ret
 %endmacro ; }}}
 
-; rdi  n
-; xmm0 a
-; xmm1 b
-; rsi  c
-; rdx  y
+; rdi:n
+; xmm0:a -> ymm0
+; xmm1:b -> ymm1
+; rsi:c  -> ymm2
+; rdx:y
 %macro fma_ssv 2 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
-
-    vbroadcasts%2 ymm3, xmm0 ; a
-    vbroadcasts%2 ymm1, xmm1 ; b
-
-    cmp rdi, 0x20 / %1
-    jl .last
-
-.loop: align 16
-    vmovups ymm2, [rsi]
-    vfmadd231p%2 ymm2, ymm3, ymm1
-    vmovups [rdx], ymm2
-    add rsi, 0x20
-    add rdx, 0x20
-    sub rdi, 0x20 / %1
-    cmp rdi, 0x20 / %1
-    jge .loop
-
-.last:
-    test rdi, rdi
-    jz .return
-    mov rax, rdi ; n
-    mov r8,  rsi ; c
-    partial_load %1, ymm2, r8, rax
-    vfmadd231p%2 ymm2, ymm3, ymm1
-    partial_store %1, rdx, ymm2, rax
-
-.return:
-    mov rsp, rbp
-    pop rbp
-    ret
+    fma3 %1, %2, 231, ymm2, ymm0, ymm1
 %endmacro ; }}}
 
-; rdi  n
-; xmm0 a
-; rsi  b
-; xmm1 c
-; rdx  y
+; rdi:n
+; xmm0:a -> ymm0
+; rsi:b  -> ymm2
+; xmm1:c -> ymm1
+; rdx:y
 %macro fma_svs 2 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
-
-    vbroadcasts%2 ymm3, xmm1 ; c
-    vbroadcasts%2 ymm1, xmm0 ; a
-
-    cmp rdi, 0x20 / %1
-    jl .last
-
-.loop: align 16
-    vmovups ymm2, [rsi]
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    vmovups [rdx], ymm2
-    add rsi,  0x20
-    add rdx, 0x20
-    sub rdi, 0x20 / %1
-    cmp rdi, 0x20 / %1
-    jge .loop
-
-.last:
-    test rdi, rdi
-    jz .return
-    mov rax, rdi ; n
-    mov r8,  rsi ; b
-    partial_load %1, ymm2, r8, rax
-    vfmadd213p%2 ymm2, ymm1, ymm3
-    partial_store %1, rdx, ymm2, rax
-
-.return:
-    mov rsp, rbp
-    pop rbp
-    ret
+    fma3 %1, %2, 213, ymm2, ymm0, ymm1
 %endmacro ; }}}
 
-; rdi  n
-; rsi  a
-; xmm0 b
-; xmm1 c
-; rdx  y
+; rdi:n
+; rsi:a  -> ymm2
+; xmm0:b -> ymm0
+; xmm1:c -> ymm1
+; rdx:y
 %macro fma_vss 2 ; {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x20
-    cld
-
-    vbroadcasts%2 ymm2, xmm0 ; b
-    vbroadcasts%2 ymm3, xmm1 ; c
-
-    cmp rdi, 0x20 / %1
-    jl .last
-
-.loop: align 16
-    vmovups ymm1, [rsi]
-    vfmadd213p%2 ymm1, ymm2, ymm3
-    vmovups [rdx], ymm1
-    add rsi, 0x20
-    add rdx, 0x20
-    sub rdi, 0x20 / %1
-    cmp rdi, 0x20 / %1
-    jge .loop
-
-.last:
-    test rdi, rdi
-    jz .return
-    mov rax, rdi ; n
-    mov r8,  rsi ; a
-    partial_load %1, ymm1, r8, rax
-    vfmadd213p%2 ymm1, ymm2, ymm3
-    partial_store %1, rdx, ymm1, rax
-
-.return:
-    mov rsp, rbp
-    pop rbp
-    ret
+    fma3 %1, %2, 213, ymm2, ymm0, ymm1
 %endmacro ; }}}
+
+section .rodata
+
+align 32
+
+mask4:
+dd  0,  0,  0,  0,  0,  0,  0,  0
+dd ~0,  0,  0,  0,  0,  0,  0,  0
+dd ~0, ~0,  0,  0,  0,  0,  0,  0
+dd ~0, ~0, ~0,  0,  0,  0,  0,  0
+dd ~0, ~0, ~0, ~0,  0,  0,  0,  0
+dd ~0, ~0, ~0, ~0, ~0,  0,  0,  0
+dd ~0, ~0, ~0, ~0, ~0, ~0,  0,  0
+dd ~0, ~0, ~0, ~0, ~0, ~0, ~0,  0
+
+mask8:
+dq  0,  0,  0,  0
+dq ~0,  0,  0,  0
+dq ~0, ~0,  0,  0
+dq ~0, ~0, ~0,  0
+
+section .text
 
 mckl_fma_vvv_ps: fma_vvv 4, s
 mckl_fma_vvs_ps: fma_vvs 4, s

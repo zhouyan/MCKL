@@ -82,22 +82,18 @@
                 mckl::rand(rng, unifd, K, bd.data());                         \
                 mckl::rand(rng, unifd, K, cd.data());                         \
                                                                               \
-                mckl::fma<float>(K, pas, pbs, pcs, rs1.data());               \
                 watch1.start();                                               \
                 mckl::fma<float>(K, pas, pbs, pcs, rs1.data());               \
                 watch1.stop();                                                \
                                                                               \
-                mckl::fma(K, pas, pbs, pcs, rs2.data());                      \
                 watch2.start();                                               \
                 mckl::fma(K, pas, pbs, pcs, rs2.data());                      \
                 watch2.stop();                                                \
                                                                               \
-                mckl::fma<double>(K, pad, pbd, pcd, rd1.data());              \
                 watch3.start();                                               \
                 mckl::fma<double>(K, pad, pbd, pcd, rd1.data());              \
                 watch3.stop();                                                \
                                                                               \
-                mckl::fma(K, pad, pbd, pcd, rd2.data());                      \
                 watch4.start();                                               \
                 mckl::fma(K, pad, pbd, pcd, rd2.data());                      \
                 watch4.stop();                                                \

@@ -51,10 +51,10 @@ default rel
 
 section .text
 
-; rdi: ctr.data()
-; rsi: n
-; rdx: r
-; rcx: mul:weyl:key
+; rdi:ctr.data()
+; rsi:n
+; rdx:r
+; rcx:mul:weyl:key
 mckl_philox4x64_bmi2_kernel: ; {{{
     push rbx
     push r12

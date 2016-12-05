@@ -42,10 +42,10 @@ default rel
 
 section .text
 
-; rdi: ctr.data()
-; rsi: n
-; rdx: r
-; rcx: mul:weyl:key
+; rdi:ctr.data()
+; rsi:n
+; rdx:r
+; rcx:mul:weyl:key
 mckl_philox2x64_bmi2_kernel: ; {{{
     test rsi, rsi
     jz .return

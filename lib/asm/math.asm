@@ -33,85 +33,38 @@
 ; rsi:a
 ; rdx:y
 %macro math_kernel_a1r1 2 ; function, operand size {{{
-    push rbp
-    mov rbp, rsp
-    shr rsp, 5
-    shl rsp, 5
-    sub rsp, 0x20
-    mov rax, rdi
-
-    cmp rdi, 0x2000 / %1
-    jg .skip
-
-    sub rsp, 0x2000
-    mov rcx, rax
-    lea rdi, [rsp + 0x20]
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
-    lea rsi, [rsp + 0x20]
-
-.skip:
-
-    test rax, rax
+    test rdi, rdi
     jz .return
-
-    mov r8, rax
-%if %1 == 4
-    shr rax, 3
-    and r8,  0x7
-%elif %1 == 8
-    shr rax, 2
-    and r8,  0x3
-%else
-    %error
-%endif
 
     %{2}_constants
 
-    test rax, rax
+    mov rax, rdi
+    and rax, (0x20 / %1) - 1
+    sub rdi, rax
+
+    test rdi, rdi
     jz .last
 
 .loop: align 16
     %2 [rdx], [rsi]
     add rsi, 0x20
     add rdx, 0x20
-    dec rax
+    sub rdi, 0x20 / %1
     jnz .loop
 
 .last:
-    test r8, r8
+    test rax, rax
     jz .return
-    mov rcx, r8
-    mov rdi, rsp
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
-    vmovaps ymm0, [rsp]
+    lea rdi, [mask%1]
+    shl rax, 5
+    add rax, rdi
+    vmovaps ymm1, [rax]
+    vmaskmovps ymm0, ymm1, [rsi]
     %2 ymm0, ymm0
-    vmovaps [rsp], ymm0
-    mov rcx, r8
-    mov rsi, rsp
-    mov rdi, rdx
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
+    vmovaps ymm1, [rax]
+    vmaskmovps [rdx], ymm1, ymm0
 
 .return:
-    mov rsp, rbp
-    pop rbp
     ret
 %endmacro ; }}}
 
@@ -120,25 +73,14 @@
 ; rdx:y
 ; rcx:z
 %macro math_kernel_a1r2 2 ; function, operand size {{{
-    push rbp
-    mov rbp, rsp
-    sub rsp, 0x40
-
     test rdi, rdi
     jz .return
 
-    mov rax, rdi
-%if %1 == 4
-    shr rdi, 3
-    and rax, 0x7
-%elif %1 == 8
-    shr rdi, 2
-    and rax, 0x3
-%else
-    %error
-%endif
-
     %{2}_constants
+
+    mov rax, rdi
+    and rax, (0x20 / %1) - 1
+    sub rdi, rax
 
     test rdi, rdi
     jz .last
@@ -148,51 +90,44 @@
     add rsi, 0x20
     add rdx, 0x20
     add rcx, 0x20
-    dec rdi
+    sub rdi, 0x20 / %1
     jnz .loop
 
 .last:
     test rax, rax
     jz .return
-    mov r8,  rcx
-    mov rcx, rax
-    mov rdi, rsp
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
-    vmovups ymm0, [rsp]
+    lea rdi, [mask%1]
+    shl rax, 5
+    add rax, rdi
+    vmovaps ymm2, [rax]
+    vmaskmovps ymm0, ymm2, [rsi]
     %2 ymm0, ymm1, ymm0
-    vmovups [rsp + 0x00], ymm0
-    vmovups [rsp + 0x20], ymm1
-    mov rcx, rax
-    mov rsi, rsp
-    mov rdi, rdx
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
-    mov rcx, rax
-    lea rsi, [rsp + 0x20]
-    mov rdi, r8
-%if %1 == 4
-    rep movsd
-%elif %1 == 8
-    rep movsq
-%else
-    %error
-%endif
+    vmovaps ymm2, [rax]
+    vmaskmovps [rdx], ymm2, ymm0
+    vmaskmovps [rcx], ymm2, ymm1
 
 .return:
-    mov rsp, rbp
-    pop rbp
     ret
 %endmacro ; }}}
+
+section .rodata
+
+align 32
+
+mask4:
+dd  0,  0,  0,  0,  0,  0,  0,  0
+dd ~0,  0,  0,  0,  0,  0,  0,  0
+dd ~0, ~0,  0,  0,  0,  0,  0,  0
+dd ~0, ~0, ~0,  0,  0,  0,  0,  0
+dd ~0, ~0, ~0, ~0,  0,  0,  0,  0
+dd ~0, ~0, ~0, ~0, ~0,  0,  0,  0
+dd ~0, ~0, ~0, ~0, ~0, ~0,  0,  0
+dd ~0, ~0, ~0, ~0, ~0, ~0, ~0,  0
+
+mask8:
+dq  0,  0,  0,  0
+dq ~0,  0,  0,  0
+dq ~0, ~0,  0,  0
+dq ~0, ~0, ~0,  0
 
 ; vim:ft=nasm

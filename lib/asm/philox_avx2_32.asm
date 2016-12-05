@@ -127,10 +127,10 @@ default rel
     rbox 9, %4
 %endmacro ; }}}
 
-; rdi: ctr.data()
-; rsi: n
-; rdx: r
-; rcx: mul:weyl:key
+; rdi:ctr.data()
+; rsi:n
+; rdx:r
+; rcx:mul:weyl:key
 %macro kernel 4 ; block size, permute constants {{{
     push rbp
     mov rbp, rsp
