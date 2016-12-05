@@ -112,6 +112,10 @@
 #define MCKL_USE_ASM_LIBRARY 0
 #endif
 
+#ifndef MCKL_USE_ASM_FMA
+#define MCKL_USE_ASM_FMA MCKL_USE_FMA
+#endif
+
 #ifndef MCKL_USE_ASM_VMF
 #define MCKL_USE_ASM_VMF 0
 #endif

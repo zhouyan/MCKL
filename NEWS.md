@@ -19,3 +19,7 @@
   experimental, with lower accuracy. They are suitable for vectorized random
   number generating and situations where a couple ULP errors are non-critical.
   See README for information of how to use them.
+
+* New `muladd` vector math functions. `fma` now always does fused
+  multiplication-addition, as its name advertise. `muladd` only does so when
+  hardware support is detected.

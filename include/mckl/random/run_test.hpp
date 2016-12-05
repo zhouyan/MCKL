@@ -128,7 +128,8 @@ class RunTestImpl<false, Up> : public ChiSquaredTest<RunTestImpl<false, Up>>
                 0.091666666666666666667, 0.026388888888888888889,
                 0.0057539682539682539683, 0.0011904761904761904762}};
 
-        fma(6, -static_cast<double>(n_), b.data(), count.data(), count.data());
+        muladd(
+            6, -static_cast<double>(n_), b.data(), count.data(), count.data());
 
         std::array<double, 36> c;
         std::size_t k = 0;

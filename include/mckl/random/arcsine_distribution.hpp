@@ -55,7 +55,7 @@ inline void arcsine_distribution_impl(
     mul(n, const_pi_by2<RealType>(), r, r);
     sin(n, r, r);
     sqr(n, r, r);
-    fma(n, r, b - a, a, r);
+    muladd(n, r, b - a, a, r);
 }
 
 } // namespace mckl::internal

@@ -64,7 +64,7 @@ inline void laplace_distribution_impl(
         }
     }
     log(n, r, r);
-    fma(n, s.data(), r, a, r);
+    muladd(n, s.data(), r, a, r);
 }
 
 } // namespace mckl::internal

@@ -139,7 +139,7 @@ always the length of the vector, and the last is a pointer to the output vector
 (except for |sincos| and |modf|, which have two output parameters). For all
 functions, the output parameters are always vectors. If there are more than one
 input parameters, then some of them, but not all, can be scalars. For example,
-for the function call |fma(n, a, b, c, y)| in table~\ref{tab:Arithmetic
+for the function call |muladd(n, a, b, c, y)| in table~\ref{tab:Arithmetic
 functions}, the input parameters are |a|, |b|, and |c|. Some of them, not all,
 can be scalars instead of pointers to vectors. The output parameter |y| has to
 be a pointer to a vector. Therefore, there are seven versions of this function
@@ -156,12 +156,12 @@ For example,
 Vector<double> a(n);
 Vector<double> b(n);
 Vector<double> y(n);
-fma(n, a.data(), b.data(), 2, y.data());
+muladd(n, a.data(), b.data(), 2, y.data());
 \end{verbatim}
 causes compile-time error because the fourth argument is an integer while the
 others are floating points. The correct call shall be,
 \begin{verbatim}
-fma(n, a.data(), b.data(), 2.0, y.data());
+muladd(n, a.data(), b.data(), 2.0, y.data());
 \end{verbatim}
 The same principle applies to mixed types functions (|abs|, |arg| and |cis|).
 That is, a |double| input can only be paired with a |std::complex<double>|
@@ -188,7 +188,8 @@ functions.
     \texttt{conj(n, a, y)}         & $y = \bar{a}$         & Complex       \\
     \texttt{abs(n, a, y)}          & $y = \Abs{a}$         & Real, Complex \\
     \texttt{arg(n, a, y)}          & $y = \mathrm{arg}(a)$ & Complex       \\
-    \texttt{fma(n, a, b, c, y)}    & $y = ab + c$          & Real, Complex \\
+    \texttt{muladd(n, a, b, c, y)} & $y = ab + c$          & Real, Complex \\
+    \texttt{fma(n, a, b, c, y)}    & $y = ab + c$          & Real          \\
     \bottomrule
   \end{tabularx}
   \caption{Arithmetic functions}
@@ -309,6 +310,32 @@ functions.
 
 \clearpage
 
+\section{Fused multiplication and addition}
+\label{sec:Fused multiplication and addition}
+
+The |muladd| and |fma| functions in the last section differs in that |fma|
+always does fused multiplication and addition through |std::fma| while |muladd|
+only does so when hardware support for \fma3 is detected. Also |muladd|
+supports complex numbers as input while |fma| does not. However, the compiler
+may or may not be able to make use the hardware support. And it may not
+vectorize the loop as most modern \cpp compilers would do for simpler
+operations such as addition and multiplication. When software implementation of
+|std::fma| is used, it will be much slower than using a multiplication and an
+addition. In this case, there are assembly implementations that take advantage
+of the hardware support for |float| and |double| precision. To enable this
+feature, one need to build and link to the runtime library
+(see~ref{sec:Optional runtime library}). One also need to set the configuration
+macro |MCKL_USE_ASM_LIB| to true. In addition, this feature is only enabled for
+platforms with \fma3 instruction set support. The library detects the
+availability of these instructions through compiler pre-defined macros. If this
+mechanism is not adequate, one can manually enable or disable them through the
+configuration macro |MCKL_HAS_FMA|. Note that, when the compiler is able to
+generate vectorized loop for |std::fma|, the assembly library may or may not
+outperform the compiler generated binary. If the compiler generated binary is
+preferred but the runtime library is also enabled for its other features, then
+one can define the configuration macro |MCKL_USE_ASM_FMA| to false to disable
+this feature.
+
 \section{Experimental vectorized implementation}
 \label{sec:Experimental vectorized implementation}
 
@@ -319,10 +346,10 @@ enable this feature, one need to build and link to the runtime library
 (see~\ref{sec:Optional runtime library}). One also need to set the
 configuration macros |MCKL_USE_ASM_LIB| and |MCKL_USE_ASM_VMF| to true. In
 addition, this feature is only enabled for platforms with \avx2 and \fma3
-instruction sets support. The library detect the availability of these
+instruction sets support. The library detects the availability of these
 instructions through compiler pre-defined macros. If this mechanism is not
-adequate, one can manually enable them through the configuration macros,
-|MCKL_HAS_AVX2| and |MCKL_HAS_FMA|, respectively.
+adequate, one can manually enable or disable them through the configuration
+macros, |MCKL_HAS_AVX2| and |MCKL_HAS_FMA|, respectively.
 
 \subsection{Caveats}
 \label{sub:Caveats}

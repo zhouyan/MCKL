@@ -105,7 +105,7 @@ inline void u01_trans_systematic_impl(
     std::size_t j = 0;
     for (std::size_t i = n0; i != n; ++i, ++j)
         r[j] = static_cast<RealType>(i);
-    fma(n - n0, r, delta, u, r);
+    muladd(n - n0, r, delta, u, r);
 }
 
 } // namespace mckl::internal

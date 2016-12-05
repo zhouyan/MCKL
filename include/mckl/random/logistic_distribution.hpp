@@ -56,7 +56,7 @@ inline void logistic_distribution_impl(
     sub(n, const_one<RealType>(), r, s.data());
     div(n, r, s.data(), r);
     log(n, r, r);
-    fma(n, r, b, a, r);
+    muladd(n, r, b, a, r);
 }
 
 } // namespace mckl::internal

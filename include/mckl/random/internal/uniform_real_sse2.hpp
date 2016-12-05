@@ -58,15 +58,9 @@ class UniformRealSSE2ImplBase
     public:
     MCKL_INLINE static RealType eval(UIntType u, RealType a, RealType b)
     {
-#if MCKL_USE_FMA
-        return std::fma(
-            U01GenericImpl<UIntType, RealType, Closed, Open>::eval(u), b - a,
-            a);
-#else
         return U01GenericImpl<UIntType, RealType, Closed, Open>::eval(u) *
             (b - a) +
             a;
-#endif
     }
 
     static void eval(

@@ -55,7 +55,7 @@ inline void levy_distribution_impl(
         rng, n, r, const_zero<RealType>(), const_one<RealType>());
     sqr(n, r, r);
     inv(n, r, r);
-    fma(n, r, b, a, r);
+    muladd(n, r, b, a, r);
 
     LevyDistribution<RealType> dist;
     for (std::size_t i = 0; i != n; ++i)

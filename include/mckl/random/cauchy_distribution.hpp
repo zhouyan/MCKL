@@ -54,7 +54,7 @@ inline void cauchy_distribution_impl(
     u01_co_distribution(rng, n, r);
     mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
-    fma(n, r, b, a, r);
+    muladd(n, r, b, a, r);
 }
 
 } // namespace mckl::internal

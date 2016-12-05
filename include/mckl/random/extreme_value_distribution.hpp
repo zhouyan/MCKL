@@ -55,7 +55,7 @@ inline void extreme_value_distribution_impl(
     log(n, r, r);
     mul(n, static_cast<RealType>(-1), r, r);
     log(n, r, r);
-    fma(n, r, -b, a, r);
+    muladd(n, r, -b, a, r);
 }
 
 } // namespace mckl::internal
