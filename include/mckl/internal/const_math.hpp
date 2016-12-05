@@ -75,7 +75,7 @@ class StirlingMatrix2
     Vector<double> data_;
 
     double &get(std::size_t i, std::size_t j) { return data_[i * ncol_ + j]; }
-}; // class StirlingMatrix
+}; // class StirlingMatrix2
 
 template <unsigned long long U,
     int N = std::numeric_limits<unsigned long long>::digits - 1>
