@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/math/src/math_log1p.cpp
+// MCKL/example/math/src/math_logf.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -31,26 +31,25 @@
 
 #include "math_asm.hpp"
 
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log1p, vd_log1p)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, float, log, vs_log)
 
 int main(int argc, char **argv)
 {
-    math_asm_vd_log1p_check(0xBFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
+    math_asm_vs_log_check(0x00800000U, 0x7F7FFFFFU);
 
-    const double sqrt2m2 = static_cast<double>(std::sqrt(2.0l) / 2.0l - 1.0l);
-    const double sqrt2m1 = static_cast<double>(std::sqrt(2.0l) - 1.0l);
+    const float sqrt2 = static_cast<float>(std::sqrt(2.0l));
+    const float sqrt2by2 = static_cast<float>(std::sqrt(2.0l) / 2.0l);
 
-    mckl::Vector<MathBound<double>> bounds;
-    bounds.push_back(MathBound<double>(-1, sqrt2m2, "", "sqrt(2) / 2 - 1"));
-    bounds.push_back(MathBound<double>(sqrt2m2, -DBL_MIN, "sqrt(2) / 2 - 1"));
-    bounds.push_back(MathBound<double>(-DBL_MIN, DBL_MIN));
-    bounds.push_back(MathBound<double>(DBL_MIN, sqrt2m1, "", "sqrt(2) - 1"));
-    bounds.push_back(MathBound<double>(sqrt2m1, 1e0, "sqrt(2) - 1"));
-    bounds.push_back(MathBound<double>(1e0, 1e1));
-    bounds.push_back(MathBound<double>(1e1, 1e2));
-    bounds.push_back(MathBound<double>(1e2, 1e3));
-    bounds.push_back(MathBound<double>(1e3, 1e4));
-    math_asm(argc, argv, math_asm_vd_log1p, bounds);
+    mckl::Vector<MathBound<float>> bounds;
+    bounds.push_back(MathBound<float>(0, FLT_MIN));
+    bounds.push_back(MathBound<float>(FLT_MIN, sqrt2by2, "", "sqrt(2) / 2"));
+    bounds.push_back(
+        MathBound<float>(sqrt2by2, sqrt2, "sqrt(2) / 2", "sqrt(2)"));
+    bounds.push_back(MathBound<float>(sqrt2, 1e1, "sqrt(2)"));
+    bounds.push_back(MathBound<float>(1e1, 1e2));
+    bounds.push_back(MathBound<float>(1e2, 1e3));
+    bounds.push_back(MathBound<float>(1e3, 1e4));
+    math_asm(argc, argv, math_asm_vs_log, bounds);
 
     return 0;
 }

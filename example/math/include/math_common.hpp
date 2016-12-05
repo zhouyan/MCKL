@@ -120,19 +120,19 @@ inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
 
     std::stringstream ss;
     ss << std::setprecision(2);
-    if (std::abs(nmin) > 0.1 && std::abs(nmin) < 10) {
+    if (std::abs(nmin) > static_cast<T>(0.1) && std::abs(nmin) < 10) {
         ss << nmin << ' ' << prefix << "MIN";
         os << ss.str();
         return;
     }
 
-    if (std::abs(nmax) > 0.1) {
+    if (std::abs(nmax) > static_cast<T>(0.1)) {
         ss << nmax << ' ' << prefix << "max";
         os << ss.str();
         return;
     }
 
-    if (std::abs(neps) > 0.1 && std::abs(neps) < 10) {
+    if (std::abs(neps) > static_cast<T>(0.1) && std::abs(neps) < 10) {
         ss << neps << ' ' << prefix << "eps";
         os << ss.str();
         return;

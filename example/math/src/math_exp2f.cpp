@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/math/src/math_log1p.cpp
+// MCKL/example/math/src/math_exp2f.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -31,26 +31,23 @@
 
 #include "math_asm.hpp"
 
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log1p, vd_log1p)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, float, exp2, vs_exp2)
 
 int main(int argc, char **argv)
 {
-    math_asm_vd_log1p_check(0xBFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
+    math_asm_vs_exp2_check(0xC2FC0000U, 0x42FE0000U);
 
-    const double sqrt2m2 = static_cast<double>(std::sqrt(2.0l) / 2.0l - 1.0l);
-    const double sqrt2m1 = static_cast<double>(std::sqrt(2.0l) - 1.0l);
-
-    mckl::Vector<MathBound<double>> bounds;
-    bounds.push_back(MathBound<double>(-1, sqrt2m2, "", "sqrt(2) / 2 - 1"));
-    bounds.push_back(MathBound<double>(sqrt2m2, -DBL_MIN, "sqrt(2) / 2 - 1"));
-    bounds.push_back(MathBound<double>(-DBL_MIN, DBL_MIN));
-    bounds.push_back(MathBound<double>(DBL_MIN, sqrt2m1, "", "sqrt(2) - 1"));
-    bounds.push_back(MathBound<double>(sqrt2m1, 1e0, "sqrt(2) - 1"));
-    bounds.push_back(MathBound<double>(1e0, 1e1));
-    bounds.push_back(MathBound<double>(1e1, 1e2));
-    bounds.push_back(MathBound<double>(1e2, 1e3));
-    bounds.push_back(MathBound<double>(1e3, 1e4));
-    math_asm(argc, argv, math_asm_vd_log1p, bounds);
+    mckl::Vector<MathBound<float>> bounds;
+    bounds.push_back(MathBound<float>(-126, -100));
+    bounds.push_back(MathBound<float>(-100, -50));
+    bounds.push_back(MathBound<float>(-50, -1));
+    bounds.push_back(MathBound<float>(-1, -FLT_MIN));
+    bounds.push_back(MathBound<float>(-FLT_MIN, FLT_MIN));
+    bounds.push_back(MathBound<float>(FLT_MIN, 1));
+    bounds.push_back(MathBound<float>(1, 50));
+    bounds.push_back(MathBound<float>(50, 100));
+    bounds.push_back(MathBound<float>(100, 127));
+    math_asm(argc, argv, math_asm_vs_exp2, bounds);
 
     return 0;
 }

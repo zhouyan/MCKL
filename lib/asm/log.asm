@@ -42,9 +42,9 @@ default rel
 ; register used as variables: ymm1-5, ymm7, ymm11, ymm13-15
 
 %macro log1pf_constants 0 ; {{{
-    vmovapd ymm6,  [rel sqrt2by2]
-    vmovapd ymm8,  [rel one]
-    vmovapd ymm9,  [rel two]
+    vmovapd ymm6, [rel sqrt2by2]
+    vmovapd ymm8, [rel one]
+    vmovapd ymm9, [rel two]
 %endmacro ; }}}
 
 ; log(1 + f) * (f + 2) / f - 2 = c15 * x^14 + ... + c5 * x^4 + c3 * x^2
@@ -118,9 +118,9 @@ default rel
     vcmpgtpd ymm2, ymm0, [%{1}_max_a] ; a > max_a
     vcmpltpd ymm3, ymm0, [%{1}_nan_a] ; a < nan_a
     vcmpneqpd ymm4, ymm0, ymm0        ; a != a
-    vpor ymm5, ymm1, ymm2
-    vpor ymm5, ymm5, ymm3
-    vpor ymm5, ymm5, ymm4
+    vorpd ymm5, ymm1, ymm2
+    vorpd ymm5, ymm5, ymm3
+    vorpd ymm5, ymm5, ymm4
     vtestpd ymm5, ymm5
     jz %%skip
     vblendvpd ymm15, ymm15, [%{1}_min_y], ymm1 ; min_y
@@ -249,7 +249,7 @@ c13: times 4 dq 0x3FC39A09D078C69F
 c15: times 4 dq 0x3FC2F112DF3E5244
 
 emask0: times 4 dq 0x4330000000000000 ; 2^52
-emask1: times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
+emask1: times 4 dq 0x43300000000003FF ; 2^52 + 1023
 fmask0: times 4 dq 0x000FFFFFFFFFFFFF ; fraction mask
 fmask1: times 4 dq 0x3FE0000000000000 ; fraction(a) / 2
 

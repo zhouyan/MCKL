@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     bounds.push_back(MathBound<double>(DBL_MIN, 1));
     bounds.push_back(MathBound<double>(1, 500));
     bounds.push_back(MathBound<double>(500, 1000));
-    bounds.push_back(MathBound<double>(1000, 1022));
+    bounds.push_back(MathBound<double>(1000, 1023));
     math_asm(argc, argv, math_asm_vd_exp2, bounds);
 
     return 0;

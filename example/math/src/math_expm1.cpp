@@ -35,23 +35,25 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, expm1, vd_expm1)
 
 int main(int argc, char **argv)
 {
-    math_asm_vd_expm1_check(0xC086232BDD7ABCD2ULL, 0x40862B7D369A5AA7ULL);
+    union {
+        std::uint64_t u;
+        double x;
+    };
+    u = 0xC086232BDD7ABCD2ULL;
+
+    union {
+        std::uint64_t v;
+        double y;
+    };
+    v = 0x40862B7D369A5AA7ULL;
 
     const double ln2 = static_cast<double>(std::log(2.0l));
     const double ln2by2 = static_cast<double>(std::log(2.0l) / 2.0l);
 
-    union {
-        std::uint64_t u;
-        double lower;
-    };
-    u = 0xC086232BDD7ABCD2ULL;
-    union {
-        std::uint64_t v;
-        double upper;
-    };
-    v = 0x40862B7D369A5AA7ULL;
+    math_asm_vd_expm1_check(u, v);
+
     mckl::Vector<MathBound<double>> bounds;
-    bounds.push_back(MathBound<double>(lower, -707));
+    bounds.push_back(MathBound<double>(x, -707));
     bounds.push_back(MathBound<double>(-707, -500));
     bounds.push_back(MathBound<double>(-500, -1));
     bounds.push_back(MathBound<double>(-1, -ln2, "", "-ln(2)"));
@@ -63,7 +65,7 @@ int main(int argc, char **argv)
     bounds.push_back(MathBound<double>(ln2, 1, "ln(2)"));
     bounds.push_back(MathBound<double>(1, 500));
     bounds.push_back(MathBound<double>(500, 707));
-    bounds.push_back(MathBound<double>(707, upper));
+    bounds.push_back(MathBound<double>(707, y));
     math_asm(argc, argv, math_asm_vd_expm1, bounds);
 
     return 0;

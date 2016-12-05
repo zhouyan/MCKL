@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/math/src/math_log1p.cpp
+// MCKL/example/math/src/math_expf.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -31,26 +31,35 @@
 
 #include "math_asm.hpp"
 
-MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, log1p, vd_log1p)
+MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, float, exp, vs_exp)
 
 int main(int argc, char **argv)
 {
-    math_asm_vd_log1p_check(0xBFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
+    union {
+        std::uint32_t u;
+        float x;
+    };
+    u = 0xC2AEAC4FU;
 
-    const double sqrt2m2 = static_cast<double>(std::sqrt(2.0l) / 2.0l - 1.0l);
-    const double sqrt2m1 = static_cast<double>(std::sqrt(2.0l) - 1.0l);
+    union {
+        std::uint32_t v;
+        float y;
+    };
+    v = 0x42B0C0A5U;
 
-    mckl::Vector<MathBound<double>> bounds;
-    bounds.push_back(MathBound<double>(-1, sqrt2m2, "", "sqrt(2) / 2 - 1"));
-    bounds.push_back(MathBound<double>(sqrt2m2, -DBL_MIN, "sqrt(2) / 2 - 1"));
-    bounds.push_back(MathBound<double>(-DBL_MIN, DBL_MIN));
-    bounds.push_back(MathBound<double>(DBL_MIN, sqrt2m1, "", "sqrt(2) - 1"));
-    bounds.push_back(MathBound<double>(sqrt2m1, 1e0, "sqrt(2) - 1"));
-    bounds.push_back(MathBound<double>(1e0, 1e1));
-    bounds.push_back(MathBound<double>(1e1, 1e2));
-    bounds.push_back(MathBound<double>(1e2, 1e3));
-    bounds.push_back(MathBound<double>(1e3, 1e4));
-    math_asm(argc, argv, math_asm_vd_log1p, bounds);
+    math_asm_vs_exp_check(u, v);
+
+    mckl::Vector<MathBound<float>> bounds;
+    bounds.push_back(MathBound<float>(x, -87));
+    bounds.push_back(MathBound<float>(-87, -80));
+    bounds.push_back(MathBound<float>(-80, -1));
+    bounds.push_back(MathBound<float>(-1, -FLT_MIN));
+    bounds.push_back(MathBound<float>(-FLT_MIN, FLT_MIN));
+    bounds.push_back(MathBound<float>(FLT_MIN, 1));
+    bounds.push_back(MathBound<float>(1, 80));
+    bounds.push_back(MathBound<float>(80, 87));
+    bounds.push_back(MathBound<float>(87, y));
+    math_asm(argc, argv, math_asm_vs_exp, bounds);
 
     return 0;
 }

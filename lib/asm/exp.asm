@@ -83,8 +83,8 @@ default rel
 
     vfmadd213pd ymm13, ymm4, ymm5 ; z13 = w13 * x^6 + w5
 
-    vpor ymm4, ymm1, ymm2
-    vpor ymm4, ymm4, ymm3
+    vorpd ymm4, ymm1, ymm2
+    vorpd ymm4, ymm4, ymm3
 %endmacro ; }}}
 
 %macro select 1 ; implicit input ymm1-4, ymm13, output ymm13 {{{
@@ -179,10 +179,10 @@ default rel
 
     ; exp(a) - 1 = exp(x) * 2^k - 1 = R * 2^k + (2^k - 1)
     vsubpd ymm5, ymm15, [one] ; 2^k - 1
-    vaddpd ymm7, ymm13, ymm13 ; 2 * R
+    vaddpd ymm9, ymm13, ymm13 ; 2 * R
     vmovapd ymm11, ymm13
     vfmadd213pd ymm13, ymm15, ymm5 ; R * 2^k + (2^k - 1)
-    vfmadd213pd ymm11, ymm11, ymm7 ; R * R + 2 * R
+    vfmadd213pd ymm11, ymm11, ymm9 ; R * R + 2 * R
     vblendvpd ymm13, ymm11, ymm13, ymm14
 
     select expm1
@@ -221,15 +221,15 @@ c11: times 4 dq 0x3E5AE64567F544E4
 c12: times 4 dq 0x3E21EED8EFF8D898
 c13: times 4 dq 0x3DE6124613A86D09
 
-bias:    times 4 dq 0x43300000000003FF ; 2^52 + 1023.0
-one:     times 4 dq 0x3FF0000000000000 ; 1.0
-half:    times 4 dq 0x3FE0000000000000 ; 0.5
-pmask:   times 4 dq 0x7FFFFFFFFFFFFFFF ; abs(x) = x & pmask
-ln2:     times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
-ln2hi:   times 4 dq 0x3FE62E42FEE00000
-ln2lo:   times 4 dq 0x3DEA39EF35793C76
-ln2inv:  times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
-ln2by2:  times 4 dq 0x3FD62E42FEFA39EF ; log(2.0l) / 2.0l
+bias:   times 4 dq 0x43300000000003FF ; 2^52 + 1023
+one:    times 4 dq 0x3FF0000000000000 ; 1.0
+half:   times 4 dq 0x3FE0000000000000 ; 0.5
+pmask:  times 4 dq 0x7FFFFFFFFFFFFFFF ; abs(x) = x & pmask
+ln2:    times 4 dq 0x3FE62E42FEFA39EF ; log(2.0l)
+ln2hi:  times 4 dq 0x3FE62E42FEE00000
+ln2lo:  times 4 dq 0x3DEA39EF35793C76
+ln2inv: times 4 dq 0x3FF71547652B82FE ; 1.0l / log(2.0l)
+ln2by2: times 4 dq 0x3FD62E42FEFA39EF ; log(2.0l) / 2.0l
 
 section .text
 

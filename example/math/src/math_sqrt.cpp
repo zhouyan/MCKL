@@ -35,10 +35,9 @@ MCKL_EXAMPLE_DEFINE_MATH_ASM(A1R1, double, sqrt, vd_sqrt)
 
 int main(int argc, char **argv)
 {
-    math_asm_vd_sqrt_check(0xFFEFFFFFFFFFFFFFULL, 0x7FEFFFFFFFFFFFFFULL);
+    math_asm_vd_sqrt_check(0ULL, 0x7FEFFFFFFFFFFFFFULL);
 
     mckl::Vector<MathBound<double>> bounds;
-    bounds.push_back(MathBound<double>(0.1, 1e4));
     bounds.push_back(MathBound<double>(0, DBL_MIN));
     bounds.push_back(MathBound<double>(DBL_MIN, 0.1));
     bounds.push_back(MathBound<double>(0.1, 1e0));

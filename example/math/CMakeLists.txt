@@ -40,8 +40,11 @@ if(AVX2_FOUND AND FMA_FOUND)
     if(MCKL_ENABLE_LIBRARY)
         add_custom_target(math_asm)
         add_custom_target(math_asm-check)
-        set(MATH_ASM_FUNCTIONS sqrt exp exp2 expm1 log log2 log10 log1p sin cos
-            sincos tan)
+        set(MATH_ASM_FUNCTIONS
+            sqrtf sqrt
+            expf exp exp2f exp2 expm1f expm1
+            logf log log2f log2 log10f log10 log1pf log1p
+            sin cos sincos tan)
         foreach(f ${MATH_ASM_FUNCTIONS})
             mckl_add_test(math ${f})
             add_dependencies(math_asm math_${f})

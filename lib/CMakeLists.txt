@@ -34,8 +34,11 @@ project(MCKLLibrary C)
 include_directories(${PROJECT_SOURCE_DIR}/asm)
 
 set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
+    ${PROJECT_SOURCE_DIR}/asm/sqrtf.asm
     ${PROJECT_SOURCE_DIR}/asm/sqrt.asm
+    ${PROJECT_SOURCE_DIR}/asm/expf.asm
     ${PROJECT_SOURCE_DIR}/asm/exp.asm
+    ${PROJECT_SOURCE_DIR}/asm/logf.asm
     ${PROJECT_SOURCE_DIR}/asm/log.asm
     ${PROJECT_SOURCE_DIR}/asm/sincos.asm
     ${PROJECT_SOURCE_DIR}/asm/fma.asm

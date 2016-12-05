@@ -40,7 +40,7 @@ default rel
 
 %macro sincostan 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
     ; b = abs(a)
-    vpand ymm1, ymm0, [pmask]
+    vandpd ymm1, ymm0, [pmask]
     vcmpgtpd ymm2, ymm1, [nan_a]
     vcmpgtpd ymm5, ymm1, [max_a]
     vblendvpd ymm0, ymm0, [nan_y], ymm2
@@ -48,7 +48,7 @@ default rel
     jz %%inrange
 
     ; reduce ymm1 to around 2^53 if ymm1 > 2^53
-    vpand ymm2, ymm1, [max253]
+    vandpd ymm2, ymm1, [max253]
     vcmpgtpd ymm3, ymm1, [pow253]
     vblendvpd ymm1, ymm1, ymm2, ymm3
 
@@ -68,7 +68,7 @@ default rel
 
     ; k = floor((n + 1) / 2) * 2
     vpaddd xmm11, xmm11, [ddone]
-    vpand xmm11, xmm11, [ddmask]
+    vandpd xmm11, xmm11, [ddmask]
 
     ; x = a - k * pi / 4
     vcvtdq2pd ymm2, xmm11
@@ -122,15 +122,15 @@ default rel
     ; signs
 %if %1 & 0x5 ; sin(a), tan(a)
     vpsllq ymm1, ymm11, 61
-    vpxor ymm1, ymm1, ymm0
-    vpand ymm1, ymm1, [smask]
-    vpxor ymm13, ymm3, ymm1
+    vxorpd ymm1, ymm1, ymm0
+    vandpd ymm1, ymm1, [smask]
+    vxorpd ymm13, ymm3, ymm1
 %endif
 %if %1 & 0x6 ; cos(a), tan(a)
     vpaddq ymm1, ymm11, [dqtwo]
     vpsllq ymm1, ymm1, 61
-    vpand ymm1, ymm1, [smask]
-    vpxor ymm14, ymm4, ymm1
+    vandpd ymm1, ymm1, [smask]
+    vxorpd ymm14, ymm4, ymm1
 %endif
 %if %1 & 0x4 ; tan(a)
     vdivpd ymm15, ymm13, ymm14
@@ -219,6 +219,7 @@ c14: times 4 dq 0xBDA8FAE9BE8838D4
 ddmask: times 8 dd 0xFFFFFFFE ; ~1
 ddone:  times 8 dd 0x00000001 ; 1
 dqtwo:  times 4 dq 0x0000000000000002 ; 2
+
 pmask:  times 4 dq 0x7FFFFFFFFFFFFFFF ; abs(x)  = x & pmask
 smask:  times 4 dq 0x8000000000000000 ; sign(x) = x & smask
 pi4dp1: times 4 dq 0x3FE921FB50000000

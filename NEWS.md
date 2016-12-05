@@ -17,8 +17,8 @@
 * New assembly implementation of vectorized `exp`, `exp2`, `expm1`, `log`,
   `log2`, `log10`, `log1p`, `sin`, `cos`, `sincos` and `tan. These are
   experimental, with lower accuracy. They are suitable for vectorized random
-  number generating and situations where a couple ULP errors are non-critical.
-  See README for information of how to use them.
+  number generating and situations where errors of a couple ULP are
+  acceptable. See README for information of how to use them.
 
 * New `muladd`, `fmadd` and related vector math functions. The former only does
   fused operation when FMA3 is supported and the assembly library is used. The

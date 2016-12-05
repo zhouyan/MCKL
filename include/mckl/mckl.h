@@ -46,19 +46,39 @@ extern "C" {
 
 #endif // __cplusplus
 
+// sqrtf.asm
+void mckl_vs_sqrt(size_t, const float *, float *);
+
 // sqrt.asm
 void mckl_vd_sqrt(size_t, const double *, double *);
+
+// expf.asm
+void mckl_vs_exp(size_t, const float *, float *);
+void mckl_vs_exp2(size_t, const float *, float *);
+void mckl_vs_expm1(size_t, const float *, float *);
 
 // exp.asm
 void mckl_vd_exp(size_t, const double *, double *);
 void mckl_vd_exp2(size_t, const double *, double *);
 void mckl_vd_expm1(size_t, const double *, double *);
 
+// logf.asm
+void mckl_vs_log(size_t, const float *, float *);
+void mckl_vs_log2(size_t, const float *, float *);
+void mckl_vs_log10(size_t, const float *, float *);
+void mckl_vs_log1p(size_t, const float *, float *);
+
 // log.asm
 void mckl_vd_log(size_t, const double *, double *);
 void mckl_vd_log2(size_t, const double *, double *);
 void mckl_vd_log10(size_t, const double *, double *);
 void mckl_vd_log1p(size_t, const double *, double *);
+
+// sincosf.asm
+void mckl_vs_sin(size_t, const float *, float *);
+void mckl_vs_cos(size_t, const float *, float *);
+void mckl_vs_sincos(size_t, const float *, float *, float *);
+void mckl_vs_tan(size_t, const float *, float *);
 
 // sincos.asm
 void mckl_vd_sin(size_t, const double *, double *);

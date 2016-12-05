@@ -39,6 +39,7 @@ int main(int argc, char **argv)
 
     const double sqrt2 = static_cast<double>(std::sqrt(2.0l));
     const double sqrt2by2 = static_cast<double>(std::sqrt(2.0l) / 2.0l);
+
     mckl::Vector<MathBound<double>> bounds;
     bounds.push_back(MathBound<double>(0, DBL_MIN));
     bounds.push_back(MathBound<double>(DBL_MIN, sqrt2by2, "", "sqrt(2) / 2"));
