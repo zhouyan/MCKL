@@ -140,12 +140,12 @@ always the length of the vector, and the last is a pointer to the output vector
 functions, the output parameters are always vectors. If there are more than one
 input parameters, then some of them, but not all, can be scalars. For example,
 for the function call |muladd(n, a, b, c, y)| in table~\ref{tab:Arithmetic
-functions}, the input parameters are |a|, |b|, and |c|. Some of them, not all,
-can be scalars instead of pointers to vectors. The output parameter |y| has to
-be a pointer to a vector. Therefore, there are seven versions of this function
-for each type of the parameters.
+  functions}, the input parameters are |a|, |b|, and |c|. Some of them, not
+all, can be scalars instead of pointers to vectors. The output parameter |y|
+has to be a pointer to a vector. Therefore, there are seven versions of this
+function for each type of the parameters.
 
-The input of these functions  can be either real numbers (|double|, etc.), or
+The input of these functions can be either real numbers (|double|, etc.), or
 complex numbers (|std::complex<double>|, etc.), or both. The supported data
 types are also listed in the tables. In most cases, output data type is the
 same as the input. There are a few exceptions. The |abs| and |arg| functions
@@ -174,6 +174,10 @@ vectors of types |float| or |double|, or their complex counterparts. The
 performance of vectorized random number generating introduced later in
 section~\ref{sec:Vectorized random number generating} heavily depends on these
 functions.
+
+The input and output pointers are allowed to alias to each other in the sense
+that they might pointing to the same memory locations. However, if they point
+different locations but the vectors overlap, the behavior is undefined.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}

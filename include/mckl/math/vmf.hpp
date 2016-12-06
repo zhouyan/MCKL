@@ -311,7 +311,9 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 
 } // namespace mckl
 
-#elif MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_VMF && MCKL_USE_FMA
+#endif // MCKL_USE_MKL_VML
+
+#if MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_VMF && MCKL_USE_FMA
 
 #define MCKL_DEFINE_MATH_VMF_ASM_1S(func)                                     \
     inline void func(std::size_t n, const float *a, float *y)                 \
@@ -341,19 +343,20 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
 namespace mckl
 {
 
+#if !MCKL_USE_MKL_VML
+
 MCKL_DEFINE_MATH_VMF_ASM_1S(sqrt)
 MCKL_DEFINE_MATH_VMF_ASM_1D(sqrt)
 
 MCKL_DEFINE_MATH_VMF_ASM_1S(exp)
 MCKL_DEFINE_MATH_VMF_ASM_1D(exp)
-MCKL_DEFINE_MATH_VMF_ASM_1S(exp2)
-MCKL_DEFINE_MATH_VMF_ASM_1D(exp2)
+
 MCKL_DEFINE_MATH_VMF_ASM_1S(expm1)
 MCKL_DEFINE_MATH_VMF_ASM_1D(expm1)
+
 MCKL_DEFINE_MATH_VMF_ASM_1S(log)
 MCKL_DEFINE_MATH_VMF_ASM_1D(log)
-MCKL_DEFINE_MATH_VMF_ASM_1S(log2)
-MCKL_DEFINE_MATH_VMF_ASM_1D(log2)
+
 MCKL_DEFINE_MATH_VMF_ASM_1S(log10)
 MCKL_DEFINE_MATH_VMF_ASM_1D(log10)
 MCKL_DEFINE_MATH_VMF_ASM_1S(log1p)
@@ -369,9 +372,17 @@ inline void sincos(std::size_t n, const double *a, double *y, double *z)
 
 MCKL_DEFINE_MATH_VMF_ASM_1D(tan)
 
+#endif // MCKL_USE_MKL_VML
+
+MCKL_DEFINE_MATH_VMF_ASM_1S(exp2)
+MCKL_DEFINE_MATH_VMF_ASM_1D(exp2)
+
+MCKL_DEFINE_MATH_VMF_ASM_1S(log2)
+MCKL_DEFINE_MATH_VMF_ASM_1D(log2)
+
 } // namespace mckl
 
-#endif // MCKL_USE_MKL_VML
+#endif // MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_VMF && MCKL_USE_FMA
 
 #if MCKL_USE_ASM_LIBRARY && MCKL_USE_ASM_FMA
 
@@ -921,10 +932,7 @@ inline void sincos(std::size_t n, const T *a, T *y, T *z)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
 
-    std::intptr_t vn = static_cast<std::intptr_t>(n);
-    std::intptr_t va = reinterpret_cast<std::intptr_t>(a);
-    std::intptr_t vy = reinterpret_cast<std::intptr_t>(y);
-    if (va - vy < vn || vy - va < vn) {
+    if (a == y || a == z) {
         alignas(32) std::array<T, k> s;
         for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
             sin<T>(k, a, s.data());
