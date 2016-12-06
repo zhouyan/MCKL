@@ -36,7 +36,7 @@ global mckl_ars_aesni_sse2_kernel
 
 default rel
 
-%macro encfirst 1 ; {{{
+%macro encfirst 1
     pxor xmm0, %1
     pxor xmm1, %1
     pxor xmm2, %1
@@ -45,9 +45,9 @@ default rel
     pxor xmm5, %1
     pxor xmm6, %1
     pxor xmm7, %1
-%endmacro ; }}}
+%endmacro
 
-%macro enc 1 ; {{{
+%macro enc 1
     aesenc xmm0, %1
     aesenc xmm1, %1
     aesenc xmm2, %1
@@ -56,9 +56,9 @@ default rel
     aesenc xmm5, %1
     aesenc xmm6, %1
     aesenc xmm7, %1
-%endmacro ; }}}
+%endmacro
 
-%macro enclast 1 ; {{{
+%macro enclast 1
     aesenclast xmm0, %1
     aesenclast xmm1, %1
     aesenclast xmm2, %1
@@ -67,9 +67,9 @@ default rel
     aesenclast xmm5, %1
     aesenclast xmm6, %1
     aesenclast xmm7, %1
-%endmacro ; }}}
+%endmacro
 
-%macro generate 1 ; rounds {{{
+%macro generate 1 ; rounds
     movdqa xmm0, xmm8
     movdqa xmm1, xmm8
     movdqa xmm2, xmm8
@@ -101,13 +101,13 @@ default rel
 %endrep
 %endif
     enclast xmm15
-%endmacro ; }}}
+%endmacro
 
 ; rdi:ctr.data()
 ; rsi:n
 ; rdx:r
 ; rcx:ks.get().data()/weyl:key
-%macro kernel 1 ; rounds {{{
+%macro kernel 1 ; rounds
     push rbp
     mov rbp, rsp
 %if %1 > 5
@@ -195,7 +195,7 @@ default rel
     mov rsp, rbp
     pop rbp
     ret
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

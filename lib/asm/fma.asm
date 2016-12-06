@@ -96,7 +96,7 @@ default rel
 ; rdx:b
 ; rcx:c
 ; r8:y
-%macro fma_vvv 3 ; {{{
+%macro fma_vvv 3
     test rdi, rdi
     jz .return
 
@@ -134,9 +134,9 @@ default rel
 
 .return:
     ret
-%endmacro ; }}}
+%endmacro
 
-%macro fma2 7 ; {{{
+%macro fma2 7
     test rdi, rdi
     jz .return
 
@@ -174,36 +174,36 @@ default rel
 
 .return:
     ret
-%endmacro ; }}}
+%endmacro
 
 ; rdi:n
 ; rsi:a  -> ymm1
 ; rdx:b  -> ymm2
 ; xmm0:c -> ymm0
 ; rcx:y
-%macro fma_vvs 3 ; {{{
+%macro fma_vvs 3
     fma2 %1, %2, %3, 213, ymm1, ymm2, ymm0
-%endmacro ; }}}
+%endmacro
 
 ; rdi:n
 ; rsi:a  -> ymm1
 ; xmm0:b -> ymm0
 ; rdx:c  -> ymm2
 ; rcx:y
-%macro fma_vsv 3 ; {{{
+%macro fma_vsv 3
     fma2 %1, %2, %3, 213, ymm1, ymm0, ymm2
-%endmacro ; }}}
+%endmacro
 
 ; rdi:n
 ; xmm0:a -> ymm0
 ; rsi:b  -> ymm1
 ; rdx:c  -> ymm2
 ; rcx:y
-%macro fma_svv 3 ; {{{
+%macro fma_svv 3
     fma2 %1, %2, %3, 213, ymm1, ymm0, ymm2
-%endmacro ; }}}
+%endmacro
 
-%macro fma3 7 ; {{{
+%macro fma3 7
     test rdi, rdi
     jz .return
 
@@ -239,34 +239,34 @@ default rel
 
 .return:
     ret
-%endmacro ; }}}
+%endmacro
 
 ; rdi:n
 ; xmm0:a -> ymm0
 ; xmm1:b -> ymm1
 ; rsi:c  -> ymm2
 ; rdx:y
-%macro fma_ssv 3 ; {{{
+%macro fma_ssv 3
     fma3 %1, %2, %3, 231, ymm2, ymm0, ymm1
-%endmacro ; }}}
+%endmacro
 
 ; rdi:n
 ; xmm0:a -> ymm0
 ; rsi:b  -> ymm2
 ; xmm1:c -> ymm1
 ; rdx:y
-%macro fma_svs 3 ; {{{
+%macro fma_svs 3
     fma3 %1, %2, %3, 213, ymm2, ymm0, ymm1
-%endmacro ; }}}
+%endmacro
 
 ; rdi:n
 ; rsi:a  -> ymm2
 ; xmm0:b -> ymm0
 ; xmm1:c -> ymm1
 ; rdx:y
-%macro fma_vss 3 ; {{{
+%macro fma_vss 3
     fma3 %1, %2, %3, 213, ymm2, ymm0, ymm1
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

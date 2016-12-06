@@ -36,14 +36,13 @@ global mckl_vd_sqrt
 default rel
 
 %macro sqrt_constants 0
-    ; do nothing
 %endmacro
 
-%macro sqrt 2 ; {{{
+%macro sqrt 2
     vmovupd ymm0, %2
     vsqrtpd ymm0, ymm0
     vmovupd %1, ymm0
-%endmacro ; }}}
+%endmacro
 
 section .text
 

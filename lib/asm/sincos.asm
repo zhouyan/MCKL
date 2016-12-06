@@ -38,7 +38,7 @@ global mckl_vd_tan
 
 default rel
 
-%macro sincostan 1 ; implicit input ymm0, output ymm13, ymm14, ymm15 {{{
+%macro sincostan 1 ; implicit input ymm0, output ymm13, ymm14, ymm15
     ; b = abs(a)
     vandpd ymm1, ymm0, [pmask]
     vcmpgtpd ymm2, ymm1, [nan_a]
@@ -149,48 +149,44 @@ default rel
     vblendvpd ymm15, ymm15, ymm0, ymm1
 %endif
 %%skip:
-%endmacro ; }}}
+%endmacro
 
-%macro sin_constants 0 ; {{{
-    ; do nothing
-%endmacro ; }}}
+%macro sin_constants 0
+%endmacro
 
-%macro cos_constants 0 ; {{{
-    ; do nothing
-%endmacro ; }}}
+%macro cos_constants 0
+%endmacro
 
-%macro sincos_constants 0 ; {{{
-    ; do nothing
-%endmacro ; }}}
+%macro sincos_constants 0
+%endmacro
 
-%macro tan_constants 0 ; {{{
-    ; do nothing
-%endmacro ; }}}
+%macro tan_constants 0
+%endmacro
 
-%macro sin 2 ; {{{
+%macro sin 2
     vmovupd ymm0, %2
     sincostan 0x1
     vmovupd %1, ymm13
-%endmacro ; }}}
+%endmacro
 
-%macro cos 2 ; {{{
+%macro cos 2
     vmovupd ymm0, %2
     sincostan 0x2
     vmovupd %1, ymm14
-%endmacro ; }}}
+%endmacro
 
-%macro sincos 3 ; {{{
+%macro sincos 3
     vmovupd ymm0, %3
     sincostan 0x3
     vmovupd %1, ymm13
     vmovupd %2, ymm14
-%endmacro ; }}}
+%endmacro
 
-%macro tan 2 ; {{{
+%macro tan 2
     vmovupd ymm0, %2
     sincostan 0x4
     vmovupd %1, ymm15
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

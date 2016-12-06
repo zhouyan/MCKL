@@ -33,7 +33,7 @@ global mckl_philox4x64_bmi2_kernel
 
 default rel
 
-%macro rbox 1 ; {{{
+%macro rbox 1
     vmovq rax, %1 ; k0
     xor rax, r11 ; t1
     vmovq rdx, xmm10 ; m2
@@ -47,7 +47,7 @@ default rel
     mov r10, rsi
     xor r12, rbx
     xor r10, rax
-%endmacro ; }}}
+%endmacro
 
 section .text
 
@@ -55,7 +55,7 @@ section .text
 ; rsi:n
 ; rdx:r
 ; rcx:mul:weyl:key
-mckl_philox4x64_bmi2_kernel: ; {{{
+mckl_philox4x64_bmi2_kernel:
     push rbx
     push r12
     push r13
@@ -128,6 +128,5 @@ mckl_philox4x64_bmi2_kernel: ; {{{
     pop r12
     pop rbx
     ret
-; }}}
 
 ; vim:ft=nasm

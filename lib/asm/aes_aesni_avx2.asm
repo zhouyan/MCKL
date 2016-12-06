@@ -36,7 +36,7 @@ global mckl_ars_aesni_avx2_kernel
 
 default rel
 
-%macro encfirst 1 ; {{{
+%macro encfirst 1
     vpxor xmm0, xmm0, %1
     vpxor xmm1, xmm1, %1
     vpxor xmm2, xmm2, %1
@@ -45,9 +45,9 @@ default rel
     vpxor xmm5, xmm5, %1
     vpxor xmm6, xmm6, %1
     vpxor xmm7, xmm7, %1
-%endmacro ; }}}
+%endmacro
 
-%macro enc 1 ; {{{
+%macro enc 1
     vaesenc xmm0, xmm0, %1
     vaesenc xmm1, xmm1, %1
     vaesenc xmm2, xmm2, %1
@@ -56,9 +56,9 @@ default rel
     vaesenc xmm5, xmm5, %1
     vaesenc xmm6, xmm6, %1
     vaesenc xmm7, xmm7, %1
-%endmacro ; }}}
+%endmacro
 
-%macro enclast 1 ; {{{
+%macro enclast 1
     vaesenclast xmm0, xmm0, %1
     vaesenclast xmm1, xmm1, %1
     vaesenclast xmm2, xmm2, %1
@@ -67,9 +67,9 @@ default rel
     vaesenclast xmm5, xmm5, %1
     vaesenclast xmm6, xmm6, %1
     vaesenclast xmm7, xmm7, %1
-%endmacro ; }}}
+%endmacro
 
-%macro generate 1 ; rounds {{{
+%macro generate 1 ; rounds
     vpaddq xmm0, xmm8, [increment + 0x00]
     vpaddq xmm1, xmm8, [increment + 0x10]
     vpaddq xmm2, xmm8, [increment + 0x20]
@@ -93,13 +93,13 @@ default rel
 %endrep
 %endif
     enclast xmm15
-%endmacro ; }}}
+%endmacro
 
 ; rdi:ctr.data()
 ; rsi:n
 ; rdx:r
 ; rcx:ks.get().data()/weyl:key
-%macro kernel 1 ; rounds {{{
+%macro kernel 1 ; rounds
     push rbp
     mov rbp, rsp
 %if %1 > 5
@@ -183,7 +183,7 @@ default rel
     mov rsp, rbp
     pop rbp
     ret
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

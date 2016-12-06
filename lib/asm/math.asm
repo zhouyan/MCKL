@@ -32,7 +32,7 @@
 ; rdi:n
 ; rsi:a
 ; rdx:y
-%macro math_kernel_a1r1 2 ; function, operand size {{{
+%macro math_kernel_a1r1 2 ; function, operand size
     test rdi, rdi
     jz .return
 
@@ -66,13 +66,13 @@
 
 .return:
     ret
-%endmacro ; }}}
+%endmacro
 
 ; rdi:n
 ; rsi:a
 ; rdx:y
 ; rcx:z
-%macro math_kernel_a1r2 2 ; function, operand size {{{
+%macro math_kernel_a1r2 2 ; function, operand size
     test rdi, rdi
     jz .return
 
@@ -108,7 +108,7 @@
 
 .return:
     ret
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

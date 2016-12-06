@@ -41,14 +41,14 @@ default rel
 ; register used as constants: ymm6-ymm8, ymm10, ymm12
 ; register used as variables: ymm1-5, ymm9, ymm11, ymm13-15
 
-%macro log1pf_constants 0 ; {{{
+%macro log1pf_constants 0
     vmovaps ymm6, [rel sqrt2by2]
     vmovaps ymm7, [rel one]
     vmovaps ymm8, [rel two]
-%endmacro ; }}}
+%endmacro
 
 ; log(1 + f) * (f + 2) / f - 2 = c9 * x^8 + ... + c5 * x^4 + c3 * x^2
-%macro log1pf 3 ; implicity input ymm1, output ymm9 {{{
+%macro log1pf 3 ; implicity input ymm1, output ymm9
     vcmpltps ymm11, ymm0, %1
     vcmpgtps ymm15, ymm0, %2
     vxorps ymm13, ymm13, ymm13 ; k = 0
@@ -106,9 +106,9 @@ default rel
     vfmadd213ps ymm9, ymm4, ymm5 ; v9 = u9 * x^4 + u5
 
     vmulps ymm9, ymm9, ymm2 ; z9 = v9 * x^2
-%endmacro ; }}}
+%endmacro
 
-%macro select 1 ; implicit input ymm0, ymm9, output ymm9 {{{
+%macro select 1 ; implicit input ymm0, ymm9, output ymm9
     vcmpltps ymm1, ymm0, [%{1}_min_a] ; a < min_a
     vcmpgtps ymm2, ymm0, [%{1}_max_a] ; a > max_a
     vcmpltps ymm3, ymm0, [%{1}_nan_a] ; a < nan_a
@@ -123,14 +123,14 @@ default rel
     vblendvps ymm9, ymm9, [%{1}_nan_y], ymm3 ; nan_y
     vblendvps ymm9, ymm9, ymm0, ymm4         ; a
 %%skip:
-%endmacro ; }}}
+%endmacro
 
-%macro log_constants 0 ; {{{
+%macro log_constants 0
     log1pf_constants
     vmovaps ymm10, [ln2]
-%endmacro ; }}}
+%endmacro
 
-%macro log 2 ; {{{
+%macro log 2
     vmovups ymm0, %2
 
     log1pf ymm6, [sqrt2], 1 ; log(1 + f) = f - x * (f - R)
@@ -142,14 +142,14 @@ default rel
 
     select log
     vmovups %1, ymm9
-%endmacro ; }}}
+%endmacro
 
-%macro log2_constants 0 ; {{{
+%macro log2_constants 0
     log1pf_constants
     vmovaps ymm10, [ln2inv]
-%endmacro ; }}}
+%endmacro
 
-%macro log2 2 ; {{{
+%macro log2 2
     vmovups ymm0, %2
 
     log1pf ymm6, [sqrt2], 1 ; log(1 + f) = f - x * (f - R)
@@ -161,15 +161,15 @@ default rel
 
     select log2
     vmovups %1, ymm9
-%endmacro ; }}}
+%endmacro
 
-%macro log10_constants 0 ; {{{
+%macro log10_constants 0
     log1pf_constants
     vmovaps ymm10, [ln10_2]
     vmovaps ymm12, [ln10inv]
-%endmacro ; }}}
+%endmacro
 
-%macro log10 2 ; {{{
+%macro log10 2
     vmovups ymm0, %2
 
     log1pf ymm6, [sqrt2], 1 ; log(1 + f) = f - x * (f - R)
@@ -182,14 +182,14 @@ default rel
 
     select log
     vmovups %1, ymm9
-%endmacro ; }}}
+%endmacro
 
-%macro log1p_constants 0 ; {{{
+%macro log1p_constants 0
     log1pf_constants
     vmovaps ymm10, [ln2]
-%endmacro ; }}}
+%endmacro
 
-%macro log1p 2 ; {{{
+%macro log1p 2
     vmovups ymm0, %2
 
     log1pf [sqrt2m2], [sqrt2m1], 0 ; log(1 + f) = f - x * (f - R)
@@ -201,7 +201,7 @@ default rel
 
     select log1p
     vmovups %1, ymm9
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

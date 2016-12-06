@@ -40,15 +40,15 @@ default rel
 ; register used as constants: ymm6, ymm8, ymm10, ymm12, ymm14
 ; register used as variables: ymm1-5, ymm7, ymm9, ymm11, ymm13, ymm15
 
-%macro expm1x_constants 0 ; {{{
+%macro expm1x_constants 0
     vmovapd ymm6,  [ln2inv]
     vmovapd ymm8,  [ln2hi]
     vmovapd ymm10, [ln2lo]
     vmovapd ymm12, [bias]
-%endmacro ; }}}
+%endmacro
 
 ; exp(x) - 1 = c13 * x^13 + ... + c2 * x^2 + x
-%macro expm1x 1 ; implicity input ymm1, ymm15, output ymm1-4, ymm13, ymm15 {{{
+%macro expm1x 1 ; implicity input ymm1, ymm15, output ymm1-4, ymm13, ymm15
     vmovapd ymm13, [c13]
     vmovapd ymm11, [c11]
     vmovapd ymm9,  [c9]
@@ -85,22 +85,22 @@ default rel
 
     vorpd ymm4, ymm1, ymm2
     vorpd ymm4, ymm4, ymm3
-%endmacro ; }}}
+%endmacro
 
-%macro select 1 ; implicit input ymm1-4, ymm13, output ymm13 {{{
+%macro select 1 ; implicit input ymm1-4, ymm13, output ymm13
     vtestpd ymm4, ymm4
     jz %%skip
     vblendvpd ymm13, ymm13, [%{1}_min_y], ymm1 ; min_y
     vblendvpd ymm13, ymm13, [%{1}_max_y], ymm2 ; max_y
     vblendvpd ymm13, ymm13, ymm0, ymm3         ; a
 %%skip:
-%endmacro ; }}}
+%endmacro
 
-%macro exp_constants 0 ; {{{
+%macro exp_constants 0
     expm1x_constants
-%endmacro ; }}}
+%endmacro
 
-%macro exp 2 ; {{{
+%macro exp 2
     vmovupd ymm0, %2
 
     ; k = round(a / log(2))
@@ -119,14 +119,14 @@ default rel
 
     select exp
     vmovupd %1, ymm13
-%endmacro ; }}}
+%endmacro
 
-%macro exp2_constants 0 ; {{{
+%macro exp2_constants 0
     expm1x_constants
     vmovapd ymm14, [ln2]
-%endmacro ; }}}
+%endmacro
 
-%macro exp2 2 ; {{{
+%macro exp2 2
     vmovupd ymm0, %2
 
     ; k = round(a)
@@ -143,13 +143,13 @@ default rel
 
     select exp2
     vmovupd %1, ymm13
-%endmacro ; }}}
+%endmacro
 
-%macro expm1_constants 0 ; {{{
+%macro expm1_constants 0
     expm1x_constants
-%endmacro ; }}}
+%endmacro
 
-%macro expm1 2 ; {{{
+%macro expm1 2
     vmovupd ymm0, %2
 
     ; log(2) / 2 <= abs(a) <= log(2)
@@ -187,7 +187,7 @@ default rel
 
     select expm1
     vmovupd %1, ymm13
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

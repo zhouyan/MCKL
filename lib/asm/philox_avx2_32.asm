@@ -34,7 +34,7 @@ global mckl_philox4x32_avx2_kernel
 
 default rel
 
-%macro rbox 2 ; {{{
+%macro rbox 2
     vmovdqa ymm15, [rsp + %1 * 0x20] ; round key
 
     vpmuludq ymm10, ymm0, ymm9
@@ -79,9 +79,9 @@ default rel
     vpshufd ymm5, ymm5, %2
     vpshufd ymm6, ymm6, %2
     vpshufd ymm7, ymm7, %2
-%endmacro ; }}}
+%endmacro
 
-%macro generate 4 ; block size, permute constants {{{
+%macro generate 4 ; block size, permute constants
 %if %1 == 0x08 ; Philox2x32
     vpaddq ymm0, ymm8, [increment2x32 + 0x000]
     vpaddq ymm1, ymm8, [increment2x32 + 0x020]
@@ -125,13 +125,13 @@ default rel
     rbox 7, %3
     rbox 8, %3
     rbox 9, %4
-%endmacro ; }}}
+%endmacro
 
 ; rdi:ctr.data()
 ; rsi:n
 ; rdx:r
 ; rcx:mul:weyl:key
-%macro kernel 4 ; block size, permute constants {{{
+%macro kernel 4 ; block size, permute constants
     push rbp
     mov rbp, rsp
     shr rsp, 5
@@ -234,7 +234,7 @@ default rel
     mov rsp, rbp
     pop rbp
     ret
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 

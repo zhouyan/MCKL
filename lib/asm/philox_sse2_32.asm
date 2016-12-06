@@ -34,7 +34,7 @@ global mckl_philox4x32_sse2_kernel
 
 default rel
 
-%macro rbox 2 ; {{{
+%macro rbox 2
     movdqa xmm15, [rsp + %1 * 0x10] ; round key
 
     movdqa xmm10, xmm0
@@ -87,9 +87,9 @@ default rel
     pshufd xmm5, xmm5, %2
     pshufd xmm6, xmm6, %2
     pshufd xmm7, xmm7, %2
-%endmacro ; }}}
+%endmacro
 
-%macro generate 4 ; block size, permute constants {{{
+%macro generate 4 ; block size, permute constants
     movdqa xmm0, xmm8
     movdqa xmm1, xmm8
     movdqa xmm2, xmm8
@@ -141,13 +141,13 @@ default rel
     rbox 7, %3
     rbox 8, %3
     rbox 9, %4
-%endmacro ; }}}
+%endmacro
 
 ; rdi:ctr.data()
 ; rsi:n
 ; rdx:r
 ; rcx:mul:weyl:key
-%macro kernel 4 ; block size, permute constants {{{
+%macro kernel 4 ; block size, permute constants
     push rbp
     mov rbp, rsp
     sub rsp, 0xA0 ; 10 round keys
@@ -251,7 +251,7 @@ default rel
     mov rsp, rbp
     pop rbp
     ret
-%endmacro ; }}}
+%endmacro
 
 section .rodata
 
