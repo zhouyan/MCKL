@@ -45,7 +45,7 @@ namespace internal
 {
 
 template <typename IntType>
-inline void backend_omp_range(IntType N, IntType &first, IntType &last)
+inline void backend_omp_range(IntType N, IntType &ibegin, IntType &iend)
 {
 #if MCKL_HAS_OMP
     const IntType np = static_cast<IntType>(::omp_get_num_threads());
@@ -57,8 +57,8 @@ inline void backend_omp_range(IntType N, IntType &first, IntType &last)
     const IntType m = N / np;
     const IntType r = N % np;
     const IntType n = m + (id < r ? 1 : 0);
-    first = id < r ? n * id : (n + 1) * r + n * (id - r);
-    last = first + n;
+    ibegin = id < r ? n * id : (n + 1) * r + n * (id - r);
+    iend = ibegin + n;
 }
 
 } // namespace mckl::internal
@@ -94,10 +94,10 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
 #pragma omp parallel default(none) firstprivate(pptr, iter)
 #endif
         {
-            size_type first = 0;
-            size_type last = 0;
-            internal::backend_omp_range(pptr->size(), first, last);
-            this->eval_range(iter, pptr->range(first, last));
+            size_type ibegin = 0;
+            size_type iend = 0;
+            internal::backend_omp_range(pptr->size(), ibegin, iend);
+            this->eval_range(iter, pptr->range(ibegin, iend));
         }
         this->eval_last(iter, particle);
     }
@@ -137,11 +137,11 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
 #pragma omp parallel default(none) firstprivate(pptr, iter, dim, r)
 #endif
         {
-            size_type first = 0;
-            size_type last = 0;
-            internal::backend_omp_range(pptr->size(), first, last);
-            this->eval_range(iter, dim, pptr->range(first, last),
-                r + static_cast<std::size_t>(first) * dim);
+            size_type ibegin = 0;
+            size_type iend = 0;
+            internal::backend_omp_range(pptr->size(), ibegin, iend);
+            this->eval_range(iter, dim, pptr->range(ibegin, iend),
+                r + static_cast<std::size_t>(ibegin) * dim);
         }
         this->eval_last(iter, particle);
     }
