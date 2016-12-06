@@ -59,7 +59,7 @@ that we first test the performance without the \mkl \vml library and then with
 it. On Haswell, when \mkl \vml is not used, the assembly implementation of
 selected functions are used. For all the four above, the \rng is |Philox4x32|
 (section~\ref{sub:Philox}) on Nehalem and |ARS| on Haswell.
-(section~\ref{sub:AES-NI instructions based RNG}). The last is when there are
+(section~\ref{sub:AES round function based RNG}). The last is when there are
 \mkl routines for generating random variates from the distribution, either
 directly or indirectly. In this case, we use the \rng |MKL_PHILOX4X32X10| on
 Nehalem and |MKL_ARS5| on Haswell (see section~\ref{sec:MKL RNG}),
