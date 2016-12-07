@@ -1,0 +1,5 @@
+Threefish1024_64                    424     8      5.64      2.60      ---Passed
+Threefish1024_64                    424     8      5.65      2.60      ---Passed
+Threefish1024_64                    424     8      5.65      2.60      ---Passed
+Threefish1024_64                    424     8      5.65      2.62      ---Passed
+Threefish1024_64                    424     8      5.64      2.60      ---Passed

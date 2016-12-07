@@ -155,8 +155,9 @@ $\hat{N}$-vector, say $a_{1:\hat{N}}$. This method selects samples to form a
 new collection $\hat{X}_{1:\hat{N}}$  by setting $\hat{X}_i = X_{a_i}$ for $i =
 1,\dots,\hat{N}$. The new sample size $\hat{N}$ does not have to be the same as
 the original, say $N$. This is closely related to the selection step of \smc
-algorithms. Let $r_i = \sum_{j = 1}^{\hat{N}}\bbI_{\{i\}}(a_j)$. Then it is
-required that $a_i = i$ for all $r_i > 0$, $i = 1,\dots,\min\{N, \hat{N}\}$.
+algorithms. Let $r_i = \sum_{j = 1}^{\hat{N}}\bbI_{\Curly{i}}(a_j)$. Then it is
+required that $a_i = i$ for all $r_i > 0$, $i = 1,\dots,\min\Curly{N,
+  \hat{N}}$.
 
 \section{Weight}
 \label{sec:Weight}
@@ -346,8 +347,8 @@ $N$-vector of normalized weights. And last, |r| is a pointer of type
 |size_type| that points to the $N$-vector of the number of duplicates of each
 particles $r_{1:N}$. It is required that, the results shall satisfy $r_i\ge0$
 for $i=1,\dots,N$ and $\sum_{i=1}^N r_i = M$. The index vector is generated
-such that, $a_i = i$ if $r_i > 0$ for $i = 1,\dots,\min\{N, M\}$ and
-$\sum_{i=1}^M\bbI_{\{j\}}(a_i) = r_j$ for $j = 1,\dots,N$.
+such that, $a_i = i$ if $r_i > 0$ for $i = 1,\dots,\min\Curly{N, M}$ and
+$\sum_{i=1}^M\bbI_{\Curly{j}}(a_i) = r_j$ for $j = 1,\dots,N$.
 
 \subsubsection{Resize with uniform selection}
 
@@ -751,7 +752,7 @@ is shown in Algorithm~\ref{alg:pf}.
     \STATE Set $t\leftarrow0$.
     \STATE Sample $\xpos^{0,i},\ypos^{0,i}\sim\calN(0,4)$ and
     $\xvel^{0,i},\yvel^{0,i}\sim\calN(0,1)$.
-    \STATE Weight $W_i^0 \propto \exp\{\ell(X_i^0 \vert Y_0)\}$
+    \STATE Weight $W_i^0 \propto \exp\Curly{\ell(X_i^0 \mid Y_0)}$
 
     \REPEAT
     \STATE \COMMENT{Iteration}
@@ -763,7 +764,7 @@ is shown in Algorithm~\ref{alg:pf}.
       \ypos^{t,i}&\sim\calN(\ypos^{t-1,i} + \Delta\yvel^{t-1,i}, 0.02) &
       \yvel^{t,i}&\sim\calN(\yvel^{t-1,i}, 0.001)
     \end{align*}
-    \STATE Weight $W_i^t \propto W_i^{t - 1}\exp\{\ell(X_i^t \vert Y_t)\}$.
+    \STATE Weight $W_i^t \propto W_i^{t - 1}\exp\Curly{\ell(X_i^t \mid Y_t)}$.
     \UNTIL{All data are processed}
     \bottomhrule
   \end{algorithmic}

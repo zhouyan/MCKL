@@ -1,0 +1,4 @@
+Weibull<float>(1,1)                  93.44       36.44        2.90        3.00       VML    (0)--Passed
+Weibull<double>(1,1)                142.71       49.67        6.80        7.05       VML    (0)--Passed
+Weibull<float>(1,1)                  93.40       36.43       15.57        2.90       VMF    (0)--Passed
+Weibull<double>(1,1)                142.76       51.62        8.73        7.27       VMF    (0)--Passed

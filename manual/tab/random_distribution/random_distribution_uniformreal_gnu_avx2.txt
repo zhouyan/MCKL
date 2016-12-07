@@ -1,0 +1,4 @@
+UniformReal<float>(-1.3,1.3)          9.50        7.04        1.53        1.52       VML    (0)--Passed
+UniformReal<double>(-1.3,1.3)        13.93        6.91        2.11        1.99       VML    (0)--Passed
+UniformReal<float>(-1.3,1.3)          9.76        7.39        1.54        1.46       VMF    (0)--Passed
+UniformReal<double>(-1.3,1.3)        13.99        7.07        2.12        1.98       VMF    (0)--Passed

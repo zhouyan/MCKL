@@ -1,0 +1,4 @@
+Exponential<float>(1)                27.09       24.33        2.93        2.85       VML    (0)--Passed
+Exponential<double>(1)               47.10       32.20        6.90        6.47       VML    (0)--Passed
+Exponential<float>(1)                27.47       25.85       13.75        2.85       VMF    (0)--Passed
+Exponential<double>(1)               52.72       32.57        8.51        6.37       VMF    (0)--Passed

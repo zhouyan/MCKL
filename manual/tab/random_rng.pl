@@ -44,6 +44,7 @@ my $intel = "../../build/release-intel";
 my $name;
 my $write = 0;
 my $pdf = 0;
+my $scale = 0;
 GetOptions(
     "run"      => \$run,
     "build"    => \$build,
@@ -53,6 +54,7 @@ GetOptions(
     "name=s"   => \$name,
     "write"    => \$write,
     "pdf"      => \$pdf,
+    "scale"    => \$scale,
 );
 $build = 1 if $run;
 
@@ -103,6 +105,11 @@ my $simd;
 $simd = "sse2" if $cpuid =~ "SSE2";
 $simd = "avx2" if $cpuid =~ "AVX2";
 my @simd = qw(sse2 avx2);
+unless ($scale) {
+    $scale = 1;
+    $scale *= 3.33 / 3.06 if $simd eq "sse2";
+    $scale *= 3.80 / 2.60 if $simd eq "avx2";
+}
 
 my %compiler = (llvm => $llvm, gnu => $gnu, intel => $intel);
 my @compiler = qw(llvm gnu intel);
@@ -192,6 +199,8 @@ sub read {
                     $cpb_b{$c}{$s}{$r} = 0xFFFF unless $cpb_b{$c}{$s}{$r};
                     for (@result) {
                         my @cpb = (split)[3, 4];
+                        $cpb[0] *= $scale;
+                        $cpb[1] *= $scale;
                         if ($cpb[0] < $cpb_s{$c}{$s}{$r}) {
                             $cpb_s{$c}{$s}{$r} = $cpb[0]
                         }

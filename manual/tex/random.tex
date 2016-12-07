@@ -102,11 +102,11 @@ others, completely different sequence of random numbers might be generated.
 
 The development by~\cite{Salmon:2011um} made high performance parallel \rng
 much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
-such that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i =
-f_k(c_i)\}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
+such that, for a sequence $\Curly{c_i = i}_{i\ge0}$, the sequence $\Curly{y_i =
+  f_k(c_i)}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
 and $f_{k_2}$ generate two sequences that appear statistically independent.
 Compared to more conventional \rng{}s which use recursions $y_i = f_k(y_{i -
-1})$, these counter-based \rng{}s are much easier to setup in a parallelized
+  1})$, these counter-based \rng{}s are much easier to setup in a parallelized
 environment. If~$c$, the counter, is an unsigned integer with~$b$ bits,
 and~$k$, the key, is an unsigned integer with~$d$ bits. Then for each $k$, the
 \rng has a period~$2^b$. And there can be at most~$2^d$ independent streams.
@@ -431,7 +431,7 @@ number of bits of |ResultType|, that is,
 constexpr int N = sizeof(ResultType) * CHAR_BIT;
 \end{verbatim}
 If $N$ is not a multiple of~32, then a compile time error will be raised.
-Otherwise, let $S = \min\{N,64\}$ and $M = N / S$. The generator keeps an
+Otherwise, let $S = \min\Curly{N,64}$ and $M = N / S$. The generator keeps an
 $S$-bit unsigned integer as its internal counter, say $c$. Use the |set| method
 to set the value of this internal integer. For example,
 \begin{verbatim}
@@ -562,8 +562,8 @@ class UniformBitsDistribution;
 is similar to the standard library's |std::independent_bits_engine|, except
 that it always generates full size random integers and |UIntType| must have
 size at least of that of |short|. That is, let~$W$ be the number of bits of
-|UIntType|, then the output is uniform on the set $\{0,\dots,2^W - 1\}$. For
-example,
+|UIntType|, then the output is uniform on the set $\Curly{0,\dots,2^W - 1}$.
+For example,
 \begin{verbatim}
 UniformBitsDistribution<uint32_t> ubits;
 ubits(rng); // Return 32-bit random integers
@@ -616,7 +616,7 @@ implements the uniform distribution on $[0, 1)$. It is implemented through the
 mapping,
 \begin{equation*}
   P = \Floor{(W + M - 1) / W},\qquad
-  K = \max\{1, P\},\qquad
+  K = \max\Curly{1, P},\qquad
   X = \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{equation*}
 This is equivalent to the standard library |std::generate_canonical|. The
@@ -632,7 +632,7 @@ class U01CCDistribution;
 \end{verbatim}
 implements the uniform distribution on $[0, 1]$ through the mapping,
 \begin{align*}
-  P &= \min\{W - 1, M\} &
+  P &= \min\Curly{W - 1, M} &
   V &= \begin{cases}
     U &\text{if } P + 1 < W \\
     \Floor{(U \bmod 2^{W - 1}) / 2^{W - P -2}} &\text{otherwise}
@@ -652,7 +652,7 @@ class U01CODistribution;
 \end{verbatim}
 implements the uniform distribution on $[0, 1)$ through the mapping,
 \begin{equation*}
-  P = \min\{W, M\},\qquad
+  P = \min\Curly{W, M},\qquad
   V = \Floor{U / 2^{W - P}},\qquad
   X = 2^{-P} V
 \end{equation*}
@@ -668,7 +668,7 @@ class U01OCDistribution;
 \end{verbatim}
 implements the uniform distribution on $(0, 1]$ through the mapping,
 \begin{equation*}
-  P = \min\{W, M\},\qquad
+  P = \min\Curly{W, M},\qquad
   V = \Floor{U / 2^{W - P}},\qquad
   X = 2^{-P} V + 2^{-P}
 \end{equation*}
@@ -684,7 +684,7 @@ class U01CODistribution;
 \end{verbatim}
 implements the uniform distribution on $(0, 1)$ through the mapping,
 \begin{equation*}
-  P = \min\{W + 1, M\},\qquad
+  P = \min\Curly{W + 1, M},\qquad
   V = \Floor{U / 2^{W + 1 - P}},\qquad
   X = 2^{-(P - 1)} V + 2^{-P}
 \end{equation*}
@@ -905,8 +905,8 @@ implements the distribution with \pdf,
   x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty).
 \end{equation*}
 The implementation uses the fact that if~$Z$ is a standard Normal random
-variable, then $X = \exp\{m + sZ\}$ is Log-normal distributed with location~$m$
-and scale~$s$.
+variable, then $X = \exp\Curly{m + sZ}$ is Log-normal distributed with
+location~$m$ and scale~$s$.
 
 \subsection{Normal distribution}
 \label{sub:Normal distribution}
@@ -970,7 +970,8 @@ implements the distribution with \pdf,
   \frac{1}{2\pi}\int_{\infty}^{\infty}
   \varphi(t;\alpha,\beta,a,b)\EE^{-ixt}\intd t\\
   &\varphi(t;\alpha,\beta,a,b) =
-  \exp\{ita - \Abs{bt}^{\alpha}(1 - i\beta\mathrm{sgn}(t)\Phi(t;\alpha))\} \\
+  \exp\Curly{
+    ita - \Abs{bt}^{\alpha}(1 - i\beta\mathrm{sgn}(t)\Phi(t;\alpha))} \\
   &\Phi(t;\alpha) = \begin{cases}
     \tan\Round[big]{\frac{\pi}{2}\alpha} & \alpha \ne 1 \\
     -\frac{2}{\pi}\log\Abs{t}            & \alpha = 1
@@ -1062,7 +1063,7 @@ class BernoulliDistribution;
 implements the distribution with \pdf,
 \begin{equation*}
   \Prob(X = k;p) = kp + (1 - k)(1 - p),\qquad
-  k \in \{0, 1\},\quad p \in [0, 1].
+  k \in \Curly{0, 1},\quad p \in [0, 1].
 \end{equation*}
 Unlike other discrete distributions, the Bernoulli distribution supports any
 integer type, including those with sizes smaller than that of |short|. The
@@ -1099,16 +1100,16 @@ class UniformIntDistribution;
 implements the distribution with \pdf,
 \begin{equation*}
   \Prob(X = k;a,b) = \frac{1}{b - a + 1},\qquad
-  k \in \{a,\dots,b\},\quad
-  a \in \Integer,\quad b \in \{x \in \Integer: x \ge a\}.
+  k \in \Curly{a,\dots,b},\quad
+  a \in \Integer,\quad b \in \Set{x \in \Integer \mid x \ge a}.
 \end{equation*}
 The specific algorithm used depends on the parameters. If $a = b$, then it
 simply returns~$a$. If $b - a + 1 = 2^W$ where~$W$ is the number of bits of
 |IntType|, then |UniformBitsDistribution| is used (see section~\ref{sec:Uniform
-bits distribution}). If $\max\{\Abs{a}, b\} < 2^{32}$, then it uses the fact
-that if~$U$ is a standard uniform random variable, then $X = \Floor{a + (b - a
-+ 1) U}$ is uniform on the set $\{a,\dots,b\}$. Otherwise the standard library
-is used.
+bits distribution}). If $\max\Curly{\Abs{a}, b} < 2^{32}$, then it uses the
+fact that if~$U$ is a standard uniform random variable, then $X = \Floor{a + (b
+  - a + 1) U}$ is uniform on the set $\Curly{a,\dots,b}$. Otherwise the
+standard library is used.
 
 \section{Multivariate distribution}
 \label{sec:Multivariate distribution}
@@ -1174,7 +1175,7 @@ implements the distribution with \pdf,
   &x_{1:d}\in\Real^d,\quad
   \mu_{1:d}\in\Real^d,\quad
   \Sigma\in
-  \{\,\text{positive semi-definite }d\text{ by }d\text{ matrix}\,\}.
+  \Curly{\text{positive semi-definite }d\text{ by }d\text{ matrix}}.
 \end{align*}
 At the time of writing, only |float| and |double| are supported types for the
 template parameter |RealType|. The second template parameter |Dim| specify the

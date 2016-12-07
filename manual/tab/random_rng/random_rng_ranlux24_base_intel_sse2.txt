@@ -1,0 +1,5 @@
+ranlux24_base                       208     8      7.35      6.71      ---Passed
+ranlux24_base                       208     8      7.35      6.70      ---Passed
+ranlux24_base                       208     8      7.35      6.74      ---Passed
+ranlux24_base                       208     8      7.36      6.72      ---Passed
+ranlux24_base                       208     8      7.35      6.74      ---Passed

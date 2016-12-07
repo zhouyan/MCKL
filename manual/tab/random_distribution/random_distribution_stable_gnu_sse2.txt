@@ -1,0 +1,12 @@
+Stable<float>(2,0,0,1)              416.96      415.57       60.50       64.03       VML    (0)--Passed
+Stable<float>(1,0,0,1)              246.61      246.41       49.88       53.43       VML    (0)--Passed
+Stable<float>(0.5,1,0,1)            417.80      417.12       55.12       58.49       VML    (0)--Passed
+Stable<double>(2,0,0,1)             503.92      502.68      146.10      149.83       VML    (0)--Passed
+Stable<double>(1,0,0,1)             295.82      295.44      112.33      117.28       VML    (0)--Passed
+Stable<double>(0.5,1,0,1)           502.93      501.20      122.12      126.55       VML    (0)--Passed
+Stable<float>(2,0,0,1)              414.60      414.09      255.96      259.28       VMF    (0)--Passed
+Stable<float>(1,0,0,1)              245.08      244.98      127.94      131.52       VMF    (0)--Passed
+Stable<float>(0.5,1,0,1)            414.77      413.45      255.66      259.36       VMF    (0)--Passed
+Stable<double>(2,0,0,1)             503.52      502.92      370.38      375.00       VMF    (0)--Passed
+Stable<double>(1,0,0,1)             295.92      295.74      189.48      193.91       VMF    (0)--Passed
+Stable<double>(0.5,1,0,1)           502.16      501.44      370.15      374.66       VMF    (0)--Passed

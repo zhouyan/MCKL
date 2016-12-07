@@ -1,0 +1,4 @@
+ExtremeValue<float>(0,1)            344.29      100.45       19.38       17.82       VML    (0)--Passed
+ExtremeValue<double>(0,1)           421.83      136.48       39.84       30.85       VML    (0)--Passed
+ExtremeValue<float>(0,1)            344.93      100.68       74.46       17.79       VMF    (0)--Passed
+ExtremeValue<double>(0,1)           419.85      136.51       85.59       30.84       VMF    (0)--Passed

@@ -1,0 +1,5 @@
+R123_Threefry2x64                    80     8      2.91      2.91      ---Passed
+R123_Threefry2x64                    80     8      2.91      2.91      ---Passed
+R123_Threefry2x64                    80     8      2.91      2.91      ---Passed
+R123_Threefry2x64                    80     8      2.91      2.91      ---Passed
+R123_Threefry2x64                    80     8      2.91      2.91      ---Passed

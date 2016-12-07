@@ -1,0 +1,5 @@
+Threefish512_64                     232     8      3.82      1.89      ---Passed
+Threefish512_64                     232     8      3.82      1.90      ---Passed
+Threefish512_64                     232     8      3.82      1.89      ---Passed
+Threefish512_64                     232     8      3.82      1.89      ---Passed
+Threefish512_64                     232     8      3.82      1.89      ---Passed

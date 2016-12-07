@@ -1,0 +1,4 @@
+Normal<float>(0,1)                  400.82       99.45       21.36       18.51       VML    (0)--Passed
+Normal<double>(0,1)                 454.38      119.81       41.42       31.69       VML    (0)--Passed
+Normal<float>(0,1)                  401.00       98.72       64.75       18.41       VMF    (0)--Passed
+Normal<double>(0,1)                 463.15      114.68       89.38       31.60       VMF    (0)--Passed

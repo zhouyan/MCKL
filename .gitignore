@@ -14,6 +14,4 @@
 /build
 /manual/manual.tex.latexmain
 /manual/tab/*.tex
-/manual/tab/random_distribution
-/manual/tab/random_rng
 /manual/tex/inc.tex

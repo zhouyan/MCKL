@@ -1,0 +1,4 @@
+U01OO<float>                          6.70        6.44        1.33        1.83       VML    (0)--Passed
+U01OO<double>                        11.42        5.89        1.74        2.41       VML    (0)--Passed
+U01OO<float>                          6.70        6.44        1.33        1.81       VMF    (0)--Passed
+U01OO<double>                        11.42        5.90        1.72        2.41       VMF    (0)--Passed
