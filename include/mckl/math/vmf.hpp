@@ -932,7 +932,7 @@ inline void sincos(std::size_t n, const T *a, T *y, T *z)
     const std::size_t m = n / k;
     const std::size_t l = n % k;
 
-    if (a == y || a == z) {
+    if (a == y) {
         alignas(32) std::array<T, k> s;
         for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
             sin<T>(k, a, s.data());
