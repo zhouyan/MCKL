@@ -30,13 +30,12 @@
 //============================================================================
 
 #include <cassert>
-#include <iostream>
 
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 
-class say
+class add
 {
     public:
     template <typename IntType>
@@ -45,9 +44,10 @@ class say
         IntType sum = 0;
         for (IntType i = block.begin(); i != block.end(); ++i)
             sum += i;
-        std::cout << sum << std::endl;
+        if (block.begin() != block.end())
+            assert(sum != 0);
     }
-}; // class say
+}; // class add
 
 class sum
 {
@@ -75,7 +75,7 @@ class sum
 
 int main()
 {
-    tbb::parallel_for(tbb::blocked_range<int>(0, 100), say());
+    tbb::parallel_for(tbb::blocked_range<int>(0, 100), add());
     sum s;
     tbb::parallel_reduce(tbb::blocked_range<int>(0, 100), s);
     assert(s.res() == 4950);
