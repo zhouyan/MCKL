@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/manual/Makefile
+#  MCKL/manual/fig/Makefile
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -29,12 +29,11 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-.PHONY : all clean
+.PHONY : all
+
+BUILD_CMD ?= ninja
+BUILD_DIR ?= ../../build/release-llvm
 
 all :
-	make -C tab
-	make -C fig
-	latexmk -silent -f manual.tex >/dev/null
-
-clean:
-	latexmk -c manual.tex
+	$(BUILD_CMD) -C $(BUILD_DIR) pf_core-pdf
+	cp $(BUILD_DIR)/example/pf/pf_core.pdf pf.pdf

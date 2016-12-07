@@ -9,6 +9,7 @@
 *.pdf
 *.run.xml
 *.swp
+*.synctex.gz
 *.toc
 .DS_Store
 /build

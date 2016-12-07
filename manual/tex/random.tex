@@ -103,10 +103,10 @@ others, completely different sequence of random numbers might be generated.
 The development by~\cite{Salmon:2011um} made high performance parallel \rng
 much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
 such that, for a sequence $\Curly{c_i = i}_{i\ge0}$, the sequence $\Curly{y_i =
-  f_k(c_i)}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
+f_k(c_i)}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
 and $f_{k_2}$ generate two sequences that appear statistically independent.
 Compared to more conventional \rng{}s which use recursions $y_i = f_k(y_{i -
-  1})$, these counter-based \rng{}s are much easier to setup in a parallelized
+1})$, these counter-based \rng{}s are much easier to setup in a parallelized
 environment. If~$c$, the counter, is an unsigned integer with~$b$ bits,
 and~$k$, the key, is an unsigned integer with~$d$ bits. Then for each $k$, the
 \rng has a period~$2^b$. And there can be at most~$2^d$ independent streams.
@@ -1193,8 +1193,8 @@ In either case, the parameter |mean| is a pointer to the mean vector of length
 $d$, and |chol| is a pointer to the lower triangular of the Cholesky
 decomposition of the covariance matrix packed row by row. For those unfamiliar
 with matrix storage schemes, this means that, |chol| is a vector of length
-$d(d+1)/2$. Let~$L$ be the lower triangular of the Cholesky decomposition, that
-is $LL^{\transpose} = \Sigma$, then the vector is
+$d(d + 1) / 2$. Let~$L$ be the lower triangular of the Cholesky decomposition,
+that is $LL^{\transpose} = \Sigma$, then the vector is
 $(L_{1,1},L_{2,1},L_{2,2},\dots,L_{d,d})^{\transpose}$. Further, both |mean|
 and |chol| can also be scalars instead of pointers to vectors. If |mean| is a
 scalar, say $\mu$, then the mean vector is assumed to be a $d$-vector with all
