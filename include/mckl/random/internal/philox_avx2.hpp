@@ -50,9 +50,9 @@ class PhiloxGeneratorAVX2Impl
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, 32>
-    : public std::conditional<K != 0 && 8 % K == 0,
+    : public std::conditional_t<K != 0 && 8 % K == 0,
           PhiloxGeneratorAVX2Impl32<T, K, Rounds, Constants>,
-          PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>>::type
+          PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>>
 {
 }; // class PhiloxGeneratorImplAVX2Impl
 

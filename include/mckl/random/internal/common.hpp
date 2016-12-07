@@ -981,12 +981,15 @@ inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
         r[i] = distribution(rng);
 }
 
-template <typename RNGType>
-class SeedType
+template <typename>
+class SeedTrait
 {
     public:
     using type = unsigned;
-}; // class SeedType
+}; // class SeedTrait
+
+template <typename RNGType>
+using SeedType = typename SeedTrait<RNGType>::type;
 
 template <typename = double>
 class ArcsineDistribution;

@@ -41,8 +41,8 @@ namespace internal
 {
 
 template <int W, typename UIntType>
-using U01UIntLeastType = typename std::conditional<W <= 32, std::uint32_t,
-    typename std::conditional<W <= 64, std::uint64_t, UIntType>::type>::type;
+using U01UIntLeastType = std::conditional_t<W <= 32, std::uint32_t,
+    std::conditional_t<W <= 64, std::uint64_t, UIntType>>;
 
 template <typename UIntType, typename, typename, typename>
 class U01GenericImpl;

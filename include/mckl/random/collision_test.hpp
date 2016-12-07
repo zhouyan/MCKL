@@ -89,8 +89,8 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
     private:
     static constexpr std::size_t K_ = internal::Pow<std::size_t, D, T>::value;
 
-    using occurs_type = typename std::conditional<K_ <= 1U << 27,
-        std::bitset<K_>, std::set<std::size_t>>::type;
+    using occurs_type = std::conditional_t<K_ <= (1U << 27), std::bitset<K_>,
+        std::set<std::size_t>>;
 
     std::size_t n_;
     double mean_;

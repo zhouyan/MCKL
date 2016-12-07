@@ -97,20 +97,20 @@ namespace internal
 #if MCKL_U01_USE_64BITS_DOUBLE
 
 template <typename RNGType, typename RealType>
-using U01UIntType = typename std::conditional<
+using U01UIntType = std::conditional_t<
     (RNGTraits<RNGType>::bits >= 64 ||
-        std::is_same<typename std::remove_cv<RealType>::type,
+        std::is_same<typename std::remove_cv_t<RealType>,
             long double>::value ||
-        std::is_same<typename std::remove_cv<RealType>::type, double>::value),
-    std::uint64_t, std::uint32_t>::type;
+        std::is_same<typename std::remove_cv_t<RealType>, double>::value),
+    std::uint64_t, std::uint32_t>;
 
 #else // MCKL_U01_USE_64BITS_DOUBLE
 
 template <typename RNGType, typename RealType>
 using U01UIntType =
-    typename std::conditional<(RNGTraits<RNGType>::bits >= 64 ||
-                                  std::is_same<RealType, long double>::value),
-        std::uint64_t, std::uint32_t>::type;
+    std::conditional_t<(RNGTraits<RNGType>::bits >= 64 ||
+                           std::is_same<RealType, long double>::value),
+        std::uint64_t, std::uint32_t>;
 
 #endif // MCKL_U01_USE_64BITS_DOUBLE
 

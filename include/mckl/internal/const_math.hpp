@@ -48,7 +48,7 @@ namespace internal
 
 template <typename T, std::size_t N>
 using StaticVector =
-    typename std::conditional<N == Dynamic, Vector<T>, std::array<T, N>>::type;
+    std::conditional_t<N == Dynamic, Vector<T>, std::array<T, N>>;
 
 class StirlingMatrix2
 {

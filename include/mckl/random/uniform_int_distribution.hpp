@@ -152,7 +152,7 @@ class UniformIntDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        using UIntType = typename std::make_unsigned<result_type>::type;
+        using UIntType = std::make_unsigned_t<result_type>;
 
         constexpr result_type imin = std::numeric_limits<result_type>::min();
         constexpr result_type imax = std::numeric_limits<result_type>::max();

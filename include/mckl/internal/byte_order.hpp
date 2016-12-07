@@ -94,7 +94,7 @@ inline T swap_bytes(T x)
     static_assert(sizeof(T) % Bytes == 0,
         "**swap_bytes** sizeof(T) is not divisible by Bytes");
 
-    using U = typename std::make_unsigned<T>::type;
+    using U = std::make_unsigned_t<T>;
 
     return static_cast<T>(swap_bytes<Bytes, 0>(static_cast<U>(x),
         std::integral_constant<bool, Bytes <= sizeof(U)>()));

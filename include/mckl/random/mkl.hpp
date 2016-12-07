@@ -803,7 +803,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
         : index_(M_)
     {
         seed(seq);
@@ -819,7 +819,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
         : index_(M_)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
@@ -838,7 +838,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
     {
         MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
         Vector<MKL_UINT> params;
@@ -860,7 +860,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
             "**MKLEngine** does not support offseting");
@@ -1162,9 +1162,9 @@ class MKLStreamState
 template <typename RNGType>
 inline constexpr int mkl_nseeds()
 {
-    return sizeof(typename SeedType<RNGType>::type) < sizeof(unsigned) ?
+    return sizeof(SeedType<RNGType>) < sizeof(unsigned) ?
         1 :
-        sizeof(typename SeedType<RNGType>::type) / sizeof(unsigned);
+        sizeof(SeedType<RNGType>) / sizeof(unsigned);
 }
 
 template <typename RNGType>
@@ -1192,7 +1192,7 @@ inline int mkl_init(
         } else {
             constexpr std::size_t ns = mkl_nseeds<RNGType>();
             union {
-                typename SeedType<RNGType>::type seed;
+                SeedType<RNGType> seed;
                 std::array<unsigned, ns> useed;
             } buf;
             std::copy_n(param, std::min(static_cast<std::size_t>(n), ns),

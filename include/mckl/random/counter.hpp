@@ -86,7 +86,7 @@ class CounterEngine
 
     template <typename SeedSeq>
     explicit CounterEngine(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
         : index_(M_)
     {
         seed(seq);
@@ -104,7 +104,7 @@ class CounterEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
     {
         key_type key;
         seq.generator(key.begin(), key.end());
@@ -280,11 +280,11 @@ class CounterEngine
 }; // class CounterEngine
 
 template <typename ResultType, typename Generator>
-class SeedType<CounterEngine<ResultType, Generator>>
+class SeedTrait<CounterEngine<ResultType, Generator>>
 {
     public:
     using type = typename CounterEngine<ResultType, Generator>::key_type;
-}; // class SeedType
+}; // class SeedTrait
 
 template <typename ResultType, typename Generator>
 inline void rand(

@@ -309,8 +309,8 @@ class Allocator : public std::allocator<T>
     using difference_type = std::ptrdiff_t;
     using pointer = T *;
     using const_pointer = const T *;
-    using reference = typename std::add_lvalue_reference<T>::type;
-    using const_reference = typename std::add_lvalue_reference<const T>::type;
+    using reference = typename std::add_lvalue_reference_t<T>;
+    using const_reference = typename std::add_lvalue_reference_t<const T>;
     using is_always_equal = std::true_type;
 
     template <typename U>

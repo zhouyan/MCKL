@@ -75,9 +75,8 @@ class SeedGenerator
     public:
     /// \brief The type of the internal seed
     using seed_type =
-        typename std::conditional<sizeof(ResultType) % sizeof(std::uint64_t) ==
-                0,
-            std::uint64_t, std::uint32_t>::type;
+        std::conditional_t<sizeof(ResultType) % sizeof(std::uint64_t) == 0,
+            std::uint64_t, std::uint32_t>;
 
     using result_type = ResultType;
 
@@ -161,8 +160,7 @@ class SeedGenerator
     seed_type np_;
     seed_type rank_;
     seed_type maxs_;
-    typename std::conditional<Atomic, std::atomic<seed_type>, seed_type>::type
-        seed_;
+    std::conditional_t<Atomic, std::atomic<seed_type>, seed_type> seed_;
 
     SeedGenerator() : seed_(1) { partition(1, 0); }
 
@@ -334,7 +332,7 @@ class SeedGenerator
 /// \brief RNG default seed generator
 /// \ingroup Random
 template <typename RNGType>
-class Seed : public SeedGenerator<typename SeedType<RNGType>::type>
+class Seed : public SeedGenerator<SeedType<RNGType>>
 {
 }; // class Seed
 

@@ -192,11 +192,10 @@ inline bool is_nullptr(T, std::false_type)
 template <typename T>
 inline bool is_nullptr(T ptr)
 {
-    return is_nullptr(
-        ptr, std::integral_constant<bool,
-                 (std::is_pointer<T>::value ||
-                     std::is_same<std::nullptr_t,
-                         typename std::remove_cv<T>::type>::value)>());
+    return is_nullptr(ptr,
+        std::integral_constant<bool,
+            (std::is_pointer<T>::value ||
+                std::is_same<std::nullptr_t, std::remove_cv_t<T>>::value)>());
 }
 
 inline bool is_nullptr(std::nullptr_t) { return true; }

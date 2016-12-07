@@ -51,17 +51,17 @@ class ThreefryGeneratorAVX2Impl
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, 32>
-    : public std::conditional<K != 0 && 16 % K == 0,
+    : public std::conditional_t<K != 0 && 16 % K == 0,
           ThreefryGeneratorAVX2Impl32<T, K, Rounds, Constants>,
-          ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>>::type
+          ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>>
 {
 }; // class ThreefryGeneratorImplAVX2Impl
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, 64>
-    : public std::conditional<K != 0 && 16 % K == 0,
+    : public std::conditional_t<K != 0 && 16 % K == 0,
           ThreefryGeneratorAVX2Impl64<T, K, Rounds, Constants>,
-          ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>>::type
+          ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>>
 {
 }; // class ThreefryGeneratorImplAVX2Impl
 
