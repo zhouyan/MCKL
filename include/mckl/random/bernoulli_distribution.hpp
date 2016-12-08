@@ -68,7 +68,7 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
 template <typename IntType>
 class BernoulliDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Bernoulli, bool)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Bernoulli, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_1(
         Bernoulli, bernoulli, IntType, double, p, 0.5)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0

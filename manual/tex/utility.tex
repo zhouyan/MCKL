@@ -32,9 +32,6 @@
 \chapter{Utilities}
 \label{chap:Utilities}
 
-The library provides some utilities for writing Monte Carlo simulation
-programs.
-
 \section{Aligned memory allocation}
 \label{sec:Aligned memory allocation}
 
@@ -43,17 +40,14 @@ memory. It works fine in most cases. However, sometime it is desirable to
 allocate memory aligned by a certain boundary. The library provides the class
 template,
 \begin{verbatim}
-template <
-    typename T,
-    size_t Alignment = AlignmentTrait<T>::value,
+template <typename T, size_t Alignment = AlignmentTrait<T>::value,
     typename Memory = AlignedMemory>
 class Allocator;
 \end{verbatim}
 which conforms to the |std::allocator| interface. The address of the pointer
 returned by the |allocate| method is a multiple of |Alignment|. The value of
 alignment has to be positive, larger than |sizeof(void *)|, and a power of two.
-Violating any of these conditions results in compile-time error. The last
-template parameter |Memory| shall have two static methods,
+The last template parameter |Memory| shall have two static methods,
 \begin{verbatim}
 static void *aligned_malloc(size_t n, size_t alignment);
 static void aligned_free(void *ptr);
@@ -61,8 +55,8 @@ static void aligned_free(void *ptr);
 The method |aligned_malloc| shall behave similar to |std::malloc| with the
 additional alignment requirement. It shall return a null pointer if it fails to
 allocate memory. It may or may not raise an exception in this situation. In any
-other case, including zero input size, it shall return a reachable non-null
-pointer. The method |aligned_free| shall behave similar to |std::free|. It
+other case, including zero input size, it shall return a pointer to a reachable
+address. The method |aligned_free| shall behave similar to |std::free|. It
 shall be able to handle a null pointer as its input. The library provides three
 implementations, discussed below. The default argument |AlignedMemory| is an
 alias to one of them by default. It can be changed by defining the
@@ -70,11 +64,11 @@ configuration macro |MCKL_ALIGNED_MEMORY_TYPE|.
 
 The |AlignedMemoryTBB| class uses the functions from the \tbb library. This is
 the default method if |MCKL_USE_TBB_MALLOC| is true. The |AlignedMemorySYS|
-This class uses operating system specific functions. If this class is define,
-it is the default method if |MCKL_USE_TBB_MALLOC| is false. Last, the
-|AlignedMemorySTD| class uses functions in the standard library and pads the
-memory manually when the alignment is insufficient. It is the last resort
-method that the library uses.
+class uses operating system specific functions. Last, the |AlignedMemorySTD|
+class uses functions in the standard library and pads the memory manually when
+the alignment is insufficient. It is the last resort method that the library
+uses when operating system support for aligned memory allocation cannot be
+used.
 
 The default alignment depends on the type |T|. If it is a scalar type, then the
 alignment is |MCKL_ALIGNMENT|, whose default is 32. This alignment is

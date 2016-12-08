@@ -69,7 +69,7 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
 template <typename IntType>
 class GeometricDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Geometric, short)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Geometric, 16)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_1(
         Geometric, geometric, IntType, double, p, 0.5)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(double, lnpinv_)

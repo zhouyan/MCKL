@@ -135,7 +135,7 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
 template <typename IntType>
 class UniformIntDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(UniformInt, short)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(UniformInt, 16)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_2(UniformInt, uniform_int, IntType,
         result_type, a, 0, result_type, b,
         std::numeric_limits<result_type>::max())

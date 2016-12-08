@@ -44,22 +44,22 @@
         "**" #Name                                                            \
         "Distribution** used with RealType other than float or double");
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Name, MinType)        \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Name, MinBits)        \
     static_assert(std::is_integral<IntType>::value,                           \
         "**" #Name                                                            \
         "Distribution** used with IntType other than integer types");         \
-    static_assert(sizeof(IntType) >= sizeof(MinType),                         \
-        "**" #Name                                                            \
-        "Distribution** used with IntType smaller than " #MinType);
+    static_assert(std::numeric_limits<IntType>::digits >= MinBits,            \
+        "**" #Name "Distribution** used with IntType smaller than " #MinBits  \
+        " bits");
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(Name, MinType)       \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(Name, MinBits)       \
     static_assert(std::is_unsigned<UIntType>::value,                          \
         "**" #Name                                                            \
         "Distribution** used with UIntType other than unsigned integer "      \
         "types");                                                             \
-    static_assert(sizeof(UIntType) >= sizeof(MinType),                        \
-        "**" #Name                                                            \
-        "Distribution** used with IntType smaller than " #MinType);
+    static_assert(std::numeric_limits<UIntType>::digits >= MinBits,           \
+        "**" #Name "Distribution** used with IntType smaller than " #MinBits  \
+        " bits");
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Name)                \
     static_assert(std::is_floating_point<RealType>::value,                    \
