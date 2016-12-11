@@ -218,7 +218,7 @@ class Sampler
     /// \brief Add a new evaluation object
     Sampler<T> &eval(const eval_type &new_eval, SamplerStage stage)
     {
-        eval_.push_back(std::make_pair(stage, new_eval));
+        eval_.emplace_back(stage, new_eval);
 
         return *this;
     }
@@ -232,7 +232,7 @@ class Sampler
     Sampler<T> &monitor(const std::string &name, const Monitor<T> &mon)
     {
         monitor_clear(name);
-        monitor_.push_back(std::make_pair(name, mon));
+        monitor_.emplace_back(name, mon);
 
         return *this;
     }

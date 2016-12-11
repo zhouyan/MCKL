@@ -29,7 +29,8 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-library(ggtikz)
+library(ggplot2)
+theme_set(theme_bw())
 
 obs <- read.table("pf.data", header = FALSE)
 est <- read.table("pf.out", header = TRUE)
@@ -39,10 +40,10 @@ dat <- data.frame(
 dat[["Source"]] <- rep(c("Estimate", "Observation"), each = dim(obs)[1])
 plt <- qplot(x = X, y = Y, data = dat, geom = "path")
 plt <- plt + aes(group = Source, color = Source, linetype = Source)
-plt <- plt + xlab("$X$")
-plt <- plt + ylab("$Y$")
-plt <- plt + scale_x_math()
-plt <- plt + scale_y_math()
+plt <- plt + xlab("X")
+plt <- plt + ylab("Y")
 plt <- plt + theme_bw() + theme(legend.position = "top")
 
-print.tikz("pf_core", plt, width = 5, ratio = 1)
+pdf("pf_core.pdf", width = 5, height = 5)
+print(plt)
+gc <- dev.off()

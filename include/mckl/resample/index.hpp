@@ -89,7 +89,7 @@ class ResampleIndex
     {
         ++iter_size_;
         if (index_.size() < iter_size_)
-            index_.push_back(Vector<index_type>(N));
+            index_.emplace_back(N);
         else
             index_[iter_size_ - 1].resize(N);
         std::copy_n(first, N, index_[iter_size_ - 1].begin());
