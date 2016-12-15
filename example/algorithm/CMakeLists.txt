@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/CMakeLists.txt
+#  MCKL/example/algorithm/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,44 +29,17 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLExample CXX)
+project(MCKLExample-algorithm CXX)
 
-add_definitions(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
+mckl_add_example(algorithm)
 
-##############################################################################
-# Check examples
-##############################################################################
+mckl_add_test(algorithm pf "OpenMP")
 
-set(EXAMPLES ${EXAMPLES} "mckl")
-add_subdirectory(mckl)
+mckl_add_file(algorithm algorithm_pf.data)
+mckl_add_file(algorithm algorithm_pf.R)
 
-set(EXAMPLES ${EXAMPLES} "algorithm")
-add_subdirectory(algorithm)
-
-set(EXAMPLES ${EXAMPLES} "gmm")
-add_subdirectory(gmm)
-
-set(EXAMPLES ${EXAMPLES} "math")
-add_subdirectory(math)
-
-set(EXAMPLES ${EXAMPLES} "pf")
-add_subdirectory(pf)
-
-set(EXAMPLES ${EXAMPLES} "random")
-add_subdirectory(random)
-
-set(EXAMPLES ${EXAMPLES} "resample")
-add_subdirectory(resample)
-
-set(EXAMPLES ${EXAMPLES} "utility")
-add_subdirectory(utility)
-
-##############################################################################
-# Enable examples
-##############################################################################
-
-message(STATUS "=================== Examples ==========================")
-foreach(example ${EXAMPLES})
-    message(STATUS ${example})
-endforeach(example ${EXAMPLES})
-message(STATUS "=======================================================")
+add_custom_target(algorithm_pf-pdf
+    DEPENDS algorithm-files algorithm_pf-check
+    COMMAND Rscript "${PROJECT_BINARY_DIR}/algorithm_pf.R"
+    COMMENT "Plotting algorithm_pf-check results"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})

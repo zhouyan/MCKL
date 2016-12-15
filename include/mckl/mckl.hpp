@@ -51,6 +51,10 @@
 /// \ingroup Algorithm
 /// \brief Metropolis-Hastings algorithm
 
+/// \defgroup SMC Sequential Monte Carlo
+/// \ingroup Algorithm
+/// \brief Sequential Monte Carlo algorithm
+
 /// \defgroup SMP Symmetric multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
 

@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/CMakeLists.txt
+#  MCKL/example/algorithm/algorithm_pf.R
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -29,44 +29,22 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLExample CXX)
+library(ggplot2)
+theme_set(theme_bw())
 
-add_definitions(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
+obs <- read.table("algorithm_pf.data", header = FALSE)
+est <- read.table("algorithm_pf.save", header = TRUE)
+dat <- data.frame(
+    X = c(est$pos.s.0, est$pos.r.0, est$pos.m.0, obs[,1]),
+    Y = c(est$pos.s.1, est$pos.r.1, est$pos.m.1, obs[,2]))
+dat[["Source"]] <- rep(
+    c("Selection", "Resample", "Mutation", "Observation"), each = dim(obs)[1])
+plt <- qplot(x = X, y = Y, data = dat, geom = "path")
+plt <- plt + aes(group = Source, color = Source, linetype = Source)
+plt <- plt + theme_bw()
+plt <- plt + theme(legend.position = "top")
+plt <- plt + theme(legend.title = element_blank())
 
-##############################################################################
-# Check examples
-##############################################################################
-
-set(EXAMPLES ${EXAMPLES} "mckl")
-add_subdirectory(mckl)
-
-set(EXAMPLES ${EXAMPLES} "algorithm")
-add_subdirectory(algorithm)
-
-set(EXAMPLES ${EXAMPLES} "gmm")
-add_subdirectory(gmm)
-
-set(EXAMPLES ${EXAMPLES} "math")
-add_subdirectory(math)
-
-set(EXAMPLES ${EXAMPLES} "pf")
-add_subdirectory(pf)
-
-set(EXAMPLES ${EXAMPLES} "random")
-add_subdirectory(random)
-
-set(EXAMPLES ${EXAMPLES} "resample")
-add_subdirectory(resample)
-
-set(EXAMPLES ${EXAMPLES} "utility")
-add_subdirectory(utility)
-
-##############################################################################
-# Enable examples
-##############################################################################
-
-message(STATUS "=================== Examples ==========================")
-foreach(example ${EXAMPLES})
-    message(STATUS ${example})
-endforeach(example ${EXAMPLES})
-message(STATUS "=======================================================")
+pdf("algorithm_pf.pdf", width = 5, height = 5)
+print(plt)
+gc <- dev.off()

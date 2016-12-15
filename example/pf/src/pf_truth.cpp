@@ -147,7 +147,7 @@ inline void PFWeight(std::size_t iter, Particle<PF> &particle)
     mckl::mul(N, tempa, nuinv, tempa);
     mckl::mul(N, tempb, nuinv, tempb);
     mckl::log1p(N, tempa, tempa);
-    mckl::log1p(N, tempa, tempa);
+    mckl::log1p(N, tempb, tempb);
     mckl::add(N, tempa, tempb, tempa);
     mckl::mul(N, -0.5 * (nu + 1), tempa, tempa);
 

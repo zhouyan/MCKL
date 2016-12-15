@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/algorithm.hpp
+// MCKL/example/algorithm/src/algorithm_pf.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,11 +29,30 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_ALGORITHM_HPP
-#define MCKL_ALGORITHM_HPP
+#include "algorithm_pf.hpp"
 
-#include <mckl/internal/config.h>
-#include <mckl/algorithm/mh.hpp>
-#include <mckl/algorithm/smc.hpp>
+int main()
+{
+    constexpr std::size_t N = 1000;
 
-#endif // MCKL_ALGORITHM_HPP
+    mckl::SMCSampler<AlgorithmPF> sampler(N);
+    sampler.selection(AlgorithmPFSelection());
+    sampler.resample(mckl::Multinomial);
+    sampler.resample_threshold(0.5);
+    sampler.monitor_selection(
+        mckl::SMCMonitor<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor),
+        "pos.s");
+    sampler.monitor_resample(
+        mckl::SMCMonitor<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor),
+        "pos.r");
+    sampler.monitor_mutation(
+        mckl::SMCMonitor<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor),
+        "pos.m");
+    sampler.iterate(sampler.particle().state().n());
+
+    std::ofstream save("algorithm_pf.save");
+    save << sampler << std::endl;
+    save.close();
+
+    return 0;
+}
