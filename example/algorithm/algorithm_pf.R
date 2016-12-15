@@ -30,7 +30,6 @@
 # ============================================================================
 
 library(ggplot2)
-theme_set(theme_bw())
 
 obs <- read.table("algorithm_pf.data", header = FALSE)
 est <- read.table("algorithm_pf.save", header = TRUE)

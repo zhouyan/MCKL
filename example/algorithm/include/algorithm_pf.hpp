@@ -46,19 +46,19 @@ class AlgorithmPF : public AlgorithmPFBase
         double y = 0;
         std::ifstream data("algorithm_pf.data");
         while (data >> x >> y) {
-            obs_x_.push_back(x);
-            obs_y_.push_back(y);
+            x_.push_back(x);
+            y_.push_back(y);
         }
         data.close();
     }
 
-    std::size_t n() const { return obs_x_.size(); }
-    double obs_x(std::size_t iter) { return obs_x_[iter]; }
-    double obs_y(std::size_t iter) { return obs_y_[iter]; }
+    std::size_t n() const { return x_.size(); }
+    double x(std::size_t iter) { return x_[iter]; }
+    double y(std::size_t iter) { return y_[iter]; }
 
     private:
-    mckl::Vector<double> obs_x_;
-    mckl::Vector<double> obs_y_;
+    mckl::Vector<double> x_;
+    mckl::Vector<double> y_;
 }; // class AlgorithmPF
 
 class AlgorithmPFSelection
@@ -97,8 +97,8 @@ class AlgorithmPFSelection
             mckl::add(M, w, v, v);
         }
 
-        mckl::sub(N, p + 0, particle.state().obs_x(iter), w + 0);
-        mckl::sub(N, p + N, particle.state().obs_y(iter), w + N);
+        mckl::sub(N, p + 0, particle.state().x(iter), w + 0);
+        mckl::sub(N, p + N, particle.state().y(iter), w + N);
         mckl::mul(M, scale, w, w);
         mckl::sqr(M, w, w);
         mckl::mul(M, w, nuinv, w);

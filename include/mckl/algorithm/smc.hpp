@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_CORE_SMC_HPP
-#define MCKL_CORE_SMC_HPP
+#ifndef MCKL_ALGORITHM_SMC_HPP
+#define MCKL_ALGORITHM_SMC_HPP
 
 #include <mckl/internal/common.hpp>
 #include <mckl/core/particle.hpp>
@@ -57,9 +57,13 @@ class SMCMonitor
     using eval_type =
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 
-    SMCMonitor(std::size_t dim, const eval_type &eval, MatrixLayout layout,
+    template <typename Eval>
+    SMCMonitor(std::size_t dim, Eval &&eval, MatrixLayout layout,
         bool record_only = false)
-        : dim_(dim), eval_(eval), layout_(layout), record_only_(record_only)
+        : dim_(dim)
+        , eval_(std::forward<Eval>(eval))
+        , layout_(layout)
+        , record_only_(record_only)
     {
         runtime_assert(layout == RowMajor || layout == ColMajor,
             "**SMCMonitor::SMCMonitor** invalid layout parameter");
@@ -108,7 +112,7 @@ class SMCMonitor
     OutputIter read_record(std::size_t i, OutputIter first) const
     {
         runtime_assert(
-            i < dim(), "**Monitor::read_record** index out of range");
+            i < dim(), "**SMCMonitor::read_record** index out of range");
 
         const std::size_t t = num_iter();
         const double *riter = record_.data() + i;
@@ -138,13 +142,13 @@ class SMCMonitor
     }
 
     /// \brief Set a new evaluation object
-    void eval(const eval_type &new_eval, MatrixLayout layout,
-        bool record_only = false)
+    template <typename Eval>
+    void estimate(Eval &&eval, MatrixLayout layout, bool record_only = false)
     {
         runtime_assert(layout == RowMajor || layout == ColMajor,
             "**SMCMonitor::eval** invalid layout parameter");
 
-        eval_ = new_eval;
+        eval_ = std::forward<Eval>(eval);
         layout_ = layout;
         record_only_ = record_only;
     }
@@ -153,8 +157,12 @@ class SMCMonitor
     /// particle system
     void operator()(std::size_t iter, Particle<T> &particle)
     {
-        runtime_assert(static_cast<bool>(eval_),
-            "**SMCMonitor::operator()** invalid evaluation object");
+        if (empty()) {
+            result_.resize(dim_);
+            std::fill(result_.begin(), result_.end(), const_nan<double>());
+            record_.insert(record_.end(), result_.begin(), result_.end());
+            return;
+        }
 
         result_.resize(dim_);
         if (record_only_) {
@@ -166,7 +174,7 @@ class SMCMonitor
         const std::size_t N = static_cast<std::size_t>(particle.size());
         r_.resize(N * dim_);
         eval_(iter, dim_, particle, r_.data());
-#if !MCKL_HAS_BLAS
+#if MCKL_HAS_BLAS
         internal::size_check<MCKL_BLAS_INT>(particle.size(), "Monitor::eval");
         if (layout_ == RowMajor) {
             internal::cblas_dgemv(internal::CblasColMajor,
@@ -383,7 +391,7 @@ class SMCSampler
     }
 
     /// \brief Attach a new monitor and return a reference to it
-    const std::pair<std::string, SMCMonitor<T>> &monitor_resample(
+    std::pair<std::string, SMCMonitor<T>> &monitor_resample(
         const SMCMonitor<T> &monitor, const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
@@ -402,7 +410,7 @@ class SMCSampler
         return add_monitor(monitor_m_, monitor, name);
     }
 
-    /// \brief Iteration
+    /// \brief Iterate the sampler
     void iterate(std::size_t n = 1)
     {
         if (n > 1)
@@ -501,7 +509,6 @@ class SMCSampler
     Particle<T> particle_;
     std::size_t iter_;
     double resample_threshold_;
-    eval_type resample_eval_;
     Vector<eval_type> eval_s_;
     Vector<eval_type> eval_r_;
     Vector<eval_type> eval_m_;
@@ -583,4 +590,4 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
 
 } // namespace mckl
 
-#endif // MCKL_CORE_SAMPLER_HPP
+#endif // MCKL_ALGORITHM_SAMPLER_HPP

@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/algorithm/CMakeLists.txt
+#  MCKL/example/algorithm/algorithm_gibbs.R
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,26 +29,14 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLExample-algorithm CXX)
+library(ggplot2)
 
-mckl_add_example(algorithm)
+obs <- read.table("algorithm_gibbs.data", header = FALSE)
+est <- read.table("algorithm_gibbs.save", header = TRUE)
+dat <- data.frame(mu = est$V0.0, lambda = est$V0.1)
+plt <- qplot(x = mu, y = lambda, data = dat, geom = "density_2d")
+plt <- plt + theme_bw()
 
-mckl_add_test(algorithm gibbs)
-mckl_add_test(algorithm pf)
-
-mckl_add_file(algorithm algorithm_gibbs.data)
-mckl_add_file(algorithm algorithm_gibbs.R)
-mckl_add_file(algorithm algorithm_pf.data)
-mckl_add_file(algorithm algorithm_pf.R)
-
-add_custom_target(algorithm_pf-pdf
-    DEPENDS algorithm-files algorithm_pf-check
-    COMMAND Rscript "${PROJECT_BINARY_DIR}/algorithm_pf.R"
-    COMMENT "Plotting algorithm_pf-check results"
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-
-add_custom_target(algorithm_gibbs-pdf
-    DEPENDS algorithm-files algorithm_gibbs-check
-    COMMAND Rscript "${PROJECT_BINARY_DIR}/algorithm_gibbs.R"
-    COMMENT "Plotting algorithm_gibbs-check results"
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+pdf("algorithm_gibbs.pdf", width = 5, height = 5)
+print(plt)
+gc <- dev.off()
