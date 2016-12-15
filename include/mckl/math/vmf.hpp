@@ -749,7 +749,8 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
 }
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::muladd_impl, fma, [[deprecated]])
+MCKL_DEFINE_MATH_VMF_FMA(
+    internal::muladd_impl, fma, [[deprecated("use **muladd** instead")]])
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(internal::muladd_impl, muladd, )

@@ -326,10 +326,16 @@ class ParticleRange
     size_type iend() const { return iend_; }
 
     /// \brief Alias to `ibegin`
-    [[deprecated]] size_type first() const { return ibegin(); }
+    [[deprecated("use **ibegin** instead")]] size_type first() const
+    {
+        return ibegin();
+    }
 
     /// \brief Alias to `iend`
-    [[deprecated]] size_type last() const { return iend(); }
+    [[deprecated("use **iend** instead")]] size_type last() const
+    {
+        return iend();
+    }
 
     /// \brief Get a `ParticleIndex<T>` object for the first particle in range
     ParticleIndex<T> begin() const { return pptr_->operator[](ibegin_); }

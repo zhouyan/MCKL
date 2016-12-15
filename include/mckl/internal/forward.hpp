@@ -56,10 +56,16 @@ template <typename>
 class Particle;
 
 template <typename>
-class Sampler;
+class SMCMonitor;
 
 template <typename>
-class Monitor;
+class SMCSampler;
+
+template <typename>
+class[[deprecated("use **SMCMonitor** instead")]] Monitor;
+
+template <typename>
+class[[deprecated("use **SMCSampler** instead")]] Sampler;
 
 } // namespace mckl
 
