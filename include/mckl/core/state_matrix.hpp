@@ -44,7 +44,7 @@ template <std::size_t Dim>
 class StateMatrixDim
 {
     protected:
-    void swap(StateMatrixDim<Dim> &) {}
+    void swap(StateMatrixDim<Dim> &) noexcept {}
 
     std::size_t get_dim() const { return Dim; }
 
@@ -73,7 +73,10 @@ class StateMatrixDim<0>
         return *this;
     }
 
-    void swap(StateMatrixDim<0> &other) { std::swap(dim_, other.dim_); }
+    void swap(StateMatrixDim<0> &other) noexcept
+    {
+        std::swap(dim_, other.dim_);
+    }
 
     std::size_t get_dim() const { return dim_; }
 
@@ -177,7 +180,8 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
     const value_type *data() const { return data_.data(); }
 
     /// \brief Swap two StateMatrix objects
-    void swap(StateMatrixBase<Layout, Dim, T> &other)
+    void swap(StateMatrixBase<Layout, Dim, T> &other) noexcept(
+        noexcept(data_.swap(other.data_)))
     {
         internal::StateMatrixDim<Dim>::swap(other);
         std::swap(size_, other.size_);
@@ -203,6 +207,7 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
         : size_(other.size_), data_(std::move(other.data_))
     {
         other.size_ = 0;
+        other.data_.clear();
     }
 
     StateMatrixBase<Layout, Dim, T> &operator=(
@@ -210,10 +215,10 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
 
     StateMatrixBase<Layout, Dim, T> &
         operator=(StateMatrixBase<Layout, Dim, T> &&other) noexcept(
-            noexcept(data_ = std::move(other.data_)))
+            noexcept(data_.swap(other.data_)))
     {
         if (this != &other) {
-            data_ = std::move(other.data_);
+            data_.swap(other.data_);
             std::swap(size_, other.size_);
         }
 
@@ -255,10 +260,10 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
 /// \brief Swap two StateMatrix objects
 /// \ingroup Core
 template <MatrixLayout Layout, std::size_t Dim, typename T>
-inline void swap(StateMatrixBase<Layout, Dim, T> &state1,
-    StateMatrixBase<Layout, Dim, T> &state2)
+inline void swap(StateMatrixBase<Layout, Dim, T> &s1,
+    StateMatrixBase<Layout, Dim, T> &s2) noexcept(noexcept(s1.swap(s2)))
 {
-    state1.swap(state2);
+    s1.swap(s2);
 }
 
 /// \brief Particle::value_type subtype
