@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/resample/include/resample_u01_sequence.hpp
+// MCKL/example/algorithm/include/algorithm_resample_u01_sequence.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,17 +29,17 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_RESAMPLE_U01_SEQUENCE_HPP
-#define MCKL_EXAMPLE_RESAMPLE_U01_SEQUENCE_HPP
+#ifndef MCKL_EXAMPLE_ALGORITHM_RESAMPLE_U01_SEQUENCE_HPP
+#define MCKL_EXAMPLE_ALGORITHM_RESAMPLE_U01_SEQUENCE_HPP
 
+#include <mckl/algorithm/resample.hpp>
 #include <mckl/random/rng.hpp>
 #include <mckl/random/uniform_int_distribution.hpp>
-#include <mckl/resample/u01_sequence.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
 template <typename U01SeqType, typename RealType>
-inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
-    int twid, const std::string &name)
+inline void algorithm_resample_u01_sequence(std::size_t N, std::size_t M,
+    std::size_t L, int twid, const std::string &name)
 {
     mckl::RNG rng;
     std::size_t num = 0;
@@ -94,17 +94,18 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M, std::size_t L,
 }
 
 template <typename RealType>
-inline void resample_u01_sequence(std::size_t N, std::size_t M, int twid)
+inline void algorithm_resample_u01_sequence(
+    std::size_t N, std::size_t M, int twid)
 {
-    resample_u01_sequence<mckl::U01SequenceSorted, RealType>(
+    algorithm_resample_u01_sequence<mckl::U01SequenceSorted, RealType>(
         N, M, N, twid, "Sorted");
-    resample_u01_sequence<mckl::U01SequenceStratified, RealType>(
+    algorithm_resample_u01_sequence<mckl::U01SequenceStratified, RealType>(
         N, M, N, twid, "Stratified");
-    resample_u01_sequence<mckl::U01SequenceSystematic, RealType>(
+    algorithm_resample_u01_sequence<mckl::U01SequenceSystematic, RealType>(
         N, M, 1, twid, "Systematic");
 }
 
-inline void resample_u01_sequence(std::size_t N, std::size_t M)
+inline void algorithm_resample_u01_sequence(std::size_t N, std::size_t M)
 {
     const int twid = 15;
     const std::size_t lwid = twid * 5;
@@ -119,10 +120,10 @@ inline void resample_u01_sequence(std::size_t N, std::size_t M)
 
     std::cout << std::fixed << std::setprecision(2);
     std::cout << std::string(lwid, '-') << std::endl;
-    resample_u01_sequence<float>(N, M, twid);
+    algorithm_resample_u01_sequence<float>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
-    resample_u01_sequence<double>(N, M, twid);
+    algorithm_resample_u01_sequence<double>(N, M, twid);
     std::cout << std::string(lwid, '-') << std::endl;
 }
 
-#endif // MCKL_EXAMPLE_RESAMPLE_U01_SEQUENCE_HPP
+#endif // MCKL_EXAMPLE_ALGORITHM_RESAMPLE_U01_SEQUENCE_HPP

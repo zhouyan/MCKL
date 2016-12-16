@@ -57,6 +57,7 @@ sub update
             next if $path =~ /\.bbl$/;
             next if $path =~ /\.bcf$/;
             next if $path =~ /\.blg$/;
+            next if $path =~ /\.data$/;
             next if $path =~ /\.fdb_latexmk$/;
             next if $path =~ /\.fls$/;
             next if $path =~ /\.latexmain$/;
@@ -66,9 +67,6 @@ sub update
             next if $path =~ /\.run.xml$/;
             next if $path =~ /\.toc$/;
             next if $path =~ /config\/.*\.md\.in$/;
-            next if $path =~ /example\/gmm\/gmm\.data$/;
-            next if $path =~ /example\/pf\/pf\.data$/;
-            next if $path =~ /example\/pf\/pf\.truth$/;
             next if $path =~ /example\/random\/random_.*\.txt$/;
             next if $path =~ /tidy\.pl$/;
             next if $path =~ /inc\.tex$/;

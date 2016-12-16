@@ -29,6 +29,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#ifndef MCKL_EXAMPLE_ALGORITHM_PMCMC_HPP
+#define MCKL_EXAMPLE_ALGORITHM_PMCMC_HPP
+
 #include <mckl/algorithm/pmcmc.hpp>
 #include <mckl/random/lognormal_distribution.hpp>
 #include <mckl/random/normal_distribution.hpp>
@@ -155,3 +158,5 @@ class AlgorithmPMCMCEstimate
         r[1] = std::get<1>(state);
     }
 }; // class AlgorithmPMCMCEstimate
+
+#endif // MCKL_EXAMPLE_ALGORITHM_PMCMC_HPP

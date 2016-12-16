@@ -129,9 +129,7 @@ inline void hdf5_dim(
     if (layout == RowMajor) {
         dim[0] = nrow;
         dim[1] = ncol;
-    }
-
-    if (layout == ColMajor) {
+    } else {
         dim[0] = ncol;
         dim[1] = nrow;
     }

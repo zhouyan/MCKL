@@ -95,7 +95,7 @@ class DirichletDistribution
 
         explicit param_type(result_type alpha) : is_scalar_(true)
         {
-            static_assert(Dim != Dynamic,
+            static_assert(Dim != 0,
                 "**DirichletDistribution::param_type** object declared with "
                 "dynamic dimension");
 
@@ -104,7 +104,7 @@ class DirichletDistribution
 
         explicit param_type(const result_type *alpha) : is_scalar_(false)
         {
-            static_assert(Dim != Dynamic,
+            static_assert(Dim != 0,
                 "**DirichletDistribution::param_type** object declared with "
                 "dynamic dimension");
 
@@ -114,7 +114,7 @@ class DirichletDistribution
         explicit param_type(std::size_t dim, result_type alpha)
             : alpha_(dim), is_scalar_(false)
         {
-            static_assert(Dim == Dynamic,
+            static_assert(Dim == 0,
                 "**DirichletDistribution::param_type** object delcared with "
                 "fixed dimension");
 
@@ -124,7 +124,7 @@ class DirichletDistribution
         explicit param_type(std::size_t dim, const result_type *alpha)
             : alpha_(dim), is_scalar_(false)
         {
-            static_assert(Dim == Dynamic,
+            static_assert(Dim == 0,
                 "**DirichletDistribution::param_type** object delcared with "
                 "fixed dimension");
 
@@ -204,20 +204,20 @@ class DirichletDistribution
         }
     }; // class param_type
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim != 0`
     explicit DirichletDistribution(result_type alpha) : param_(alpha) {}
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim != 0`
     explicit DirichletDistribution(const result_type *alpha) : param_(alpha) {}
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Only usable when `Dim == 0`
     explicit DirichletDistribution(std::size_t dim, result_type alpha)
         : param_(dim, alpha)
     {
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Only usable when `Dim == 0`
     DirichletDistribution(std::size_t dim, const result_type *alpha)
         : param_(dim, alpha)
     {

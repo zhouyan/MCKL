@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/resample/src/resample_transform.cpp
+// MCKL/example/algorithm/src/algorithm_resample_u01_sequence.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -23,53 +23,24 @@
 // LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
 // CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
 // SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// INTERRUPTION); HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE);
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "resample_transform.hpp"
+#include "algorithm_resample_u01_sequence.hpp"
 
 int main(int argc, char **argv)
 {
-    std::size_t N = 1000;
+    std::size_t N = 10000;
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
-
-    std::size_t n = 1000;
+    std::size_t M = 1000;
     if (argc > 2)
-        n = static_cast<std::size_t>(std::atoi(argv[2]));
+        M = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    resample_trans_rep_index_test<mckl::ResampleMultinomial>(
-        N, n, "Multinomial", true);
-    resample_trans_rep_index_test<mckl::ResampleMultinomial>(
-        N, n, "Multinomial", false);
-
-    resample_trans_rep_index_test<mckl::ResampleStratified>(
-        N, n, "Stratified", true);
-    resample_trans_rep_index_test<mckl::ResampleStratified>(
-        N, n, "Stratified", false);
-
-    resample_trans_rep_index_test<mckl::ResampleSystematic>(
-        N, n, "Systematic", true);
-    resample_trans_rep_index_test<mckl::ResampleSystematic>(
-        N, n, "Systematic", false);
-
-    resample_trans_rep_index_test<mckl::ResampleResidual>(
-        N, n, "Residual", true);
-    resample_trans_rep_index_test<mckl::ResampleResidual>(
-        N, n, "Residual", false);
-
-    resample_trans_rep_index_test<mckl::ResampleResidualStratified>(
-        N, n, "ResidualStratified", true);
-    resample_trans_rep_index_test<mckl::ResampleResidualStratified>(
-        N, n, "ResidualStratified", false);
-
-    resample_trans_rep_index_test<mckl::ResampleResidualSystematic>(
-        N, n, "ResidualSystematic", true);
-    resample_trans_rep_index_test<mckl::ResampleResidualSystematic>(
-        N, n, "ResidualSystematic", false);
+    algorithm_resample_u01_sequence(N, M);
 
     return 0;
 }

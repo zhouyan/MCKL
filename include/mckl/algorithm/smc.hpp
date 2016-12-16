@@ -33,9 +33,9 @@
 #define MCKL_ALGORITHM_SMC_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/algorithm/resample.hpp>
 #include <mckl/core/particle.hpp>
 #include <mckl/core/state_matrix.hpp>
-#include <mckl/resample.hpp>
 
 namespace mckl
 {
@@ -132,11 +132,9 @@ class SMCMonitor
         if (layout == RowMajor)
             return std::copy(record_.begin(), record_.end(), first);
 
-        if (layout == ColMajor) {
-            for (std::size_t d = 0; d != dim_; ++d)
-                for (std::size_t i = 0; i != num_iter(); ++i)
-                    *first++ = record(d, i);
-        }
+        for (std::size_t d = 0; d != dim_; ++d)
+            for (std::size_t i = 0; i != num_iter(); ++i)
+                *first++ = record(d, i);
 
         return first;
     }
@@ -592,4 +590,4 @@ inline std::basic_ostream<CharT, Traits> &operator<<(
 
 } // namespace mckl
 
-#endif // MCKL_ALGORITHM_SAMPLER_HPP
+#endif // MCKL_ALGORITHM_SMC_HPP

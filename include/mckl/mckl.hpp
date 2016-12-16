@@ -59,6 +59,10 @@
 /// \ingroup Algorithm
 /// \brief Particle Markov chain Monte Carlo
 
+/// \defgroup Resample Resampling
+/// \ingroup Algorithm
+/// \brief Resampling
+
 /// \defgroup SMC Sequential Monte Carlo
 /// \ingroup Algorithm
 /// \brief Sequential Monte Carlo
@@ -147,9 +151,6 @@
 /// \ingroup RandomC
 /// \brief Converting random integers to uniform floating points
 
-/// \defgroup Resample Resampling algorithms
-/// \brief Resampling algorithm functor classes
-
 /// \defgroup Utility Utility
 /// \brief Utilities
 
@@ -171,7 +172,6 @@
 #include <mckl/math.hpp>
 #include <mckl/random.hpp>
 #include <mckl/randomc.h>
-#include <mckl/resample.hpp>
 #include <mckl/smp.hpp>
 #include <mckl/utility.hpp>
 

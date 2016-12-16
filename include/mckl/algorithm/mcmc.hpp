@@ -125,11 +125,9 @@ class MCMCMonitor
         if (layout == RowMajor)
             return std::copy(record_.begin(), record_.end(), first);
 
-        if (layout == ColMajor) {
-            for (std::size_t d = 0; d != dim_; ++d)
-                for (std::size_t i = 0; i != num_iter(); ++i)
-                    *first++ = record(d, i);
-        }
+        for (std::size_t d = 0; d != dim_; ++d)
+            for (std::size_t i = 0; i != num_iter(); ++i)
+                *first++ = record(d, i);
 
         return first;
     }

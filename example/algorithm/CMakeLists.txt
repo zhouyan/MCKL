@@ -33,8 +33,11 @@ project(MCKLExample-algorithm CXX)
 
 mckl_add_example(algorithm)
 
-set(ALGORITHMS gibbs pf pmcmc)
+mckl_add_test(algorithm resample_index)
+mckl_add_test(algorithm resample_transform)
+mckl_add_test(algorithm resample_u01_sequence)
 
+set(ALGORITHMS gibbs pf pmcmc)
 foreach(alg ${ALGORITHMS})
     mckl_add_test(algorithm ${alg})
     mckl_add_file(algorithm algorithm_${alg}.data)

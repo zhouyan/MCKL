@@ -1003,7 +1003,7 @@ class CauchyDistribution;
 template <typename = double>
 class ChiSquaredDistribution;
 
-template <typename = double, std::size_t = Dynamic>
+template <typename = double, std::size_t = 0>
 class DirichletDistribution;
 
 template <typename = int>
@@ -1036,7 +1036,7 @@ class LognormalDistribution;
 template <typename = double>
 class NormalDistribution;
 
-template <typename = double, std::size_t = Dynamic>
+template <typename = double, std::size_t = 0>
 class NormalMVDistribution;
 
 template <typename = double>

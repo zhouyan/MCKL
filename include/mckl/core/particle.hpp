@@ -36,7 +36,6 @@
 #include <mckl/core/weight.hpp>
 #include <mckl/random/rng_set.hpp>
 #include <mckl/random/seed.hpp>
-#include <mckl/resample/algorithm.hpp>
 
 namespace mckl
 {
@@ -410,40 +409,6 @@ class Particle
     {
         resize_by_index(
             N, index, std::is_convertible<InputIter, const size_type *>());
-    }
-
-    /// \brief Resize by resampling
-    ///
-    /// \param N The new sample size
-    /// \param op The resampling function object
-    ///
-    /// \details
-    /// The particle system is resampled to a new system with possibly
-    /// different size. The system will be changed even if `N == size()`.
-    template <typename ResampleType>
-    void resize_by_resample(size_type N, ResampleType &&op)
-    {
-        Vector<size_type> rep(static_cast<std::size_t>(size_));
-        Vector<size_type> idx(static_cast<std::size_t>(N));
-        op(static_cast<std::size_t>(size_), static_cast<std::size_t>(N), rng_,
-            weight_.data(), rep.data());
-        resample_trans_rep_index(static_cast<std::size_t>(size_),
-            static_cast<std::size_t>(N), rep.data(), idx.data());
-        resize(N, idx.data());
-    }
-
-    /// \brief Resize by uniformly selecting from all particles
-    ///
-    /// \param N The new sample size
-    ///
-    /// \details
-    /// This is equivalent to first set the weights to equal, and then perform
-    /// Multinomial resampling. The particle system will be changed even if
-    /// `N == size()`.
-    void resize_by_uniform(size_type N)
-    {
-        weight_.set_equal();
-        resize_by_resample(N, ResampleMultinomial());
     }
 
     /// \brief Read and write access to the state collection object

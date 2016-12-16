@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/resample/include/resample_transform.hpp
+// MCKL/example/algorithm/include/algorithm_resample_transform.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,12 +29,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_RESAMPLE_TRANSFORM_HPP
-#define MCKL_EXAMPLE_RESAMPLE_TRANSFORM_HPP
+#ifndef MCKL_EXAMPLE_ALGORITHM_RESAMPLE_TRANSFORM_HPP
+#define MCKL_EXAMPLE_ALGORITHM_RESAMPLE_TRANSFORM_HPP
 
-#include "resample_test.hpp"
+#include "algorithm_resample.hpp"
 
-inline bool resample_trans_rep_index_check(
+inline bool algorithm_resample_trans_rep_index_check(
     const mckl::Vector<std::size_t> &rep, const mckl::Vector<std::size_t> &idx)
 {
     const std::size_t N = rep.size();
@@ -80,7 +80,7 @@ inline bool resample_trans_rep_index_check(
 }
 
 template <typename ResampleType>
-inline void resample_trans_rep_index_test(
+inline void algorithm_resample_trans_rep_index(
     std::size_t N, std::size_t n, const std::string &scheme, bool fixed)
 {
     std::cout << std::string(80, '=') << std::endl;
@@ -115,7 +115,7 @@ inline void resample_trans_rep_index_test(
         mckl::resample_trans_rep_index(N, M, rep.data(), idx.data());
         watch_trans.stop();
 
-        passed = passed && resample_trans_rep_index_check(rep, idx);
+        passed = passed && algorithm_resample_trans_rep_index_check(rep, idx);
     }
 
     std::cout << std::setw(60) << std::left
@@ -129,4 +129,4 @@ inline void resample_trans_rep_index_test(
     std::cout << std::string(80, '-') << std::endl;
 }
 
-#endif // MCKL_EXAMPLE_RESAMPLE_TRANSFORM_HPP
+#endif // MCKL_EXAMPLE_ALGORITHM_RESAMPLE_TRANSFORM_HPP

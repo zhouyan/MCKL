@@ -100,11 +100,6 @@ class BackendTBB;
 /// \ingroup SMP
 using BackendSMP = MCKL_SMP_BACKEND;
 
-/// \brief Template type parameter that cause the base class to use dynamic
-/// dispatch
-/// \ingroup SMP
-class Virtual;
-
 /// \brief Sampler<T>::eval_type
 /// \ingroup SMP
 template <typename T, typename = Virtual, typename = BackendSMP>

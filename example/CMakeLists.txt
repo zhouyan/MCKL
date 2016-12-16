@@ -42,7 +42,6 @@ set(EXAMPLES ${EXAMPLES} core)
 set(EXAMPLES ${EXAMPLES} math)
 set(EXAMPLES ${EXAMPLES} mckl)
 set(EXAMPLES ${EXAMPLES} random)
-set(EXAMPLES ${EXAMPLES} resample)
 set(EXAMPLES ${EXAMPLES} utility)
 
 message(STATUS "=================== Examples ==========================")

@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/resample/include/resample_test.hpp
+// MCKL/example/algorithm/include/algorithm_resample.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,21 +29,21 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_RESAMPLE_TEST_HPP
-#define MCKL_EXAMPLE_RESAMPLE_TEST_HPP
+#ifndef MCKL_EXAMPLE_ALGORITHM_RESAMPLE_HPP
+#define MCKL_EXAMPLE_ALGORITHM_RESAMPLE_HPP
 
+#include <mckl/algorithm/resample.hpp>
 #include <mckl/core/state_matrix.hpp>
 #include <mckl/core/weight.hpp>
 #include <mckl/random/rng.hpp>
 #include <mckl/random/uniform_int_distribution.hpp>
-#include <mckl/resample.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
 template <mckl::MatrixLayout Layout>
-using ResampleState = mckl::StateMatrix<Layout, mckl::Dynamic, int>;
+using AlgorithmResampleState = mckl::StateMatrix<Layout, 0, int>;
 
 template <typename RNGType>
-inline mckl::Vector<std::size_t> resample_size(
+inline mckl::Vector<std::size_t> algorithm_resample_size(
     RNGType &rng, std::size_t N, std::size_t dim, bool fixed)
 {
     if (fixed)
@@ -59,7 +59,7 @@ inline mckl::Vector<std::size_t> resample_size(
 }
 
 template <typename RNGType>
-inline mckl::Vector<mckl::Vector<int>> resample_value(
+inline mckl::Vector<mckl::Vector<int>> algorithm_resample_value(
     RNGType &rng, const mckl::Vector<std::size_t> &size)
 {
     mckl::Vector<mckl::Vector<int>> value;
@@ -77,7 +77,7 @@ inline mckl::Vector<mckl::Vector<int>> resample_value(
 }
 
 template <typename RNGType>
-inline mckl::Vector<mckl::Vector<double>> resample_weight(
+inline mckl::Vector<mckl::Vector<double>> algorithm_resample_weight(
     RNGType &rng, const mckl::Vector<std::size_t> &size)
 {
     mckl::Vector<mckl::Vector<double>> weight;
@@ -97,8 +97,8 @@ inline mckl::Vector<mckl::Vector<double>> resample_weight(
 }
 
 template <typename RNGType>
-inline mckl::Vector<mckl::Vector<std::size_t>> resample_index(RNGType &rng,
-    const mckl::Vector<std::size_t> &size,
+inline mckl::Vector<mckl::Vector<std::size_t>> algorithm_resample_index(
+    RNGType &rng, const mckl::Vector<std::size_t> &size,
     const mckl::Vector<mckl::Vector<double>> &weight)
 {
     mckl::Vector<mckl::Vector<size_t>> index;
@@ -119,4 +119,4 @@ inline mckl::Vector<mckl::Vector<std::size_t>> resample_index(RNGType &rng,
     return index;
 }
 
-#endif // MCKL_EXAMPLE_RESAMPLE_TEST_HPP
+#endif // MCKL_EXAMPLE_ALGORITHM_RESAMPLE_HPP

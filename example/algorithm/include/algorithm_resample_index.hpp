@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/resample/include/resample_index.hpp
+// MCKL/example/algorithm/include/algorithm_resample_index.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,20 +29,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_RESAMPLE_INDEX_HPP
-#define MCKL_EXAMPLE_RESAMPLE_INDEX_HPP
+#ifndef MCKL_EXAMPLE_ALGORITHM_RESAMPLE_INDEX_HPP
+#define MCKL_EXAMPLE_ALGORITHM_RESAMPLE_INDEX_HPP
 
-#include "resample_test.hpp"
+#include "algorithm_resample.hpp"
 
 template <mckl::MatrixLayout Layout>
-inline ResampleState<Layout> resample_index_fixed(
+inline AlgorithmResampleState<Layout> algorithm_resample_index_fixed(
     const mckl::Vector<std::size_t> &size,
     const mckl::Vector<mckl::Vector<int>> &value,
     const mckl::Vector<mckl::Vector<std::size_t>> &index)
 {
     const std::size_t dim = size.size() - 1;
     const std::size_t N = size[dim];
-    ResampleState<Layout> state(0);
+    AlgorithmResampleState<Layout> state(0);
     state.resize(N, dim);
 
     mckl::StopWatch watch;
@@ -70,14 +70,14 @@ inline ResampleState<Layout> resample_index_fixed(
 }
 
 template <mckl::MatrixLayout Layout>
-inline ResampleState<Layout> resample_index_rands(
+inline AlgorithmResampleState<Layout> algorithm_resample_index_rands(
     const mckl::Vector<std::size_t> &size,
     const mckl::Vector<mckl::Vector<int>> &value,
     const mckl::Vector<mckl::Vector<std::size_t>> &index)
 {
     const std::size_t dim = size.size() - 1;
-    ResampleState<Layout> state(size[0]);
-    ResampleState<Layout> tmp(0);
+    AlgorithmResampleState<Layout> state(size[0]);
+    AlgorithmResampleState<Layout> tmp(0);
     state.resize(size[0], 1);
 
     mckl::StopWatch watch;
@@ -108,15 +108,15 @@ inline ResampleState<Layout> resample_index_rands(
 }
 
 template <mckl::MatrixLayout Layout>
-inline ResampleState<Layout> resample_index_trace(
+inline AlgorithmResampleState<Layout> algorithm_resample_index_trace(
     const mckl::Vector<std::size_t> &size,
     const mckl::Vector<mckl::Vector<int>> &value,
     const mckl::Vector<mckl::Vector<std::size_t>> &index)
 {
     const std::size_t dim = size.size() - 1;
     const std::size_t N = size[dim];
-    ResampleState<Layout> state(0);
-    ResampleState<Layout> idxmat(0);
+    AlgorithmResampleState<Layout> state(0);
+    AlgorithmResampleState<Layout> idxmat(0);
     state.resize(N, dim);
     idxmat.resize(N, dim);
 
@@ -140,8 +140,9 @@ inline ResampleState<Layout> resample_index_trace(
 }
 
 template <mckl::MatrixLayout Layout1, mckl::MatrixLayout Layout2>
-inline bool resample_index_check(
-    const ResampleState<Layout1> &state1, const ResampleState<Layout2> &state2)
+inline bool algorithm_resample_index_check(
+    const AlgorithmResampleState<Layout1> &state1,
+    const AlgorithmResampleState<Layout2> &state2)
 {
     if (state1.size() != state2.size())
         return false;
@@ -159,7 +160,8 @@ inline bool resample_index_check(
 }
 
 template <mckl::MatrixLayout Layout1, mckl::MatrixLayout Layout2>
-inline void resample_index_test(std::size_t N, std::size_t dim, bool fixed)
+inline void algorithm_resample_index(
+    std::size_t N, std::size_t dim, bool fixed)
 {
     std::cout << std::string(80, '=') << std::endl;
     std::cout << std::setw(60) << std::left << "Sample size" << std::setw(20)
@@ -176,14 +178,14 @@ inline void resample_index_test(std::size_t N, std::size_t dim, bool fixed)
     std::cout << std::string(80, '-') << std::endl;
 
     mckl::RNG rng;
-    auto size = resample_size(rng, N, dim, fixed);
-    auto value = resample_value(rng, size);
-    auto weight = resample_weight(rng, size);
-    auto index = resample_index(rng, size, weight);
-    bool passed =
-        resample_index_check(resample_index_trace<Layout1>(size, value, index),
-            fixed ? resample_index_fixed<Layout2>(size, value, index) :
-                    resample_index_rands<Layout2>(size, value, index));
+    auto size = algorithm_resample_size(rng, N, dim, fixed);
+    auto value = algorithm_resample_value(rng, size);
+    auto weight = algorithm_resample_weight(rng, size);
+    auto index = algorithm_resample_index(rng, size, weight);
+    bool passed = algorithm_resample_index_check(
+        algorithm_resample_index_trace<Layout1>(size, value, index), fixed ?
+            algorithm_resample_index_fixed<Layout2>(size, value, index) :
+            algorithm_resample_index_rands<Layout2>(size, value, index));
 
     std::cout << std::setw(60) << std::left << "Test result" << std::setw(20)
               << std::right << std::fixed << (passed ? "Passed" : "Failed")
@@ -191,4 +193,4 @@ inline void resample_index_test(std::size_t N, std::size_t dim, bool fixed)
     std::cout << std::string(80, '-') << std::endl;
 }
 
-#endif // MCKL_EXAMPLE_RESAMPLE_INDEX_HPP
+#endif // MCKL_EXAMPLE_ALGORITHM_RESAMPLE_INDEX_HPP

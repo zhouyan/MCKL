@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/resample.hpp
+// MCKL/example/algorithm/src/algorithm_resample_index.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,13 +29,26 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RESAMPLE_HPP
-#define MCKL_RESAMPLE_HPP
+#include "algorithm_resample_index.hpp"
 
-#include <mckl/internal/config.h>
-#include <mckl/resample/algorithm.hpp>
-#include <mckl/resample/index.hpp>
-#include <mckl/resample/transform.hpp>
-#include <mckl/resample/u01_sequence.hpp>
+int main(int argc, char **argv)
+{
+    std::size_t N = 1000;
+    if (argc > 1)
+        N = static_cast<std::size_t>(std::atoi(argv[1]));
 
-#endif // MCKL_RESAMPLE_HPP
+    std::size_t dim = 1000;
+    if (argc > 2)
+        dim = static_cast<std::size_t>(std::atoi(argv[2]));
+
+    algorithm_resample_index<mckl::RowMajor, mckl::RowMajor>(N, dim, true);
+    algorithm_resample_index<mckl::RowMajor, mckl::ColMajor>(N, dim, true);
+    algorithm_resample_index<mckl::ColMajor, mckl::RowMajor>(N, dim, true);
+    algorithm_resample_index<mckl::ColMajor, mckl::ColMajor>(N, dim, true);
+    algorithm_resample_index<mckl::RowMajor, mckl::RowMajor>(N, dim, false);
+    algorithm_resample_index<mckl::RowMajor, mckl::ColMajor>(N, dim, false);
+    algorithm_resample_index<mckl::ColMajor, mckl::RowMajor>(N, dim, false);
+    algorithm_resample_index<mckl::ColMajor, mckl::ColMajor>(N, dim, false);
+
+    return 0;
+}

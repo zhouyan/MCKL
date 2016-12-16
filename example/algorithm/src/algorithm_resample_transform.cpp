@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/resample/src/resample_index.cpp
+// MCKL/example/algorithm/src/algorithm_resample_transform.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "resample_index.hpp"
+#include "algorithm_resample_transform.hpp"
 
 int main(int argc, char **argv)
 {
@@ -37,18 +37,39 @@ int main(int argc, char **argv)
     if (argc > 1)
         N = static_cast<std::size_t>(std::atoi(argv[1]));
 
-    std::size_t dim = 1000;
+    std::size_t n = 1000;
     if (argc > 2)
-        dim = static_cast<std::size_t>(std::atoi(argv[2]));
+        n = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    resample_index_test<mckl::RowMajor, mckl::RowMajor>(N, dim, true);
-    resample_index_test<mckl::RowMajor, mckl::ColMajor>(N, dim, true);
-    resample_index_test<mckl::ColMajor, mckl::RowMajor>(N, dim, true);
-    resample_index_test<mckl::ColMajor, mckl::ColMajor>(N, dim, true);
-    resample_index_test<mckl::RowMajor, mckl::RowMajor>(N, dim, false);
-    resample_index_test<mckl::RowMajor, mckl::ColMajor>(N, dim, false);
-    resample_index_test<mckl::ColMajor, mckl::RowMajor>(N, dim, false);
-    resample_index_test<mckl::ColMajor, mckl::ColMajor>(N, dim, false);
+    algorithm_resample_trans_rep_index<mckl::ResampleMultinomial>(
+        N, n, "Multinomial", true);
+    algorithm_resample_trans_rep_index<mckl::ResampleMultinomial>(
+        N, n, "Multinomial", false);
+
+    algorithm_resample_trans_rep_index<mckl::ResampleStratified>(
+        N, n, "Stratified", true);
+    algorithm_resample_trans_rep_index<mckl::ResampleStratified>(
+        N, n, "Stratified", false);
+
+    algorithm_resample_trans_rep_index<mckl::ResampleSystematic>(
+        N, n, "Systematic", true);
+    algorithm_resample_trans_rep_index<mckl::ResampleSystematic>(
+        N, n, "Systematic", false);
+
+    algorithm_resample_trans_rep_index<mckl::ResampleResidual>(
+        N, n, "Residual", true);
+    algorithm_resample_trans_rep_index<mckl::ResampleResidual>(
+        N, n, "Residual", false);
+
+    algorithm_resample_trans_rep_index<mckl::ResampleResidualStratified>(
+        N, n, "ResidualStratified", true);
+    algorithm_resample_trans_rep_index<mckl::ResampleResidualStratified>(
+        N, n, "ResidualStratified", false);
+
+    algorithm_resample_trans_rep_index<mckl::ResampleResidualSystematic>(
+        N, n, "ResidualSystematic", true);
+    algorithm_resample_trans_rep_index<mckl::ResampleResidualSystematic>(
+        N, n, "ResidualSystematic", false);
 
     return 0;
 }

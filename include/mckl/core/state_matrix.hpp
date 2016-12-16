@@ -52,12 +52,28 @@ class StateMatrixDim
 }; // class StateMatrixDim
 
 template <>
-class StateMatrixDim<Dynamic>
+class StateMatrixDim<0>
 {
     protected:
     StateMatrixDim() : dim_(0) {}
 
-    void swap(StateMatrixDim<Dynamic> &other) { std::swap(dim_, other.dim_); }
+    StateMatrixDim(const StateMatrixDim<0> &) = default;
+
+    StateMatrixDim(StateMatrixDim<0> &&other) noexcept : dim_(other.dim_)
+    {
+        other.dim_ = 0;
+    }
+
+    StateMatrixDim<0> &operator=(const StateMatrixDim<0> &) = default;
+
+    StateMatrixDim<0> &operator=(StateMatrixDim<0> &&other) noexcept
+    {
+        std::swap(other.dim_, dim_);
+
+        return *this;
+    }
+
+    void swap(StateMatrixDim<0> &other) { std::swap(dim_, other.dim_); }
 
     std::size_t get_dim() const { return dim_; }
 
@@ -145,10 +161,10 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
     /// \brief Reserve space for specified sample size and dimension
     ///
     /// \details
-    /// `dim` is ignored unless `Dim == Dynamic`.
+    /// `dim` is ignored unless `Dim == 0`.
     void reserve(size_type N, size_type dim)
     {
-        data_.reserve(N * (Dim == Dynamic ? dim : this->dim()));
+        data_.reserve(N * (Dim == 0 ? dim : this->dim()));
     }
 
     /// \brief Release memory no longer needed
@@ -173,7 +189,7 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
 
     StateMatrixBase(size_type N, size_type dim) : size_(N)
     {
-        static_assert(Dim == Dynamic,
+        static_assert(Dim == 0,
             "**StateMatrix::StateMatrix** used with an object with fixed "
             "dimension");
 
@@ -182,13 +198,27 @@ class StateMatrixBase : private internal::StateMatrixDim<Dim>
 
     StateMatrixBase(const StateMatrixBase<Layout, Dim, T> &) = default;
 
+    StateMatrixBase(StateMatrixBase<Layout, Dim, T> &&other) noexcept(
+        noexcept(Vector<T>(std::move(other.data_))))
+        : size_(other.size_), data_(std::move(other.data_))
+    {
+        other.size_ = 0;
+    }
+
     StateMatrixBase<Layout, Dim, T> &operator=(
         const StateMatrixBase<Layout, Dim, T> &) = default;
 
-    StateMatrixBase(StateMatrixBase<Layout, Dim, T> &&) = default;
+    StateMatrixBase<Layout, Dim, T> &
+        operator=(StateMatrixBase<Layout, Dim, T> &&other) noexcept(
+            noexcept(data_ = std::move(other.data_)))
+    {
+        if (this != &other) {
+            data_ = std::move(other.data_);
+            std::swap(size_, other.size_);
+        }
 
-    StateMatrixBase<Layout, Dim, T> &operator=(
-        StateMatrixBase<Layout, Dim, T> &&) = default;
+        return *this;
+    }
 
     void resize_data(size_type N, size_type dim)
     {
@@ -248,7 +278,7 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     }
 
     /// \brief Construct a matrix with `N` rows and `dim` columns, only usable
-    /// when `Dim == Dynamic`
+    /// when `Dim == 0`
     StateMatrix(size_type N, size_type dim)
         : StateMatrixBase<RowMajor, Dim, T>(N, dim)
     {
@@ -257,21 +287,21 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
     /// \brief Change the sample size
     void resize(size_type N) { resize_both(N, this->dim()); }
 
-    /// \brief Change the sample size and dimension, only usable when `Dim ==
-    /// Dynamic`
+    /// \brief Change the sample size and dimension, only usable when
+    /// `Dim == 0`
     void resize(size_type N, size_type dim)
     {
-        static_assert(Dim == Dynamic,
+        static_assert(Dim == 0,
             "**StateMatrix::resize** used with an object with fixed "
             "dimension");
 
         resize_both(N, dim);
     }
 
-    /// \brief Change the dimension, only usable when `Dim == Dynamic`
+    /// \brief Change the dimension, only usable when `Dim == 0`
     void resize_dim(size_type dim)
     {
-        static_assert(Dim == Dynamic,
+        static_assert(Dim == 0,
             "**StateMatrix::resize_dim** used with an object with fixed "
             "dimension");
 
@@ -389,8 +419,8 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
         if (src == dst)
             return;
 
-        duplicate_dispatch(src, dst, std::integral_constant < bool,
-            Dim == Dynamic || 8 < Dim > ());
+        duplicate_dispatch(
+            src, dst, std::integral_constant<bool, (Dim == 0 || 8 < Dim)>());
     }
 
     template <typename OutputIter>
@@ -419,11 +449,10 @@ class StateMatrix<RowMajor, Dim, T> : public StateMatrixBase<RowMajor, Dim, T>
             "**StateMatrix::read** invalid layout parameter");
 
         if (layout == RowMajor)
-            first = std::copy_n(this->data(), this->data_size(), first);
+            return std::copy_n(this->data(), this->data_size(), first);
 
-        if (layout == ColMajor)
-            for (size_type j = 0; j != this->dim(); ++j)
-                first = read_col(j, first);
+        for (size_type j = 0; j != this->dim(); ++j)
+            first = read_col(j, first);
 
         return first;
     }
@@ -517,7 +546,7 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     }
 
     /// \brief Construct a matrix with `N` rows and `dim` columns, only usable
-    /// when `Dim == Dynamic`
+    /// when `Dim == 0`
     StateMatrix(size_type N, size_type dim)
         : StateMatrixBase<ColMajor, Dim, T>(N, dim)
     {
@@ -526,21 +555,21 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     /// \brief Change the sample size
     void resize(size_type N) { resize_both(N, this->dim()); }
 
-    /// \brief Change the sample size and dimension, only usable when `Dim ==
-    /// Dynamic`
+    /// \brief Change the sample size and dimension, only usable when
+    /// `Dim == 0`
     void resize(size_type N, size_type dim)
     {
-        static_assert(Dim == Dynamic,
+        static_assert(Dim == 0,
             "**StateMatrix::resize** used with an object with fixed "
             "dimension");
 
         resize_both(N, dim);
     }
 
-    /// \brief Change the dimension, only usable when `Dim == Dynamic`
+    /// \brief Change the dimension, only usable when `Dim == 0`
     void resize_dim(size_type dim)
     {
-        static_assert(Dim == Dynamic,
+        static_assert(Dim == 0,
             "**StateMatrix::resize_dim** used with an object with fixed "
             "dimension");
 
@@ -673,8 +702,8 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
         if (src == dst)
             return;
 
-        duplicate_dispatch(src, dst, std::integral_constant < bool,
-            Dim == Dynamic || 8 < Dim > ());
+        duplicate_dispatch(
+            src, dst, std::integral_constant<bool, (Dim == 0 || 8 < Dim)>());
     }
 
     template <typename OutputIter>
@@ -699,13 +728,11 @@ class StateMatrix<ColMajor, Dim, T> : public StateMatrixBase<ColMajor, Dim, T>
     {
         runtime_assert(layout == RowMajor || layout == ColMajor,
             "**StateMatrix::read** invalid layout parameter");
-
-        if (layout == RowMajor)
-            for (size_type i = 0; i != this->size(); ++i)
-                first = read_row(i, first);
-
         if (layout == ColMajor)
-            first = std::copy_n(this->data(), this->data_size(), first);
+            return std::copy_n(this->data(), this->data_size(), first);
+
+        for (size_type i = 0; i != this->size(); ++i)
+            first = read_row(i, first);
 
         return first;
     }

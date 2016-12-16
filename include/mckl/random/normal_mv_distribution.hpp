@@ -144,7 +144,7 @@ class NormalMVDistribution
         param_type(result_type mean, result_type chol)
             : is_scalar_mean_(true), is_scalar_chol_(true)
         {
-            static_assert(Dim != Dynamic,
+            static_assert(Dim != 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "dynamic dimension");
 
@@ -155,7 +155,7 @@ class NormalMVDistribution
         param_type(result_type mean, const result_type *chol)
             : is_scalar_mean_(true), is_scalar_chol_(false)
         {
-            static_assert(Dim != Dynamic,
+            static_assert(Dim != 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "dynamic dimension");
 
@@ -166,7 +166,7 @@ class NormalMVDistribution
         param_type(const result_type *mean, result_type chol)
             : is_scalar_mean_(false), is_scalar_chol_(true)
         {
-            static_assert(Dim != Dynamic,
+            static_assert(Dim != 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "dynamic dimension");
 
@@ -177,7 +177,7 @@ class NormalMVDistribution
         param_type(const result_type *mean, const result_type *chol)
             : is_scalar_mean_(false), is_scalar_chol_(false)
         {
-            static_assert(Dim != Dynamic,
+            static_assert(Dim != 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "dynamic dimension");
 
@@ -191,7 +191,7 @@ class NormalMVDistribution
             , is_scalar_mean_(true)
             , is_scalar_chol_(true)
         {
-            static_assert(Dim == Dynamic,
+            static_assert(Dim == 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "fixed dimension");
 
@@ -205,7 +205,7 @@ class NormalMVDistribution
             , is_scalar_mean_(true)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic,
+            static_assert(Dim == 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "fixed dimension");
 
@@ -219,7 +219,7 @@ class NormalMVDistribution
             , is_scalar_mean_(false)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic,
+            static_assert(Dim == 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "fixed dimension");
 
@@ -234,7 +234,7 @@ class NormalMVDistribution
             , is_scalar_mean_(false)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic,
+            static_assert(Dim == 0,
                 "**NormalMVDistribution::param_type** object declared with "
                 "fixed dimension");
 
@@ -345,7 +345,7 @@ class NormalMVDistribution
         }
     }; // class param_type
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim != 0`
     NormalMVDistribution(result_type mean, result_type chol)
         : param_(mean, chol)
     {
@@ -354,7 +354,7 @@ class NormalMVDistribution
         reset();
     }
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim != 0`
     NormalMVDistribution(result_type mean, const result_type *chol)
         : param_(mean, chol)
     {
@@ -363,7 +363,7 @@ class NormalMVDistribution
         reset();
     }
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim != 0`
     NormalMVDistribution(const result_type *mean, result_type chol)
         : param_(mean, chol)
     {
@@ -372,7 +372,7 @@ class NormalMVDistribution
         reset();
     }
 
-    /// \brief Only usable when `Dim != Dynamic`
+    /// \brief Only usable when `Dim != 0`
     NormalMVDistribution(const result_type *mean, const result_type *chol)
         : param_(mean, chol)
     {
@@ -381,7 +381,7 @@ class NormalMVDistribution
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Only usable when `Dim == 0`
     NormalMVDistribution(std::size_t dim, result_type mean, result_type chol)
         : param_(dim, mean, chol)
     {
@@ -390,7 +390,7 @@ class NormalMVDistribution
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Only usable when `Dim == 0`
     NormalMVDistribution(
         std::size_t dim, result_type mean, const result_type *chol)
         : param_(dim, mean, chol)
@@ -400,7 +400,7 @@ class NormalMVDistribution
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Only usable when `Dim == 0`
     NormalMVDistribution(
         std::size_t dim, const result_type *mean, result_type chol)
         : param_(dim, mean, chol)
@@ -410,7 +410,7 @@ class NormalMVDistribution
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Only usable when `Dim == 0`
     NormalMVDistribution(
         std::size_t dim, const result_type *mean, const result_type *chol)
         : param_(dim, mean, chol)
