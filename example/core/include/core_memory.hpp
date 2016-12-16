@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/utility/include/utility_aligned_memory.hpp
+// MCKL/example/core/include/core_memory.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,23 +29,23 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
-#define MCKL_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
+#ifndef MCKL_EXAMPLE_CORE_MEMORY_HPP
+#define MCKL_EXAMPLE_CORE_MEMORY_HPP
 
+#include <mckl/core/memory.hpp>
 #include <mckl/random/rng.hpp>
 #include <mckl/random/uniform_int_distribution.hpp>
-#include <mckl/utility/aligned_memory.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-template <typename T, std::size_t Alignment, typename Memory>
-inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
+template <typename T, typename Memory>
+inline void core_memory_test(std::size_t N, std::size_t m,
     const std::string &tname, const std::string &memory)
 {
     std::cout << std::string(80, '=') << std::endl;
-    std::cout << std::setw(60) << std::left << "Type name" << std::setw(20)
+    std::cout << std::setw(60) << std::left << "Type" << std::setw(20)
               << std::right << tname << std::endl;
     std::cout << std::setw(60) << std::left << "Alignment" << std::setw(20)
-              << std::right << Alignment << std::endl;
+              << std::right << Memory::alignment() << std::endl;
     std::cout << std::setw(60) << std::left << "Memory" << std::setw(20)
               << std::right << memory << std::endl;
     std::cout << std::string(80, '-') << std::endl;
@@ -59,7 +59,7 @@ inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
     mckl::RNG rng;
     mckl::UniformIntDistribution<std::size_t> runif(N / 2, N * 2);
 
-    using Alloc = mckl::Allocator<T, Alignment, Memory>;
+    using Alloc = mckl::Allocator<T, Memory>;
     using Vec = std::vector<T, Alloc>;
     Alloc alloc;
 
@@ -73,7 +73,8 @@ inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
         watch_alloc.start();
         auto ptr = alloc.allocate(n);
         watch_alloc.stop();
-        flag = reinterpret_cast<std::uintptr_t>(ptr) % Alignment == 0;
+        flag =
+            reinterpret_cast<std::uintptr_t>(ptr) % Memory::alignment() == 0;
         if (!flag)
             std::cout << "Failed alignment (allocate)" << std::endl;
         passed = passed && flag;
@@ -86,7 +87,9 @@ inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
         watch_vec.start();
         Vec vec(n);
         watch_vec.stop();
-        flag = reinterpret_cast<std::uintptr_t>(vec.data()) % Alignment == 0;
+        flag = reinterpret_cast<std::uintptr_t>(vec.data()) %
+                Memory::alignment() ==
+            0;
         if (!flag)
             std::cout << "Failed alignment (vector(n))" << std::endl;
         passed = passed && flag;
@@ -99,7 +102,9 @@ inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
         watch_val.start();
         Vec val(n, v);
         watch_val.stop();
-        flag = reinterpret_cast<std::uintptr_t>(val.data()) % Alignment == 0;
+        flag = reinterpret_cast<std::uintptr_t>(val.data()) %
+                Memory::alignment() ==
+            0;
         if (!flag)
             std::cout << "Failed alignment (vector(n, val))" << std::endl;
         flag = true;
@@ -131,26 +136,22 @@ inline void utility_aligned_memory_test(std::size_t N, std::size_t m,
 }
 
 template <typename T, std::size_t Alignment>
-inline void utility_aligned_memory_test(
+inline void core_memory_test(
     std::size_t n, std::size_t m, const std::string &tname)
 {
-    utility_aligned_memory_test<T, Alignment, mckl::AlignedMemorySTD>(
-        n, m, tname, "AlignedMemorySTD");
+    core_memory_test<T, mckl::MemorySTD<Alignment>>(n, m, tname, "MemorySTD");
 #if MCKL_HAS_POSIX || defined(MCKL_MSVC)
-    utility_aligned_memory_test<T, Alignment, mckl::AlignedMemorySYS>(
-        n, m, tname, "AlignedMemorySYS");
+    core_memory_test<T, mckl::MemorySYS<Alignment>>(n, m, tname, "MemorySYS");
 #endif
 #if MCKL_HAS_TBB
-    utility_aligned_memory_test<T, Alignment, mckl::AlignedMemoryTBB>(
-        n, m, tname, "AlignedMemoryTBB");
+    core_memory_test<T, mckl::MemoryTBB<Alignment>>(n, m, tname, "MemoryTBB");
 #endif
 }
 
 template <typename T>
-inline void utility_aligned_memory(
-    std::size_t n, std::size_t m, const std::string &tname)
+inline void core_memory(std::size_t n, std::size_t m, const std::string &tname)
 {
-    utility_aligned_memory_test<T, 32>(n, m, tname);
+    core_memory_test<T, 32>(n, m, tname);
 }
 
-#endif // MCKL_EXAMPLE_UTILITY_ALIGNED_MEMORY_HPP
+#endif // MCKL_EXAMPLE_CORE_MEMORY_HPP

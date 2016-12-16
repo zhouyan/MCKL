@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/utility/src/utility_aligned_memory.cpp
+// MCKL/example/core/src/core_memory.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "utility_aligned_memory.hpp"
+#include "core_memory.hpp"
 
 int main(int argc, char **argv)
 {
@@ -41,14 +41,14 @@ int main(int argc, char **argv)
     if (argc > 2)
         m = static_cast<std::size_t>(std::atoi(argv[2]));
 
-    utility_aligned_memory<char>(n, m, "char");
-    utility_aligned_memory<short>(n, m, "short");
-    utility_aligned_memory<int>(n, m, "int");
-    utility_aligned_memory<long>(n, m, "long");
-    utility_aligned_memory<long long>(n, m, "long long");
-    utility_aligned_memory<float>(n, m, "float");
-    utility_aligned_memory<double>(n, m, "double");
-    utility_aligned_memory<long double>(n, m, "long double");
+    core_memory<char>(n, m, "char");
+    core_memory<short>(n, m, "short");
+    core_memory<int>(n, m, "int");
+    core_memory<long>(n, m, "long");
+    core_memory<long long>(n, m, "long long");
+    core_memory<float>(n, m, "float");
+    core_memory<double>(n, m, "double");
+    core_memory<long double>(n, m, "long double");
 
     return 0;
 }

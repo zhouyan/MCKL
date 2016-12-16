@@ -153,10 +153,6 @@
 /// \defgroup Utility Utility
 /// \brief Utilities
 
-/// \defgroup AlignedMemory Aligned memory alignment
-/// \ingroup Utility
-/// \brief Memory allocation with alignment requirement
-
 /// \defgroup Covariance Covariance
 /// \ingroup Utility
 /// \brief Covariance matrix estimation

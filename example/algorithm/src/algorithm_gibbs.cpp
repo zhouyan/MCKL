@@ -33,6 +33,8 @@
 
 int main()
 {
+    constexpr std::size_t N = 1000;
+
     mckl::MCMCSampler<AlgorithmGibbs> sampler;
     sampler.mutation(AlgorithmGibbsMutation());
     auto &monitor = sampler
@@ -42,7 +44,7 @@ int main()
 
     std::get<0>(sampler.state()) = 0;
     std::get<1>(sampler.state()) = 1;
-    sampler.iterate(1000);
+    sampler.iterate(N);
 
     double mean[2];
     monitor.result(mean, 500, 7);

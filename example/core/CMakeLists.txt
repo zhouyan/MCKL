@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/utility/CMakeLists.txt
+#  MCKL/example/core/CMakeLists.txt
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -29,10 +29,8 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLExample-utility CXX)
+project(MCKLExample-core CXX)
 
-mckl_add_example(utility)
+mckl_add_example(core)
 
-if(HDF5_FOUND)
-    mckl_add_test(utility hdf5)
-endif(HDF5_FOUND)
+mckl_add_test(core memory)

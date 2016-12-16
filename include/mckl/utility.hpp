@@ -33,7 +33,6 @@
 #define MCKL_UTILITY_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/utility/aligned_memory.hpp>
 #include <mckl/utility/covariance.hpp>
 #include <mckl/utility/stop_watch.hpp>
 

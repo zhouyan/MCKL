@@ -60,8 +60,8 @@
 #include <mckl/internal/fma.hpp>
 #endif
 
+#include <mckl/core/memory.hpp>
 #include <mckl/math.hpp>
-#include <mckl/utility/aligned_memory.hpp>
 
 // Utilities
 #include <cstddef>

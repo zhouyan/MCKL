@@ -34,33 +34,20 @@ project(MCKLExample CXX)
 add_definitions(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
 
 ##############################################################################
-# Check examples
+# Examples
 ##############################################################################
 
-set(EXAMPLES ${EXAMPLES} "mckl")
-add_subdirectory(mckl)
-
-set(EXAMPLES ${EXAMPLES} "algorithm")
-add_subdirectory(algorithm)
-
-set(EXAMPLES ${EXAMPLES} "math")
-add_subdirectory(math)
-
-set(EXAMPLES ${EXAMPLES} "random")
-add_subdirectory(random)
-
-set(EXAMPLES ${EXAMPLES} "resample")
-add_subdirectory(resample)
-
-set(EXAMPLES ${EXAMPLES} "utility")
-add_subdirectory(utility)
-
-##############################################################################
-# Enable examples
-##############################################################################
+set(EXAMPLES ${EXAMPLES} algorithm)
+set(EXAMPLES ${EXAMPLES} core)
+set(EXAMPLES ${EXAMPLES} math)
+set(EXAMPLES ${EXAMPLES} mckl)
+set(EXAMPLES ${EXAMPLES} random)
+set(EXAMPLES ${EXAMPLES} resample)
+set(EXAMPLES ${EXAMPLES} utility)
 
 message(STATUS "=================== Examples ==========================")
 foreach(example ${EXAMPLES})
     message(STATUS ${example})
+    add_subdirectory(${example})
 endforeach(example ${EXAMPLES})
 message(STATUS "=======================================================")

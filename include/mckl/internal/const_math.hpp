@@ -34,7 +34,7 @@
 
 #include <mckl/internal/config.h>
 #include <mckl/internal/defines.hpp>
-#include <mckl/utility/aligned_memory.hpp>
+#include <mckl/core/memory.hpp>
 #include <algorithm>
 #include <array>
 #include <limits>

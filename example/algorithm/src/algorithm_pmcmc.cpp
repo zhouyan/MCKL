@@ -31,9 +31,11 @@
 
 #include "algorithm_pmcmc.hpp"
 
-int main(int argc, char **argv)
+int main()
 {
-    const std::size_t N = 2000;
+    constexpr std::size_t K = 80;
+    constexpr std::size_t M = 10;
+    constexpr std::size_t N = 1000;
 
     mckl::PMCMCMutation<AlgorithmPMCMCState, AlgorithmPMCMC> mutation(
         AlgorithmPMCMCPrior(), N);
@@ -43,18 +45,18 @@ int main(int argc, char **argv)
     mutation.pf().resample(mckl::Stratified);
     mutation.pf().resample_threshold(0.5);
 
-    mckl::MCMCMonitor<AlgorithmPMCMCState> monitor(
-        2, AlgorithmPMCMCEstimate());
-
     mckl::MCMCSampler<AlgorithmPMCMCState> sampler;
     sampler.mutation(std::move(mutation));
-    auto &monitor = sampler.monitor(std::move(monitor)).second;
+    auto &monitor = sampler
+                        .monitor(mckl::MCMCMonitor<AlgorithmPMCMCState>(
+                            2, AlgorithmPMCMCEstimate()))
+                        .second;
 
     std::get<0>(sampler.state()) = 0.10;
     std::get<1>(sampler.state()) = 10.0;
-    std::cout << std::string(100, '=') << std::endl;
-    for (std::size_t i = 0; i != 100; ++i) {
-        sampler.iterate(10);
+    std::cout << std::string(K, '=') << std::endl;
+    for (std::size_t i = 0; i != K; ++i) {
+        sampler.iterate(M);
         std::cout << '-' << std::flush;
     }
     std::cout << std::endl;

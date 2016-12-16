@@ -50,7 +50,7 @@ class AlgorithmGibbsMutation
             xbar_ += x;
         }
         data.close();
-        n_ = x_.size();
+        n_ = static_cast<double>(x_.size());
         xbar_ /= n_;
     }
 
