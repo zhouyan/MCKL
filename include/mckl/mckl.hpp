@@ -45,15 +45,23 @@
 /// \brief Constructing samplers with operations on the whole particle set
 
 /// \defgroup Algorithm Algorithm
-/// \brief Monte Carlo algorithms
+/// \brief Algorithm
+
+/// \defgroup MCMC Markov chain Monte Carlo
+/// \ingroup Algorithm
+/// \brief Markov chain Monte Carlo
 
 /// \defgroup MH Metropolis-Hastings
 /// \ingroup Algorithm
-/// \brief Metropolis-Hastings algorithm
+/// \brief Metropolis-Hastings
+
+/// \defgroup PMCMC Particle Markov chain Monte Carlo
+/// \ingroup Algorithm
+/// \brief Particle Markov chain Monte Carlo
 
 /// \defgroup SMC Sequential Monte Carlo
 /// \ingroup Algorithm
-/// \brief Sequential Monte Carlo algorithm
+/// \brief Sequential Monte Carlo
 
 /// \defgroup SMP Symmetric multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture

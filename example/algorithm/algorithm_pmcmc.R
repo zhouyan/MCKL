@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/algorithm/algorithm_gibbs.R
+#  MCKL/example/algorithm/algorithm_pmcmc.R
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -31,11 +31,13 @@
 
 library(ggplot2)
 
-est <- read.table("algorithm_gibbs.save", header = TRUE)
-dat <- data.frame(mu = est$V0.0, lambda = est$V0.1)
-plt <- qplot(x = mu, y = lambda, data = dat, geom = "density_2d")
+est <- read.table("algorithm_pmcmc.save", header = TRUE)
+dat <- data.frame(theta = est$V0.0, sigma = est$V0.1)
+plt <- qplot(x = theta, y = sigma, data = dat, geom = "density_2d")
+plt <- plt + scale_x_log10()
+plt <- plt + scale_y_log10()
 plt <- plt + theme_bw()
 
-pdf("algorithm_gibbs.pdf", width = 5, height = 5)
+pdf("algorithm_pmcmc.pdf", width = 5, height = 5)
 print(plt)
 gc <- dev.off()

@@ -231,13 +231,15 @@ class SMCSampler
     using size_type = typename Particle<T>::size_type;
     using eval_type = std::function<void(std::size_t, Particle<T> &)>;
 
+    SMCSampler() = default;
+
     /// \brief Construct a SMC sampler
     ///
     /// \details
     /// All arguments are passed to the constructor of Particle
     template <typename... Args>
-    explicit SMCSampler(Args &&... args)
-        : particle_(std::forward<Args>(args)...)
+    explicit SMCSampler(size_type N, Args &&... args)
+        : particle_(N, std::forward<Args>(args)...)
         , iter_(0)
         , resample_threshold_(resample_threshold_never())
     {

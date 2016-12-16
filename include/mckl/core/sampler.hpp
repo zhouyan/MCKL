@@ -94,13 +94,15 @@ class Sampler
     using size_type = typename Particle<T>::size_type;
     using eval_type = std::function<void(std::size_t, Particle<T> &)>;
 
+    Sampler() = default;
+
     /// \brief Construct a Sampler
     ///
     /// \details
     /// All arguments are passed to the constructor of Particle
     template <typename... Args>
-    explicit Sampler(Args &&... args)
-        : particle_(std::forward<Args>(args)...)
+    explicit Sampler(size_type N, Args &&... args)
+        : particle_(N, std::forward<Args>(args)...)
         , iter_num_(0)
         , resample_threshold_(resample_threshold_never())
     {

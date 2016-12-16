@@ -33,22 +33,15 @@ project(MCKLExample-algorithm CXX)
 
 mckl_add_example(algorithm)
 
-mckl_add_test(algorithm gibbs)
-mckl_add_test(algorithm pf)
+set(ALGORITHMS gibbs pf pmcmc)
 
-mckl_add_file(algorithm algorithm_gibbs.data)
-mckl_add_file(algorithm algorithm_gibbs.R)
-mckl_add_file(algorithm algorithm_pf.data)
-mckl_add_file(algorithm algorithm_pf.R)
-
-add_custom_target(algorithm_pf-pdf
-    DEPENDS algorithm-files algorithm_pf-check
-    COMMAND Rscript "${PROJECT_BINARY_DIR}/algorithm_pf.R"
-    COMMENT "Plotting algorithm_pf-check results"
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-
-add_custom_target(algorithm_gibbs-pdf
-    DEPENDS algorithm-files algorithm_gibbs-check
-    COMMAND Rscript "${PROJECT_BINARY_DIR}/algorithm_gibbs.R"
-    COMMENT "Plotting algorithm_gibbs-check results"
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+foreach(alg ${ALGORITHMS})
+    mckl_add_test(algorithm ${alg})
+    mckl_add_file(algorithm algorithm_${alg}.data)
+    mckl_add_file(algorithm algorithm_${alg}.R)
+    add_custom_target(algorithm_${alg}-pdf
+        DEPENDS algorithm-files algorithm_${alg}-check
+        COMMAND Rscript "${PROJECT_BINARY_DIR}/algorithm_${alg}.R"
+        COMMENT "Plotting algorithm_${alg}-check results"
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+endforeach(alg ${ALGORITHMS})

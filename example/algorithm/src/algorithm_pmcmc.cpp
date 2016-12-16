@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/algorithm/src/algorithm_gibbs.cpp
+// MCKL/example/algorithm/src/algorithm_pmcmc.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,27 +29,42 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "algorithm_gibbs.hpp"
+#include "algorithm_pmcmc.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
-    mckl::MCMCSampler<AlgorithmGibbs> sampler;
-    sampler.mutation(AlgorithmGibbsMutation());
-    auto &monitor = sampler
-                        .monitor(mckl::MCMCMonitor<AlgorithmGibbs>(
-                            2, AlgorithmGibbsEstimate()))
-                        .second;
+    const std::size_t N = 2000;
 
-    std::get<0>(sampler.state()) = 0;
-    std::get<1>(sampler.state()) = 1;
-    sampler.iterate(1000);
+    mckl::PMCMCMutation<AlgorithmPMCMCState, AlgorithmPMCMC> mutation(
+        AlgorithmPMCMCPrior(), N);
+    mutation.update(AlgorithmPMCMCUpdate<0>());
+    mutation.update(AlgorithmPMCMCUpdate<1>());
+    mutation.pf().selection(AlgorithmPMCMCSelection());
+    mutation.pf().resample(mckl::Stratified);
+    mutation.pf().resample_threshold(0.5);
+
+    mckl::MCMCMonitor<AlgorithmPMCMCState> monitor(
+        2, AlgorithmPMCMCEstimate());
+
+    mckl::MCMCSampler<AlgorithmPMCMCState> sampler;
+    sampler.mutation(std::move(mutation));
+    auto &monitor = sampler.monitor(std::move(monitor)).second;
+
+    std::get<0>(sampler.state()) = 0.10;
+    std::get<1>(sampler.state()) = 10.0;
+    std::cout << std::string(100, '=') << std::endl;
+    for (std::size_t i = 0; i != 100; ++i) {
+        sampler.iterate(10);
+        std::cout << '-' << std::flush;
+    }
+    std::cout << std::endl;
 
     double mean[2];
     monitor.result(mean, 500, 7);
-    std::cout << "mu:     " << mean[0] << std::endl;
-    std::cout << "lambda: " << mean[1] << std::endl;
+    std::cout << "theta: " << mean[0] << std::endl;
+    std::cout << "simga: " << mean[1] << std::endl;
 
-    std::ofstream save("algorithm_gibbs.save");
+    std::ofstream save("algorithm_pmcmc.save");
     save << sampler << std::endl;
     save.close();
 
