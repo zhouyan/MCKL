@@ -43,14 +43,8 @@ add_subdirectory(mckl)
 set(EXAMPLES ${EXAMPLES} "algorithm")
 add_subdirectory(algorithm)
 
-set(EXAMPLES ${EXAMPLES} "gmm")
-add_subdirectory(gmm)
-
 set(EXAMPLES ${EXAMPLES} "math")
 add_subdirectory(math)
-
-set(EXAMPLES ${EXAMPLES} "pf")
-add_subdirectory(pf)
 
 set(EXAMPLES ${EXAMPLES} "random")
 add_subdirectory(random)

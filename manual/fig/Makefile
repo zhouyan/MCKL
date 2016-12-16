@@ -35,5 +35,5 @@ BUILD_CMD ?= ninja
 BUILD_DIR ?= ../../build/release-llvm
 
 all :
-	$(BUILD_CMD) -C $(BUILD_DIR) pf_core-pdf
-	cp $(BUILD_DIR)/example/pf/pf_core.pdf pf.pdf
+	$(BUILD_CMD) -C $(BUILD_DIR) algorithm_pf-pdf
+	cp $(BUILD_DIR)/example/algorithm/algorithm_pf.pdf pf.pdf

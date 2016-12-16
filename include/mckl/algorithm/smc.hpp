@@ -403,7 +403,7 @@ class SMCSampler
     }
 
     /// \brief Attach a new monitor and return a reference to it
-    const std::pair<std::string, SMCMonitor<T>> &monitor_mutation(
+    std::pair<std::string, SMCMonitor<T>> &monitor_mutation(
         const SMCMonitor<T> &monitor, const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
@@ -520,7 +520,7 @@ class SMCSampler
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
 
-    const std::pair<std::string, SMCMonitor<T>> &add_monitor(
+    std::pair<std::string, SMCMonitor<T>> &add_monitor(
         Vector<std::pair<std::string, SMCMonitor<T>>> &vector,
         const SMCMonitor<T> &monitor, const std::string &name)
     {
