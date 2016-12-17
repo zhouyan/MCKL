@@ -35,6 +35,7 @@
 #include <mckl/internal/config.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <memory>
 #include <new>
 #include <vector>

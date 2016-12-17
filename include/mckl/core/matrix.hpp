@@ -49,6 +49,8 @@ class Matrix
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
+    Vector<T> data_;
+
     public:
     using size_type = std::size_t;
     using value_type = T;
@@ -59,7 +61,7 @@ class Matrix
 
     /// \brief Construct the matrix given number of rows and columns
     Matrix(size_type nrow, size_type ncol)
-        : nrow_(nrow), ncol_(ncol), data_(nrow * ncol)
+        : data_(nrow * ncol), nrow_(nrow), ncol_(ncol)
     {
     }
 
@@ -67,7 +69,7 @@ class Matrix
 
     Matrix(Matrix<Layout, T> &&other) noexcept(
         noexcept(Vector<T>(std::move(other.data_))))
-        : nrow_(other.nrow_), ncol_(other.ncol_), data_(std::move(other.data_))
+        : data_(std::move(other.data_)), nrow_(other.nrow_), ncol_(other.ncol_)
     {
         other.nrow_ = 0;
         other.ncol_ = 0;
@@ -263,7 +265,6 @@ class Matrix
     private:
     size_type nrow_;
     size_type ncol_;
-    Vector<T> data_;
 
     // Layout == RowMajor
 
