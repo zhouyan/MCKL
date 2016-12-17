@@ -37,16 +37,16 @@ int main()
 
     mckl::MCMCSampler<AlgorithmGibbs> sampler;
     sampler.mutation(AlgorithmGibbsMutation());
-    auto vname = sampler.monitor(
-        mckl::MCMCMonitor<AlgorithmGibbs>(2, AlgorithmGibbsEstimate()));
-    auto &monitor = sampler.monitor(vname);
+    auto vname = sampler.estimator(
+        mckl::MCMCEstimator<AlgorithmGibbs>(2, AlgorithmGibbsEstimate()));
+    auto &estimator = sampler.estimator(vname);
 
     std::get<0>(sampler.state()) = 0;
     std::get<1>(sampler.state()) = 1;
     sampler.iterate(N);
 
     double mean[2];
-    monitor.average(mean, 500, 7);
+    estimator.average(mean, 500, 7);
     std::cout << "mu:     " << mean[0] << std::endl;
     std::cout << "lambda: " << mean[1] << std::endl;
 

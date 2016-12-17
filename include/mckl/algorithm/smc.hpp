@@ -41,10 +41,10 @@
 namespace mckl
 {
 
-/// \brief SMC monitor of Monte Carlo integrations
+/// \brief SMC estimator of Monte Carlo integrations
 /// \ingroup SMC
 template <typename T>
-class SMCMonitor : public EstimateMatrix<double, 0>
+class SMCEstimator : public EstimateMatrix<double, 0>
 {
     public:
     using state_type = T;
@@ -52,7 +52,7 @@ class SMCMonitor : public EstimateMatrix<double, 0>
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 
     template <typename Eval>
-    SMCMonitor(std::size_t dim, Eval &&eval, MatrixLayout layout,
+    SMCEstimator(std::size_t dim, Eval &&eval, MatrixLayout layout,
         bool record_only = false)
         : EstimateMatrix<double, 0>(0, dim)
         , eval_(std::forward<Eval>(eval))
@@ -60,11 +60,11 @@ class SMCMonitor : public EstimateMatrix<double, 0>
         , record_only_(record_only)
     {
         runtime_assert(static_cast<bool>(eval_),
-            "**SMCMonitor::SMCMonitor** used with an invalid evaluation "
+            "**SMCEstimator::SMCEstimator** used with an invalid evaluation "
             "object");
     }
 
-    /// \brief If this is a record only monitor
+    /// \brief If this is a record only estimator
     bool record_only() const { return record_only_; }
 
     /// \brief Set a new evaluation object
@@ -72,14 +72,14 @@ class SMCMonitor : public EstimateMatrix<double, 0>
     void estimate(Eval &&eval, MatrixLayout layout, bool record_only = false)
     {
         runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**SMCMonitor::estimate** invalid layout parameter");
+            "**SMCEstimator::estimate** invalid layout parameter");
 
         eval_ = std::forward<Eval>(eval);
         layout_ = layout;
         record_only_ = record_only;
 
         runtime_assert(static_cast<bool>(eval_),
-            "**SMCMonitor::estimate** used with an invalid evaluation "
+            "**SMCEstimator::estimate** used with an invalid evaluation "
             "object");
     }
 
@@ -99,7 +99,7 @@ class SMCMonitor : public EstimateMatrix<double, 0>
         r_.resize(N * dim());
         eval_(iter, this->dim(), particle, r_.data());
 #if MCKL_HAS_BLAS
-        internal::size_check<MCKL_BLAS_INT>(N, "SMCMonitor::operator()");
+        internal::size_check<MCKL_BLAS_INT>(N, "SMCEstimator::operator()");
         if (layout_ == RowMajor) {
             internal::cblas_dgemv(internal::CblasColMajor,
                 internal::CblasNoTrans,
@@ -139,7 +139,7 @@ class SMCMonitor : public EstimateMatrix<double, 0>
     eval_type eval_;
     MatrixLayout layout_;
     bool record_only_;
-}; // class Monitor
+}; // class Estimator
 
 /// \brief SMC sampler
 /// \ingroup SMC
@@ -184,27 +184,27 @@ class SMCSampler
     /// \brief Reserve space for a specified number of iterations
     void reserve(std::size_t n)
     {
+        for (auto &e : estimator_s_)
+            e.second.reserve(n);
+        for (auto &e : estimator_r_)
+            e.second.reserve(n);
+        for (auto &e : estimator_m_)
+            e.second.reserve(n);
         n += num_iter();
-        for (auto &m : monitor_s_)
-            m.second.reserve(n);
-        for (auto &m : monitor_r_)
-            m.second.reserve(n);
-        for (auto &m : monitor_m_)
-            m.second.reserve(n);
         size_history_.reserve(n);
         ess_history_.reserve(n);
     }
 
     /// \brief Reset the sampler by clear all history, evaluation objects, and
-    /// monitors
+    /// estimators
     void reset()
     {
         eval_s_.clear();
         eval_r_.clear();
         eval_m_.clear();
-        monitor_s_.clear();
-        monitor_r_.clear();
-        monitor_m_.clear();
+        estimator_s_.clear();
+        estimator_r_.clear();
+        estimator_m_.clear();
         clear();
     }
 
@@ -213,12 +213,12 @@ class SMCSampler
     {
         iter_ = 0;
         particle_.weight().set_equal();
-        for (auto &m : monitor_s_)
-            m.second.clear();
-        for (auto &m : monitor_r_)
-            m.second.clear();
-        for (auto &m : monitor_m_)
-            m.second.clear();
+        for (auto &e : estimator_s_)
+            e.second.clear();
+        for (auto &e : estimator_r_)
+            e.second.clear();
+        for (auto &e : estimator_m_)
+            e.second.clear();
         size_history_.clear();
         ess_history_.clear();
     }
@@ -311,53 +311,53 @@ class SMCSampler
             "**SMCSampler::mutation** used with an invalid evaluation object");
     }
 
-    /// \brief Attach a new monitor and return a reference to it
-    std::string monitor_selection(
-        const SMCMonitor<T> &monitor, const std::string &name = std::string())
+    /// \brief Attach a new estimator and return a reference to it
+    std::string selection_estimator(const SMCEstimator<T> &estimator,
+        const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::monitor_selection** used after first iteration");
+            "**SMCSampler::selection_estimator** used after first iteration");
 
-        return insert_monitor(monitor_s_, monitor, name);
+        return insert_estimator(estimator_s_, estimator, name);
     }
 
-    /// \brief Attach a new monitor and return a reference to it
-    std::string monitor_resample(
-        const SMCMonitor<T> &monitor, const std::string &name = std::string())
+    /// \brief Attach a new estimator and return a reference to it
+    std::string resample_estimator(const SMCEstimator<T> &estimator,
+        const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::monitor_resample** used after first iteration");
+            "**SMCSampler::resample_estimator** used after first iteration");
 
-        return insert_monitor(monitor_r_, monitor, name);
+        return insert_estimator(estimator_r_, estimator, name);
     }
 
-    /// \brief Attach a new monitor and return a reference to it
-    std::string monitor_mutation(
-        const SMCMonitor<T> &monitor, const std::string &name = std::string())
+    /// \brief Attach a new estimator and return a reference to it
+    std::string mutation_estimator(const SMCEstimator<T> &estimator,
+        const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::monitor_mutation** used after first iteration");
+            "**SMCSampler::mutation_estimator** used after first iteration");
 
-        return insert_monitor(monitor_m_, monitor, name);
+        return insert_estimator(estimator_m_, estimator, name);
     }
 
-    /// \brief Get read only access to monitor in the selection step given
+    /// \brief Get read only access to estimator in the selection step given
     /// (partial) name
-    const SMCMonitor<T> &monitor_selection(const std::string &name) const
+    const SMCEstimator<T> &estimator_selection(const std::string &name) const
     {
-        return find_monitor(monitor_s_, name);
+        return find_estimator(estimator_s_, name);
     }
 
-    /// \brief Get read only access to monitor in the resample step
-    const SMCMonitor<T> &monitor_resample(const std::string &name) const
+    /// \brief Get read only access to estimator in the resample step
+    const SMCEstimator<T> &estimator_resample(const std::string &name) const
     {
-        return find_monitor(monitor_r_, name);
+        return find_estimator(estimator_r_, name);
     }
 
-    /// \brief Get read only access to monitor in the mutation step
-    const SMCMonitor<T> &monitor_mutation(const std::string &name) const
+    /// \brief Get read only access to estimator in the mutation step
+    const SMCEstimator<T> &estimator_mutation(const std::string &name) const
     {
-        return find_monitor(monitor_m_, name);
+        return find_estimator(estimator_m_, name);
     }
 
     /// \brief Iterate the sampler
@@ -406,24 +406,24 @@ class SMCSampler
 
         df["ESS"] = ess_history_;
 
-        for (const auto &m : monitor_s_) {
-            for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_variable(i, data.begin());
-                df[m.first + "." + std::to_string(i)] = data;
+        for (const auto &e : estimator_s_) {
+            for (std::size_t i = 0; i != e.second.dim(); ++i) {
+                e.second.read_variable(i, data.begin());
+                df[e.first + "." + std::to_string(i)] = data;
             }
         }
 
-        for (const auto &m : monitor_r_) {
-            for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_variable(i, data.begin());
-                df[m.first + "." + std::to_string(i)] = data;
+        for (const auto &e : estimator_r_) {
+            for (std::size_t i = 0; i != e.second.dim(); ++i) {
+                e.second.read_variable(i, data.begin());
+                df[e.first + "." + std::to_string(i)] = data;
             }
         }
 
-        for (const auto &m : monitor_m_) {
-            for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_variable(i, data.begin());
-                df[m.first + "." + std::to_string(i)] = data;
+        for (const auto &e : estimator_m_) {
+            for (std::size_t i = 0; i != e.second.dim(); ++i) {
+                e.second.read_variable(i, data.begin());
+                df[e.first + "." + std::to_string(i)] = data;
             }
         }
 
@@ -462,15 +462,15 @@ class SMCSampler
     Vector<eval_type> eval_s_;
     Vector<eval_type> eval_r_;
     Vector<eval_type> eval_m_;
-    Vector<std::pair<std::string, SMCMonitor<T>>> monitor_s_;
-    Vector<std::pair<std::string, SMCMonitor<T>>> monitor_r_;
-    Vector<std::pair<std::string, SMCMonitor<T>>> monitor_m_;
+    Vector<std::pair<std::string, SMCEstimator<T>>> estimator_s_;
+    Vector<std::pair<std::string, SMCEstimator<T>>> estimator_r_;
+    Vector<std::pair<std::string, SMCEstimator<T>>> estimator_m_;
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
 
-    std::string insert_monitor(
-        Vector<std::pair<std::string, SMCMonitor<T>>> &vector,
-        const SMCMonitor<T> &monitor, const std::string &name)
+    std::string insert_estimator(
+        Vector<std::pair<std::string, SMCEstimator<T>>> &vector,
+        const SMCEstimator<T> &estimator, const std::string &name)
     {
         auto find = [&vector](const std::string &vname) {
             return std::find_if(vector.begin(), vector.end(),
@@ -489,13 +489,13 @@ class SMCSampler
             if (f != vector.end())
                 vector.erase(f);
         }
-        vector.emplace_back(vname, monitor);
+        vector.emplace_back(vname, estimator);
 
         return vname;
     }
 
-    const SMCMonitor<T> &find_monitor(
-        Vector<std::pair<std::string, SMCMonitor<T>>> &vector,
+    const SMCEstimator<T> &find_estimator(
+        Vector<std::pair<std::string, SMCEstimator<T>>> &vector,
         const std::string &name) const
     {
         auto exact = std::find_if(vector.begin(), vector.end(),
@@ -511,7 +511,7 @@ class SMCSampler
             return partial->second;
 
         runtime_assert(
-            false, "**SMCSampler::monitor** not found with the given name");
+            false, "**SMCSampler::estimator** not found with the given name");
 
         return vector.front().second;
     }
@@ -519,17 +519,17 @@ class SMCSampler
     void do_iterate()
     {
         do_eval(eval_s_);
-        do_monitor(monitor_s_);
+        do_estimate(estimator_s_);
 
         size_history_.push_back(size());
         ess_history_.push_back(particle_.weight().ess());
 
         if (ess_history_.back() < size() * resample_threshold_)
             do_eval(eval_r_);
-        do_monitor(monitor_r_);
+        do_estimate(estimator_r_);
 
         do_eval(eval_m_);
-        do_monitor(monitor_m_);
+        do_estimate(estimator_m_);
 
         ++iter_;
     }
@@ -540,10 +540,10 @@ class SMCSampler
             eval(iter_, particle_);
     }
 
-    void do_monitor(Vector<std::pair<std::string, SMCMonitor<T>>> &vector)
+    void do_estimate(Vector<std::pair<std::string, SMCEstimator<T>>> &vector)
     {
-        for (auto &m : vector)
-            m.second(iter_, particle_);
+        for (auto &e : vector)
+            e.second(iter_, particle_);
     }
 }; // class SMCSampler
 

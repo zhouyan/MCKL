@@ -40,10 +40,10 @@
 namespace mckl
 {
 
-/// \brief MCMC monitor of estimates
+/// \brief MCMC estimator
 /// \ingroup MCMC
 template <typename T>
-class MCMCMonitor : public EstimateMatrix<double, 0>
+class MCMCEstimator : public EstimateMatrix<double, 0>
 {
     public:
     using state_type = T;
@@ -51,11 +51,11 @@ class MCMCMonitor : public EstimateMatrix<double, 0>
         std::function<void(std::size_t, std::size_t, state_type &, double *)>;
 
     template <typename Eval>
-    MCMCMonitor(std::size_t dim, Eval &&eval)
+    MCMCEstimator(std::size_t dim, Eval &&eval)
         : EstimateMatrix<double, 0>(0, dim), eval_(std::forward<Eval>(eval))
     {
         runtime_assert(static_cast<bool>(eval_),
-            "**MCMCMonitor::SMCMonitor** used with an invalid evaluation "
+            "**MCMCEstimator::MCMCEstimator** used with an invalid evaluation "
             "object");
     }
 
@@ -66,7 +66,7 @@ class MCMCMonitor : public EstimateMatrix<double, 0>
         eval_ = std::forward<Eval>(eval);
 
         runtime_assert(static_cast<bool>(eval_),
-            "**MCMCMonitor::estimate** used with an invalid evaluation "
+            "**MCMCEstimator::estimate** used with an invalid evaluation "
             "object");
     }
 
@@ -108,7 +108,7 @@ class MCMCMonitor : public EstimateMatrix<double, 0>
 
     private:
     eval_type eval_;
-}; // class MCMCMonitor
+}; // class MCMCEstimator
 
 /// \brief MCMC sampler
 /// \ingroup MCMC
@@ -135,19 +135,18 @@ class MCMCSampler
     /// \brief Reserve space for a specified number of iterations
     void reserve(std::size_t n)
     {
-        n += num_iter();
-        for (auto &m : monitor_)
-            m.second.reserve(n);
+        for (auto &e : estimator_)
+            e.second.reserve(n);
         for (auto &a : accept_history_)
-            a.reserve(n);
+            a.reserve(num_iter() + n);
     }
 
     /// \brief Reset the sampler by clear all history, evaluation objects, and
-    /// monitors
+    /// estimators
     void reset()
     {
         eval_.clear();
-        monitor_.clear();
+        estimator_.clear();
         clear();
     }
 
@@ -155,8 +154,8 @@ class MCMCSampler
     void clear()
     {
         iter_ = 0;
-        for (auto &m : monitor_)
-            m.second.clear();
+        for (auto &e : estimator_)
+            e.second.clear();
         accept_history_.clear();
     }
 
@@ -175,11 +174,11 @@ class MCMCSampler
             "object");
     }
 
-    std::string monitor(
-        const MCMCMonitor<T> &monitor, const std::string &name = std::string())
+    std::string estimator(const MCMCEstimator<T> &estimator,
+        const std::string &name = std::string())
     {
         auto find = [this](const std::string &vname) {
-            return std::find_if(monitor_.begin(), monitor_.end(),
+            return std::find_if(estimator_.begin(), estimator_.end(),
                 [&vname](auto &iter) { return iter.first == vname; });
         };
 
@@ -187,37 +186,37 @@ class MCMCSampler
         if (name.empty()) {
             const std::string v("V");
             int i = 0;
-            while (find(v + std::to_string(i)) != monitor_.end())
+            while (find(v + std::to_string(i)) != estimator_.end())
                 ++i;
             vname = "V" + std::to_string(i);
         } else {
             auto f = find(vname);
-            if (f != monitor_.end())
-                monitor_.erase(f);
+            if (f != estimator_.end())
+                estimator_.erase(f);
         }
-        monitor_.emplace_back(vname, monitor);
+        estimator_.emplace_back(vname, estimator);
 
         return vname;
     }
 
-    const MCMCMonitor<T> &monitor(const std::string &name) const
+    const MCMCEstimator<T> &estimator(const std::string &name) const
     {
-        auto exact = std::find_if(monitor_.begin(), monitor_.end(),
+        auto exact = std::find_if(estimator_.begin(), estimator_.end(),
             [&name](auto &iter) { return iter.first == name; });
-        if (exact != monitor_.end())
+        if (exact != estimator_.end())
             return exact->second;
 
         auto partial = std::find_if(
-            monitor_.begin(), monitor_.end(), [&name](auto &iter) {
+            estimator_.begin(), estimator_.end(), [&name](auto &iter) {
                 return iter.first.find(name) != std::string::npos;
             });
-        if (partial != monitor_.end())
+        if (partial != estimator_.end())
             return partial->second;
 
         runtime_assert(
-            false, "**MCMCSampler::monitor** not found with the given name");
+            false, "**MCMCSampler::estimator** not found with the given name");
 
-        return monitor_.front().second;
+        return estimator_.front().second;
     }
 
     /// \brief Iterate the sampler
@@ -246,10 +245,10 @@ class MCMCSampler
             df["Accept." + std::to_string(i)] = data;
         }
 
-        for (const auto &m : monitor_) {
-            for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_variable(i, data.begin());
-                df[m.first + "." + std::to_string(i)] = data;
+        for (const auto &e : estimator_) {
+            for (std::size_t i = 0; i != e.second.dim(); ++i) {
+                e.second.read_variable(i, data.begin());
+                df[e.first + "." + std::to_string(i)] = data;
             }
         }
 
@@ -285,7 +284,7 @@ class MCMCSampler
     state_type state_;
     std::size_t iter_;
     Vector<eval_type> eval_;
-    Vector<std::pair<std::string, MCMCMonitor<T>>> monitor_;
+    Vector<std::pair<std::string, MCMCEstimator<T>>> estimator_;
     Vector<Vector<std::size_t>> accept_history_;
 
     void do_iterate()
@@ -293,8 +292,8 @@ class MCMCSampler
         for (std::size_t i = 0; i != eval_.size(); ++i)
             accept_history_[i].push_back(eval_[i](iter_, state_));
 
-        for (auto &m : monitor_)
-            m.second(iter_, state_);
+        for (auto &e : estimator_)
+            e.second(iter_, state_);
 
         ++iter_;
     }
