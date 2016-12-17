@@ -35,123 +35,183 @@
 #include <mckl/core/memory.hpp>
 #include <mckl/random/rng.hpp>
 #include <mckl/random/uniform_int_distribution.hpp>
+#include <mckl/random/uniform_real_distribution.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-template <typename T, typename Memory>
-inline void core_memory_test(std::size_t N, std::size_t m,
-    const std::string &tname, const std::string &memory)
+inline void core_memory_check(const std::string &func, std::size_t align,
+    std::size_t bytes, const mckl::StopWatch &watch, bool passed)
 {
-    std::cout << std::string(80, '=') << std::endl;
-    std::cout << std::setw(60) << std::left << "Type" << std::setw(20)
-              << std::right << tname << std::endl;
-    std::cout << std::setw(60) << std::left << "Alignment" << std::setw(20)
-              << std::right << Memory::alignment() << std::endl;
-    std::cout << std::setw(60) << std::left << "Memory" << std::setw(20)
-              << std::right << memory << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
+    const double perf = watch.has_cycles() ? (1.0 * watch.cycles() / bytes) :
+                                             (1e-9 * bytes / watch.seconds());
 
-    bool passed = true;
-    bool zeroed = true;
-    mckl::StopWatch watch_alloc;
-    mckl::StopWatch watch_dealloc;
-    mckl::StopWatch watch_vec;
-    mckl::StopWatch watch_val;
-    mckl::RNG rng;
-    mckl::UniformIntDistribution<std::size_t> runif(N / 2, N * 2);
-
-    using Alloc = mckl::Allocator<T, Memory>;
-    using Vec = std::vector<T, Alloc>;
-    Alloc alloc;
-
-    for (std::size_t i = 0; i != m; ++i) {
-        if (!passed)
-            break;
-
-        bool flag;
-        std::size_t n = runif(rng);
-
-        watch_alloc.start();
-        auto ptr = alloc.allocate(n);
-        watch_alloc.stop();
-        flag =
-            reinterpret_cast<std::uintptr_t>(ptr) % Memory::alignment() == 0;
-        if (!flag)
-            std::cout << "Failed alignment (allocate)" << std::endl;
-        passed = passed && flag;
-
-        watch_dealloc.start();
-        alloc.deallocate(ptr);
-        watch_dealloc.stop();
-
-        T zero = static_cast<T>(0);
-        watch_vec.start();
-        Vec vec(n);
-        watch_vec.stop();
-        flag = reinterpret_cast<std::uintptr_t>(vec.data()) %
-                Memory::alignment() ==
-            0;
-        if (!flag)
-            std::cout << "Failed alignment (vector(n))" << std::endl;
-        passed = passed && flag;
-        flag = true;
-        for (std::size_t j = 0; j != n; ++j)
-            flag = flag && mckl::internal::is_equal(vec[j], zero);
-        zeroed = zeroed && flag;
-
-        T v = static_cast<T>(123.456);
-        watch_val.start();
-        Vec val(n, v);
-        watch_val.stop();
-        flag = reinterpret_cast<std::uintptr_t>(val.data()) %
-                Memory::alignment() ==
-            0;
-        if (!flag)
-            std::cout << "Failed alignment (vector(n, val))" << std::endl;
-        flag = true;
-        for (std::size_t j = 0; j != n; ++j)
-            flag = flag && mckl::internal::is_equal(val[j], v);
-        if (!flag)
-            std::cout << "Failed initialization (vector(n, val))" << std::endl;
-        passed = passed && flag;
-    }
-
-    std::cout << std::setw(60) << std::left << "Time (ms) for allocate(n)"
-              << std::setw(20) << std::right << std::fixed
-              << watch_alloc.milliseconds() << std::endl;
-    std::cout << std::setw(60) << std::left << "Time (ms) for deallocate(ptr)"
-              << std::setw(20) << std::right << std::fixed
-              << watch_dealloc.milliseconds() << std::endl;
-    std::cout << std::setw(60) << std::left << "Time (ms) for vector(n)"
-              << std::setw(20) << std::right << std::fixed
-              << watch_vec.milliseconds() << std::endl;
-    std::cout << std::setw(60) << std::left << "Time (ms) for vector(n, val)"
-              << std::setw(20) << std::right << std::fixed
-              << watch_val.milliseconds() << std::endl;
-    std::cout << std::setw(60) << std::left << "Zeroed vector(n)"
-              << std::setw(20) << std::right << (zeroed ? "True" : "False")
-              << std::endl;
-    std::cout << std::setw(60) << std::left << "Test result" << std::setw(20)
-              << std::right << (passed ? "Passed" : "Failed") << std::endl;
-    std::cout << std::string(80, '-') << std::endl;
+    std::cout << std::setw(80) << std::left << func;
+    std::cout << std::setw(10) << std::right << align;
+    std::cout << std::setw(10) << std::right << perf;
+    std::cout << std::setw(15) << std::right << (passed ? "Passed" : "Failed");
+    std::cout << std::endl;
 }
 
-template <typename T, std::size_t Alignment>
-inline void core_memory_test(
-    std::size_t n, std::size_t m, const std::string &tname)
+template <typename Alloc>
+inline void core_memory_allocate(std::size_t N, std::size_t M,
+    const std::string &tname, const std::string &mname)
 {
-    core_memory_test<T, mckl::MemorySTD<Alignment>>(n, m, tname, "MemorySTD");
-#if MCKL_HAS_POSIX || defined(MCKL_MSVC)
-    core_memory_test<T, mckl::MemorySYS<Alignment>>(n, m, tname, "MemorySYS");
-#endif
-#if MCKL_HAS_TBB
-    core_memory_test<T, mckl::MemoryTBB<Alignment>>(n, m, tname, "MemoryTBB");
-#endif
+    mckl::RNG rng;
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
+
+    Alloc alloc;
+    mckl::Vector<typename Alloc::pointer> ptr;
+    ptr.reserve(M);
+    std::size_t n = 0;
+    mckl::StopWatch watch;
+
+    watch.start();
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = rsize(rng);
+        n += K;
+        ptr.push_back(alloc.allocate(K));
+    }
+    watch.stop();
+
+    const std::string func(
+        "Allocator<" + tname + ", " + mname + "<" + tname + ">>::allocate");
+    const std::size_t bytes = n * sizeof(typename Alloc::value_type);
+    constexpr std::uintptr_t align = Alloc::memory_type::alignment();
+    bool passed = true;
+    for (auto p : ptr) {
+        passed = passed && reinterpret_cast<std::uintptr_t>(p) % align == 0;
+        alloc.deallocate(p);
+    }
+    core_memory_check(func, align, bytes, watch, passed);
+}
+
+template <typename Alloc>
+inline void core_memory_vector(std::size_t N, std::size_t M,
+    const std::string &tname, const std::string &mname)
+{
+    mckl::RNG rng;
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
+
+    using Vec = mckl::Vector<typename Alloc::value_type, Alloc>;
+    mckl::Vector<Vec> vec;
+    vec.reserve(M);
+    std::size_t n = 0;
+    mckl::StopWatch watch;
+
+    watch.start();
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = rsize(rng);
+        n += K;
+        vec.emplace_back(Vec(K));
+    }
+    watch.stop();
+
+    const std::string func("Vector<" + tname + ", Allocator<" + tname + ", " +
+        mname + "<" + tname + ">>>(size_t)");
+    const std::size_t bytes = n * sizeof(typename Alloc::value_type);
+    constexpr std::uintptr_t align = Alloc::memory_type::alignment();
+    bool passed = true;
+    for (auto v : vec) {
+        passed =
+            passed && reinterpret_cast<std::uintptr_t>(v.data()) % align == 0;
+    }
+    core_memory_check(func, align, bytes, watch, passed);
+}
+
+template <typename Alloc>
+inline void core_memory_vector_val(std::size_t N, std::size_t M,
+    const std::string &tname, const std::string &mname)
+{
+    mckl::RNG rng;
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformRealDistribution<double> runif(
+        static_cast<double>(N / 2), static_cast<double>(N));
+
+    using Vec = mckl::Vector<typename Alloc::value_type, Alloc>;
+    auto val = static_cast<typename Alloc::value_type>(runif(rng));
+    mckl::Vector<Vec> vec;
+    vec.reserve(M);
+    std::size_t n = 0;
+    mckl::StopWatch watch;
+
+    watch.start();
+    for (std::size_t i = 0; i != M; ++i) {
+        std::size_t K = rsize(rng);
+        n += K;
+        vec.emplace_back(Vec(K, val));
+    }
+    watch.stop();
+
+    const std::string func("Vector<" + tname + ", Allocator<" + tname + ", " +
+        mname + "<" + tname + ">>>(size_t, " + tname + ")");
+    const std::size_t bytes = n * sizeof(typename Alloc::value_type);
+    constexpr std::uintptr_t align = Alloc::memory_type::alignment();
+    bool passed = true;
+    for (auto v : vec) {
+        passed =
+            passed && reinterpret_cast<std::uintptr_t>(v.data()) % align == 0;
+        for (auto &x : v)
+            passed = passed && x == val;
+    }
+    core_memory_check(func, align, bytes, watch, passed);
 }
 
 template <typename T>
-inline void core_memory(std::size_t n, std::size_t m, const std::string &tname)
+inline void core_memory(std::size_t N, std::size_t M, const std::string &tname)
 {
-    core_memory_test<T, 32>(n, m, tname);
+    constexpr std::size_t alignment = mckl::AlignOf<T>;
+    N /= sizeof(T);
+
+    std::cout << std::fixed << std::setprecision(2);
+
+    core_memory_allocate<mckl::Allocator<T, mckl::MemorySTD<alignment>>>(
+        N, M, tname, "MemorySTD");
+#if MCKL_HAS_POSIX || defined(MCKL_MSVC)
+    core_memory_allocate<mckl::Allocator<T, mckl::MemorySYS<alignment>>>(
+        N, M, tname, "MemorySYS");
+#endif
+#if MCKL_HAS_TBB
+    core_memory_allocate<mckl::Allocator<T, mckl::MemoryTBB<alignment>>>(
+        N, M, tname, "MemoryTBB");
+#endif
+    std::cout << std::string(115, '-') << std::endl;
+
+    core_memory_vector<mckl::Allocator<T, mckl::MemorySTD<alignment>>>(
+        N, M, tname, "MemorySTD");
+#if MCKL_HAS_POSIX || defined(MCKL_MSVC)
+    core_memory_vector<mckl::Allocator<T, mckl::MemorySYS<alignment>>>(
+        N, M, tname, "MemorySYS");
+#endif
+#if MCKL_HAS_TBB
+    core_memory_vector<mckl::Allocator<T, mckl::MemoryTBB<alignment>>>(
+        N, M, tname, "MemoryTBB");
+#endif
+    std::cout << std::string(115, '-') << std::endl;
+
+    core_memory_vector_val<mckl::Allocator<T, mckl::MemorySTD<alignment>>>(
+        N, M, tname, "MemorySTD");
+#if MCKL_HAS_POSIX || defined(MCKL_MSVC)
+    core_memory_vector_val<mckl::Allocator<T, mckl::MemorySYS<alignment>>>(
+        N, M, tname, "MemorySYS");
+#endif
+#if MCKL_HAS_TBB
+    core_memory_vector_val<mckl::Allocator<T, mckl::MemoryTBB<alignment>>>(
+        N, M, tname, "MemoryTBB");
+#endif
+    std::cout << std::string(115, '-') << std::endl;
+}
+
+inline void core_memory(std::size_t N, std::size_t M)
+{
+    std::cout << std::string(115, '=') << std::endl;
+    std::cout << std::setw(80) << std::left << "Function";
+    std::cout << std::setw(10) << std::right << "Alignment";
+    std::cout << std::setw(10) << std::right
+              << (mckl::StopWatch::has_cycles() ? "cpB" : "GB/s");
+    std::cout << std::setw(15) << std::right << "Determinstics";
+    std::cout << std::endl;
+    std::cout << std::string(115, '-') << std::endl;
+
+    core_memory<int>(N, M, "int");
 }
 
 #endif // MCKL_EXAMPLE_CORE_MEMORY_HPP

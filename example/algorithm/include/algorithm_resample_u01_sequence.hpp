@@ -113,8 +113,8 @@ inline void algorithm_resample_u01_sequence(std::size_t N, std::size_t M)
     std::cout << std::string(lwid, '=') << std::endl;
     std::cout << std::setw(twid) << std::left << "Precision";
     std::cout << std::setw(twid) << std::left << "Algorithm";
-    std::cout << std::setw(twid) << std::right << "CPE (Transform)";
-    std::cout << std::setw(twid) << std::right << "CPE (Generate)";
+    std::cout << std::setw(twid) << std::right << "cpB (Transform)";
+    std::cout << std::setw(twid) << std::right << "cpB (Generate)";
     std::cout << std::setw(twid) << std::right << "Error";
     std::cout << std::endl;
 

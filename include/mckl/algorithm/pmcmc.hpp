@@ -35,10 +35,44 @@
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/mcmc.hpp>
 #include <mckl/algorithm/smc.hpp>
+#include <mckl/core/state_matrix.hpp>
 #include <mckl/random/rng.hpp>
 
 namespace mckl
 {
+
+template <MatrixLayout Layout, std::size_t Dim, typename T, typename Param>
+class PMCMCStateMatrix : public StateMatrix<Layout, Dim, T>
+{
+    public:
+    using size_type = typename Matrix<Layout, T>::size_type;
+    using value_type = typename Matrix<Layout, T>::value_type;
+    using param_type = Param;
+
+    explicit PMCMCStateMatrix(size_type N)
+        : StateMatrix<Layout, Dim, T>(N), log_nc_(0)
+    {
+    }
+
+    PMCMCStateMatrix(size_type N, size_type dim)
+        : StateMatrix<Layout, Dim, T>(N, dim), log_nc_(0)
+    {
+    }
+
+    double log_nc() const { return log_nc_; }
+
+    void set_log_nc(double nc) { log_nc_ = nc; }
+
+    void add_log_nc(double nc) { log_nc_ += nc; }
+
+    const param_type &param() { return param_; }
+
+    void param(const param_type &p) { return param_ = p; }
+
+    private:
+    double log_nc_;
+    param_type param_;
+}; // class PMCMCStateMatrix
 
 /// \brief Particle Markov chain Monte Carlo mutation
 /// \ingroup PMCMC

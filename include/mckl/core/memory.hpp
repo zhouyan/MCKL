@@ -87,27 +87,6 @@
 namespace mckl
 {
 
-namespace internal
-{
-
-template <typename T, bool = std::is_scalar<T>::value>
-class AlignOfImpl
-{
-    public:
-    static constexpr std::size_t value =
-        alignof(T) > MCKL_ALIGNMENT_MIN ? alignof(T) : MCKL_ALIGNMENT_MIN;
-}; // class AlignOfImpl
-
-template <typename T>
-class AlignOfImpl<T, true>
-{
-    public:
-    static constexpr std::size_t
-        value = alignof(T) > MCKL_ALIGNMENT ? alignof(T) : MCKL_ALIGNMENT;
-}; // class AlignOfImpl
-
-} // namespace mckl::internal
-
 /// \brief Alignment of types
 ///
 /// \details
@@ -115,8 +94,11 @@ class AlignOfImpl<T, true>
 /// * For all other types, define the maximum of `MCKL_MIN_ALIGNMENT` and
 /// `alignof(T)` as `value`.
 template <typename T>
-constexpr std::size_t AlignOf = std::integral_constant<std::size_t,
-    internal::AlignOfImpl<T>::value>::value;
+constexpr std::size_t AlignOf =
+    std::integral_constant<std::size_t, std::is_scalar<T>::value ?
+            (alignof(T) > MCKL_ALIGNMENT ? alignof(T) : MCKL_ALIGNMENT) :
+            (alignof(T) > MCKL_ALIGNMENT_MIN ? alignof(T) :
+                                               MCKL_ALIGNMENT_MIN)>::value;
 
 /// \brief Memory allocation using `std::malloc` and `std::free`
 /// \ingroup Core
@@ -139,7 +121,11 @@ class MemorySTD
 
     static void *malloc(std::size_t n)
     {
-        std::size_t bytes = (n > 0 ? n : 1) + Alignment + sizeof(void *);
+        if (n < 1)
+            n = 1;
+        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+
+        std::size_t bytes = n + Alignment + sizeof(void *);
         if (bytes < n)
             return nullptr;
 
@@ -189,8 +175,12 @@ class MemorySYS
 
     static void *malloc(std::size_t n)
     {
+        if (n < 1)
+            n = 1;
+        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+
         void *ptr = nullptr;
-        if (::posix_memalign(&ptr, Alignment, n > 0 ? n : 1) != 0)
+        if (::posix_memalign(&ptr, Alignment, n) != 0)
             ptr = nullptr;
 
         return ptr;
@@ -220,7 +210,11 @@ class MemorySYS
 
     static void *malloc(std::size_t n)
     {
-        return _aligned_malloc(n > 0 ? n : 1, Alignment);
+        if (n < 1)
+            n = 1;
+        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+
+        return _aligned_malloc(n, Alignment);
     }
 
     static void free(void *ptr)
@@ -252,7 +246,11 @@ class MemoryTBB
 
     static void *malloc(std::size_t n)
     {
-        return scalable_aligned_malloc(n > 0 ? n : 1, Alignment);
+        if (n < 1)
+            n = 1;
+        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+
+        return scalable_aligned_malloc(n, Alignment);
     }
 
     static void free(void *ptr)
@@ -268,53 +266,6 @@ class MemoryTBB
 /// \ingroup Core
 template <std::size_t Alignment>
 using Memory = MCKL_MEMORY_TYPE<Alignment>;
-
-/// \brief Define class member `new` and `delete` using Memory
-/// \ingroup Core
-///
-/// \details
-/// The behavior of the custom `operator new` is slightly different than the
-/// standard ones. There will be no `new` handler called in the case of failure
-/// to allocate memory. Another way to view this is that the class that uses
-/// these custom `operator new` has its own `new` handler which does exactly
-/// nothing.
-#define MCKL_DEFINE_NEW_DELETE(Class)                                         \
-    public:                                                                   \
-    static void *operator new(std::size_t n)                                  \
-    {                                                                         \
-        void *ptr = ::mckl::Memory<AlignOf<Class>>::malloc(n);                \
-        if (ptr == nullptr)                                                   \
-            throw std::bad_alloc();                                           \
-                                                                              \
-        return ptr;                                                           \
-    }                                                                         \
-                                                                              \
-    static void *operator new[](std::size_t n)                                \
-    {                                                                         \
-        void *ptr = ::mckl::Memory<AlignOf<Class>>::malloc(n);                \
-        if (ptr == nullptr)                                                   \
-            throw std::bad_alloc();                                           \
-                                                                              \
-        return ptr;                                                           \
-    }                                                                         \
-                                                                              \
-    static void *operator new(std::size_t, void *ptr) { return ptr; }         \
-                                                                              \
-    static void *operator new[](std::size_t, void *ptr) { return ptr; }       \
-                                                                              \
-    static void operator delete(void *ptr)                                    \
-    {                                                                         \
-        ::mckl::Memory<AlignOf<Class>>::free(ptr);                            \
-    }                                                                         \
-                                                                              \
-    static void operator delete[](void *ptr)                                  \
-    {                                                                         \
-        ::mckl::Memory<AlignOf<Class>>::free(ptr);                            \
-    }                                                                         \
-                                                                              \
-    static void operator delete(void *, void *) {}                            \
-                                                                              \
-    static void operator delete[](void *, void *) {}
 
 /// \brief Allocator
 /// \ingroup Core
@@ -341,6 +292,7 @@ class Allocator : public std::allocator<T>
     using reference = typename std::add_lvalue_reference_t<T>;
     using const_reference = typename std::add_lvalue_reference_t<const T>;
     using is_always_equal = std::true_type;
+    using memory_type = Mem;
 
     template <typename U>
     struct rebind {
@@ -375,6 +327,7 @@ class Allocator : public std::allocator<T>
         pointer ptr = static_cast<pointer>(Mem::malloc(bytes));
         if (ptr == nullptr)
             throw std::bad_alloc();
+        std::memset(ptr, 0, bytes);
 
         return ptr;
     }
@@ -421,6 +374,7 @@ class Allocator<void, Mem>
     using value_type = void;
     using pointer = void *;
     using const_pointer = const void *;
+    using memory_type = Mem;
 
     template <class U>
     struct rebind {
@@ -436,6 +390,7 @@ class Allocator<const void, Mem>
     using value_type = const void;
     using pointer = const void *;
     using const_pointer = const void *;
+    using memory_type = Mem;
 
     template <class U>
     struct rebind {

@@ -33,22 +33,24 @@
 
 int main(int argc, char **argv)
 {
-    std::size_t n = 1000;
-    if (argc > 1)
-        n = static_cast<std::size_t>(std::atoi(argv[1]));
+    --argc;
+    ++argv;
 
-    std::size_t m = 1000;
-    if (argc > 2)
-        m = static_cast<std::size_t>(std::atoi(argv[2]));
+    std::size_t N = 8192;
+    if (argc > 0) {
+        N = static_cast<std::size_t>(std::atoi(*argv));
+        --argc;
+        ++argv;
+    }
 
-    core_memory<char>(n, m, "char");
-    core_memory<short>(n, m, "short");
-    core_memory<int>(n, m, "int");
-    core_memory<long>(n, m, "long");
-    core_memory<long long>(n, m, "long long");
-    core_memory<float>(n, m, "float");
-    core_memory<double>(n, m, "double");
-    core_memory<long double>(n, m, "long double");
+    std::size_t M = 1000;
+    if (argc > 0) {
+        M = static_cast<std::size_t>(std::atoi(*argv));
+        --argc;
+        ++argv;
+    }
+
+    core_memory(N, M);
 
     return 0;
 }

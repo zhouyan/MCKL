@@ -58,8 +58,6 @@ namespace mckl
 template <typename RNGType = RNG>
 class RNGSetScalar
 {
-    MCKL_DEFINE_NEW_DELETE(RNGSetScalar<RNGType>)
-
     public:
     using rng_type = RNGType;
     using size_type = std::size_t;
