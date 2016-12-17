@@ -556,18 +556,6 @@ inline void hdf5store(const Matrix<Layout, T> &state_matrix,
         state_matrix.data(), filename, dataname, append);
 }
 
-// /// \brief Store a Monitor in the HDF5 format
-// /// \ingroup HDF5
-// template <typename T>
-// inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
-//     const std::string &dataname, bool append)
-// {
-//     std::map<std::string, Vector<double>> df = monitor.summary();
-//     hdf5store(filename, dataname, append);
-//     for (const auto &v : df)
-//         hdf5store(v.second, filename, dataname + "/" + v.first, append);
-// }
-
 /// \brief Store a Particle in the HDF5 format
 /// \ingroup HDF5
 template <typename T>

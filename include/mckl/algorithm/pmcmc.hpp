@@ -40,6 +40,8 @@
 namespace mckl
 {
 
+/// \brief Particle Markov chain Monte Carlo mutation
+/// \ingroup PMCMC
 template <typename State, typename T>
 class PMCMCMutation
 {
