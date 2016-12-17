@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/core/monitor.hpp
+// MCKL/example/core/src/core_matrix.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,22 +29,34 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_CORE_MONITOR_HPP
-#define MCKL_CORE_MONITOR_HPP
+#include "core_matrix.hpp"
 
-#include <mckl/internal/common.hpp>
-
-namespace mckl
+int main(int argc, char **argv)
 {
+    --argc;
+    ++argv;
 
-/// \brief Monitor for Monte Carlo integration
-/// \ingroup Core
-template <typename Dervied>
-class Monitor
-{
-    public:
-}; // class Monitor
+    std::size_t N = 100;
+    if (argc > 0) {
+        std::size_t n = static_cast<std::size_t>(std::atoi(*argv));
+        if (n != 0) {
+            N = n;
+            --argc;
+            ++argv;
+        }
+    }
 
-} // namespace mckl
+    std::size_t M = 1000;
+    if (argc > 0) {
+        std::size_t m = static_cast<std::size_t>(std::atoi(*argv));
+        if (m != 0) {
+            M = m;
+            --argc;
+            ++argv;
+        }
+    }
 
-#endif // MCKL_CORE_MONITOR_HPP
+    core_matrix(N, M);
+
+    return 0;
+}

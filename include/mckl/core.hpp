@@ -33,7 +33,7 @@
 #define MCKL_CORE_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/core/monitor.hpp>
+#include <mckl/core/matrix.hpp>
 #include <mckl/core/particle.hpp>
 #include <mckl/core/sampler.hpp>
 #include <mckl/core/state_matrix.hpp>

@@ -546,15 +546,27 @@ inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
         dataptr.get());
 }
 
-/// \brief Store a StateMatrix in the HDF5 format
+/// \brief Store a Matrix in the HDF5 format
 /// \ingroup HDF5
-template <MatrixLayout Layout, std::size_t Dim, typename T>
-inline void hdf5store(const StateMatrix<Layout, Dim, T> &state_matrix,
+template <MatrixLayout Layout, typename T>
+inline void hdf5store(const Matrix<Layout, T> &state_matrix,
     const std::string &filename, const std::string &dataname, bool append)
 {
-    hdf5store(Layout, state_matrix.size(), state_matrix.dim(),
+    hdf5store(Layout, state_matrix.nrow(), state_matrix.ncol(),
         state_matrix.data(), filename, dataname, append);
 }
+
+// /// \brief Store a Monitor in the HDF5 format
+// /// \ingroup HDF5
+// template <typename T>
+// inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
+//     const std::string &dataname, bool append)
+// {
+//     std::map<std::string, Vector<double>> df = monitor.summary();
+//     hdf5store(filename, dataname, append);
+//     for (const auto &v : df)
+//         hdf5store(v.second, filename, dataname + "/" + v.first, append);
+// }
 
 /// \brief Store a Particle in the HDF5 format
 /// \ingroup HDF5
@@ -566,18 +578,6 @@ inline void hdf5store(const Particle<T> &particle, const std::string &filename,
     hdf5store(particle.state(), filename, dataname + "/State", true);
     hdf5store(static_cast<std::size_t>(particle.weight().size()),
         particle.weight().data(), filename, dataname + "/Weight", true);
-}
-
-/// \brief Store a Monitor in the HDF5 format
-/// \ingroup HDF5
-template <typename T>
-inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
-    const std::string &dataname, bool append)
-{
-    std::map<std::string, Vector<double>> df = monitor.summary();
-    hdf5store(filename, dataname, append);
-    for (const auto &v : df)
-        hdf5store(v.second, filename, dataname + "/" + v.first, append);
 }
 
 /// \brief Store a Sampler in the HDF5 format

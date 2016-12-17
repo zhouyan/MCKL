@@ -33,7 +33,6 @@
 #define MCKL_CORE_SAMPLER_HPP
 
 #include <mckl/internal/common.hpp>
-#include <mckl/core/monitor.hpp>
 
 namespace mckl
 {

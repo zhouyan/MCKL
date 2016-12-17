@@ -38,10 +38,11 @@
 namespace mckl
 {
 
-template <MatrixLayout, std::size_t, typename>
-class StateMatrix;
+template <MatrixLayout, typename>
+class Matrix;
 
-class Weight;
+template <typename>
+class Monitor;
 
 template <typename>
 class ParticleIndex;
@@ -56,16 +57,9 @@ template <typename>
 class Particle;
 
 template <typename>
-class SMCMonitor;
+class Sampler;
 
-template <typename>
-class SMCSampler;
-
-template <typename>
-class[[deprecated("use **SMCMonitor** instead")]] Monitor;
-
-template <typename>
-class[[deprecated("use **SMCSampler** instead")]] Sampler;
+class Weight;
 
 } // namespace mckl
 
