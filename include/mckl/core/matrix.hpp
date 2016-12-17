@@ -119,6 +119,12 @@ class Matrix
     /// \brief Reserve space given number of rows and columns
     void reserve(size_type n, size_type m) { data_.reserve(n * m); }
 
+    /// \brief Reserve space given number of rows
+    void reserve_nrow(size_type n) { reserve(n, ncol()); }
+
+    /// \brief Reserve space given number of columns
+    void reserve_ncol(size_type m) { reserve(nrow(), m); }
+
     /// \brief Release memory no longer needed
     void shrink_to_fit() { data_.shrink_to_fit(); }
 

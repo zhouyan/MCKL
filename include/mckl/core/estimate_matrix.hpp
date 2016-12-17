@@ -33,89 +33,123 @@
 #define MCKL_CORE_ESTIMATE_MATRIX_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/matrix.hpp>
 
 namespace mckl
 {
 
 /// \brief Estimate matrix for iterative Monte Carlo algorithms
 /// \ingroup Core
-template <typename T>
-class EstimateMatrix
+///
+/// \details
+/// Let \f$\eta\f$ be an estimator of dimension \f$d\f$, and \f$t\f$ be the
+/// number of iterations of the algorithms. The estimates are collected in an
+/// \f$t\f$ by \f$d\f$ matrix \f$E\f$, where \f$E_{i,j} = \eta_i(j)\f$, the
+/// \f$j\f$-th component of the an estimate at iteration \f$i\f$.
+template <typename T, std::size_t Dim>
+class EstimateMatrix : public Matrix<RowMajor, T>
 {
     public:
-    using size_type = std::size_t;
-    using value_type = T;
+    using size_type = typename Matrix<RowMajor, T>::size_type;
+    using value_type = typename Matrix<RowMajor, T>::value_type;
 
-    EstimateMatrix(std::size_t dim) : dim_(dim) {}
+    explicit EstimateMatrix(size_type N) : Matrix<RowMajor, T>(N, Dim) {}
 
-    EstimateMatrix(const EstimateMatrix &) = default;
-
-    EstimateMatrix(EstimateMatrix &&other) noexcept(
-        noexcept(Vector<T>(std::move(other.data_))))
-        : dim_(other.dim_), data_(std::move(other.data_))
+    EstimateMatrix(size_type N, size_type dim) : Matrix<RowMajor, T>(N, dim)
     {
-        other.data_ = 0;
-    }
-
-    EstimateMatrix &operator=(const EstimateMatrix &) = default;
-
-    EstimateMatrix &operator=(EstimateMatrix &&other) noexcept(
-        noexcept(data_.swap(other.data_)))
-    {
-        if (this != &other) {
-            data_.swap(other.data_);
-            std::swap(dim_, other.dim_);
-        }
-
-        return *this;
+        static_assert(Dim == 0,
+            "**EstimateMatrix::EstimateMatrix** used with an object with "
+            "fixed dimension");
     }
 
     /// \brief The dimension of the estimator
-    std::size_t dim() const { return dim_; }
+    std::size_t dim() const { return this->ncol(); }
 
     /// \brief The number of iterations stored in the estimate matrix
-    std::size_t num_iter() const { return dim_ = 0 ? 0 : data_.size() / dim_; }
-
-    /// \brief Synonym of `dim()`
-    size_type row_size() const { return dim(); }
-
-    /// \brief Synonym of `size()`
-    size_type col_size() const { return size(); }
+    std::size_t num_iter() const { return this->nrow(); }
 
     /// \brief Reserve space for specified *additional* number of iterations
-    void reserve(std::size_t n) { data_.reserve(data_.size() + n * dim_); }
+    void reserve(std::size_t n) { this->reserve_nrow(num_iter() + n); }
 
-    /// \brief Release memory no longer needed
-    void shrink_to_fit() { data_.shrink_to_fit(); }
-
-    /// \brief Pointer to the upper left corner of the matrix
-    value_type *data() { return data_.data(); }
-
-    /// \brief Pointer to the upper left corner of the matrix
-    const value_type *data() const { return data_.data(); }
-
-    /// \brief Swap two EstimateMatrix objects
-    void swap(EstimateMatrix<Layout, Dim, T> &other) noexcept(
-        noexcept(data_.swap(other.data_)))
+    /// \brief Read the values of \f$\eta_i(1:d)\f$
+    template <typename OutputIter>
+    OutputIter read_estimate(size_type i, OutputIter first) const
     {
-        internal::Dimension<Dim>::swap(other);
-        std::swap(size_, other.size_);
-        data_.swap(other.data_);
+        return this->read_row(i, first);
     }
 
-    private:
-    std::size_t dim_;
-    Vector<value_type> data_;
-}; // class EstimateMatrix
+    /// \brief Read the values of \f$\eta_{1:t}(j)\f$
+    template <typename OutputIter>
+    OutputIter read_variable(size_type j, OutputIter first) const
+    {
+        return this->read_col(j, first);
+    }
 
-/// \brief Swap two EstimateMatrix objects
-/// \ingroup Core
-template <typename T>
-inline void swap(EstimateMatrix<T> &m1, EstimateMatrix<T> &m2) noexcept(
-    noexcept(m1.swap(m2)))
-{
-    m1.swap(m2);
-}
+    /// \brief Add space for a new estimate, return a pointer to the new space
+    T *insert_estimate()
+    {
+        const size_type i = num_iter();
+        resize_nrow(i + 1);
+
+        return this->row_data(i);
+    }
+
+    /// \brief Add a new estimate to the bottom of the matrix
+    template <typename InputIter>
+    void insert_estimate(InputIter first)
+    {
+        const size_type i = num_iter();
+        resize_nrow(i + 1);
+        std::copy_n(first, dim(), this->row_data(i));
+    }
+
+    /// \brief Add a new estimate into the matrix given iteration number
+    ///
+    /// \details
+    /// Let \f$t\f$ be the number of iterations currently stored within the
+    /// matrix. If \f$i < t\f$, then the estimate of \f$i\f$-th iteration is
+    /// overriden. If \f$i = t\f$, then it is added to the bottom of the
+    /// matrix. If \f$i > t\f$. Then the matrix will have \f$i + 1\f$
+    /// iterations, and the values of estimates of iterations \f$t\f$ to
+    /// \f$i - 1\f$ will be initialized as `-const_nan<T>()` if `T` is a
+    /// floating point type.
+    template <typename InputIter>
+    void insert_estimate(size_type i, InputIter first)
+    {
+        const size_type t = num_iter();
+        if (i < t)
+            std::copy_n(first, dim(), this->row_data(i));
+        if (i == t)
+            insert_estimate(first);
+        if (i > t)
+            insert_estimate_dispatch(t, i, first, std::is_floating_point<T>());
+    }
+
+    /// \brief Remove all estimates in the matrix and resize it to zero rows
+    void clear() { resize_nrow(0); }
+
+    private:
+    using Matrix<RowMajor, T>::resize;
+    using Matrix<RowMajor, T>::resize_nrow;
+    using Matrix<RowMajor, T>::resize_ncol;
+
+    template <typename InputIter>
+    void insert_estimate_dispatch(
+        size_type t, size_type i, InputIter first, std::true_type)
+    {
+        insert_estimate_dispatch(t, i, first, std::false_type());
+        if (i > t)
+            std::fill_n(this->row_data(t), (i - t) * dim(), -const_nan<T>());
+    }
+
+    template <typename InputIter>
+    void insert_estimate_dispatch(
+        size_type t, size_type i, InputIter first, std::false_type)
+    {
+        resize_nrow(std::max(i + 1, t));
+        std::copy_n(first, dim(), this->row_data(i));
+    }
+}; // class EstimateMatrix
 
 } // namespace mckl
 

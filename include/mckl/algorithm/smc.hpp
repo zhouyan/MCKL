@@ -34,6 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/resample.hpp>
+#include <mckl/core/estimate_matrix.hpp>
 #include <mckl/core/particle.hpp>
 #include <mckl/core/state_matrix.hpp>
 
@@ -42,149 +43,74 @@ namespace mckl
 
 /// \brief SMC monitor of Monte Carlo integrations
 /// \ingroup SMC
-///
-/// \tparam T The state type
-///
-/// \details
-/// The record of estimates is represented by an \f$T\f$ by \f$D\f$ matrix
-/// \f$R\f$, where \f$T\f$ is the number of iterations recorded and \f$D\f$ is
-/// the dimesion of the monitor. If \f$D = 0\f$, then \f$T\f$ is always equal
-/// to zero.
 template <typename T>
-class SMCMonitor
+class SMCMonitor : public EstimateMatrix<double, 0>
 {
     public:
+    using state_type = T;
     using eval_type =
         std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
 
     template <typename Eval>
     SMCMonitor(std::size_t dim, Eval &&eval, MatrixLayout layout,
         bool record_only = false)
-        : dim_(dim)
+        : EstimateMatrix<double, 0>(0, dim)
         , eval_(std::forward<Eval>(eval))
         , layout_(layout)
         , record_only_(record_only)
     {
-        runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**SMCMonitor::SMCMonitor** invalid layout parameter");
-    }
-
-    /// \brief The dimension \f$D\f$
-    std::size_t dim() const { return dim_; }
-
-    /// \brief The number of iterations \f$T\f$
-    std::size_t num_iter() const
-    {
-        return dim_ == 0 ? 0 : record_.size() / dim_;
+        runtime_assert(static_cast<bool>(eval_),
+            "**SMCMonitor::SMCMonitor** used with an invalid evaluation "
+            "object");
     }
 
     /// \brief If this is a record only monitor
     bool record_only() const { return record_only_; }
-
-    /// \brief Reserve space for a specified number of iterations
-    void reserve(std::size_t n) { record_.reserve(dim_ * n); }
-
-    /// \brief If the evaluation object is valid
-    bool empty() const { return !eval_; }
-
-    /// \brief The value of \f$R_{T,i}\f$
-    double record(std::size_t i) const
-    {
-        runtime_assert(i < dim(), "**SMCMonitor::record** index out of range");
-        runtime_assert(
-            num_iter() > 0, "**SMCMonitor::record** no iteration reocorded");
-
-        return record_[(num_iter() - 1) * dim_ + i];
-    }
-
-    /// \brief The value of \f$R_{t,i}\f$
-    double record(std::size_t i, std::size_t t) const
-    {
-        runtime_assert(i < dim(), "**SMCMonitor::record** index out of range");
-        runtime_assert(t < num_iter(),
-            "**SMCMonitor::record** iteration number out of range");
-
-        return record_[t * dim_ + i];
-    }
-
-    /// \brief Read the values of \f$R_{1:T,i}\f$
-    template <typename OutputIter>
-    OutputIter read_record(std::size_t i, OutputIter first) const
-    {
-        runtime_assert(
-            i < dim(), "**SMCMonitor::read_record** index out of range");
-
-        const std::size_t t = num_iter();
-        const double *riter = record_.data() + i;
-        for (std::size_t j = 0; j != t; ++j, ++first, riter += dim_)
-            *first = *riter;
-
-        return first;
-    }
-
-    /// \brief Read the values of \f$R\f$
-    template <typename OutputIter>
-    OutputIter read_record_matrix(MatrixLayout layout, OutputIter first) const
-    {
-        runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**SMCMonitor::read_record_matrix** invalid layout parameter");
-
-        if (layout == RowMajor)
-            return std::copy(record_.begin(), record_.end(), first);
-
-        for (std::size_t d = 0; d != dim_; ++d)
-            for (std::size_t i = 0; i != num_iter(); ++i)
-                *first++ = record(d, i);
-
-        return first;
-    }
 
     /// \brief Set a new evaluation object
     template <typename Eval>
     void estimate(Eval &&eval, MatrixLayout layout, bool record_only = false)
     {
         runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**SMCMonitor::eval** invalid layout parameter");
+            "**SMCMonitor::estimate** invalid layout parameter");
 
         eval_ = std::forward<Eval>(eval);
         layout_ = layout;
         record_only_ = record_only;
+
+        runtime_assert(static_cast<bool>(eval_),
+            "**SMCMonitor::estimate** used with an invalid evaluation "
+            "object");
     }
+
+    using EstimateMatrix<double, 0>::operator();
 
     /// \brief Perform the evaluation given the iteration number and the
     /// particle system
     void operator()(std::size_t iter, Particle<T> &particle)
     {
-        if (empty()) {
-            result_.resize(dim_);
-            std::fill(result_.begin(), result_.end(), const_nan<double>());
-            record_.insert(record_.end(), result_.begin(), result_.end());
-            return;
-        }
-
-        result_.resize(dim_);
+        result_.resize(this->dim());
         if (record_only_) {
-            eval_(iter, dim_, particle, result_.data());
-            record_.insert(record_.end(), result_.begin(), result_.end());
+            eval_(iter, this->dim(), particle, this->insert_estimate());
             return;
         }
 
         const std::size_t N = static_cast<std::size_t>(particle.size());
-        r_.resize(N * dim_);
-        eval_(iter, dim_, particle, r_.data());
+        r_.resize(N * dim());
+        eval_(iter, this->dim(), particle, r_.data());
 #if MCKL_HAS_BLAS
-        internal::size_check<MCKL_BLAS_INT>(particle.size(), "Monitor::eval");
+        internal::size_check<MCKL_BLAS_INT>(N, "SMCMonitor::operator()");
         if (layout_ == RowMajor) {
             internal::cblas_dgemv(internal::CblasColMajor,
-                internal::CblasNoTrans, static_cast<MCKL_BLAS_INT>(dim_),
+                internal::CblasNoTrans,
+                static_cast<MCKL_BLAS_INT>(this->dim()),
                 static_cast<MCKL_BLAS_INT>(N), 1.0, r_.data(),
-                static_cast<MCKL_BLAS_INT>(dim_), particle.weight().data(), 1,
-                0.0, result_.data(), 1);
-        }
-        if (layout_ == ColMajor) {
+                static_cast<MCKL_BLAS_INT>(this->dim()),
+                particle.weight().data(), 1, 0.0, result_.data(), 1);
+        } else {
             internal::cblas_dgemv(internal::CblasColMajor,
                 internal::CblasTrans, static_cast<MCKL_BLAS_INT>(N),
-                static_cast<MCKL_BLAS_INT>(dim_), 1.0, r_.data(),
+                static_cast<MCKL_BLAS_INT>(this->dim()), 1.0, r_.data(),
                 static_cast<MCKL_BLAS_INT>(N), particle.weight().data(), 1,
                 0.0, result_.data(), 1);
         }
@@ -194,30 +120,25 @@ class SMCMonitor
         if (layout_ == RowMajor) {
             std::fill(result_.begin(), result_.end(), 0);
             for (std::size_t i = 0; i != N; ++i, ++w)
-                for (std::size_t d = 0; d != dim_; ++d, ++r)
+                for (std::size_t d = 0; d != this->dim(); ++d, ++r)
                     result_[d] += (*w) * (*r);
         }
         if (layout_ == ColMajor) {
-            for (std::size_t d = 0; d != dim_; ++d, r += N) {
+            for (std::size_t d = 0; d != this->dim(); ++d, r += N) {
                 mul(N, r, w, r);
                 result_[d] = std::accumulate(r, r + N, 0.0);
             }
         }
 #endif // MCKL_HAS_BLAS
-        record_.insert(record_.end(), result_.begin(), result_.end());
+        this->insert_estimate(result_.data());
     }
 
-    /// \brief Clear all records
-    void clear() { record_.clear(); }
-
     private:
-    std::size_t dim_;
+    Vector<double> result_;
+    Vector<double> r_;
     eval_type eval_;
     MatrixLayout layout_;
     bool record_only_;
-    Vector<double> record_;
-    Vector<double> result_;
-    Vector<double> r_;
 }; // class Monitor
 
 /// \brief SMC sampler
@@ -324,9 +245,13 @@ class SMCSampler
     void selection(Eval &&eval)
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::selection** called after first iteration");
+            "**SMCSampler::selection** used after first iteration");
 
         eval_s_.emplace_back(std::forward<Eval>(eval));
+
+        runtime_assert(static_cast<bool>(eval_s_.back()),
+            "**SMCSampler::selection** used with an invalid evaluation "
+            "object");
     }
 
     /// \brief Add a new evaluation object for the selection step
@@ -336,9 +261,12 @@ class SMCSampler
             nullptr)
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::resample** called after first iteration");
+            "**SMCSampler::resample** used after first iteration");
 
         eval_r_.emplace_back(std::forward<Eval>(eval));
+
+        runtime_assert(static_cast<bool>(eval_r_.back()),
+            "**SMCSampler::resample** used with an invalid evaluation object");
     }
 
     /// \brief Add a new evaluation object for the resample step by a built-in
@@ -346,7 +274,7 @@ class SMCSampler
     void resample(ResampleScheme scheme)
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::resample** called after first iteration");
+            "**SMCSampler::resample** used after first iteration");
 
         switch (scheme) {
             case Multinomial:
@@ -375,39 +303,61 @@ class SMCSampler
     void mutation(Eval &&eval)
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::mutation** called after first iteration");
+            "**SMCSampler::mutation** used after first iteration");
 
         eval_m_.emplace_back(std::forward<Eval>(eval));
+
+        runtime_assert(static_cast<bool>(eval_m_.back()),
+            "**SMCSampler::mutation** used with an invalid evaluation object");
     }
 
     /// \brief Attach a new monitor and return a reference to it
-    const std::pair<std::string, SMCMonitor<T>> &monitor_selection(
+    std::string monitor_selection(
         const SMCMonitor<T> &monitor, const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::monitor_selection** called after first iteration");
+            "**SMCSampler::monitor_selection** used after first iteration");
 
-        return add_monitor(monitor_s_, monitor, name);
+        return insert_monitor(monitor_s_, monitor, name);
     }
 
     /// \brief Attach a new monitor and return a reference to it
-    std::pair<std::string, SMCMonitor<T>> &monitor_resample(
+    std::string monitor_resample(
         const SMCMonitor<T> &monitor, const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::monitor_resample** called after first iteration");
+            "**SMCSampler::monitor_resample** used after first iteration");
 
-        return add_monitor(monitor_r_, monitor, name);
+        return insert_monitor(monitor_r_, monitor, name);
     }
 
     /// \brief Attach a new monitor and return a reference to it
-    std::pair<std::string, SMCMonitor<T>> &monitor_mutation(
+    std::string monitor_mutation(
         const SMCMonitor<T> &monitor, const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
-            "**SMCSampler::monitor_mutation** called after first iteration");
+            "**SMCSampler::monitor_mutation** used after first iteration");
 
-        return add_monitor(monitor_m_, monitor, name);
+        return insert_monitor(monitor_m_, monitor, name);
+    }
+
+    /// \brief Get read only access to monitor in the selection step given
+    /// (partial) name
+    const SMCMonitor<T> &monitor_selection(const std::string &name) const
+    {
+        return find_monitor(monitor_s_, name);
+    }
+
+    /// \brief Get read only access to monitor in the resample step
+    const SMCMonitor<T> &monitor_resample(const std::string &name) const
+    {
+        return find_monitor(monitor_r_, name);
+    }
+
+    /// \brief Get read only access to monitor in the mutation step
+    const SMCMonitor<T> &monitor_mutation(const std::string &name) const
+    {
+        return find_monitor(monitor_m_, name);
     }
 
     /// \brief Iterate the sampler
@@ -458,21 +408,21 @@ class SMCSampler
 
         for (const auto &m : monitor_s_) {
             for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_record(i, data.begin());
+                m.second.read_variable(i, data.begin());
                 df[m.first + "." + std::to_string(i)] = data;
             }
         }
 
         for (const auto &m : monitor_r_) {
             for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_record(i, data.begin());
+                m.second.read_variable(i, data.begin());
                 df[m.first + "." + std::to_string(i)] = data;
             }
         }
 
         for (const auto &m : monitor_m_) {
             for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_record(i, data.begin());
+                m.second.read_variable(i, data.begin());
                 df[m.first + "." + std::to_string(i)] = data;
             }
         }
@@ -518,7 +468,7 @@ class SMCSampler
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
 
-    std::pair<std::string, SMCMonitor<T>> &add_monitor(
+    std::string insert_monitor(
         Vector<std::pair<std::string, SMCMonitor<T>>> &vector,
         const SMCMonitor<T> &monitor, const std::string &name)
     {
@@ -541,7 +491,29 @@ class SMCSampler
         }
         vector.emplace_back(vname, monitor);
 
-        return vector.back();
+        return vname;
+    }
+
+    const SMCMonitor<T> &find_monitor(
+        Vector<std::pair<std::string, SMCMonitor<T>>> &vector,
+        const std::string &name) const
+    {
+        auto exact = std::find_if(vector.begin(), vector.end(),
+            [&name](auto &iter) { return iter.first == name; });
+        if (exact != vector.end())
+            return exact->second;
+
+        auto partial =
+            std::find_if(vector.begin(), vector.end(), [&name](auto &iter) {
+                return iter.first.find(name) != std::string::npos;
+            });
+        if (partial != vector.end())
+            return partial->second;
+
+        runtime_assert(
+            false, "**SMCSampler::monitor** not found with the given name");
+
+        return vector.front().second;
     }
 
     void do_iterate()
@@ -564,20 +536,14 @@ class SMCSampler
 
     void do_eval(Vector<eval_type> &vector)
     {
-        for (auto &eval : vector) {
-            runtime_assert(static_cast<bool>(eval),
-                "**SMCSampler** empty evaluation object");
+        for (auto &eval : vector)
             eval(iter_, particle_);
-        }
     }
 
     void do_monitor(Vector<std::pair<std::string, SMCMonitor<T>>> &vector)
     {
-        for (auto &m : vector) {
-            runtime_assert(
-                !m.second.empty(), "**SMCSampler** empty monitor object");
+        for (auto &m : vector)
             m.second(iter_, particle_);
-        }
     }
 }; // class SMCSampler
 

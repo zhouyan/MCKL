@@ -147,8 +147,8 @@ template <typename U, typename T>
 inline void union_le(std::size_t n, T *r)
 {
     static_assert(sizeof(U) % sizeof(T) == 0 || sizeof(T) % sizeof(U) == 0,
-        "**union_le** called with sizeof(U) and sizeof(T) with neither of "
-        "them a multiple of the other");
+        "**union_le** used with sizeof(U) and sizeof(T) with neither of them "
+        "a multiple of the other");
 
 #if MCKL_HAS_BIG_ENDIAN
     union_le<U>(n, r, std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),

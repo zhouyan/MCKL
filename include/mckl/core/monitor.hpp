@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/example/algorithm/src/algorithm_gibbs.cpp
+// MCKL/include/mckl/core/monitor.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,30 +29,15 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include "algorithm_gibbs.hpp"
+#ifndef MCKL_CORE_MONITOR_HPP
+#define MCKL_CORE_MONITOR_HPP
 
-int main()
+#include <mckl/internal/common.hpp>
+#include <mckl/core/estimate_matrix.hpp>
+
+namespace mckl
 {
-    constexpr std::size_t N = 1000;
 
-    mckl::MCMCSampler<AlgorithmGibbs> sampler;
-    sampler.mutation(AlgorithmGibbsMutation());
-    auto vname = sampler.monitor(
-        mckl::MCMCMonitor<AlgorithmGibbs>(2, AlgorithmGibbsEstimate()));
-    auto &monitor = sampler.monitor(vname);
+} // namespace mckl
 
-    std::get<0>(sampler.state()) = 0;
-    std::get<1>(sampler.state()) = 1;
-    sampler.iterate(N);
-
-    double mean[2];
-    monitor.average(mean, 500, 7);
-    std::cout << "mu:     " << mean[0] << std::endl;
-    std::cout << "lambda: " << mean[1] << std::endl;
-
-    std::ofstream save("algorithm_gibbs.save");
-    save << sampler << std::endl;
-    save.close();
-
-    return 0;
-}
+#endif // MCKL_CORE_MONITOR_HPP

@@ -34,6 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/mh.hpp>
+#include <mckl/core/estimate_matrix.hpp>
 #include <mckl/random/rng.hpp>
 
 namespace mckl
@@ -41,16 +42,8 @@ namespace mckl
 
 /// \brief MCMC monitor of estimates
 /// \ingroup MCMC
-///
-/// \tparam T The state type
-///
-/// \details
-/// The record of estimates is represented by an \f$T\f$ by \f$D\f$ matrix
-/// \f$R\f$, where \f$T\f$ is the number of iterations recorded and \f$D\f$ is
-/// the dimesion of the monitor. If \f$D = 0\f$, then \f$T\f$ is always equal
-/// to zero.
 template <typename T>
-class MCMCMonitor
+class MCMCMonitor : public EstimateMatrix<double, 0>
 {
     public:
     using state_type = T;
@@ -59,77 +52,11 @@ class MCMCMonitor
 
     template <typename Eval>
     MCMCMonitor(std::size_t dim, Eval &&eval)
-        : dim_(dim), eval_(std::forward<Eval>(eval))
+        : EstimateMatrix<double, 0>(0, dim), eval_(std::forward<Eval>(eval))
     {
-    }
-
-    /// \brief The dimension \f$D\f$
-    std::size_t dim() const { return dim_; }
-
-    /// \brief The number of iterations \f$T\f$
-    std::size_t num_iter() const
-    {
-        return dim_ == 0 ? 0 : record_.size() / dim_;
-    }
-
-    /// \brief Reserve space for a specified number of iterations
-    void reserve(std::size_t n) { record_.reserve(dim_ * n); }
-
-    /// \brief If the evaluation object is valid
-    bool empty() const { return !eval_; }
-
-    /// \brief The value of \f$R_{T,i}\f$
-    double record(std::size_t i) const
-    {
-        runtime_assert(
-            i < dim(), "**MCMCMonitor::record** index out of range");
-        runtime_assert(
-            num_iter() > 0, "**MCMCMonitor::record** no iteration reocorded");
-
-        return record_[(num_iter() - 1) * dim_ + i];
-    }
-
-    /// \brief The value of \f$R_{t,i}\f$
-    double record(std::size_t i, std::size_t t) const
-    {
-        runtime_assert(
-            i < dim(), "**MCMCMonitor::record** index out of range");
-        runtime_assert(t < num_iter(),
-            "**MCMCMonitor::record** iteration number out of range");
-
-        return record_[t * dim_ + i];
-    }
-
-    /// \brief Read the values of \f$R_{1:T,i}\f$
-    template <typename OutputIter>
-    OutputIter read_record(std::size_t i, OutputIter first) const
-    {
-        runtime_assert(
-            i < dim(), "**MCMCMonitor::read_record** index out of range");
-
-        const std::size_t t = num_iter();
-        const double *riter = record_.data() + i;
-        for (std::size_t j = 0; j != t; ++j, ++first, riter += dim_)
-            *first = *riter;
-
-        return first;
-    }
-
-    /// \brief Read the values of \f$R\f$
-    template <typename OutputIter>
-    OutputIter read_record_matrix(MatrixLayout layout, OutputIter first) const
-    {
-        runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**MCMCMonitor::read_record_matrix** invalid layout parameter");
-
-        if (layout == RowMajor)
-            return std::copy(record_.begin(), record_.end(), first);
-
-        for (std::size_t d = 0; d != dim_; ++d)
-            for (std::size_t i = 0; i != num_iter(); ++i)
-                *first++ = record(d, i);
-
-        return first;
+        runtime_assert(static_cast<bool>(eval_),
+            "**MCMCMonitor::SMCMonitor** used with an invalid evaluation "
+            "object");
     }
 
     /// \brief Set a new evaluation object
@@ -137,75 +64,50 @@ class MCMCMonitor
     void estimate(Eval &&eval)
     {
         eval_ = std::forward<Eval>(eval);
+
+        runtime_assert(static_cast<bool>(eval_),
+            "**MCMCMonitor::estimate** used with an invalid evaluation "
+            "object");
     }
 
     /// \brief Perform the evaluation given the iteration number and the state
     void operator()(std::size_t iter, state_type &state)
     {
-        if (empty()) {
-            result_.resize(dim_);
-            std::fill(result_.begin(), result_.end(), const_nan<double>());
-            record_.insert(record_.end(), result_.begin(), result_.end());
-            return;
-        }
-
-        result_.resize(dim_);
-        eval_(iter, dim_, state, result_.data());
-        record_.insert(record_.end(), result_.begin(), result_.end());
+        eval_(iter, this->dim(), state, this->insert_estimate());
     }
 
     /// \brief Get the average of estimates after `cut` iterations using every
     /// `thin` elements
     template <typename OutputIter>
-    OutputIter result(
-        OutputIter first, std::size_t cut = 0, std::size_t thin = 1)
+    OutputIter average(
+        OutputIter first, std::size_t cut = 0, std::size_t thin = 1) const
     {
         const std::size_t N = num_iter();
 
         if (cut >= N)
-            return std::fill_n(first, dim_, 0);
+            return std::fill_n(first, this->dim(), -const_nan<double>());
 
         thin = thin < 1 ? 1 : thin;
         if (N - cut < thin)
-            return std::copy_n(record_.data() + cut * dim_, dim_, first);
+            return this->read_estimate(cut, first);
 
         if (thin < 1)
             thin = 1;
-        const std::size_t M = (N - cut) / thin;
-        const double *r = record_.data() + cut * dim_;
-        if (thin > 1) {
-            v_.resize(M * dim_);
-            double *v = v_.data();
-            for (std::size_t i = 0; i != M; ++i, r += dim_ * thin, v += dim_)
-                std::copy_n(r, dim_, v);
-            r = v_.data();
+        Vector<double> sum(this->dim());
+        std::fill(sum.begin(), sum.end(), 0);
+        std::size_t n = 0;
+        while (cut < num_iter()) {
+            add(this->dim(), this->row_data(cut), sum.data(), sum.data());
+            cut += thin;
+            ++n;
         }
+        mul(this->dim(), 1.0 / n, sum.data(), sum.data());
 
-#if MCKL_HAS_BLAS
-        w_.resize(M);
-        result_.resize(dim_);
-        std::fill(w_.begin(), w_.end(), 1.0 / M);
-        internal::cblas_dgemv(internal::CblasColMajor, internal::CblasNoTrans,
-            static_cast<MCKL_BLAS_INT>(dim_), static_cast<MCKL_BLAS_INT>(M),
-            1.0, r, static_cast<MCKL_BLAS_INT>(dim_), w_.data(), 1, 0.0,
-            result_.data(), 1);
-#else  // MCKL_HAS_BLAS
-// FIXME non-blas impl
-#endif // MCKL_HAS_BLAS
-
-        return std::copy(result_.begin(), result_.end(), first);
+        return std::copy(sum.begin(), sum.end(), first);
     }
 
-    /// \brief Clear all records
-    void clear() { record_.clear(); }
-
     private:
-    std::size_t dim_;
     eval_type eval_;
-    Vector<double> record_;
-    Vector<double> result_;
-    Vector<double> w_;
-    Vector<double> v_;
 }; // class MCMCMonitor
 
 /// \brief MCMC sampler
@@ -263,13 +165,17 @@ class MCMCSampler
     void mutation(Eval &&eval)
     {
         runtime_assert(num_iter() == 0,
-            "**MCMCSampler::mutation** called after first iteration");
+            "**MCMCSampler::mutation** used after first iteration");
 
         eval_.emplace_back(std::forward<Eval>(eval));
         accept_history_.emplace_back(0);
+
+        runtime_assert(static_cast<bool>(eval_.back()),
+            "**MCMCSampler::mutation** used with an invalid evaluation "
+            "object");
     }
 
-    std::pair<std::string, MCMCMonitor<T>> &monitor(
+    std::string monitor(
         const MCMCMonitor<T> &monitor, const std::string &name = std::string())
     {
         auto find = [this](const std::string &vname) {
@@ -291,7 +197,27 @@ class MCMCSampler
         }
         monitor_.emplace_back(vname, monitor);
 
-        return monitor_.back();
+        return vname;
+    }
+
+    const MCMCMonitor<T> &monitor(const std::string &name) const
+    {
+        auto exact = std::find_if(monitor_.begin(), monitor_.end(),
+            [&name](auto &iter) { return iter.first == name; });
+        if (exact != monitor_.end())
+            return exact->second;
+
+        auto partial = std::find_if(
+            monitor_.begin(), monitor_.end(), [&name](auto &iter) {
+                return iter.first.find(name) != std::string::npos;
+            });
+        if (partial != monitor_.end())
+            return partial->second;
+
+        runtime_assert(
+            false, "**MCMCSampler::monitor** not found with the given name");
+
+        return monitor_.front().second;
     }
 
     /// \brief Iterate the sampler
@@ -322,7 +248,7 @@ class MCMCSampler
 
         for (const auto &m : monitor_) {
             for (std::size_t i = 0; i != m.second.dim(); ++i) {
-                m.second.read_record(i, data.begin());
+                m.second.read_variable(i, data.begin());
                 df[m.first + "." + std::to_string(i)] = data;
             }
         }
@@ -364,17 +290,11 @@ class MCMCSampler
 
     void do_iterate()
     {
-        for (std::size_t i = 0; i != eval_.size(); ++i) {
-            runtime_assert(static_cast<bool>(eval_[i]),
-                "**MCMCSampler** empty evaluation object");
+        for (std::size_t i = 0; i != eval_.size(); ++i)
             accept_history_[i].push_back(eval_[i](iter_, state_));
-        }
 
-        for (auto &m : monitor_) {
-            runtime_assert(
-                !m.second.empty(), "**MCMCSampler** empty monitor object");
+        for (auto &m : monitor_)
             m.second(iter_, state_);
-        }
 
         ++iter_;
     }

@@ -47,10 +47,9 @@ int main()
 
     mckl::MCMCSampler<AlgorithmPMCMCState> sampler;
     sampler.mutation(std::move(mutation));
-    auto &monitor = sampler
-                        .monitor(mckl::MCMCMonitor<AlgorithmPMCMCState>(
-                            2, AlgorithmPMCMCEstimate()))
-                        .second;
+    auto vname = sampler.monitor(
+        mckl::MCMCMonitor<AlgorithmPMCMCState>(2, AlgorithmPMCMCEstimate()));
+    auto &monitor = sampler.monitor(vname);
 
     std::get<0>(sampler.state()) = 0.10;
     std::get<1>(sampler.state()) = 10.0;
@@ -62,7 +61,7 @@ int main()
     std::cout << std::endl;
 
     double mean[2];
-    monitor.result(mean, 500, 7);
+    monitor.average(mean, 500, 7);
     std::cout << "theta: " << mean[0] << std::endl;
     std::cout << "simga: " << mean[1] << std::endl;
 

@@ -581,10 +581,10 @@ class ResampleIndex
     public:
     using index_type = IntType;
 
-    ResampleIndex() : iter_size_(0) {}
+    ResampleIndex() : num_iter_(0) {}
 
     /// \brief Number of iterations recorded
-    std::size_t iter_size() const { return iter_size_; }
+    std::size_t num_iter() const { return num_iter_; }
 
     /// \brief The sample size of the last iteration
     std::size_t size() const
@@ -603,7 +603,7 @@ class ResampleIndex
     }
 
     /// \brief Reset history
-    void reset() { iter_size_ = 0; }
+    void reset() { num_iter_ = 0; }
 
     /// \brief Release memory
     void clear() { index_.clear(); }
@@ -611,29 +611,29 @@ class ResampleIndex
     /// \brief Append an identity resampling index
     void push_back(std::size_t N)
     {
-        ++iter_size_;
+        ++num_iter_;
         resize_identity(N);
-        if (index_.size() < iter_size_)
+        if (index_.size() < num_iter_)
             index_.push_back(identity_);
         else
-            index_[iter_size_ - 1] = identity_;
+            index_[num_iter_ - 1] = identity_;
     }
 
     /// \brief Append a resampling index
     template <typename InputIter>
     void push_back(std::size_t N, InputIter first)
     {
-        ++iter_size_;
-        if (index_.size() < iter_size_)
+        ++num_iter_;
+        if (index_.size() < num_iter_)
             index_.emplace_back(N);
         else
-            index_[iter_size_ - 1].resize(N);
-        std::copy_n(first, N, index_[iter_size_ - 1].begin());
+            index_[num_iter_ - 1].resize(N);
+        std::copy_n(first, N, index_[num_iter_ - 1].begin());
     }
 
     index_type index(std::size_t id) const
     {
-        return index(id, iter_size_ - 1, 0);
+        return index(id, num_iter_ - 1, 0);
     }
 
     index_type index(std::size_t id, std::size_t iter_back) const
@@ -645,7 +645,7 @@ class ResampleIndex
     index_type index(
         std::size_t id, std::size_t iter_back, std::size_t iter) const
     {
-        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+        runtime_assert(iter <= iter_back && iter_back < num_iter(),
             "**ResampleIndex::index** iteration numbers out of range");
 
         index_type idx = index_.back()[id];
@@ -659,12 +659,12 @@ class ResampleIndex
 
     std::size_t index_matrix_nrow() const
     {
-        return index_matrix_nrow(iter_size_ - 1);
+        return index_matrix_nrow(num_iter_ - 1);
     }
 
     std::size_t index_matrix_nrow(std::size_t iter_back) const
     {
-        runtime_assert(iter_back < iter_size(),
+        runtime_assert(iter_back < num_iter(),
             "**ResampleIndex::index_matrix_nrow** iteration numbers out of "
             "range");
 
@@ -673,7 +673,7 @@ class ResampleIndex
 
     std::size_t index_matrix_ncol() const
     {
-        return index_matrix_ncol(iter_size_ - 1, 0);
+        return index_matrix_ncol(num_iter_ - 1, 0);
     }
 
     std::size_t index_matrix_ncol(std::size_t iter_back) const
@@ -684,7 +684,7 @@ class ResampleIndex
     std::size_t index_matrix_ncol(
         std::size_t iter_back, std::size_t iter) const
     {
-        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+        runtime_assert(iter <= iter_back && iter_back < num_iter(),
             "**ResampleIndex::index_matrix_ncol** iteration numbers out of "
             "range");
 
@@ -693,7 +693,7 @@ class ResampleIndex
 
     Vector<index_type> index_matrix(MatrixLayout layout) const
     {
-        return index_matrix(layout, iter_size_ - 1, 0);
+        return index_matrix(layout, num_iter_ - 1, 0);
     }
 
     Vector<index_type> index_matrix(
@@ -706,7 +706,7 @@ class ResampleIndex
     Vector<index_type> index_matrix(
         MatrixLayout layout, std::size_t iter_back, std::size_t iter) const
     {
-        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+        runtime_assert(iter <= iter_back && iter_back < num_iter(),
             "**ResampleIndex::index_matrix** iteration numbers out of range");
 
         Vector<index_type> idxmat(
@@ -719,7 +719,7 @@ class ResampleIndex
     template <typename RandomIter>
     RandomIter read_index_matrix(MatrixLayout layout, RandomIter first) const
     {
-        return read_index_matrix(layout, first, iter_size_ - 1, 0);
+        return read_index_matrix(layout, first, num_iter_ - 1, 0);
     }
 
     template <typename RandomIter>
@@ -742,7 +742,7 @@ class ResampleIndex
     RandomIter read_index_matrix(MatrixLayout layout, RandomIter first,
         std::size_t iter_back, std::size_t iter) const
     {
-        runtime_assert(iter <= iter_back && iter_back < iter_size(),
+        runtime_assert(iter <= iter_back && iter_back < num_iter(),
             "**ResampleIndex::read_index_matrix** iteration numbers out of "
             "range");
 
@@ -791,7 +791,7 @@ class ResampleIndex
     }
 
     private:
-    std::size_t iter_size_;
+    std::size_t num_iter_;
     Vector<index_type> identity_;
     Vector<Vector<index_type>> index_;
 
