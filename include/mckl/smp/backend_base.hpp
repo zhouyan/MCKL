@@ -100,23 +100,23 @@ class BackendTBB;
 /// \ingroup SMP
 using BackendSMP = MCKL_SMP_BACKEND;
 
-/// \brief Sampler<T>::eval_type
+/// \brief SMCSMCSampler<T>::eval_type
 /// \ingroup SMP
 template <typename T, typename = Virtual, typename = BackendSMP>
-class SamplerEvalSMP;
+class SMCSamplerEvalSMP;
 
-/// \brief Monitor<T>::eval_type
+/// \brief SMCEstimator<T>::eval_type
 /// \ingroup SMP
 template <typename T, typename = Virtual, typename = BackendSMP>
-class MonitorEvalSMP;
+class SMCEstimatorEvalSMP;
 
-/// \brief Sampler evaluation base dispatch class
+/// \brief SMCSampler evaluation base dispatch class
 /// \ingroup SMP
 template <typename T, typename Derived>
-class SamplerEvalBase
+class SMCSamplerEvalBase
 {
     protected:
-    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL(SamplerEval)
+    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL(SMCSamplerEval)
 
     void eval_each(std::size_t iter, ParticleIndex<T> idx)
     {
@@ -228,35 +228,35 @@ class SamplerEvalBase
     // base
 
     void eval_dispatch(std::size_t, ParticleIndex<T>,
-        void (SamplerEvalBase::*)(std::size_t, ParticleIndex<T>))
+        void (SMCSamplerEvalBase::*)(std::size_t, ParticleIndex<T>))
     {
     }
 
     void eval_range_dispatch(std::size_t iter, const ParticleRange<T> &range,
-        void (SamplerEvalBase::*)(std::size_t, const ParticleRange<T> &))
+        void (SMCSamplerEvalBase::*)(std::size_t, const ParticleRange<T> &))
     {
         for (auto idx : range)
             eval_each(iter, idx);
     }
 
     void eval_first_dispatch(std::size_t, Particle<T> &,
-        void (SamplerEvalBase::*)(std::size_t, Particle<T> &))
+        void (SMCSamplerEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
 
     void eval_last_dispatch(std::size_t, Particle<T> &,
-        void (SamplerEvalBase::*)(std::size_t, Particle<T> &))
+        void (SMCSamplerEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
-}; // class SamplerEvalBase
+}; // class SMCSamplerEvalBase
 
 /// \brief Mampler evaluation base dispatch class
 /// \ingroup SMP
 template <typename T>
-class SamplerEvalBase<T, Virtual>
+class SMCSamplerEvalBase<T, Virtual>
 {
     protected:
-    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(SamplerEval)
+    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(SMCSamplerEval)
 
     virtual void eval_each(std::size_t, ParticleIndex<T>) {}
 
@@ -269,15 +269,15 @@ class SamplerEvalBase<T, Virtual>
     virtual void eval_first(std::size_t, Particle<T> &) {}
 
     virtual void eval_last(std::size_t, Particle<T> &) {}
-}; // class SamplerEvalBase<T, Virtual>
+}; // class SMCSamplerEvalBase<T, Virtual>
 
-/// \brief Monitor evalution base dispatch class
+/// \brief SMCEstimator evalution base dispatch class
 /// \ingroup SMP
 template <typename T, typename Derived>
-class MonitorEvalBase
+class SMCEstimatorEvalBase
 {
     protected:
-    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL(MonitorEval)
+    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL(SMCEstimatorEval)
 
     void eval_each(
         std::size_t iter, std::size_t dim, ParticleIndex<T> idx, double *r)
@@ -399,14 +399,14 @@ class MonitorEvalBase
     // base
 
     void eval_dispatch(std::size_t, std::size_t, ParticleIndex<T>, double *,
-        void (MonitorEvalBase::*)(
+        void (SMCEstimatorEvalBase::*)(
             std::size_t, std::size_t, ParticleIndex<T>, double *))
     {
     }
 
     void eval_range_dispatch(std::size_t iter, std::size_t dim,
         const ParticleRange<T> &range, double *r,
-        void (MonitorEvalBase::*)(
+        void (SMCEstimatorEvalBase::*)(
             std::size_t, std::size_t, const ParticleRange<T> &, double *))
     {
         for (auto idx : range) {
@@ -416,23 +416,23 @@ class MonitorEvalBase
     }
 
     void eval_first_dispatch(std::size_t, Particle<T> &,
-        void (MonitorEvalBase::*)(std::size_t, Particle<T> &))
+        void (SMCEstimatorEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
 
     void eval_last_dispatch(std::size_t, Particle<T> &,
-        void (MonitorEvalBase::*)(std::size_t, Particle<T> &))
+        void (SMCEstimatorEvalBase::*)(std::size_t, Particle<T> &))
     {
     }
-}; // class MonitorBase
+}; // class SMCEstimatorBase
 
-/// \brief Monitor evalution base dispatch class
+/// \brief SMCEstimator evalution base dispatch class
 /// \ingroup SMP
 template <typename T>
-class MonitorEvalBase<T, Virtual>
+class SMCEstimatorEvalBase<T, Virtual>
 {
     protected:
-    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(MonitorEval)
+    MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(SMCEstimatorEval)
 
     virtual void eval_each(
         std::size_t, std::size_t, ParticleIndex<T>, double *)
@@ -451,7 +451,7 @@ class MonitorEvalBase<T, Virtual>
     virtual void eval_first(std::size_t, Particle<T> &) {}
 
     virtual void eval_last(std::size_t, Particle<T> &) {}
-}; // class MonitorEvalBase<T, Virtual>
+}; // class SMCEstimatorEvalBase<T, Virtual>
 
 } // namespace mckl
 

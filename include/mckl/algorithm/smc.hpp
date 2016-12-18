@@ -36,6 +36,7 @@
 #include <mckl/algorithm/resample.hpp>
 #include <mckl/core/estimator.hpp>
 #include <mckl/core/particle.hpp>
+#include <mckl/core/sampler.hpp>
 #include <mckl/core/state_matrix.hpp>
 
 namespace mckl
@@ -51,7 +52,7 @@ class SMCEstimator
         "**SMCEsimator** used with estimate type U not convertible to double");
 
     public:
-    SMCEstimator() = default;
+    SMCEstimator() : layout_(RowMajor), record_only_(false) {}
 
     SMCEstimator(std::size_t dim)
         : Estimator<U, std::size_t, std::size_t, Particle<T> &, U *>(dim)
@@ -148,15 +149,27 @@ class SMCEstimator
     }
 }; // class SMCEstimator
 
+template <typename, typename>
+class SMCSampler;
+
+template <typename T, typename U>
+class SamplerTrait<SMCSampler<T, U>>
+{
+    public:
+    using eval_type = std::function<void(std::size_t, Particle<T> &)>;
+    using estimator_type = SMCEstimator<T, U>;
+}; // class SamplerTrait
+
 /// \brief SMC sampler
 /// \ingroup SMC
 template <typename T, typename U = double>
-class SMCSampler
+class SMCSampler : public Sampler<SMCSampler<T, U>>
 {
     public:
+    using state_type = T;
     using size_type = typename Particle<T>::size_type;
-    using eval_type = std::function<void(std::size_t, Particle<T> &)>;
-    using estimator_type = SMCEstimator<T, U>;
+    using eval_type = typename Sampler<SMCSampler<T, U>>::eval_type;
+    using estimator_type = typename Sampler<SMCSampler<T, U>>::estimator_type;
 
     SMCSampler() : iter_(0), resample_threshold_(resample_threshold_never()) {}
 
@@ -166,16 +179,17 @@ class SMCSampler
     /// All arguments are passed to the constructor of Particle
     template <typename... Args>
     explicit SMCSampler(size_type N, Args &&... args)
-        : particle_(N, std::forward<Args>(args)...)
+        : Sampler<SMCSampler<T, U>>(3)
+        , particle_(N, std::forward<Args>(args)...)
         , iter_(0)
         , resample_threshold_(resample_threshold_never())
     {
     }
 
     /// \brief Clone the SMC sampler except the RNG engines
-    SMCSampler<T> clone() const
+    SMCSampler<T, U> clone() const
     {
-        SMCSampler<T> sampler(*this);
+        SMCSampler<T, U> sampler(*this);
         sampler.particle().rng_set().reset();
         sampler.particle().rng().seed(
             Seed<typename Particle<T>::rng_type>::instance().get());
@@ -192,12 +206,7 @@ class SMCSampler
     /// \brief Reserve space for a specified number of iterations
     void reserve(std::size_t n)
     {
-        for (auto &e : estimator_s_)
-            e.second.reserve(n);
-        for (auto &e : estimator_r_)
-            e.second.reserve(n);
-        for (auto &e : estimator_m_)
-            e.second.reserve(n);
+        Sampler<SMCSampler<T, U>>::reserve(n);
         n += num_iter();
         size_history_.reserve(n);
         ess_history_.reserve(n);
@@ -207,26 +216,15 @@ class SMCSampler
     /// estimators
     void reset()
     {
-        eval_s_.clear();
-        eval_r_.clear();
-        eval_m_.clear();
-        estimator_s_.clear();
-        estimator_r_.clear();
-        estimator_m_.clear();
+        Sampler<SMCSampler<T, U>>::reset();
         clear();
     }
 
     /// \brief Clear all history
     void clear()
     {
+        Sampler<SMCSampler<T, U>>::clear();
         iter_ = 0;
-        particle_.weight().set_equal();
-        for (auto &e : estimator_s_)
-            e.second.clear();
-        for (auto &e : estimator_r_)
-            e.second.clear();
-        for (auto &e : estimator_m_)
-            e.second.clear();
         size_history_.clear();
         ess_history_.clear();
     }
@@ -252,14 +250,7 @@ class SMCSampler
     template <typename Eval>
     void selection(Eval &&eval)
     {
-        runtime_assert(num_iter() == 0,
-            "**SMCSampler::selection** used after first iteration");
-
-        eval_s_.emplace_back(std::forward<Eval>(eval));
-
-        runtime_assert(static_cast<bool>(eval_s_.back()),
-            "**SMCSampler::selection** used with an invalid evaluation "
-            "object");
+        this->eval(0, std::forward<Eval>(eval));
     }
 
     /// \brief Add a new evaluation object for the selection step
@@ -268,22 +259,13 @@ class SMCSampler
         std::enable_if_t<!std::is_convertible<Eval, ResampleScheme>::value> * =
             nullptr)
     {
-        runtime_assert(num_iter() == 0,
-            "**SMCSampler::resample** used after first iteration");
-
-        eval_r_.emplace_back(std::forward<Eval>(eval));
-
-        runtime_assert(static_cast<bool>(eval_r_.back()),
-            "**SMCSampler::resample** used with an invalid evaluation object");
+        this->eval(1, std::forward<Eval>(eval));
     }
 
     /// \brief Add a new evaluation object for the resample step by a built-in
     /// resample scheme
     void resample(ResampleScheme scheme)
     {
-        runtime_assert(num_iter() == 0,
-            "**SMCSampler::resample** used after first iteration");
-
         switch (scheme) {
             case Multinomial:
                 resample(ResampleEval<T>(ResampleMultinomial()));
@@ -310,62 +292,47 @@ class SMCSampler
     template <typename Eval>
     void mutation(Eval &&eval)
     {
-        runtime_assert(num_iter() == 0,
-            "**SMCSampler::mutation** used after first iteration");
-
-        eval_m_.emplace_back(std::forward<Eval>(eval));
-
-        runtime_assert(static_cast<bool>(eval_m_.back()),
-            "**SMCSampler::mutation** used with an invalid evaluation object");
+        this->eval(2, std::forward<Eval>(eval));
     }
 
     /// \brief Attach a new estimator and return a reference to it
     std::string selection_estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
-        runtime_assert(num_iter() == 0,
-            "**SMCSampler::selection_estimator** used after first iteration");
-
-        return insert_estimator(estimator_s_, estimator, name);
+        return this->estimator(0, estimator, name);
     }
 
     /// \brief Attach a new estimator and return a reference to it
     std::string resample_estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
-        runtime_assert(num_iter() == 0,
-            "**SMCSampler::resample_estimator** used after first iteration");
-
-        return insert_estimator(estimator_r_, estimator, name);
+        return this->estimator(1, estimator, name);
     }
 
     /// \brief Attach a new estimator and return a reference to it
     std::string mutation_estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
-        runtime_assert(num_iter() == 0,
-            "**SMCSampler::mutation_estimator** used after first iteration");
-
-        return insert_estimator(estimator_m_, estimator, name);
+        return this->estimator(2, estimator, name);
     }
 
     /// \brief Get read only access to estimator in the selection step given
     /// (partial) name
     const estimator_type &estimator_selection(const std::string &name) const
     {
-        return find_estimator(estimator_s_, name);
+        return this->estimator(0, name);
     }
 
     /// \brief Get read only access to estimator in the resample step
     const estimator_type &estimator_resample(const std::string &name) const
     {
-        return find_estimator(estimator_r_, name);
+        return this->estimator(1, name);
     }
 
     /// \brief Get read only access to estimator in the mutation step
     const estimator_type &estimator_mutation(const std::string &name) const
     {
-        return find_estimator(estimator_m_, name);
+        return this->estimator(2, name);
     }
 
     /// \brief Iterate the sampler
@@ -383,18 +350,12 @@ class SMCSampler
     /// \brief Read only access to the Particle<T> object
     const Particle<T> &particle() const { return particle_; }
 
-    /// \brief Get the sample size given an iteration number
-    size_type size_history(std::size_t t) const { return size_history_[t]; }
-
     /// \brief Read history the sampler sizes
     template <typename OutputIter>
     OutputIter read_size_history(OutputIter first) const
     {
         return std::copy(size_history_.begin(), size_history_.end(), first);
     }
-
-    /// \brief Get the value of ESS given an iteration
-    double ess_history(std::size_t t) const { return ess_history_[t]; }
 
     /// \brief Read the history of the values of ESS
     template <typename OutputIter>
@@ -403,164 +364,43 @@ class SMCSampler
         return std::copy(ess_history_.begin(), ess_history_.end(), first);
     }
 
-    /// \brief Summary of SMC sampler history
-    std::map<std::string, Vector<double>> summary() const
-    {
-        std::map<std::string, Vector<double>> df;
-        Vector<double> data(num_iter());
-
-        std::copy(size_history_.begin(), size_history_.end(), data.begin());
-        df["Size"] = data;
-
-        df["ESS"] = ess_history_;
-
-        for (const auto &e : estimator_s_) {
-            for (std::size_t i = 0; i != e.second.dim(); ++i) {
-                e.second.read_variable(i, data.begin());
-                df[e.first + "." + std::to_string(i)] = data;
-            }
-        }
-
-        for (const auto &e : estimator_r_) {
-            for (std::size_t i = 0; i != e.second.dim(); ++i) {
-                e.second.read_variable(i, data.begin());
-                df[e.first + "." + std::to_string(i)] = data;
-            }
-        }
-
-        for (const auto &e : estimator_m_) {
-            for (std::size_t i = 0; i != e.second.dim(); ++i) {
-                e.second.read_variable(i, data.begin());
-                df[e.first + "." + std::to_string(i)] = data;
-            }
-        }
-
-        return df;
-    }
-
-    /// \brief Print the history of the SMC sampler
-    ///
-    /// \param os The ostream to which the contents are printed
-    /// \param sepchar The seperator of fields
-    template <typename CharT, typename Traits>
-    std::basic_ostream<CharT, Traits> &print(
-        std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
-    {
-        if (!os || num_iter() == 0)
-            return os;
-
-        const auto df = summary();
-
-        for (const auto &v : df)
-            os << v.first << sepchar;
-        os << '\n';
-        for (std::size_t i = 0; i != num_iter(); ++i) {
-            for (const auto &v : df)
-                os << v.second[i] << sepchar;
-            os << '\n';
-        }
-
-        return os;
-    }
-
     private:
     Particle<T> particle_;
     std::size_t iter_;
     double resample_threshold_;
-    Vector<eval_type> eval_s_;
-    Vector<eval_type> eval_r_;
-    Vector<eval_type> eval_m_;
-    Vector<std::pair<std::string, estimator_type>> estimator_s_;
-    Vector<std::pair<std::string, estimator_type>> estimator_r_;
-    Vector<std::pair<std::string, estimator_type>> estimator_m_;
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
 
-    std::string insert_estimator(
-        Vector<std::pair<std::string, estimator_type>> &vector,
-        const estimator_type &estimator, const std::string &name)
-    {
-        auto find = [&vector](const std::string &vname) {
-            return std::find_if(vector.begin(), vector.end(),
-                [&vname](auto &iter) { return iter.first == vname; });
-        };
-
-        std::string vname(name);
-        if (name.empty()) {
-            const std::string v("V");
-            int i = 0;
-            while (find(v + std::to_string(i)) != vector.end())
-                ++i;
-            vname = "V" + std::to_string(i);
-        } else {
-            auto f = find(vname);
-            if (f != vector.end())
-                vector.erase(f);
-        }
-        vector.emplace_back(vname, estimator);
-
-        return vname;
-    }
-
-    const estimator_type &find_estimator(
-        Vector<std::pair<std::string, estimator_type>> &vector,
-        const std::string &name) const
-    {
-        auto exact = std::find_if(vector.begin(), vector.end(),
-            [&name](auto &iter) { return iter.first == name; });
-        if (exact != vector.end())
-            return exact->second;
-
-        auto partial =
-            std::find_if(vector.begin(), vector.end(), [&name](auto &iter) {
-                return iter.first.find(name) != std::string::npos;
-            });
-        if (partial != vector.end())
-            return partial->second;
-
-        runtime_assert(
-            false, "**SMCSampler::estimator** not found with the given name");
-
-        return vector.front().second;
-    }
-
     void do_iterate()
     {
-        do_eval(eval_s_);
-        do_estimate(estimator_s_);
+        do_eval(0);
+        do_estimate(0);
 
         size_history_.push_back(size());
         ess_history_.push_back(particle_.weight().ess());
 
         if (ess_history_.back() < size() * resample_threshold_)
-            do_eval(eval_r_);
-        do_estimate(estimator_r_);
+            do_eval(1);
+        do_estimate(1);
 
-        do_eval(eval_m_);
-        do_estimate(estimator_m_);
+        do_eval(2);
+        do_estimate(2);
 
         ++iter_;
     }
 
-    void do_eval(Vector<eval_type> &vector)
+    void do_eval(std::size_t step)
     {
-        for (auto &eval : vector)
+        for (auto &eval : this->eval(step))
             eval(iter_, particle_);
     }
 
-    void do_estimate(Vector<std::pair<std::string, estimator_type>> &vector)
+    void do_estimate(std::size_t step)
     {
-        for (auto &e : vector)
+        for (auto &e : this->estimator(step))
             e.second.estimate(iter_, particle_);
     }
 }; // class SMCSampler
-
-template <typename CharT, typename Traits, typename T, typename U>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const SMCSampler<T, U> &sampler)
-{
-    return sampler.print(os);
-}
 
 } // namespace mckl
 

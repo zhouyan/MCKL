@@ -35,6 +35,7 @@
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/mh.hpp>
 #include <mckl/core/estimator.hpp>
+#include <mckl/core/sampler.hpp>
 #include <mckl/random/rng.hpp>
 
 namespace mckl
@@ -55,19 +56,32 @@ class MCMCEstimator : public Estimator<U, std::size_t, std::size_t, T &, U *>
     }
 }; // class MCMCEstimator
 
+template <typename, typename>
+class MCMCSampler;
+
+template <typename T, typename U>
+class SamplerTrait<MCMCSampler<T, U>>
+{
+    public:
+    using eval_type = std::function<std::size_t(std::size_t, T &)>;
+    using estimator_type = MCMCEstimator<T, U>;
+}; // class SamplerTrait
+
 /// \brief MCMC sampler
 /// \ingroup MCMC
 template <typename T, typename U>
-class MCMCSampler
+class MCMCSampler : public Sampler<MCMCSampler<T, U>>
 {
     public:
     using state_type = T;
-    using eval_type = std::function<std::size_t(std::size_t, state_type &)>;
-    using estimator_type = MCMCEstimator<T, U>;
+    using eval_type = typename Sampler<MCMCSampler<T, U>>::eval_type;
+    using estimator_type = typename Sampler<MCMCSampler<T, U>>::estimator_type;
 
     template <typename... Args>
     explicit MCMCSampler(Args &&... args)
-        : state_(std::forward<Args>(args)...), iter_(0)
+        : Sampler<MCMCSampler<T, U>>(1)
+        , state_(std::forward<Args>(args)...)
+        , iter_(0)
     {
     }
 
@@ -81,8 +95,7 @@ class MCMCSampler
     /// \brief Reserve space for a specified number of iterations
     void reserve(std::size_t n)
     {
-        for (auto &e : estimator_)
-            e.second.reserve(n);
+        Sampler<MCMCSampler<T, U>>::reserve(n);
         for (auto &a : accept_history_)
             a.reserve(num_iter() + n);
     }
@@ -91,17 +104,15 @@ class MCMCSampler
     /// estimators
     void reset()
     {
-        eval_.clear();
-        estimator_.clear();
+        Sampler<MCMCSampler<T, U>>::reset();
         clear();
     }
 
     /// \brief Clear all history
     void clear()
     {
+        Sampler<MCMCSampler<T, U>>::clear();
         iter_ = 0;
-        for (auto &e : estimator_)
-            e.second.clear();
         accept_history_.clear();
     }
 
@@ -109,60 +120,18 @@ class MCMCSampler
     template <typename Eval>
     void mutation(Eval &&eval)
     {
-        runtime_assert(num_iter() == 0,
-            "**MCMCSampler::mutation** used after first iteration");
-
-        eval_.emplace_back(std::forward<Eval>(eval));
-        accept_history_.emplace_back(0);
-
-        runtime_assert(static_cast<bool>(eval_.back()),
-            "**MCMCSampler::mutation** used with an invalid evaluation "
-            "object");
+        this->eval(0, std::forward<Eval>(eval));
     }
 
     std::string estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
-        auto find = [this](const std::string &vname) {
-            return std::find_if(estimator_.begin(), estimator_.end(),
-                [&vname](auto &iter) { return iter.first == vname; });
-        };
-
-        std::string vname(name);
-        if (name.empty()) {
-            const std::string v("V");
-            int i = 0;
-            while (find(v + std::to_string(i)) != estimator_.end())
-                ++i;
-            vname = "V" + std::to_string(i);
-        } else {
-            auto f = find(vname);
-            if (f != estimator_.end())
-                estimator_.erase(f);
-        }
-        estimator_.emplace_back(vname, estimator);
-
-        return vname;
+        return Sampler<MCMCSampler<T, U>>::estimator(0, estimator, name);
     }
 
     const estimator_type &estimator(const std::string &name) const
     {
-        auto exact = std::find_if(estimator_.begin(), estimator_.end(),
-            [&name](auto &iter) { return iter.first == name; });
-        if (exact != estimator_.end())
-            return exact->second;
-
-        auto partial = std::find_if(
-            estimator_.begin(), estimator_.end(), [&name](auto &iter) {
-                return iter.first.find(name) != std::string::npos;
-            });
-        if (partial != estimator_.end())
-            return partial->second;
-
-        runtime_assert(
-            false, "**MCMCSampler::estimator** not found with the given name");
-
-        return estimator_.front().second;
+        return Sampler<MCMCSampler<T, U>>::estimator(0, name);
     }
 
     /// \brief Iterate the sampler
@@ -180,77 +149,54 @@ class MCMCSampler
     /// \brief Read only access to the state object
     const state_type &state() const { return state_; }
 
-    std::map<std::string, Vector<U>> summary() const
+    /// \brief Read accept count history given mutation step index
+    template <typename OutputIter>
+    OutputIter read_accept_history(std::size_t i, OutputIter first) const
     {
-        std::map<std::string, Vector<U>> df;
-        Vector<U> data(num_iter());
+        runtime_assert(i < accept_history_.size(),
+            "**MCMCSampler::read_accept_history** index out of range");
 
-        for (std::size_t i = 0; i != accept_history_.size(); ++i) {
-            std::copy(accept_history_[i].begin(), accept_history_[i].end(),
-                data.begin());
-            df["Accept." + std::to_string(i)] = data;
-        }
-
-        for (const auto &e : estimator_) {
-            for (std::size_t i = 0; i != e.second.dim(); ++i) {
-                e.second.read_variable(i, data.begin());
-                df[e.first + "." + std::to_string(i)] = data;
-            }
-        }
-
-        return df;
+        return std::copy(
+            accept_history_[i].begin(), accept_history_[i].end(), first);
     }
 
-    /// \brief Print the history of the MCMC sampler
-    ///
-    /// \param os The ostream to which the contents are printed
-    /// \param sepchar The seperator of fields
-    template <typename CharT, typename Traits>
-    std::basic_ostream<CharT, Traits> &print(
-        std::basic_ostream<CharT, Traits> &os, char sepchar = '\t') const
+    /// \brief Read all accept count history into a matrix
+    template <typename OutputIter>
+    OutputIter read_accept_history(MatrixLayout layout, OutputIter first) const
     {
-        if (!os || num_iter() == 0)
-            return os;
-
-        const auto df = summary();
-
-        for (const auto &v : df)
-            os << v.first << sepchar;
-        os << '\n';
-        for (std::size_t i = 0; i != num_iter(); ++i) {
-            for (const auto &v : df)
-                os << v.second[i] << sepchar;
-            os << '\n';
+        if (layout == RowMajor) {
+            if (accept_history_.size() > 0) {
+                const std::size_t n = accept_history_.front().size();
+                const std::size_t d = accept_history_.size();
+                for (std::size_t i = 0; i != n; ++i)
+                    for (std::size_t j = 0; j != d; ++j)
+                        *first++ = accept_history_[j][i];
+            }
+        } else {
+            for (std::size_t i = 0; i != accept_history_.size(); ++i)
+                first = read_accept_history(i, first);
         }
 
-        return os;
+        return first;
     }
 
     private:
     state_type state_;
     std::size_t iter_;
-    Vector<eval_type> eval_;
-    Vector<std::pair<std::string, estimator_type>> estimator_;
     Vector<Vector<std::size_t>> accept_history_;
 
     void do_iterate()
     {
-        for (std::size_t i = 0; i != eval_.size(); ++i)
-            accept_history_[i].push_back(eval_[i](iter_, state_));
+        accept_history_.resize(this->eval(0).size());
+        for (std::size_t i = 0; i != this->eval(0).size(); ++i)
+            accept_history_[i].push_back(this->eval(0)[i](iter_, state_));
 
-        for (auto &e : estimator_)
+        for (auto &e : Sampler<MCMCSampler<T, U>>::estimator(0))
             e.second.estimate(iter_, state_);
 
         ++iter_;
     }
 }; // class MCMCSampler
-
-template <typename CharT, typename Traits, typename T, typename U>
-inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const MCMCSampler<T, U> &sampler)
-{
-    return sampler.print(os);
-}
 
 } // namespace mckl
 

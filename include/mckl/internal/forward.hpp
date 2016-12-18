@@ -56,7 +56,7 @@ class ParticleRange;
 template <typename>
 class Particle;
 
-template <typename, typename = double>
+template <typename>
 class Sampler;
 
 class Weight;

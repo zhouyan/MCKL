@@ -52,18 +52,19 @@ inline ::tbb::blocked_range<IntType> backend_tbb_range(
 
 } // namespace mckl::internal
 
-/// \brief Sampler<T>::eval_type subtype using Intel Threading Building Blocks
+/// \brief SMCSampler<T>::eval_type subtype using Intel Threading Building
+/// Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class SamplerEvalSMP<T, Derived, BackendTBB>
-    : public SamplerEvalBase<T, Derived>
+class SMCSamplerEvalSMP<T, Derived, BackendTBB>
+    : public SMCSamplerEvalBase<T, Derived>
 {
     class work_type
     {
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(SamplerEvalSMP<T, Derived, BackendTBB> *wptr,
+        work_type(SMCSamplerEvalSMP<T, Derived, BackendTBB> *wptr,
             std::size_t iter, Particle<T> *pptr)
             : wptr_(wptr), iter_(iter), pptr_(pptr)
         {
@@ -75,7 +76,7 @@ class SamplerEvalSMP<T, Derived, BackendTBB>
         }
 
         private:
-        SamplerEvalSMP<T, Derived, BackendTBB> *const wptr_;
+        SMCSamplerEvalSMP<T, Derived, BackendTBB> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
     }; // class work_type
@@ -87,7 +88,7 @@ class SamplerEvalSMP<T, Derived, BackendTBB>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(TBB, SamplerEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(TBB, SMCSamplerEval)
 
     void run(std::size_t iter, Particle<T> &particle)
     {
@@ -104,20 +105,21 @@ class SamplerEvalSMP<T, Derived, BackendTBB>
             work_type(this, iter, &particle), std::forward<Args>(args)...);
         this->eval_last(iter, particle);
     }
-}; // class SamplerEvalSMP
+}; // class SMCSamplerEvalSMP
 
-/// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
+/// \brief SMCEstimator<T>::eval_type subtype using Intel Threading Building
+/// Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-class MonitorEvalSMP<T, Derived, BackendTBB>
-    : public MonitorEvalBase<T, Derived>
+class SMCEstimatorEvalSMP<T, Derived, BackendTBB>
+    : public SMCEstimatorEvalBase<T, Derived>
 {
     class work_type
     {
         public:
         using size_type = typename Particle<T>::size_type;
 
-        work_type(MonitorEvalSMP<T, Derived, BackendTBB> *wptr,
+        work_type(SMCEstimatorEvalSMP<T, Derived, BackendTBB> *wptr,
             std::size_t iter, std::size_t dim, Particle<T> *pptr, double *r)
             : wptr_(wptr), iter_(iter), dim_(dim), pptr_(pptr), r_(r)
         {
@@ -131,7 +133,7 @@ class MonitorEvalSMP<T, Derived, BackendTBB>
         }
 
         private:
-        MonitorEvalSMP<T, Derived, BackendTBB> *const wptr_;
+        SMCEstimatorEvalSMP<T, Derived, BackendTBB> *const wptr_;
         const std::size_t iter_;
         const std::size_t dim_;
         Particle<T> *const pptr_;
@@ -146,7 +148,7 @@ class MonitorEvalSMP<T, Derived, BackendTBB>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(TBB, MonitorEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(TBB, SMCEstimatorEval)
 
     void run(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
@@ -165,17 +167,19 @@ class MonitorEvalSMP<T, Derived, BackendTBB>
             std::forward<Args>(args)...);
         this->eval_last(iter, particle);
     }
-}; // class MonitorEvalSMP
+}; // class SMCEstimatorEvalSMP
 
-/// \brief Sampler<T>::eval_type subtype using Intel Threading Building Blocks
+/// \brief SMCSampler<T>::eval_type subtype using Intel Threading Building
+/// Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-using SamplerEvalTBB = SamplerEvalSMP<T, Derived, BackendTBB>;
+using SMCSamplerEvalTBB = SMCSamplerEvalSMP<T, Derived, BackendTBB>;
 
-/// \brief Monitor<T>::eval_type subtype using Intel Threading Building Blocks
+/// \brief SMCEstimator<T>::eval_type subtype using Intel Threading Building
+/// Blocks
 /// \ingroup TBB
 template <typename T, typename Derived>
-using MonitorEvalTBB = MonitorEvalSMP<T, Derived, BackendTBB>;
+using SMCEstimatorEvalTBB = SMCEstimatorEvalSMP<T, Derived, BackendTBB>;
 
 } // namespace mckl
 

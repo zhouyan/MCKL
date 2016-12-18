@@ -63,11 +63,11 @@ inline void backend_omp_range(IntType N, IntType &ibegin, IntType &iend)
 
 } // namespace mckl::internal
 
-/// \brief Sampler<T>::eval_type subtype using OpenMP
+/// \brief SMCSampler<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class SamplerEvalSMP<T, Derived, BackendOMP>
-    : public SamplerEvalBase<T, Derived>
+class SMCSamplerEvalSMP<T, Derived, BackendOMP>
+    : public SMCSamplerEvalBase<T, Derived>
 {
     public:
     void operator()(std::size_t iter, Particle<T> &particle)
@@ -76,7 +76,7 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SamplerEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SMCSamplerEval)
 
     void run(std::size_t iter, Particle<T> &particle)
     {
@@ -101,13 +101,13 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
         }
         this->eval_last(iter, particle);
     }
-}; // class SamplerEvalSMP
+}; // class SMCSamplerEvalSMP
 
-/// \brief Monitor<T>::eval_type subtype using OpenMP
+/// \brief SMCEstimator<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MonitorEvalSMP<T, Derived, BackendOMP>
-    : public MonitorEvalBase<T, Derived>
+class SMCEstimatorEvalSMP<T, Derived, BackendOMP>
+    : public SMCEstimatorEvalBase<T, Derived>
 {
     public:
     void operator()(
@@ -117,7 +117,7 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SMCEstimatorEval)
 
     void run(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
@@ -145,17 +145,17 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
         }
         this->eval_last(iter, particle);
     }
-}; // class MonitorEvalSMP
+}; // class SMCEstimatorEvalSMP
 
-/// \brief Sampler<T>::eval_type subtype using OpenMP
+/// \brief SMCSampler<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using SamplerEvalOMP = SamplerEvalSMP<T, Derived, BackendOMP>;
+using SMCSamplerEvalOMP = SMCSamplerEvalSMP<T, Derived, BackendOMP>;
 
-/// \brief Monitor<T>::eval_type subtype using OpenMP
+/// \brief SMCEstimator<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using MonitorEvalOMP = MonitorEvalSMP<T, Derived, BackendOMP>;
+using SMCEstimatorEvalOMP = SMCEstimatorEvalSMP<T, Derived, BackendOMP>;
 
 } // namespace mckl
 
