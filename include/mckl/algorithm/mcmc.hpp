@@ -34,7 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/mh.hpp>
-#include <mckl/core/estimate_matrix.hpp>
+#include <mckl/core/estimator.hpp>
 #include <mckl/random/rng.hpp>
 
 namespace mckl
@@ -42,82 +42,28 @@ namespace mckl
 
 /// \brief MCMC estimator
 /// \ingroup MCMC
-template <typename T>
-class MCMCEstimator : public EstimateMatrix<double, 0>
+template <typename T, typename U>
+class MCMCEstimator : public Estimator<U, std::size_t, std::size_t, T &, U *>
 {
     public:
-    using state_type = T;
-    using eval_type =
-        std::function<void(std::size_t, std::size_t, state_type &, double *)>;
+    using Estimator<U, std::size_t, std::size_t, T &, U *>::Estimator;
+    using Estimator<U, std::size_t, std::size_t, T &, U *>::estimate;
 
-    template <typename Eval>
-    MCMCEstimator(std::size_t dim, Eval &&eval)
-        : EstimateMatrix<double, 0>(0, dim), eval_(std::forward<Eval>(eval))
+    void estimate(std::size_t iter, T &state)
     {
-        runtime_assert(static_cast<bool>(eval_),
-            "**MCMCEstimator::MCMCEstimator** used with an invalid evaluation "
-            "object");
+        this->eval(iter, this->dim(), state, this->insert_estimate());
     }
-
-    /// \brief Set a new evaluation object
-    template <typename Eval>
-    void estimate(Eval &&eval)
-    {
-        eval_ = std::forward<Eval>(eval);
-
-        runtime_assert(static_cast<bool>(eval_),
-            "**MCMCEstimator::estimate** used with an invalid evaluation "
-            "object");
-    }
-
-    /// \brief Perform the evaluation given the iteration number and the state
-    void operator()(std::size_t iter, state_type &state)
-    {
-        eval_(iter, this->dim(), state, this->insert_estimate());
-    }
-
-    /// \brief Get the average of estimates after `cut` iterations using every
-    /// `thin` elements
-    template <typename OutputIter>
-    OutputIter average(
-        OutputIter first, std::size_t cut = 0, std::size_t thin = 1) const
-    {
-        const std::size_t N = num_iter();
-
-        if (cut >= N)
-            return std::fill_n(first, this->dim(), -const_nan<double>());
-
-        thin = thin < 1 ? 1 : thin;
-        if (N - cut < thin)
-            return this->read_estimate(cut, first);
-
-        if (thin < 1)
-            thin = 1;
-        Vector<double> sum(this->dim());
-        std::fill(sum.begin(), sum.end(), 0);
-        std::size_t n = 0;
-        while (cut < num_iter()) {
-            add(this->dim(), this->row_data(cut), sum.data(), sum.data());
-            cut += thin;
-            ++n;
-        }
-        mul(this->dim(), 1.0 / n, sum.data(), sum.data());
-
-        return std::copy(sum.begin(), sum.end(), first);
-    }
-
-    private:
-    eval_type eval_;
 }; // class MCMCEstimator
 
 /// \brief MCMC sampler
 /// \ingroup MCMC
-template <typename T>
+template <typename T, typename U>
 class MCMCSampler
 {
     public:
     using state_type = T;
     using eval_type = std::function<std::size_t(std::size_t, state_type &)>;
+    using estimator_type = MCMCEstimator<T, U>;
 
     template <typename... Args>
     explicit MCMCSampler(Args &&... args)
@@ -174,7 +120,7 @@ class MCMCSampler
             "object");
     }
 
-    std::string estimator(const MCMCEstimator<T> &estimator,
+    std::string estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
         auto find = [this](const std::string &vname) {
@@ -199,7 +145,7 @@ class MCMCSampler
         return vname;
     }
 
-    const MCMCEstimator<T> &estimator(const std::string &name) const
+    const estimator_type &estimator(const std::string &name) const
     {
         auto exact = std::find_if(estimator_.begin(), estimator_.end(),
             [&name](auto &iter) { return iter.first == name; });
@@ -234,10 +180,10 @@ class MCMCSampler
     /// \brief Read only access to the state object
     const state_type &state() const { return state_; }
 
-    std::map<std::string, Vector<double>> summary() const
+    std::map<std::string, Vector<U>> summary() const
     {
-        std::map<std::string, Vector<double>> df;
-        Vector<double> data(num_iter());
+        std::map<std::string, Vector<U>> df;
+        Vector<U> data(num_iter());
 
         for (std::size_t i = 0; i != accept_history_.size(); ++i) {
             std::copy(accept_history_[i].begin(), accept_history_[i].end(),
@@ -284,7 +230,7 @@ class MCMCSampler
     state_type state_;
     std::size_t iter_;
     Vector<eval_type> eval_;
-    Vector<std::pair<std::string, MCMCEstimator<T>>> estimator_;
+    Vector<std::pair<std::string, estimator_type>> estimator_;
     Vector<Vector<std::size_t>> accept_history_;
 
     void do_iterate()
@@ -293,15 +239,15 @@ class MCMCSampler
             accept_history_[i].push_back(eval_[i](iter_, state_));
 
         for (auto &e : estimator_)
-            e.second(iter_, state_);
+            e.second.estimate(iter_, state_);
 
         ++iter_;
     }
 }; // class MCMCSampler
 
-template <typename CharT, typename Traits, typename T>
+template <typename CharT, typename Traits, typename T, typename U>
 inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const MCMCSampler<T> &sampler)
+    std::basic_ostream<CharT, Traits> &os, const MCMCSampler<T, U> &sampler)
 {
     return sampler.print(os);
 }

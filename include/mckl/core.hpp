@@ -33,6 +33,8 @@
 #define MCKL_CORE_HPP
 
 #include <mckl/internal/config.h>
+#include <mckl/core/estimate_matrix.hpp>
+#include <mckl/core/estimtor.hpp>
 #include <mckl/core/matrix.hpp>
 #include <mckl/core/particle.hpp>
 #include <mckl/core/sampler.hpp>

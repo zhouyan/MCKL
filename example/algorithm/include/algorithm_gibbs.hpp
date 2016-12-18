@@ -57,9 +57,9 @@ class AlgorithmGibbsMutation
     std::size_t operator()(std::size_t, AlgorithmGibbs &state)
     {
         constexpr double m = 0;
-        constexpr double tau = 1;
-        constexpr double alpha = 1;
-        constexpr double beta = 1;
+        constexpr double tau = 0.01;
+        constexpr double alpha = 0.01;
+        constexpr double beta = 100;
 
         double mu = std::get<0>(state);
         double lambda = std::get<1>(state);

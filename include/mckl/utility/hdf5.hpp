@@ -123,9 +123,6 @@ class HDF5StoreDataPtr
 inline void hdf5_dim(
     MatrixLayout layout, std::size_t nrow, std::size_t ncol, ::hsize_t *dim)
 {
-    runtime_assert(layout == RowMajor || layout == ColMajor,
-        "**hdf5_dim** invalid layout parameter");
-
     if (layout == RowMajor) {
         dim[0] = nrow;
         dim[1] = ncol;

@@ -42,9 +42,6 @@ namespace mckl
 template <MatrixLayout Layout, typename T>
 class Matrix
 {
-    static_assert(Layout == RowMajor || Layout == ColMajor,
-        "**Matrix** used with Layout other than RowMajor or ColMajor");
-
     using major = std::integral_constant<MatrixLayout, Layout>;
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
@@ -237,9 +234,6 @@ class Matrix
     template <typename OutputIter>
     OutputIter read(MatrixLayout layout, OutputIter first) const
     {
-        runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**Matrix::read** used with invalid layout parameter");
-
         if (layout == Layout)
             return std::copy(data_.begin(), data_.end(), first);
 

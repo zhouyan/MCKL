@@ -73,12 +73,6 @@ class Covariance
         result_type *cov, MatrixLayout cov_layout = RowMajor,
         bool cov_upper = false, bool cov_packed = false)
     {
-        runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**Covariance::operator()** invalid layout parameter");
-
-        runtime_assert(cov_layout == RowMajor || cov_layout == ColMajor,
-            "**Covariance::operator()** invalid cov_layout parameter");
-
         if (n * p == 0)
             return;
 

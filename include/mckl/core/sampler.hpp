@@ -37,12 +37,16 @@
 namespace mckl
 {
 
-/// \brief SMC Sampler
+/// \brief Sampler for iterative Monte Carlo algorithms
 /// \ingroup Core
-template <typename Derived>
+template <typename T, typename U>
 class Sampler
 {
     public:
+    Sampler() : iter_(0) {}
+
+    private:
+    std::size_t iter_;
 }; // class Sampler
 
 } // namespace mckl

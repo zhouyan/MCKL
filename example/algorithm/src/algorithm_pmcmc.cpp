@@ -33,8 +33,7 @@
 
 int main()
 {
-    constexpr std::size_t K = 80;
-    constexpr std::size_t M = 10;
+    constexpr std::size_t M = 1000;
     constexpr std::size_t N = 1000;
 
     mckl::PMCMCMutation<AlgorithmPMCMCState, AlgorithmPMCMC> mutation(
@@ -45,25 +44,14 @@ int main()
     mutation.pf().resample(mckl::Stratified);
     mutation.pf().resample_threshold(0.5);
 
-    mckl::MCMCSampler<AlgorithmPMCMCState> sampler;
+    mckl::MCMCSampler<AlgorithmPMCMCState, double> sampler;
     sampler.mutation(std::move(mutation));
-    auto vname = sampler.estimator(
-        mckl::MCMCEstimator<AlgorithmPMCMCState>(2, AlgorithmPMCMCEstimate()));
-    auto &estimator = sampler.estimator(vname);
+    sampler.estimator(mckl::MCMCEstimator<AlgorithmPMCMCState, double>(
+        2, AlgorithmPMCMCEstimate()));
 
     std::get<0>(sampler.state()) = 0.10;
     std::get<1>(sampler.state()) = 10.0;
-    std::cout << std::string(K, '=') << std::endl;
-    for (std::size_t i = 0; i != K; ++i) {
-        sampler.iterate(M);
-        std::cout << '-' << std::flush;
-    }
-    std::cout << std::endl;
-
-    double mean[2];
-    estimator.average(mean, 500, 7);
-    std::cout << "theta: " << mean[0] << std::endl;
-    std::cout << "simga: " << mean[1] << std::endl;
+    sampler.iterate(M);
 
     std::ofstream save("algorithm_pmcmc.save");
     save << sampler << std::endl;

@@ -46,21 +46,14 @@ namespace mckl
 /// number of iterations of the algorithms. The estimates are collected in an
 /// \f$t\f$ by \f$d\f$ matrix \f$E\f$, where \f$E_{i,j} = \eta_i(j)\f$, the
 /// \f$j\f$-th component of the an estimate at iteration \f$i\f$.
-template <typename T, std::size_t Dim>
+template <typename T>
 class EstimateMatrix : public Matrix<RowMajor, T>
 {
     public:
     using size_type = typename Matrix<RowMajor, T>::size_type;
     using value_type = typename Matrix<RowMajor, T>::value_type;
 
-    explicit EstimateMatrix(size_type N) : Matrix<RowMajor, T>(N, Dim) {}
-
-    EstimateMatrix(size_type N, size_type dim) : Matrix<RowMajor, T>(N, dim)
-    {
-        static_assert(Dim == 0,
-            "**EstimateMatrix::EstimateMatrix** used with an object with "
-            "fixed dimension");
-    }
+    EstimateMatrix(size_type N, size_type dim) : Matrix<RowMajor, T>(N, dim) {}
 
     /// \brief The dimension of the estimator
     std::size_t dim() const { return this->ncol(); }

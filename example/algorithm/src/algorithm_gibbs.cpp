@@ -33,22 +33,16 @@
 
 int main()
 {
-    constexpr std::size_t N = 1000;
+    constexpr std::size_t N = 10000;
 
-    mckl::MCMCSampler<AlgorithmGibbs> sampler;
+    mckl::MCMCSampler<AlgorithmGibbs, double> sampler;
     sampler.mutation(AlgorithmGibbsMutation());
-    auto vname = sampler.estimator(
-        mckl::MCMCEstimator<AlgorithmGibbs>(2, AlgorithmGibbsEstimate()));
-    auto &estimator = sampler.estimator(vname);
+    sampler.estimator(mckl::MCMCEstimator<AlgorithmGibbs, double>(
+        2, AlgorithmGibbsEstimate()));
 
     std::get<0>(sampler.state()) = 0;
     std::get<1>(sampler.state()) = 1;
     sampler.iterate(N);
-
-    double mean[2];
-    estimator.average(mean, 500, 7);
-    std::cout << "mu:     " << mean[0] << std::endl;
-    std::cout << "lambda: " << mean[1] << std::endl;
 
     std::ofstream save("algorithm_gibbs.save");
     save << sampler << std::endl;

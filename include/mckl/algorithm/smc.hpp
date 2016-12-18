@@ -34,34 +34,38 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/resample.hpp>
-#include <mckl/core/estimate_matrix.hpp>
+#include <mckl/core/estimator.hpp>
 #include <mckl/core/particle.hpp>
 #include <mckl/core/state_matrix.hpp>
 
 namespace mckl
 {
 
-/// \brief SMC estimator of Monte Carlo integrations
+/// \brief SMC estimator
 /// \ingroup SMC
-template <typename T>
-class SMCEstimator : public EstimateMatrix<double, 0>
+template <typename T, typename U>
+class SMCEstimator
+    : public Estimator<U, std::size_t, std::size_t, Particle<T> &, U *>
 {
+    static_assert(std::is_convertible<U, double>::value,
+        "**SMCEsimator** used with estimate type U not convertible to double");
+
     public:
-    using state_type = T;
-    using eval_type =
-        std::function<void(std::size_t, std::size_t, Particle<T> &, double *)>;
+    SMCEstimator() = default;
+
+    SMCEstimator(std::size_t dim)
+        : Estimator<U, std::size_t, std::size_t, Particle<T> &, U *>(dim)
+    {
+    }
 
     template <typename Eval>
-    SMCEstimator(std::size_t dim, Eval &&eval, MatrixLayout layout,
+    SMCEstimator(std::size_t dim, Eval &&eval, MatrixLayout layout = RowMajor,
         bool record_only = false)
-        : EstimateMatrix<double, 0>(0, dim)
-        , eval_(std::forward<Eval>(eval))
+        : Estimator<U, std::size_t, std::size_t, Particle<T> &, U *>(
+              dim, std::forward<Eval>(eval))
         , layout_(layout)
         , record_only_(record_only)
     {
-        runtime_assert(static_cast<bool>(eval_),
-            "**SMCEstimator::SMCEstimator** used with an invalid evaluation "
-            "object");
     }
 
     /// \brief If this is a record only estimator
@@ -69,64 +73,57 @@ class SMCEstimator : public EstimateMatrix<double, 0>
 
     /// \brief Set a new evaluation object
     template <typename Eval>
-    void estimate(Eval &&eval, MatrixLayout layout, bool record_only = false)
+    void estimate(
+        Eval &&eval, MatrixLayout layout = RowMajor, bool record_only = false)
     {
-        runtime_assert(layout == RowMajor || layout == ColMajor,
-            "**SMCEstimator::estimate** invalid layout parameter");
-
-        eval_ = std::forward<Eval>(eval);
+        Estimator<U, std::size_t, std::size_t, Particle<T> &, U *>::estimate(
+            std::forward<Eval>(eval));
         layout_ = layout;
         record_only_ = record_only;
-
-        runtime_assert(static_cast<bool>(eval_),
-            "**SMCEstimator::estimate** used with an invalid evaluation "
-            "object");
     }
-
-    using EstimateMatrix<double, 0>::operator();
 
     /// \brief Perform the evaluation given the iteration number and the
     /// particle system
-    void operator()(std::size_t iter, Particle<T> &particle)
+    void estimate(std::size_t iter, Particle<T> &particle)
     {
         result_.resize(this->dim());
         if (record_only_) {
-            eval_(iter, this->dim(), particle, this->insert_estimate());
+            this->eval(iter, this->dim(), particle, this->insert_estimate());
             return;
         }
 
-        const std::size_t N = static_cast<std::size_t>(particle.size());
-        r_.resize(N * dim());
-        eval_(iter, this->dim(), particle, r_.data());
+        const std::size_t n = static_cast<std::size_t>(particle.size());
+        const std::size_t d = this->dim();
+        u_.resize(n * d);
+        this->eval(iter, d, particle, u_.data());
+
+        const double *w = particle.weight().data();
+        const double *r = rptr(std::is_same<U, double>());
+
 #if MCKL_HAS_BLAS
-        internal::size_check<MCKL_BLAS_INT>(N, "SMCEstimator::operator()");
+        internal::size_check<MCKL_BLAS_INT>(n, "SMCEstimator::estimate");
+        internal::size_check<MCKL_BLAS_INT>(d, "SMCEstimator::estimate");
         if (layout_ == RowMajor) {
             internal::cblas_dgemv(internal::CblasColMajor,
-                internal::CblasNoTrans,
-                static_cast<MCKL_BLAS_INT>(this->dim()),
-                static_cast<MCKL_BLAS_INT>(N), 1.0, r_.data(),
-                static_cast<MCKL_BLAS_INT>(this->dim()),
-                particle.weight().data(), 1, 0.0, result_.data(), 1);
+                internal::CblasNoTrans, static_cast<MCKL_BLAS_INT>(d),
+                static_cast<MCKL_BLAS_INT>(n), 1.0, r,
+                static_cast<MCKL_BLAS_INT>(d), w, 1, 0.0, result_.data(), 1);
         } else {
             internal::cblas_dgemv(internal::CblasColMajor,
-                internal::CblasTrans, static_cast<MCKL_BLAS_INT>(N),
-                static_cast<MCKL_BLAS_INT>(this->dim()), 1.0, r_.data(),
-                static_cast<MCKL_BLAS_INT>(N), particle.weight().data(), 1,
-                0.0, result_.data(), 1);
+                internal::CblasTrans, static_cast<MCKL_BLAS_INT>(n),
+                static_cast<MCKL_BLAS_INT>(d), 1.0, r,
+                static_cast<MCKL_BLAS_INT>(n), w, 1, 0.0, result_.data(), 1);
         }
 #else  // MCKL_HAS_BLAS
-        const double *w = particle.weight().data();
-        double *r = r_.data();
         if (layout_ == RowMajor) {
             std::fill(result_.begin(), result_.end(), 0);
-            for (std::size_t i = 0; i != N; ++i, ++w)
-                for (std::size_t d = 0; d != this->dim(); ++d, ++r)
+            for (std::size_t i = 0; i != n; ++i, ++w)
+                for (std::size_t d = 0; d != d; ++d, ++r)
                     result_[d] += (*w) * (*r);
-        }
-        if (layout_ == ColMajor) {
-            for (std::size_t d = 0; d != this->dim(); ++d, r += N) {
-                mul(N, r, w, r);
-                result_[d] = std::accumulate(r, r + N, 0.0);
+        } else {
+            for (std::size_t d = 0; d != d; ++d, r += n) {
+                mul(n, r, w, r);
+                result_[d] = std::accumulate(r, r + n, 0.0);
             }
         }
 #endif // MCKL_HAS_BLAS
@@ -134,23 +131,34 @@ class SMCEstimator : public EstimateMatrix<double, 0>
     }
 
     private:
-    Vector<double> result_;
+    Vector<U> u_;
     Vector<double> r_;
-    eval_type eval_;
+    Vector<double> result_;
     MatrixLayout layout_;
     bool record_only_;
-}; // class Estimator
+
+    const double *rptr(std::true_type) { return u_.data(); }
+
+    const double *rptr(std::false_type)
+    {
+        r_.resize(u_.size());
+        std::copy(u_.begin(), u_.end(), r_.begin());
+
+        return r_.data();
+    }
+}; // class SMCEstimator
 
 /// \brief SMC sampler
 /// \ingroup SMC
-template <typename T>
+template <typename T, typename U = double>
 class SMCSampler
 {
     public:
     using size_type = typename Particle<T>::size_type;
     using eval_type = std::function<void(std::size_t, Particle<T> &)>;
+    using estimator_type = SMCEstimator<T, U>;
 
-    SMCSampler() = default;
+    SMCSampler() : iter_(0), resample_threshold_(resample_threshold_never()) {}
 
     /// \brief Construct a SMC sampler
     ///
@@ -312,7 +320,7 @@ class SMCSampler
     }
 
     /// \brief Attach a new estimator and return a reference to it
-    std::string selection_estimator(const SMCEstimator<T> &estimator,
+    std::string selection_estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
@@ -322,7 +330,7 @@ class SMCSampler
     }
 
     /// \brief Attach a new estimator and return a reference to it
-    std::string resample_estimator(const SMCEstimator<T> &estimator,
+    std::string resample_estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
@@ -332,7 +340,7 @@ class SMCSampler
     }
 
     /// \brief Attach a new estimator and return a reference to it
-    std::string mutation_estimator(const SMCEstimator<T> &estimator,
+    std::string mutation_estimator(const estimator_type &estimator,
         const std::string &name = std::string())
     {
         runtime_assert(num_iter() == 0,
@@ -343,19 +351,19 @@ class SMCSampler
 
     /// \brief Get read only access to estimator in the selection step given
     /// (partial) name
-    const SMCEstimator<T> &estimator_selection(const std::string &name) const
+    const estimator_type &estimator_selection(const std::string &name) const
     {
         return find_estimator(estimator_s_, name);
     }
 
     /// \brief Get read only access to estimator in the resample step
-    const SMCEstimator<T> &estimator_resample(const std::string &name) const
+    const estimator_type &estimator_resample(const std::string &name) const
     {
         return find_estimator(estimator_r_, name);
     }
 
     /// \brief Get read only access to estimator in the mutation step
-    const SMCEstimator<T> &estimator_mutation(const std::string &name) const
+    const estimator_type &estimator_mutation(const std::string &name) const
     {
         return find_estimator(estimator_m_, name);
     }
@@ -462,15 +470,15 @@ class SMCSampler
     Vector<eval_type> eval_s_;
     Vector<eval_type> eval_r_;
     Vector<eval_type> eval_m_;
-    Vector<std::pair<std::string, SMCEstimator<T>>> estimator_s_;
-    Vector<std::pair<std::string, SMCEstimator<T>>> estimator_r_;
-    Vector<std::pair<std::string, SMCEstimator<T>>> estimator_m_;
+    Vector<std::pair<std::string, estimator_type>> estimator_s_;
+    Vector<std::pair<std::string, estimator_type>> estimator_r_;
+    Vector<std::pair<std::string, estimator_type>> estimator_m_;
     Vector<size_type> size_history_;
     Vector<double> ess_history_;
 
     std::string insert_estimator(
-        Vector<std::pair<std::string, SMCEstimator<T>>> &vector,
-        const SMCEstimator<T> &estimator, const std::string &name)
+        Vector<std::pair<std::string, estimator_type>> &vector,
+        const estimator_type &estimator, const std::string &name)
     {
         auto find = [&vector](const std::string &vname) {
             return std::find_if(vector.begin(), vector.end(),
@@ -494,8 +502,8 @@ class SMCSampler
         return vname;
     }
 
-    const SMCEstimator<T> &find_estimator(
-        Vector<std::pair<std::string, SMCEstimator<T>>> &vector,
+    const estimator_type &find_estimator(
+        Vector<std::pair<std::string, estimator_type>> &vector,
         const std::string &name) const
     {
         auto exact = std::find_if(vector.begin(), vector.end(),
@@ -540,16 +548,16 @@ class SMCSampler
             eval(iter_, particle_);
     }
 
-    void do_estimate(Vector<std::pair<std::string, SMCEstimator<T>>> &vector)
+    void do_estimate(Vector<std::pair<std::string, estimator_type>> &vector)
     {
         for (auto &e : vector)
-            e.second(iter_, particle_);
+            e.second.estimate(iter_, particle_);
     }
 }; // class SMCSampler
 
-template <typename CharT, typename Traits, typename T>
+template <typename CharT, typename Traits, typename T, typename U>
 inline std::basic_ostream<CharT, Traits> &operator<<(
-    std::basic_ostream<CharT, Traits> &os, const SMCSampler<T> &sampler)
+    std::basic_ostream<CharT, Traits> &os, const SMCSampler<T, U> &sampler)
 {
     return sampler.print(os);
 }

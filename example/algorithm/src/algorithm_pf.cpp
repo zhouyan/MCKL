@@ -35,18 +35,18 @@ int main()
 {
     constexpr std::size_t N = 1000;
 
-    mckl::SMCSampler<AlgorithmPF> sampler(N);
+    mckl::SMCSampler<AlgorithmPF, double> sampler(N);
     sampler.selection(AlgorithmPFSelection());
     sampler.resample(mckl::Multinomial);
     sampler.resample_threshold(0.5);
-    sampler.selection_estimator(
-        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor),
+    sampler.selection_estimator(mckl::SMCEstimator<AlgorithmPF, double>(
+                                    2, AlgorithmPFPos(), mckl::ColMajor),
         "pos.s");
-    sampler.resample_estimator(
-        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor),
+    sampler.resample_estimator(mckl::SMCEstimator<AlgorithmPF, double>(
+                                   2, AlgorithmPFPos(), mckl::ColMajor),
         "pos.r");
-    sampler.mutation_estimator(
-        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor),
+    sampler.mutation_estimator(mckl::SMCEstimator<AlgorithmPF, double>(
+                                   2, AlgorithmPFPos(), mckl::ColMajor),
         "pos.m");
     sampler.iterate(sampler.particle().state().n());
 
