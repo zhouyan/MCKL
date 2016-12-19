@@ -33,6 +33,7 @@
 #define MCKL_CORE_SAMPLER_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/matrix.hpp>
 
 namespace mckl
 {
@@ -53,7 +54,7 @@ class Sampler
     {
         for (auto &est : estimator_)
             for (auto &e : est)
-                e.second.reserve(n);
+                e.reserve(n);
     }
 
     void reset()
@@ -68,46 +69,57 @@ class Sampler
     {
         for (auto &est : estimator_)
             for (auto &e : est)
-                e.second.clear();
+                e.clear();
     }
 
-    std::map<std::string, Vector<typename estimator_type::value_type>>
-        summary() const
+    template <MatrixLayout Layout, typename T>
+    Matrix<Layout, T> summary() const
     {
-        using T = typename estimator_type::value_type;
-        const std::size_t n = static_cast<const Derived *>(this)->num_iter();
+        const std::size_t nrow =
+            static_cast<const Derived *>(this)->num_iter();
 
-        std::map<std::string, Vector<T>> df;
-        Vector<T> data(n);
+        std::size_t ncol = 0;
+        for (auto &est : estimator_)
+            for (auto &e : est)
+                ncol += e.dim();
 
-        for (const auto &est : estimator_) {
-            for (const auto &e : est) {
-                for (std::size_t i = 0; i != e.second.dim(); ++i) {
-                    e.second.read_variable(i, data.begin());
-                    df[e.first + "." + std::to_string(i)] = data;
-                }
+        Matrix<Layout, T> mat(nrow, ncol);
+        if (nrow * ncol == 0)
+            return mat;
+
+        if (Layout == RowMajor) {
+            for (std::size_t i = 0; i != nrow; ++i) {
+                T *first = mat.row_data(i);
+                for (auto &est : estimator_)
+                    for (auto &e : est)
+                        first = e.read_row(i, first);
             }
+        } else {
+            T *first = mat.col_data(0);
+            for (auto &est : estimator_)
+                for (auto &e : est)
+                    for (std::size_t i = 0; i != e.dim(); ++i)
+                        first = e.read_col(i, first);
         }
 
-        return df;
+        return mat;
     }
 
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print(
         std::basic_ostream<CharT, Traits> &os, char sepchar = ' ') const
     {
-        const std::size_t n = static_cast<const Derived *>(this)->num_iter();
+        const auto mat = summary<RowMajor, double>();
+        const std::size_t n = mat.nrow();
+        const std::size_t m = mat.ncol();
 
-        if (!os || n == 0)
+        if (!os || n * m == 0)
             return os;
 
-        const auto df = summary();
-        for (const auto &v : df)
-            os << v.first << sepchar;
-        os << '\n';
+        auto v = mat.data();
         for (std::size_t i = 0; i != n; ++i) {
-            for (const auto &v : df)
-                os << v.second[i] << sepchar;
+            for (std::size_t j = 0; j != m; ++j)
+                os << *v++ << sepchar;
             os << '\n';
         }
 
@@ -133,76 +145,58 @@ class Sampler
         return eval_.at(step);
     }
 
-    Vector<std::pair<std::string, estimator_type>> &estimator(std::size_t step)
+    Vector<estimator_type> &estimator(std::size_t step)
     {
         return estimator_.at(step);
     }
 
-    const Vector<std::pair<std::string, estimator_type>> &estimator(
-        std::size_t step) const
+    const Vector<estimator_type> &estimator(std::size_t step) const
     {
         return estimator_.at(step);
     }
 
     template <typename Eval>
-    void eval(std::size_t step, Eval &&eval)
+    std::size_t eval(std::size_t step, Eval &&eval,
+        std::enable_if_t<!std::is_integral<Eval>::value> * = nullptr)
     {
         eval_.at(step).push_back(std::forward<Eval>(eval));
+
+        return eval_.at(step).size() - 1;
+    }
+
+    eval_type &eval(std::size_t step, std::size_t k)
+    {
+        return eval_.at(step).at(k);
+    }
+
+    const eval_type &eval(std::size_t step, std::size_t k) const
+    {
+        return eval_.at(step).at(k);
     }
 
     template <typename Estimator>
-    std::string estimator(
-        std::size_t step, Estimator &&estimator, const std::string &name)
+    std::size_t estimator(std::size_t step, Estimator &&estimator,
+        std::enable_if_t<!std::is_integral<Estimator>::value> * = nullptr)
     {
-        auto find = [this, step](const std::string &vname) {
-            return std::find_if(estimator_.at(step).begin(),
-                estimator_.at(step).end(),
-                [&vname](auto &p) { return p.first == vname; });
-        };
+        estimator_.at(step).push_back(std::forward<Estimator>(estimator));
 
-        std::string vname(name);
-        if (name.empty()) {
-            const std::string v("V");
-            int i = 0;
-            while (find(v + std::to_string(i)) != estimator_.at(step).end())
-                ++i;
-            vname = "V" + std::to_string(i);
-        } else {
-            auto f = find(vname);
-            if (f != estimator_.at(step).end())
-                estimator_.at(step).erase(f);
-        }
-        estimator_.at(step).emplace_back(
-            vname, std::forward<Estimator>(estimator));
-
-        return vname;
+        return estimator_.at(step).size() - 1;
     }
 
-    const estimator_type &estimator(std::size_t step, const std::string &name)
+    estimator_type &estimator(std::size_t step, std::size_t k)
     {
-        auto exact = std::find_if(estimator_.at(step).begin(),
-            estimator_.at(step).end(),
-            [&name](auto &p) { return p.first == name; });
-        if (exact != estimator_.at(step).end())
-            return exact->second;
+        return estimator_.at(step).at(k);
+    }
 
-        auto partial = std::find_if(estimator_.at(step).begin(),
-            estimator_.at(step).end(), [&name](auto &p) {
-                return p.first.find(name) != std::string::npos;
-            });
-        if (partial != estimator_.at(step).end())
-            return partial->second;
-
-        runtime_assert(
-            false, "**Sampler::estimator** not found with the given name");
-
-        return estimator_.at(step).front().second;
+    const estimator_type &estimator(std::size_t step, std::size_t k) const
+    {
+        return estimator_.at(step).at(k);
     }
 
     private:
     std::size_t num_iter_;
     Vector<Vector<eval_type>> eval_;
-    Vector<Vector<std::pair<std::string, estimator_type>>> estimator_;
+    Vector<Vector<estimator_type>> estimator_;
 }; // class Sampler
 
 } // namespace mckl

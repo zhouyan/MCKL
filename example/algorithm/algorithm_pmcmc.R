@@ -31,13 +31,14 @@
 
 library(ggplot2)
 
-est <- read.table("algorithm_pmcmc.save", header = TRUE)
-dat <- data.frame(theta = est$V0.0, sigma = est$V0.1)
-plt <- qplot(x = theta, y = sigma, data = dat, geom = "density_2d")
-plt <- plt + scale_x_log10()
-plt <- plt + scale_y_log10()
+est <- read.table("algorithm_pmcmc.save", header = FALSE)
+dat <- data.frame(X = est[,1], Y = est[,2])
+plt <- qplot(x = X, y = Y, data = dat)
+plt <- plt + stat_density_2d(aes(fill = ..level..), geom = "polygon")
+plt <- plt + xlab(expression(theta))
+plt <- plt + ylab(expression(sigma))
 plt <- plt + theme_bw()
-
-pdf("algorithm_pmcmc.pdf", width = 5, height = 5)
+plt <- plt + theme(legend.position = "top")
+pdf("algorithm_pmcmc.pdf")
 print(plt)
 gc <- dev.off()

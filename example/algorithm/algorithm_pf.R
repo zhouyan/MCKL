@@ -32,18 +32,14 @@
 library(ggplot2)
 
 obs <- read.table("algorithm_pf.data", header = FALSE)
-est <- read.table("algorithm_pf.save", header = TRUE)
-dat <- data.frame(
-    X = c(est$pos.s.0, est$pos.r.0, est$pos.m.0, obs[,1]),
-    Y = c(est$pos.s.1, est$pos.r.1, est$pos.m.1, obs[,2]))
-dat[["Source"]] <- rep(
-    c("Selection", "Resample", "Mutation", "Observation"), each = dim(obs)[1])
+est <- read.table("algorithm_pf.save", header = FALSE)
+dat <- data.frame(X = c(est[,5], obs[,1]), Y = c(est[,6], obs[,2]))
+dat[["Source"]] <- rep(c("Estimates", "Observation"), each = dim(obs)[1])
 plt <- qplot(x = X, y = Y, data = dat, geom = "path")
 plt <- plt + aes(group = Source, color = Source, linetype = Source)
 plt <- plt + theme_bw()
 plt <- plt + theme(legend.position = "top")
 plt <- plt + theme(legend.title = element_blank())
-
-pdf("algorithm_pf.pdf", width = 5, height = 5)
+pdf("algorithm_pf.pdf")
 print(plt)
 gc <- dev.off()

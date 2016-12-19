@@ -36,14 +36,15 @@
 #include <mckl/random/lognormal_distribution.hpp>
 #include <mckl/random/normal_distribution.hpp>
 
-using AlgorithmPMCMCState = std::array<double, 3>;
-using AlgorithmPMCMCBase = mckl::StateMatrix<mckl::ColMajor, 1, double>;
+using AlgorithmPMCMCParam = std::array<double, 3>;
+
+using AlgorithmPMCMCBase =
+    mckl::PMCMCStateMatrix<AlgorithmPMCMCParam, mckl::ColMajor, 1, double>;
 
 class AlgorithmPMCMC : public AlgorithmPMCMCBase
 {
     public:
-    AlgorithmPMCMC(std::size_t N)
-        : AlgorithmPMCMCBase(N), theta_(1), sigma_(1), log_nc_(0)
+    AlgorithmPMCMC(std::size_t N) : AlgorithmPMCMCBase(N)
     {
         double y = 0;
         std::ifstream data("algorithm_pmcmc.data");
@@ -52,30 +53,11 @@ class AlgorithmPMCMC : public AlgorithmPMCMCBase
         data.close();
     }
 
-    void reset(const AlgorithmPMCMCState &state)
-    {
-        theta_ = std::get<0>(state);
-        sigma_ = std::get<0>(state);
-        log_nc_ = 0;
-    }
-
     std::size_t n() const { return y_.size(); }
-
-    double log_nc() const { return log_nc_; }
-
-    void log_nc(double l) { log_nc_ = l; }
-
-    void add_log_nc(double inc) { log_nc_ += inc; }
-
-    double theta() const { return theta_; }
-    double sigma() const { return sigma_; }
     double y(std::size_t iter) const { return y_[iter]; }
 
     private:
     mckl::Vector<double> y_;
-    double theta_;
-    double sigma_;
-    double log_nc_;
 }; // class AlgorithmPMCMC
 
 class AlgorithmPMCMCSelection
@@ -88,8 +70,8 @@ class AlgorithmPMCMCSelection
         constexpr double h = 0.025;
         constexpr std::size_t k = 20;
 
-        const double theta = particle.state().theta();
-        const double sigma = particle.state().sigma();
+        const double theta = particle.state().param()[0];
+        const double sigma = particle.state().param()[1];
         const double y = particle.state().y(iter);
         const std::size_t N = particle.size();
         double *const x = particle.state().col_data(0);
@@ -116,6 +98,7 @@ class AlgorithmPMCMCSelection
         particle.weight().add_log(w);
         mckl::exp(N, w, w);
         mckl::mul(N, particle.weight().data(), w, w);
+
         particle.state().add_log_nc(std::log(std::accumulate(w, w + N, 0.0)));
     }
 
@@ -126,9 +109,9 @@ class AlgorithmPMCMCSelection
 class AlgorithmPMCMCPrior
 {
     public:
-    double operator()(const AlgorithmPMCMCState &state)
+    double operator()(const AlgorithmPMCMCParam &param)
     {
-        return -std::get<0>(state) - 2 * std::get<1>(state);
+        return -std::get<0>(param) - 2 * std::get<1>(param);
     }
 }; // class AlgorithmPMCMCPrior
 
@@ -137,7 +120,7 @@ class AlgorithmPMCMCUpdate
 {
     public:
     template <typename RNGType>
-    double operator()(RNGType &rng, AlgorithmPMCMCState &s)
+    double operator()(RNGType &rng, AlgorithmPMCMCParam &s)
     {
         mckl::LognormalDistribution<double> lognormal(0, 0.5);
         const double u = lognormal(rng);
@@ -152,10 +135,10 @@ class AlgorithmPMCMCEstimate
 {
     public:
     void operator()(
-        std::size_t, std::size_t, AlgorithmPMCMCState &state, double *r)
+        std::size_t, std::size_t, AlgorithmPMCMCParam &param, double *r)
     {
-        r[0] = std::get<0>(state);
-        r[1] = std::get<1>(state);
+        r[0] = std::get<0>(param);
+        r[1] = std::get<1>(param);
     }
 }; // class AlgorithmPMCMCEstimate
 

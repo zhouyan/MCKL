@@ -41,93 +41,77 @@
 namespace mckl
 {
 
-template <MatrixLayout Layout, std::size_t Dim, typename T, typename Param>
+template <typename Param, MatrixLayout Layout, std::size_t Dim, typename T>
 class PMCMCStateMatrix : public StateMatrix<Layout, Dim, T>
 {
     public:
-    using size_type = typename Matrix<Layout, T>::size_type;
-    using value_type = typename Matrix<Layout, T>::value_type;
     using param_type = Param;
 
-    explicit PMCMCStateMatrix(size_type N)
+    explicit PMCMCStateMatrix(std::size_t N)
         : StateMatrix<Layout, Dim, T>(N), log_nc_(0)
     {
     }
 
-    PMCMCStateMatrix(size_type N, size_type dim)
+    PMCMCStateMatrix(std::size_t N, std::size_t dim)
         : StateMatrix<Layout, Dim, T>(N, dim), log_nc_(0)
     {
     }
 
     double log_nc() const { return log_nc_; }
 
-    void set_log_nc(double nc) { log_nc_ = nc; }
-
     void add_log_nc(double nc) { log_nc_ += nc; }
 
     const param_type &param() { return param_; }
 
-    void param(const param_type &p) { return param_ = p; }
+    void reset(const param_type &p, double nc = 0)
+    {
+        param_ = p;
+        log_nc_ = nc;
+    }
 
     private:
-    double log_nc_;
     param_type param_;
+    double log_nc_;
 }; // class PMCMCStateMatrix
 
 /// \brief Particle Markov chain Monte Carlo mutation
 /// \ingroup PMCMC
-template <typename State, typename T>
+template <typename Param, typename T, typename U = double>
 class PMCMCMutation
 {
     public:
-    using state_type = State;
+    using param_type = Param;
+    using state_type = T;
+    using size_type = typename Particle<T>::size_type;
     using eval_type =
-        std::function<double(typename Particle<T>::rng_type &, state_type &)>;
-    using prior_type = std::function<double(const state_type &)>;
+        std::function<double(typename Particle<T>::rng_type &, param_type &)>;
+    using prior_type = std::function<double(const param_type &)>;
 
-    template <typename... Args>
-    PMCMCMutation(const prior_type &prior, Args &&... args)
-        : prior_(prior), pf_(std::forward<Args>(args)...)
+    template <typename Prior, typename... Args>
+    PMCMCMutation(std::size_t N, std::size_t M, Prior &&prior, Args &&... args)
+        : M_(M), prior_(prior), pf_(N, std::forward<Args>(args)...)
     {
     }
 
-    SMCSampler<T> &pf() { return pf_; }
-
-    SMCSampler<T> &pf() const { return pf_; }
-
-    std::size_t operator()(std::size_t iter, state_type &state)
+    void reset()
     {
-        if (iter == 0) {
-            pf_.clear();
-            pf_.particle().state().reset(state);
-            pf_.iterate(pf_.particle().state().n());
-            return 0;
-        }
-
-        state_type s(state);
-        double l = pf_.particle().state().log_nc();
-        double p = -l;
-        for (auto &eval : eval_)
-            p += eval(pf_.particle().rng(), s);
-
-        pf_.clear();
-        pf_.particle().state().reset(s);
-        pf_.iterate(pf_.particle().state().n());
-        p += pf_.particle().state().log_nc();
-        p += prior_(s) - prior_(state);
-
-        mckl::U01Distribution<double> u01;
-        double u = std::log(u01(pf_.particle().rng()));
-
-        if (u < p) {
-            state = s;
-            return 1;
-        }
-        pf_.particle().state().log_nc(l);
-        return 0;
+        eval_.clear();
+        pf_.reset();
     }
 
-    void reset() { eval_.clear(); }
+    SMCSampler<T, U> &pf() { return pf_; }
+
+    SMCSampler<T, U> &pf() const { return pf_; }
+
+    PMCMCMutation<Param, T, U> clone() const
+    {
+        PMCMCMutation<Param, T, U> mutation(*this);
+        mutation.pf_.particle().rng_set().reset();
+        mutation.pf_.particle().rng().seed(
+            Seed<typename Particle<T>::rng_type>::instance().get());
+
+        return mutation;
+    }
 
     template <typename Prior>
     void prior(Prior &&prior)
@@ -135,14 +119,50 @@ class PMCMCMutation
         prior_ = std::forward<Prior>(prior);
     }
 
-    /// \brief Add a new evaluation object for the mutation step
+    /// \brief Add a new evaluation object for the update step
     template <typename Eval>
-    void update(Eval &&eval)
+    std::size_t update(Eval &&eval)
     {
-        eval_.emplace_back(std::forward<Eval>(eval));
+        eval_.push_back(std::forward<Eval>(eval));
+
+        return eval_.size() - 1;
+    }
+
+    std::size_t operator()(std::size_t iter, param_type &param)
+    {
+        if (iter == 0) {
+            pf_.clear();
+            pf_.particle().state().reset(param, 0);
+            pf_.iterate(M_);
+            return 0;
+        }
+
+        const double lnc = pf_.particle().state().log_nc();
+
+        double prob = -prior_(param) - lnc;
+        param_type p(param);
+        for (auto &eval : eval_)
+            prob += eval(pf_.particle().rng(), p);
+        prob += prior_(p);
+
+        pf_.clear();
+        pf_.particle().state().reset(p, 0);
+        pf_.iterate(M_);
+        prob += pf_.particle().state().log_nc();
+
+        mckl::U01Distribution<double> u01;
+        double u = std::log(u01(pf_.particle().rng()));
+
+        if (u < prob)
+            param = std::move(p);
+        else
+            pf_.particle().state().reset(param, lnc);
+
+        return u < prob ? 1 : 0;
     }
 
     private:
+    std::size_t M_;
     prior_type prior_;
     SMCSampler<T> pf_;
     Vector<eval_type> eval_;

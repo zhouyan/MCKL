@@ -43,7 +43,7 @@ namespace mckl
 
 /// \brief MCMC estimator
 /// \ingroup MCMC
-template <typename T, typename U>
+template <typename T, typename U = double>
 class MCMCEstimator : public Estimator<U, std::size_t, std::size_t, T &, U *>
 {
     public:
@@ -56,7 +56,7 @@ class MCMCEstimator : public Estimator<U, std::size_t, std::size_t, T &, U *>
     }
 }; // class MCMCEstimator
 
-template <typename, typename>
+template <typename, typename = double>
 class MCMCSampler;
 
 template <typename T, typename U>
@@ -118,20 +118,31 @@ class MCMCSampler : public Sampler<MCMCSampler<T, U>>
 
     /// \brief Add a new evaluation object for the mutation step
     template <typename Eval>
-    void mutation(Eval &&eval)
+    std::size_t mutation(Eval &&eval,
+        std::enable_if_t<!std::is_integral<Eval>::value> * = nullptr)
     {
-        this->eval(0, std::forward<Eval>(eval));
+        return this->eval(0, std::forward<Eval>(eval));
     }
 
-    std::string estimator(const estimator_type &estimator,
-        const std::string &name = std::string())
+    eval_type &mutation(std::size_t k) { return this->eval(0, k); }
+
+    const eval_type &mutation(std::size_t k) const { return this->eval(0, k); }
+
+    template <typename Estimator>
+    std::size_t estimator(Estimator &&estimator)
     {
-        return Sampler<MCMCSampler<T, U>>::estimator(0, estimator, name);
+        return Sampler<MCMCSampler<T, U>>::estimator(
+            0, std::forward<Estimator>(estimator));
     }
 
-    const estimator_type &estimator(const std::string &name) const
+    estimator_type &estimator(std::size_t k)
     {
-        return Sampler<MCMCSampler<T, U>>::estimator(0, name);
+        return Sampler<MCMCSampler<T, U>>::estimator(0, k);
+    }
+
+    const estimator_type &estimator(std::size_t k) const
+    {
+        return Sampler<MCMCSampler<T, U>>::estimator(0, k);
     }
 
     /// \brief Iterate the sampler
@@ -192,7 +203,7 @@ class MCMCSampler : public Sampler<MCMCSampler<T, U>>
             accept_history_[i].push_back(this->eval(0)[i](iter_, state_));
 
         for (auto &e : Sampler<MCMCSampler<T, U>>::estimator(0))
-            e.second.estimate(iter_, state_);
+            e.estimate(iter_, state_);
 
         ++iter_;
     }

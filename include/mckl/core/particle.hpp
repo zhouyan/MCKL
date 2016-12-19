@@ -40,6 +40,9 @@
 namespace mckl
 {
 
+template <typename>
+class Particle;
+
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
 template <typename T>

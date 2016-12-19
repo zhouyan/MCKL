@@ -33,25 +33,38 @@
 
 int main()
 {
+    constexpr std::size_t N = 10000;
     constexpr std::size_t M = 1000;
-    constexpr std::size_t N = 1000;
 
-    mckl::PMCMCMutation<AlgorithmPMCMCState, AlgorithmPMCMC> mutation(
-        AlgorithmPMCMCPrior(), N);
+    AlgorithmPMCMC state(0);
+
+    mckl::PMCMCMutation<AlgorithmPMCMCParam, AlgorithmPMCMC> mutation(
+        M, state.n(), AlgorithmPMCMCPrior());
     mutation.update(AlgorithmPMCMCUpdate<0>());
     mutation.update(AlgorithmPMCMCUpdate<1>());
     mutation.pf().selection(AlgorithmPMCMCSelection());
     mutation.pf().resample(mckl::Stratified);
     mutation.pf().resample_threshold(0.5);
 
-    mckl::MCMCSampler<AlgorithmPMCMCState, double> sampler;
+    mckl::MCMCSampler<AlgorithmPMCMCParam> sampler;
     sampler.mutation(std::move(mutation));
-    sampler.estimator(mckl::MCMCEstimator<AlgorithmPMCMCState, double>(
-        2, AlgorithmPMCMCEstimate()));
 
     std::get<0>(sampler.state()) = 0.10;
     std::get<1>(sampler.state()) = 10.0;
-    sampler.iterate(M);
+    for (std::size_t i = 0; i != 100; ++i) {
+        sampler.iterate(N / 100);
+        std::cout << '-' << std::flush;
+    }
+    std::cout << std::endl;
+
+    sampler.clear();
+    sampler.estimator(
+        mckl::MCMCEstimator<AlgorithmPMCMCParam>(2, AlgorithmPMCMCEstimate()));
+    for (std::size_t i = 0; i != 100; ++i) {
+        sampler.iterate(N / 100);
+        std::cout << '-' << std::flush;
+    }
+    std::cout << std::endl;
 
     std::ofstream save("algorithm_pmcmc.save");
     save << sampler << std::endl;

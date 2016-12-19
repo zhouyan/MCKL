@@ -33,6 +33,7 @@
 #define MCKL_SMP_BACKEND_BASE_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/particle.hpp>
 
 #ifdef MCKL_CLANG
 #pragma clang diagnostic push

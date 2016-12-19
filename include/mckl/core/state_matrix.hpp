@@ -34,6 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/core/matrix.hpp>
+#include <mckl/core/particle.hpp>
 
 namespace mckl
 {

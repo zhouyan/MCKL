@@ -45,13 +45,13 @@ template <>
 inline std::string utility_hdf5_typename<float>()
 {
     return "float";
-};
+}
 
 template <>
 inline std::string utility_hdf5_typename<double>()
 {
     return "double";
-};
+}
 
 template <mckl::MatrixLayout>
 inline std::string utility_hdf5_layoutname();
@@ -60,13 +60,13 @@ template <>
 inline std::string utility_hdf5_layoutname<mckl::RowMajor>()
 {
     return "RowMajor";
-};
+}
 
 template <>
 inline std::string utility_hdf5_layoutname<mckl::ColMajor>()
 {
     return "ColMajor";
-};
+}
 
 template <typename T1, typename T2>
 inline void utility_hdf5(std::size_t N, std::size_t M)

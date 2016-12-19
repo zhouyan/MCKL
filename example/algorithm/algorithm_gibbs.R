@@ -31,16 +31,13 @@
 
 library(ggplot2)
 
-obs <- read.table("algorithm_gibbs.data", header = FALSE)[,1]
-est <- read.table("algorithm_gibbs.save", header = TRUE)
-dat <- data.frame(mu = est$V0.0, lambda = est$V0.1)
-plt <- qplot(x = mu, y = lambda, data = dat, geom = "density_2d")
-plt <- plt + geom_vline(xintercept = mean(obs), color = "green")
-plt <- plt + geom_hline(yintercept = 1 / var(obs), color = "green")
-plt <- plt + geom_vline(xintercept = mean(dat$mu), color = "red")
-plt <- plt + geom_hline(yintercept = mean(dat$lambda), color = "red")
+est <- read.table("algorithm_gibbs.save", header = FALSE)
+dat <- data.frame(X = est[,1], Y = est[,2])
+plt <- qplot(x = X, y = Y, data = dat)
+plt <- plt + stat_density_2d(aes(fill = ..level..), geom = "polygon")
+plt <- plt + xlab(expression(mu))
+plt <- plt + ylab(expression(lambda))
 plt <- plt + theme_bw()
-
-pdf("algorithm_gibbs.pdf", width = 5, height = 5)
+pdf("algorithm_gibbs.pdf")
 print(plt)
 gc <- dev.off()

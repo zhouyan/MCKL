@@ -33,6 +33,7 @@
 #define MCKL_ALGORITHM_RESAMPLE_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/particle.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
 namespace mckl

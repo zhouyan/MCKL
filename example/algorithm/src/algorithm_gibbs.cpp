@@ -35,13 +35,16 @@ int main()
 {
     constexpr std::size_t N = 10000;
 
-    mckl::MCMCSampler<AlgorithmGibbs, double> sampler;
+    mckl::MCMCSampler<AlgorithmGibbs> sampler;
     sampler.mutation(AlgorithmGibbsMutation());
-    sampler.estimator(mckl::MCMCEstimator<AlgorithmGibbs, double>(
-        2, AlgorithmGibbsEstimate()));
 
     std::get<0>(sampler.state()) = 0;
     std::get<1>(sampler.state()) = 1;
+    sampler.iterate(N);
+
+    sampler.clear();
+    sampler.estimator(
+        mckl::MCMCEstimator<AlgorithmGibbs>(2, AlgorithmGibbsEstimate()));
     sampler.iterate(N);
 
     std::ofstream save("algorithm_gibbs.save");

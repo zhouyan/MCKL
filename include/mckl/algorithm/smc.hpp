@@ -44,7 +44,7 @@ namespace mckl
 
 /// \brief SMC estimator
 /// \ingroup SMC
-template <typename T, typename U>
+template <typename T, typename U = double>
 class SMCEstimator
     : public Estimator<U, std::size_t, std::size_t, Particle<T> &, U *>
 {
@@ -149,7 +149,7 @@ class SMCEstimator
     }
 }; // class SMCEstimator
 
-template <typename, typename>
+template <typename, typename = double>
 class SMCSampler;
 
 template <typename T, typename U>
@@ -162,7 +162,7 @@ class SamplerTrait<SMCSampler<T, U>>
 
 /// \brief SMC sampler
 /// \ingroup SMC
-template <typename T, typename U = double>
+template <typename T, typename U>
 class SMCSampler : public Sampler<SMCSampler<T, U>>
 {
     public:
@@ -248,91 +248,114 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
 
     /// \brief Add a new evaluation object for the selection step
     template <typename Eval>
-    void selection(Eval &&eval)
+    std::size_t selection(Eval &&eval,
+        std::enable_if_t<!std::is_integral<Eval>::value> * = nullptr)
     {
-        this->eval(0, std::forward<Eval>(eval));
+        return this->eval(0, std::forward<Eval>(eval));
+    }
+
+    eval_type &selection(std::size_t k) { return this->eval(0, k); }
+
+    const eval_type &selection(std::size_t k) const
+    {
+        return this->eval(0, k);
     }
 
     /// \brief Add a new evaluation object for the selection step
     template <typename Eval>
-    void resample(Eval &&eval,
-        std::enable_if_t<!std::is_convertible<Eval, ResampleScheme>::value> * =
-            nullptr)
+    std::size_t resample(Eval &&eval,
+        std::enable_if_t<!std::is_integral<Eval>::value> * = nullptr)
     {
-        this->eval(1, std::forward<Eval>(eval));
+        return this->eval(1, std::forward<Eval>(eval));
     }
 
     /// \brief Add a new evaluation object for the resample step by a built-in
     /// resample scheme
-    void resample(ResampleScheme scheme)
+    std::size_t resample(ResampleScheme scheme)
     {
         switch (scheme) {
             case Multinomial:
-                resample(ResampleEval<T>(ResampleMultinomial()));
-                break;
+                return resample(ResampleEval<T>(ResampleMultinomial()));
             case Residual:
-                resample(ResampleEval<T>(ResampleResidual()));
-                break;
+                return resample(ResampleEval<T>(ResampleResidual()));
             case Stratified:
-                resample(ResampleEval<T>(ResampleStratified()));
-                break;
+                return resample(ResampleEval<T>(ResampleStratified()));
             case Systematic:
-                resample(ResampleEval<T>(ResampleSystematic()));
-                break;
+                return resample(ResampleEval<T>(ResampleSystematic()));
             case ResidualStratified:
-                resample(ResampleEval<T>(ResampleResidualStratified()));
-                break;
+                return resample(ResampleEval<T>(ResampleResidualStratified()));
             case ResidualSystematic:
-                resample(ResampleEval<T>(ResampleResidualSystematic()));
-                break;
+                return resample(ResampleEval<T>(ResampleResidualSystematic()));
+            default:
+                return resample(ResampleEval<T>(ResampleMultinomial()));
         }
     }
 
+    eval_type &resample(std::size_t k) { return this->eval(1, k); }
+
+    const eval_type &resample(std::size_t k) const { return this->eval(1, k); }
+
     /// \brief Add a new evaluation object for the mutation step
     template <typename Eval>
-    void mutation(Eval &&eval)
+    std::size_t mutation(Eval &&eval,
+        std::enable_if_t<!std::is_integral<Eval>::value> * = nullptr)
     {
-        this->eval(2, std::forward<Eval>(eval));
+        return this->eval(2, std::forward<Eval>(eval));
     }
 
-    /// \brief Attach a new estimator and return a reference to it
-    std::string selection_estimator(const estimator_type &estimator,
-        const std::string &name = std::string())
+    eval_type &mutation(std::size_t k) { return this->eval(2, k); }
+
+    const eval_type &mutation(std::size_t k) const { return this->eval(2, k); }
+
+    template <typename Estimator>
+    std::size_t selection_estimator(Estimator &&estimator,
+        std::enable_if_t<!std::is_integral<Estimator>::value> * = nullptr)
     {
-        return this->estimator(0, estimator, name);
+        return this->estimator(0, std::forward<Estimator>(estimator));
     }
 
-    /// \brief Attach a new estimator and return a reference to it
-    std::string resample_estimator(const estimator_type &estimator,
-        const std::string &name = std::string())
+    estimator_type &selection_estimator(std::size_t k)
     {
-        return this->estimator(1, estimator, name);
+        return this->estimator(0, k);
     }
 
-    /// \brief Attach a new estimator and return a reference to it
-    std::string mutation_estimator(const estimator_type &estimator,
-        const std::string &name = std::string())
+    const estimator_type &selection_estimator(std::size_t k) const
     {
-        return this->estimator(2, estimator, name);
+        return this->estimator(0, k);
     }
 
-    /// \brief Get read only access to estimator in the selection step given
-    /// (partial) name
-    const estimator_type &estimator_selection(const std::string &name) const
+    template <typename Estimator>
+    std::size_t resample_estimator(Estimator &&estimator,
+        std::enable_if_t<!std::is_integral<Estimator>::value> * = nullptr)
     {
-        return this->estimator(0, name);
+        return this->estimator(1, std::forward<Estimator>(estimator));
     }
 
-    /// \brief Get read only access to estimator in the resample step
-    const estimator_type &estimator_resample(const std::string &name) const
+    estimator_type &resample_estimator(std::size_t k)
     {
-        return this->estimator(1, name);
+        return this->estimator(1, k);
     }
 
-    /// \brief Get read only access to estimator in the mutation step
-    const estimator_type &estimator_mutation(const std::string &name) const
+    const estimator_type &resample_estimator(std::size_t k) const
     {
-        return this->estimator(2, name);
+        return this->estimator(1, k);
+    }
+
+    template <typename Estimator>
+    std::size_t mutation_estimator(Estimator &&estimator,
+        std::enable_if_t<!std::is_integral<Estimator>::value> * = nullptr)
+    {
+        return this->estimator(2, std::forward<Estimator>(estimator));
+    }
+
+    estimator_type &mutation_estimator(std::size_t k)
+    {
+        return this->estimator(2, k);
+    }
+
+    const estimator_type &mutation_estimator(std::size_t k) const
+    {
+        return this->estimator(2, k);
     }
 
     /// \brief Iterate the sampler
@@ -398,7 +421,7 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
     void do_estimate(std::size_t step)
     {
         for (auto &e : this->estimator(step))
-            e.second.estimate(iter_, particle_);
+            e.estimate(iter_, particle_);
     }
 }; // class SMCSampler
 
