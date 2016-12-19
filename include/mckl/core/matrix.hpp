@@ -56,6 +56,8 @@ class Matrix
     using pointer = value_type *;
     using const_pointer = const value_type *;
 
+    Matrix() : nrow_(0), ncol_(0) {}
+
     /// \brief Construct the matrix given number of rows and columns
     Matrix(size_type nrow, size_type ncol)
         : data_(nrow * ncol), nrow_(nrow), ncol_(ncol)
@@ -63,6 +65,16 @@ class Matrix
     }
 
     Matrix(const Matrix<Layout, T> &) = default;
+
+    Matrix(const Matrix<Layout == RowMajor ? ColMajor : RowMajor, T> &other)
+        : data_(other.nrow() * other.ncol())
+        , nrow_(other.nrow())
+        , ncol_(other.ncol())
+    {
+        for (std::size_t i = 0; i != nrow_; ++i)
+            for (std::size_t j = 0; j != ncol_; ++j)
+                operator()(i, j) = other(i, j);
+    }
 
     Matrix(Matrix<Layout, T> &&other) noexcept(
         noexcept(Vector<T>(std::move(other.data_))))
@@ -83,6 +95,17 @@ class Matrix
             std::swap(nrow_, other.nrow_);
             std::swap(ncol_, other.ncol_);
         }
+
+        return *this;
+    }
+
+    Matrix<Layout, T> &operator=(
+        const Matrix<Layout == RowMajor ? ColMajor : RowMajor, T> &other)
+    {
+        resize(other.nrow_, other.ncol_);
+        for (std::size_t i = 0; i != nrow_; ++i)
+            for (std::size_t j = 0; j != ncol_; ++j)
+                operator()(i, j) = other(i, j);
 
         return *this;
     }

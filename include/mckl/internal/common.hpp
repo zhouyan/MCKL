@@ -36,7 +36,6 @@
 
 #include <mckl/internal/assert.hpp>
 #include <mckl/internal/defines.hpp>
-#include <mckl/internal/forward.hpp>
 #include <mckl/internal/traits.hpp>
 
 #include <mckl/internal/byte_order.hpp>

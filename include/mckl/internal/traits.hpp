@@ -34,7 +34,6 @@
 
 #include <mckl/internal/config.h>
 #include <mckl/internal/defines.hpp>
-#include <mckl/internal/forward.hpp>
 #include <type_traits>
 
 #define MCKL_DEFINE_TYPE_DISPATCH_TRAIT(Outer, Inner, Default)                \

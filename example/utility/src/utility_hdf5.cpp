@@ -33,15 +33,24 @@
 
 int main(int argc, char **argv)
 {
-    std::size_t nrow = 1000;
-    if (argc > 1)
-        nrow = static_cast<std::size_t>(std::atoi(argv[1]));
+    --argc;
+    ++argv;
 
-    std::size_t ncol = 1000;
-    if (argc > 2)
-        ncol = static_cast<std::size_t>(std::atoi(argv[2]));
+    std::size_t N = 1000;
+    if (argc > 0) {
+        N = static_cast<std::size_t>(std::atoi(*argv));
+        --argc;
+        ++argv;
+    }
 
-    utility_hdf5(nrow, ncol);
+    std::size_t M = 1000;
+    if (argc > 0) {
+        M = static_cast<std::size_t>(std::atoi(*argv));
+        --argc;
+        ++argv;
+    }
+
+    utility_hdf5(N, M);
 
     return 0;
 }

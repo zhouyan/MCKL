@@ -32,100 +32,208 @@
 #ifndef MCKL_EXAMPLE_UTILITY_HDF5_HPP
 #define MCKL_EXAMPLE_UTILITY_HDF5_HPP
 
+#include <mckl/random/rng.hpp>
+#include <mckl/random/u01_distribution.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include <mckl/utility/hdf5.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-#define MCKL_EXAMPLE_UTILITY_HDF5_TEST(orig, load)                            \
-    utility_hdf5_test<orig, load>(nrow, ncol, #orig, #load);
+template <typename>
+inline std::string utility_hdf5_typename();
 
-template <typename OrigType, typename LoadType>
-inline bool utility_hdf5_check(
-    const mckl::Vector<OrigType> &orig, const mckl::Vector<LoadType> &load)
+template <>
+inline std::string utility_hdf5_typename<float>()
 {
-    for (std::size_t i = 0; i != orig.size(); ++i)
-        if (!mckl::internal::is_equal(static_cast<LoadType>(orig[i]), load[i]))
-            return false;
-    return true;
-}
+    return "float";
+};
 
-template <typename OrigType, typename LoadType>
-inline void utility_hdf5_test(std::size_t nrow, std::size_t ncol,
-    const std::string &orig_type, const std::string &load_type)
+template <>
+inline std::string utility_hdf5_typename<double>()
 {
-    std::cout << std::setw(20) << std::left << orig_type << std::setw(20)
-              << std::left << load_type;
+    return "double";
+};
 
-    const std::string filename("hdf5.h5");
-    const std::size_t n = nrow * ncol;
+template <mckl::MatrixLayout>
+inline std::string utility_hdf5_layoutname();
 
-    mckl::Vector<OrigType> orig(n);
-    for (std::size_t i = 0; i != n; ++i)
-        orig[i] = static_cast<OrigType>(i);
-    mckl::StopWatch watch_store;
-    watch_store.start();
-    mckl::hdf5store(filename);
-    mckl::hdf5store(filename, "data", true);
-    mckl::hdf5store(n, orig.begin(), filename, "data/x1", true);
-    mckl::hdf5store(n, orig.data(), filename, "data/x2", true);
-    mckl::hdf5store(
-        mckl::RowMajor, nrow, ncol, orig.begin(), filename, "data/m1", true);
-    mckl::hdf5store(
-        mckl::RowMajor, nrow, ncol, orig.data(), filename, "data/m2", true);
-    mckl::hdf5store(
-        mckl::ColMajor, nrow, ncol, orig.begin(), filename, "data/m3", true);
-    mckl::hdf5store(
-        mckl::ColMajor, nrow, ncol, orig.data(), filename, "data/m4", true);
-    watch_store.stop();
+template <>
+inline std::string utility_hdf5_layoutname<mckl::RowMajor>()
+{
+    return "RowMajor";
+};
 
+template <>
+inline std::string utility_hdf5_layoutname<mckl::ColMajor>()
+{
+    return "ColMajor";
+};
+
+template <typename T1, typename T2>
+inline void utility_hdf5(std::size_t N, std::size_t M)
+{
+    mckl::RNG rng;
+    mckl::UniformIntDistribution<std::size_t> rsize(0, N);
+    mckl::U01Distribution<T1> u01;
+
+    const std::string filename("utility_hdf5.h5");
+    const std::string dataname("data");
+    mckl::StopWatch watch1;
+    mckl::StopWatch watch2;
     bool passed = true;
-    mckl::Vector<LoadType> load(n);
-    mckl::StopWatch watch_load;
-    watch_load.start();
-    passed = passed && n == mckl::hdf5load_size(filename, "data/x1");
-    passed = passed && n == mckl::hdf5load_size(filename, "data/x2");
-    passed = passed && n == mckl::hdf5load_size(filename, "data/m1");
-    passed = passed && n == mckl::hdf5load_size(filename, "data/m2");
-    passed = passed && n == mckl::hdf5load_size(filename, "data/m3");
-    passed = passed && n == mckl::hdf5load_size(filename, "data/m4");
-    mckl::hdf5load(filename, "data/x1", load.begin());
-    passed = passed && utility_hdf5_check(orig, load);
-    mckl::hdf5load(filename, "data/x2", load.data());
-    passed = passed && utility_hdf5_check(orig, load);
-    mckl::hdf5load(filename, "data/m1", load.begin());
-    passed = passed && utility_hdf5_check(orig, load);
-    mckl::hdf5load(filename, "data/m2", load.data());
-    passed = passed && utility_hdf5_check(orig, load);
-    mckl::hdf5load(filename, "data/m3", load.begin());
-    passed = passed && utility_hdf5_check(orig, load);
-    mckl::hdf5load(filename, "data/m4", load.data());
-    passed = passed && utility_hdf5_check(orig, load);
-    watch_load.stop();
+    std::size_t n = 0;
+    for (std::size_t k = 0; k != M; ++k) {
+        const std::size_t m = k == 0 ? 0 : rsize(rng);
+        n += m;
 
-    std::cout << std::setw(20) << std::right << std::fixed
-              << watch_store.milliseconds() << std::setw(20) << std::right
-              << std::fixed << watch_load.milliseconds() << std::setw(20)
-              << std::right << (passed ? "Passed" : "Failed") << std::endl;
-    std::cout << std::string(100, '-') << std::endl;
+        mckl::Vector<T1> v1(m);
+        mckl::rand(rng, u01, m, v1.data());
+
+        watch1.start();
+        mckl::hdf5store(v1, filename, dataname, false);
+        watch1.stop();
+
+        watch2.start();
+        auto v2 = mckl::hdf5load<T2>(filename, dataname);
+        watch2.stop();
+
+        passed = passed && v1.size() == v2.size();
+        if (!passed)
+            break;
+
+        mckl::Vector<float> f1(n);
+        mckl::Vector<float> f2(n);
+        std::copy(v1.begin(), v1.end(), f1.begin());
+        std::copy(v2.begin(), v2.end(), f2.begin());
+        passed = passed && f1 == f2;
+        if (!passed)
+            break;
+    }
+
+    const std::string n1("Vector<" + utility_hdf5_typename<T1>() + ">");
+    const std::string n2("Vector<" + utility_hdf5_typename<T2>() + ">");
+    const std::size_t bytes1 = n * sizeof(T1);
+    const std::size_t bytes2 = n * sizeof(T2);
+
+    std::cout << std::setw(30) << std::left << n1;
+    std::cout << std::setw(30) << std::left << n2;
+    std::cout << std::setw(10) << std::right
+              << 1e-6 * bytes1 / watch1.seconds();
+    std::cout << std::setw(10) << std::right
+              << 1e-6 * bytes2 / watch2.seconds();
+    std::cout << std::setw(15) << std::right << (passed ? "Passed" : "Failed");
+    std::cout << std::endl;
 }
 
-inline void utility_hdf5(std::size_t nrow, std::size_t ncol)
+template <mckl::MatrixLayout Layout1, mckl::MatrixLayout Layout2, typename T1,
+    typename T2>
+inline void utility_hdf5(std::size_t N, std::size_t M)
 {
-    std::cout << std::string(100, '=') << std::endl;
-    std::cout << std::setw(20) << std::left << "Orignal type" << std::setw(20)
-              << std::left << "Load type" << std::setw(20) << std::right
-              << std::fixed << "Time (ms) store" << std::setw(20) << std::right
-              << std::fixed << "Time (ms) load" << std::setw(20) << std::right
-              << "Test" << std::endl;
-    std::cout << std::string(100, '-') << std::endl;
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(float, float);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(float, double);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(float, long double);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(double, float);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(double, double);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(double, long double);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(long double, float);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(long double, float);
-    MCKL_EXAMPLE_UTILITY_HDF5_TEST(long double, long double);
+    mckl::RNG rng;
+    mckl::UniformIntDistribution<std::size_t> rsize(0, N);
+    mckl::U01Distribution<T1> u01;
+
+    const std::string filename("utility_hdf5.h5");
+    const std::string dataname("data");
+    mckl::StopWatch watch1;
+    mckl::StopWatch watch2;
+    bool passed = true;
+    std::size_t n = 0;
+    for (std::size_t k = 0; k != M; ++k) {
+        const std::size_t nrow = k == 0 ? 0 : rsize(rng);
+        const std::size_t ncol = k == 1 ? 0 : rsize(rng);
+        n += nrow * ncol;
+
+        mckl::Matrix<Layout1, T1> m1(nrow, ncol);
+        mckl::rand(rng, u01, nrow * ncol, m1.data());
+
+        watch1.start();
+        mckl::hdf5store(m1, filename, dataname, false);
+        watch1.stop();
+
+        watch2.start();
+        auto m2 = mckl::hdf5load<Layout2, T2>(filename, dataname);
+        watch2.stop();
+
+        passed = passed && m1.nrow() == m2.nrow() && m1.ncol() == m2.ncol();
+        if (!passed)
+            break;
+
+        mckl::Matrix<mckl::RowMajor, float> f1(nrow, ncol);
+        mckl::Matrix<mckl::RowMajor, float> f2(nrow, ncol);
+        for (std::size_t i = 0; i != nrow; ++i)
+            for (std::size_t j = 0; j != ncol; ++j)
+                f1(i, j) = static_cast<float>(m1(i, j));
+        for (std::size_t i = 0; i != nrow; ++i)
+            for (std::size_t j = 0; j != ncol; ++j)
+                f2(i, j) = static_cast<float>(m2(i, j));
+        passed = passed && f1 == f2;
+        if (!passed)
+            break;
+    }
+
+    const std::string n1("Matrix<" + utility_hdf5_layoutname<Layout1>() +
+        ", " + utility_hdf5_typename<T1>() + ">");
+    const std::string n2("Matrix<" + utility_hdf5_layoutname<Layout2>() +
+        ", " + utility_hdf5_typename<T2>() + ">");
+    const std::size_t bytes1 = n * sizeof(T1);
+    const std::size_t bytes2 = n * sizeof(T2);
+
+    std::cout << std::setw(30) << std::left << n1;
+    std::cout << std::setw(30) << std::left << n2;
+    std::cout << std::setw(10) << std::right
+              << 1e-6 * bytes1 / watch1.seconds();
+    std::cout << std::setw(10) << std::right
+              << 1e-6 * bytes2 / watch2.seconds();
+    std::cout << std::setw(15) << std::right << (passed ? "Passed" : "Failed");
+    std::cout << std::endl;
+}
+
+inline void utility_hdf5(std::size_t N, std::size_t M)
+{
+    std::cout << std::string(95, '=') << std::endl;
+
+    std::cout << std::setw(30) << std::left << "Data (S)";
+    std::cout << std::setw(30) << std::left << "Data (L)";
+    std::cout << std::setw(10) << std::right << "MB/s (S)";
+    std::cout << std::setw(10) << std::right << "MB/s (L)";
+    std::cout << std::setw(15) << std::right << "Determinstics" << std::endl;
+
+    std::cout << std::string(95, '-') << std::endl;
+
+    utility_hdf5<float, float>(N, M);
+    utility_hdf5<float, double>(N, M);
+    utility_hdf5<double, float>(N, M);
+    utility_hdf5<double, double>(N, M);
+
+    std::cout << std::string(95, '-') << std::endl;
+
+    utility_hdf5<mckl::RowMajor, mckl::RowMajor, float, float>(N, M);
+    utility_hdf5<mckl::RowMajor, mckl::RowMajor, float, double>(N, M);
+    utility_hdf5<mckl::RowMajor, mckl::RowMajor, double, float>(N, M);
+    utility_hdf5<mckl::RowMajor, mckl::RowMajor, double, double>(N, M);
+
+    std::cout << std::string(95, '-') << std::endl;
+
+    utility_hdf5<mckl::RowMajor, mckl::ColMajor, float, float>(N, M);
+    utility_hdf5<mckl::RowMajor, mckl::ColMajor, float, double>(N, M);
+    utility_hdf5<mckl::RowMajor, mckl::ColMajor, double, float>(N, M);
+    utility_hdf5<mckl::RowMajor, mckl::ColMajor, double, double>(N, M);
+
+    std::cout << std::string(95, '-') << std::endl;
+
+    utility_hdf5<mckl::ColMajor, mckl::RowMajor, float, float>(N, M);
+    utility_hdf5<mckl::ColMajor, mckl::RowMajor, float, double>(N, M);
+    utility_hdf5<mckl::ColMajor, mckl::RowMajor, double, float>(N, M);
+    utility_hdf5<mckl::ColMajor, mckl::RowMajor, double, double>(N, M);
+
+    std::cout << std::string(95, '-') << std::endl;
+
+    utility_hdf5<mckl::ColMajor, mckl::ColMajor, float, float>(N, M);
+    utility_hdf5<mckl::ColMajor, mckl::ColMajor, float, double>(N, M);
+    utility_hdf5<mckl::ColMajor, mckl::ColMajor, double, float>(N, M);
+    utility_hdf5<mckl::ColMajor, mckl::ColMajor, double, double>(N, M);
+
+    std::cout << std::string(95, '-') << std::endl;
 }
 
 #endif // MCKL_EXAMPLE_UTILITY_HDF5_HPP
