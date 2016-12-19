@@ -286,9 +286,13 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
                 return resample(ResampleEval<T>(ResampleResidualStratified()));
             case ResidualSystematic:
                 return resample(ResampleEval<T>(ResampleResidualSystematic()));
-            default:
-                return resample(ResampleEval<T>(ResampleMultinomial()));
         }
+
+        runtime_assert(false,
+            "**SMCSampler::resample** used with unknown resample "
+            "scheme");
+
+        return resample(ResampleEval<T>(ResampleMultinomial()));
     }
 
     eval_type &resample(std::size_t k) { return this->eval(1, k); }
