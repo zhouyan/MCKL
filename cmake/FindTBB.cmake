@@ -40,7 +40,6 @@
 # TBB_LINK_LIBRARIES              - TBB libraries that shall be linked to
 # TBB_MALLOC_LINK_LIBRARIES       - TBB malloc libraries
 # TBB_MALLOC_PROXY_LINK_LIBRARIES - TBB malloc proxy libraries
-# TBB_DEFINITIONS                 - TBB compile time definitions
 #
 # The following variables affect the behavior of this module
 #

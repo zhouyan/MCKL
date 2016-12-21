@@ -136,6 +136,14 @@
 #define MCKL_HAS_TBB 0
 #endif
 
+#ifndef MCKL_HAS_JEMALLOC
+#define MCKL_HAS_JEMALLOC 0
+#endif
+
+#ifndef MCKL_USE_JEMALLOC
+#define MCKL_USE_JEMALLOC MCKL_HAS_JEMALLOC
+#endif
+
 #ifndef MCKL_USE_TBB
 #define MCKL_USE_TBB MCKL_HAS_TBB
 #endif

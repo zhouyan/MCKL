@@ -46,6 +46,10 @@
 #include <malloc.h>
 #endif
 
+#if MCKL_HAS_JEMALLOC
+#include <jemalloc/jemalloc.h>
+#endif
+
 #if MCKL_HAS_TBB
 #include <tbb/scalable_allocator.h>
 #endif
@@ -70,19 +74,15 @@
 /// \brief Default allocation type
 /// \ingroup Config
 #ifndef MCKL_MEMORY_TYPE
-#if MCKL_USE_TBB_MALLOC
+#if MCKL_USE_JEMALLOC
+#define MCKL_MEMORY_TYPE ::mckl::MemoryJEM
+#elif MCKL_USE_TBB_MALLOC
 #define MCKL_MEMORY_TYPE ::mckl::MemoryTBB
 #elif MCKL_HAS_POSIX || defined(MCKL_MSVC)
 #define MCKL_MEMORY_TYPE ::mckl::MemorySYS
 #else
 #define MCKL_MEMORY_TYPE ::mckl::MemorySTD
 #endif
-#endif
-
-/// \brief Allocator::construct default behavior for scalar type
-/// \ingroup Config
-#ifndef MCKL_CONSTRUCT_SCALAR
-#define MCKL_CONSTRUCT_SCALAR 0
 #endif
 
 namespace mckl
@@ -227,6 +227,41 @@ class MemorySYS
 
 #endif // MCKL_HAS_POSIX
 
+#if MCKL_HAS_JEMALLOC
+
+/// \brief Aligned memory using jemalloc
+/// \ingroup Core
+template <std::size_t Alignment>
+class MemoryJEM
+{
+    static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
+        "**MemoryJEM** used with Alignment other than a power of two positive "
+        "integer");
+
+    static_assert(Alignment >= sizeof(void *),
+        "**MemoryJEM** used with Alignment less than sizeof(void *)");
+
+    public:
+    static constexpr std::size_t alignment() { return Alignment; }
+
+    static void *malloc(std::size_t n)
+    {
+        if (n < 1)
+            n = 1;
+        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+
+        return ::je_aligned_alloc(Alignment, n);
+    }
+
+    static void free(void *ptr)
+    {
+        if (ptr != nullptr)
+            ::je_free(ptr);
+    }
+}; // class MemoryTBB
+
+#endif // MCKL_HAS_JEMALLOC
+
 #if MCKL_HAS_TBB
 
 /// \brief Aligned memory using Intel TBB `scalable_aligned_malloc` and
@@ -307,13 +342,15 @@ class Allocator : public std::allocator<T>
     Allocator<T, Mem> &operator=(Allocator<T, Mem> &&) = default;
 
     template <typename U>
-    Allocator(const Allocator<U, Mem> &other)
+    Allocator(const Allocator<U, Mem> &other) noexcept(
+        noexcept(std::allocator<T>(static_cast<std::allocator<U>>(other))))
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
 
     template <typename U>
-    Allocator(Allocator<U, Mem> &&other)
+    Allocator(Allocator<U, Mem> &&other) noexcept(noexcept(
+        std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))))
         : std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))
     {
     }
@@ -337,33 +374,6 @@ class Allocator : public std::allocator<T>
     {
         if (ptr != nullptr)
             Mem::free(ptr);
-    }
-
-    template <typename U>
-    void construct(U *ptr)
-    {
-        construct_dispatch(ptr,
-            std::integral_constant<bool,
-                (MCKL_CONSTRUCT_SCALAR != 0 || !std::is_scalar<U>::value)>());
-    }
-
-    template <typename U, typename Arg, typename... Args>
-    void constrct(U *ptr, Arg &&arg, Args &&... args)
-    {
-        std::allocator<T>::construct(
-            ptr, std::forward<Arg>(arg), std::forward<Args>(args)...);
-    }
-
-    private:
-    template <typename U>
-    void construct_dispatch(U *ptr, std::true_type)
-    {
-        std::allocator<T>::construct(ptr);
-    }
-
-    template <typename U>
-    void construct_dispatch(U *, std::false_type)
-    {
     }
 }; // class Allocator
 

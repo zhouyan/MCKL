@@ -77,10 +77,8 @@ inline void core_memory_allocate(std::size_t N, std::size_t M,
     const std::size_t bytes = n * sizeof(typename Alloc::value_type);
     constexpr std::uintptr_t align = Alloc::memory_type::alignment();
     bool passed = true;
-    for (auto p : ptr) {
+    for (auto p : ptr)
         passed = passed && reinterpret_cast<std::uintptr_t>(p) % align == 0;
-        alloc.deallocate(p);
-    }
     core_memory_check(func, align, bytes, watch, passed);
 }
 
@@ -169,6 +167,10 @@ inline void core_memory(std::size_t N, std::size_t M, const std::string &tname)
     core_memory_allocate<mckl::Allocator<T, mckl::MemorySYS<alignment>>>(
         N, M, tname, "MemorySYS");
 #endif
+#if MCKL_HAS_JEMALLOC
+    core_memory_allocate<mckl::Allocator<T, mckl::MemoryJEM<alignment>>>(
+        N, M, tname, "MemoryJEM");
+#endif
 #if MCKL_HAS_TBB
     core_memory_allocate<mckl::Allocator<T, mckl::MemoryTBB<alignment>>>(
         N, M, tname, "MemoryTBB");
@@ -180,6 +182,10 @@ inline void core_memory(std::size_t N, std::size_t M, const std::string &tname)
 #if MCKL_HAS_POSIX || defined(MCKL_MSVC)
     core_memory_vector<mckl::Allocator<T, mckl::MemorySYS<alignment>>>(
         N, M, tname, "MemorySYS");
+#endif
+#if MCKL_HAS_JEMALLOC
+    core_memory_vector<mckl::Allocator<T, mckl::MemoryJEM<alignment>>>(
+        N, M, tname, "MemoryJEM");
 #endif
 #if MCKL_HAS_TBB
     core_memory_vector<mckl::Allocator<T, mckl::MemoryTBB<alignment>>>(
@@ -193,10 +199,15 @@ inline void core_memory(std::size_t N, std::size_t M, const std::string &tname)
     core_memory_vector_val<mckl::Allocator<T, mckl::MemorySYS<alignment>>>(
         N, M, tname, "MemorySYS");
 #endif
+#if MCKL_HAS_JEMALLOC
+    core_memory_vector_val<mckl::Allocator<T, mckl::MemoryJEM<alignment>>>(
+        N, M, tname, "MemoryJEM");
+#endif
 #if MCKL_HAS_TBB
     core_memory_vector_val<mckl::Allocator<T, mckl::MemoryTBB<alignment>>>(
         N, M, tname, "MemoryTBB");
 #endif
+
     std::cout << std::string(115, '-') << std::endl;
 }
 

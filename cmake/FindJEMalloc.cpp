@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/core.hpp
+// MCKL/cmake/FindJEMalloc.cpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,17 +29,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_CORE_HPP
-#define MCKL_CORE_HPP
+#include <jemalloc/jemalloc.h>
+#include <cstdlib>
 
-#include <mckl/internal/config.h>
-#include <mckl/core/estimate_matrix.hpp>
-#include <mckl/core/estimator.hpp>
-#include <mckl/core/matrix.hpp>
-#include <mckl/core/memory.hpp>
-#include <mckl/core/particle.hpp>
-#include <mckl/core/sampler.hpp>
-#include <mckl/core/state_matrix.hpp>
-#include <mckl/core/weight.hpp>
+int main()
+{
+    je_malloc(1000);
 
-#endif // MCKL_CORE_HPP
+    je_malloc_stats_print(NULL, NULL, NULL);
+
+    return 0;
+}
