@@ -62,7 +62,10 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     std::size_t num_iter() const { return this->nrow(); }
 
     /// \brief Reserve space for specified *additional* number of iterations
-    void reserve(std::size_t n) { this->reserve_nrow(num_iter() + n); }
+    void reserve(std::size_t n)
+    {
+        Matrix<RowMajor, T>::reserve(num_iter() + n, dim());
+    }
 
     /// \brief Read the values of \f$\eta_i(1:d)\f$
     template <typename OutputIter>
@@ -82,7 +85,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     T *insert_estimate()
     {
         const size_type i = num_iter();
-        resize_nrow(i + 1);
+        this->resize(i + 1, dim());
 
         return this->row_data(i);
     }
@@ -92,7 +95,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     void insert_estimate(InputIter first)
     {
         const size_type i = num_iter();
-        resize_nrow(i + 1);
+        this->resize(i + 1, dim());
         std::copy_n(first, dim(), this->row_data(i));
     }
 
@@ -118,14 +121,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
             insert_estimate_dispatch(t, i, first, std::is_floating_point<T>());
     }
 
-    /// \brief Remove all estimates in the matrix and resize it to zero rows
-    void clear() { resize_nrow(0); }
-
     private:
-    using Matrix<RowMajor, T>::resize;
-    using Matrix<RowMajor, T>::resize_nrow;
-    using Matrix<RowMajor, T>::resize_ncol;
-
     template <typename InputIter>
     void insert_estimate_dispatch(
         size_type t, size_type i, InputIter first, std::true_type)
@@ -139,7 +135,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     void insert_estimate_dispatch(
         size_type t, size_type i, InputIter first, std::false_type)
     {
-        resize_nrow(std::max(i + 1, t));
+        this->resize(std::max(i + 1, t), dim());
         std::copy_n(first, dim(), this->row_data(i));
     }
 }; // class EstimateMatrix

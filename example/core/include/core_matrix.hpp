@@ -221,44 +221,6 @@ inline bool core_matrix_check_resize(std::size_t N, std::size_t M)
 }
 
 template <mckl::MatrixLayout Layout>
-inline bool core_matrix_check_resize_nrow(std::size_t N, std::size_t M)
-{
-    mckl::RNG rng;
-    mckl::UniformIntDistribution<std::size_t> rsize(0, N);
-
-    for (std::size_t i = 0; i != M; ++i) {
-        std::size_t nrow0 = rsize(rng);
-        std::size_t ncol0 = rsize(rng);
-        std::size_t nrow1 = rsize(rng);
-        CoreMatrix<Layout> m(nrow0, ncol0);
-        core_matrix_fill(m);
-        m.resize_nrow(nrow1);
-        if (!core_matrix_check(m, nrow0, ncol0))
-            return false;
-    }
-    return true;
-}
-
-template <mckl::MatrixLayout Layout>
-inline bool core_matrix_check_resize_ncol(std::size_t N, std::size_t M)
-{
-    mckl::RNG rng;
-    mckl::UniformIntDistribution<std::size_t> rsize(0, N);
-
-    for (std::size_t i = 0; i != M; ++i) {
-        std::size_t nrow0 = rsize(rng);
-        std::size_t ncol0 = rsize(rng);
-        std::size_t ncol1 = rsize(rng);
-        CoreMatrix<Layout> m(nrow0, ncol0);
-        core_matrix_fill(m);
-        m.resize_ncol(ncol1);
-        if (!core_matrix_check(m, nrow0, ncol0))
-            return false;
-    }
-    return true;
-}
-
-template <mckl::MatrixLayout Layout>
 inline bool core_matrix_check_shrink_to_fit(std::size_t N, std::size_t M)
 {
     mckl::RNG rng;
@@ -371,8 +333,6 @@ inline void core_matrix(std::size_t N, std::size_t M)
     core_matrix(N, M, "nrow", core_matrix_check_nrow<Layout>);
     core_matrix(N, M, "ncol", core_matrix_check_ncol<Layout>);
     core_matrix(N, M, "resize", core_matrix_check_resize<Layout>);
-    core_matrix(N, M, "resize_nrow", core_matrix_check_resize_nrow<Layout>);
-    core_matrix(N, M, "resize_ncol", core_matrix_check_resize_ncol<Layout>);
     core_matrix(
         N, M, "shrink_to_fit", core_matrix_check_shrink_to_fit<Layout>);
     core_matrix(N, M, "read_row", core_matrix_check_read_row<Layout>);

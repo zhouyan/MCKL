@@ -112,35 +112,15 @@ class StateMatrix : public Matrix<Layout, T>
     /// \brief The dimension
     size_type dim() const { return this->ncol(); }
 
-    /// \brief Number of elements in the matrix
-    size_type data_size() const { return this->nrow() * this->ncol(); }
+    using Matrix<Layout, T>::reserve;
 
     /// \brief Reserve space for specified sample size
     void reserve(size_type N) { this->reserve_nrow(N); }
 
-    /// \brief Reserve space for specified sample size and dimension
-    ///
-    /// \details
-    /// `dim` is ignored unless `Dim == 0`.
-    void reserve(size_type N, size_type dim)
-    {
-        Matrix<Layout, T>::reserve(N, Dim == 0 ? dim : dim());
-    }
-
     using Matrix<Layout, T>::resize;
 
     /// \brief Change the sample size
-    void resize(size_type N) { this->resize_nrow(N); }
-
-    /// \brief Change the dimension, only usable when `Dim == 0`
-    void resize_dim(size_type dim)
-    {
-        static_assert(Dim == 0,
-            "**StateMatrix::resize_dim** used with an object with fixed "
-            "dimension");
-
-        this->resize_ncol(dim);
-    }
+    void resize(size_type N) { this->resize(N, dim()); }
 
     /// \brief Select samples
     ///

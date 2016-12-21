@@ -56,9 +56,10 @@ class Matrix
     using pointer = value_type *;
     using const_pointer = const value_type *;
 
+    /// \brief Construct an empty matrix
     Matrix() : nrow_(0), ncol_(0) {}
 
-    /// \brief Construct the matrix given number of rows and columns
+    /// \brief Construct a matrix given number of rows and columns
     Matrix(size_type nrow, size_type ncol)
         : data_(nrow * ncol), nrow_(nrow), ncol_(ncol)
     {
@@ -66,6 +67,7 @@ class Matrix
 
     Matrix(const Matrix<Layout, T> &) = default;
 
+    /// \brief Construct a matrix by copying one with different layout
     Matrix(const Matrix<Layout == RowMajor ? ColMajor : RowMajor, T> &other)
         : data_(other.nrow() * other.ncol())
         , nrow_(other.nrow())
@@ -99,6 +101,7 @@ class Matrix
         return *this;
     }
 
+    /// \brief Copy another matrix with a different layout
     Matrix<Layout, T> &operator=(
         const Matrix<Layout == RowMajor ? ColMajor : RowMajor, T> &other)
     {
@@ -108,64 +111,6 @@ class Matrix
                 operator()(i, j) = other(i, j);
 
         return *this;
-    }
-
-    /// \brief Number of rows
-    size_type nrow() const { return nrow_; }
-
-    /// \brief Number of columns
-    size_type ncol() const { return ncol_; }
-
-    /// \brief Resize the number of rows and columns
-    void resize(size_type nrow, size_type ncol)
-    {
-        if (nrow * ncol == 0) {
-            data_.clear();
-            nrow_ = nrow;
-            ncol_ = ncol;
-            return;
-        }
-
-        if (nrow == nrow_ && ncol_ == ncol)
-            return;
-
-        resize_dispatch(nrow, ncol, major());
-    }
-
-    /// \brief Resize the number of rows
-    void resize_nrow(size_type nrow) { resize(nrow, ncol_); }
-
-    /// \brief Resize the number of columns
-    void resize_ncol(size_type ncol) { resize(nrow_, ncol); }
-
-    /// \brief Reserve space given number of rows and columns
-    void reserve(size_type n, size_type m) { data_.reserve(n * m); }
-
-    /// \brief Reserve space given number of rows
-    void reserve_nrow(size_type n) { reserve(n, ncol()); }
-
-    /// \brief Reserve space given number of columns
-    void reserve_ncol(size_type m) { reserve(nrow(), m); }
-
-    /// \brief Release memory no longer needed
-    void shrink_to_fit() { data_.shrink_to_fit(); }
-
-    /// \brief Pointer to the upper left corner of the matrix
-    pointer data() { return data_.data(); }
-
-    /// \brief Pointer to the upper left corner of the matrix
-    const_pointer data() const { return data_.data(); }
-
-    /// \brief The element at row `i` and column `j`
-    reference operator()(size_type i, size_type j)
-    {
-        return at_dispatch(i, j, major());
-    }
-
-    /// \brief The element at row `i` and column `j`
-    const_reference operator()(size_type i, size_type j) const
-    {
-        return at_dispatch(i, j, major());
     }
 
     /// \brief The element at row `i` and column `j`
@@ -186,40 +131,35 @@ class Matrix
         return at_dispatch(i, j, major());
     }
 
-    /// \brief The stride of row-wise access
-    ///
-    /// \details
-    /// To iterate over a specific row `i`,
-    /// ~~~{.cpp}
-    /// auto stride = m.row_stride();
-    /// auto data = m.row_data(i);
-    /// auto size = m.row_size();
-    /// for (j = 0; j != size; ++j, data += stride)
-    ///     /* *data is the same as m(i, j) */;
-    /// ~~~
-    size_type row_stride() const { return row_stride_dispatch(major()); }
+    /// \brief The element at row `i` and column `j`
+    reference operator()(size_type i, size_type j)
+    {
+        return at_dispatch(i, j, major());
+    }
 
-    /// \brief Pointer to the beginning of a row
+    /// \brief The element at row `i` and column `j`
+    const_reference operator()(size_type i, size_type j) const
+    {
+        return at_dispatch(i, j, major());
+    }
+
+    /// \brief Pointer to the upper left corner of the matrix
+    pointer data() { return data_.data(); }
+
+    /// \brief Pointer to the upper left corner of the matrix
+    const_pointer data() const { return data_.data(); }
+
+    /// \brief Pointer to the first element of a row
     pointer row_data(size_type i) { return row_data_dispatch(i, major()); }
 
-    /// \brief Pointer to the beginning of a row
+    /// \brief Pointer to the first element of a column
     const_pointer row_data(size_type i) const
     {
         return row_data_dispatch(i, major());
     }
 
-    /// \brief The stride size of column-wise access
-    ///
-    /// \details
-    /// To iterate over a specific column `j`,
-    /// ~~~{.cpp}
-    /// auto stride = m.col_stride();
-    /// auto data = m.col_data(j);
-    /// auto size = m.col_size();
-    /// for (i = 0; i != size; ++i, data += stride)
-    ///     /* *data is the same as m(i, j); */;
-    /// ~~~
-    size_type col_stride() const { return col_stride_dispatch(major()); }
+    /// \brief The stride of row-wise access through `row_data`
+    size_type row_stride() const { return row_stride_dispatch(major()); }
 
     /// \brief Pointer to the beginning of a column
     pointer col_data(size_type j) { return col_data_dispatch(j, major()); }
@@ -230,7 +170,49 @@ class Matrix
         return col_data_dispatch(j, major());
     }
 
-    /// \brief Swap two Matrix objects
+    /// \brief The stride size of column-wise access through `col_data`
+    size_type col_stride() const { return col_stride_dispatch(major()); }
+
+    bool empty() const { return nrow_ * ncol_ == 0; }
+
+    /// \brief The number of rows
+    size_type nrow() const { return nrow_; }
+
+    /// \brief The number of columns
+    size_type ncol() const { return ncol_; }
+
+    /// \brief Reserve space for the matrix given the new number of rows and
+    /// columns
+    void reserve(size_type n, size_type m) { data_.reserve(n * m); }
+
+    /// \brief Resize the matrix given new number of rows and columns
+    void resize(size_type nrow, size_type ncol)
+    {
+        if (nrow * ncol == 0) {
+            data_.clear();
+            nrow_ = nrow;
+            ncol_ = ncol;
+            return;
+        }
+
+        if (nrow == nrow_ && ncol_ == ncol)
+            return;
+
+        resize_dispatch(nrow, ncol, major());
+    }
+
+    /// \brief Release memory no longer needed
+    void shrink_to_fit() { data_.shrink_to_fit(); }
+
+    /// \brief Clear the matrix
+    void clear()
+    {
+        data_.clear();
+        nrow_ = 0;
+        ncol_ = 0;
+    }
+
+    /// \brief Swap two matrices
     void swap(Matrix<Layout, T> &other) noexcept(
         noexcept(data_.swap(other.data_)))
     {
@@ -443,6 +425,13 @@ class Matrix
         return first;
     }
 }; // class Matrix
+
+template <MatrixLayout Layout, typename T>
+void swap(Matrix<Layout, T> &m1, Matrix<Layout, T> &m2) noexcept(
+    noexcept(m1.swap(m2)))
+{
+    m1.swap(m2);
+}
 
 } // namespace mckl
 

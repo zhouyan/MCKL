@@ -85,7 +85,7 @@ inline AlgorithmResampleState<Layout> algorithm_resample_index_rands(
     for (std::size_t d = 0; d != dim; ++d) {
         const auto &val = value[d];
         const auto &idx = index[d];
-        state.resize_dim(d + 1);
+        state.resize(state.size(), d + 1);
         for (std::size_t i = 0; i != size[d]; ++i)
             state(i, d) = val[i];
         tmp.resize(size[d + 1], d + 1);
