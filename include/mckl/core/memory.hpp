@@ -365,7 +365,6 @@ class Allocator : public std::allocator<T>
         pointer ptr = static_cast<pointer>(Mem::malloc(bytes));
         if (ptr == nullptr)
             throw std::bad_alloc();
-        std::memset(ptr, 0, bytes);
 
         return ptr;
     }
@@ -374,6 +373,33 @@ class Allocator : public std::allocator<T>
     {
         if (ptr != nullptr)
             Mem::free(ptr);
+    }
+
+    template <typename U>
+    void construct(U *ptr) noexcept(
+        std::is_nothrow_default_constructible<U>::value)
+    {
+        construct_dispatch(ptr, std::is_scalar<U>());
+    }
+
+    template <typename U, typename... Args>
+    void construct(U *ptr, Args &&... args) noexcept(
+        std::is_nothrow_constructible<U, Args...>::value)
+    {
+        ::new (static_cast<void *>(ptr)) U(std::forward<Args>(args)...);
+    }
+
+    private:
+    template <typename U>
+    void construct_dispatch(U *, std::true_type) noexcept
+    {
+    }
+
+    template <typename U>
+    void construct_dispatch(U *ptr, std::false_type) noexcept(
+        std::is_nothrow_default_constructible<U>::value)
+    {
+        ::new (static_cast<void *>(ptr)) U;
     }
 }; // class Allocator
 

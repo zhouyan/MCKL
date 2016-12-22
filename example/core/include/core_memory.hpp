@@ -38,14 +38,15 @@
 #include <mckl/random/uniform_real_distribution.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-inline void core_memory_check(const std::string &func, std::size_t align,
-    std::size_t bytes, const mckl::StopWatch &watch, bool passed)
+inline void core_memory_check(const std::string &function,
+    std::size_t alignment, std::size_t bytes, const mckl::StopWatch &watch,
+    bool passed)
 {
     const double perf = watch.has_cycles() ? (1.0 * watch.cycles() / bytes) :
                                              (1e-9 * bytes / watch.seconds());
 
-    std::cout << std::setw(80) << std::left << func;
-    std::cout << std::setw(10) << std::right << align;
+    std::cout << std::setw(80) << std::left << function;
+    std::cout << std::setw(10) << std::right << alignment;
     std::cout << std::setw(10) << std::right << perf;
     std::cout << std::setw(15) << std::right << (passed ? "Passed" : "Failed");
     std::cout << std::endl;
@@ -64,22 +65,22 @@ inline void core_memory_allocate(std::size_t N, std::size_t M,
     std::size_t n = 0;
     mckl::StopWatch watch;
 
+    bool passed = true;
+    constexpr std::uintptr_t alignment = Alloc::memory_type::alignment();
     watch.start();
     for (std::size_t i = 0; i != M; ++i) {
         std::size_t K = rsize(rng);
         n += K;
         ptr.push_back(alloc.allocate(K));
+        passed = passed &&
+            reinterpret_cast<std::uintptr_t>(ptr.back()) % alignment == 0;
     }
     watch.stop();
 
-    const std::string func(
+    const std::string function(
         "Allocator<" + tname + ", " + mname + "<" + tname + ">>::allocate");
     const std::size_t bytes = n * sizeof(typename Alloc::value_type);
-    constexpr std::uintptr_t align = Alloc::memory_type::alignment();
-    bool passed = true;
-    for (auto p : ptr)
-        passed = passed && reinterpret_cast<std::uintptr_t>(p) % align == 0;
-    core_memory_check(func, align, bytes, watch, passed);
+    core_memory_check(function, alignment, bytes, watch, passed);
 }
 
 template <typename Alloc>
@@ -94,6 +95,11 @@ inline void core_memory_vector(std::size_t N, std::size_t M,
     vec.reserve(M);
     std::size_t n = 0;
     mckl::StopWatch watch;
+
+    for (std::size_t i = 0; i != M; ++i)
+        vec.emplace_back(Vec(rsize(rng)));
+    vec.clear();
+    rng = mckl::RNG();
 
     watch.start();
     for (std::size_t i = 0; i != M; ++i) {
@@ -130,6 +136,11 @@ inline void core_memory_vector_val(std::size_t N, std::size_t M,
     vec.reserve(M);
     std::size_t n = 0;
     mckl::StopWatch watch;
+
+    for (std::size_t i = 0; i != M; ++i)
+        vec.emplace_back(Vec(rsize(rng), val));
+    vec.clear();
+    rng = mckl::RNG();
 
     watch.start();
     for (std::size_t i = 0; i != M; ++i) {
