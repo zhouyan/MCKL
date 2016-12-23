@@ -47,13 +47,6 @@ project(MCKL C CXX)
 set(MCKL_VERSION 0.2)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-set(MCKL_GOOD_COMPILER TRUE)
-if(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
-    if(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
-        set(MCKL_GOOD_COMPILER FALSE)
-    endif(${CMAKE_CXX_COMPILER_VERSION} MATCHES "16.0.2.20160204")
-endif(${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" AND APPLE)
-
 ##############################################################################
 # Options
 ##############################################################################

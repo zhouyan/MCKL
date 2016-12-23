@@ -76,7 +76,7 @@ inline constexpr T const_inf()
     return std::numeric_limits<T>::infinity();
 }
 
-/// \brief Non-signalling NaN `std::numeric_limits<T>::quiet_NaN()`
+/// \brief Non-signalling NaN
 /// \ingroup Constants
 template <typename T>
 inline constexpr T const_nan()

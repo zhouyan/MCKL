@@ -403,8 +403,6 @@ class Allocator : public std::allocator<T>
     }
 }; // class Allocator
 
-/// \brief Allocator specialization of `void`
-/// \ingroup Core
 template <typename Mem>
 class Allocator<void, Mem>
 {
@@ -419,8 +417,6 @@ class Allocator<void, Mem>
     };
 }; // class Allocator
 
-/// \brief Allocator specialization of `const void`
-/// \ingroup Core
 template <typename Mem>
 class Allocator<const void, Mem>
 {
@@ -435,8 +431,6 @@ class Allocator<const void, Mem>
     };
 }; // class Allocator
 
-/// \brief Comparison of two Allocator
-/// \ingroup Core
 template <typename T1, typename T2, typename Mem1, typename Mem2>
 inline constexpr bool operator==(
     const Allocator<T1, Mem1> &, const Allocator<T2, Mem2> &)
@@ -444,8 +438,6 @@ inline constexpr bool operator==(
     return std::is_same<Mem1, Mem2>::value;
 }
 
-/// \brief Comparison of two Allocator
-/// \ingroup Core
 template <typename T1, typename T2, typename Mem1, typename Mem2>
 inline constexpr bool operator!=(
     const Allocator<T1, Mem1> &, const Allocator<T2, Mem2> &)
