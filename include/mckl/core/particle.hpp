@@ -75,32 +75,13 @@ MCKL_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
-///
-/// \details
-/// This is the basic ParticleIndex available for any type of Particle. To
-/// extend it for type `T`. One can either specialize
-/// ParticleIndexBaseTypeTrait<T> or define a class template named
-/// `particle_index_type` within `T` with the following minimum requirement.
-/// ~~~{.cpp}
-/// template <typename S>
-/// class particle_index_type
-/// {
-///     public:
-///     particle_index_type(
-///         typename Particle<T>::size_type i, Particle<S> *pptr);
-///     size_type i() const;
-///     Particle<S> &particle() const;
-///     Particle<S> *patricle_ptr() const;
-/// };
-/// ~~~
-/// Usually you can safely derive `particle_index_type<S>` from
-/// ParticleIndexBase<S> and add methods specific to `S`.
 template <typename T>
-class ParticleIndex : public ParticleIndexBaseType<T>
+class ParticleIndex final : public ParticleIndexBaseType<T>
 {
     public:
     using particle_type = Particle<T>;
     using size_type = typename particle_type::size_type;
+    using difference_type = std::make_signed_t<size_type>;
     using rng_type = typename particle_type::rng_type;
 
     ParticleIndex(size_type i, particle_type *pptr)
@@ -109,178 +90,170 @@ class ParticleIndex : public ParticleIndexBaseType<T>
     }
 
     template <typename IntType>
-    ParticleIndex<T> operator[](IntType n)
+    ParticleIndex operator[](IntType n)
     {
-        return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                    static_cast<std::ptrdiff_t>(this->i()) +
-                                    static_cast<std::ptrdiff_t>(n)),
+        return ParticleIndex(
+            static_cast<size_type>(static_cast<difference_type>(this->i()) +
+                static_cast<difference_type>(n)),
             this->particle_ptr());
     }
 
-    ParticleIndex<T> &operator*() { return *this; }
+    ParticleIndex &operator*() { return *this; }
 
-    const ParticleIndex<T> &operator*() const { return *this; }
+    const ParticleIndex &operator*() const { return *this; }
 
-    ParticleIndex<T> *operator->() { return this; }
+    ParticleIndex *operator->() { return this; }
 
-    const ParticleIndex<T> *operator->() const { return this; }
+    const ParticleIndex *operator->() const { return this; }
+
+    friend bool operator==(
+        const ParticleIndex &idx1, const ParticleIndex &idx2)
+    {
+        runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+            "Compare two ParticleIndex objects from two different particle "
+            "systems");
+
+        return idx1.i() == idx2.i();
+    }
+
+    friend bool operator!=(
+        const ParticleIndex &idx1, const ParticleIndex &idx2)
+    {
+        return idx1.i() != idx2.i();
+    }
+
+    friend bool operator<(const ParticleIndex &idx1, const ParticleIndex &idx2)
+    {
+        runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+            "Compare two ParticleIndex objects from two different particle "
+            "systems");
+
+        return idx1.i() < idx2.i();
+    }
+
+    friend bool operator>(const ParticleIndex &idx1, const ParticleIndex &idx2)
+    {
+        runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+            "Compare two ParticleIndex objects from two different particle "
+            "systems");
+
+        return idx1.i() > idx2.i();
+    }
+
+    friend bool operator<=(
+        const ParticleIndex &idx1, const ParticleIndex &idx2)
+    {
+        runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+            "Compare two ParticleIndex objects from two different particle "
+            "systems");
+
+        return idx1.i() <= idx2.i();
+    }
+
+    friend bool operator>=(
+        const ParticleIndex &idx1, const ParticleIndex &idx2)
+    {
+        runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+            "Compare two ParticleIndex objects from two different particle "
+            "systems");
+
+        return idx1.i() >= idx2.i();
+    }
+
+    friend ParticleIndex &operator++(ParticleIndex &idx)
+    {
+        idx = ParticleIndex(idx.i() + 1, idx.particle_ptr());
+
+        return idx;
+    }
+
+    friend ParticleIndex operator++(ParticleIndex &idx, int)
+    {
+        ParticleIndex idx_tmp(idx);
+        idx = ParticleIndex(idx.i() + 1, idx.particle_ptr());
+
+        return idx_tmp;
+    }
+
+    friend ParticleIndex &operator--(ParticleIndex &idx)
+    {
+        idx = ParticleIndex(idx.i() - 1, idx.particle_ptr());
+
+        return idx;
+    }
+
+    friend ParticleIndex operator--(ParticleIndex &idx, int)
+    {
+        ParticleIndex idx_tmp(idx);
+        idx = ParticleIndex(idx.i() - 1, idx.particle_ptr());
+
+        return idx_tmp;
+    }
+
+    template <typename IntType>
+    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex>
+        operator+(const ParticleIndex &idx, IntType n)
+    {
+        return ParticleIndex(
+            static_cast<size_type>(static_cast<difference_type>(idx.i()) +
+                static_cast<difference_type>(n)),
+            idx.particle_ptr());
+    }
+
+    template <typename IntType>
+    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex>
+        operator+(IntType n, const ParticleIndex &idx)
+    {
+        return ParticleIndex(
+            static_cast<size_type>(static_cast<difference_type>(idx.i()) +
+                static_cast<difference_type>(n)),
+            idx.particle_ptr());
+    }
+
+    template <typename IntType>
+    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex>
+        operator-(const ParticleIndex &idx, IntType n)
+    {
+        return ParticleIndex(
+            static_cast<size_type>(static_cast<difference_type>(idx.i()) -
+                static_cast<difference_type>(n)),
+            idx.particle_ptr());
+    }
+
+    template <typename IntType>
+    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex &>
+        operator+=(ParticleIndex &idx, IntType n)
+    {
+        idx = idx + n;
+
+        return idx;
+    }
+
+    template <typename IntType>
+    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex &>
+        operator-=(ParticleIndex &idx, IntType n)
+    {
+        idx = idx - n;
+
+        return idx;
+    }
+
+    friend difference_type operator-(
+        const ParticleIndex &idx1, const ParticleIndex &idx2)
+    {
+        runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+            "Substract two ParticleIndex objects from two different particle "
+            "systems");
+
+        return static_cast<difference_type>(idx1.i()) -
+            static_cast<difference_type>(idx2.i());
+    }
 }; // class ParticleIndex
-
-template <typename T>
-inline bool operator==(
-    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
-{
-    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
-        "Compare two ParticleIndex objects from two different particle "
-        "systems");
-
-    return idx1.i() == idx2.i();
-}
-
-template <typename T>
-inline bool operator!=(
-    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
-{
-    return idx1.i() != idx2.i();
-}
-
-template <typename T>
-inline bool operator<(
-    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
-{
-    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
-        "Compare two ParticleIndex objects from two different particle "
-        "systems");
-
-    return idx1.i() < idx2.i();
-}
-
-template <typename T>
-inline bool operator>(
-    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
-{
-    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
-        "Compare two ParticleIndex objects from two different particle "
-        "systems");
-
-    return idx1.i() > idx2.i();
-}
-
-template <typename T>
-inline bool operator<=(
-    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
-{
-    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
-        "Compare two ParticleIndex objects from two different particle "
-        "systems");
-
-    return idx1.i() <= idx2.i();
-}
-
-template <typename T>
-inline bool operator>=(
-    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
-{
-    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
-        "Compare two ParticleIndex objects from two different particle "
-        "systems");
-
-    return idx1.i() >= idx2.i();
-}
-
-template <typename T>
-inline ParticleIndex<T> &operator++(ParticleIndex<T> &idx)
-{
-    idx = ParticleIndex<T>(idx.i() + 1, idx.particle_ptr());
-
-    return idx;
-}
-
-template <typename T>
-inline ParticleIndex<T> operator++(ParticleIndex<T> &idx, int)
-{
-    ParticleIndex<T> idx_tmp(idx);
-    idx = ParticleIndex<T>(idx.i() + 1, idx.particle_ptr());
-
-    return idx_tmp;
-}
-
-template <typename T>
-inline ParticleIndex<T> &operator--(ParticleIndex<T> &idx)
-{
-    idx = ParticleIndex<T>(idx.i() - 1, idx.particle_ptr());
-
-    return idx;
-}
-
-template <typename T>
-inline ParticleIndex<T> operator--(ParticleIndex<T> &idx, int)
-{
-    ParticleIndex<T> idx_tmp(idx);
-    idx = ParticleIndex<T>(idx.i() - 1, idx.particle_ptr());
-
-    return idx_tmp;
-}
-
-template <typename T, typename IntType>
-inline ParticleIndex<T> operator+(const ParticleIndex<T> &idx, IntType n)
-{
-    return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                static_cast<std::ptrdiff_t>(idx.i()) +
-                                static_cast<std::ptrdiff_t>(n)),
-        idx.particle_ptr());
-}
-
-template <typename T, typename IntType>
-inline ParticleIndex<T> operator+(IntType n, const ParticleIndex<T> &idx)
-{
-    return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                static_cast<std::ptrdiff_t>(idx.i()) +
-                                static_cast<std::ptrdiff_t>(n)),
-        idx.particle_ptr());
-}
-
-template <typename T, typename IntType>
-inline ParticleIndex<T> operator-(const ParticleIndex<T> &idx, IntType n)
-{
-    return ParticleIndex<T>(static_cast<typename Particle<T>::size_type>(
-                                static_cast<std::ptrdiff_t>(idx.i()) -
-                                static_cast<std::ptrdiff_t>(n)),
-        idx.particle_ptr());
-}
-
-template <typename T, typename IntType>
-inline ParticleIndex<T> &operator+=(ParticleIndex<T> &idx, IntType n)
-{
-    idx = idx + n;
-
-    return idx;
-}
-
-template <typename T, typename IntType>
-inline ParticleIndex<T> &operator-=(ParticleIndex<T> &idx, IntType n)
-{
-    idx = idx - n;
-
-    return idx;
-}
-
-template <typename T>
-inline std::ptrdiff_t operator-(
-    const ParticleIndex<T> &idx1, const ParticleIndex<T> &idx2)
-{
-    runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
-        "Substract two ParticleIndex objects from two different particle "
-        "systems");
-
-    return static_cast<std::ptrdiff_t>(idx1.i()) -
-        static_cast<std::ptrdiff_t>(idx2.i());
-}
 
 /// \brief A subset of particles
 /// \ingroup Core
 template <typename T>
-class ParticleRange
+class ParticleRange final
 {
     public:
     using particle_type = Particle<T>;
@@ -303,7 +276,7 @@ class ParticleRange
     }
 
     template <typename SplitType>
-    ParticleRange(ParticleRange<T> &other, SplitType)
+    ParticleRange(ParticleRange &other, SplitType)
         : pptr_(other.pptr_)
         , ibegin_((other.ibegin_ + other.iend_) / 2)
         , iend_(other.iend_)
@@ -391,9 +364,9 @@ class Particle
     }
 
     /// \brief Clone the Particle except the RNG engines
-    Particle<T> clone() const
+    Particle clone() const
     {
-        Particle<T> particle(*this);
+        Particle particle(*this);
         particle.rng_set_.reset();
         particle.rng_.seed(Seed<rng_type>::instance().get());
 
