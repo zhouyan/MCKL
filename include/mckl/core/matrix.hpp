@@ -39,7 +39,7 @@ namespace mckl
 
 /// \brief Matrix
 /// \ingroup Core
-template <MatrixLayout Layout, typename T>
+template <MatrixLayout Layout, typename T, typename Alloc = Allocator<T>>
 class Matrix
 {
     using major = std::integral_constant<MatrixLayout, Layout>;
@@ -55,6 +55,8 @@ class Matrix
     using const_reference = const value_type &;
     using pointer = value_type *;
     using const_pointer = const value_type *;
+    using transpose_type =
+        Matrix<Layout == RowMajor ? ColMajor : RowMajor, T, Alloc>;
 
     /// \brief Construct an empty matrix
     Matrix() : nrow_(0), ncol_(0) {}
@@ -65,10 +67,10 @@ class Matrix
     {
     }
 
-    Matrix(const Matrix<Layout, T> &) = default;
+    Matrix(const Matrix &) = default;
 
     /// \brief Construct a matrix by copying one with different layout
-    Matrix(const Matrix<Layout == RowMajor ? ColMajor : RowMajor, T> &other)
+    Matrix(const transpose_type &other)
         : data_(other.nrow() * other.ncol())
         , nrow_(other.nrow())
         , ncol_(other.ncol())
@@ -78,7 +80,7 @@ class Matrix
                 operator()(i, j) = other(i, j);
     }
 
-    Matrix(Matrix<Layout, T> &&other) noexcept(
+    Matrix(Matrix &&other) noexcept(
         noexcept(Vector<T>(std::move(other.data_))))
         : data_(std::move(other.data_)), nrow_(other.nrow_), ncol_(other.ncol_)
     {
@@ -87,9 +89,9 @@ class Matrix
         other.data_.clear();
     }
 
-    Matrix<Layout, T> &operator=(const Matrix<Layout, T> &) = default;
+    Matrix &operator=(const Matrix &) = default;
 
-    Matrix<Layout, T> &operator=(Matrix<Layout, T> &&other) noexcept(
+    Matrix &operator=(Matrix &&other) noexcept(
         noexcept(data_.swap(other.data_)))
     {
         if (this != &other) {
@@ -102,8 +104,7 @@ class Matrix
     }
 
     /// \brief Copy another matrix with a different layout
-    Matrix<Layout, T> &operator=(
-        const Matrix<Layout == RowMajor ? ColMajor : RowMajor, T> &other)
+    Matrix &operator=(const transpose_type &other)
     {
         resize(other.nrow_, other.ncol_);
         for (std::size_t i = 0; i != nrow_; ++i)
@@ -213,8 +214,7 @@ class Matrix
     }
 
     /// \brief Swap two matrices
-    void swap(Matrix<Layout, T> &other) noexcept(
-        noexcept(data_.swap(other.data_)))
+    void swap(Matrix &other) noexcept(noexcept(data_.swap(other.data_)))
     {
         std::swap(nrow_, other.nrow_);
         std::swap(ncol_, other.ncol_);
@@ -245,8 +245,12 @@ class Matrix
         return transpose_dispatch(first, major());
     }
 
-    friend bool operator==(
-        const Matrix<Layout, T> &m1, const Matrix<Layout, T> &m2)
+    friend void swap(Matrix &m1, Matrix &m2) noexcept(noexcept(m1.swap(m2)))
+    {
+        m1.swap(m2);
+    }
+
+    friend bool operator==(const Matrix &m1, const Matrix &m2)
     {
         if (m1.nrow_ != m2.nrow_)
             return false;
@@ -255,8 +259,7 @@ class Matrix
         return m1.data_ == m2.data_;
     }
 
-    friend bool operator!=(
-        const Matrix<Layout, T> &m1, const Matrix<Layout, T> &m2)
+    friend bool operator!=(const Matrix &m1, const Matrix &m2)
     {
         return !(m1 == m2);
     }
@@ -275,7 +278,7 @@ class Matrix
             return;
         }
 
-        Matrix<Layout, T> tmp(nrow, ncol);
+        Matrix tmp(nrow, ncol);
         const size_type n = std::min(nrow, nrow_);
         const size_type m = std::min(ncol, ncol_);
         for (size_type i = 0; i != n; ++i)
@@ -355,7 +358,7 @@ class Matrix
             return;
         }
 
-        Matrix<Layout, T> tmp(nrow, ncol);
+        Matrix tmp(nrow, ncol);
         const size_type n = std::min(nrow, nrow_);
         const size_type m = std::min(ncol, ncol_);
         for (size_type i = 0; i != m; ++i)
@@ -425,13 +428,6 @@ class Matrix
         return first;
     }
 }; // class Matrix
-
-template <MatrixLayout Layout, typename T>
-void swap(Matrix<Layout, T> &m1, Matrix<Layout, T> &m2) noexcept(
-    noexcept(m1.swap(m2)))
-{
-    m1.swap(m2);
-}
 
 } // namespace mckl
 
