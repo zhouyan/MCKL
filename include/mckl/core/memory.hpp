@@ -62,13 +62,13 @@
 
 /// \brief The minimum alignment for any type
 /// \ingroup Config
-#ifndef MCKL_ALIGNMENT_MIN
-#define MCKL_ALIGNMENT_MIN 16
+#ifndef MCKL_MINIMUM_ALIGNMENT
+#define MCKL_MINIMUM_ALIGNMENT 16
 #endif
 
-#if MCKL_ALIGNMENT < MCKL_ALIGNMENT_MIN
+#if MCKL_ALIGNMENT < MCKL_MINIMUM_ALIGNMENT
 #undef MCKL_ALIGNEMNT
-#define MCKL_ALIGNMENT MCKL_ALIGNMENT_MIN
+#define MCKL_ALIGNMENT MCKL_MINIMUM_ALIGNMENT
 #endif
 
 /// \brief Default allocation type
@@ -88,25 +88,53 @@
 namespace mckl
 {
 
+namespace internal
+{
+
+template <std::size_t Alignment, typename UIntType>
+std::size_t alignment_round0(UIntType n)
+{
+    static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
+        "**alignment_round0** used with Alignment other than a power of two "
+        "positive integer");
+
+    static_assert(Alignment >= sizeof(void *),
+        "**alignment_round0** used with Alignment less than sizeof(void *)");
+
+    static_assert(std::is_unsigned<UIntType>::value,
+        "alignment_round0** used with UIntType other than unsigned integer "
+        "types");
+
+    constexpr std::size_t addn = Alignment - 1;
+    constexpr std::size_t mask = ~addn;
+
+    return (n + addn) & mask;
+}
+
+template <std::size_t Alignment, typename UIntType>
+std::size_t alignment_round(UIntType n)
+{
+    return n == 0 ? Alignment : alignment_round0<Alignment>(n);
+}
+
+} // namespace mckl::internal
+
 /// \brief Alignment of types
 ///
 /// \details
-/// * For scalar types, define `MCKL_ALIGNMENT` as `value`
-/// * For all other types, define the maximum of `MCKL_MIN_ALIGNMENT` and
+/// * For scalar types, define the maximum of `MCKL_ALIGNMENT` and `alignof(T)`
+/// as `value`
+/// * For all other types, define the maximum of `MCKL_MINIMUM_ALIGNMENT` and
 /// `alignof(T)` as `value`.
 template <typename T>
-constexpr std::size_t AlignOf =
-    std::integral_constant<std::size_t, std::is_scalar<T>::value ?
-            (alignof(T) > MCKL_ALIGNMENT ? alignof(T) : MCKL_ALIGNMENT) :
-            (alignof(T) > MCKL_ALIGNMENT_MIN ? alignof(T) :
-                                               MCKL_ALIGNMENT_MIN)>::value;
+constexpr std::size_t AlignOf = std::integral_constant<std::size_t,
+    std::is_scalar<T>::value ?
+        (alignof(T) > MCKL_ALIGNMENT ? alignof(T) : MCKL_ALIGNMENT) :
+        (alignof(T) > MCKL_MINIMUM_ALIGNMENT ? alignof(T) :
+                                               MCKL_MINIMUM_ALIGNMENT)>::value;
 
-/// \brief Memory allocation using `std::malloc` and `std::free`
+/// \brief Memory allocation using the standard library
 /// \ingroup Core
-///
-/// \details
-/// Memory allocated through this class is aligned but some bytes might be
-/// wasted in each allocation.
 template <std::size_t Alignment>
 class MemorySTD
 {
@@ -120,35 +148,32 @@ class MemorySTD
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *malloc(std::size_t n)
+    static void *allocate(std::size_t n, const void * = nullptr)
     {
-        if (n < 1)
-            n = 1;
-        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
-
-        std::size_t bytes = n + Alignment + sizeof(void *);
-        if (bytes < n)
+        const std::size_t m = internal::alignment_round0<Alignment>(
+            n + sizeof(std::uintptr_t) + Alignment);
+        if (m < n)
             return nullptr;
 
-        void *orig_ptr = std::malloc(bytes);
-        if (orig_ptr == nullptr)
+        std::uintptr_t *const address =
+            static_cast<std::uintptr_t *>(std::malloc(m));
+        if (address == nullptr)
             return nullptr;
 
-        uintptr_t address = reinterpret_cast<uintptr_t>(orig_ptr);
-        uintptr_t offset = Alignment - (address + sizeof(void *)) % Alignment;
-        void *ptr =
-            reinterpret_cast<void *>(address + offset + sizeof(void *));
-        void **orig = reinterpret_cast<void **>(address + offset);
-        *orig = orig_ptr;
+        std::uintptr_t *const ptr = reinterpret_cast<std::uintptr_t *>(
+            internal::alignment_round0<Alignment>(
+                reinterpret_cast<std::uintptr_t>(address + 1)));
+        ptr[-1] = reinterpret_cast<std::uintptr_t>(address);
 
-        return ptr;
+        return static_cast<void *>(ptr);
     }
 
-    static void free(void *ptr)
+    static void deallocate(void *ptr, std::size_t = 0)
     {
         if (ptr != nullptr) {
-            std::free(*reinterpret_cast<void **>(
-                reinterpret_cast<uintptr_t>(ptr) - sizeof(void *)));
+            const std::uintptr_t address =
+                static_cast<std::uintptr_t *>(ptr)[-1];
+            std::free(reinterpret_cast<void *>(address));
         }
     }
 }; // class MemorySTD
@@ -174,20 +199,21 @@ class MemorySYS
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *malloc(std::size_t n)
+    static void *allocate(std::size_t n, const void * = nullptr)
     {
-        if (n < 1)
-            n = 1;
-        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+        const std::size_t m = internal::alignment_round<Alignment>(n);
+
+        if (m < n)
+            return nullptr;
 
         void *ptr = nullptr;
-        if (::posix_memalign(&ptr, Alignment, n) != 0)
+        if (::posix_memalign(&ptr, Alignment, m) != 0)
             ptr = nullptr;
 
         return ptr;
     }
 
-    static void free(void *ptr)
+    static void deallocate(void *ptr, std::size_t = 0)
     {
         if (ptr != nullptr)
             ::free(ptr);
@@ -209,16 +235,14 @@ class MemorySYS
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *malloc(std::size_t n)
+    static void *allocate(std::size_t n, const void * = nullptr)
     {
-        if (n < 1)
-            n = 1;
-        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+        const std::size_t m = internal::alignment_round<Alignment>(n);
 
-        return _aligned_malloc(n, Alignment);
+        return m < n ? nullptr : _aligned_malloc(m, Alignment);
     }
 
-    static void free(void *ptr)
+    static void deallocate(void *ptr, std::size_t = 0)
     {
         if (ptr != nullptr)
             _aligned_free(ptr);
@@ -244,16 +268,14 @@ class MemoryJEM
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *malloc(std::size_t n)
+    static void *allocate(std::size_t n, const void * = nullptr)
     {
-        if (n < 1)
-            n = 1;
-        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+        const std::size_t m = internal::alignment_round<Alignment>(n);
 
-        return ::je_aligned_alloc(Alignment, n);
+        return m < n ? nullptr : ::je_aligned_alloc(Alignment, m);
     }
 
-    static void free(void *ptr)
+    static void deallocate(void *ptr, std::size_t = 0)
     {
         if (ptr != nullptr)
             ::je_free(ptr);
@@ -280,16 +302,14 @@ class MemoryTBB
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *malloc(std::size_t n)
+    static void *allocate(std::size_t n, const void * = nullptr)
     {
-        if (n < 1)
-            n = 1;
-        n = (n / Alignment + (n % Alignment == 0 ? 0 : 1)) * Alignment;
+        const std::size_t m = internal::alignment_round<Alignment>(n);
 
-        return scalable_aligned_malloc(n, Alignment);
+        return m < n ? nullptr : scalable_aligned_malloc(m, Alignment);
     }
 
-    static void free(void *ptr)
+    static void deallocate(void *ptr, std::size_t = 0)
     {
         if (ptr != nullptr)
             scalable_aligned_free(ptr);
@@ -298,7 +318,7 @@ class MemoryTBB
 
 #endif // MCKL_HAS_TBB
 
-/// \brief Default Memory type
+/// \brief Default memory allocaiton and deallocation class
 /// \ingroup Core
 template <std::size_t Alignment>
 using Memory = MCKL_MEMORY_TYPE<Alignment>;
@@ -307,39 +327,18 @@ using Memory = MCKL_MEMORY_TYPE<Alignment>;
 /// \ingroup Core
 ///
 /// \tparam T The value type
-/// \tparam Mem The memory allocation class.
-///
-/// \details
-/// `Mem` must provides two static member functions, `malloc` and `free`. The
-/// member function `malloc` shall behave similar to `std::malloc`. It shall
-/// return a reachable non-null pointer even if the size is zero. It shall
-/// return a null pointer if it fails to allocate the memory. The member
-/// function `free` shall behave just like `std::free`. It shall be able to
-/// handle a null pointer as its input.
+/// \tparam Mem The memory allocation and deallocation class.
 template <typename T, typename Mem = Memory<AlignOf<T>>>
 class Allocator : public std::allocator<T>
 {
     public:
-    using value_type = T;
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
-    using pointer = T *;
-    using const_pointer = const T *;
-    using reference = typename std::add_lvalue_reference_t<T>;
-    using const_reference = typename std::add_lvalue_reference_t<const T>;
-    using is_always_equal = std::true_type;
     using memory_type = Mem;
 
-    template <typename U>
-    struct rebind {
-        using other = Allocator<U, Mem>;
-    };
-
     Allocator() = default;
-    Allocator(const Allocator<T, Mem> &) = default;
-    Allocator(Allocator<T, Mem> &&) = default;
-    Allocator<T, Mem> &operator=(const Allocator<T, Mem> &) = default;
-    Allocator<T, Mem> &operator=(Allocator<T, Mem> &&) = default;
+    Allocator(const Allocator &) = default;
+    Allocator(Allocator &&) = default;
+    Allocator &operator=(const Allocator &) = default;
+    Allocator &operator=(Allocator &&) = default;
 
     template <typename U>
     Allocator(const Allocator<U, Mem> &other) noexcept(
@@ -355,24 +354,22 @@ class Allocator : public std::allocator<T>
     {
     }
 
-    pointer allocate(size_type n, const void * = nullptr)
+    T *allocate(std::size_t n, const void *hint = nullptr)
     {
-        n = n > 1 ? n : 1;
-        size_type bytes = n * sizeof(value_type);
-        if (bytes < n)
+        const std::size_t m = n * sizeof(T);
+        if (m < n)
             throw std::bad_alloc();
 
-        pointer ptr = static_cast<pointer>(Mem::malloc(bytes));
+        T *ptr = static_cast<T *>(memory_type::allocate(m, hint));
         if (ptr == nullptr)
             throw std::bad_alloc();
 
         return ptr;
     }
 
-    void deallocate(pointer ptr, size_type = 0)
+    void deallocate(T *ptr, std::size_t size = 0)
     {
-        if (ptr != nullptr)
-            Mem::free(ptr);
+        memory_type::deallocate(ptr, size);
     }
 
     template <typename U>
@@ -404,31 +401,15 @@ class Allocator : public std::allocator<T>
 }; // class Allocator
 
 template <typename Mem>
-class Allocator<void, Mem>
+class Allocator<void, Mem> : public std::allocator<void>
 {
-    using value_type = void;
-    using pointer = void *;
-    using const_pointer = const void *;
     using memory_type = Mem;
-
-    template <class U>
-    struct rebind {
-        using other = Allocator<U, Mem>;
-    };
 }; // class Allocator
 
 template <typename Mem>
-class Allocator<const void, Mem>
+class Allocator<const void, Mem> : public std::allocator<const void>
 {
-    using value_type = const void;
-    using pointer = const void *;
-    using const_pointer = const void *;
     using memory_type = Mem;
-
-    template <class U>
-    struct rebind {
-        using other = Allocator<U, Mem>;
-    };
 }; // class Allocator
 
 template <typename T1, typename T2, typename Mem1, typename Mem2>

@@ -43,8 +43,6 @@ inline void core_memory(std::size_t N, std::size_t M, const std::string &tname,
     std::uniform_int_distribution<std::size_t> rsize(0, N);
 
     Alloc alloc;
-    std::vector<typename Alloc::pointer> ptr;
-    ptr.reserve(M);
 
     bool passed = true;
     constexpr std::uintptr_t alignment = Alloc::memory_type::alignment();
@@ -55,9 +53,9 @@ inline void core_memory(std::size_t N, std::size_t M, const std::string &tname,
     for (std::size_t i = 0; i != M; ++i) {
         std::size_t K = rsize(rng);
         n += K;
-        ptr.push_back(alloc.allocate(K));
-        passed = passed &&
-            reinterpret_cast<std::uintptr_t>(ptr.back()) % alignment == 0;
+        auto ptr = alloc.allocate(K);
+        passed =
+            passed && reinterpret_cast<std::uintptr_t>(ptr) % alignment == 0;
     }
     watch.stop();
 
