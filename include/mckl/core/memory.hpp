@@ -92,7 +92,7 @@ namespace internal
 {
 
 template <std::size_t Alignment, typename UIntType>
-std::size_t alignment_round0(UIntType n)
+inline std::size_t alignment_round0(UIntType n)
 {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
         "**alignment_round0** used with Alignment other than a power of two "
@@ -112,7 +112,7 @@ std::size_t alignment_round0(UIntType n)
 }
 
 template <std::size_t Alignment, typename UIntType>
-std::size_t alignment_round(UIntType n)
+inline std::size_t alignment_round(UIntType n)
 {
     return n == 0 ? Alignment : alignment_round0<Alignment>(n);
 }
@@ -334,6 +334,13 @@ class Allocator : public std::allocator<T>
     public:
     using memory_type = Mem;
 
+    template <typename U>
+    class rebind
+    {
+        public:
+        using other = Allocator<U, Mem>;
+    };
+
     Allocator() = default;
     Allocator(const Allocator &) = default;
     Allocator(Allocator &&) = default;
@@ -401,15 +408,41 @@ class Allocator : public std::allocator<T>
 }; // class Allocator
 
 template <typename Mem>
-class Allocator<void, Mem> : public std::allocator<void>
+class Allocator<void, Mem>
 {
+    public:
+    using value_type = void;
+    using pointer = void *;
+    using const_pointer = const void *;
+    using propagate_on_container_move_assignment = std::true_type;
+    using is_always_equal = std::true_type;
     using memory_type = Mem;
+
+    template <typename U>
+    class rebind
+    {
+        public:
+        using other = Allocator<U, Mem>;
+    };
 }; // class Allocator
 
 template <typename Mem>
-class Allocator<const void, Mem> : public std::allocator<const void>
+class Allocator<const void, Mem>
 {
+    public:
+    using value_type = const void;
+    using pointer = const void *;
+    using const_pointer = const void *;
+    using propagate_on_container_move_assignment = std::true_type;
+    using is_always_equal = std::true_type;
     using memory_type = Mem;
+
+    template <typename U>
+    class rebind
+    {
+        public:
+        using other = Allocator<U, Mem>;
+    };
 }; // class Allocator
 
 template <typename T1, typename T2, typename Mem1, typename Mem2>
