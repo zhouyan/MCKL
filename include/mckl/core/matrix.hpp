@@ -42,7 +42,7 @@ namespace mckl
 template <MatrixLayout Layout, typename T, typename Alloc = Allocator<T>>
 class Matrix
 {
-    using major = std::integral_constant<MatrixLayout, Layout>;
+    using layout_dispatch = std::integral_constant<MatrixLayout, Layout>;
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
@@ -120,7 +120,7 @@ class Matrix
         runtime_assert(i < nrow_, "**Matrix::at** row index out of range");
         runtime_assert(j < ncol_, "**Matrix::at** column index out of range");
 
-        return at_dispatch(i, j, major());
+        return at_dispatch(i, j, layout_dispatch());
     }
 
     /// \brief The element at row `i` and column `j`
@@ -129,19 +129,19 @@ class Matrix
         runtime_assert(i < nrow_, "**Matrix::at** row index out of range");
         runtime_assert(j < ncol_, "**Matrix::at** column index out of range");
 
-        return at_dispatch(i, j, major());
+        return at_dispatch(i, j, layout_dispatch());
     }
 
     /// \brief The element at row `i` and column `j`
     reference operator()(size_type i, size_type j)
     {
-        return at_dispatch(i, j, major());
+        return at_dispatch(i, j, layout_dispatch());
     }
 
     /// \brief The element at row `i` and column `j`
     const_reference operator()(size_type i, size_type j) const
     {
-        return at_dispatch(i, j, major());
+        return at_dispatch(i, j, layout_dispatch());
     }
 
     /// \brief Pointer to the upper left corner of the matrix
@@ -151,28 +151,40 @@ class Matrix
     const_pointer data() const { return data_.data(); }
 
     /// \brief Pointer to the first element of a row
-    pointer row_data(size_type i) { return row_data_dispatch(i, major()); }
+    pointer row_data(size_type i)
+    {
+        return row_data_dispatch(i, layout_dispatch());
+    }
 
     /// \brief Pointer to the first element of a column
     const_pointer row_data(size_type i) const
     {
-        return row_data_dispatch(i, major());
+        return row_data_dispatch(i, layout_dispatch());
     }
 
     /// \brief The stride of row-wise access through `row_data`
-    size_type row_stride() const { return row_stride_dispatch(major()); }
+    size_type row_stride() const
+    {
+        return row_stride_dispatch(layout_dispatch());
+    }
 
     /// \brief Pointer to the beginning of a column
-    pointer col_data(size_type j) { return col_data_dispatch(j, major()); }
+    pointer col_data(size_type j)
+    {
+        return col_data_dispatch(j, layout_dispatch());
+    }
 
     /// \brief Pointer to the beginning of a column
     const_pointer col_data(size_type j) const
     {
-        return col_data_dispatch(j, major());
+        return col_data_dispatch(j, layout_dispatch());
     }
 
     /// \brief The stride size of column-wise access through `col_data`
-    size_type col_stride() const { return col_stride_dispatch(major()); }
+    size_type col_stride() const
+    {
+        return col_stride_dispatch(layout_dispatch());
+    }
 
     bool empty() const { return nrow_ * ncol_ == 0; }
 
@@ -199,7 +211,7 @@ class Matrix
         if (nrow == nrow_ && ncol_ == ncol)
             return;
 
-        resize_dispatch(nrow, ncol, major());
+        resize_dispatch(nrow, ncol, layout_dispatch());
     }
 
     /// \brief Release memory no longer needed
@@ -225,14 +237,14 @@ class Matrix
     template <typename OutputIter>
     OutputIter read_row(size_type i, OutputIter first) const
     {
-        return read_row_dispatch(i, first, major());
+        return read_row_dispatch(i, first, layout_dispatch());
     }
 
     /// \brief Read a column with an output iterator
     template <typename OutputIter>
     OutputIter read_col(size_type i, OutputIter first) const
     {
-        return read_col_dispatch(i, first, major());
+        return read_col_dispatch(i, first, layout_dispatch());
     }
 
     /// \brief Read the matrix with an output iterator given a new layout
@@ -242,7 +254,7 @@ class Matrix
         if (layout == Layout)
             return std::copy(data_.begin(), data_.end(), first);
 
-        return transpose_dispatch(first, major());
+        return transpose_dispatch(first, layout_dispatch());
     }
 
     friend void swap(Matrix &m1, Matrix &m2) noexcept(noexcept(m1.swap(m2)))

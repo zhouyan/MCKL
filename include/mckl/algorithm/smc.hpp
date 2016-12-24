@@ -99,7 +99,7 @@ class SMCEstimator
         this->eval(iter, d, particle, u_.data());
 
         const double *w = particle.weight().data();
-        const double *r = rptr(std::is_same<U, double>());
+        double *r = rptr(std::is_same<U, double>());
 
 #if MCKL_HAS_BLAS
         internal::size_check<MCKL_BLAS_INT>(n, "SMCEstimator::estimate");
@@ -138,9 +138,9 @@ class SMCEstimator
     MatrixLayout layout_;
     bool record_only_;
 
-    const double *rptr(std::true_type) { return u_.data(); }
+    double *rptr(std::true_type) { return u_.data(); }
 
-    const double *rptr(std::false_type)
+    double *rptr(std::false_type)
     {
         r_.resize(u_.size());
         std::copy(u_.begin(), u_.end(), r_.begin());

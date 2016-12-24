@@ -44,7 +44,7 @@ namespace mckl
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 class StateMatrix : public Matrix<Layout, T>
 {
-    using major = std::integral_constant<MatrixLayout, Layout>;
+    using layout_dispatch = std::integral_constant<MatrixLayout, Layout>;
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
@@ -134,7 +134,7 @@ class StateMatrix : public Matrix<Layout, T>
     template <typename IntType, typename InputIter>
     void select(IntType N, InputIter index)
     {
-        select_dispatch(N, index, major());
+        select_dispatch(N, index, layout_dispatch());
     }
 
     /// \brief Duplicate a sample
@@ -146,7 +146,7 @@ class StateMatrix : public Matrix<Layout, T>
         if (src == dst)
             return;
 
-        duplicate_dispatch(src, dst, major(),
+        duplicate_dispatch(src, dst, layout_dispatch(),
             std::integral_constant<bool, (Dim == 0 || 8 < Dim)>());
     }
 
@@ -212,8 +212,8 @@ class StateMatrix : public Matrix<Layout, T>
     void duplicate_dispatch(
         size_type src, size_type dst, row_major, std::false_type)
     {
-        duplicate_j<0>(this->row_data(src), this->row_data(dst), row_major(),
-            std::integral_constant<bool, 0 < Dim>());
+        duplicate_j<0>(this->row_data(src), this->row_data(dst),
+            row_major(), std::integral_constant<bool, 0 < Dim>());
     }
 
     template <std::size_t>
