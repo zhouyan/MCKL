@@ -46,7 +46,7 @@ class Matrix
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
-    Vector<T> data_;
+    Vector<T, Alloc> data_;
 
     public:
     using size_type = std::size_t;
@@ -59,17 +59,22 @@ class Matrix
         Matrix<Layout == RowMajor ? ColMajor : RowMajor, T, Alloc>;
 
     /// \brief Construct an empty matrix
-    Matrix() : nrow_(0), ncol_(0) {}
+    Matrix() noexcept(
+        std::is_nothrow_default_constructible<Vector<T, Alloc>>::value)
+        : nrow_(0), ncol_(0)
+    {
+    }
 
-    /// \brief Construct a matrix given number of rows and columns
+    /// \brief Construct an `nrow` by `ncol` matrix
     Matrix(size_type nrow, size_type ncol)
         : data_(nrow * ncol), nrow_(nrow), ncol_(ncol)
     {
     }
 
+    /// \brief Copy constructor
     Matrix(const Matrix &) = default;
 
-    /// \brief Construct a matrix by copying one with different layout
+    /// \brief Copy constructor using a matrix with a different layout
     Matrix(const transpose_type &other)
         : data_(other.nrow() * other.ncol())
         , nrow_(other.nrow())
@@ -80,17 +85,41 @@ class Matrix
                 operator()(i, j) = other(i, j);
     }
 
+    /// \brief Move constructor
     Matrix(Matrix &&other) noexcept(
-        noexcept(Vector<T>(std::move(other.data_))))
+        std::is_nothrow_move_constructible<Vector<T, Alloc>>::value)
         : data_(std::move(other.data_)), nrow_(other.nrow_), ncol_(other.ncol_)
     {
         other.nrow_ = 0;
         other.ncol_ = 0;
-        other.data_.clear();
     }
 
+    /// \brief Move constructor using a matrix with a different layout
+    Matrix(transpose_type &&other)
+        : data_(other.nrow() * other.ncol())
+        , nrow_(other.nrow())
+        , ncol_(other.ncol())
+    {
+        for (std::size_t i = 0; i != nrow_; ++i)
+            for (std::size_t j = 0; j != ncol_; ++j)
+                operator()(i, j) = std::move(other(i, j));
+    }
+
+    /// \brief Copy assignment operator
     Matrix &operator=(const Matrix &) = default;
 
+    /// \brief Copy assignment operator using a matrix with a different layout
+    Matrix &operator=(const transpose_type &other)
+    {
+        resize(other.nrow_, other.ncol_);
+        for (std::size_t i = 0; i != nrow_; ++i)
+            for (std::size_t j = 0; j != ncol_; ++j)
+                operator()(i, j) = other(i, j);
+
+        return *this;
+    }
+
+    /// \brief Move assignment operator
     Matrix &operator=(Matrix &&other) noexcept(
         noexcept(data_.swap(other.data_)))
     {
@@ -103,13 +132,13 @@ class Matrix
         return *this;
     }
 
-    /// \brief Copy another matrix with a different layout
-    Matrix &operator=(const transpose_type &other)
+    /// \brief Move assignment operator using a matrix with a different layout
+    Matrix &operator=(transpose_type &&other)
     {
         resize(other.nrow_, other.ncol_);
         for (std::size_t i = 0; i != nrow_; ++i)
             for (std::size_t j = 0; j != ncol_; ++j)
-                operator()(i, j) = other(i, j);
+                operator()(i, j) = std::move(other(i, j));
 
         return *this;
     }
@@ -117,8 +146,10 @@ class Matrix
     /// \brief The element at row `i` and column `j`
     reference at(size_type i, size_type j)
     {
-        runtime_assert(i < nrow_, "**Matrix::at** row index out of range");
-        runtime_assert(j < ncol_, "**Matrix::at** column index out of range");
+        runtime_assert<std::out_of_range>(
+            i < nrow_, "**Matrix::at** row index out of range");
+        runtime_assert<std::out_of_range>(
+            j < ncol_, "**Matrix::at** column index out of range");
 
         return at_dispatch(i, j, layout_dispatch());
     }
@@ -126,8 +157,10 @@ class Matrix
     /// \brief The element at row `i` and column `j`
     const_reference at(size_type i, size_type j) const
     {
-        runtime_assert(i < nrow_, "**Matrix::at** row index out of range");
-        runtime_assert(j < ncol_, "**Matrix::at** column index out of range");
+        runtime_assert<std::out_of_range>(
+            i < nrow_, "**Matrix::at** row index out of range");
+        runtime_assert<std::out_of_range>(
+            j < ncol_, "**Matrix::at** column index out of range");
 
         return at_dispatch(i, j, layout_dispatch());
     }
@@ -186,7 +219,8 @@ class Matrix
         return col_stride_dispatch(layout_dispatch());
     }
 
-    bool empty() const { return nrow_ * ncol_ == 0; }
+    /// \brief If the matrix is empty, either zero rows or zero columns or both
+    bool empty() const { return nrow_ == 0 || ncol_ == 0; }
 
     /// \brief The number of rows
     size_type nrow() const { return nrow_; }

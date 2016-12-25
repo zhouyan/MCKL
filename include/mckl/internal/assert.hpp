@@ -85,6 +85,19 @@ inline void runtime_assert(
     runtime_assert(cond, msg.c_str(), soft);
 }
 
+template <typename Except>
+inline void runtime_assert(bool cond, const char *msg)
+{
+    if (!cond)
+        throw Except(msg);
+}
+
+template <typename Except>
+inline void runtime_assert(bool cond, const std::string &msg)
+{
+    runtime_assert<Except>(cond, msg.c_str());
+}
+
 namespace internal
 {
 
