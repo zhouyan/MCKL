@@ -33,4 +33,5 @@ project(MCKLExample-core CXX)
 
 mckl_add_example(core)
 
+mckl_add_test(core matrix)
 mckl_add_test(core memory)

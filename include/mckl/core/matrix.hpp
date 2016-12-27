@@ -37,7 +37,170 @@
 namespace mckl
 {
 
-/// \brief Matrix
+namespace internal
+{
+
+template <typename T>
+class MatrixIterator : public std::iterator<std::random_access_iterator_tag, T>
+{
+    public:
+    MatrixIterator() : ptr_(nullptr), stride_(1) {}
+
+    template <typename IntType>
+    MatrixIterator(T *ptr, IntType stride)
+        : ptr_(ptr), stride_(static_cast<std::ptrdiff_t>(stride))
+    {
+    }
+
+    T &operator*() const { return *ptr_; }
+
+    T *operator->() const { return ptr_; }
+
+    friend bool operator==(
+        const MatrixIterator &iter1, const MatrixIterator &iter2)
+    {
+        runtime_assert(iter1.stride_ == iter2.stride_,
+            "**MatrixIterator::operator==** used with two iterators with "
+            "different strides");
+
+        return iter1.ptr_ == iter2.ptr_;
+    }
+
+    friend bool operator!=(
+        const MatrixIterator &iter1, const MatrixIterator &iter2)
+    {
+        runtime_assert(iter1.stride_ == iter2.stride_,
+            "**MatrixIterator::operator!=** used with two iterators with "
+            "different strides");
+
+        return iter1.ptr_ != iter2.ptr_;
+    }
+
+    friend bool operator<(
+        const MatrixIterator &iter1, const MatrixIterator &iter2)
+    {
+        runtime_assert(iter1.stride_ == iter2.stride_,
+            "**MatrixIterator::operator<** used with two iterators with "
+            "different strides");
+
+        return iter1.ptr_ < iter2.ptr_;
+    }
+
+    friend bool operator<=(
+        const MatrixIterator &iter1, const MatrixIterator &iter2)
+    {
+        runtime_assert(iter1.stride_ == iter2.stride_,
+            "**MatrixIterator::operator<=** used with two iterators with "
+            "different strides");
+
+        return iter1.ptr_ <= iter2.ptr_;
+    }
+
+    friend bool operator>(
+        const MatrixIterator &iter1, const MatrixIterator &iter2)
+    {
+        runtime_assert(iter1.stride_ == iter2.stride_,
+            "**MatrixIterator::operator>** used with two iterators with "
+            "different strides");
+
+        return iter1.ptr_ > iter2.ptr_;
+    }
+
+    friend bool operator>=(
+        const MatrixIterator &iter1, const MatrixIterator &iter2)
+    {
+        runtime_assert(iter1.stride_ == iter2.stride_,
+            "**MatrixIterator::operator>=** used with two iterators with "
+            "different strides");
+
+        return iter1.ptr_ >= iter2.ptr_;
+    }
+
+    friend MatrixIterator &operator++(MatrixIterator &iter)
+    {
+        iter.ptr_ += iter.stride_;
+
+        return iter;
+    }
+
+    friend MatrixIterator operator++(MatrixIterator &iter, int)
+    {
+        MatrixIterator ret(iter);
+        iter.ptr_ += iter.stride_;
+
+        return ret;
+    }
+
+    friend MatrixIterator &operator--(MatrixIterator &iter)
+    {
+        iter.ptr_ -= iter.stride_;
+
+        return iter;
+    }
+
+    friend MatrixIterator operator--(MatrixIterator &iter, int)
+    {
+        MatrixIterator ret(iter);
+        iter.ptr_ -= iter.stride_;
+
+        return ret;
+    }
+
+    template <typename IntType>
+    friend MatrixIterator operator+(const MatrixIterator &iter, IntType n)
+    {
+        MatrixIterator ret(iter);
+        ret.ptr_ += ret.stride_ * static_cast<std::ptrdiff_t>(n);
+
+        return ret;
+    }
+
+    template <typename IntType>
+    friend MatrixIterator operator+(IntType n, const MatrixIterator &iter)
+    {
+        return iter + n;
+    }
+
+    template <typename IntType>
+    friend MatrixIterator operator-(const MatrixIterator &iter, IntType n)
+    {
+        return iter + (-static_cast<std::ptrdiff_t>(n));
+    }
+
+    template <typename IntType>
+    friend MatrixIterator &operator+=(MatrixIterator &iter, IntType n)
+    {
+        iter = iter + n;
+
+        return iter;
+    }
+
+    template <typename IntType>
+    friend MatrixIterator &operator-=(MatrixIterator &iter, IntType n)
+    {
+        iter = iter - n;
+
+        return iter;
+    }
+
+    friend std::ptrdiff_t operator-(
+        const MatrixIterator &iter1, const MatrixIterator &iter2)
+    {
+        runtime_assert(iter1.stride_ == iter2.stride_,
+            "**MatrixIterator::operator-** used with two iterators with "
+            "different strides");
+
+        return (iter1.ptr_ - iter2.ptr_) / iter1.stride_;
+    }
+
+    private:
+    T *ptr_;
+    std::ptrdiff_t stride_;
+}; // class MatrixIterator
+
+} // namespace mckl::internal
+
+/// \brief Matrix container
 /// \ingroup Core
 template <MatrixLayout Layout, typename T, typename Alloc = Allocator<T>>
 class Matrix
@@ -47,6 +210,8 @@ class Matrix
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
     Vector<T, Alloc> data_;
+    std::size_t nrow_;
+    std::size_t ncol_;
 
     public:
     using size_type = std::size_t;
@@ -55,6 +220,28 @@ class Matrix
     using const_reference = const value_type &;
     using pointer = value_type *;
     using const_pointer = const value_type *;
+
+    using iterator = pointer;
+    using const_iterator = const_pointer;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+    using row_iterator = std::conditional_t<Layout == RowMajor, pointer,
+        internal::MatrixIterator<T>>;
+    using const_row_iterator = std::conditional_t<Layout == RowMajor, pointer,
+        internal::MatrixIterator<const T>>;
+    using reverse_row_iterator = std::reverse_iterator<row_iterator>;
+    using const_reverse_row_iterator =
+        std::reverse_iterator<const_row_iterator>;
+
+    using col_iterator = std::conditional_t<Layout == ColMajor, pointer,
+        internal::MatrixIterator<T>>;
+    using const_col_iterator = std::conditional_t<Layout == ColMajor, pointer,
+        internal::MatrixIterator<const T>>;
+    using reverse_col_iterator = std::reverse_iterator<col_iterator>;
+    using const_reverse_col_iterator =
+        std::reverse_iterator<const_col_iterator>;
+
     using transpose_type =
         Matrix<Layout == RowMajor ? ColMajor : RowMajor, T, Alloc>;
 
@@ -141,6 +328,171 @@ class Matrix
                 operator()(i, j) = std::move(other(i, j));
 
         return *this;
+    }
+
+    /// \brief Iterator to the upper-left corner of the matrix
+    iterator begin() { return data(); }
+
+    /// \brief Iterator to the upper-left corner of the matrix
+    const_iterator begin() const { return cbegin(); }
+
+    /// \brief Iterator to the upper-left corner of the matrix
+    const_iterator cbegin() const { return data(); }
+
+    /// \brief Iterator to one pass the lower-right corner of the matrix
+    iterator end() { return begin() + nrow_ * ncol_; }
+
+    /// \brief Iterator to one pass the lower-right corner of the matrix
+    const_iterator end() const { return cend(); }
+
+    /// \brief Iterator to one pass the lower-right corner of the matrix
+    const_iterator cend() const { return begin() + nrow_ * ncol_; }
+
+    /// \brief Iterator to the lower-right corner of the matrix
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
+
+    /// \brief Iterator to the lower-right corner of the matrix
+    const_reverse_iterator rbegin() const { return crbegin(); }
+
+    /// \brief Iterator to the lower-right corner of the matrix
+    const_reverse_iterator crbegin() const
+    {
+        return const_reverse_iterator(cend());
+    }
+
+    /// \brief Iterator one before the upper-left corner of the matrix
+    reverse_iterator rend() { return reverse_iterator(begin()); }
+
+    /// \brief Iterator one before the upper-left corner of the matrix
+    const_reverse_iterator rend() const { return crend(); }
+
+    /// \brief Iterator one before the upper-left corner of the matrix
+    const_reverse_iterator crend() { return const_reverse_iterator(cbegin()); }
+
+    /// \brief Iterator to the beginning of a given row
+    row_iterator row_begin(size_type i)
+    {
+        return row_begin_dispatch(i, layout_dispatch());
+    }
+
+    /// \brief Iterator to the beginning of a given row
+    const_row_iterator row_begin(size_type i) const { return row_cbegin(i); }
+
+    /// \brief Iterator to the beginning of a given row
+    const_row_iterator row_cbegin(size_type i)
+    {
+        return row_begin_dispatch(i, layout_dispatch());
+    }
+
+    /// \brief Iterator to one pass the end of a given row
+    row_iterator row_end(size_type i) { return row_begin(i) + ncol_; }
+
+    /// \brief Iterator to one pass the end of a given row
+    const_row_iterator row_end(size_type i) const { return row_cend(i); }
+
+    /// \brief Iterator to one pass the end of a given row
+    const_row_iterator row_cend(size_type i) const
+    {
+        return row_cbegin(i) + ncol_;
+    }
+
+    /// \brief Iterator to the end of a given row
+    reverse_row_iterator row_rbegin(size_type i)
+    {
+        return reverse_row_iterator(row_end(i));
+    }
+
+    /// \brief Iterator to the end of a given row
+    const_reverse_row_iterator row_rbegin(size_type i) const
+    {
+        return row_crbegin(i);
+    }
+
+    /// \brief Iterator to the end of a given row
+    const_reverse_row_iterator row_crbegin(size_type i) const
+    {
+        return const_reverse_row_iterator(row_cend(i));
+    }
+
+    /// \brief Iterator to one before the beginning of a given row
+    reverse_row_iterator row_rend(size_type i)
+    {
+        return reverse_row_iterator(row_begin(i));
+    }
+
+    /// \brief Iterator to one before the beginning of a given row
+    const_reverse_row_iterator row_rend(size_type i) const
+    {
+        return row_crend(i);
+    }
+
+    /// \brief Iterator to one before the beginning of a given row
+    const_reverse_row_iterator row_crend(size_type i) const
+    {
+        return const_reverse_row_iterator(row_cbegin(i));
+    }
+
+    /// \brief Iterator to the beginning of a given column
+    col_iterator col_begin(size_type i)
+    {
+        return col_begin_dispatch(i, layout_dispatch());
+    }
+
+    /// \brief Iterator to the beginning of a given column
+    const_col_iterator col_begin(size_type j) const { return col_cbegin(j); }
+
+    /// \brief Iterator to the beginning of a given column
+    const_col_iterator col_cbegin(size_type j)
+    {
+        return col_begin_dispatch(j, layout_dispatch());
+    }
+
+    /// \brief Iterator to one pass the end of a given column
+    col_iterator col_end(size_type j) { return col_begin(j) + nrow_; }
+
+    /// \brief Iterator to one pass the end of a given column
+    const_col_iterator col_end(size_type j) const { return col_cend(j); }
+
+    /// \brief Iterator to one pass the end of a given column
+    const_col_iterator col_cend(size_type j) const
+    {
+        return col_cbegin(j) + nrow_;
+    }
+
+    /// \brief Iterator to the end of a given column
+    reverse_col_iterator col_rbegin(size_type j)
+    {
+        return reverse_col_iterator(col_end(j));
+    }
+
+    /// \brief Iterator to the end of a given column
+    const_reverse_col_iterator col_rbegin(size_type j) const
+    {
+        return col_crbegin(j);
+    }
+
+    /// \brief Iterator to the end of a given column
+    const_reverse_col_iterator col_crbegin(size_type j) const
+    {
+        return const_reverse_col_iterator(col_cend(j));
+    }
+
+    /// \brief Iterator to one before the beginning of a given column
+    reverse_col_iterator col_rend(size_type j)
+    {
+        return reverse_col_iterator(col_begin(j));
+    }
+
+    /// \brief Iterator to one before the beginning of a given column
+    const_reverse_col_iterator col_rend(size_type j) const
+    {
+        return col_crend(j);
+    }
+
+    /// \brief Iterator to one before the beginning of a given column
+    const_reverse_col_iterator col_crend(size_type j) const
+    {
+        return const_reverse_col_iterator(col_cbegin(j));
     }
 
     /// \brief The element at row `i` and column `j`
@@ -291,11 +643,13 @@ class Matrix
         return transpose_dispatch(first, layout_dispatch());
     }
 
+    /// \brief Swap contents of two matrices
     friend void swap(Matrix &m1, Matrix &m2) noexcept(noexcept(m1.swap(m2)))
     {
         m1.swap(m2);
     }
 
+    /// \brief Compare equality of two matrices
     friend bool operator==(const Matrix &m1, const Matrix &m2)
     {
         if (m1.nrow_ != m2.nrow_)
@@ -305,16 +659,32 @@ class Matrix
         return m1.data_ == m2.data_;
     }
 
+    /// \brief Compare inequality of two matrices
     friend bool operator!=(const Matrix &m1, const Matrix &m2)
     {
         return !(m1 == m2);
     }
 
     private:
-    size_type nrow_;
-    size_type ncol_;
-
     // Layout == RowMajor
+
+    pointer row_begin_dispatch(size_type i, row_major) { return row_data(i); }
+
+    const_pointer row_begin_dispatch(size_type i, row_major) const
+    {
+        return row_data(i);
+    }
+
+    internal::MatrixIterator<T> col_begin_dispatch(size_type j, row_major)
+    {
+        return internal::MatrixIterator<T>(col_data(j), col_stride());
+    }
+
+    internal::MatrixIterator<const T> col_begin_dispatch(
+        size_type j, row_major) const
+    {
+        return internal::MatrixIterator<const T>(col_data(j), col_stride());
+    }
 
     void resize_dispatch(size_type nrow, size_type ncol, row_major)
     {
@@ -395,6 +765,24 @@ class Matrix
     }
 
     // Layout == ColMajor
+
+    internal::MatrixIterator<T> row_begin_dispatch(size_type i, col_major)
+    {
+        return internal::MatrixIterator<T>(row_data(i), row_stride());
+    }
+
+    internal::MatrixIterator<const T> row_begin_dispatch(
+        size_type i, col_major) const
+    {
+        return internal::MatrixIterator<const T>(row_data(i), row_stride());
+    }
+
+    pointer col_begin_dispatch(size_type j, col_major) { return col_data(j); }
+
+    const_pointer col_begin_dispatch(size_type j, col_major) const
+    {
+        return col_data(j);
+    }
 
     void resize_dispatch(size_type nrow, size_type ncol, col_major)
     {
