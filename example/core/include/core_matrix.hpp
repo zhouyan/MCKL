@@ -81,6 +81,14 @@ inline void core_matrix(std::size_t N, std::size_t M)
         pass1 = pass1 && s1 == r1;
         s1 = std::accumulate(cmat.begin(), cmat.end(), zero);
         pass1 = pass1 && s1 == r1;
+        s1 = 0;
+        for (auto v : mat)
+            s1 += v;
+        pass1 = pass1 && s1 == r1;
+        s1 = 0;
+        for (auto v : cmat)
+            s1 += v;
+        pass1 = pass1 && s1 == r1;
 
         watch2.start();
         std::uint64_t r2 = ((m * n * (n - 1) / 2) << 32) + n * m * (m - 1) / 2;
@@ -115,6 +123,27 @@ inline void core_matrix(std::size_t N, std::size_t M)
                     cmat.row_end(static_cast<std::size_t>(i)), zero);
             pass3 = pass3 && s == r;
         }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s = 0;
+            for (auto v : mat.row(static_cast<std::size_t>(i)))
+                s += v;
+            pass3 = pass3 && s == r;
+        }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s = 0;
+            for (auto v : mat.crow(static_cast<std::size_t>(i)))
+                s += v;
+            pass3 = pass3 && s == r;
+        }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s = 0;
+            for (auto v : cmat.row(static_cast<std::size_t>(i)))
+                s += v;
+            pass3 = pass3 && s == r;
+        }
 
         watch4.start();
         for (std::uint64_t i = 0; i != n; ++i) {
@@ -137,6 +166,27 @@ inline void core_matrix(std::size_t N, std::size_t M)
             std::uint64_t s =
                 std::accumulate(cmat.row_rbegin(static_cast<std::size_t>(i)),
                     cmat.row_rend(static_cast<std::size_t>(i)), zero);
+            pass4 = pass4 && s == r;
+        }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s = 0;
+            for (auto v : mat.rrow(static_cast<std::size_t>(i)))
+                s += v;
+            pass4 = pass4 && s == r;
+        }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s = 0;
+            for (auto v : mat.crrow(static_cast<std::size_t>(i)))
+                s += v;
+            pass4 = pass4 && s == r;
+        }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s = 0;
+            for (auto v : cmat.rrow(static_cast<std::size_t>(i)))
+                s += v;
             pass4 = pass4 && s == r;
         }
 
@@ -163,6 +213,27 @@ inline void core_matrix(std::size_t N, std::size_t M)
                     cmat.col_end(static_cast<std::size_t>(j)), zero);
             pass5 = pass5 && s == r;
         }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s = 0;
+            for (auto v : mat.col(j))
+                s += v;
+            pass5 = pass5 && s == r;
+        }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s = 0;
+            for (auto v : mat.ccol(j))
+                s += v;
+            pass5 = pass5 && s == r;
+        }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s = 0;
+            for (auto v : cmat.col(j))
+                s += v;
+            pass5 = pass5 && s == r;
+        }
 
         watch6.start();
         for (std::uint64_t j = 0; j != m; ++j) {
@@ -185,6 +256,27 @@ inline void core_matrix(std::size_t N, std::size_t M)
             std::uint64_t s =
                 std::accumulate(cmat.col_rbegin(static_cast<std::size_t>(j)),
                     cmat.col_rend(static_cast<std::size_t>(j)), zero);
+            pass6 = pass6 && s == r;
+        }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s = 0;
+            for (auto v : mat.rcol(j))
+                s += v;
+            pass6 = pass6 && s == r;
+        }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s = 0;
+            for (auto v : mat.crcol(j))
+                s += v;
+            pass6 = pass6 && s == r;
+        }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s = 0;
+            for (auto v : cmat.rcol(j))
+                s += v;
             pass6 = pass6 && s == r;
         }
     }
