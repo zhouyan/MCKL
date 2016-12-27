@@ -169,10 +169,10 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
 
     friend ParticleIndex operator++(ParticleIndex &idx, int)
     {
-        ParticleIndex idx_tmp(idx);
+        ParticleIndex ret(idx);
         idx = ParticleIndex(idx.i() + 1, idx.particle_ptr());
 
-        return idx_tmp;
+        return ret;
     }
 
     friend ParticleIndex &operator--(ParticleIndex &idx)
@@ -184,15 +184,14 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
 
     friend ParticleIndex operator--(ParticleIndex &idx, int)
     {
-        ParticleIndex idx_tmp(idx);
+        ParticleIndex ret(idx);
         idx = ParticleIndex(idx.i() - 1, idx.particle_ptr());
 
-        return idx_tmp;
+        return ret;
     }
 
     template <typename IntType>
-    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex>
-        operator+(const ParticleIndex &idx, IntType n)
+    friend ParticleIndex operator+(const ParticleIndex &idx, IntType n)
     {
         return ParticleIndex(
             static_cast<size_type>(static_cast<difference_type>(idx.i()) +
@@ -201,28 +200,19 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     }
 
     template <typename IntType>
-    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex>
-        operator+(IntType n, const ParticleIndex &idx)
+    friend ParticleIndex operator+(IntType n, const ParticleIndex &idx)
     {
-        return ParticleIndex(
-            static_cast<size_type>(static_cast<difference_type>(idx.i()) +
-                static_cast<difference_type>(n)),
-            idx.particle_ptr());
+        return idx + n;
     }
 
     template <typename IntType>
-    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex>
-        operator-(const ParticleIndex &idx, IntType n)
+    friend ParticleIndex operator-(const ParticleIndex &idx, IntType n)
     {
-        return ParticleIndex(
-            static_cast<size_type>(static_cast<difference_type>(idx.i()) -
-                static_cast<difference_type>(n)),
-            idx.particle_ptr());
+        return idx + (-static_cast<different_type>(n));
     }
 
     template <typename IntType>
-    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex &>
-        operator+=(ParticleIndex &idx, IntType n)
+    friend ParticleIndex &operator+=(ParticleIndex &idx, IntType n)
     {
         idx = idx + n;
 
@@ -230,8 +220,7 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     }
 
     template <typename IntType>
-    friend std::enable_if_t<std::is_integral<IntType>::value, ParticleIndex &>
-        operator-=(ParticleIndex &idx, IntType n)
+    friend ParticleIndex &operator-=(ParticleIndex &idx, IntType n)
     {
         idx = idx - n;
 
