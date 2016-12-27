@@ -60,7 +60,9 @@ class RuntimeAssert : public std::runtime_error
 
 #if MCKL_NO_RUNTIME_ASSERT
 
-inline void runtime_assert(bool, const char *, bool) {}
+inline void runtime_assert(bool, const char *, bool = false) {}
+
+inline void runtime_assert(bool, const std::string &, bool = false) {}
 
 #else // MCKL_NO_RUNTIME_ASSERT
 
@@ -77,13 +79,13 @@ inline void runtime_assert(bool cond, const char *msg, bool soft = false)
 #endif // MCKL_RUNTIME_ASSERT_AS_EXCEPTION
 }
 
-#endif // MCKL_NO_RUNTIME_ASSERT
-
 inline void runtime_assert(
     bool cond, const std::string &msg, bool soft = false)
 {
     runtime_assert(cond, msg.c_str(), soft);
 }
+
+#endif // MCKL_NO_RUNTIME_ASSERT
 
 template <typename Except>
 inline void runtime_assert(bool cond, const char *msg)
