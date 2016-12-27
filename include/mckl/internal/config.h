@@ -49,24 +49,10 @@
 #endif
 #endif
 
-#ifndef MCKL_NO_RUNTIME_WARNING
-#ifndef NDEBUG
-#define MCKL_NO_RUNTIME_WARNING 0
-#else
-#define MCKL_NO_RUNTIME_WARNING 1
-#endif
-#endif
-
 /// \brief Turn MCKL runtime assertions into exceptions
 /// \ingroup Config
 #ifndef MCKL_RUNTIME_ASSERT_AS_EXCEPTION
 #define MCKL_RUNTIME_ASSERT_AS_EXCEPTION 0
-#endif
-
-/// \brief Turn MCKL runtime warnings into exceptions
-/// \ingroup Config
-#ifndef MCKL_RUNTIME_WARNING_AS_EXCEPTION
-#define MCKL_RUNTIME_WARNING_AS_EXCEPTION 0
 #endif
 
 /// \brief Produce exact the same results regardless of endianness

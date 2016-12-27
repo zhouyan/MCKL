@@ -148,7 +148,7 @@ class MemorySTD
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *allocate(std::size_t n, const void * = nullptr)
+    static void *allocate(std::size_t n, const void * = nullptr) noexcept
     {
         const std::size_t m = internal::alignment_round0<Alignment>(
             n + sizeof(std::uintptr_t) + Alignment);
@@ -168,7 +168,7 @@ class MemorySTD
         return static_cast<void *>(ptr);
     }
 
-    static void deallocate(void *ptr, std::size_t = 0)
+    static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
         if (ptr != nullptr) {
             const std::uintptr_t address =
@@ -199,7 +199,7 @@ class MemorySYS
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *allocate(std::size_t n, const void * = nullptr)
+    static void *allocate(std::size_t n, const void * = nullptr) noexcept
     {
         const std::size_t m = internal::alignment_round<Alignment>(n);
 
@@ -213,7 +213,7 @@ class MemorySYS
         return ptr;
     }
 
-    static void deallocate(void *ptr, std::size_t = 0)
+    static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
         if (ptr != nullptr)
             ::free(ptr);
@@ -235,14 +235,14 @@ class MemorySYS
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *allocate(std::size_t n, const void * = nullptr)
+    static void *allocate(std::size_t n, const void * = nullptr) noexcept
     {
         const std::size_t m = internal::alignment_round<Alignment>(n);
 
         return m < n ? nullptr : _aligned_malloc(m, Alignment);
     }
 
-    static void deallocate(void *ptr, std::size_t = 0)
+    static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
         if (ptr != nullptr)
             _aligned_free(ptr);
@@ -268,14 +268,14 @@ class MemoryJEM
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *allocate(std::size_t n, const void * = nullptr)
+    static void *allocate(std::size_t n, const void * = nullptr) noexcept
     {
         const std::size_t m = internal::alignment_round<Alignment>(n);
 
         return m < n ? nullptr : ::je_aligned_alloc(Alignment, m);
     }
 
-    static void deallocate(void *ptr, std::size_t = 0)
+    static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
         if (ptr != nullptr)
             ::je_free(ptr);
@@ -302,14 +302,14 @@ class MemoryTBB
     public:
     static constexpr std::size_t alignment() { return Alignment; }
 
-    static void *allocate(std::size_t n, const void * = nullptr)
+    static void *allocate(std::size_t n, const void * = nullptr) noexcept
     {
         const std::size_t m = internal::alignment_round<Alignment>(n);
 
         return m < n ? nullptr : scalable_aligned_malloc(m, Alignment);
     }
 
-    static void deallocate(void *ptr, std::size_t = 0)
+    static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
         if (ptr != nullptr)
             scalable_aligned_free(ptr);
@@ -348,15 +348,13 @@ class Allocator : public std::allocator<T>
     Allocator &operator=(Allocator &&) = default;
 
     template <typename U>
-    Allocator(const Allocator<U, Mem> &other) noexcept(
-        noexcept(std::allocator<T>(static_cast<std::allocator<U>>(other))))
+    Allocator(const Allocator<U, Mem> &other) noexcept
         : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
 
     template <typename U>
-    Allocator(Allocator<U, Mem> &&other) noexcept(noexcept(
-        std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))))
+    Allocator(Allocator<U, Mem> &&other) noexcept
         : std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))
     {
     }
@@ -374,7 +372,8 @@ class Allocator : public std::allocator<T>
         return ptr;
     }
 
-    void deallocate(T *ptr, std::size_t size = 0)
+    void deallocate(T *ptr, std::size_t size = 0) noexcept(
+        noexcept(memory_type::deallocate(ptr, size)))
     {
         memory_type::deallocate(ptr, size);
     }

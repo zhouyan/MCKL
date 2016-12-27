@@ -86,92 +86,68 @@ class StrideIterator
     StrideIterator &operator=(StrideIterator &&) = default;
 
     /// \brief The base iterator
-    RandomIter base() const { return iter_; }
+    RandomIter base() const noexcept { return iter_; }
 
     /// \brief The stride size
-    difference_type stride() const { return stride_; }
+    difference_type stride() const noexcept { return stride_; }
 
     /// \brief Dereference operator
-    reference operator*() const { return *iter_; }
+    reference operator*() const noexcept { return *iter_; }
 
     /// \brief Member selection operator
-    RandomIter operator->() const { return iter_; }
+    RandomIter operator->() const noexcept { return iter_; }
 
     /// \brief Subscript operator
     template <typename IntType>
-    reference operator[](IntType n) const
+    reference operator[](IntType n) const noexcept
     {
         return *((*this) + n);
     }
 
     /// \brief Compare equality of two iterators
     friend bool operator==(
-        const StrideIterator &iter1, const StrideIterator &iter2)
+        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**StrideIterator::operator==** used with two iterators with "
-            "different strides");
-
         return iter1.iter_ == iter2.iter_;
     }
 
     /// \brief Compare inequality of two iterators
     friend bool operator!=(
-        const StrideIterator &iter1, const StrideIterator &iter2)
+        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**StrideIterator::operator!=** used with two iterators with "
-            "different strides");
-
         return iter1.iter_ != iter2.iter_;
     }
 
     /// \brief Compare less-than of two iterators
     friend bool operator<(
-        const StrideIterator &iter1, const StrideIterator &iter2)
+        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**StrideIterator::operator<** used with two iterators with "
-            "different strides");
-
         return iter1.iter_ < iter2.iter_;
     }
 
     /// \brief Compare less-than or equality of two iterators
     friend bool operator<=(
-        const StrideIterator &iter1, const StrideIterator &iter2)
+        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**StrideIterator::operator<=** used with two iterators with "
-            "different strides");
-
         return iter1.iter_ <= iter2.iter_;
     }
 
     /// \brief Compare greater-than of two iterators
     friend bool operator>(
-        const StrideIterator &iter1, const StrideIterator &iter2)
+        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**StrideIterator::operator>** used with two iterators with "
-            "different strides");
-
         return iter1.iter_ > iter2.iter_;
     }
 
     /// \brief Compare greater-than or equality of two iterators
     friend bool operator>=(
-        const StrideIterator &iter1, const StrideIterator &iter2)
+        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**StrideIterator::operator>=** used with two iterators with "
-            "different strides");
-
         return iter1.iter_ >= iter2.iter_;
     }
 
     /// \brief Prefix increment
-    friend StrideIterator &operator++(StrideIterator &iter)
+    friend StrideIterator &operator++(StrideIterator &iter) noexcept
     {
         iter.iter_ += iter.stride_;
 
@@ -179,7 +155,7 @@ class StrideIterator
     }
 
     /// \brief Postfix increment
-    friend StrideIterator operator++(StrideIterator &iter, int)
+    friend StrideIterator operator++(StrideIterator &iter, int) noexcept
     {
         StrideIterator ret(iter);
         iter.iter_ += iter.stride_;
@@ -188,7 +164,7 @@ class StrideIterator
     }
 
     /// \brief Prefix decrement
-    friend StrideIterator &operator--(StrideIterator &iter)
+    friend StrideIterator &operator--(StrideIterator &iter) noexcept
     {
         iter.iter_ -= iter.stride_;
 
@@ -196,7 +172,7 @@ class StrideIterator
     }
 
     /// \brief Postfix decrement
-    friend StrideIterator operator--(StrideIterator &iter, int)
+    friend StrideIterator operator--(StrideIterator &iter, int) noexcept
     {
         StrideIterator ret(iter);
         iter.iter_ -= iter.stride_;
@@ -206,7 +182,8 @@ class StrideIterator
 
     /// \brief Addition with an integer
     template <typename IntType>
-    friend StrideIterator operator+(const StrideIterator &iter, IntType n)
+    friend StrideIterator operator+(
+        const StrideIterator &iter, IntType n) noexcept
     {
         StrideIterator ret(iter);
         ret.iter_ += ret.stride_ * static_cast<difference_type>(n);
@@ -216,21 +193,23 @@ class StrideIterator
 
     /// \brief Addition with an integer
     template <typename IntType>
-    friend StrideIterator operator+(IntType n, const StrideIterator &iter)
+    friend StrideIterator operator+(
+        IntType n, const StrideIterator &iter) noexcept
     {
         return iter + n;
     }
 
     /// \brief Substruction with an integer
     template <typename IntType>
-    friend StrideIterator operator-(const StrideIterator &iter, IntType n)
+    friend StrideIterator operator-(
+        const StrideIterator &iter, IntType n) noexcept
     {
         return iter + (-static_cast<difference_type>(n));
     }
 
     /// \brief Compound addition and assignment
     template <typename IntType>
-    friend StrideIterator &operator+=(StrideIterator &iter, IntType n)
+    friend StrideIterator &operator+=(StrideIterator &iter, IntType n) noexcept
     {
         iter = iter + n;
 
@@ -239,7 +218,7 @@ class StrideIterator
 
     /// \brief Compound substruction and assignment
     template <typename IntType>
-    friend StrideIterator &operator-=(StrideIterator &iter, IntType n)
+    friend StrideIterator &operator-=(StrideIterator &iter, IntType n) noexcept
     {
         iter = iter - n;
 
@@ -248,12 +227,8 @@ class StrideIterator
 
     /// \brief Distance between two operators
     friend difference_type operator-(
-        const StrideIterator &iter1, const StrideIterator &iter2)
+        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**StrideIterator::operator-** used with two iterators with "
-            "different strides");
-
         return (iter1.iter_ - iter2.iter_) / iter1.stride_;
     }
 

@@ -56,10 +56,10 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     EstimateMatrix(size_type N, size_type dim) : Matrix<RowMajor, T>(N, dim) {}
 
     /// \brief The dimension of the estimator
-    std::size_t dim() const { return this->ncol(); }
+    std::size_t dim() const noexcept { return this->ncol(); }
 
     /// \brief The number of iterations stored in the estimate matrix
-    std::size_t num_iter() const { return this->nrow(); }
+    std::size_t num_iter() const noexcept { return this->nrow(); }
 
     /// \brief Reserve space for specified *additional* number of iterations
     void reserve(std::size_t n)
@@ -71,7 +71,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     template <typename OutputIter>
     OutputIter read_estimate(size_type i, OutputIter first) const
     {
-        return std::copy(this->row_begin(i), this->row_end(i), first);
+        return std::copy_n(this->row_begin(i), this->row_end(i), first);
     }
 
     /// \brief Read the values of \f$\eta_{1:t}(j)\f$
@@ -94,9 +94,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     template <typename InputIter>
     void insert_estimate(InputIter first)
     {
-        const size_type i = num_iter();
-        this->resize(i + 1, dim());
-        std::copy_n(first, dim(), this->row_data(i));
+        this->push_back_row(first);
     }
 
     /// \brief Add a new estimate into the matrix given iteration number
@@ -114,7 +112,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     {
         const size_type t = num_iter();
         if (i < t)
-            std::copy_n(first, dim(), this->row_data(i));
+            std::copy_n(first, dim(), this->row_begin(i));
         if (i == t)
             insert_estimate(first);
         if (i > t)
@@ -128,7 +126,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     {
         insert_estimate_dispatch(t, i, first, std::false_type());
         if (i > t)
-            std::fill_n(this->row_data(t), (i - t) * dim(), -const_nan<T>());
+            std::fill_n(this->row_begin(t), (i - t) * dim(), -const_nan<T>());
     }
 
     template <typename InputIter>
@@ -136,7 +134,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
         size_type t, size_type i, InputIter first, std::false_type)
     {
         this->resize(std::max(i + 1, t), dim());
-        std::copy_n(first, dim(), this->row_data(i));
+        std::copy_n(first, dim(), this->row_begin(i));
     }
 }; // class EstimateMatrix
 
