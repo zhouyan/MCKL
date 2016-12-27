@@ -33,177 +33,10 @@
 #define MCKL_CORE_MATRIX_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/iterator.hpp>
 
 namespace mckl
 {
-
-namespace internal
-{
-
-template <typename T>
-class MatrixIterator : public std::iterator<std::random_access_iterator_tag, T>
-{
-    public:
-    MatrixIterator() noexcept : ptr_(nullptr), stride_(1) {}
-
-    template <typename IntType>
-    MatrixIterator(T *ptr, IntType stride) noexcept
-        : ptr_(ptr), stride_(static_cast<std::ptrdiff_t>(stride))
-    {
-    }
-
-    operator MatrixIterator<const T>()
-    {
-        return MatrixIterator<const T>(ptr_, stride_);
-    }
-
-    T &operator*() const { return *ptr_; }
-
-    T *operator->() const { return ptr_; }
-
-    friend bool operator==(
-        const MatrixIterator &iter1, const MatrixIterator &iter2)
-    {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**MatrixIterator::operator==** used with two iterators with "
-            "different strides");
-
-        return iter1.ptr_ == iter2.ptr_;
-    }
-
-    friend bool operator!=(
-        const MatrixIterator &iter1, const MatrixIterator &iter2)
-    {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**MatrixIterator::operator!=** used with two iterators with "
-            "different strides");
-
-        return iter1.ptr_ != iter2.ptr_;
-    }
-
-    friend bool operator<(
-        const MatrixIterator &iter1, const MatrixIterator &iter2)
-    {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**MatrixIterator::operator<** used with two iterators with "
-            "different strides");
-
-        return iter1.ptr_ < iter2.ptr_;
-    }
-
-    friend bool operator<=(
-        const MatrixIterator &iter1, const MatrixIterator &iter2)
-    {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**MatrixIterator::operator<=** used with two iterators with "
-            "different strides");
-
-        return iter1.ptr_ <= iter2.ptr_;
-    }
-
-    friend bool operator>(
-        const MatrixIterator &iter1, const MatrixIterator &iter2)
-    {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**MatrixIterator::operator>** used with two iterators with "
-            "different strides");
-
-        return iter1.ptr_ > iter2.ptr_;
-    }
-
-    friend bool operator>=(
-        const MatrixIterator &iter1, const MatrixIterator &iter2)
-    {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**MatrixIterator::operator>=** used with two iterators with "
-            "different strides");
-
-        return iter1.ptr_ >= iter2.ptr_;
-    }
-
-    friend MatrixIterator &operator++(MatrixIterator &iter)
-    {
-        iter.ptr_ += iter.stride_;
-
-        return iter;
-    }
-
-    friend MatrixIterator operator++(MatrixIterator &iter, int)
-    {
-        MatrixIterator ret(iter);
-        iter.ptr_ += iter.stride_;
-
-        return ret;
-    }
-
-    friend MatrixIterator &operator--(MatrixIterator &iter)
-    {
-        iter.ptr_ -= iter.stride_;
-
-        return iter;
-    }
-
-    friend MatrixIterator operator--(MatrixIterator &iter, int)
-    {
-        MatrixIterator ret(iter);
-        iter.ptr_ -= iter.stride_;
-
-        return ret;
-    }
-
-    template <typename IntType>
-    friend MatrixIterator operator+(const MatrixIterator &iter, IntType n)
-    {
-        MatrixIterator ret(iter);
-        ret.ptr_ += ret.stride_ * static_cast<std::ptrdiff_t>(n);
-
-        return ret;
-    }
-
-    template <typename IntType>
-    friend MatrixIterator operator+(IntType n, const MatrixIterator &iter)
-    {
-        return iter + n;
-    }
-
-    template <typename IntType>
-    friend MatrixIterator operator-(const MatrixIterator &iter, IntType n)
-    {
-        return iter + (-static_cast<std::ptrdiff_t>(n));
-    }
-
-    template <typename IntType>
-    friend MatrixIterator &operator+=(MatrixIterator &iter, IntType n)
-    {
-        iter = iter + n;
-
-        return iter;
-    }
-
-    template <typename IntType>
-    friend MatrixIterator &operator-=(MatrixIterator &iter, IntType n)
-    {
-        iter = iter - n;
-
-        return iter;
-    }
-
-    friend std::ptrdiff_t operator-(
-        const MatrixIterator &iter1, const MatrixIterator &iter2)
-    {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "**MatrixIterator::operator-** used with two iterators with "
-            "different strides");
-
-        return (iter1.ptr_ - iter2.ptr_) / iter1.stride_;
-    }
-
-    private:
-    T *ptr_;
-    std::ptrdiff_t stride_;
-}; // class MatrixIterator
-
-} // namespace mckl::internal
 
 /// \brief Matrix container
 /// \ingroup Core
@@ -232,17 +65,17 @@ class Matrix
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     using row_iterator = std::conditional_t<Layout == RowMajor, pointer,
-        internal::MatrixIterator<T>>;
+        StrideIterator<pointer>>;
     using const_row_iterator = std::conditional_t<Layout == RowMajor,
-        const_pointer, internal::MatrixIterator<const T>>;
+        const_pointer, StrideIterator<const_pointer>>;
     using reverse_row_iterator = std::reverse_iterator<row_iterator>;
     using const_reverse_row_iterator =
         std::reverse_iterator<const_row_iterator>;
 
     using col_iterator = std::conditional_t<Layout == ColMajor, pointer,
-        internal::MatrixIterator<T>>;
+        StrideIterator<pointer>>;
     using const_col_iterator = std::conditional_t<Layout == ColMajor,
-        const_pointer, internal::MatrixIterator<const T>>;
+        const_pointer, StrideIterator<const_pointer>>;
     using reverse_col_iterator = std::reverse_iterator<col_iterator>;
     using const_reverse_col_iterator =
         std::reverse_iterator<const_col_iterator>;
@@ -659,15 +492,15 @@ class Matrix
         return row_data(i);
     }
 
-    internal::MatrixIterator<T> col_begin_dispatch(size_type j, row_major)
+    StrideIterator<pointer> col_begin_dispatch(size_type j, row_major)
     {
-        return internal::MatrixIterator<T>(col_data(j), col_stride());
+        return StrideIterator<pointer>(col_data(j), col_stride());
     }
 
-    internal::MatrixIterator<const T> col_begin_dispatch(
+    StrideIterator<const_pointer> col_begin_dispatch(
         size_type j, row_major) const
     {
-        return internal::MatrixIterator<const T>(col_data(j), col_stride());
+        return StrideIterator<const_pointer>(col_data(j), col_stride());
     }
 
     void resize_dispatch(size_type nrow, size_type ncol, row_major)
@@ -722,15 +555,15 @@ class Matrix
 
     // Layout == ColMajor
 
-    internal::MatrixIterator<T> row_begin_dispatch(size_type i, col_major)
+    StrideIterator<pointer> row_begin_dispatch(size_type i, col_major)
     {
-        return internal::MatrixIterator<T>(row_data(i), row_stride());
+        return StrideIterator<pointer>(row_data(i), row_stride());
     }
 
-    internal::MatrixIterator<const T> row_begin_dispatch(
+    StrideIterator<const_pointer> row_begin_dispatch(
         size_type i, col_major) const
     {
-        return internal::MatrixIterator<const T>(row_data(i), row_stride());
+        return StrideIterator<const_pointer>(row_data(i), row_stride());
     }
 
     pointer col_begin_dispatch(size_type j, col_major) { return col_data(j); }
