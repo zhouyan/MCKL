@@ -44,12 +44,17 @@ template <typename T>
 class MatrixIterator : public std::iterator<std::random_access_iterator_tag, T>
 {
     public:
-    MatrixIterator() : ptr_(nullptr), stride_(1) {}
+    MatrixIterator() noexcept : ptr_(nullptr), stride_(1) {}
 
     template <typename IntType>
-    MatrixIterator(T *ptr, IntType stride)
+    MatrixIterator(T *ptr, IntType stride) noexcept
         : ptr_(ptr), stride_(static_cast<std::ptrdiff_t>(stride))
     {
+    }
+
+    operator MatrixIterator<const T>()
+    {
+        return MatrixIterator<const T>(ptr_, stride_);
     }
 
     T &operator*() const { return *ptr_; }
@@ -228,16 +233,16 @@ class Matrix
 
     using row_iterator = std::conditional_t<Layout == RowMajor, pointer,
         internal::MatrixIterator<T>>;
-    using const_row_iterator = std::conditional_t<Layout == RowMajor, pointer,
-        internal::MatrixIterator<const T>>;
+    using const_row_iterator = std::conditional_t<Layout == RowMajor,
+        const_pointer, internal::MatrixIterator<const T>>;
     using reverse_row_iterator = std::reverse_iterator<row_iterator>;
     using const_reverse_row_iterator =
         std::reverse_iterator<const_row_iterator>;
 
     using col_iterator = std::conditional_t<Layout == ColMajor, pointer,
         internal::MatrixIterator<T>>;
-    using const_col_iterator = std::conditional_t<Layout == ColMajor, pointer,
-        internal::MatrixIterator<const T>>;
+    using const_col_iterator = std::conditional_t<Layout == ColMajor,
+        const_pointer, internal::MatrixIterator<const T>>;
     using reverse_col_iterator = std::reverse_iterator<col_iterator>;
     using const_reverse_col_iterator =
         std::reverse_iterator<const_col_iterator>;
@@ -367,7 +372,10 @@ class Matrix
     const_reverse_iterator rend() const { return crend(); }
 
     /// \brief Iterator one before the upper-left corner of the matrix
-    const_reverse_iterator crend() { return const_reverse_iterator(cbegin()); }
+    const_reverse_iterator crend() const
+    {
+        return const_reverse_iterator(cbegin());
+    }
 
     /// \brief Iterator to the beginning of a given row
     row_iterator row_begin(size_type i)
@@ -379,7 +387,7 @@ class Matrix
     const_row_iterator row_begin(size_type i) const { return row_cbegin(i); }
 
     /// \brief Iterator to the beginning of a given row
-    const_row_iterator row_cbegin(size_type i)
+    const_row_iterator row_cbegin(size_type i) const
     {
         return row_begin_dispatch(i, layout_dispatch());
     }
@@ -442,7 +450,7 @@ class Matrix
     const_col_iterator col_begin(size_type j) const { return col_cbegin(j); }
 
     /// \brief Iterator to the beginning of a given column
-    const_col_iterator col_cbegin(size_type j)
+    const_col_iterator col_cbegin(size_type j) const
     {
         return col_begin_dispatch(j, layout_dispatch());
     }
@@ -619,30 +627,6 @@ class Matrix
         data_.swap(other.data_);
     }
 
-    /// \brief Read a row with an output iterator
-    template <typename OutputIter>
-    OutputIter read_row(size_type i, OutputIter first) const
-    {
-        return read_row_dispatch(i, first, layout_dispatch());
-    }
-
-    /// \brief Read a column with an output iterator
-    template <typename OutputIter>
-    OutputIter read_col(size_type i, OutputIter first) const
-    {
-        return read_col_dispatch(i, first, layout_dispatch());
-    }
-
-    /// \brief Read the matrix with an output iterator given a new layout
-    template <typename OutputIter>
-    OutputIter read(MatrixLayout layout, OutputIter first) const
-    {
-        if (layout == Layout)
-            return std::copy(data_.begin(), data_.end(), first);
-
-        return transpose_dispatch(first, layout_dispatch());
-    }
-
     /// \brief Swap contents of two matrices
     friend void swap(Matrix &m1, Matrix &m2) noexcept(noexcept(m1.swap(m2)))
     {
@@ -736,34 +720,6 @@ class Matrix
         return data_.data() + j;
     }
 
-    template <typename OutputIter>
-    OutputIter read_row_dispatch(
-        size_type i, OutputIter first, row_major) const
-    {
-        return std::copy_n(row_data(i), ncol_, first);
-    }
-
-    template <typename OutputIter>
-    OutputIter read_col_dispatch(
-        size_type j, OutputIter first, row_major) const
-    {
-        const_pointer p = col_data(j);
-        const size_type s = col_stride();
-        for (std::size_t i = 0; i != nrow_; ++i, p += s)
-            *first++ = *p;
-
-        return first;
-    }
-
-    template <typename OutputIter>
-    OutputIter transpose_dispatch(OutputIter first, row_major) const
-    {
-        for (size_type j = 0; j != ncol_; ++j)
-            first = read_col(j, first);
-
-        return first;
-    }
-
     // Layout == ColMajor
 
     internal::MatrixIterator<T> row_begin_dispatch(size_type i, col_major)
@@ -832,34 +788,6 @@ class Matrix
     const_pointer col_data_dispatch(size_type j, col_major) const
     {
         return data_.data() + j * nrow_;
-    }
-
-    template <typename OutputIter>
-    OutputIter read_row_dispatch(
-        size_type i, OutputIter first, col_major) const
-    {
-        const_pointer p = row_data(i);
-        const size_type s = row_stride();
-        for (std::size_t j = 0; j != ncol_; ++j, p += s)
-            *first++ = *p;
-
-        return first;
-    }
-
-    template <typename OutputIter>
-    OutputIter read_col_dispatch(
-        size_type j, OutputIter first, col_major) const
-    {
-        return std::copy_n(col_data(j), nrow_, first);
-    }
-
-    template <typename OutputIter>
-    OutputIter transpose_dispatch(OutputIter first, col_major) const
-    {
-        for (size_type i = 0; i != nrow_; ++i)
-            first = read_row(i, first);
-
-        return first;
     }
 }; // class Matrix
 

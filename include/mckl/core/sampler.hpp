@@ -92,14 +92,14 @@ class Sampler
                 T *first = mat.row_data(i);
                 for (auto &est : estimator_)
                     for (auto &e : est)
-                        first = e.read_row(i, first);
+                        first = std::copy(e.row_begin(i), e.row_end(i), first);
             }
         } else {
             T *first = mat.col_data(0);
             for (auto &est : estimator_)
                 for (auto &e : est)
-                    for (std::size_t i = 0; i != e.dim(); ++i)
-                        first = e.read_col(i, first);
+                    for (std::size_t j = 0; j != e.dim(); ++j)
+                        first = std::copy(e.col_begin(j), e.col_end(j), first);
         }
 
         return mat;

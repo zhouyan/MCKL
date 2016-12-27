@@ -77,6 +77,7 @@ inline void core_matrix(std::size_t N, std::size_t M)
                     (i << 32) + j;
             }
         }
+        const mckl::Matrix<Layout, std::uint64_t> cmat(mat);
 
         constexpr std::uint64_t zero = 0;
 
@@ -85,12 +86,20 @@ inline void core_matrix(std::size_t N, std::size_t M)
         std::uint64_t s1 = core_matrix_sum(mat.begin(), mat.end(), zero);
         pass1 = pass1 && s1 == r1;
         watch1.stop();
+        s1 = core_matrix_sum(mat.cbegin(), mat.cend(), zero);
+        pass1 = pass1 && s1 == r1;
+        s1 = core_matrix_sum(cmat.begin(), cmat.end(), zero);
+        pass1 = pass1 && s1 == r1;
 
         watch2.start();
         std::uint64_t r2 = ((m * n * (n - 1) / 2) << 32) + n * m * (m - 1) / 2;
         std::uint64_t s2 = core_matrix_sum(mat.rbegin(), mat.rend(), zero);
         pass2 = pass2 && s2 == r2;
         watch2.stop();
+        s2 = core_matrix_sum(mat.crbegin(), mat.crend(), zero);
+        pass2 = pass2 && s2 == r2;
+        s2 = core_matrix_sum(cmat.rbegin(), cmat.rend(), zero);
+        pass2 = pass2 && s2 == r2;
 
         watch3.start();
         for (std::uint64_t i = 0; i != n; ++i) {
@@ -101,6 +110,20 @@ inline void core_matrix(std::size_t N, std::size_t M)
             pass3 = pass3 && s == r;
         }
         watch3.stop();
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s =
+                core_matrix_sum(mat.row_cbegin(static_cast<std::size_t>(i)),
+                    mat.row_cend(static_cast<std::size_t>(i)), zero);
+            pass3 = pass3 && s == r;
+        }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s =
+                core_matrix_sum(cmat.row_begin(static_cast<std::size_t>(i)),
+                    cmat.row_end(static_cast<std::size_t>(i)), zero);
+            pass3 = pass3 && s == r;
+        }
 
         watch4.start();
         for (std::uint64_t i = 0; i != n; ++i) {
@@ -111,6 +134,20 @@ inline void core_matrix(std::size_t N, std::size_t M)
             pass4 = pass4 && s == r;
         }
         watch4.stop();
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s =
+                core_matrix_sum(mat.row_crbegin(static_cast<std::size_t>(i)),
+                    mat.row_crend(static_cast<std::size_t>(i)), zero);
+            pass4 = pass4 && s == r;
+        }
+        for (std::uint64_t i = 0; i != n; ++i) {
+            std::uint64_t r = ((m * i) << 32) + m * (m - 1) / 2;
+            std::uint64_t s =
+                core_matrix_sum(cmat.row_rbegin(static_cast<std::size_t>(i)),
+                    cmat.row_rend(static_cast<std::size_t>(i)), zero);
+            pass4 = pass4 && s == r;
+        }
 
         watch5.start();
         for (std::uint64_t j = 0; j != m; ++j) {
@@ -121,6 +158,20 @@ inline void core_matrix(std::size_t N, std::size_t M)
             pass5 = pass5 && s == r;
         }
         watch5.stop();
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s =
+                core_matrix_sum(mat.col_cbegin(static_cast<std::size_t>(j)),
+                    mat.col_cend(static_cast<std::size_t>(j)), zero);
+            pass5 = pass5 && s == r;
+        }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s =
+                core_matrix_sum(cmat.col_begin(static_cast<std::size_t>(j)),
+                    cmat.col_end(static_cast<std::size_t>(j)), zero);
+            pass5 = pass5 && s == r;
+        }
 
         watch6.start();
         for (std::uint64_t j = 0; j != m; ++j) {
@@ -131,6 +182,20 @@ inline void core_matrix(std::size_t N, std::size_t M)
             pass6 = pass6 && s == r;
         }
         watch6.stop();
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s =
+                core_matrix_sum(mat.col_crbegin(static_cast<std::size_t>(j)),
+                    mat.col_crend(static_cast<std::size_t>(j)), zero);
+            pass6 = pass6 && s == r;
+        }
+        for (std::uint64_t j = 0; j != m; ++j) {
+            std::uint64_t r = ((n * (n - 1) / 2) << 32) + n * j;
+            std::uint64_t s =
+                core_matrix_sum(cmat.col_rbegin(static_cast<std::size_t>(j)),
+                    cmat.col_rend(static_cast<std::size_t>(j)), zero);
+            pass6 = pass6 && s == r;
+        }
     }
 
     double p1 = 0;
@@ -196,14 +261,14 @@ inline void core_matrix(std::size_t N, std::size_t M)
     else
         perf = "ME/s";
 
-    // std::cout << std::string(55, '=') << std::endl;
-    // std::cout << std::setw(30) << std::left << "RowMajor";
-    // std::cout << std::setw(10) << std::right << perf;
-    // std::cout << std::setw(15) << std::right << "Determinstics";
-    // std::cout << std::endl;
-    // std::cout << std::string(55, '-') << std::endl;
-    // core_matrix<mckl::RowMajor>(N, M);
-    // std::cout << std::string(55, '-') << std::endl;
+    std::cout << std::string(55, '=') << std::endl;
+    std::cout << std::setw(30) << std::left << "RowMajor";
+    std::cout << std::setw(10) << std::right << perf;
+    std::cout << std::setw(15) << std::right << "Determinstics";
+    std::cout << std::endl;
+    std::cout << std::string(55, '-') << std::endl;
+    core_matrix<mckl::RowMajor>(N, M);
+    std::cout << std::string(55, '-') << std::endl;
 
     std::cout << std::string(55, '=') << std::endl;
     std::cout << std::setw(30) << std::left << "ColMajor";

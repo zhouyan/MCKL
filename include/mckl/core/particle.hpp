@@ -208,7 +208,7 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     template <typename IntType>
     friend ParticleIndex operator-(const ParticleIndex &idx, IntType n)
     {
-        return idx + (-static_cast<different_type>(n));
+        return idx + (-static_cast<difference_type>(n));
     }
 
     template <typename IntType>

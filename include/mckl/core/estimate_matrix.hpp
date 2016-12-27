@@ -71,14 +71,14 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     template <typename OutputIter>
     OutputIter read_estimate(size_type i, OutputIter first) const
     {
-        return this->read_row(i, first);
+        return std::copy(this->row_begin(i), this->row_end(i), first);
     }
 
     /// \brief Read the values of \f$\eta_{1:t}(j)\f$
     template <typename OutputIter>
     OutputIter read_variable(size_type j, OutputIter first) const
     {
-        return this->read_col(j, first);
+        return std::copy(this->col_begin(j), this->col_end(j), first);
     }
 
     /// \brief Add space for a new estimate, return a pointer to the new space
