@@ -74,6 +74,7 @@ function(mckl_add_example exname)
     add_custom_target(${exname})
     add_custom_target(${exname}-check)
     add_custom_target(${exname}-files)
+    add_custom_target(${exname}-plots)
     add_dependencies(${exname} ${exname}-files)
     add_dependencies(example ${exname})
 endfunction(mckl_add_example)
@@ -97,25 +98,35 @@ function(mckl_add_test exname testname)
 endfunction(mckl_add_test)
 
 function(mckl_add_file exname filename)
-    set(src ${exname}_${filename})
     if(UNIX)
         ADD_CUSTOM_COMMAND(
-            OUTPUT  ${PROJECT_BINARY_DIR}/${filename}
-            DEPENDS ${PROJECT_SOURCE_DIR}/${filename}
+            OUTPUT  ${PROJECT_BINARY_DIR}/${exname}_${filename}
+            DEPENDS ${PROJECT_SOURCE_DIR}/${exname}_${filename}
             COMMAND ${CMAKE_COMMAND} ARGS -E create_symlink
-            ${PROJECT_SOURCE_DIR}/${filename}
-            ${PROJECT_BINARY_DIR}/${filename})
+            ${PROJECT_SOURCE_DIR}/${exname}_${filename}
+            ${PROJECT_BINARY_DIR}/${exname}_${filename})
     else(UNIX)
         ADD_CUSTOM_COMMAND(
-            OUTPUT  ${PROJECT_BINARY_DIR}/${filename}
-            DEPENDS ${PROJECT_SOURCE_DIR}/${filename}
+            OUTPUT  ${PROJECT_BINARY_DIR}/${exname}_${filename}
+            DEPENDS ${PROJECT_SOURCE_DIR}/${exname}_${filename}
             COMMAND ${CMAKE_COMMAND} ARGS -E copy
-            ${PROJECT_SOURCE_DIR}/${filename}
-            ${PROJECT_BINARY_DIR}/${filename})
+            ${PROJECT_SOURCE_DIR}/${exname}_${filename}
+            ${PROJECT_BINARY_DIR}/${exname}_${filename})
     endif(UNIX)
-    add_custom_target(${src} DEPENDS ${PROJECT_BINARY_DIR}/${filename})
-    add_dependencies(${exname}-files ${src})
+    add_custom_target(${exname}-${exname}_${filename}
+        DEPENDS ${PROJECT_BINARY_DIR}/${exname}_${filename})
+    add_dependencies(${exname}-files ${exname}-${exname}_${filename})
 endfunction(mckl_add_file)
+
+function(mckl_add_plot exname testname)
+    mckl_add_file(${exname} ${testname}.R)
+    add_custom_target(${exname}_${testname}-plot
+        DEPENDS ${exname}-files ${exname}_${testname}-check
+        COMMAND Rscript "${PROJECT_BINARY_DIR}/${exname}_${testname}.R"
+        COMMENT "Plotting ${exname}_${testname}-check results"
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+    add_dependencies(${exname}-plots ${exname}_${testname}-plot)
+endfunction(mckl_add_plot exname testname)
 
 ##############################################################################
 # Essential

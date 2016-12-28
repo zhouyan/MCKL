@@ -37,16 +37,14 @@ mckl_add_test(algorithm resample_index)
 mckl_add_test(algorithm resample_transform)
 mckl_add_test(algorithm resample_u01_sequence)
 
-set(ALGORITHMS gibbs pf pmcmc)
-add_custom_target(algorithm-pdf)
-foreach(alg ${ALGORITHMS})
-    mckl_add_test(algorithm ${alg})
-    mckl_add_file(algorithm algorithm_${alg}.data)
-    mckl_add_file(algorithm algorithm_${alg}.R)
-    add_custom_target(algorithm_${alg}-pdf
-        DEPENDS algorithm-files algorithm_${alg}-check
-        COMMAND Rscript "${PROJECT_BINARY_DIR}/algorithm_${alg}.R"
-        COMMENT "Plotting algorithm_${alg}-check results"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-    add_dependencies(algorithm-pdf algorithm_${alg}-pdf)
-endforeach(alg ${ALGORITHMS})
+mckl_add_test(algorithm gibbs)
+mckl_add_test(algorithm pf)
+mckl_add_test(algorithm pmcmc)
+
+mckl_add_plot(algorithm gibbs)
+mckl_add_plot(algorithm pf)
+mckl_add_plot(algorithm pmcmc)
+
+mckl_add_file(algorithm gibbs.data)
+mckl_add_file(algorithm pf.data)
+mckl_add_file(algorithm pmcmc.data)

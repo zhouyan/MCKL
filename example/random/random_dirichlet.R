@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/example/math/CMakeLists.txt
+#  MCKL/example/random/random_dirichlet.R
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,28 +29,13 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLExample-math CXX)
+library(ggplot2)
 
-mckl_add_example(math)
-
-mckl_add_test(math vmf)
-
-if(AVX2_FOUND AND FMA_FOUND)
-    mckl_add_test(math fma)
-    if(MCKL_ENABLE_LIBRARY)
-        add_custom_target(math_asm)
-        add_custom_target(math_asm-check)
-        set(MATH_ASM_FUNCTIONS
-            sqrtf sqrt
-            expf exp exp2f exp2 expm1f expm1
-            logf log log2f log2 log10f log10 log1pf log1p
-            sin cos sincos tan)
-        foreach(f ${MATH_ASM_FUNCTIONS})
-            mckl_add_test(math ${f})
-            add_dependencies(math_asm math_${f})
-            add_dependencies(math_asm-check math_${f}-check)
-        endforeach(f ${MATH_ASM_FUNCTIONS})
-    endif(MCKL_ENABLE_LIBRARY)
-endif(AVX2_FOUND AND FMA_FOUND)
-
-mckl_add_plot(math asm)
+dat <- read.table("random_dirichlet.txt", header = TRUE)
+plt <- qplot(x = V1, y = V2, group = Implementation, color = Implementation,
+    data = dat, geom = "density_2d")
+plt <- plt + facet_wrap(~Distribution, nrow = 2, scale = "free")
+plt <- plt + theme_bw() + theme(legend.position = "top")
+pdf("random_dirichlet.pdf", width = 14.4, height = 9)
+print(plt)
+gc <- dev.off()
