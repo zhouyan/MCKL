@@ -33,7 +33,9 @@
 #define MCKL_ALGORITHM_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/algorithm/mh.hpp>
+#include <mckl/algorithm/mcmc.hpp>
+#include <mckl/algorithm/pmcmc.hpp>
+#include <mckl/algorithm/resample.hpp>
 #include <mckl/algorithm/smc.hpp>
 
 #endif // MCKL_ALGORITHM_HPP

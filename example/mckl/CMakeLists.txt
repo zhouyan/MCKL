@@ -48,7 +48,6 @@ mckl_add_test_header(mckl TRUE "OpenMP")
 
 mckl_add_test_header(algorithm TRUE)
 mckl_add_test_header(algorithm/mcmc     TRUE)
-mckl_add_test_header(algorithm/mh       TRUE)
 mckl_add_test_header(algorithm/pmcmc    TRUE)
 mckl_add_test_header(algorithm/resample TRUE)
 mckl_add_test_header(algorithm/smc      TRUE)

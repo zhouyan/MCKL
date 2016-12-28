@@ -33,7 +33,6 @@
 #define MCKL_ALGORITHM_MCMC_HPP
 
 #include <mckl/internal/common.hpp>
-#include <mckl/algorithm/mh.hpp>
 #include <mckl/core/estimator.hpp>
 #include <mckl/core/sampler.hpp>
 #include <mckl/random/rng.hpp>
