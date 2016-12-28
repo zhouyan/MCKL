@@ -46,7 +46,7 @@ inline bool dirichlet_distribution_check_param(
     std::size_t dim, RealType *alpha)
 {
     for (std::size_t i = 0; i != dim; ++i)
-        if (alpha <= 0)
+        if (alpha[i] <= 0)
             return false;
     return true;
 }
