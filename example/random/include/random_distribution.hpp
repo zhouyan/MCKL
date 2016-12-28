@@ -1785,6 +1785,7 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
         pass = pass && r1 == r2;
 
         std::stringstream ssb;
+        ssb.precision(20);
         ssb << dist;
         mckl::rand(rng1, dist, K, r1.data());
         ssb >> dist;

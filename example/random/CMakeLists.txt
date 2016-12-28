@@ -235,6 +235,7 @@ foreach(Dist ${MCKL_DISTRIBUTION})
 endforeach(Dist ${MCKL_DISTRIBUTION})
 
 mckl_add_test(random aes)
+mckl_add_test(random normal_mv)
 mckl_add_test(random seed)
 mckl_add_test(random skein)
 mckl_add_test(random threefish)
@@ -258,6 +259,8 @@ if(TestU01_FOUND)
     add_dependencies(random_testu01-check random_testu01_crush-check)
     add_dependencies(random_testu01-check random_testu01_smallcrush-check)
 endif(TestU01_FOUND)
+
+mckl_add_file(random random_normal_mv.R)
 
 mckl_add_file(random random_aes128.txt)
 mckl_add_file(random random_aes192.txt)
@@ -328,3 +331,11 @@ mckl_add_file(random random_seed_13x64.txt)
 mckl_add_file(random random_seed_14x64.txt)
 mckl_add_file(random random_seed_15x64.txt)
 mckl_add_file(random random_seed_16x64.txt)
+
+add_custom_target(random-pdf)
+add_custom_target(random_normal_mv-pdf
+    DEPENDS random-files random_normal_mv-check
+    COMMAND Rscript "${PROJECT_BINARY_DIR}/random_normal_mv.R"
+    COMMENT "Plotting random_normal_mv-check results"
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+add_dependencies(random-pdf random_normal_mv-pdf)
