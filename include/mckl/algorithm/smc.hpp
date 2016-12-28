@@ -100,8 +100,6 @@ class SMCEstimator
 
         const double *w = particle.weight().data();
         double *r = rptr(std::is_same<U, double>());
-
-#if MCKL_HAS_BLAS
         internal::size_check<MCKL_BLAS_INT>(n, "SMCEstimator::estimate");
         internal::size_check<MCKL_BLAS_INT>(d, "SMCEstimator::estimate");
         if (layout_ == RowMajor) {
@@ -115,19 +113,6 @@ class SMCEstimator
                 static_cast<MCKL_BLAS_INT>(d), 1.0, r,
                 static_cast<MCKL_BLAS_INT>(n), w, 1, 0.0, result_.data(), 1);
         }
-#else  // MCKL_HAS_BLAS
-        if (layout_ == RowMajor) {
-            std::fill(result_.begin(), result_.end(), 0);
-            for (std::size_t i = 0; i != n; ++i, ++w)
-                for (std::size_t d = 0; d != d; ++d, ++r)
-                    result_[d] += (*w) * (*r);
-        } else {
-            for (std::size_t d = 0; d != d; ++d, r += n) {
-                mul(n, r, w, r);
-                result_[d] = std::accumulate(r, r + n, 0.0);
-            }
-        }
-#endif // MCKL_HAS_BLAS
         this->insert_estimate(result_.data());
     }
 

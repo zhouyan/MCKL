@@ -158,10 +158,6 @@
 #define MCKL_USE_MKL_VSL MCKL_HAS_MKL
 #endif
 
-#ifndef MCKL_HAS_BLAS
-#define MCKL_HAS_BLAS MCKL_HAS_MKL
-#endif
-
 #ifndef MCKL_USE_CBLAS
 #define MCKL_USE_CBLAS MCKL_USE_MKL_CBLAS
 #endif
