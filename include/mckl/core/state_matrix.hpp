@@ -212,8 +212,8 @@ class StateMatrix : public Matrix<Layout, T>
     void duplicate_dispatch(
         size_type src, size_type dst, row_major, std::false_type)
     {
-        duplicate_j<0>(this->row_data(src), this->row_data(dst),
-            row_major(), std::integral_constant<bool, 0 < Dim>());
+        duplicate_j<0>(this->row_data(src), this->row_data(dst), row_major(),
+            std::integral_constant<bool, 0 < Dim>());
     }
 
     template <std::size_t>

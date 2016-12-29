@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <jemalloc/jemalloc.h>
 #include <cstdlib>
+#include <jemalloc/jemalloc.h>
 
 int main()
 {
