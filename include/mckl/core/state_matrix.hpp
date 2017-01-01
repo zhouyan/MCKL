@@ -56,6 +56,8 @@ class StateMatrix : public Matrix<Layout, T>
     class particle_index_type : public ParticleIndexBase<S>
     {
         public:
+        particle_index_type() = default;
+
         particle_index_type(
             typename Particle<S>::size_type i, Particle<S> *pptr)
             : ParticleIndexBase<S>(i, pptr)

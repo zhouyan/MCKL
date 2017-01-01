@@ -47,63 +47,6 @@ class Matrix
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
-    template <typename Iter>
-    class view
-    {
-        public:
-        using size_type = std::size_t;
-        using value_type = T;
-        using reference = value_type &;
-        using pointer = value_type *;
-        using iterator = Iter;
-
-        view(Iter begin, Iter end) : begin_(begin), end_(end) {}
-
-        template <typename U>
-        view(const view<U> &other) : begin_(other.begin()), end_(other.end())
-        {
-        }
-
-        view(const view &) = default;
-        view(view &&) = default;
-        view &operator=(const view &) = default;
-        view &operator=(view &&) = default;
-
-        reference at(size_type i) const
-        {
-            runtime_assert<std::out_of_range>(
-                begin_ + i < end_, "**Matrix::vew::at** index out of range");
-
-            return operator[](i);
-        }
-
-        reference operator[](size_type i) const noexcept
-        {
-            return *(begin_ + i);
-        }
-
-        iterator begin() const noexcept { return begin_; }
-
-        iterator end() const noexcept { return end_; }
-
-        reference front() const noexcept { return *begin_; }
-
-        reference back() const noexcept { return *(--end_); }
-
-        bool empty() const noexcept { return begin_ >= end_; }
-
-        size_type size() const noexcept
-        {
-            using std::distance;
-
-            return distance(begin_, end_);
-        }
-
-        private:
-        Iter begin_;
-        Iter end_;
-    }; // class view
-
     Vector<T, Alloc> data_;
 
     public:
@@ -135,15 +78,15 @@ class Matrix
     using const_reverse_col_iterator =
         std::reverse_iterator<const_col_iterator>;
 
-    using row_view = view<row_iterator>;
-    using const_row_view = view<const_row_iterator>;
-    using reverse_row_view = view<reverse_row_iterator>;
-    using const_reverse_row_view = view<const_reverse_row_iterator>;
+    using row_range = Range<row_iterator>;
+    using const_row_range = Range<const_row_iterator>;
+    using reverse_row_range = Range<reverse_row_iterator>;
+    using const_reverse_row_range = Range<const_reverse_row_iterator>;
 
-    using col_view = view<col_iterator>;
-    using const_col_view = view<const_col_iterator>;
-    using reverse_col_view = view<reverse_col_iterator>;
-    using const_reverse_col_view = view<const_reverse_col_iterator>;
+    using col_range = Range<col_iterator>;
+    using const_col_range = Range<const_col_iterator>;
+    using reverse_col_range = Range<reverse_col_iterator>;
+    using const_reverse_col_range = Range<const_reverse_col_iterator>;
 
     using transpose_type =
         Matrix<Layout == RowMajor ? ColMajor : RowMajor, T, Alloc>;
@@ -380,76 +323,76 @@ class Matrix
         return const_reverse_col_iterator(col_cbegin(j));
     }
 
-    /// \brief View of a given row
-    row_view row(size_type i) noexcept
+    /// \brief Range of a given row
+    row_range row(size_type i) noexcept
     {
-        return row_view(row_begin(i), row_end(i));
+        return row_range(row_begin(i), row_end(i));
     }
 
-    /// \brief View of a given row
-    const_row_view row(size_type i) const noexcept
+    /// \brief Range of a given row
+    const_row_range row(size_type i) const noexcept
     {
-        return const_row_view(row_begin(i), row_end(i));
+        return const_row_range(row_begin(i), row_end(i));
     }
 
-    /// \brief View of a given row
-    const_row_view crow(size_type i) const noexcept
+    /// \brief Range of a given row
+    const_row_range crow(size_type i) const noexcept
     {
-        return const_row_view(row_cbegin(i), row_cend(i));
+        return const_row_range(row_cbegin(i), row_cend(i));
     }
 
-    /// \brief View of a given row in reverse order
-    reverse_row_view rrow(size_type i) noexcept
+    /// \brief Range of a given row in reverse order
+    reverse_row_range rrow(size_type i) noexcept
     {
-        return reverse_row_view(row_rbegin(i), row_rend(i));
+        return reverse_row_range(row_rbegin(i), row_rend(i));
     }
 
-    /// \brief View of a given row in reverse order
-    const_reverse_row_view rrow(size_type i) const noexcept
+    /// \brief Range of a given row in reverse order
+    const_reverse_row_range rrow(size_type i) const noexcept
     {
-        return const_reverse_row_view(row_rbegin(i), row_rend(i));
+        return const_reverse_row_range(row_rbegin(i), row_rend(i));
     }
 
-    /// \brief View of a given row in reverse order
-    const_reverse_row_view crrow(size_type i) const noexcept
+    /// \brief Range of a given row in reverse order
+    const_reverse_row_range crrow(size_type i) const noexcept
     {
-        return const_reverse_row_view(row_crbegin(i), row_crend(i));
+        return const_reverse_row_range(row_crbegin(i), row_crend(i));
     }
 
-    /// \brief View of a given column
-    col_view col(size_type i) noexcept
+    /// \brief Range of a given column
+    col_range col(size_type i) noexcept
     {
-        return col_view(col_begin(i), col_end(i));
+        return col_range(col_begin(i), col_end(i));
     }
 
-    /// \brief View of a given column
-    const_col_view col(size_type i) const noexcept
+    /// \brief Range of a given column
+    const_col_range col(size_type i) const noexcept
     {
-        return const_col_view(col_begin(i), col_end(i));
+        return const_col_range(col_begin(i), col_end(i));
     }
 
-    /// \brief View of a given column
-    const_col_view ccol(size_type i) const noexcept
+    /// \brief Range of a given column
+    const_col_range ccol(size_type i) const noexcept
     {
-        return const_col_view(col_cbegin(i), col_cend(i));
+        return const_col_range(col_cbegin(i), col_cend(i));
     }
 
-    /// \brief View of a given column in reverse order
-    reverse_col_view rcol(size_type i) noexcept
+    /// \brief Range of a given column in reverse order
+    reverse_col_range rcol(size_type i) noexcept
     {
-        return reverse_col_view(col_rbegin(i), col_rend(i));
+        return reverse_col_range(col_rbegin(i), col_rend(i));
     }
 
-    /// \brief View of a given column in reverse order
-    const_reverse_col_view rcol(size_type i) const noexcept
+    /// \brief Range of a given column in reverse order
+    const_reverse_col_range rcol(size_type i) const noexcept
     {
-        return const_reverse_col_view(col_rbegin(i), col_rend(i));
+        return const_reverse_col_range(col_rbegin(i), col_rend(i));
     }
 
-    /// \brief View of a given column in reverse order
-    const_reverse_col_view crcol(size_type i) const noexcept
+    /// \brief Range of a given column in reverse order
+    const_reverse_col_range crcol(size_type i) const noexcept
     {
-        return const_reverse_col_view(col_crbegin(i), col_crend(i));
+        return const_reverse_col_range(col_crbegin(i), col_crend(i));
     }
 
     /// \brief The element at row `i` and column `j`

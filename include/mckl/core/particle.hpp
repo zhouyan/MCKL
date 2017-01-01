@@ -33,6 +33,7 @@
 #define MCKL_CORE_PARTICLE_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/iterator.hpp>
 #include <mckl/core/weight.hpp>
 #include <mckl/random/rng_set.hpp>
 #include <mckl/random/seed.hpp>
@@ -49,23 +50,24 @@ template <typename T>
 class ParticleIndexBase
 {
     public:
-    using particle_type = Particle<T>;
-    using size_type = typename particle_type::size_type;
-    using rng_type = typename particle_type::rng_type;
+    ParticleIndexBase() : pptr_(nullptr), i_(0) {}
 
-    ParticleIndexBase(size_type i, particle_type *pptr) : pptr_(pptr), i_(i) {}
+    ParticleIndexBase(typename Particle<T>::size_type i, Particle<T> *pptr)
+        : pptr_(pptr), i_(i)
+    {
+    }
 
-    particle_type &particle() const { return *pptr_; }
+    Particle<T> &particle() const { return *pptr_; }
 
-    particle_type *particle_ptr() const { return pptr_; }
+    Particle<T> *particle_ptr() const { return pptr_; }
 
-    size_type i() const { return i_; }
+    typename Particle<T>::size_type i() const { return i_; }
 
-    rng_type &rng() const { return pptr_->rng(i_); }
+    typename Particle<T>::rng_type &rng() const { return pptr_->rng(i_); }
 
     private:
-    particle_type *pptr_;
-    size_type i_;
+    Particle<T> *pptr_;
+    typename Particle<T>::size_type i_;
 }; // class ParticleIndexBase
 
 /// \brief ParticleIndex base class trait
@@ -75,36 +77,48 @@ MCKL_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 
 /// \brief A thin wrapper over a complete Particle
 /// \ingroup Core
+///
+/// \details
+/// This class also serves as an random access iterator
 template <typename T>
 class ParticleIndex final : public ParticleIndexBaseType<T>
 {
     public:
-    using particle_type = Particle<T>;
-    using size_type = typename particle_type::size_type;
-    using difference_type = std::make_signed_t<size_type>;
-    using rng_type = typename particle_type::rng_type;
+    using difference_type =
+        std::make_signed_t<typename Particle<T>::size_type>;
+    using value_type = ParticleIndex;
+    using pointer = ParticleIndex *;
+    using reference = ParticleIndex &;
+    using iterator_category = std::random_access_iterator_tag;
 
-    ParticleIndex(size_type i, particle_type *pptr)
+    ParticleIndex() = default;
+
+    ParticleIndex(typename Particle<T>::size_type i, Particle<T> *pptr)
         : ParticleIndexBaseType<T>(i, pptr)
     {
     }
 
+    /// \brief Dereference operator returns a reference to the index itself
+    ParticleIndex &operator*() noexcept { return *this; }
+
+    /// \brief Dereference operator returns a reference to the index itself
+    const ParticleIndex &operator*() const noexcept { return *this; }
+
+    /// \brief Member selection operator returns a pointer the index itself
+    ParticleIndex *operator->() noexcept { return this; }
+
+    /// \brief Member selection operator returns a pointer the index itself
+    const ParticleIndex *operator->() const noexcept { return this; }
+
+    /// \brief Subscript operator return a new index
     template <typename IntType>
     ParticleIndex operator[](IntType n)
     {
-        return ParticleIndex(
-            static_cast<size_type>(static_cast<difference_type>(this->i()) +
-                static_cast<difference_type>(n)),
+        return ParticleIndex(static_cast<typename Particle<T>::size_type>(
+                                 static_cast<difference_type>(this->i()) +
+                                 static_cast<difference_type>(n)),
             this->particle_ptr());
     }
-
-    ParticleIndex &operator*() { return *this; }
-
-    const ParticleIndex &operator*() const { return *this; }
-
-    ParticleIndex *operator->() { return this; }
-
-    const ParticleIndex *operator->() const { return this; }
 
     friend bool operator==(
         const ParticleIndex &idx1, const ParticleIndex &idx2)
@@ -119,6 +133,10 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     friend bool operator!=(
         const ParticleIndex &idx1, const ParticleIndex &idx2)
     {
+        runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
+            "Compare two ParticleIndex objects from two different particle "
+            "systems");
+
         return idx1.i() != idx2.i();
     }
 
@@ -162,30 +180,26 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
 
     friend ParticleIndex &operator++(ParticleIndex &idx)
     {
-        idx = ParticleIndex(idx.i() + 1, idx.particle_ptr());
-
-        return idx;
+        return idx = ParticleIndex(idx.particle_ptr(), ++idx.i());
     }
 
     friend ParticleIndex operator++(ParticleIndex &idx, int)
     {
         ParticleIndex ret(idx);
-        idx = ParticleIndex(idx.i() + 1, idx.particle_ptr());
+        ++idx;
 
         return ret;
     }
 
     friend ParticleIndex &operator--(ParticleIndex &idx)
     {
-        idx = ParticleIndex(idx.i() - 1, idx.particle_ptr());
-
-        return idx;
+        return idx = ParticleIndex(idx.particle_ptr(), --idx.i());
     }
 
     friend ParticleIndex operator--(ParticleIndex &idx, int)
     {
         ParticleIndex ret(idx);
-        idx = ParticleIndex(idx.i() - 1, idx.particle_ptr());
+        --idx;
 
         return ret;
     }
@@ -194,9 +208,9 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     friend ParticleIndex operator+(const ParticleIndex &idx, IntType n)
     {
         return ParticleIndex(
-            static_cast<size_type>(static_cast<difference_type>(idx.i()) +
-                static_cast<difference_type>(n)),
-            idx.particle_ptr());
+            idx.particle_ptr(), static_cast<typename Particle<T>::size_type>(
+                                    static_cast<difference_type>(idx.i()) +
+                                    static_cast<difference_type>(n)));
     }
 
     template <typename IntType>
@@ -214,115 +228,47 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     template <typename IntType>
     friend ParticleIndex &operator+=(ParticleIndex &idx, IntType n)
     {
-        idx = idx + n;
-
-        return idx;
+        return idx = idx + n;
     }
 
     template <typename IntType>
     friend ParticleIndex &operator-=(ParticleIndex &idx, IntType n)
     {
-        idx = idx - n;
-
-        return idx;
+        return idx = idx - n;
     }
 
     friend difference_type operator-(
         const ParticleIndex &idx1, const ParticleIndex &idx2)
     {
         runtime_assert(idx1.particle_ptr() == idx2.particle_ptr(),
-            "Substract two ParticleIndex objects from two different particle "
-            "systems");
+            "Substract two ParticleIndex objects from two different "
+            "particle systems");
 
         return static_cast<difference_type>(idx1.i()) -
             static_cast<difference_type>(idx2.i());
     }
 }; // class ParticleIndex
 
-/// \brief A subset of particles
+/// \brief Range of ParticleIndex
 /// \ingroup Core
 template <typename T>
-class ParticleRange final
+class ParticleRange : public Range<ParticleIndex<T>>
 {
     public:
-    using particle_type = Particle<T>;
-    using size_type = typename particle_type::size_type;
+    using Range<ParticleIndex<T>>::Range;
 
-    /// \brief Construct a new particle range
-    ///
-    /// \param ibegin Integral index of the first particle
-    /// \param iend Integral index of one pass the last particle
-    /// \param pptr A pointer to the Particle system
-    /// \param grainsize The grain size. A particle range is dvisible if its
-    /// size is larger thant he grainsize.
-    ParticleRange(size_type ibegin, size_type iend, particle_type *pptr,
-        size_type grainsize = 1)
-        : pptr_(pptr), ibegin_(ibegin), iend_(iend), grainsize_(grainsize)
+    Particle<T> &particle() const { return this->begin()->particle(); }
+
+    Particle<T> *particle_ptr() const { return this->begin()->particle_ptr(); }
+
+    typename Particle<T>::size_type ibegin() const
     {
-        runtime_assert(!internal::is_negative(ibegin) && ibegin < iend &&
-                iend <= pptr->size() && grainsize > 0,
-            "**ParticleRange** constructed with invalid arguments");
+        return this->begin()->i();
     }
 
-    template <typename SplitType>
-    ParticleRange(ParticleRange &other, SplitType)
-        : pptr_(other.pptr_)
-        , ibegin_((other.ibegin_ + other.iend_) / 2)
-        , iend_(other.iend_)
-        , grainsize_(other.grainsize_)
-    {
-        other.iend_ = ibegin_;
-    }
-
-    /// \brief Get a reference to the particle system
-    particle_type &particle() const { return *pptr_; }
-
-    /// \brief Get a pointer to the particle system
-    particle_type *particle_ptr() const { return pptr_; }
-
-    /// \brief The size of this range
-    size_type size() const { return iend_ - ibegin_; }
-
-    /// \brief Integral index of the first particle
-    size_type ibegin() const { return ibegin_; }
-
-    /// \brief Integral index of one pass the last particle
-    size_type iend() const { return iend_; }
-
-    /// \brief Alias to `ibegin`
-    [[deprecated("use **ibegin** instead")]] size_type first() const
-    {
-        return ibegin();
-    }
-
-    /// \brief Alias to `iend`
-    [[deprecated("use **iend** instead")]] size_type last() const
-    {
-        return iend();
-    }
-
-    /// \brief Get a `ParticleIndex<T>` object for the first particle in range
-    ParticleIndex<T> begin() const { return pptr_->operator[](ibegin_); }
-
-    /// \brief Get a `ParticleIndex<T>` object for one pass the last particle
-    /// in range
-    ParticleIndex<T> end() const { return pptr_->operator[](iend_); }
-
-    /// \brief If the range is empty
-    bool empty() const { return ibegin_ == iend_; }
-
-    /// \brief If the range can be divided into two sub-ranges.
-    bool is_divisible() const { return size() > grainsize_; }
-
-    private:
-    particle_type *pptr_;
-    size_type ibegin_;
-    size_type iend_;
-    size_type grainsize_;
+    typename Particle<T>::size_type iend() const { return this->end()->i(); }
 }; // class ParticleRange
 
-/// \brief Particle class representing the whole particle set
-/// \ingroup Core
 template <typename T>
 class Particle
 {
@@ -415,22 +361,23 @@ class Particle
     /// \brief Get a ParticleIndex<T> object for the i-th particle
     ParticleIndex<T> operator[](size_type i)
     {
-        return ParticleIndex<T>(i, this);
+        return ParticleIndex<T>(this, i);
     }
 
-    /// \brief Get a ParticleIndex<T> object for the i-th particle
+    /// \brief Alias to `operator[]`
     ParticleIndex<T> operator()(size_type i) { return operator[](i); }
+
+    /// \brief Alias to `operator[]`
+    ParticleIndex<T> index(size_type i) { return operator[](i); }
 
     /// \brief Get a ParticleIndex<T> object for the i-th particle
     ParticleIndex<T> at(size_type i)
     {
-        runtime_assert(i <= size(), "**Particle::at** index out of range");
+        runtime_assert<std::out_of_range>(
+            i <= size(), "**Particle::at** index out of range");
 
         return operator[](i);
     }
-
-    /// \brief Alias to `operator[]`
-    ParticleIndex<T> index(size_type i) { return operator[](i); }
 
     /// \brief Get a ParticleIndex<T> object for the first particle
     ParticleIndex<T> begin() { return operator[](0); }
@@ -438,17 +385,17 @@ class Particle
     /// \brief Get a ParticleIndex<T> object for one pass the last particle
     ParticleIndex<T> end() { return operator[](size_); }
 
-    /// \brief Get a ParticleRange<T> object of a given range
+    /// \brief Get a Range<ParticleItrator<T>> object of all particles
+    ParticleRange<T> range(size_type grainsize = 1)
+    {
+        return ParticleRange<T>(begin(), end(), grainsize);
+    }
+
+    /// \brief Get a Range<ParticleIndex<T>> object of a given range
     ParticleRange<T> range(
         size_type ibegin, size_type iend, size_type grainsize = 1)
     {
-        return ParticleRange<T>(ibegin, iend, this, grainsize);
-    }
-
-    /// \brief Get a ParticleRange<T> object of all particles
-    ParticleRange<T> range(size_type grainsize = 1)
-    {
-        return ParticleRange<T>(0, size(), this, grainsize);
+        return ParticleRange<T>(index(ibegin), index(iend), grainsize);
     }
 
     private:

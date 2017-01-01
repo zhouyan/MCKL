@@ -32,6 +32,7 @@
 #ifndef MCKL_SMP_BACKEND_STD_HPP
 #define MCKL_SMP_BACKEND_STD_HPP
 
+#include <mckl/core/iterator.hpp>
 #include <mckl/smp/backend_base.hpp>
 #include <future>
 #include <thread>
@@ -68,28 +69,22 @@ namespace internal
 {
 
 template <typename IntType>
-inline void backend_std_range(
-    IntType N, mckl::Vector<IntType> &first, mckl::Vector<IntType> &last)
+inline mckl::Vector<Range<IntType>> backend_std_range(IntType N)
 {
-    first.clear();
-    last.clear();
     const IntType np =
         static_cast<IntType>(std::max(1U, BackendSTD::instance().np()));
-    if (np == 1) {
-        first.push_back(0);
-        last.push_back(N);
-        return;
-    }
-
     const IntType m = N / np;
     const IntType r = N % np;
+
     IntType b = 0;
+    mckl::Vector<Range<IntType>> range;
     for (IntType id = 0; id != np; ++id) {
         const IntType n = m + (id < r ? 1 : 0);
-        first.push_back(b);
-        last.push_back(b + n);
+        range.emplace_back(b, b + n);
         b += n;
     }
+
+    return range;
 }
 
 } // namespace mckl::internal
@@ -117,19 +112,13 @@ class SMCSamplerEvalSMP<T, Derived, BackendSTD>
     template <typename... Args>
     void run(std::size_t iter, Particle<T> &particle, std::size_t, Args &&...)
     {
-        using size_type = typename Particle<T>::size_type;
-
         this->eval_first(iter, particle);
-        mckl::Vector<size_type> first;
-        mckl::Vector<size_type> last;
-        internal::backend_std_range(particle.size(), first, last);
         mckl::Vector<std::future<void>> task_group;
-        for (std::size_t i = 0; i != first.size(); ++i) {
-            const size_type b = first[i];
-            const size_type e = last[i];
+        for (auto range : internal::backend_std_range(particle.size())) {
             task_group.push_back(std::async(
-                std::launch::async, [this, iter, &particle, b, e]() {
-                    this->eval_range(iter, particle.range(b, e));
+                std::launch::async, [this, iter, &particle, range]() {
+                    this->eval_range(
+                        iter, particle.range(range.begin(), range.end()));
                 }));
         }
         for (auto &task : task_group)
@@ -164,20 +153,14 @@ class SMCEstimatorEvalSMP<T, Derived, BackendSTD>
     void run(std::size_t iter, std::size_t dim, Particle<T> &particle,
         double *r, std::size_t, Args &&...)
     {
-        using size_type = typename Particle<T>::size_type;
-
         this->eval_first(iter, particle);
-        mckl::Vector<size_type> first;
-        mckl::Vector<size_type> last;
-        internal::backend_std_range(particle.size(), first, last);
         mckl::Vector<std::future<void>> task_group;
-        for (std::size_t i = 0; i != first.size(); ++i) {
-            const size_type b = first[i];
-            const size_type e = last[i];
+        for (auto range : internal::backend_std_range(particle.size())) {
             task_group.push_back(std::async(
-                std::launch::async, [this, iter, dim, &particle, r, b, e]() {
-                    this->eval_range(iter, dim, particle.range(b, e),
-                        r + static_cast<std::size_t>(b) * dim);
+                std::launch::async, [this, iter, dim, &particle, r, range]() {
+                    this->eval_range(iter, dim,
+                        particle.range(range.begin(), range.end()),
+                        r + static_cast<std::size_t>(range.begin()) * dim);
                 }));
         }
         for (auto &task : task_group)
