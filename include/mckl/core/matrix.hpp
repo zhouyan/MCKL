@@ -164,17 +164,6 @@ class Matrix
     /// \brief Copy constructor
     Matrix(const Matrix &) = default;
 
-    /// \brief Copy constructor using a matrix with a different layout
-    Matrix(const transpose_type &other)
-        : data_(other.nrow() * other.ncol())
-        , nrow_(other.nrow())
-        , ncol_(other.ncol())
-    {
-        for (std::size_t i = 0; i != nrow_; ++i)
-            for (std::size_t j = 0; j != ncol_; ++j)
-                operator()(i, j) = other(i, j);
-    }
-
     /// \brief Move constructor
     Matrix(Matrix &&other) noexcept(
         std::is_nothrow_move_constructible<Vector<T, Alloc>>::value)
@@ -184,30 +173,8 @@ class Matrix
         other.ncol_ = 0;
     }
 
-    /// \brief Move constructor using a matrix with a different layout
-    Matrix(transpose_type &&other)
-        : data_(other.nrow() * other.ncol())
-        , nrow_(other.nrow())
-        , ncol_(other.ncol())
-    {
-        for (std::size_t i = 0; i != nrow_; ++i)
-            for (std::size_t j = 0; j != ncol_; ++j)
-                operator()(i, j) = std::move(other(i, j));
-    }
-
     /// \brief Copy assignment operator
     Matrix &operator=(const Matrix &) = default;
-
-    /// \brief Copy assignment operator using a matrix with a different layout
-    Matrix &operator=(const transpose_type &other)
-    {
-        resize(other.nrow_, other.ncol_);
-        for (std::size_t i = 0; i != nrow_; ++i)
-            for (std::size_t j = 0; j != ncol_; ++j)
-                operator()(i, j) = other(i, j);
-
-        return *this;
-    }
 
     /// \brief Move assignment operator
     Matrix &operator=(Matrix &&other) noexcept(
@@ -222,15 +189,15 @@ class Matrix
         return *this;
     }
 
-    /// \brief Move assignment operator using a matrix with a different layout
-    Matrix &operator=(transpose_type &&other)
+    explicit operator transpose_type() const
     {
-        resize(other.nrow_, other.ncol_);
-        for (std::size_t i = 0; i != nrow_; ++i)
-            for (std::size_t j = 0; j != ncol_; ++j)
-                operator()(i, j) = std::move(other(i, j));
+        transpose_type mat(nrow_, ncol_);
 
-        return *this;
+        for (size_type i = 0; i != nrow_; ++i)
+            for (size_type j = 0; j != ncol_; ++j)
+                mat(i, j) = operator()(i, j);
+
+        return mat;
     }
 
     /// \brief Iterator to the upper-left corner of the matrix

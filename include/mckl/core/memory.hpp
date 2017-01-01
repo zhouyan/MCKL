@@ -74,10 +74,10 @@
 /// \brief Default allocation type
 /// \ingroup Config
 #ifndef MCKL_MEMORY_TYPE
-#if MCKL_USE_JEMALLOC
-#define MCKL_MEMORY_TYPE ::mckl::MemoryJEM
-#elif MCKL_USE_TBB_MALLOC
+#if MCKL_USE_TBB_MALLOC
 #define MCKL_MEMORY_TYPE ::mckl::MemoryTBB
+#elif MCKL_USE_JEMALLOC
+#define MCKL_MEMORY_TYPE ::mckl::MemoryJEM
 #elif MCKL_HAS_POSIX || defined(MCKL_MSVC)
 #define MCKL_MEMORY_TYPE ::mckl::MemorySYS
 #else
@@ -92,7 +92,7 @@ namespace internal
 {
 
 template <std::size_t Alignment, typename UIntType>
-inline std::size_t alignment_round0(UIntType n)
+inline constexpr std::size_t alignment_round0(UIntType n)
 {
     static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
         "**alignment_round0** used with Alignment other than a power of two "
@@ -112,7 +112,7 @@ inline std::size_t alignment_round0(UIntType n)
 }
 
 template <std::size_t Alignment, typename UIntType>
-inline std::size_t alignment_round(UIntType n)
+inline constexpr std::size_t alignment_round(UIntType n)
 {
     return n == 0 ? Alignment : alignment_round0<Alignment>(n);
 }
@@ -120,12 +120,13 @@ inline std::size_t alignment_round(UIntType n)
 } // namespace mckl::internal
 
 /// \brief Alignment of types
+/// \ingroup Core
 ///
 /// \details
-/// * For scalar types, define the maximum of `MCKL_ALIGNMENT` and `alignof(T)`
-/// as `value`
-/// * For all other types, define the maximum of `MCKL_MINIMUM_ALIGNMENT` and
-/// `alignof(T)` as `value`.
+/// * For scalar types, defined to the maximum of `MCKL_ALIGNMENT` and
+/// `alignof(T)`
+/// * For all other types, define to the maximum of `MCKL_MINIMUM_ALIGNMENT`
+/// and `alignof(T)` as `value`.
 template <typename T>
 constexpr std::size_t AlignOf = std::integral_constant<std::size_t,
     std::is_scalar<T>::value ?
@@ -135,6 +136,8 @@ constexpr std::size_t AlignOf = std::integral_constant<std::size_t,
 
 /// \brief Memory allocation using the standard library
 /// \ingroup Core
+///
+/// \tparam Alignment The alignment of the allocated memory
 template <std::size_t Alignment>
 class MemorySTD
 {
@@ -180,12 +183,10 @@ class MemorySTD
 
 #if MCKL_HAS_POSIX
 
-/// \brief Aligned memory using native system aligned memory allocation
+/// \brief Memory allocation using native system functions
 /// \ingroup Core
 ///
-/// \details
-/// This class use `posix_memalign` and `free` on POSIX systems (Mac OS X,
-/// Linux, etc.) and `_aligned_malloc` and `_aligned_free` on Windows.
+/// \tparam Alignment The alignment of the allocated memory
 template <std::size_t Alignment>
 class MemorySYS
 {
@@ -253,8 +254,10 @@ class MemorySYS
 
 #if MCKL_HAS_JEMALLOC
 
-/// \brief Aligned memory using jemalloc
+/// \brief Memory allocation using jemalloc
 /// \ingroup Core
+///
+/// \tparam Alignment The alignment of the allocated memory
 template <std::size_t Alignment>
 class MemoryJEM
 {
@@ -280,15 +283,16 @@ class MemoryJEM
         if (ptr != nullptr)
             ::je_free(ptr);
     }
-}; // class MemoryTBB
+}; // class MemoryJEM
 
 #endif // MCKL_HAS_JEMALLOC
 
 #if MCKL_HAS_TBB
 
-/// \brief Aligned memory using Intel TBB `scalable_aligned_malloc` and
-/// `scalable_aligned_free`.
+/// \brief Memory allocation using Intel TBB
 /// \ingroup Core
+///
+/// \tparam Alignment The alignment of the allocated memory
 template <std::size_t Alignment>
 class MemoryTBB
 {
@@ -318,22 +322,34 @@ class MemoryTBB
 
 #endif // MCKL_HAS_TBB
 
-/// \brief Default memory allocaiton and deallocation class
+/// \brief Default memory allocation policy
 /// \ingroup Core
+///
+/// \tparam Alignment The alignment of the allocated memory
+///
+/// \details
+/// This template is aliased to the configuration macro  `MCKL_MEMORY_TYPE`.
+/// The default precedence is as the following,
+/// * MemoryJEM
+/// * MemoryTBB
+/// * MemorySYS
+/// * MemorySTD
 template <std::size_t Alignment>
 using Memory = MCKL_MEMORY_TYPE<Alignment>;
 
-/// \brief Allocator
+/// \brief Standard library compatible allocator with policies
 /// \ingroup Core
 ///
 /// \tparam T The value type
-/// \tparam Mem The memory allocation and deallocation class.
+/// \tparam Mem The memory allocation policy
+///
+/// \sa Allocator<void, Mem>
+/// \sa Allocator<const void, Mem>
+/// \sa [std::allocator](http://en.cppreference.com/w/cpp/memory/allocator)
 template <typename T, typename Mem = Memory<AlignOf<T>>>
 class Allocator : public std::allocator<T>
 {
     public:
-    using memory_type = Mem;
-
     template <typename U>
     class rebind
     {
@@ -342,16 +358,6 @@ class Allocator : public std::allocator<T>
     };
 
     Allocator() = default;
-    Allocator(const Allocator &) = default;
-    Allocator(Allocator &&) = default;
-    Allocator &operator=(const Allocator &) = default;
-    Allocator &operator=(Allocator &&) = default;
-
-    template <typename U>
-    Allocator(const Allocator<U, Mem> &other) noexcept
-        : std::allocator<T>(static_cast<std::allocator<U>>(other))
-    {
-    }
 
     template <typename U>
     Allocator(Allocator<U, Mem> &&other) noexcept
@@ -365,7 +371,7 @@ class Allocator : public std::allocator<T>
         if (m < n)
             throw std::bad_alloc();
 
-        T *ptr = static_cast<T *>(memory_type::allocate(m, hint));
+        T *ptr = static_cast<T *>(Mem::allocate(m, hint));
         if (ptr == nullptr)
             throw std::bad_alloc();
 
@@ -373,36 +379,9 @@ class Allocator : public std::allocator<T>
     }
 
     void deallocate(T *ptr, std::size_t size = 0) noexcept(
-        noexcept(memory_type::deallocate(ptr, size)))
+        noexcept(Mem::deallocate(ptr, size)))
     {
-        memory_type::deallocate(ptr, size);
-    }
-
-    template <typename U>
-    void construct(U *ptr) noexcept(
-        std::is_nothrow_default_constructible<U>::value)
-    {
-        construct_dispatch(ptr, std::is_scalar<U>());
-    }
-
-    template <typename U, typename... Args>
-    void construct(U *ptr, Args &&... args) noexcept(
-        std::is_nothrow_constructible<U, Args...>::value)
-    {
-        ::new (static_cast<void *>(ptr)) U(std::forward<Args>(args)...);
-    }
-
-    private:
-    template <typename U>
-    void construct_dispatch(U *, std::true_type) noexcept
-    {
-    }
-
-    template <typename U>
-    void construct_dispatch(U *ptr, std::false_type) noexcept(
-        std::is_nothrow_default_constructible<U>::value)
-    {
-        ::new (static_cast<void *>(ptr)) U;
+        Mem::deallocate(ptr, size);
     }
 }; // class Allocator
 
@@ -415,7 +394,6 @@ class Allocator<void, Mem>
     using const_pointer = const void *;
     using propagate_on_container_move_assignment = std::true_type;
     using is_always_equal = std::true_type;
-    using memory_type = Mem;
 
     template <typename U>
     class rebind
@@ -434,7 +412,6 @@ class Allocator<const void, Mem>
     using const_pointer = const void *;
     using propagate_on_container_move_assignment = std::true_type;
     using is_always_equal = std::true_type;
-    using memory_type = Mem;
 
     template <typename U>
     class rebind
@@ -444,6 +421,7 @@ class Allocator<const void, Mem>
     };
 }; // class Allocator
 
+/// \relates Allocator
 template <typename T1, typename T2, typename Mem1, typename Mem2>
 inline constexpr bool operator==(
     const Allocator<T1, Mem1> &, const Allocator<T2, Mem2> &)
@@ -451,6 +429,7 @@ inline constexpr bool operator==(
     return std::is_same<Mem1, Mem2>::value;
 }
 
+/// \relates Allocator
 template <typename T1, typename T2, typename Mem1, typename Mem2>
 inline constexpr bool operator!=(
     const Allocator<T1, Mem1> &, const Allocator<T2, Mem2> &)
@@ -458,7 +437,7 @@ inline constexpr bool operator!=(
     return !std::is_same<Mem1, Mem2>::value;
 }
 
-/// \brief std::vector with Allocator as default allocator
+/// \brief std::vector with Allocator as the default allocator
 /// \ingroup Core
 template <typename T, typename Alloc = Allocator<T>>
 using Vector = std::vector<T, Alloc>;

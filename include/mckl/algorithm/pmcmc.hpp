@@ -86,6 +86,7 @@ class PMCMCMutation
     using eval_type =
         std::function<double(typename Particle<T>::rng_type &, param_type &)>;
     using prior_type = std::function<double(const param_type &)>;
+    using pf_type = SMCSampler<T, U>;
 
     template <typename Prior, typename... Args>
     PMCMCMutation(std::size_t N, std::size_t M, Prior &&prior, Args &&... args)
@@ -99,9 +100,9 @@ class PMCMCMutation
         pf_.reset();
     }
 
-    SMCSampler<T, U> &pf() { return pf_; }
+    pf_type &pf() { return pf_; }
 
-    SMCSampler<T, U> &pf() const { return pf_; }
+    pf_type &pf() const { return pf_; }
 
     PMCMCMutation<Param, T, U> clone() const
     {
@@ -164,7 +165,7 @@ class PMCMCMutation
     private:
     std::size_t M_;
     prior_type prior_;
-    SMCSampler<T> pf_;
+    pf_type pf_;
     Vector<eval_type> eval_;
 }; // class PMCMCMutation
 
