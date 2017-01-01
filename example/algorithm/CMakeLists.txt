@@ -38,7 +38,7 @@ mckl_add_test(algorithm resample_transform)
 mckl_add_test(algorithm resample_u01_sequence)
 
 mckl_add_test(algorithm gibbs)
-mckl_add_test(algorithm pf)
+mckl_add_test(algorithm pf "OpenMP")
 mckl_add_test(algorithm pmcmc)
 
 mckl_add_plot(algorithm gibbs)

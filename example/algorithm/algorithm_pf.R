@@ -31,12 +31,32 @@
 
 library(ggplot2)
 
+backend <- c("SEQ", "STD", "OMP", "TBB")
+
 obs <- read.table("algorithm_pf.data", header = FALSE)
-est <- read.table("algorithm_pf.save", header = FALSE)
-dat <- data.frame(X = c(est[,5], obs[,1]), Y = c(est[,6], obs[,2]))
-dat[["Source"]] <- rep(c("Estimates", "Observation"), each = dim(obs)[1])
+obs <- data.frame(X = obs[,1], Y = obs[,2])
+obs$Source <- "Observation"
+
+dat <- data.frame()
+for (bkd in backend) {
+    savefile <- paste0("algorithm_pf_", bkd, ".save")
+    if (file.exists(savefile)) {
+        d <- read.table(savefile, header = FALSE)
+        sel <- data.frame(X = d[,1], Y = d[,2])
+        res <- data.frame(X = d[,3], Y = d[,4])
+        mul <- data.frame(X = d[,5], Y = d[,6])
+        sel$Source <- "Selection"
+        res$Source <- "Resample"
+        mul$Source <- "Mutation"
+        d <- rbind(sel, res, mul, obs)
+        d$Backend <- bkd
+        dat <- rbind(dat, d)
+    }
+}
+
 plt <- qplot(x = X, y = Y, data = dat, geom = "path")
 plt <- plt + aes(group = Source, color = Source, linetype = Source)
+plt <- plt + facet_wrap(~ Backend)
 plt <- plt + theme_bw()
 plt <- plt + theme(legend.position = "top")
 plt <- plt + theme(legend.title = element_blank())

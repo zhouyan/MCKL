@@ -34,6 +34,8 @@
 
 #include <mckl/algorithm/smc.hpp>
 #include <mckl/random/normal_distribution.hpp>
+#include <mckl/smp.hpp>
+#include <mckl/utility/stop_watch.hpp>
 
 using AlgorithmPFBase = mckl::StateMatrix<mckl::ColMajor, 4, double>;
 
@@ -61,66 +63,177 @@ class AlgorithmPF : public AlgorithmPFBase
     mckl::Vector<double> y_;
 }; // class AlgorithmPF
 
-class AlgorithmPFSelection
+template <typename Backend>
+class AlgorithmPFSelection : public mckl::SMCSamplerEvalSMP<AlgorithmPF,
+                                 AlgorithmPFSelection<Backend>, Backend>
 {
     public:
     void operator()(std::size_t iter, mckl::Particle<AlgorithmPF> &particle)
+    {
+        this->run(iter, particle, 1000);
+    }
+
+    void eval_first(std::size_t, mckl::Particle<AlgorithmPF> &particle)
+    {
+        w_.resize(particle.size());
+        v_.resize(particle.size());
+    }
+
+    void eval_last(std::size_t, mckl::Particle<AlgorithmPF> &particle)
+    {
+        particle.weight().add_log(w_.data());
+    }
+
+    void eval_range(
+        std::size_t iter, const mckl::ParticleRange<AlgorithmPF> &range)
     {
         constexpr double scale = 10;
         constexpr double nuinv = 0.1;
         constexpr double coeff = -5.5;
         constexpr double delta = 0.1;
 
-        auto &rng = particle.rng();
-        const std::size_t N = particle.size();
-        const std::size_t M = N * 2;
+        auto rng = range.begin().rng();
 
-        w_.resize(M);
-        double *const w = w_.data();
-        double *const p = particle.state().col_data(0);
-        double *const v = particle.state().col_data(2);
+        const std::size_t N = range.size();
+        double *const w = w_.data() + range.ibegin();
+        double *const v = v_.data() + range.ibegin();
+        double *const p =
+            range.particle().state().col_data(0) + range.ibegin();
+        double *const q =
+            range.particle().state().col_data(1) + range.ibegin();
+        double *const s =
+            range.particle().state().col_data(2) + range.ibegin();
+        double *const t =
+            range.particle().state().col_data(3) + range.ibegin();
 
         if (iter == 0) {
             mckl::NormalDistribution<double> rp(0, 2);
-            mckl::rand(rng, rp, M, p);
-
             mckl::NormalDistribution<double> rv(0, 1);
-            mckl::rand(rng, rv, M, v);
+
+            mckl::rand(rng, rp, N, p);
+            mckl::rand(rng, rp, N, q);
+            mckl::rand(rng, rv, N, s);
+            mckl::rand(rng, rv, N, t);
         } else {
             mckl::NormalDistribution<double> rp(0, std::sqrt(0.02));
-            mckl::rand(rng, rp, M, w);
-            mckl::muladd(M, delta, v, w, w);
-            mckl::add(M, w, p, p);
-
             mckl::NormalDistribution<double> rv(0, std::sqrt(0.001));
-            mckl::rand(rng, rv, M, w);
-            mckl::add(M, w, v, v);
+
+            mckl::rand(rng, rp, N, w);
+            mckl::muladd(N, delta, s, w, w);
+            mckl::add(N, w, p, p);
+            mckl::rand(rng, rv, N, w);
+            mckl::add(N, w, s, s);
+
+            mckl::rand(rng, rp, N, w);
+            mckl::muladd(N, delta, t, w, w);
+            mckl::add(N, w, q, q);
+            mckl::rand(rng, rv, N, w);
+            mckl::add(N, w, t, t);
         }
 
-        mckl::sub(N, p + 0, particle.state().x(iter), w + 0);
-        mckl::sub(N, p + N, particle.state().y(iter), w + N);
-        mckl::mul(M, scale, w, w);
-        mckl::sqr(M, w, w);
-        mckl::mul(M, w, nuinv, w);
-        mckl::log1p(M, w, w);
-        mckl::add(N, w, w + N, w);
+        mckl::sub(N, p, range.particle().state().x(iter), w);
+        mckl::mul(N, scale, w, w);
+        mckl::sqr(N, w, w);
+        mckl::mul(N, w, nuinv, w);
+        mckl::log1p(N, w, w);
+
+        mckl::sub(N, q, range.particle().state().y(iter), v);
+        mckl::mul(N, scale, v, v);
+        mckl::sqr(N, v, v);
+        mckl::mul(N, v, nuinv, v);
+        mckl::log1p(N, v, v);
+
+        mckl::add(N, w, v, w);
         mckl::mul(N, coeff, w, w);
-        particle.weight().add_log(w);
+
+        range.begin().rng() = rng;
     }
 
     private:
     mckl::Vector<double> w_;
+    mckl::Vector<double> v_;
 }; // AlgorithmPFSelection
 
-class AlgorithmPFPos
+template <typename Backend>
+class AlgorithmPFPos : public mckl::SMCEstimatorEvalSMP<AlgorithmPF,
+                           AlgorithmPFPos<Backend>, Backend>
 {
     public:
-    void operator()(std::size_t, std::size_t,
-        mckl::Particle<AlgorithmPF> &particle, double *r)
+    void eval_each(std::size_t, std::size_t,
+        mckl::ParticleIndex<AlgorithmPF> idx, double *r)
     {
-        std::memcpy(
-            r, particle.state().data(), sizeof(double) * particle.size() * 2);
+        r[0] = idx(0);
+        r[1] = idx(1);
     }
 }; // class AlgorithmPFPos
+
+template <typename Backend>
+inline std::string algorithm_pf_name();
+
+template <>
+inline std::string algorithm_pf_name<mckl::BackendSEQ>()
+{
+    return "SEQ";
+}
+
+template <>
+inline std::string algorithm_pf_name<mckl::BackendSTD>()
+{
+    return "STD";
+}
+
+template <>
+inline std::string algorithm_pf_name<mckl::BackendOMP>()
+{
+    return "OMP";
+}
+
+template <>
+inline std::string algorithm_pf_name<mckl::BackendTBB>()
+{
+    return "TBB";
+}
+
+template <typename Backend>
+inline void algorithm_pf(std::size_t N)
+{
+    mckl::SMCSampler<AlgorithmPF> sampler(N);
+    sampler.selection(AlgorithmPFSelection<Backend>());
+    sampler.resample(mckl::Stratified);
+    sampler.resample_threshold(0.5);
+    sampler.selection_estimator(
+        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos<Backend>()));
+    sampler.resample_estimator(
+        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos<Backend>()));
+    sampler.mutation_estimator(
+        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos<Backend>()));
+
+    sampler.iterate(sampler.particle().state().n());
+    sampler.clear();
+
+    mckl::StopWatch watch;
+    watch.start();
+    sampler.iterate(sampler.particle().state().n());
+    watch.stop();
+
+    const std::string name = algorithm_pf_name<Backend>();
+    std::cout << name << ": " << watch.seconds() << 's' << std::endl;
+
+    std::ofstream save("algorithm_pf_" + name + ".save");
+    save << sampler << std::endl;
+    save.close();
+}
+
+inline void algorithm_pf(std::size_t N)
+{
+    std::cout << std::fixed << std::setprecision(3);
+
+    algorithm_pf<mckl::BackendSEQ>(N);
+    algorithm_pf<mckl::BackendSTD>(N);
+    algorithm_pf<mckl::BackendOMP>(N);
+#if MCKL_HAS_TBB
+    algorithm_pf<mckl::BackendTBB>(N);
+#endif
+}
 
 #endif // MCKL_EXAMPLE_ALGORITHM_PF_HPP

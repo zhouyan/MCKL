@@ -68,20 +68,22 @@ class BackendSTD
 namespace internal
 {
 
-template <typename IntType>
-inline mckl::Vector<Range<IntType>> backend_std_range(IntType N)
+template <typename T>
+inline mckl::Vector<ParticleRange<T>> backend_std_range(Particle<T> &particle)
 {
-    const IntType np =
-        static_cast<IntType>(std::max(1U, BackendSTD::instance().np()));
-    const IntType m = N / np;
-    const IntType r = N % np;
+    const std::size_t N = static_cast<std::size_t>(particle.size());
+    const std::size_t n =
+        static_cast<std::size_t>(std::max(1U, BackendSTD::instance().np()));
+    const std::size_t m = N / n;
+    const std::size_t r = N % n;
 
-    IntType b = 0;
-    mckl::Vector<Range<IntType>> range;
-    for (IntType id = 0; id != np; ++id) {
-        const IntType n = m + (id < r ? 1 : 0);
-        range.emplace_back(b, b + n);
-        b += n;
+    ParticleIndex<T> b = particle.begin();
+    mckl::Vector<ParticleRange<T>> range;
+    range.reserve(n);
+    for (std::size_t i = 0; i != n; ++i) {
+        const std::size_t l = m + (i < r ? 1 : 0);
+        range.emplace_back(b, b + l);
+        b += l;
     }
 
     return range;
@@ -114,11 +116,10 @@ class SMCSamplerEvalSMP<T, Derived, BackendSTD>
     {
         this->eval_first(iter, particle);
         mckl::Vector<std::future<void>> task_group;
-        for (auto range : internal::backend_std_range(particle.size())) {
+        for (auto range : internal::backend_std_range(particle)) {
             task_group.push_back(std::async(
                 std::launch::async, [this, iter, &particle, range]() {
-                    this->eval_range(
-                        iter, particle.range(range.begin(), range.end()));
+                    this->eval_range(iter, range);
                 }));
         }
         for (auto &task : task_group)
@@ -155,12 +156,11 @@ class SMCEstimatorEvalSMP<T, Derived, BackendSTD>
     {
         this->eval_first(iter, particle);
         mckl::Vector<std::future<void>> task_group;
-        for (auto range : internal::backend_std_range(particle.size())) {
+        for (auto range : internal::backend_std_range(particle)) {
             task_group.push_back(std::async(
                 std::launch::async, [this, iter, dim, &particle, r, range]() {
-                    this->eval_range(iter, dim,
-                        particle.range(range.begin(), range.end()),
-                        r + static_cast<std::size_t>(range.begin()) * dim);
+                    this->eval_range(iter, dim, range,
+                        r + static_cast<std::size_t>(range.ibegin()) * dim);
                 }));
         }
         for (auto &task : task_group)

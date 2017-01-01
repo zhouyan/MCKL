@@ -31,25 +31,19 @@
 
 #include "algorithm_pf.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
-    constexpr std::size_t N = 1000;
+    --argc;
+    ++argv;
 
-    mckl::SMCSampler<AlgorithmPF> sampler(N);
-    sampler.selection(AlgorithmPFSelection());
-    sampler.resample(mckl::Multinomial);
-    sampler.resample_threshold(0.5);
-    sampler.selection_estimator(
-        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor));
-    sampler.resample_estimator(
-        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor));
-    sampler.mutation_estimator(
-        mckl::SMCEstimator<AlgorithmPF>(2, AlgorithmPFPos(), mckl::ColMajor));
-    sampler.iterate(sampler.particle().state().n());
+    std::size_t N = 100000;
+    if (argc > 0) {
+        N = static_cast<std::size_t>(std::atoi(*argv));
+        --argc;
+        ++argv;
+    }
 
-    std::ofstream save("algorithm_pf.save");
-    save << sampler << std::endl;
-    save.close();
+    algorithm_pf(N);
 
     return 0;
 }

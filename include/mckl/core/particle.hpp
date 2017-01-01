@@ -87,8 +87,8 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     using difference_type =
         std::make_signed_t<typename Particle<T>::size_type>;
     using value_type = ParticleIndex;
-    using pointer = ParticleIndex *;
-    using reference = ParticleIndex &;
+    using pointer = const ParticleIndex *;
+    using reference = const ParticleIndex &;
     using iterator_category = std::random_access_iterator_tag;
 
     ParticleIndex() = default;
@@ -99,16 +99,10 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     }
 
     /// \brief Dereference operator returns a reference to the index itself
-    ParticleIndex &operator*() noexcept { return *this; }
-
-    /// \brief Dereference operator returns a reference to the index itself
-    const ParticleIndex &operator*() const noexcept { return *this; }
+    reference operator*() const noexcept { return *this; }
 
     /// \brief Member selection operator returns a pointer the index itself
-    ParticleIndex *operator->() noexcept { return this; }
-
-    /// \brief Member selection operator returns a pointer the index itself
-    const ParticleIndex *operator->() const noexcept { return this; }
+    pointer operator->() const noexcept { return this; }
 
     /// \brief Subscript operator return a new index
     template <typename IntType>
@@ -180,7 +174,7 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
 
     friend ParticleIndex &operator++(ParticleIndex &idx)
     {
-        return idx = ParticleIndex(idx.particle_ptr(), ++idx.i());
+        return idx = ParticleIndex(idx.i() + 1, idx.particle_ptr());
     }
 
     friend ParticleIndex operator++(ParticleIndex &idx, int)
@@ -193,7 +187,7 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
 
     friend ParticleIndex &operator--(ParticleIndex &idx)
     {
-        return idx = ParticleIndex(idx.particle_ptr(), --idx.i());
+        return idx = ParticleIndex(idx.i() - 1, idx.particle_ptr());
     }
 
     friend ParticleIndex operator--(ParticleIndex &idx, int)
@@ -207,10 +201,10 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
     template <typename IntType>
     friend ParticleIndex operator+(const ParticleIndex &idx, IntType n)
     {
-        return ParticleIndex(
-            idx.particle_ptr(), static_cast<typename Particle<T>::size_type>(
-                                    static_cast<difference_type>(idx.i()) +
-                                    static_cast<difference_type>(n)));
+        return ParticleIndex(static_cast<typename Particle<T>::size_type>(
+                                 static_cast<difference_type>(idx.i()) +
+                                 static_cast<difference_type>(n)),
+            idx.particle_ptr());
     }
 
     template <typename IntType>
@@ -361,7 +355,7 @@ class Particle
     /// \brief Get a ParticleIndex<T> object for the i-th particle
     ParticleIndex<T> operator[](size_type i)
     {
-        return ParticleIndex<T>(this, i);
+        return ParticleIndex<T>(i, this);
     }
 
     /// \brief Alias to `operator[]`

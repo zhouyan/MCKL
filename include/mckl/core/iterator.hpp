@@ -153,7 +153,7 @@ class StrideIterator
     friend StrideIterator operator++(StrideIterator &iter, int) noexcept
     {
         StrideIterator ret(iter);
-        iter.iter_ += iter.stride_;
+        ++iter;
 
         return ret;
     }
@@ -170,7 +170,7 @@ class StrideIterator
     friend StrideIterator operator--(StrideIterator &iter, int) noexcept
     {
         StrideIterator ret(iter);
-        iter.iter_ -= iter.stride_;
+        --iter;
 
         return ret;
     }
@@ -367,7 +367,7 @@ class Range<InputIter, false>
     }
 
     /// \brief If the range is divisible, i.e., `grainsize() < size()`
-    bool is_divisible() const { grainsize_ < size(); }
+    bool is_divisible() const { return grainsize_ < size(); }
 
     /// \brief The lower bound of the range
     iterator begin() const { return begin_; }

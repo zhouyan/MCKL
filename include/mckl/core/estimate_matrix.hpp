@@ -61,6 +61,9 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     /// \brief The number of iterations stored in the estimate matrix
     std::size_t num_iter() const noexcept { return this->nrow(); }
 
+    /// \brief Clear the estimate matrix but preserve the dimension
+    void clear() { this->resize(0, dim()); }
+
     /// \brief Reserve space for specified *additional* number of iterations
     void reserve(std::size_t n)
     {
@@ -120,6 +123,9 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     }
 
     private:
+    using Matrix<RowMajor, T>::resize;
+    using Matrix<RowMajor, T>::push_back_col;
+
     template <typename InputIter>
     void insert_estimate_dispatch(
         size_type t, size_type i, InputIter first, std::true_type)
