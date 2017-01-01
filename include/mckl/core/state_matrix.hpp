@@ -80,14 +80,10 @@ class StateMatrix : public Matrix<Layout, T>
         }
 
         /// \brief `this->particle().state()(this->i(), j)`
-        value_type &operator[](size_type j) const
+        value_type &operator()(size_type j) const
         {
-            return this->particle().state()(
-                static_cast<size_type>(this->i()), j);
+            return this->particle().state()(this->i(), j);
         }
-
-        /// \brief `this->particle().state()(this->i(), j)`
-        value_type &operator()(size_type j) const { return operator[](j); }
 
         /// \brief `this->particle().state().at(this->i(), j)`
         value_type &at(size_type j) const
@@ -95,7 +91,7 @@ class StateMatrix : public Matrix<Layout, T>
             runtime_assert(
                 j < dim(), "**StateMatrix::at** index out of range");
 
-            return operator[](j);
+            return operator()(j);
         }
     }; // class particle_index_type
 
