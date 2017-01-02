@@ -61,6 +61,8 @@ class ParticleIndexBase
 
     Particle<T> *particle_ptr() const { return pptr_; }
 
+    T &state() const { return pptr_->state(); }
+
     typename Particle<T>::size_type i() const { return i_; }
 
     typename Particle<T>::rng_type &rng() const { return pptr_->rng(i_); }
@@ -274,8 +276,7 @@ class Particle
     using rng_type = typename rng_set_type::rng_type;
 
     Particle()
-        : size_(0)
-        , state_(0)
+        : state_(0)
         , weight_(0)
         , rng_set_(0)
         , rng_(Seed<rng_type>::instance().get())
@@ -284,8 +285,7 @@ class Particle
 
     template <typename... Args>
     explicit Particle(size_type N, Args &&... args)
-        : size_(N)
-        , state_(N, std::forward<Args>(args)...)
+        : state_(N, std::forward<Args>(args)...)
         , weight_(static_cast<SizeType<weight_type>>(N))
         , rng_set_(static_cast<SizeType<rng_set_type>>(N))
         , rng_(Seed<rng_type>::instance().get())
@@ -303,17 +303,22 @@ class Particle
     }
 
     /// \brief Number of particles
-    size_type size() const { return size_; }
+    size_type size() const { return state_.size(); }
 
     /// \brief Resize by selecting according to user supplied index vector
     ///
-    /// \param N The new sample size
+    /// \param n The new sample size
     /// \param index N-vector of parent indices
     template <typename InputIter>
-    void resize_by_index(size_type N, InputIter index)
+    void select(size_type n, InputIter index)
     {
-        resize_by_index(
-            N, index, std::is_convertible<InputIter, const size_type *>());
+        if (n != size()) {
+            weight_.resize(static_cast<SizeType<weight_type>>(n));
+            rng_set_.resize(static_cast<SizeType<rng_set_type>>(n));
+        } else {
+            weight_.set_equal();
+        }
+        state_.select(n, index);
     }
 
     /// \brief Read and write access to the state collection object
@@ -377,7 +382,7 @@ class Particle
     ParticleIndex<T> begin() { return operator[](0); }
 
     /// \brief Get a ParticleIndex<T> object for one pass the last particle
-    ParticleIndex<T> end() { return operator[](size_); }
+    ParticleIndex<T> end() { return operator[](size()); }
 
     /// \brief Get a Range<ParticleItrator<T>> object of all particles
     ParticleRange<T> range(size_type grainsize = 1)
@@ -393,44 +398,10 @@ class Particle
     }
 
     private:
-    size_type size_;
     state_type state_;
     weight_type weight_;
     rng_set_type rng_set_;
     rng_type rng_;
-
-    void resize(size_type N, const size_type *idx)
-    {
-        size_ = N;
-        state_.select(N, idx);
-        weight_.resize(static_cast<SizeType<weight_type>>(N));
-        rng_set_.resize(static_cast<SizeType<rng_set_type>>(N));
-    }
-
-    template <typename InputIter>
-    void resize_by_index(size_type N, InputIter index, std::true_type)
-    {
-        resize(N, static_cast<const size_type *>(index));
-    }
-
-    template <typename InputIter>
-    void resize_by_index(size_type N, InputIter index, std::false_type)
-    {
-        Vector<size_type> idx(static_cast<std::size_t>(N));
-        std::copy_n(index, N, idx.data());
-        resize(N, idx.data());
-    }
-
-    template <typename InputIter, typename OutputIter>
-    void resize_copy_index(
-        std::size_t N, std::size_t M, InputIter src, OutputIter dst)
-    {
-        while (N > M) {
-            dst = std::copy_n(src, M, dst);
-            N -= M;
-        }
-        std::copy_n(src, N, dst);
-    }
 }; // class Particle
 
 } // namespace mckl

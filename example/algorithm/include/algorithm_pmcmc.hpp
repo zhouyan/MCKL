@@ -39,7 +39,7 @@
 using AlgorithmPMCMCParam = std::array<double, 3>;
 
 using AlgorithmPMCMCBase =
-    mckl::PMCMCStateMatrix<AlgorithmPMCMCParam, mckl::ColMajor, 1, double>;
+    mckl::PMCMCStateMatrix<AlgorithmPMCMCParam, mckl::ColMajor, double, 1>;
 
 class AlgorithmPMCMC : public AlgorithmPMCMCBase
 {

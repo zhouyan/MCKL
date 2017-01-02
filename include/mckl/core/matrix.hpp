@@ -40,6 +40,10 @@ namespace mckl
 
 /// \brief Matrix container
 /// \ingroup Core
+///
+/// \tparam Layout The storage layout, either RowMajor or ColMajor
+/// \tparam T The value type
+/// \tparam Alloc The allocator type
 template <MatrixLayout Layout, typename T, typename Alloc = Allocator<T>>
 class Matrix
 {
@@ -134,249 +138,255 @@ class Matrix
         return *this;
     }
 
+    /// \brief Convert to a matrix with a different storage layout
     explicit operator transpose_type() const
     {
         transpose_type mat(nrow_, ncol_);
 
-        for (size_type i = 0; i != nrow_; ++i)
+        if (Layout == RowMajor)
+            for (size_type i = 0; i != nrow_; ++i)
+                for (size_type j = 0; j != ncol_; ++j)
+                    mat(i, j) = operator()(i, j);
+        if (Layout == ColMajor)
             for (size_type j = 0; j != ncol_; ++j)
-                mat(i, j) = operator()(i, j);
+                for (size_type i = 0; i != nrow_; ++i)
+                    mat(i, j) = operator()(i, j);
 
         return mat;
     }
 
-    /// \brief Returns the associated allocator
+    /// \brief Return the associated allocator
     allocator_type get_allocator() const { return data_.get_allocator(); }
 
-    /// \brief Iterator to the upper-left corner of the matrix
+    /// \brief Iterator to the upper left corner of the matrix
     iterator begin() { return data(); }
 
-    /// \brief Iterator to the upper-left corner of the matrix
+    /// \brief Iterator to the upper left corner of the matrix
     const_iterator begin() const { return cbegin(); }
 
-    /// \brief Iterator to the upper-left corner of the matrix
+    /// \brief Iterator to the upper left corner of the matrix
     const_iterator cbegin() const { return data(); }
 
-    /// \brief Iterator to one pass the lower-right corner of the matrix
+    /// \brief Iterator to one pass the lower right corner of the matrix
     iterator end() { return begin() + nrow_ * ncol_; }
 
-    /// \brief Iterator to one pass the lower-right corner of the matrix
+    /// \brief Iterator to one pass the lower right corner of the matrix
     const_iterator end() const { return cend(); }
 
-    /// \brief Iterator to one pass the lower-right corner of the matrix
+    /// \brief Iterator to one pass the lower right corner of the matrix
     const_iterator cend() const { return begin() + nrow_ * ncol_; }
 
-    /// \brief Iterator to the lower-right corner of the matrix
+    /// \brief Iterator to the lower right corner of the matrix
     reverse_iterator rbegin() { return reverse_iterator(end()); }
 
-    /// \brief Iterator to the lower-right corner of the matrix
+    /// \brief Iterator to the lower right corner of the matrix
     const_reverse_iterator rbegin() const { return crbegin(); }
 
-    /// \brief Iterator to the lower-right corner of the matrix
+    /// \brief Iterator to the lower right corner of the matrix
     const_reverse_iterator crbegin() const
     {
         return const_reverse_iterator(cend());
     }
 
-    /// \brief Iterator one before the upper-left corner of the matrix
+    /// \brief Iterator one before the upper left corner of the matrix
     reverse_iterator rend() { return reverse_iterator(begin()); }
 
-    /// \brief Iterator one before the upper-left corner of the matrix
+    /// \brief Iterator one before the upper left corner of the matrix
     const_reverse_iterator rend() const { return crend(); }
 
-    /// \brief Iterator one before the upper-left corner of the matrix
+    /// \brief Iterator one before the upper left corner of the matrix
     const_reverse_iterator crend() const
     {
         return const_reverse_iterator(cbegin());
     }
 
-    /// \brief Iterator to the beginning of a given row
+    /// \brief Iterator to the beginning of a row
     row_iterator row_begin(size_type i)
     {
         return row_begin_dispatch(i, layout_dispatch());
     }
 
-    /// \brief Iterator to the beginning of a given row
+    /// \brief Iterator to the beginning of a row
     const_row_iterator row_begin(size_type i) const { return row_cbegin(i); }
 
-    /// \brief Iterator to the beginning of a given row
+    /// \brief Iterator to the beginning of a row
     const_row_iterator row_cbegin(size_type i) const
     {
         return row_begin_dispatch(i, layout_dispatch());
     }
 
-    /// \brief Iterator to one pass the end of a given row
+    /// \brief Iterator to one pass the end of a row
     row_iterator row_end(size_type i) { return row_begin(i) + ncol_; }
 
-    /// \brief Iterator to one pass the end of a given row
+    /// \brief Iterator to one pass the end of a row
     const_row_iterator row_end(size_type i) const { return row_cend(i); }
 
-    /// \brief Iterator to one pass the end of a given row
+    /// \brief Iterator to one pass the end of a row
     const_row_iterator row_cend(size_type i) const
     {
         return row_cbegin(i) + ncol_;
     }
 
-    /// \brief Iterator to the end of a given row
+    /// \brief Iterator to the end of a row
     reverse_row_iterator row_rbegin(size_type i)
     {
         return reverse_row_iterator(row_end(i));
     }
 
-    /// \brief Iterator to the end of a given row
+    /// \brief Iterator to the end of a row
     const_reverse_row_iterator row_rbegin(size_type i) const
     {
         return row_crbegin(i);
     }
 
-    /// \brief Iterator to the end of a given row
+    /// \brief Iterator to the end of a row
     const_reverse_row_iterator row_crbegin(size_type i) const
     {
         return const_reverse_row_iterator(row_cend(i));
     }
 
-    /// \brief Iterator to one before the beginning of a given row
+    /// \brief Iterator to one before the beginning of a row
     reverse_row_iterator row_rend(size_type i)
     {
         return reverse_row_iterator(row_begin(i));
     }
 
-    /// \brief Iterator to one before the beginning of a given row
+    /// \brief Iterator to one before the beginning of a row
     const_reverse_row_iterator row_rend(size_type i) const
     {
         return row_crend(i);
     }
 
-    /// \brief Iterator to one before the beginning of a given row
+    /// \brief Iterator to one before the beginning of a row
     const_reverse_row_iterator row_crend(size_type i) const
     {
         return const_reverse_row_iterator(row_cbegin(i));
     }
 
-    /// \brief Iterator to the beginning of a given column
+    /// \brief Iterator to the beginning of a column
     col_iterator col_begin(size_type i)
     {
         return col_begin_dispatch(i, layout_dispatch());
     }
 
-    /// \brief Iterator to the beginning of a given column
+    /// \brief Iterator to the beginning of a column
     const_col_iterator col_begin(size_type j) const { return col_cbegin(j); }
 
-    /// \brief Iterator to the beginning of a given column
+    /// \brief Iterator to the beginning of a column
     const_col_iterator col_cbegin(size_type j) const
     {
         return col_begin_dispatch(j, layout_dispatch());
     }
 
-    /// \brief Iterator to one pass the end of a given column
+    /// \brief Iterator to one pass the end of a column
     col_iterator col_end(size_type j) { return col_begin(j) + nrow_; }
 
-    /// \brief Iterator to one pass the end of a given column
+    /// \brief Iterator to one pass the end of a column
     const_col_iterator col_end(size_type j) const { return col_cend(j); }
 
-    /// \brief Iterator to one pass the end of a given column
+    /// \brief Iterator to one pass the end of a column
     const_col_iterator col_cend(size_type j) const
     {
         return col_cbegin(j) + nrow_;
     }
 
-    /// \brief Iterator to the end of a given column
+    /// \brief Iterator to the end of a column
     reverse_col_iterator col_rbegin(size_type j)
     {
         return reverse_col_iterator(col_end(j));
     }
 
-    /// \brief Iterator to the end of a given column
+    /// \brief Iterator to the end of a column
     const_reverse_col_iterator col_rbegin(size_type j) const
     {
         return col_crbegin(j);
     }
 
-    /// \brief Iterator to the end of a given column
+    /// \brief Iterator to the end of a column
     const_reverse_col_iterator col_crbegin(size_type j) const
     {
         return const_reverse_col_iterator(col_cend(j));
     }
 
-    /// \brief Iterator to one before the beginning of a given column
+    /// \brief Iterator to one before the beginning of a column
     reverse_col_iterator col_rend(size_type j)
     {
         return reverse_col_iterator(col_begin(j));
     }
 
-    /// \brief Iterator to one before the beginning of a given column
+    /// \brief Iterator to one before the beginning of a column
     const_reverse_col_iterator col_rend(size_type j) const
     {
         return col_crend(j);
     }
 
-    /// \brief Iterator to one before the beginning of a given column
+    /// \brief Iterator to one before the beginning of a column
     const_reverse_col_iterator col_crend(size_type j) const
     {
         return const_reverse_col_iterator(col_cbegin(j));
     }
 
-    /// \brief Range of a given row
+    /// \brief Range of a row
     row_range row(size_type i) { return row_range(row_begin(i), row_end(i)); }
 
-    /// \brief Range of a given row
+    /// \brief Range of a row
     const_row_range row(size_type i) const
     {
         return const_row_range(row_begin(i), row_end(i));
     }
 
-    /// \brief Range of a given row
+    /// \brief Range of a row
     const_row_range crow(size_type i) const
     {
         return const_row_range(row_cbegin(i), row_cend(i));
     }
 
-    /// \brief Range of a given row in reverse order
+    /// \brief Range of a row in reverse order
     reverse_row_range rrow(size_type i)
     {
         return reverse_row_range(row_rbegin(i), row_rend(i));
     }
 
-    /// \brief Range of a given row in reverse order
+    /// \brief Range of a row in reverse order
     const_reverse_row_range rrow(size_type i) const
     {
         return const_reverse_row_range(row_rbegin(i), row_rend(i));
     }
 
-    /// \brief Range of a given row in reverse order
+    /// \brief Range of a row in reverse order
     const_reverse_row_range crrow(size_type i) const
     {
         return const_reverse_row_range(row_crbegin(i), row_crend(i));
     }
 
-    /// \brief Range of a given column
+    /// \brief Range of a column
     col_range col(size_type i) { return col_range(col_begin(i), col_end(i)); }
 
-    /// \brief Range of a given column
+    /// \brief Range of a column
     const_col_range col(size_type i) const
     {
         return const_col_range(col_begin(i), col_end(i));
     }
 
-    /// \brief Range of a given column
+    /// \brief Range of a column
     const_col_range ccol(size_type i) const
     {
         return const_col_range(col_cbegin(i), col_cend(i));
     }
 
-    /// \brief Range of a given column in reverse order
+    /// \brief Range of a column in reverse order
     reverse_col_range rcol(size_type i)
     {
         return reverse_col_range(col_rbegin(i), col_rend(i));
     }
 
-    /// \brief Range of a given column in reverse order
+    /// \brief Range of a column in reverse order
     const_reverse_col_range rcol(size_type i) const
     {
         return const_reverse_col_range(col_rbegin(i), col_rend(i));
     }
 
-    /// \brief Range of a given column in reverse order
+    /// \brief Range of a column in reverse order
     const_reverse_col_range crcol(size_type i) const
     {
         return const_reverse_col_range(col_crbegin(i), col_crend(i));
@@ -404,13 +414,13 @@ class Matrix
         return at_dispatch(i, j, layout_dispatch());
     }
 
-    /// \brief The element at row `i` and column `j`
+    /// \brief Access an element in the matrix
     reference operator()(size_type i, size_type j)
     {
         return at_dispatch(i, j, layout_dispatch());
     }
 
-    /// \brief The element at row `i` and column `j`
+    /// \brief Access an element in the matrix
     const_reference operator()(size_type i, size_type j) const
     {
         return at_dispatch(i, j, layout_dispatch());
@@ -428,13 +438,13 @@ class Matrix
         return row_data_dispatch(i, layout_dispatch());
     }
 
-    /// \brief Pointer to the first element of a column
+    /// \brief Pointer to the first element of a row
     const_pointer row_data(size_type i) const
     {
         return row_data_dispatch(i, layout_dispatch());
     }
 
-    /// \brief The stride of row-wise access through `row_data`
+    /// \brief The stride of row-wise access through `row_data()`
     size_type row_stride() const
     {
         return row_stride_dispatch(layout_dispatch());
@@ -452,13 +462,13 @@ class Matrix
         return col_data_dispatch(j, layout_dispatch());
     }
 
-    /// \brief The stride size of column-wise access through `col_data`
+    /// \brief The stride size of column-wise access through `col_data()`
     size_type col_stride() const
     {
         return col_stride_dispatch(layout_dispatch());
     }
 
-    /// \brief If the matrix is empty, either zero rows or zero columns or both
+    /// \brief If the matrix is empty, i.e., `nrow() * ncol() == 0`
     bool empty() const { return nrow_ == 0 || ncol_ == 0; }
 
     /// \brief The number of rows
@@ -467,11 +477,16 @@ class Matrix
     /// \brief The number of columns
     size_type ncol() const { return ncol_; }
 
-    /// \brief Reserve space for the matrix given the new number of rows and
-    /// columns
+    /// \brief Reserve storage space for the matrix
     void reserve(size_type n, size_type m) { data_.reserve(n * m); }
 
-    /// \brief Resize the matrix given new number of rows and columns
+    /// \brief Resize the matrix
+    ///
+    /// \details
+    /// Let the orignal be a \f$p\f$ by \f$q\f$ matrix and the new matrix be of
+    /// dimensions \f$s\f$ by \f$t\f$. Then the sub-matrix at the upper left
+    /// corner, of dimensions \f$n = \min\{p,s\}\f$ by \f$m = \min\{q,t\}\f$
+    /// has its original values.
     void resize(size_type nrow, size_type ncol)
     {
         if (nrow * ncol == 0) {
@@ -490,7 +505,7 @@ class Matrix
     /// \brief Release memory no longer needed
     void shrink_to_fit() { data_.shrink_to_fit(); }
 
-    /// \brief Clear the matrix
+    /// \brief Clear the matrix of all elements
     void clear()
     {
         data_.clear();
@@ -522,11 +537,13 @@ class Matrix
         data_.swap(other.data_);
     }
 
+    /// \brief Swap two matrices
     friend void swap(Matrix &m1, Matrix &m2) noexcept(noexcept(m1.swap(m2)))
     {
         m1.swap(m2);
     }
 
+    /// \brief Compare equality
     friend bool operator==(const Matrix &m1, const Matrix &m2)
     {
         if (m1.nrow_ != m2.nrow_)
@@ -536,6 +553,7 @@ class Matrix
         return m1.data_ == m2.data_;
     }
 
+    /// \brief Compare inequality
     friend bool operator!=(const Matrix &m1, const Matrix &m2)
     {
         return !(m1 == m2);
@@ -565,22 +583,6 @@ class Matrix
     {
         return StepIterator<const_pointer>(
             col_data(j), static_cast<difference_type>(col_stride()));
-    }
-
-    void resize_dispatch(size_type nrow, size_type ncol, row_major)
-    {
-        if (ncol == ncol_) {
-            data_.resize(nrow * ncol);
-            nrow_ = nrow;
-            return;
-        }
-
-        Matrix tmp(nrow, ncol);
-        const size_type n = std::min(nrow, nrow_);
-        const size_type m = std::min(ncol, ncol_);
-        for (size_type i = 0; i != n; ++i)
-            std::copy_n(row_data(i), m, tmp.row_data(i));
-        swap(tmp);
     }
 
     reference at_dispatch(size_type i, size_type j, row_major)
@@ -617,6 +619,22 @@ class Matrix
         return data_.data() + j;
     }
 
+    void resize_dispatch(size_type nrow, size_type ncol, row_major)
+    {
+        if (ncol == ncol_) {
+            data_.resize(nrow * ncol);
+            nrow_ = nrow;
+            return;
+        }
+
+        Matrix tmp(nrow, ncol);
+        const size_type n = std::min(nrow, nrow_);
+        const size_type m = std::min(ncol, ncol_);
+        for (size_type i = 0; i != n; ++i)
+            std::copy_n(row_data(i), m, tmp.row_data(i));
+        swap(tmp);
+    }
+
     // Layout == ColMajor
 
     StepIterator<pointer> row_begin_dispatch(size_type i, col_major)
@@ -637,22 +655,6 @@ class Matrix
     const_pointer col_begin_dispatch(size_type j, col_major) const
     {
         return col_data(j);
-    }
-
-    void resize_dispatch(size_type nrow, size_type ncol, col_major)
-    {
-        if (nrow == nrow_) {
-            data_.resize(nrow * ncol);
-            ncol_ = ncol;
-            return;
-        }
-
-        Matrix tmp(nrow, ncol);
-        const size_type n = std::min(nrow, nrow_);
-        const size_type m = std::min(ncol, ncol_);
-        for (size_type i = 0; i != m; ++i)
-            std::copy_n(col_data(i), n, tmp.col_data(i));
-        swap(tmp);
     }
 
     reference at_dispatch(size_type i, size_type j, col_major)
@@ -687,6 +689,22 @@ class Matrix
     const_pointer col_data_dispatch(size_type j, col_major) const
     {
         return data_.data() + j * nrow_;
+    }
+
+    void resize_dispatch(size_type nrow, size_type ncol, col_major)
+    {
+        if (nrow == nrow_) {
+            data_.resize(nrow * ncol);
+            ncol_ = ncol;
+            return;
+        }
+
+        Matrix tmp(nrow, ncol);
+        const size_type n = std::min(nrow, nrow_);
+        const size_type m = std::min(ncol, ncol_);
+        for (size_type i = 0; i != m; ++i)
+            std::copy_n(col_data(i), n, tmp.col_data(i));
+        swap(tmp);
     }
 }; // class Matrix
 

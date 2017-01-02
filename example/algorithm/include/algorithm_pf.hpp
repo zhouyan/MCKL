@@ -37,7 +37,7 @@
 #include <mckl/smp.hpp>
 #include <mckl/utility/stop_watch.hpp>
 
-using AlgorithmPFBase = mckl::StateMatrix<mckl::ColMajor, 4, double>;
+using AlgorithmPFBase = mckl::StateMatrix<mckl::ColMajor, double, 4>;
 
 class AlgorithmPF : public AlgorithmPFBase
 {

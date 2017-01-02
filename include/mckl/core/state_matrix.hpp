@@ -41,7 +41,16 @@ namespace mckl
 
 /// \brief Particle::state_type subtype
 /// \ingroup Core
-template <MatrixLayout Layout, std::size_t Dim, typename T>
+///
+/// \tparam Layout The storage layout, either RowMajor or ColMajor
+/// \tparam Dim The initial dimension of the samples
+/// \tparam T The value type of the samples
+///
+/// \details
+/// Let \f$X\f$ be \f$D\f$-vector of samples of type `T`. A collection of
+/// \f$N\f$ samples is stored as an \f$N\f$ by \f$D\f$ matrix. The value of the
+/// template parameter `Dim` only specifies the initial value of \f$D\f$.
+template <MatrixLayout Layout, typename T, std::size_t Dim = 0>
 class StateMatrix : public Matrix<Layout, T>
 {
     using layout_dispatch = std::integral_constant<MatrixLayout, Layout>;
@@ -49,13 +58,24 @@ class StateMatrix : public Matrix<Layout, T>
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
     public:
-    using size_type = typename Matrix<Layout, T>::size_type;
     using value_type = typename Matrix<Layout, T>::value_type;
+    using size_type = typename Matrix<Layout, T>::size_type;
+    using difference_type = typename Matrix<Layout, T>::difference_type;
+    using reference = typename Matrix<Layout, T>::reference;
+    using pointer = typename Matrix<Layout, T>::pointer;
 
+    /// \brief ParticleIndex base class
     template <typename S>
     class particle_index_type : public ParticleIndexBase<S>
     {
         public:
+        using iterator = typename Matrix<Layout, T>::row_iterator;
+        using const_iterator = typename Matrix<Layout, T>::const_row_iterator;
+        using reverse_iterator =
+            typename Matrix<Layout, T>::reverse_row_iterator;
+        using const_reverse_iterator =
+            typename Matrix<Layout, T>::const_reverse_row_iterator;
+
         particle_index_type() = default;
 
         particle_index_type(
@@ -64,39 +84,77 @@ class StateMatrix : public Matrix<Layout, T>
         {
         }
 
-        /// \brief `this->particle().state().dim()`
-        std::size_t dim() const { return this->particle().state().dim(); }
+        /// \brief `this->state().row_begin(this->i())`
+        iterator begin() const { return this->state().row_begin(this->i()); }
 
-        /// \brief `this->particle().state().row_stride()`
-        size_type stride() const
+        /// \brief `this->state().row_cbegin(this->i())`
+        const_iterator cbegin() const
         {
-            return this->particle().state().row_stride();
+            return this->state().row_cbegin(this->i());
         }
 
-        /// \brief `this->particle().state().row_data(this->i())`
-        value_type *data() const
+        /// \brief `this->state().row_end(this->i())`
+        iterator end() const { return this->state().row_end(this->i()); }
+
+        /// \brief `this->state().row_cend(this->i())`
+        const_iterator cend() const
         {
-            return this->particle().state().row_data(this->i());
+            return this->state().row_cend(this->i());
         }
 
-        /// \brief `this->particle().state()(this->i(), j)`
-        value_type &operator()(size_type j) const
+        /// \brief `this->state().row_rbegin(this->i())`
+        reverse_iterator rbegin() const
         {
-            return this->particle().state()(this->i(), j);
+            return this->state().row_rbegin(this->i());
         }
 
-        /// \brief `this->particle().state().at(this->i(), j)`
-        value_type &at(size_type j) const
+        /// \brief `this->state().row_crbegin(this->i())`
+        const_reverse_iterator crbegin() const
         {
-            runtime_assert(
-                j < dim(), "**StateMatrix::at** index out of range");
-
-            return operator()(j);
+            return this->state().row_crbegin(this->i());
         }
+
+        /// \brief `this->state().row_rend(this->i())`
+        reverse_iterator rend() const
+        {
+            return this->state().row_rend(this->i());
+        }
+
+        /// \brief `this->state().row_crend(this->i())`
+        const_reverse_iterator crend() const
+        {
+            return this->state().row_crend(this->i());
+        }
+
+        /// \brief `this->state().at(this->i(), j)`
+        reference at(size_type j) const
+        {
+            return this->state().at(this->i(), j);
+        }
+
+        /// \brief `this->state()(this->i(), j)`
+        reference operator()(size_type j) const
+        {
+            return this->state()(this->i(), j);
+        }
+
+        /// \brief `this->state().row_data(this->i())`
+        pointer data() const { return this->state().row_data(this->i()); }
+
+        /// \brief `this->state().row_stride()`
+        size_type stride() const { return this->state().row_stride(); }
+
+        /// \brief `this->state().empty()`
+        bool empty() const { return this->state().empty(); }
+
+        /// \brief `this->state().dim()`
+        size_type dim() const { return this->state().dim(); }
     }; // class particle_index_type
 
-    explicit StateMatrix(size_type N) : Matrix<Layout, T>(N, Dim) {}
+    /// \brief `Matrix::Matrix(N, Dim)`
+    explicit StateMatrix(size_type N = 0) : Matrix<Layout, T>(N, Dim) {}
 
+    /// \brief `Matrix::Matrix(N, dim)`
     StateMatrix(size_type N, size_type dim) : Matrix<Layout, T>(N, dim)
     {
         static_assert(Dim == 0,
@@ -104,41 +162,49 @@ class StateMatrix : public Matrix<Layout, T>
             "dimension");
     }
 
-    /// \brief The numbrer of samples
+    /// \brief `Matrix::nrow()`
     size_type size() const { return this->nrow(); }
 
-    /// \brief The dimension
+    /// \brief `Matrix::ncol()`
     size_type dim() const { return this->ncol(); }
 
     using Matrix<Layout, T>::reserve;
 
-    /// \brief Reserve space for specified sample size
-    void reserve(size_type N) { this->reserve_nrow(N); }
+    /// \brief `Matrix::reserve(N, dim())`
+    void reserve(size_type N) { this->reserve(N, dim()); }
 
     using Matrix<Layout, T>::resize;
 
-    /// \brief Change the sample size
+    /// \brief `Matrix::resize(N, dim())`
     void resize(size_type N) { this->resize(N, dim()); }
 
-    /// \brief Select samples
+    /// \brief Select samples in-place
     ///
-    /// \param N The new sample size
+    /// \param n The new sample size
     /// \param index N-vector of parent index
     ///
-    /// \details
-    /// Let \f$a_i\f$ denote the value of `index[i]`, and
+    /// \pre Let \f$a_i\f$ denote the value of `index[i]`, and
     /// \f$r_i = \sum_{j=1}^N \mathbb{I}_{\{i\}}(a_j)\f$. Then it is required
     /// that \f$a_i = i\f$ for all \f$r_i > 0\f$.
-    template <typename IntType, typename InputIter>
-    void select(IntType N, InputIter index)
+    ///
+    /// \post `size() == N`
+    /// \post For \f$i = 1,\dots,N\f$, \f$Y_i = X_{a_i}\f$, where \f$Y_i\f$ is
+    /// the \f$i\f$-th row of the new matrix and \f$X_j\f$ is the \f$j\f$-th
+    /// row of the original matrix
+    template <typename InputIter>
+    void select(size_type n, InputIter index)
     {
-        select_dispatch(N, index, layout_dispatch());
+        select_dispatch(n, index, layout_dispatch());
     }
 
     /// \brief Duplicate a sample
     ///
     /// \param src The index of sample to be duplicated
     /// \param dst The index of sample to be eliminated
+    ///
+    /// \post Let \f$i\f$ and \f$j\f$ be the values of `src` and `dst`,
+    /// respectivley, then \f$X_j = X_i\f$, where \f$X_i\f$ is the \f$i\f$-th
+    /// row of the matrix
     void duplicate(size_type src, size_type dst)
     {
         if (src == dst)
@@ -149,10 +215,9 @@ class StateMatrix : public Matrix<Layout, T>
     }
 
     private:
-    template <typename IntType, typename InputIter>
-    void select_dispatch(IntType N, InputIter index, row_major)
+    template <typename InputIter>
+    void select_dispatch(size_type n, InputIter index, row_major)
     {
-        size_type n = static_cast<size_type>(N);
         if (size() == 0 || internal::is_nullptr(index)) {
             resize(n);
             return;
@@ -168,10 +233,9 @@ class StateMatrix : public Matrix<Layout, T>
         return;
     }
 
-    template <typename IntType, typename InputIter>
-    void select_dispatch(IntType N, InputIter index, col_major)
+    template <typename InputIter>
+    void select_dispatch(size_type n, InputIter index, col_major)
     {
-        size_type n = static_cast<size_type>(N);
         if (size() == 0 || internal::is_nullptr(index)) {
             resize(n);
             return;
@@ -187,7 +251,7 @@ class StateMatrix : public Matrix<Layout, T>
                     dst[i] = src[*idx];
             }
         } else {
-            Matrix<ColMajor, T> tmp(N, dim());
+            Matrix<ColMajor, T> tmp(n, dim());
             for (size_type j = 0; j != dim(); ++j) {
                 idx = index;
                 const value_type *src = this->col_data(j);

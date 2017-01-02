@@ -41,21 +41,13 @@
 namespace mckl
 {
 
-template <typename Param, MatrixLayout Layout, std::size_t Dim, typename T>
-class PMCMCStateMatrix : public StateMatrix<Layout, Dim, T>
+template <typename Param, MatrixLayout Layout, typename T, std::size_t Dim = 0>
+class PMCMCStateMatrix : public StateMatrix<Layout, T, Dim>
 {
     public:
     using param_type = Param;
 
-    explicit PMCMCStateMatrix(std::size_t N)
-        : StateMatrix<Layout, Dim, T>(N), log_nc_(0)
-    {
-    }
-
-    PMCMCStateMatrix(std::size_t N, std::size_t dim)
-        : StateMatrix<Layout, Dim, T>(N, dim), log_nc_(0)
-    {
-    }
+    using StateMatrix<Layout, T, Dim>::StateMatrix;
 
     double log_nc() const { return log_nc_; }
 

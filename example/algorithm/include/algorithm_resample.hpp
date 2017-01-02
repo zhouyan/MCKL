@@ -40,7 +40,7 @@
 #include <mckl/utility/stop_watch.hpp>
 
 template <mckl::MatrixLayout Layout>
-using AlgorithmResampleState = mckl::StateMatrix<Layout, 0, int>;
+using AlgorithmResampleState = mckl::StateMatrix<Layout, int>;
 
 template <typename RNGType>
 inline mckl::Vector<std::size_t> algorithm_resample_size(

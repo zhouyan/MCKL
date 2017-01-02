@@ -472,7 +472,7 @@ class ResampleEval
         eval_ = std::forward<Eval>(eval);
     }
 
-    /// \brief Returns how many particles having non-zero replication number
+    /// \brief Resample a particle collection
     void operator()(std::size_t, Particle<T> &particle) const
     {
         runtime_assert(static_cast<bool>(eval_),
@@ -485,8 +485,7 @@ class ResampleEval
         Vector<size_type> idx(N);
         eval_(N, N, particle.rng(), particle.weight().data(), rep.data());
         resample_trans_rep_index(N, N, rep.data(), idx.data());
-        particle.state().select(N, idx.data());
-        particle.weight().set_equal();
+        particle.select(particle.size(), idx.data());
     }
 
     private:

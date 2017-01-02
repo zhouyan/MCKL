@@ -39,6 +39,8 @@ namespace mckl
 
 /// \brief Iterator adapter which increment the base iterator in multiple steps
 /// \ingroup Core
+///
+/// \tparam Base An iterator type
 template <typename Base>
 class StepIterator
 {
@@ -315,6 +317,8 @@ class Range;
 /// \brief Range of integers
 /// \ingroup Core
 ///
+/// \tparam IntType An integral type
+///
 /// \details
 /// A range of integer types denote the half-open interval \f$[b, e)\f$, where
 /// \f$b \le e\f$.
@@ -389,6 +393,8 @@ class Range<IntType, true>
 
 /// \brief Range of iterators
 /// \ingroup Core
+///
+/// \tparam Iterator An iterator type
 ///
 /// \details
 /// A range of iterators denote the half-open interval \f$[b, e)\f$ where
