@@ -265,6 +265,16 @@ class ParticleRange : public Range<ParticleIndex<T>>
     typename Particle<T>::size_type iend() const { return this->end()->i(); }
 }; // class ParticleRange
 
+/// \brief Particle system
+/// \ingroup Core
+///
+/// \tparam T The sample collection type
+///
+/// \details
+/// A collection of particles is formed by,
+/// * The collection of samples
+/// * The weights of samples
+/// * A collection of RNG engines for parallel use
 template <typename T>
 class Particle
 {
@@ -275,6 +285,7 @@ class Particle
     using rng_set_type = RNGSetType<T>;
     using rng_type = typename rng_set_type::rng_type;
 
+    /// \brief Default constructor
     Particle()
         : state_(0)
         , weight_(0)
@@ -283,6 +294,10 @@ class Particle
     {
     }
 
+    /// \brief Construct a particle system
+    ///
+    /// \details
+    /// All arguments are passed down to the constructor of `T`
     template <typename... Args>
     explicit Particle(size_type N, Args &&... args)
         : state_(N, std::forward<Args>(args)...)
@@ -302,7 +317,7 @@ class Particle
         return particle;
     }
 
-    /// \brief Number of particles
+    /// \brief The number of particles
     size_type size() const { return state_.size(); }
 
     /// \brief Resize by selecting according to user supplied index vector
@@ -355,24 +370,18 @@ class Particle
     const rng_type &rng() const { return rng_; }
 
     /// \brief Get a ParticleIndex<T> object for the i-th particle
-    ParticleIndex<T> operator[](size_type i)
-    {
-        return ParticleIndex<T>(i, this);
-    }
-
-    /// \brief Alias to `operator[]`
-    ParticleIndex<T> operator()(size_type i) { return operator[](i); }
-
-    /// \brief Alias to `operator[]`
-    ParticleIndex<T> index(size_type i) { return operator[](i); }
-
-    /// \brief Get a ParticleIndex<T> object for the i-th particle
     ParticleIndex<T> at(size_type i)
     {
         runtime_assert<std::out_of_range>(
             i <= size(), "**Particle::at** index out of range");
 
         return operator[](i);
+    }
+
+    /// \brief Get a ParticleIndex<T> object for the i-th particle
+    ParticleIndex<T> operator[](size_type i)
+    {
+        return ParticleIndex<T>(i, this);
     }
 
     /// \brief Get a ParticleIndex<T> object for the first particle
@@ -387,11 +396,13 @@ class Particle
         return ParticleRange<T>(begin(), end(), grainsize);
     }
 
-    /// \brief Get a Range<ParticleIndex<T>> object of a given range
+    /// \brief Get a ParticleRange<T> object given a range denoted by integral
+    /// values
     ParticleRange<T> range(
         size_type ibegin, size_type iend, size_type grainsize = 1)
     {
-        return ParticleRange<T>(index(ibegin), index(iend), grainsize);
+        return ParticleRange<T>(operator[](ibegin), operator[](iend),
+            grainsize);
     }
 
     private:
