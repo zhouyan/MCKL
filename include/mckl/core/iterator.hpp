@@ -37,196 +37,277 @@
 namespace mckl
 {
 
-/// \brief Random access iterator adaptor for non-unity stride
+/// \brief Iterator adapter which increment the base iterator in multiple steps
 /// \ingroup Core
-template <typename RandomIter>
-class StrideIterator
+template <typename Base>
+class StepIterator
 {
-    static_assert(
-        std::is_same<
-            typename std::iterator_traits<RandomIter>::iterator_category,
-            std::random_access_iterator_tag>::value,
-        "**StrideIterator** used with RandomIter other than a random access "
-        "iterator");
-
     public:
-    using difference_type = std::ptrdiff_t;
-    using value_type = typename std::iterator_traits<RandomIter>::value_type;
-    using pointer = typename std::iterator_traits<RandomIter>::pointer;
-    using reference = typename std::iterator_traits<RandomIter>::reference;
-    using iterator_category = std::random_access_iterator_tag;
+    using difference_type = std::make_signed_t<
+        typename std::iterator_traits<Base>::difference_type>;
+    using value_type = typename std::iterator_traits<Base>::value_type;
+    using pointer = typename std::iterator_traits<Base>::pointer;
+    using reference = typename std::iterator_traits<Base>::reference;
+    using iterator_category =
+        typename std::iterator_traits<Base>::iterator_category;
 
-    StrideIterator() noexcept : stride_(1) {}
-
-    template <typename IntType>
-    StrideIterator(RandomIter iter, IntType stride) noexcept
-        : iter_(iter), stride_(static_cast<difference_type>(stride))
+    /// \brief Default constructor
+    StepIterator() noexcept(std::is_nothrow_default_constructible<Base>::value)
+        : base_(Base()), step_(1)
     {
     }
 
-    template <typename Iter>
-    StrideIterator(const StrideIterator<Iter> &other) noexcept
-        : iter_(other.base()), stride_(other.stride())
+    /// \brief Convert from a base iterator
+    ///
+    /// \param base The base iterator
+    /// \param step The step size. Each call of the increment/decrement
+    /// operator of the newly constructed iterator will advance it by a
+    /// distance equal to `step`.
+    ///
+    /// \pre `Base` is copy constructible
+    StepIterator(Base base, difference_type step = 1) noexcept(
+        std::is_nothrow_copy_constructible<Base>::value)
+        : base_(base), step_(step)
     {
     }
 
-    /// \brief Return the underlying random access iterator
-    RandomIter base() const noexcept { return iter_; }
+    /// \brief Convert from compatible StepIterator
+    ///
+    /// \pre T is convertible to Base
+    template <typename T>
+    StepIterator(const StepIterator<T> &other) noexcept(
+        std::is_nothrow_copy_constructible<Base>::value)
+        : base_(other.base()), step_(other.step())
+    {
+    }
 
-    /// \brief Return the stride size
-    difference_type stride() const noexcept { return stride_; }
+    /// \brief Return the underlying base iterator
+    Base base() const { return base_; }
 
-    reference operator*() const noexcept { return *iter_; }
+    /// \brief Return the increment step size
+    difference_type step() const { return step_; }
 
-    RandomIter operator->() const noexcept { return iter_; }
+    /// \brief Dereference the base iterator
+    reference operator*() const { return *base_; }
 
-    /// \brief `base()[n * stride()]`
+    /// \brief Member selection through the base iterator
+    Base operator->() const { return base_; }
+
+    /// \brief Equivalent to `*((*this) + n)`
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `n * step() < 0`
     template <typename IntType>
-    reference operator[](IntType n) const noexcept
+    reference operator[](IntType n) const
     {
         return *((*this) + n);
     }
 
+    /// \brief Compare equality
+    ///
+    /// \pre `Base` is equality comparable
+    /// \pre `iter1.step() == iter2.step()`
     friend bool operator==(
-        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
+        const StepIterator &iter1, const StepIterator &iter2)
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "Compare two StrideIterator objects with different strides");
+        runtime_assert(iter1.step_ == iter2.step_,
+            "Compare two StepIterator objects with different steps");
 
-        return iter1.iter_ == iter2.iter_;
+        return iter1.base_ == iter2.base_;
     }
 
+    /// \brief Compare inequality
+    ///
+    /// \pre `Base` is inequality comparable
+    /// \pre `iter1.step() == iter2.step()`
     friend bool operator!=(
-        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
+        const StepIterator &iter1, const StepIterator &iter2)
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "Compare two StrideIterator objects with different strides");
+        runtime_assert(iter1.step_ == iter2.step_,
+            "Compare two StepIterator objects with different steps");
 
-        return iter1.iter_ != iter2.iter_;
+        return iter1.base_ != iter2.base_;
     }
 
-    friend bool operator<(
-        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
+    /// \brief Compare less than relation
+    ///
+    /// \pre `Base` is less than comparable
+    /// \pre `iter1.step() == iter2.step()`
+    friend bool operator<(const StepIterator &iter1, const StepIterator &iter2)
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "Compare two StrideIterator objects with different strides");
+        runtime_assert(iter1.step_ == iter2.step_,
+            "Compare two StepIterator objects with different steps");
 
-        return iter1.iter_ < iter2.iter_;
+        return iter1.base_ < iter2.base_;
     }
 
+    /// \brief Compare less than relation or equality
+    ///
+    /// \pre `Base` is less than or equality comparable
+    /// \pre `iter1.step() == iter2.step()`
     friend bool operator<=(
-        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
+        const StepIterator &iter1, const StepIterator &iter2)
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "Compare two StrideIterator objects with different strides");
+        runtime_assert(iter1.step_ == iter2.step_,
+            "Compare two StepIterator objects with different steps");
 
-        return iter1.iter_ <= iter2.iter_;
+        return iter1.base_ <= iter2.base_;
     }
 
-    friend bool operator>(
-        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
+    /// \brief Compare greater than relation
+    ///
+    /// \pre `Base` is greater than comparable
+    /// \pre `iter1.step() == iter2.step()`
+    friend bool operator>(const StepIterator &iter1, const StepIterator &iter2)
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "Compare two StrideIterator objects with different strides");
+        runtime_assert(iter1.step_ == iter2.step_,
+            "Compare two StepIterator objects with different steps");
 
-        return iter1.iter_ > iter2.iter_;
+        return iter1.base_ > iter2.base_;
     }
 
+    /// \brief Compare greater than relation or equality
+    ///
+    /// \pre `Base` is greater than or equality comparable
+    /// \pre `iter1.step() == iter2.step()`
     friend bool operator>=(
-        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
+        const StepIterator &iter1, const StepIterator &iter2)
     {
-        runtime_assert(iter1.stride_ == iter2.stride_,
-            "Compare two StrideIterator objects with different strides");
+        runtime_assert(iter1.step_ == iter2.step_,
+            "Compare two StepIterator objects with different steps");
 
-        return iter1.iter_ >= iter2.iter_;
+        return iter1.base_ >= iter2.base_;
     }
 
-    /// \brief `iter.base() += iter.stride()`
-    friend StrideIterator &operator++(StrideIterator &iter) noexcept
+    /// \brief Prefix increment: advance the base iterator by a distance of
+    /// `iter.step()`
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `iter.step() < 0`
+    friend StepIterator &operator++(StepIterator &iter)
     {
-        iter.iter_ += iter.stride_;
+        using std::advance;
+
+        advance(iter.base_, iter.step_);
 
         return iter;
     }
 
-    /// \brief `iter.base() += iter.stride()`
-    friend StrideIterator operator++(StrideIterator &iter, int) noexcept
+    /// \brief Postfix increment
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `iter.step() < 0`
+    friend StepIterator operator++(StepIterator &iter, int)
     {
-        StrideIterator ret(iter);
+        StepIterator ret(iter);
         ++iter;
 
         return ret;
     }
 
-    /// \brief `iter.base() -= iter.stride()`
-    friend StrideIterator &operator--(StrideIterator &iter) noexcept
+    /// \brief Prefix decrement: advance the base iterator by a distance of
+    /// `-iter.step()`
+    ///
+    /// \pre `Base` is a input iterator
+    /// \pre `Base` is a bidirectional iterator if `iter.step() > 0`
+    friend StepIterator &operator--(StepIterator &iter)
     {
-        iter.iter_ -= iter.stride_;
+        using std::advance;
+
+        advance(iter.base_, -iter.step_);
 
         return iter;
     }
 
-    /// \brief `iter.base() -= iter.stride()`
-    friend StrideIterator operator--(StrideIterator &iter, int) noexcept
+    /// \brief Postfix decrement
+    ///
+    /// \pre `Base` is a input iterator
+    /// \pre `Base` is a bidirectional iterator if `iter.step() > 0`
+    friend StepIterator operator--(StepIterator &iter, int)
     {
-        StrideIterator ret(iter);
+        StepIterator ret(iter);
         --iter;
 
         return ret;
     }
 
-    /// \brief `iter.base() + n * iter.stride()`
+    /// \brief Addition with integer: advance the base iterator by a distance
+    /// of `n * iter.step()`
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `n * iter.step() < 0`
     template <typename IntType>
-    friend StrideIterator operator+(
-        const StrideIterator &iter, IntType n) noexcept
+    friend StepIterator operator+(const StepIterator &iter, IntType n)
     {
-        StrideIterator ret(iter);
-        ret.iter_ += ret.stride_ * static_cast<difference_type>(n);
+        using std::advance;
+
+        StepIterator ret(iter);
+        advance(ret.base_, static_cast<difference_type>(n) * ret.step_);
 
         return ret;
     }
 
-    /// \brief `iter.base() + n * iter.stride()`
+    /// \brief Addition with integer
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `n * iter.step() < 0`
     template <typename IntType>
-    friend StrideIterator operator+(
-        IntType n, const StrideIterator &iter) noexcept
+    friend StepIterator operator+(IntType n, const StepIterator &iter)
     {
         return iter + n;
     }
 
-    /// \brief `iter.base() - n * iter.stride()`
+    /// \brief Subtraction with integer: advance the base iterator by a
+    /// distance `-n * iter.step()`
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `n * iter.step() > 0`
     template <typename IntType>
-    friend StrideIterator operator-(
-        const StrideIterator &iter, IntType n) noexcept
+    friend StepIterator operator-(const StepIterator &iter, IntType n)
     {
         return iter + (-static_cast<difference_type>(n));
     }
 
-    /// \brief `iter.base() += n * iter.stride()`
+    /// \brief Compound addition with integer
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `n * iter.step() < 0`
     template <typename IntType>
-    friend StrideIterator &operator+=(StrideIterator &iter, IntType n) noexcept
+    friend StepIterator &operator+=(StepIterator &iter, IntType n)
     {
         return iter = iter + n;
     }
 
-    /// \brief `iter.base() -= n * iter.stride()`
+    /// \brief Compound subtraction with integer
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `Base` is a bidirectional iterator if `n * iter.step() > 0`
     template <typename IntType>
-    friend StrideIterator &operator-=(StrideIterator &iter, IntType n) noexcept
+    friend StepIterator &operator-=(StepIterator &iter, IntType n)
     {
         return iter = iter - n;
     }
 
-    /// \brief `(iter1.base() - iter2.base()) / iter1.stride()`
+    /// \brief Difference between two iterators
+    ///
+    /// \pre `Base` is an input iterator
+    /// \pre `iter1` is reachable by incrementing `iter2`
+    /// \pre `iter1.step() == iter2.step()`
     friend difference_type operator-(
-        const StrideIterator &iter1, const StrideIterator &iter2) noexcept
+        const StepIterator &iter1, const StepIterator &iter2)
     {
-        return (iter1.iter_ - iter2.iter_) / iter1.stride_;
+        runtime_assert(iter1.step_ == iter2.step_,
+            "Subtract two StepIterator objects with different steps");
+
+        using std::distance;
+
+        return distance(iter2.base_, iter1.base_) / iter1.step_;
     }
 
     private:
-    RandomIter iter_;
-    difference_type stride_;
-}; // class StrideIterator
+    Base base_;
+    difference_type step_;
+}; // class StepIterator
 
 template <typename T, bool = std::is_integral<T>::value>
 class Range;
@@ -244,16 +325,25 @@ class Range<IntType, true>
     using size_type = std::size_t;
     using iterator = IntType;
 
-    Range() : begin_(0), end_(0), grainsize_(1) {}
+    /// \brief Default constructor
+    Range() noexcept : begin_(0), end_(0), grainsize_(1) {}
 
-    Range(const Range &) = default;
-
+    /// \brief Construct a new range with a pair of integers
+    ///
+    /// \param begin The lower bound of the range
+    /// \param end The upper bound of the range
+    /// \param grainsize The minimum size of a divisible range
+    ///
+    /// \pre `begin <= end`
     Range(iterator begin, iterator end, size_type grainsize = 1)
         : begin_(begin), end_(end), grainsize_(grainsize)
     {
         runtime_assert(begin_ <= end_,
             "**Range::Range** used with invalid pair of integers");
     }
+
+    /// \brief Copy Constructor
+    Range(const Range &) = default;
 
     /// \brief Copy construct a new range which split the original
     ///
@@ -282,8 +372,8 @@ class Range<IntType, true>
     /// \brief If the range is empty, i.e., `begin() >= end()`
     bool empty() const { return begin_ >= end_; }
 
-    /// \brief If the range is divisible, i.e., `grainsize() < size()`
-    bool is_divisible() const { return grainsize_ < size(); }
+    /// \brief If the range is divisible, i.e., `grainsize() <= size()`
+    bool is_divisible() const { return grainsize_ <= size(); }
 
     /// \brief The lower bound of the range
     iterator begin() const { return begin_; }
@@ -301,22 +391,29 @@ class Range<IntType, true>
 /// \ingroup Core
 ///
 /// \details
-/// A range of input iterators denote the half-open interval \f$[b, e)\f$ where
+/// A range of iterators denote the half-open interval \f$[b, e)\f$ where
 /// `distance(b, e) >= 0`.
-template <typename InputIter>
-class Range<InputIter, false>
+template <typename Iterator>
+class Range<Iterator, false>
 {
     public:
     using size_type = std::size_t;
-    using iterator = InputIter;
+    using iterator = Iterator;
     using value_type = typename std::iterator_traits<iterator>::value_type;
     using pointer = typename std::iterator_traits<iterator>::pointer;
     using reference = typename std::iterator_traits<iterator>::reference;
 
+    /// \brief Default constructor
     Range() : begin_(iterator()), end_(begin_), grainsize_(1) {}
 
-    Range(const Range &) = default;
-
+    /// \brief Construct a new range with a pair of iterators
+    ///
+    /// \param begin The lower bound of the range
+    /// \param end The upper bound of the range
+    /// \param grainsize The minimum size of a divisible range
+    ///
+    /// \pre `Iterator` is an input iterator
+    /// \pre `distance(begin, end) >= 0`
     Range(iterator begin, iterator end, size_type grainsize = 1)
         : begin_(begin), end_(end), grainsize_(grainsize)
     {
@@ -326,7 +423,12 @@ class Range<InputIter, false>
             "**Range::Range** used with invalid pair of iterators");
     }
 
+    /// \brief Copy constructor
+    Range(const Range &) = default;
+
     /// \brief Copy construct a new range which split the original
+    ///
+    /// \pre `Iterator is an input iterator
     ///
     /// \details
     /// Let the original range in `other` be \f$[b, e)\f$. The newly
@@ -366,8 +468,8 @@ class Range<InputIter, false>
         return distance(begin_, end_) <= 0;
     }
 
-    /// \brief If the range is divisible, i.e., `grainsize() < size()`
-    bool is_divisible() const { return grainsize_ < size(); }
+    /// \brief If the range is divisible, i.e., `grainsize() <= size()`
+    bool is_divisible() const { return grainsize_ <= size(); }
 
     /// \brief The lower bound of the range
     iterator begin() const { return begin_; }
@@ -375,23 +477,38 @@ class Range<InputIter, false>
     /// \brief The upper bound of the range
     iterator end() const { return end_; }
 
-    /// \brief Access an element in the range given random access iterators
-    /// with bound checking
-    reference at(size_type i) const
+    /// \brief Access an element within the range with bound checking
+    ///
+    /// \pre `Iterator` is an input iterator
+    /// \pre `n >= 0 && n < size()`
+    reference at(size_type n) const
     {
         runtime_assert<std::out_of_range>(
-            begin_ + i < end_, "**Range::at** index out of range");
+            n < size(), "**Range::at** index out of range");
 
-        return operator[](i);
+        return operator[](n);
     }
 
-    /// \brief Access an element in the range given random access iterators
-    reference operator[](size_type i) const { return *(begin_ + i); }
+    /// \brief Access an element within the range
+    ///
+    /// \pre `Iterator` is an input iterator
+    /// \pre `n >= 0 && n < size()`
+    reference operator[](size_type n) const
+    {
+        using std::advance;
+
+        iterator iter = begin_;
+        advance(iter, n);
+
+        return *iter;
+    }
 
     /// \brief Access the first element in the range
     reference front() const { return *begin_; }
 
-    /// \brief Access the last element in the range given bidirectory iterators
+    /// \brief Access the last element in the range
+    ///
+    /// \pre `Iterator` is a bidirectional iterator
     reference back() const { return *(--end_); }
 
     private:

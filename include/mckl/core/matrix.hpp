@@ -50,8 +50,10 @@ class Matrix
     Vector<T, Alloc> data_;
 
     public:
-    using size_type = std::size_t;
     using value_type = T;
+    using allocator_type = Alloc;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using reference = value_type &;
     using const_reference = const value_type &;
     using pointer = value_type *;
@@ -62,18 +64,18 @@ class Matrix
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    using row_iterator = std::conditional_t<Layout == RowMajor, pointer,
-        StrideIterator<pointer>>;
+    using row_iterator =
+        std::conditional_t<Layout == RowMajor, pointer, StepIterator<pointer>>;
     using const_row_iterator = std::conditional_t<Layout == RowMajor,
-        const_pointer, StrideIterator<const_pointer>>;
+        const_pointer, StepIterator<const_pointer>>;
     using reverse_row_iterator = std::reverse_iterator<row_iterator>;
     using const_reverse_row_iterator =
         std::reverse_iterator<const_row_iterator>;
 
-    using col_iterator = std::conditional_t<Layout == ColMajor, pointer,
-        StrideIterator<pointer>>;
+    using col_iterator =
+        std::conditional_t<Layout == ColMajor, pointer, StepIterator<pointer>>;
     using const_col_iterator = std::conditional_t<Layout == ColMajor,
-        const_pointer, StrideIterator<const_pointer>>;
+        const_pointer, StepIterator<const_pointer>>;
     using reverse_col_iterator = std::reverse_iterator<col_iterator>;
     using const_reverse_col_iterator =
         std::reverse_iterator<const_col_iterator>;
@@ -143,259 +145,244 @@ class Matrix
         return mat;
     }
 
-    /// \brief Iterator to the upper-left corner of the matrix
-    iterator begin() noexcept { return data(); }
+    /// \brief Returns the associated allocator
+    allocator_type get_allocator() const { return data_.get_allocator(); }
 
     /// \brief Iterator to the upper-left corner of the matrix
-    const_iterator begin() const noexcept { return cbegin(); }
+    iterator begin() { return data(); }
 
     /// \brief Iterator to the upper-left corner of the matrix
-    const_iterator cbegin() const noexcept { return data(); }
+    const_iterator begin() const { return cbegin(); }
+
+    /// \brief Iterator to the upper-left corner of the matrix
+    const_iterator cbegin() const { return data(); }
 
     /// \brief Iterator to one pass the lower-right corner of the matrix
-    iterator end() noexcept { return begin() + nrow_ * ncol_; }
+    iterator end() { return begin() + nrow_ * ncol_; }
 
     /// \brief Iterator to one pass the lower-right corner of the matrix
-    const_iterator end() const noexcept { return cend(); }
+    const_iterator end() const { return cend(); }
 
     /// \brief Iterator to one pass the lower-right corner of the matrix
-    const_iterator cend() const noexcept { return begin() + nrow_ * ncol_; }
+    const_iterator cend() const { return begin() + nrow_ * ncol_; }
 
     /// \brief Iterator to the lower-right corner of the matrix
-    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
 
     /// \brief Iterator to the lower-right corner of the matrix
-    const_reverse_iterator rbegin() const noexcept { return crbegin(); }
+    const_reverse_iterator rbegin() const { return crbegin(); }
 
     /// \brief Iterator to the lower-right corner of the matrix
-    const_reverse_iterator crbegin() const noexcept
+    const_reverse_iterator crbegin() const
     {
         return const_reverse_iterator(cend());
     }
 
     /// \brief Iterator one before the upper-left corner of the matrix
-    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
 
     /// \brief Iterator one before the upper-left corner of the matrix
-    const_reverse_iterator rend() const noexcept { return crend(); }
+    const_reverse_iterator rend() const { return crend(); }
 
     /// \brief Iterator one before the upper-left corner of the matrix
-    const_reverse_iterator crend() const noexcept
+    const_reverse_iterator crend() const
     {
         return const_reverse_iterator(cbegin());
     }
 
     /// \brief Iterator to the beginning of a given row
-    row_iterator row_begin(size_type i) noexcept
+    row_iterator row_begin(size_type i)
     {
         return row_begin_dispatch(i, layout_dispatch());
     }
 
     /// \brief Iterator to the beginning of a given row
-    const_row_iterator row_begin(size_type i) const noexcept
-    {
-        return row_cbegin(i);
-    }
+    const_row_iterator row_begin(size_type i) const { return row_cbegin(i); }
 
     /// \brief Iterator to the beginning of a given row
-    const_row_iterator row_cbegin(size_type i) const noexcept
+    const_row_iterator row_cbegin(size_type i) const
     {
         return row_begin_dispatch(i, layout_dispatch());
     }
 
     /// \brief Iterator to one pass the end of a given row
-    row_iterator row_end(size_type i) noexcept { return row_begin(i) + ncol_; }
+    row_iterator row_end(size_type i) { return row_begin(i) + ncol_; }
 
     /// \brief Iterator to one pass the end of a given row
-    const_row_iterator row_end(size_type i) const noexcept
-    {
-        return row_cend(i);
-    }
+    const_row_iterator row_end(size_type i) const { return row_cend(i); }
 
     /// \brief Iterator to one pass the end of a given row
-    const_row_iterator row_cend(size_type i) const noexcept
+    const_row_iterator row_cend(size_type i) const
     {
         return row_cbegin(i) + ncol_;
     }
 
     /// \brief Iterator to the end of a given row
-    reverse_row_iterator row_rbegin(size_type i) noexcept
+    reverse_row_iterator row_rbegin(size_type i)
     {
         return reverse_row_iterator(row_end(i));
     }
 
     /// \brief Iterator to the end of a given row
-    const_reverse_row_iterator row_rbegin(size_type i) const noexcept
+    const_reverse_row_iterator row_rbegin(size_type i) const
     {
         return row_crbegin(i);
     }
 
     /// \brief Iterator to the end of a given row
-    const_reverse_row_iterator row_crbegin(size_type i) const noexcept
+    const_reverse_row_iterator row_crbegin(size_type i) const
     {
         return const_reverse_row_iterator(row_cend(i));
     }
 
     /// \brief Iterator to one before the beginning of a given row
-    reverse_row_iterator row_rend(size_type i) noexcept
+    reverse_row_iterator row_rend(size_type i)
     {
         return reverse_row_iterator(row_begin(i));
     }
 
     /// \brief Iterator to one before the beginning of a given row
-    const_reverse_row_iterator row_rend(size_type i) const noexcept
+    const_reverse_row_iterator row_rend(size_type i) const
     {
         return row_crend(i);
     }
 
     /// \brief Iterator to one before the beginning of a given row
-    const_reverse_row_iterator row_crend(size_type i) const noexcept
+    const_reverse_row_iterator row_crend(size_type i) const
     {
         return const_reverse_row_iterator(row_cbegin(i));
     }
 
     /// \brief Iterator to the beginning of a given column
-    col_iterator col_begin(size_type i) noexcept
+    col_iterator col_begin(size_type i)
     {
         return col_begin_dispatch(i, layout_dispatch());
     }
 
     /// \brief Iterator to the beginning of a given column
-    const_col_iterator col_begin(size_type j) const noexcept
-    {
-        return col_cbegin(j);
-    }
+    const_col_iterator col_begin(size_type j) const { return col_cbegin(j); }
 
     /// \brief Iterator to the beginning of a given column
-    const_col_iterator col_cbegin(size_type j) const noexcept
+    const_col_iterator col_cbegin(size_type j) const
     {
         return col_begin_dispatch(j, layout_dispatch());
     }
 
     /// \brief Iterator to one pass the end of a given column
-    col_iterator col_end(size_type j) noexcept { return col_begin(j) + nrow_; }
+    col_iterator col_end(size_type j) { return col_begin(j) + nrow_; }
 
     /// \brief Iterator to one pass the end of a given column
-    const_col_iterator col_end(size_type j) const noexcept
-    {
-        return col_cend(j);
-    }
+    const_col_iterator col_end(size_type j) const { return col_cend(j); }
 
     /// \brief Iterator to one pass the end of a given column
-    const_col_iterator col_cend(size_type j) const noexcept
+    const_col_iterator col_cend(size_type j) const
     {
         return col_cbegin(j) + nrow_;
     }
 
     /// \brief Iterator to the end of a given column
-    reverse_col_iterator col_rbegin(size_type j) noexcept
+    reverse_col_iterator col_rbegin(size_type j)
     {
         return reverse_col_iterator(col_end(j));
     }
 
     /// \brief Iterator to the end of a given column
-    const_reverse_col_iterator col_rbegin(size_type j) const noexcept
+    const_reverse_col_iterator col_rbegin(size_type j) const
     {
         return col_crbegin(j);
     }
 
     /// \brief Iterator to the end of a given column
-    const_reverse_col_iterator col_crbegin(size_type j) const noexcept
+    const_reverse_col_iterator col_crbegin(size_type j) const
     {
         return const_reverse_col_iterator(col_cend(j));
     }
 
     /// \brief Iterator to one before the beginning of a given column
-    reverse_col_iterator col_rend(size_type j) noexcept
+    reverse_col_iterator col_rend(size_type j)
     {
         return reverse_col_iterator(col_begin(j));
     }
 
     /// \brief Iterator to one before the beginning of a given column
-    const_reverse_col_iterator col_rend(size_type j) const noexcept
+    const_reverse_col_iterator col_rend(size_type j) const
     {
         return col_crend(j);
     }
 
     /// \brief Iterator to one before the beginning of a given column
-    const_reverse_col_iterator col_crend(size_type j) const noexcept
+    const_reverse_col_iterator col_crend(size_type j) const
     {
         return const_reverse_col_iterator(col_cbegin(j));
     }
 
     /// \brief Range of a given row
-    row_range row(size_type i) noexcept
-    {
-        return row_range(row_begin(i), row_end(i));
-    }
+    row_range row(size_type i) { return row_range(row_begin(i), row_end(i)); }
 
     /// \brief Range of a given row
-    const_row_range row(size_type i) const noexcept
+    const_row_range row(size_type i) const
     {
         return const_row_range(row_begin(i), row_end(i));
     }
 
     /// \brief Range of a given row
-    const_row_range crow(size_type i) const noexcept
+    const_row_range crow(size_type i) const
     {
         return const_row_range(row_cbegin(i), row_cend(i));
     }
 
     /// \brief Range of a given row in reverse order
-    reverse_row_range rrow(size_type i) noexcept
+    reverse_row_range rrow(size_type i)
     {
         return reverse_row_range(row_rbegin(i), row_rend(i));
     }
 
     /// \brief Range of a given row in reverse order
-    const_reverse_row_range rrow(size_type i) const noexcept
+    const_reverse_row_range rrow(size_type i) const
     {
         return const_reverse_row_range(row_rbegin(i), row_rend(i));
     }
 
     /// \brief Range of a given row in reverse order
-    const_reverse_row_range crrow(size_type i) const noexcept
+    const_reverse_row_range crrow(size_type i) const
     {
         return const_reverse_row_range(row_crbegin(i), row_crend(i));
     }
 
     /// \brief Range of a given column
-    col_range col(size_type i) noexcept
-    {
-        return col_range(col_begin(i), col_end(i));
-    }
+    col_range col(size_type i) { return col_range(col_begin(i), col_end(i)); }
 
     /// \brief Range of a given column
-    const_col_range col(size_type i) const noexcept
+    const_col_range col(size_type i) const
     {
         return const_col_range(col_begin(i), col_end(i));
     }
 
     /// \brief Range of a given column
-    const_col_range ccol(size_type i) const noexcept
+    const_col_range ccol(size_type i) const
     {
         return const_col_range(col_cbegin(i), col_cend(i));
     }
 
     /// \brief Range of a given column in reverse order
-    reverse_col_range rcol(size_type i) noexcept
+    reverse_col_range rcol(size_type i)
     {
         return reverse_col_range(col_rbegin(i), col_rend(i));
     }
 
     /// \brief Range of a given column in reverse order
-    const_reverse_col_range rcol(size_type i) const noexcept
+    const_reverse_col_range rcol(size_type i) const
     {
         return const_reverse_col_range(col_rbegin(i), col_rend(i));
     }
 
     /// \brief Range of a given column in reverse order
-    const_reverse_col_range crcol(size_type i) const noexcept
+    const_reverse_col_range crcol(size_type i) const
     {
         return const_reverse_col_range(col_crbegin(i), col_crend(i));
     }
 
-    /// \brief The element at row `i` and column `j`
+    /// \brief Access an element in the matrix with bound checking
     reference at(size_type i, size_type j)
     {
         runtime_assert<std::out_of_range>(
@@ -406,7 +393,7 @@ class Matrix
         return at_dispatch(i, j, layout_dispatch());
     }
 
-    /// \brief The element at row `i` and column `j`
+    /// \brief Access an element in the matrix with bound checking
     const_reference at(size_type i, size_type j) const
     {
         runtime_assert<std::out_of_range>(
@@ -430,55 +417,55 @@ class Matrix
     }
 
     /// \brief Pointer to the upper left corner of the matrix
-    pointer data() noexcept { return data_.data(); }
+    pointer data() { return data_.data(); }
 
     /// \brief Pointer to the upper left corner of the matrix
-    const_pointer data() const noexcept { return data_.data(); }
+    const_pointer data() const { return data_.data(); }
 
     /// \brief Pointer to the first element of a row
-    pointer row_data(size_type i) noexcept
+    pointer row_data(size_type i)
     {
         return row_data_dispatch(i, layout_dispatch());
     }
 
     /// \brief Pointer to the first element of a column
-    const_pointer row_data(size_type i) const noexcept
+    const_pointer row_data(size_type i) const
     {
         return row_data_dispatch(i, layout_dispatch());
     }
 
     /// \brief The stride of row-wise access through `row_data`
-    size_type row_stride() const noexcept
+    size_type row_stride() const
     {
         return row_stride_dispatch(layout_dispatch());
     }
 
     /// \brief Pointer to the beginning of a column
-    pointer col_data(size_type j) noexcept
+    pointer col_data(size_type j)
     {
         return col_data_dispatch(j, layout_dispatch());
     }
 
     /// \brief Pointer to the beginning of a column
-    const_pointer col_data(size_type j) const noexcept
+    const_pointer col_data(size_type j) const
     {
         return col_data_dispatch(j, layout_dispatch());
     }
 
     /// \brief The stride size of column-wise access through `col_data`
-    size_type col_stride() const noexcept
+    size_type col_stride() const
     {
         return col_stride_dispatch(layout_dispatch());
     }
 
     /// \brief If the matrix is empty, either zero rows or zero columns or both
-    bool empty() const noexcept { return nrow_ == 0 || ncol_ == 0; }
+    bool empty() const { return nrow_ == 0 || ncol_ == 0; }
 
     /// \brief The number of rows
-    size_type nrow() const noexcept { return nrow_; }
+    size_type nrow() const { return nrow_; }
 
     /// \brief The number of columns
-    size_type ncol() const noexcept { return ncol_; }
+    size_type ncol() const { return ncol_; }
 
     /// \brief Reserve space for the matrix given the new number of rows and
     /// columns
@@ -560,25 +547,24 @@ class Matrix
 
     // Layout == RowMajor
 
-    pointer row_begin_dispatch(size_type i, row_major) noexcept
+    pointer row_begin_dispatch(size_type i, row_major) { return row_data(i); }
+
+    const_pointer row_begin_dispatch(size_type i, row_major) const
     {
         return row_data(i);
     }
 
-    const_pointer row_begin_dispatch(size_type i, row_major) const noexcept
+    StepIterator<pointer> col_begin_dispatch(size_type j, row_major)
     {
-        return row_data(i);
+        return StepIterator<pointer>(
+            col_data(j), static_cast<difference_type>(col_stride()));
     }
 
-    StrideIterator<pointer> col_begin_dispatch(size_type j, row_major) noexcept
+    StepIterator<const_pointer> col_begin_dispatch(
+        size_type j, row_major) const
     {
-        return StrideIterator<pointer>(col_data(j), col_stride());
-    }
-
-    StrideIterator<const_pointer> col_begin_dispatch(
-        size_type j, row_major) const noexcept
-    {
-        return StrideIterator<const_pointer>(col_data(j), col_stride());
+        return StepIterator<const_pointer>(
+            col_data(j), static_cast<difference_type>(col_stride()));
     }
 
     void resize_dispatch(size_type nrow, size_type ncol, row_major)
@@ -607,49 +593,48 @@ class Matrix
         return data_[i * ncol_ + j];
     }
 
-    size_type row_stride_dispatch(row_major) const noexcept { return 1; }
+    size_type row_stride_dispatch(row_major) const { return 1; }
 
-    pointer row_data_dispatch(size_type i, row_major) noexcept
+    pointer row_data_dispatch(size_type i, row_major)
     {
         return data_.data() + i * ncol_;
     }
 
-    const_pointer row_data_dispatch(size_type i, row_major) const noexcept
+    const_pointer row_data_dispatch(size_type i, row_major) const
     {
         return data_.data() + i * ncol_;
     }
 
-    size_type col_stride_dispatch(row_major) const noexcept { return ncol_; }
+    size_type col_stride_dispatch(row_major) const { return ncol_; }
 
-    pointer col_data_dispatch(size_type j, row_major) noexcept
+    pointer col_data_dispatch(size_type j, row_major)
     {
         return data_.data() + j;
     }
 
-    const_pointer col_data_dispatch(size_type j, row_major) const noexcept
+    const_pointer col_data_dispatch(size_type j, row_major) const
     {
         return data_.data() + j;
     }
 
     // Layout == ColMajor
 
-    StrideIterator<pointer> row_begin_dispatch(size_type i, col_major) noexcept
+    StepIterator<pointer> row_begin_dispatch(size_type i, col_major)
     {
-        return StrideIterator<pointer>(row_data(i), row_stride());
+        return StepIterator<pointer>(
+            row_data(i), static_cast<difference_type>(row_stride()));
     }
 
-    StrideIterator<const_pointer> row_begin_dispatch(
-        size_type i, col_major) const noexcept
+    StepIterator<const_pointer> row_begin_dispatch(
+        size_type i, col_major) const
     {
-        return StrideIterator<const_pointer>(row_data(i), row_stride());
+        return StepIterator<const_pointer>(
+            row_data(i), static_cast<difference_type>(row_stride()));
     }
 
-    pointer col_begin_dispatch(size_type j, col_major) noexcept
-    {
-        return col_data(j);
-    }
+    pointer col_begin_dispatch(size_type j, col_major) { return col_data(j); }
 
-    const_pointer col_begin_dispatch(size_type j, col_major) const noexcept
+    const_pointer col_begin_dispatch(size_type j, col_major) const
     {
         return col_data(j);
     }
@@ -680,26 +665,26 @@ class Matrix
         return data_[j * nrow_ + i];
     }
 
-    size_type row_stride_dispatch(col_major) const noexcept { return nrow_; }
+    size_type row_stride_dispatch(col_major) const { return nrow_; }
 
-    pointer row_data_dispatch(size_type i, col_major) noexcept
+    pointer row_data_dispatch(size_type i, col_major)
     {
         return data_.data() + i;
     }
 
-    const_pointer row_data_dispatch(size_type i, col_major) const noexcept
+    const_pointer row_data_dispatch(size_type i, col_major) const
     {
         return data_.data() + i;
     }
 
-    size_type col_stride_dispatch(col_major) const noexcept { return 1; }
+    size_type col_stride_dispatch(col_major) const { return 1; }
 
-    pointer col_data_dispatch(size_type j, col_major) noexcept
+    pointer col_data_dispatch(size_type j, col_major)
     {
         return data_.data() + j * nrow_;
     }
 
-    const_pointer col_data_dispatch(size_type j, col_major) const noexcept
+    const_pointer col_data_dispatch(size_type j, col_major) const
     {
         return data_.data() + j * nrow_;
     }
