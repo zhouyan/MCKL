@@ -68,7 +68,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     /// \brief Clear the estimate matrix but preserve the dimension
     void clear() { this->resize(0, dim()); }
 
-    /// \brief Reserve space for specified *additional* number of iterations
+    /// \brief Reserve space for *additional* iterations
     void reserve(std::size_t n)
     {
         Matrix<RowMajor, T>::reserve(num_iter() + n, dim());

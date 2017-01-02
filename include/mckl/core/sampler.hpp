@@ -50,6 +50,7 @@ class Sampler
     using eval_type = typename SamplerTrait<Derived>::eval_type;
     using estimator_type = typename SamplerTrait<Derived>::estimator_type;
 
+    /// \brief Reserve space for *additional* iterations
     void reserve(std::size_t n)
     {
         for (auto &est : estimator_)
@@ -57,6 +58,7 @@ class Sampler
                 e.reserve(n);
     }
 
+    /// \brief Remove all evaluation methods
     void reset()
     {
         for (auto &eval : eval_)
@@ -65,6 +67,7 @@ class Sampler
             est.clear();
     }
 
+    /// \brief Clear all estimator histories
     void clear()
     {
         for (auto &est : estimator_)
@@ -72,6 +75,7 @@ class Sampler
                 e.clear();
     }
 
+    /// \brief Return a combined matrix of all estimates
     template <MatrixLayout Layout, typename T>
     Matrix<Layout, T> summary() const
     {
@@ -105,6 +109,10 @@ class Sampler
         return mat;
     }
 
+    /// \brief Print the summary matrix in textual form
+    ///
+    /// \param os The output stream
+    /// \param sepchar The character used to seperate fields
     template <typename CharT, typename Traits>
     std::basic_ostream<CharT, Traits> &print(
         std::basic_ostream<CharT, Traits> &os, char sepchar = ' ') const
@@ -126,6 +134,7 @@ class Sampler
         return os;
     }
 
+    /// \brief Output the summary mtrix through an output stream
     template <typename CharT, typename Traits>
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os, const Sampler<Derived> &sampler)
