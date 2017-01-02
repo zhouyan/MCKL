@@ -38,7 +38,7 @@
 namespace mckl
 {
 
-/// \brief Weight class
+/// \brief Weights of samples
 /// \ingroup Core
 class Weight
 {
@@ -51,14 +51,7 @@ class Weight
     size_type size() const { return data_.size(); }
 
     /// \brief Resize the Weight object
-    void resize(size_type N)
-    {
-        if (N == size())
-            return;
-
-        data_.resize(N);
-        set_equal();
-    }
+    void resize(size_type N) { data_.resize(N); }
 
     /// \brief Reserve space
     void reserve(size_type N) { data_.reserve(N); }

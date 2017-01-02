@@ -50,10 +50,14 @@ template <typename T>
 class EstimateMatrix : public Matrix<RowMajor, T>
 {
     public:
-    using size_type = typename Matrix<RowMajor, T>::size_type;
     using value_type = typename Matrix<RowMajor, T>::value_type;
+    using size_type = typename Matrix<RowMajor, T>::size_type;
+    using estimate_range = typename Matrix<RowMajor, T>::row_range;
+    using variable_range = typename Matrix<RowMajor, T>::col_range;
+    using const_estimate_range = typename Matrix<RowMajor, T>::const_row_range;
+    using const_variable_range = typename Matrix<RowMajor, T>::const_col_range;
 
-    EstimateMatrix(size_type N, size_type dim) : Matrix<RowMajor, T>(N, dim) {}
+    EstimateMatrix(size_type dim) : Matrix<RowMajor, T>(0, dim) {}
 
     /// \brief The dimension of the estimator
     std::size_t dim() const noexcept { return this->ncol(); }
@@ -70,21 +74,25 @@ class EstimateMatrix : public Matrix<RowMajor, T>
         Matrix<RowMajor, T>::reserve(num_iter() + n, dim());
     }
 
-    /// \brief Read the values of \f$\eta_i(1:d)\f$
-    template <typename OutputIter>
-    OutputIter read_estimate(size_type i, OutputIter first) const
+    /// \brief Range of an estimate
+    estimate_range estimate(size_type i) { return this->row_range(i); }
+
+    /// \brief Range of an estimate
+    const_estimate_range estimate(size_type i) const
     {
-        return std::copy_n(this->row_begin(i), this->row_end(i), first);
+        return this->row_range(i);
     }
 
-    /// \brief Read the values of \f$\eta_{1:t}(j)\f$
-    template <typename OutputIter>
-    OutputIter read_variable(size_type j, OutputIter first) const
+    /// \brief Range of a variable
+    variable_range variable(size_type j) { return this->col_range(j); }
+
+    /// \brief Range of a variable
+    const_variable_range variable(size_type j) const
     {
-        return std::copy(this->col_begin(j), this->col_end(j), first);
+        return this->col_range(j);
     }
 
-    /// \brief Add space for a new estimate, return a pointer to the new space
+    /// \brief Add space for a new estimate, return a pointer to the new row
     T *insert_estimate()
     {
         const size_type i = num_iter();

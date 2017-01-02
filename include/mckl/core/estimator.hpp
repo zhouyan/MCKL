@@ -50,12 +50,16 @@ class Estimator : public EstimateMatrix<T>
 
     template <typename Eval>
     Estimator(std::size_t dim, Eval &&eval)
-        : EstimateMatrix<T>(0, dim), eval_(std::forward<Eval>(eval))
+        : EstimateMatrix<T>(dim), eval_(std::forward<Eval>(eval))
     {
     }
 
+    using EstimateMatrix<T>::estimate;
+
+    /// \brief Set a new estimate evaluation method
     template <typename Eval>
-    void estimate(Eval &&eval)
+    std::enable_if_t<!std::is_convertible<Eval, int>::value> estimate(
+        Eval &&eval)
     {
         eval_ = std::forward<Eval>(eval);
     }

@@ -312,13 +312,10 @@ class Particle
     template <typename InputIter>
     void select(size_type n, InputIter index)
     {
-        if (n != size()) {
-            weight_.resize(static_cast<SizeType<weight_type>>(n));
-            rng_set_.resize(static_cast<SizeType<rng_set_type>>(n));
-        } else {
-            weight_.set_equal();
-        }
         state_.select(n, index);
+        weight_.resize(static_cast<SizeType<weight_type>>(n));
+        weight_.set_equal();
+        rng_set_.resize(static_cast<SizeType<rng_set_type>>(n));
     }
 
     /// \brief Read and write access to the state collection object
