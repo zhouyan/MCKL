@@ -67,7 +67,7 @@ class StepIterator
     /// distance equal to `step`.
     ///
     /// \pre `Base` is copy constructible
-    StepIterator(Base base, difference_type step = 1) noexcept(
+    explicit StepIterator(Base base, difference_type step = 1) noexcept(
         std::is_nothrow_copy_constructible<Base>::value)
         : base_(base), step_(step)
     {

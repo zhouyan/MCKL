@@ -32,28 +32,94 @@
 \chapter{Building blocks}
 \label{chap:Building blocks}
 
-In this chapter, we introduce the basic data structures and other building
-blocks of the library.
+In this chapter, we introduce the basic building blocks of the library.
+
+\section{Iterators}
+\label{sec:Iterators}
+
+\subsection{Step iterator}
+\label{sub:Step iterator}
+
+The step iterator can be used to access memory in a regular, non-contiguous
+pattern. The class template,
+\begin{verbatim}
+template <typename Base>
+class StepIterator;
+\end{verbatim}
+implements an iterator adapter, that will increment a base iterator multiple
+steps at a time. It can be constructed by,
+\begin{verbatim}
+StepIterator(Base base = Base(), difference_type step = 1);
+\end{verbatim}
+All operations for a random access iterator is defined. For example,
+\begin{verbatim}
+Base base;
+StepIterator<Base> iter(base, step);
+*iter;    // => *base
+++iter;   // => std::advance(base, step);
+--iter;   // => std::advance(base, -step);
+iter + n; // => std::advance(base, step * n);
+iter[n];  // => *(iter + n);
+\end{verbatim}
+The base iterator only needs to meet the input iterator requirement for most
+operations. If it is to be decremented, either through subtraction or negative
+step size, it also needs to meet the bidirectional iterator requirement.
+
+\subsection{Range}
+\label{sub:Range}
+
+The range concept abstracts a half-open interval $[b, e)$ denoted by either a
+pair of integers or iterators. This is implemented by the following class
+template,
+\begin{verbatim}
+template <typename T, bool = std::is_integral<T>::value>
+class Range;
+\end{verbatim}
+A range can be constructed by,
+\begin{verbatim}
+Range(T begin, T end, size_type grainsize = 1);
+\end{verbatim}
+The lower and upper bounds of the interval, and the grain size, can be access
+later. For example,
+\begin{verbatim}
+Range(begin, end, grainsize) range;
+range.begin();
+range.end();
+range.grainsize();
+\end{verbatim}
+When |T| is of an iterator type, the interval can be mapped into one denoted by
+a pair of integers. Thus, we will use the integer denoted interval $[b, e)$ for
+the discussions follows.
+
+A range can be split into two, $[b, h)$ and $[h, e)$ such that $h = \Floor{(b +
+  e) / 2}$. Such the two ranges can be created by the following constructor,
+\begin{verbatim}
+template <typename Split>
+Range(Range &other, Split);
+\end{verbatim}
+where |Split| can be any type. Its sole purpose is to distinguish this
+constructor from the copy constructor. A range is empty if and only if $b \ge
+e$. This can be tested by the |empty| method. The size of the range is
+$\max\Curly{0, e - b}$, which is returned by the |size| method. A range is
+divisible if its grain size is smaller than or equal to its size, where the
+grain size is specified by the optional third parameter of the constructor.
+This can be tested by the |is_divisible| method.
 
 \section{Matrix}
 \label{sec:Matrix}
 
-The |Matrix| class is a container representing a two-dimensional array. It is
-not designed to be a full-fledged matrix class for the purposes such as linear
-algebra. Instead, it will serve as the base class later for some data
-structures with matrix-like data layout.
-
-The class is declared as the following,
+The class template,
 \begin{verbatim}
 template <MatrixLayout Layout, typename T>
 clas Matrix;
 \end{verbatim}
-where |MatrixLayout| is an enumeration defined as the following
+is a container representing a two-dimensional array. It is not designed to be a
+full-fledged matrix class for the purposes such as linear algebra. The
+enumerator |MatrixLayout| is defined as the following
 \begin{verbatim}
 enum class MatrixLayout { RowMajor = 101, ColMajor = 102 };
 \end{verbatim}
-and |T| is the data type of the matrix element. For convenience, two constants
-are defined,
+For convenience, two constants are defined,
 \begin{verbatim}
 constexpr MatrixLayout RowMajor = MatrixLayout::RowMajor;
 constexpr MatrixLayout ColMajor = MatrixLayout::ColMajor;
@@ -97,6 +163,18 @@ matrix may have either unit stride row-wise or column-wise.
 Other methods such as |reserve|, |swap|, etc., take their usual meanings as in
 the standard library containers. See the reference manual for details.
 
+In additional, |Matrix| also provide iterator based element access.
+\begin{verbatim}
+A.begin();      // => The upper left corner of the matrix
+A.end();        // => One pass the lower right corner of the matrix
+A.row_begin(i); // => Beginning of the i-th row
+A.row_end(i);   // => End of the i-th row
+A.col_begin(j); // => Beginning of the j-th column
+A.col_end(j);   // => End of the j-th column
+\end{verbatim}
+Other methods for element access and manipulation of the matrix can be found in
+the reference manual.
+
 \subsection{Matrix of states}
 \label{sub:Matrix of states}
 
@@ -132,14 +210,14 @@ S.resize(n); // => S.resize(n, S.ncol());
 S.reserve(n);
 \end{verbatim}
 
-\subsection{Matrix of estimates}
-\label{sub:Matrix of estimates}
+\section{State}
+\label{sec:State}
 
 \section{Weight}
 \label{sec:Weight}
 
-\section{Particle system}
-\label{sec:Particle system}
+\section{Particle}
+\label{sec:Particle}
 
-\section{Estimator of iterative algorithms}
-\label{sec:Estimator of iterative algorithms}
+\section{Estimator}
+\label{sec:Estimator}
