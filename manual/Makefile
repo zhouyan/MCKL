@@ -33,7 +33,6 @@
 
 all :
 	make -C tab
-	make -C fig
 	latexmk -silent -f manual.tex >/dev/null
 
 clean:
