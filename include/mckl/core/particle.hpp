@@ -287,10 +287,7 @@ class Particle
 
     /// \brief Default constructor
     Particle()
-        : state_(0)
-        , weight_(0)
-        , rng_set_(0)
-        , rng_(Seed<rng_type>::instance().get())
+        : weight_(0), rng_set_(0), rng_(Seed<rng_type>::instance().get())
     {
     }
 
