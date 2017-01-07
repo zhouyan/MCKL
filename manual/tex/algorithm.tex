@@ -1,5 +1,5 @@
 % ============================================================================
-%  MCKL/manual/manual.tex
+%  MCKL/manual/tex/algorithm.tex
 % ----------------------------------------------------------------------------
 %  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
@@ -29,38 +29,20 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\documentclass[
-a4paper,bib,hyper,sups,
-fontsize=12pt,
-fontset=Arno,
-monoscale=MatchLowercase,
-]{mbook}
+\chapter{Algorithm}
+\label{chap:Algorithm}
 
-\input{tex/macro}
-\input{tex/inc.tex}
+\section{Markov chain Monte Carlo}
+\label{sec:Markov chain Monte Carlo}
 
-\addbibresource{manual.bib}
+\section{Importance sampling}
+\label{sec:Importance sampling}
 
-\begin{document}
+\section{Resampling}
+\label{sec:Resampling}
 
-\frontmatter
-\include{tex/front}
+\section{Sequential Monte Carlo}
+\label{sec:Sequential Monte Carlo}
 
-\mainmatter
-\include{tex/introduction}
-\include{tex/core}
-\include{tex/algorithm}
-\include{tex/smp}
-\include{tex/math}
-\include{tex/random}
-\include{tex/utility}
-
-\printbibliography
-
-\appendix
-\include{tex/config}
-\include{tex/random_rng}
-\include{tex/random_distribution}
-\include{tex/random_testu01}
-
-\end{document}
+\section{Particle Markov chain Monte Carlo}
+\label{sec:Particle Markov chain Monte Carlo}

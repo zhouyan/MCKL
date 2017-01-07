@@ -40,16 +40,16 @@ platforms.
 \section{Decomposition of evaluation objects}
 \label{sec:Decomposition of evaluation objects}
 
-Recall that, in section~\ref{sec:Sampler} we introduced the concepts of sampler
-evaluation objects. The primary method of iterating a sampler is through
-one or more evaluation objects that is convertible to the following type,
+Recall that, in section~\ref{sec:Sequential Monte Carlo} we introduced the
+concepts of sampler evaluation objects. The primary method of iterating a
+sampler is through one or more evaluation objects that is convertible to the
+following type,
 \begin{verbatim}
 using eval_type = std::function<void(size_t, Particle<T> &)>;
 \end{verbatim}
 In some situations, part of the evaluation process can be parallelized. For
-example, consider the weight step in the simple particle filter in
-section~\ref{sec:Example (PF)}. Recall the simple |PFWeight| function in
-section~\ref{sub:Implementation (PF)},
+example, consider the weight step in the simple particle filter in. Recall the
+simple |PFWeight|,
 \begin{verbatim}
 void PFWeight(size_t iter, Particle<PF> &particle)
 {
@@ -227,8 +227,7 @@ virtual void eval_each(size_t iter, size_t dim, ParticleIndex<T> idx, double *r)
 \end{verbatim}
 Now the output parameter |r| no longer points an $N$ by $d$ matrix. Instead it
 points to a $d$-vector specific for each particle. For example, recall the
-estimation function |PFEstimate| in
-section~\ref{sub:Implementation (PF)}.
+estimation function |PFEstimate|,
 \begin{verbatim}
 void PFEstimate(size_t, size_t, Particle<PF> &particle, double *r)
 {
