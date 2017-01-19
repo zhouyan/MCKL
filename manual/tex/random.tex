@@ -67,7 +67,7 @@ for (size_t i = 0; i != n; ++i)
 The results are always the same unless a non-deterministic \rng is used (see
 section~\ref{sec:Non-deterministic RNG}). For some \rng{}s implemented in
 \mckl, the vectorized function may have considerable performance advantage. See
-appendix~\ref{chap:Performance of RNG}. The second variant of |rand| is for
+appendix~\ref{chap:Performance of RNGs}. The second variant of |rand| is for
 generating distribution random variates,
 \begin{verbatim}
 template <typename RNGType, typename DistributionType>
@@ -89,7 +89,7 @@ for (size_t i = 0; i != n; ++i)
 \end{verbatim}
 Depending on the type of \rng and the distribution (including its parameters),
 the vectorized function may have superior performance. See
-appendix~\ref{chap:Performance of distribution}. However, the results are not
+appendix~\ref{chap:Performance of Distributions}. However, the results are not
 always the same as using a loop. The uniform bits distribution (see
 section~\ref{sec:Uniform bits distribution}) and the standard uniform
 distributions (see section~\ref{sec:Standard uniform distribution}) will always
