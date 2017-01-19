@@ -29,8 +29,8 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\chapter{Configuration macros}
-\label{chap:Configuration macros}
+\chapter{Configuration Macros}
+\label{chap:Configuration Macros}
 
 The library has a few configuration macros. All macros have default values if
 left undefined, and can be overwritten by defining them with proper values
@@ -199,9 +199,9 @@ to be false, the library declares the \blas Fortran routines in C itself (see
 below).
 
 \paragraph{\texttt{MCKL\_BLAS\_NAME} and
-\texttt{MCKL\_BLAS\_NAME\_NO\_UNDERSCORE}} These two macros determine how shall
-the \blas Fortran routines be declared in C. The default behavior is to append
-an underscore to the function name. For example, |dgemv| in Fortran becomes
+\texttt{MCKL\_BLAS\_NAME\_NO\_UNDERSCORE}} These two macros determine how the
+\blas Fortran routines are declared in C. The default behavior is to append an
+underscore to the function name. For example, |dgemv| in Fortran becomes
 |dgemv_| in C. If there should be no underscore, define the second macro. If
 the name mangling is more complicated, one can define the |MCKL_BLAS_NAME|
 macro directly. For example,
@@ -228,44 +228,12 @@ The value must be a power of two and positive.
 \paragraph{\texttt{MCKL\_ALIGNMENT\_MIN}} The minimum alignment for all types.
 The default is 16. The value must be a power of two and positive.
 
-\paragraph{\texttt{MCKL\_ALIGNED\_MEMORY\_TYPE}} The default type of the
-|Memroy| template parameter of |Allocator| (see section~\ref{sec:Aligned memory
-allocation}). The default depends on the other configuration macros. If
+\paragraph{\texttt{MCKL\_MEMORY\_TYPE}} The default type of the |Memroy|
+template parameter of |Allocator| (see section~\ref{sec:Aligned memory
+  allocation}). The default depends on the other configuration macros. If
 |MCKL_USE_TBB_MALLOC| is true, then the default is |AlignedMemoryTBB|.
 Otherwise it is |AlignedMemorySYS| if it is defined. Otherwise
 |AlignedMemmorySTD| is used as a last resort.
-
-\paragraph{\texttt{MCKL\_CONSTRUCT\_SCALAR}} Determine if scalar types shall be
-zero initialized upon allocation by |Allocator|. The default is false. This
-departures from the behavior of |std::allocator|, with which the memory is
-always value initialized. For example,
-\begin{verbatim}
-std::vector<int> v(n);
-\end{verbatim}
-initializes all values to zero. In contrast,
-\begin{verbatim}
-Vector<int> v(n);
-\end{verbatim}
-leaves the memory uninitialized. To get zero initialized vectors, one can
-either define this macro to 1, or more efficiently,
-\begin{verbatim}
-Vector<int> v(n);
-std::fill(v.begin(), v.end(), 0); // or
-std::memset(v.data(), 0, sizeof(int) * v.size());
-\end{verbatim}
-The two methods are equivalent in most standard library implementations. It is
-strongly recommended that to leave this macro defined to zero. The constructor
-of |std::vector|, with which |Vector| is an alias to, calls the |construct|
-member of |Allocator| to initialize elements one by one, which is a huge waste
-of time. The library does not rely on zero initialization itself. Note that,
-this macro only affect \emph{default initialization of scalars}. For class
-types etc., and other constructor of |std::vector|, such as
-\begin{verbatim}
-Vector<ClassType> c(n);
-Vector<int> v(n, 2);
-\end{verbatim}
-the behavior is as expected. That is, the first is default initialized and the
-second is value initialized.
 
 \section{Error handling}
 \label{sec:Error handling}

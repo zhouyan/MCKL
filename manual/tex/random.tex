@@ -29,8 +29,8 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\chapter{Random number generating}
-\label{chap:Random number generating}
+\chapter{Random Number Generating}
+\label{chap:Random Number Generating}
 
 In this chapter, we first introduce vectorized random number generating in
 section~\ref{sec:Vectorized random number generating}. Then a set of \rng
@@ -153,7 +153,8 @@ class AES192KeySeq;
 template <std::size_t Rounds = MCKL_AES256_ROUNDS>
 class AES256KeySeq;
 
-template <std::size_t Rounds = MCKL_ARS_ROUNDS, typename Constants = ARSConstants>
+template <std::size_t Rounds = MCKL_ARS_ROUNDS,
+    typename Constants = ARSConstants>
 class ARSKeySeq;
 \end{verbatim}
 The default rounds of the first three are~10, 12 and~14, respectively. And thus
@@ -593,7 +594,7 @@ produced by \rng{}s are transferred to~32- or~64-bit random integers through
 the class |UniformBitsDistribution| before they are mapped to floating point
 numbers within the interval $[0, 1]$. The integer type depends on |RealType|
 and the range of the \rng{}, $R$. If $\log_2 R \ge 64$ or |RealType| is
-|long double|, then the integer type is |uint64_t|. If the configuration macro
+|long double|, then the integer type is |uint64_t|. If
 |MCKL_U01_USE_64BITS_DOUBLE| is true and |RealType| is |double|, then the
 integer type is also |uint64_t|. Otherwise, the integer type is |uint32_t|.
 
@@ -601,8 +602,8 @@ In the following, let~$W$ be the number of bits of the integer type, and~$M$ be
 the number of significant bits (including the implicit one) of |RealType|. We
 also denote the input random integers as~$U$ and the output random real numbers
 as~$X$. The type |U01Distribution| is aliased to |U01CanonicalDistribution| if
-the configuration macro |MCKL_U01_USE_FIXED_POINT| is set to false (the
-default). Otherwise it is aliased to |U01CODistribution|.
+the |MCKL_U01_USE_FIXED_POINT| is set to false (the default). Otherwise it is
+aliased to |U01CODistribution|.
 
 \subsection{Canonical form}
 \label{sub:Canonical form}

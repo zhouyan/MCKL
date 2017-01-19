@@ -107,10 +107,10 @@ where $x_{i,j}$ is the $j$\sth component of the $i$\sth sample, and $w_i$ is
 the weight of the $i$\sth sample. At the time of writing, only |float| and
 |double| are supported. The class has the following operator as its interface,
 \begin{verbatim}
-void operator()(
-    MatrixLayout layout, size_t n, size_t p, const RealType *x, const RealType *w,
-    RealType *mean, RealType *cov, MatrixLayout cov_layout = RowMajor,
-    bool cov_upper = false, bool cov_packed = false)
+void operator()(MatrixLayout layout, size_t n, size_t p, const RealType *x,
+    const RealType *w, RealType *mean, RealType *cov,
+    MatrixLayout cov_layout = RowMajor, bool cov_upper = false,
+    bool cov_packed = false);
 \end{verbatim}
 It computes the sample covariance matrix $\Sigma$,
 where $x$ is the $n$ by $p$ matrix of samples, and $w$ is the $n$-vector of
@@ -175,11 +175,10 @@ following,
 library(rhdf5)
 pf <- as.data.frame(h5read("pf.h5", "sampler"))
 \end{verbatim}
-This creates a |data.frame| similar to that shown in
-section~\ref{sub:Implementation (PF)}. The |hdf5store| function is overloaded
-for |StateMatrix|, |Sampler| and |Monitor|. It is also overloaded for
-|Particle| if an overload for |T| is defined. They all follow the format as
-above. In addition, the following creates a new empty \hdf file,
+This creates a |data.frame|. The |hdf5store| function is overloaded for
+|StateMatrix|, |Sampler| and |Monitor|. It is also overloaded for |Particle| if
+an overload for |T| is defined. They all follow the format as above. In
+addition, the following creates a new empty \hdf file,
 \begin{verbatim}
 hdf5store(filename);
 \end{verbatim}
