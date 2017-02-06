@@ -83,7 +83,7 @@
 \UseAbbr[\hdf]{hdf5}
 \UseAbbr[\ilp]{ilp64}
 \UseAbbr[\lp]{lp64}
-\UseAbbr[\testu][\lnfigures]{TestU01}
+\UseAbbr[\testu][\textlnum]{TestU01}
 
 \UseMathBB{I}
 
@@ -103,41 +103,26 @@
 \NewDocumentCommand\ypos{}{Y_{\mathrm{pos}}}
 \NewDocumentCommand\yvel{}{Y_{\mathrm{vel}}}
 
-\NewDocumentCommand\system{}{Two \cpu and operation system combinations are
-  tested. The first is an Intel Xeon~W3550, running at~3.06~GHz base frequency
-  and~3.33~GHz maximum turbo boost frequency, with four physical cores and
-  eight logical ones through hyperthreading, with CentOS (verison~7.2) and the
-  second is an Intel Core~i7-4960\textsc{hq}, running at~2.60~Ghz base
-  frequency and~3.80~GHz maximum turbo boost freqency, with four physical cores
-  and eight logical ones through hyperthreading, with macOS Sierra
-  (version~10.12.1). They are labeled as ``Nehalem'' and ``Haswell'',
-respectively, based on their \cpu microarchitecture.}
+\NewDocumentCommand\system{}{The performance is measured on an MacBook~Pro with
+an Intel Core~i7--4960\Abbr{hq} \cpu running macOS Sierra (version 10.12.1).}
 
-\NewDocumentCommand\compiler{}{Three compilers are tested on each system, \llvm
-  clang (version~3.9.1 on CentOS and version Apple~8.0.0 on macOS), \gnu \gcc
-  (version~6.2.0 on bosth systems), and Intel \cpp compiler (version~17.0.0 on
-CentOS and version~17.0.1 on macOS).}
+\NewDocumentCommand\compiler{}{Three compilers are tested, \llvm clang (version
+  Apple 8.0.0), \gnu \gcc (version 6.3.0), and Intel \cpp compiler (version
+17.0.1).}
 
-\NewDocumentCommand\compilerone{}{\compiler{} The results shown here is with
-the \llvm clang compiler.}
+\NewDocumentCommand\compilerone{}{\compiler{} Results of the \llvm clang
+compiler is shown here.}
 
 \NewDocumentCommand\compilerthree{}{\compiler{} They are labeled as ``\llvm'',
 ``\gnu'' and ``\intel'', respectively.}
 
 \ExplSyntaxOn
 \NewDocumentCommand\perftable{m m m m}{
-  \file_if_exist:nT{tab/random_#1_#2_sse2.tex}{
-    \begin{table}
-      \input{tab/random_#1_#2_sse2}
-      \caption{Performance~of~#3~(Nehalem)}
-      \label{tab:Performance~of~#4~(Nehalem)}
-    \end{table}
-  }
   \file_if_exist:nT{tab/random_#1_#2_avx2.tex}{
     \begin{table}
       \input{tab/random_#1_#2_avx2}
       \caption{Performance~of~#3~(Haswell)}
-      \label{tab:Performance~of~#4~(Haswell)}
+      \label{tab:Performance~of~#4}
     \end{table}
   }
 }

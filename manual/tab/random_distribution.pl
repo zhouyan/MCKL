@@ -236,7 +236,7 @@ sub read {
 
 sub table {
     my $header;
-    $header .= '\tbfigures' . "\n";
+    $header .= '\tnumshape' . "\n";
     $header .= '\begin{tabularx}{\textwidth}{p{2in}RRRRR}' . "\n";
     $header .= ' ' x 2 . '\toprule' . "\n";
     $header .= ' ' x 2 . 'Distribution & \std & \mckl & \vmf & \vml & \mkl';

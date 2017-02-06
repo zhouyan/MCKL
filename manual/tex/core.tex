@@ -61,9 +61,10 @@ StepIterator<Base> iter(base, step);
 iter + n; // => std::advance(base, step * n);
 iter[n];  // => *(iter + n);
 \end{verbatim}
-The base iterator only needs to meet the input iterator requirement for most
+The base iterator needs to meet the input iterator requirement for most
 operations. If it is to be decremented, either through subtraction or negative
-step size, it also needs to meet the bidirectional iterator requirement.
+step size, it also needs to meet the bidirectional iterator requirement as
+well.
 
 \subsection{Range}
 \label{sub:Range}
@@ -80,7 +81,7 @@ A range can be constructed by,
 Range(T begin, T end, size_type grainsize = 1);
 \end{verbatim}
 The lower and upper bounds of the interval, and the grain size, can be access
-later. For example,
+later,
 \begin{verbatim}
 Range(begin, end, grainsize) range;
 range.begin();
@@ -113,9 +114,8 @@ The class template,
 template <MatrixLayout Layout, typename T>
 clas Matrix;
 \end{verbatim}
-is a container representing a two-dimensional array. It is not designed to be a
-full-fledged matrix class for the purposes such as linear algebra. The
-enumerator |MatrixLayout| is defined as the following
+is a container representing a two-dimensional array. The enumerator
+|MatrixLayout| is defined as the following
 \begin{verbatim}
 enum class MatrixLayout { RowMajor = 101, ColMajor = 102 };
 \end{verbatim}
@@ -125,8 +125,8 @@ constexpr MatrixLayout RowMajor = MatrixLayout::RowMajor;
 constexpr MatrixLayout ColMajor = MatrixLayout::ColMajor;
 \end{verbatim}
 
-A matrix can be constructed with either zero elements or the number of rows and
-columns.
+A matrix can be constructed with either zero elements or the numbers of rows
+and columns.
 \begin{verbatim}
 Matrix<RowMajor, double> A;       // An empty matrix
 Matrix<RowMajor, double> A(n, m); // An n by m matrix
@@ -161,7 +161,7 @@ The concept of ``stride'' is important when iterating elements through the
 matrix may have either unit stride row-wise or column-wise.
 
 Other methods such as |reserve|, |swap|, etc., take their usual meanings as in
-the standard library containers. See the reference manual for details.
+the standard library containers.
 
 In additional, |Matrix| also provide iterator based element access.
 \begin{verbatim}
@@ -172,17 +172,16 @@ A.row_end(i);   // => End of the i-th row
 A.col_begin(j); // => Beginning of the j-th column
 A.col_end(j);   // => End of the j-th column
 \end{verbatim}
-Other methods for element access and manipulation of the matrix can be found in
-the reference manual.
 
 \subsection{Matrix of states}
 \label{sub:Matrix of states}
 
 Consider a collection of samples $X_{1:N}$ and each $X_i$ is a $d$-vector. In
 this case, it can be conveniently represented by an $N$ by $d$ matrix. The
-dimension $d$ (number of columns) of this matrix is usually fixed and often
-known at compile time, while the sample size $N$ (number of rows) may change as
-an algorithm proceeds. A derived class of |Matrix| is defined for this purpose.
+dimension $d$ (the number of columns) of this matrix is usually fixed and often
+known at compile time, while the sample size $N$ (the number of rows) may
+change as an algorithm proceeds. A derived class of |Matrix| is defined for
+this purpose.
 \begin{verbatim}
 template <MatrixLayout Layout, std::size_t Dim, typename T>
 class StateMatrix : public Matrix<Layout, T>;
@@ -191,11 +190,11 @@ If the template parameter |Dim| denotes the dimension $d$. If it is zero, then
 the dimension can be later changed at compile time. Otherwise, it is fixed.
 Such a matrix can be constructed given it sample size,
 \begin{verbatim}
-StateMatrix<RowMajor, 4, double> S(n); // And n by 4 matrix of states
+StateMatrix<RowMajor, 4, double> S(n); // An n by 4 matrix
 \end{verbatim}
 It can also be constructed given the sampler size and dimension,
 \begin{verbatim}
-StateMatrix<RowMajor, 0, double> S(n, d); // And n by d matrix of states
+StateMatrix<RowMajor, 0, double> S(n, d); // An n by d matrix
 \end{verbatim}
 Note that, the constructor above is only available if |Dim| is zero. A few
 attributes of the matrix can be access,

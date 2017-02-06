@@ -39,8 +39,8 @@
 functions. For example, to get the value of $\pi$ with a desired precision, one
 can use the following,
 \begin{verbatim}
-constexpr float pi_f = const_pi<float>();
-constexpr double pi_d = const_pi<double>();
+constexpr float       pi_f = const_pi<float>();
+constexpr double      pi_d = const_pi<double>();
 constexpr long double pi_l = const_pi<long double>();
 \end{verbatim}
 The compiler evaluates these values at compile-time and thus there is no
@@ -136,17 +136,19 @@ for (size_t i = 0; i != n; ++i)
 The functions defined are listed in tables~\ref{tab:Arithmetic functions}
 to~\ref{tab:Rounding functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
-(except for |sincos| and |modf|, which have two output parameters). For all
-functions, the output parameters are always vectors. If there are more than one
-input parameters, then some of them, but not all, can be scalars. For example,
-for the function call |muladd(n, a, b, c, y)| in table~\ref{tab:Arithmetic
-  functions}, the input parameters are |a|, |b|, and |c|. Some of them, not
-all, can be scalars instead of pointers to vectors. The output parameter |y|
-has to be a pointer to a vector. Therefore, there are seven versions of this
-function for each type of the parameters.
+(except for |sincos| and |modf|, which have two output parameters). The output
+parameters are always vectors. Some of the input parameters may be scalars. For
+example, in the function call,
+\begin{verbatim}
+muladd(n, a, b, c, y);
+\end{verbatim}
+in table~\ref{tab:Arithmetic functions}, the input parameters are |a|, |b|, and
+|c|. Some of them, (but not all), can be scalars instead of pointers to
+vectors. The output parameter |y| has to be a pointer to a vector. Therefore,
+there are seven versions of this function for each type of the parameters.
 
-The input of these functions can be either real numbers (|double|, etc.), or
-complex numbers (|std::complex<double>|, etc.), or both. The supported data
+The input of these functions can be either real numbers (floating point types),
+or complex numbers (|std::complex<double>|, etc.), or both. The supported data
 types are also listed in the tables. In most cases, output data type is the
 same as the input. There are a few exceptions. The |abs| and |arg| functions
 always have real numbers as output. The |cis| function takes real numbers as
@@ -159,47 +161,45 @@ Vector<double> y(n);
 muladd(n, a.data(), b.data(), 2, y.data());
 \end{verbatim}
 causes compile-time error because the fourth argument is an integer while the
-others are floating points. The correct call shall be,
+others are floating point types. The correct call shall be,
 \begin{verbatim}
 muladd(n, a.data(), b.data(), 2.0, y.data());
 \end{verbatim}
 The same principle applies to mixed types functions (|abs|, |arg| and |cis|).
-That is, a |double| input can only be paired with a |std::complex<double>|
-output for |cis| and \emph{vice versa} for |abs| and |arg|.
 
 With only the standard library, these functions do not provide performance
 advantage compared to simple loops. When \mkl \vml is available, some functions
 can have substantial performance improvement when all input arguments are
-vectors of types |float| or |double|, or their complex counterparts. The
-performance of vectorized random number generating introduced later in
-section~\ref{sec:Vectorized random number generating} heavily depends on these
-functions.
+vectors of types single or double precision floating point types, or their
+complex counterparts. The performance of vectorized random number generating
+(see section~\ref{sec:Vectorized random number generating}) heavily depends on
+these functions.
 
 The input and output pointers are allowed to alias to each other in the sense
 that they might pointing to the same memory locations. However, if they point
 different locations but the vectors overlap, the behavior is undefined.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \begin{tabularx}{\textwidth}{LLC}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{add(n, a, b, y)}        & $y = a + b$           & Real, Complex \\
-    \texttt{sub(n, a, b, y)}        & $y = a - b$           & Real, Complex \\
-    \texttt{sqr(n, a, y)}           & $y = a^2$             & Real          \\
-    \texttt{mul(n, a, b, y)}        & $y = ab$              & Real, Complex \\
-    \texttt{mulbyconj(n, a, b, y)}  & $y = a\bar{b}$        & Complex       \\
-    \texttt{conj(n, a, y)}          & $y = \bar{a}$         & Complex       \\
-    \texttt{abs(n, a, y)}           & $y = \Abs{a}$         & Real, Complex \\
-    \texttt{arg(n, a, y)}           & $y = \mathrm{arg}(a)$ & Complex       \\
-    \texttt{muladd(n, a, b, c, y)}  & $y = ab + c$          & Real, Complex \\
-    \texttt{mulsub(n, a, b, c, y)}  & $y = ab - c$          & Real, Complex \\
-    \texttt{nmuladd(n, a, b, c, y)} & $y = -ab + c$         & Real, Complex \\
-    \texttt{nmulsub(n, a, b, c, y)} & $y = -ab - c$         & Real, Complex \\
-    \texttt{fmadd(n, a, b, c, y)}   & $y = ab + c$ (fused)  & Real          \\
-    \texttt{fmsub(n, a, b, c, y)}   & $y = ab - c$ (fused)  & Real          \\
-    \texttt{fnmadd(n, a, b, c, y)}  & $y = -ab + c$ (fused) & Real          \\
-    \texttt{fnmsub(n, a, b, c, y)}  & $y = -ab - c$ (fused) & Real          \\
+    \texttt{add}       & $y = a + b$           & Real, Complex \\
+    \texttt{sub}       & $y = a - b$           & Real, Complex \\
+    \texttt{sqr}       & $y = a^2$             & Real          \\
+    \texttt{mul}       & $y = ab$              & Real, Complex \\
+    \texttt{mulbyconj} & $y = a\bar{b}$        & Complex       \\
+    \texttt{conj}      & $y = \bar{a}$         & Complex       \\
+    \texttt{abs}       & $y = \Abs{a}$         & Real, Complex \\
+    \texttt{arg}       & $y = \mathrm{arg}(a)$ & Complex       \\
+    \texttt{muladd}    & $y = ab + c$          & Real, Complex \\
+    \texttt{mulsub}    & $y = ab - c$          & Real, Complex \\
+    \texttt{nmuladd}   & $y = -ab + c$         & Real, Complex \\
+    \texttt{nmulsub}   & $y = -ab - c$         & Real, Complex \\
+    \texttt{fmadd}     & $y = ab + c$ (fused)  & Real          \\
+    \texttt{fmsub}     & $y = ab - c$ (fused)  & Real          \\
+    \texttt{fnmadd}    & $y = -ab + c$ (fused) & Real          \\
+    \texttt{fnmsub}    & $y = -ab - c$ (fused) & Real          \\
     \bottomrule
   \end{tabularx}
   \caption{Arithmetic functions}
@@ -207,20 +207,20 @@ different locations but the vectors overlap, the behavior is undefined.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \begin{tabularx}{\textwidth}{LLC}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{inv(n, a, y)}      & $y = 1 / a$            & Real          \\
-    \texttt{div(n, a, b, y)}   & $y = a / b$            & Real, Complex \\
-    \texttt{sqrt(n, a, y)}     & $y = \sqrt{a}$         & Real, Complex \\
-    \texttt{invsqrt(n, a, y)}  & $y = 1 / \sqrt{a}$     & Real          \\
-    \texttt{cbrt(n, a, y)}     & $y = \sqrt[3]{a}$      & Real          \\
-    \texttt{invcbrt(n, a, y)}  & $y = 1 / \sqrt[3]{a}$  & Real          \\
-    \texttt{pow2o3(n, a, y)}   & $y = a^{2/3}$          & Real          \\
-    \texttt{pow3o2(n, a, y)}   & $y = a^{3/2}$          & Real          \\
-    \texttt{pow(n, a, b, y)}   & $y = a^b$              & Real, Complex \\
-    \texttt{hypot(n, a, b, y)} & $y = \sqrt{a^2 + b^2}$ & Real          \\
+    \texttt{inv}     & $y = 1 / a$            & Real          \\
+    \texttt{div}     & $y = a / b$            & Real, Complex \\
+    \texttt{sqrt}    & $y = \sqrt{a}$         & Real, Complex \\
+    \texttt{invsqrt} & $y = 1 / \sqrt{a}$     & Real          \\
+    \texttt{cbrt}    & $y = a^{1/3}$          & Real          \\
+    \texttt{invcbrt} & $y = a^{-1/3}$         & Real          \\
+    \texttt{pow2o3}  & $y = a^{2/3}$          & Real          \\
+    \texttt{pow3o2}  & $y = a^{3/2}$          & Real          \\
+    \texttt{pow}     & $y = a^b$              & Real, Complex \\
+    \texttt{hypot}   & $y = \sqrt{a^2 + b^2}$ & Real          \\
     \bottomrule
   \end{tabularx}
   \caption{Power and root functions}
@@ -228,17 +228,17 @@ different locations but the vectors overlap, the behavior is undefined.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \begin{tabularx}{\textwidth}{LLC}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{exp(n, a, y)}   & $y = \EE^a$       & Real, Complex \\
-    \texttt{exp2(n, a, y)}  & $y = 2^a$         & Real          \\
-    \texttt{expm1(n, a, y)} & $y = \EE^a - 1$   & Real          \\
-    \texttt{log(n, a, y)}   & $y = \ln a$       & Real, Complex \\
-    \texttt{log2(n, a, y)}  & $y = \log_2 a$    & Real          \\
-    \texttt{log10(n, a, y)} & $y = \log_{10} a$ & Real, Complex \\
-    \texttt{log1p(n, a, y)} & $y = \ln(a + 1)$  & Real          \\
+    \texttt{exp}   & $y = \EE^a$       & Real, Complex \\
+    \texttt{exp2}  & $y = 2^a$         & Real          \\
+    \texttt{expm1} & $y = \EE^a - 1$   & Real          \\
+    \texttt{log}   & $y = \ln a$       & Real, Complex \\
+    \texttt{log2}  & $y = \log_2 a$    & Real          \\
+    \texttt{log10} & $y = \log_{10} a$ & Real, Complex \\
+    \texttt{log1p} & $y = \ln(a + 1)$  & Real          \\
     \bottomrule
   \end{tabularx}
   \caption{Exponential and logarithm functions}
@@ -246,19 +246,19 @@ different locations but the vectors overlap, the behavior is undefined.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \begin{tabularx}{\textwidth}{LLC}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{cos(n, a, y)}       & $y = \cos(a)$        & Real, Complex \\
-    \texttt{sin(n, a, y)}       & $y = \sin(a)$        & Real, Complex \\
-    \texttt{sincos(n, a, y, z)} & $y = \sin(a)$, $z = \cos(a)$ & Real  \\
-    \texttt{cis(n, a, y)}       & $y = \cos(a) + i\sin(a)$   & Complex \\
-    \texttt{tan(n, a, y)}       & $y = \tan(a)$        & Real, Complex \\
-    \texttt{acos(n, a, y)}      & $y = \arccos(a)$     & Real, Complex \\
-    \texttt{asin(n, a, y)}      & $y = \arcsin(a)$     & Real, Complex \\
-    \texttt{atan(n, a, y)}      & $y = \arctan(a)$     & Real, Complex \\
-    \texttt{atan2(n, a, y)}     & $y = \arctan(a / b)$ & Real          \\
+    \texttt{cos}    & $y = \cos(a)$        & Real, Complex \\
+    \texttt{sin}    & $y = \sin(a)$        & Real, Complex \\
+    \texttt{sincos} & $y = \sin(a)$, $z = \cos(a)$ & Real  \\
+    \texttt{cis}    & $y = \cos(a) + i\sin(a)$   & Complex \\
+    \texttt{tan}    & $y = \tan(a)$        & Real, Complex \\
+    \texttt{acos}   & $y = \arccos(a)$     & Real, Complex \\
+    \texttt{asin}   & $y = \arcsin(a)$     & Real, Complex \\
+    \texttt{atan}   & $y = \arctan(a)$     & Real, Complex \\
+    \texttt{atan2}  & $y = \arctan(a / b)$ & Real          \\
     \bottomrule
   \end{tabularx}
   \caption{Trigonometric functions}
@@ -266,16 +266,16 @@ different locations but the vectors overlap, the behavior is undefined.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \begin{tabularx}{\textwidth}{LLC}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{cosh(n, a, y)}  & $y = \cosh(a)$             & Real, Complex \\
-    \texttt{sinh(n, a, y)}  & $y = \sinh(a)$             & Real, Complex \\
-    \texttt{tanh(n, a, y)}  & $y = \tanh(a)$             & Real, Complex \\
-    \texttt{acosh(n, a, y)} & $y = \mathrm{arc}\cosh(a)$ & Real, Complex \\
-    \texttt{asinh(n, a, y)} & $y = \mathrm{arc}\sinh(a)$ & Real, Complex \\
-    \texttt{atanh(n, a, y)} & $y = \mathrm{arc}\tanh(a)$ & Real, Complex \\
+    \texttt{cosh}  & $y = \cosh(a)$             & Real, Complex \\
+    \texttt{sinh}  & $y = \sinh(a)$             & Real, Complex \\
+    \texttt{tanh}  & $y = \tanh(a)$             & Real, Complex \\
+    \texttt{acosh} & $y = \mathrm{arc}\cosh(a)$ & Real, Complex \\
+    \texttt{asinh} & $y = \mathrm{arc}\sinh(a)$ & Real, Complex \\
+    \texttt{atanh} & $y = \mathrm{arc}\tanh(a)$ & Real, Complex \\
     \bottomrule
   \end{tabularx}
   \caption{Hyperbolic functions}
@@ -283,16 +283,15 @@ different locations but the vectors overlap, the behavior is undefined.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \begin{tabularx}{\textwidth}{LLC}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{erf(n, a, y)}     & $y = \mathrm{erf}(a)$  & Real \\
-    \texttt{erfc(n, a, y)}    & $y = \mathrm{erfc}(a)$ & Real \\
-    \texttt{cdfnorm(n, a, y)} & $y = (1 + \mathrm{erf}(a / \sqrt{2})) / 2$
-    & Real \\
-    \texttt{lgamma(n, a, y)}  & $y = \ln\Gamma(a)$     & Real \\
-    \texttt{tgamma(n, a, y)}  & $y = \Gamma(a)$        & Real \\
+    \texttt{erf}     & $y = \mathrm{erf}(a)$  & Real \\
+    \texttt{erfc}    & $y = \mathrm{erfc}(a)$ & Real \\
+    \texttt{cdfnorm} & $y = (1 + \mathrm{erf}(a / \sqrt{2})) / 2$ & Real \\
+    \texttt{lgamma}  & $y = \ln\Gamma(a)$     & Real \\
+    \texttt{tgamma}  & $y = \Gamma(a)$        & Real \\
     \bottomrule
   \end{tabularx}
   \caption{Special functions}
@@ -300,18 +299,17 @@ different locations but the vectors overlap, the behavior is undefined.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \begin{tabularx}{\textwidth}{LLC}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{floor(n, a, y)} & $y = \Floor{a}$                       & Real \\
-    \texttt{ceil(n, a, y)}  & $y = \Ceil{a}$                        & Real \\
-    \texttt{trunc(n, a, y)} & $y = \mathrm{sgn}(a)\Floor{\Abs{a}}$  & Real \\
-    \texttt{round(n, a, y)} & $y = \text{nearest integer of }a$     & Real \\
-    \texttt{nearbyint(n, a, y)} & $y = \text{nearest integer of }a$ & Real \\
-    \texttt{rint(n, a, y)}  & $y = \text{nearest integer of }a$     & Real \\
-    \texttt{modf(n, a, y, z)} &
-    $y = \mathrm{sign}(a)\Floor{\Abs{a}}$, $z = a - y$ & Real \\
+    \texttt{floor} & $y = \Floor{a}$                       & Real \\
+    \texttt{ceil}  & $y = \Ceil{a}$                        & Real \\
+    \texttt{trunc} & $y = \mathrm{sgn}(a)\Floor{\Abs{a}}$  & Real \\
+    \texttt{round} & $y = \text{nearest integer of }a$     & Real \\
+    \texttt{nearbyint} & $y = \text{nearest integer of }a$ & Real \\
+    \texttt{rint}  & $y = \text{nearest integer of }a$     & Real \\
+    \texttt{modf}&$y = \mathrm{sign}(a)\Floor{\Abs{a}}$, $z = a - y$ & Real \\
     \bottomrule
   \end{tabularx}
   \caption{Rounding functions}
@@ -324,50 +322,54 @@ different locations but the vectors overlap, the behavior is undefined.
 \label{sec:Fused multiplication and addition}
 
 The |muladd| and |fmadd| functions in the last section differs in that |fmadd|
-always does fused multiplication and addition through |std::fma| while |muladd|
-use one multiplication and one addition. Also |muladd| supports complex numbers
-as input while |fmadd| does not. However, the compiler may or may not be able
-to make use the hardware \fma support. And it may not vectorize the loop in
-|fmadd| etc., as most modern \cpp compilers would do for simpler operations
+always does fused multiplication and addition by |std::fma| while |muladd| use
+one multiplication and one addition. However, the compiler may or may not be
+able to make use the platform \fma support. And it may not vectorize the loop
+in |fmadd| etc., as most modern \cpp compilers would do for simpler operations
 such as addition and multiplication.
 
 When software implementation of |std::fma| is used, it will be much slower than
 using one multiplication and one addition. In this case, there are assembly
-implementations that take advantage of the hardware support for |float| and
-|double| precision. To enable this feature, one need to build and link to the
-runtime library (see section~\ref{sec:Optional runtime library}). One also need
-to set the configuration macro |MCKL_USE_ASM_LIB| to true. In addition, this
-feature is only enabled for platforms with \fma{}3 instruction set support.
+implementations that take advantage of the platform support for single and
+double precision. To enable this feature, one need to build and link to the
+optional runtime library (see section~\ref{sec:Optional runtime library}). One
+also need to set the configuration macro |MCKL_USE_ASM_LIB| to true. In
+addition, this feature is only enabled for platforms with \fma{}3 instruction
+set support.
 
-The library detects the availability of these instructions through compiler
-pre-defined macros. If this mechanism is not adequate, one can manually enable
-or disable them through the configuration macro |MCKL_HAS_FMA|. Note that, when
-the compiler is able to generate vectorized loop for |std::fma|, the assembly
-library may or may not outperform the compiler generated binary. If the
-compiler generated binary is preferred but the runtime library is also enabled
-for its other features, then one can define the configuration macro
-|MCKL_USE_ASM_FMA| to false to disable this feature.
+The library detects the availability of these instructions using compiler
+macros. If this mechanism is not adequate, one can manually enable or disable
+them using the configuration macro |MCKL_HAS_FMA|. Note that, when the compiler
+is able to generate vectorized loop for |std::fma|, the assembly library may or
+may not outperform the compiler generated binary. If the compiler generated
+binary is preferred but the runtime library is also enabled for its other
+features, then one can define the configuration macro |MCKL_USE_ASM_FMA| to
+false to disable this feature.
 
 The same principles also applies to other related functions such as |mulsub|
 and |fmsub|. Last but not least, when the runtime library is used, it also
-replace |float| and |double| precisions of |muladd|, etc., with their
-corresponding fused version, which is faster and more accurate.
+replace single and double precisions of |muladd|, etc., with their
+corresponding fused version.
 
 \section{Experimental vectorized implementation}
 \label{sec:Experimental vectorized implementation}
 
-Optionally, one can enable an experimental implementation of a few selected
+Optionally, one can enable experimental implementations of a few selected
 functions, listed in table~\ref{tab:Functions with experimental vectorized
-  implementation}, to enhance their performance of |double| precision. The
-exponential, logarithm and related functions also enhance performance of
-|float| precision. To enable this feature, one need to build and link to the
-runtime library (see section~\ref{sec:Optional runtime library}). One also need
-to set the configuration macros |MCKL_USE_ASM_LIB| and |MCKL_USE_ASM_VMF| to
-true. In addition, this feature is only enabled for platforms with \avx{}2 and
+implementation}, to enhance their performance of double precision. The
+exponential, logarithm and related functions also enhance performance of single
+precision. To enable this feature, one needs to build and link to the optinal 
+runtime library (see section~\ref{sec:Optional runtime library}). One also
+needs to set the following configuration macros to true,
+\begin{verbatim}
+#define MCKL_USE_ASM_LIB 1
+#define MCKL_USE_ASM_VMF 1
+\end{verbatim}
+In addition, this feature is only enabled for platforms with \avx{}2 and
 \fma{}3 instruction sets support. The library detects the availability of these
-instructions through compiler pre-defined macros. If this mechanism is not
-adequate, one can manually enable or disable them through the configuration
-macros, |MCKL_HAS_AVX2| and |MCKL_HAS_FMA|, respectively.
+instructions using compiler macros. If this mechanism is inadequate, one can
+manually enable or disable them using the configuration macros, |MCKL_HAS_AVX2|
+and |MCKL_HAS_FMA|, respectively.
 
 \subsection{Caveats}
 \label{sub:Caveats}
@@ -392,7 +394,7 @@ other functions, subnormal inputs are treated the same way as normal numbers.
 
 The handling of special values, $-0.0$, $0.0$, $-\infty$, $\infty$, \nan,
 underflows, and overflows follows the \ieee~754 standard, except for the
-treatment of subnormal numbers as described above.
+treatment of subnormal numbers.
 
 \subsection{Measured accuracy}
 \label{sub:Measured accuracy}
@@ -400,40 +402,30 @@ treatment of subnormal numbers as described above.
 These functions have reduced accuracy compared to the standard library.
 Reputable implementations of math functions usually give results with error
 bounded by 1~\ulp. Some of these functions, especially the trigonometric
-functions, give considerably larger errors. Tables~\ref{tab:Measured accuracy
-  of vectorized implementation of exp} to~\ref{tab:Measured accuracy of
-  vectorized implementation of tan} give the measured upper bounds of errors
-and the intervals on which they are measured. The measurement was done by
-generating one billion random inputs. In the tables, $\delta$ denotes the
-smallest normal floating numbers for the respective precision.
+functions, give larger errors. Tables~\ref{tab:Measured accuracy of vectorized
+  implementation of exp} to~\ref{tab:Measured accuracy of vectorized
+implementation of tan} give the measured upper bounds of errors and the
+intervals on which they are measured. The measurement was done by generating
+one billion random inputs. In the tables, $\delta$ denotes the smallest normal
+floating point numbers for the respective precision.
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLL}
+  \def\check{\char"2713}
+  \begin{tabularx}{\textwidth}{LCC}
     \toprule
-    Function & Operation & Data type \\
+    Function & Single precision & Double precision \\
     \midrule
-    \texttt{exp(n, a, y)}       & $y = \EE^a$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{exp2(n, a, y)}      & $y = 2^a$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{expm1(n, a, y)}     & $y = \EE^a - 1$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{log(n, a, y)}       & $y = \ln a$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{log2(n, a, y)}      & $y = \log_2 a$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{log10(n, a, y)}     & $y = \log_{10} a$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{log1p(n, a, y)}     & $y = \ln(a + 1)$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{cos(n, a, y)}       & $y = \cos(a)$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{sin(n, a, y)}       & $y = \sin(a)$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{sincos(n, a, y, z)} & $y = \sin(a)$, $z = \cos(a)$
-    & \texttt{float}, \texttt{double} \\
-    \texttt{tan(n, a, y)}       & $y = \tan(a)$
-    & \texttt{float}, \texttt{double} \\
+    \texttt{exp}    & \check & \check \\
+    \texttt{exp2}   & \check & \check \\
+    \texttt{expm1}  & \check & \check \\
+    \texttt{log}    & \check & \check \\
+    \texttt{log2}   & \check & \check \\
+    \texttt{log10}  & \check & \check \\
+    \texttt{log1p}  & \check & \check \\
+    \texttt{cos}    &        & \check \\
+    \texttt{sin}    &        & \check \\
+    \texttt{sincos} &        & \check \\
+    \texttt{tan}    &        & \check \\
     \bottomrule
   \end{tabularx}
   \caption{Functions with experimental vectorized implementation}
@@ -441,13 +433,13 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLLL}
+  \begin{tabularx}{\textwidth}{LcLc}
     \toprule
     \multicolumn{2}{c}{Single precision} &
     \multicolumn{2}{c}{Double precision} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     Range & Error (\ulp) & Range & Error (\ulp) \\
-    \midrule
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     $[-87.3, -87)$      & $1$ & $[-708.4, -707)$    & $1$ \\
     $[-87, -70)$        & $1$ & $[-707, -500)$      & $1$ \\
     $[-70, -1)$         & $1$ & $[-500, -1)$        & $1$ \\
@@ -464,13 +456,13 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLLL}
+  \begin{tabularx}{\textwidth}{LcLc}
     \toprule
     \multicolumn{2}{c}{Single precision} &
     \multicolumn{2}{c}{Double precision} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     Range & Error (\ulp) & Range & Error (\ulp) \\
-    \midrule
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     $[-126, -100)$      & $1$ & $[-1022, -1000)$    & $1$ \\
     $[-100, -50)$       & $1$ & $[-1000, -500)$     & $1$ \\
     $[-50, -1)$         & $1$ & $[-500, -1)$        & $1$ \\
@@ -487,13 +479,13 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLLL}
+  \begin{tabularx}{\textwidth}{LcLc}
     \toprule
     \multicolumn{2}{c}{Single precision} &
     \multicolumn{2}{c}{Double precision} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     Range & Error (\ulp) & Range & Error (\ulp) \\
-    \midrule
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     $[-87.3, -87)$           & $0$ & $[-708.4, -707)$         & $0$ \\
     $[-87, -70)$             & $0$ & $[-707, -500)$           & $0$ \\
     $[-70, -1)$              & $1$ & $[-500, -1)$             & $1$ \\
@@ -514,19 +506,19 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLLL}
+  \begin{tabularx}{\textwidth}{LcLc}
     \toprule
     \multicolumn{2}{c}{Single precision} &
     \multicolumn{2}{c}{Double precision} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     Range & Error (\ulp) & Range & Error (\ulp) \\
-    \midrule
-    $[\delta, \sqrt{2} / 2)$  & $1$ & $[\delta, \sqrt{2} / 2)$  & $1$ \\
-    $[\sqrt{2} / 2, sqrt{2})$ & $1$ & $[\sqrt{2} / 2, sqrt{2})$ & $1$ \\
-    $[\sqrt{2}, 10)$          & $1$ & $[\sqrt{2}, 10)$          & $1$ \\
-    $[10, 10^2)$              & $1$ & $[10, 10^2)$              & $1$ \\
-    $[10^2, 10^3)$            & $1$ & $[10^2, 10^3)$            & $1$ \\
-    $[10^3, 10^4)$            & $1$ & $[10^3, 10^4)$            & $1$ \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    $[\delta, \sqrt{2} / 2)$   & $1$ & $[\delta, \sqrt{2} / 2)$   & $1$ \\
+    $[\sqrt{2} / 2, \sqrt{2})$ & $1$ & $[\sqrt{2} / 2, \sqrt{2})$ & $1$ \\
+    $[\sqrt{2}, 10)$           & $1$ & $[\sqrt{2}, 10)$           & $1$ \\
+    $[10, 10^2)$               & $1$ & $[10, 10^2)$               & $1$ \\
+    $[10^2, 10^3)$             & $1$ & $[10^2, 10^3)$             & $1$ \\
+    $[10^3, 10^4)$             & $1$ & $[10^3, 10^4)$             & $1$ \\
     \bottomrule
   \end{tabularx}
   \caption{Measured accuracy of vectorized implementation of \texttt{log}}
@@ -534,13 +526,13 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLLL}
+  \begin{tabularx}{\textwidth}{LcLc}
     \toprule
     \multicolumn{2}{c}{Single precision} &
     \multicolumn{2}{c}{Double precision} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     Range & Error (\ulp) & Range & Error (\ulp) \\
-    \midrule
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     $[\delta, \sqrt{2} / 2)$  & $1$ & $[\delta, \sqrt{2} / 2)$  & $1$ \\
     $[\sqrt{2} / 2, sqrt{2})$ & $2$ & $[\sqrt{2} / 2, sqrt{2})$ & $2$ \\
     $[\sqrt{2}, 10)$          & $1$ & $[\sqrt{2}, 10)$          & $1$ \\
@@ -554,13 +546,13 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLLL}
+  \begin{tabularx}{\textwidth}{LcLc}
     \toprule
     \multicolumn{2}{c}{Single precision} &
     \multicolumn{2}{c}{Double precision} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     Range & Error (\ulp) & Range & Error (\ulp) \\
-    \midrule
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     $[\delta, \sqrt{2} / 2)$  & $2$ & $[\delta, \sqrt{2} / 2)$  & $1$ \\
     $[\sqrt{2} / 2, sqrt{2})$ & $2$ & $[\sqrt{2} / 2, sqrt{2})$ & $2$ \\
     $[\sqrt{2}, 10)$          & $2$ & $[\sqrt{2}, 10)$          & $1$ \\
@@ -574,13 +566,13 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LLLL}
+  \begin{tabularx}{\textwidth}{LcLc}
     \toprule
     \multicolumn{2}{c}{Single precision} &
     \multicolumn{2}{c}{Double precision} \\
     \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     Range & Error (\ulp) & Range & Error (\ulp) \\
-    \midrule
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
     $[-1, \sqrt{2} / 2 - 1)$  & $2$ & $[-1, \sqrt{2} / 2 - 1)$      & $3$ \\
     $[\sqrt{2}/2-1, -\delta)$ & $1$ & $[\sqrt{2} / 2 - 1, -\delta)$ & $1$ \\
     $[-\delta, \delta)$       & $0$ & $[-\delta, \delta)$           & $0$ \\
@@ -597,7 +589,7 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LL}
+  \begin{tabularx}{\textwidth}{LC}
     \toprule
     Range & Error (\ulp, double precision only) \\
     \midrule
@@ -613,7 +605,7 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LL}
+  \begin{tabularx}{\textwidth}{LC}
     \toprule
     Range & Error (\ulp, double precision only) \\
     \midrule
@@ -629,7 +621,7 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LL}
+  \begin{tabularx}{\textwidth}{LC}
     \toprule
     Range & Error (\ulp, double precision only) \\
     \midrule
@@ -645,7 +637,7 @@ smallest normal floating numbers for the respective precision.
 \end{table}
 
 \begin{table}
-  \begin{tabularx}{\textwidth}{LL}
+  \begin{tabularx}{\textwidth}{LC}
     \toprule
     Range & Error (\ulp, double precision only) \\
     \midrule

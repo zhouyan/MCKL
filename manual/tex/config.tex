@@ -158,9 +158,9 @@ directly to bypass this check,
 \end{verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_TBB}} Determine if the \tbb library is available.
-The class template |RNGSetTBB| in section~\ref{sec:Multiple RNG streams} and
-the class |AlignedMemoryTBB| in section~\ref{sec:Aligned memory allocation} are
-only defined if this macro is true.
+The class template |RNGSetTBB| in section~\ref{sec:Multiple random number
+  generators} and the class |AlignedMemoryTBB| in section~\ref{sec:Aligned
+memory allocation} are only defined if this macro is true.
 
 \paragraph{\texttt{MCKL\_USE\_TBB}} Allow the library to use the \tbb library
 for parallelization. Currently this macro has no affect. The use of \tbb for
@@ -174,8 +174,9 @@ section~\ref{sec:Programming models}.
 as the default multiple \rng stream management method.
 
 \paragraph{\texttt{MCKL\_HAS\_MKL}} Determine if the \mkl library is available.
-The \rng{}s in section~\ref{sec:MKL RNG} are only defined if this macro is
-true. One can include the following header directly to bypass this check,
+The \rng{}s in section~\ref{sec:MKL random number generators} are only defined
+if this macro is true. One can include the following header directly to bypass
+this check,
 \begin{verbatim}
 #include <mckl/random/mkl.hpp>
 \end{verbatim}

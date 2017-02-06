@@ -34,12 +34,13 @@
 
 In this chapter, we first introduce vectorized random number generating in
 section~\ref{sec:Vectorized random number generating}. Then a set of \rng
-engines are discussed in sections~\ref{sec:Counter-based RNG}
-to~\ref{sec:Non-deterministic RNG}. Section~\ref{sec:Seeding RNG} shows how to
-seed multiple distinctive \rng instances, either within a single program or
-across multiple computing nodes. Section~\ref{sec:Multiple RNG streams} shows
-how multiple \rng instances in a parallelized program can be managed. Last, a
-set of distribution generators are discussed in sections~\ref{sec:Uniform bits
+engines are discussed in sections~\ref{sec:Counter-based random number
+generators} to~\ref{sec:Non-deterministic random number generators}.
+Section~\ref{sec:Seeding random number generators} shows how to seed multiple
+distinctive \rng instances, either within a single program or across multiple
+computing nodes. Section~\ref{sec:Multiple random number generators} shows how
+multiple \rng instances in a parallelized program can be managed. Last, a set
+of distribution generators are discussed in sections~\ref{sec:Uniform bits
 distribution} to~\ref{sec:Multivariate distribution}.
 
 \section{Vectorized random number generating}
@@ -65,10 +66,10 @@ for (size_t i = 0; i != n; ++i)
     r[i] = rng();
 \end{verbatim}
 The results are always the same unless a non-deterministic \rng is used (see
-section~\ref{sec:Non-deterministic RNG}). For some \rng{}s implemented in
-\mckl, the vectorized function may have considerable performance advantage. See
-appendix~\ref{chap:Performance of RNGs}. The second variant of |rand| is for
-generating distribution random variates,
+section~\ref{sec:Non-deterministic random number generators}). For some \rng{}s
+implemented in \mckl, the vectorized function may have considerable performance
+advantage. See appendix~\ref{chap:Performance of Random Number Generators}. The
+second variant of |rand| is for generating distribution random variates,
 \begin{verbatim}
 template <typename RNGType, typename DistributionType>
 void rand(RNGType &rng, DistributionType &distribution, size_t n,
@@ -97,8 +98,8 @@ produce exactly the same results as using a loop. For some distributions, such
 as those using the inverse method, the difference is up to rounding errors. For
 others, completely different sequences of random numbers might be generated.
 
-\section{Counter-based \texorpdfstring{\rng}{RNG}}
-\label{sec:Counter-based RNG}
+\section{Counter-based random number generators}
+\label{sec:Counter-based random number generators}
 
 The development by~\cite{Salmon:2011um} made high performance parallel \rng
 much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
@@ -122,9 +123,9 @@ classes such as |std::mt19937|. A few generators are implemented in \mckl and
 discussed briefly in this section. See~\cite{Salmon:2011um} for details of each
 algorithm.
 
-\subsection{\texorpdfstring{\aes}{AES} round function based
-\texorpdfstring{\rng}{RNG}}
-\label{sub:AES round function based RNG}
+\subsection{\texorpdfstring{\aes}{AES} round function based random number
+generators}
+\label{sub:AES round function based random number generators}
 
 \aes\footnote{\url{https://en.wikipedia.org/wiki/Advanced_Encryption_Standard}}
 round function based \rng{}s in~\cite{Salmon:2011um} are implemented in the
@@ -338,8 +339,8 @@ using Threefish512_64  = Threefish512Engine<uint64_t>;
 using Threefish1024_64 = Threefish1024Engine<uint64_t>;
 \end{verbatim}
 
-\section{\texorpdfstring{\mkl \rng}{MKL RNG}}
-\label{sec:MKL RNG}
+\section{\texorpdfstring{\mkl}{MKL} random number generators}
+\label{sec:MKL random number generators}
 
 \mkl provides some high performance \rng{}s. \mckl implements a wrapper class
 \begin{verbatim}
@@ -389,8 +390,8 @@ $t$-distribution. In addition, it is also applicable if a distribution is a
 special case of one of the distributions supported by \mkl, e.g., the
 $\chi^2$-distribution.
 
-\section{Non-deterministic \texorpdfstring{\rng}{RNG}}
-\label{sec:Non-deterministic RNG}
+\section{Non-deterministic random number generators}
+\label{sec:Non-deterministic random number generators}
 
 If \rdrand\footnote{\url{https://en.wikipedia.org/wiki/RdRand}} instructions
 are supported, \mckl also implements three non-deterministic \rng{}s,
@@ -402,8 +403,8 @@ A value of zero, the default, means the number of trials is unlimited. If it is
 a positive number, and if after the specified number of trials no random
 integer is returned by \rdrand instructions, zero is returned.
 
-\section{Seeding \texorpdfstring{\rng}{RNG}}
-\label{sec:Seeding RNG}
+\section{Seeding random number generators}
+\label{sec:Seeding random number generators}
 
 The following singleton class template,
 \begin{verbatim}
@@ -524,8 +525,8 @@ they share the same internal counter $c$. For counter-based \rng{}s implemented
 in \mckl, keys will be generated as seeds and \rng{}s with the same key width
 will share the same internal counter $c$.
 
-\section{Multiple \texorpdfstring{\rng}{RNG} streams}
-\label{sec:Multiple RNG streams}
+\section{Multiple random number generators}
+\label{sec:Multiple random number generators}
 
 The class template |RNGSet| can be used to manage multiple \rng instances
 within a parallel program. Three of them are implemented in \mckl. They all
@@ -544,13 +545,13 @@ same \rng. It is only useful when an |RNGSet| interface is required while the
 thread-safety and other issues are not important. The second implementation is
 |RNGSetVector|. It is an array of \rng{}s with length~$N$. It has memory cost
 $O(N)$. Many of the counter-based \rng{}s (see section~\ref{sec:Counter-based
-RNG}) have small state sizes and thus for moderate~$N$, this cost is not
-significant. The method calls |rng_set[i]| and |rng_set[j]| return independent
-\rng{}s if $i \ne j$. If \tbb is available, there is a third implementation,
-|RNGSetTBB|, which uses thread-local storage (\tls). It has much smaller memory
-footprint than |RNGSetVector| while maintains better thread-safety. The type
-alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is available. Otherwise it
-is defined to be |RNGSetVector|.
+random number generators}) have small state sizes and thus for moderate~$N$,
+this cost is not significant. The method calls |rng_set[i]| and |rng_set[j]|
+return independent \rng{}s if $i \ne j$. If \tbb is available, there is a third
+implementation, |RNGSetTBB|, which uses thread-local storage (\tls). It has
+much smaller memory footprint than |RNGSetVector| while maintains better
+thread-safety. The type alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is
+available. Otherwise it is defined to be |RNGSetVector|.
 
 \section{Uniform bits distribution}
 \label{sec:Uniform bits distribution}
