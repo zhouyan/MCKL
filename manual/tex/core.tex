@@ -3,7 +3,7 @@
 % ----------------------------------------------------------------------------
 %  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
-%  Copyright (c) 2013-2016, Yan Zhou
+%  Copyright (c) 2013-2017, Yan Zhou
 %  All rights reserved.
 %
 %  Redistribution and use in source and binary forms, with or without
@@ -29,968 +29,117 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\chapter{Core concepts}
-\label{chap:Core concepts}
+\chapter{Building blocks}
+\label{chap:Building blocks}
 
-In this chapter, we introduce the core concepts of the library. There are five
-of them. At the center is a user defined class that represents the state space.
-It shall contain the state values $X_{1:N_t}^t$. This class may also contain
-other members that is specific for the model, such as its data set. Next are
-the weights $W_{1:N_t}^t$. These two form the particle system $S_{1:N_t}^t$,
-where $S_i^t = (X_i^t,W_i^t)$. A sampler operates on a particle system to
-produce samples iteratively. A sampler may also use some monitors to calculate
-some estimates $\varphi^t(S_{1:N_t}^t)$ as it progresses. These concepts are
-all abstracted in the library. For brevity, in the following we drop the time
-dependent index $t$.
+In this chapter, we introduce the basic data structures and other building
+blocks of the library.
 
-\section{State}
-\label{sec:State}
+\section{Matrix}
+\label{sec:Matrix}
 
-Let $E$ be the state space. A state object represents the states $X_{1:N}$ and
-everything it depends on. If there exists an integer $d\ge1$ and some space
-$\calX$ such that $E\subseteq\calX^d$. Then, we can represent the states as an
-$N$ by $d$ matrix. The element at row $i$ and column $j$ is thus the $j$\ith
-component of $X_i$. The library provides a class template to abstract this type
-of state space,
+The |Matrix| class is a container representing a two-dimensional array. It is
+not designed to be a full-fledged matrix class for the purposes such as linear
+algebra. Instead, it will serve as the base class later for some data
+structures with matrix-like data layout.
+
+The class is declared as the following,
 \begin{verbatim}
-template <MatrixLayout Layout, size_t Dim, typename ValueType>
-class StateMatrix;
+template <MatrixLayout Layout, typename T>
+clas Matrix;
 \end{verbatim}
-where |Layout| is either |RowMajor| or |ColMajor|, which specifies the matrix
-layout, |Dim| is the dimension of $X$, i.e., $d$ and |ValueType| represents
-values in $\calX$. For example, if $E\subseteq\Real^d$, then one can use the
-following class,
+where |MatrixLayout| is an enumeration defined as the following
 \begin{verbatim}
-StateMatrix<RowMajor, d, double> state(N);
+enum class MatrixLayout { RowMajor = 101, ColMajor = 102 };
 \end{verbatim}
-This is not a general purpose matrix class for use such as linear algebra. It
-is more of a container with a few additional methods. Below is some common
-operations can be done on |state|,
+and |T| is the data type of the matrix element. For convenience, two constants
+are defined,
 \begin{verbatim}
-state.size();     // Get sample size
-state.dim();      // Get dimension
-state.row_size(); // Same as size()
-state.col_size(); // Same as dim()
-state.resize(N);  // Set sample size
-state(i, j);      // The element at row i, column j
-state.at(i, j);   // Same as above but with assertion
+constexpr MatrixLayout RowMajor = MatrixLayout::RowMajor;
+constexpr MatrixLayout ColMajor = MatrixLayout::ColMajor;
 \end{verbatim}
-If the template parameter |Dim| is equal to zero, then it is assumed that the
-dimension is dynamic and may change later. In this case, there is an additional
-constructor and other methods,
+
+A matrix can be constructed with either zero elements or the number of rows and
+columns.
 \begin{verbatim}
-StateMatrix<RowMajor, Dynamic, double> state(N, d);
-state.resize(N, d);  // Set sample size and dimension
-state.resize_dim(d); // Set dimension
+Matrix<RowMajor, double> A;       // An empty matrix
+Matrix<RowMajor, double> A(n, m); // An n by m matrix
 \end{verbatim}
-The enumerator |Dynamic| above has the value zero. Note that, these methods are
-only available when the template parameter |Dim| is zero. Attempting to call
-these methods when it is positive results in compile-time errors. Let $p$ be
-the minimum of the original and new sample sizes, and $q$ be the minimum of the
-original and new dimensions. All the methods that change the size of the matrix
-preserve the $p$ by $q$ matrix at the upper left corner of the original. It is
-also possible to get pointers to the raw data,
+A few attributes of the matrix can be accessed,
 \begin{verbatim}
-state.data();       // &state(0, 0)
-state.row_data(i);  // &state(i, 0)
-state.col_data(i);  // &state(0, j)
-state.row_stride(); // &state(i, j + 1) - &state(i, j)
-state.col_stride(); // &state(i + 1, j) - &state(i, j)
+A.nrow(); // Number of rows n
+A.ncol(); // Number of columns m
 \end{verbatim}
-These pointers can provide either read only or read and write access to the raw
-data, depends on whether or not the |state| object is constant. Note that, the
-strides of the pointers returned by |row_data| and |col_data| depends on the
-template parameter |Layout|. To iterate over a specific row,
+The size of the matrix can be changed,
 \begin{verbatim}
-auto rowptr = state.row_data(i);
-auto stride = state.row_stride();
-auto d = state.dim();
-for (size_type j = 0; j != d; ++j, rowptr += stride)
-    /* *rowptr is the same as state(i, j) */;
+A.resize(n, m); // Change the number of rows and columns
 \end{verbatim}
-And similarly, to iterate over a specific column,
+Let $p$ and $q$ be the number of rows and columns of the original matrix,
+respectively. Let $s$ and $t$ be the new dimensions, and $n = \min\Curly{p, s}$
+and $m = \min\Curly{q, t}$. Then the $n$ by $m$ upper-left corner of the
+original matrix is preserved. There are few ways to access elements,
 \begin{verbatim}
-auto colptr = state.col_data(j);
-auto stride = state.col_stride();
-auto n = state.size();
-for (size_type i = 0; i != n; ++i, colptr += stride)
-    /* *colptr is the as state(i, j) */;
+A(i, j);    // The element of i-th row and j-th column
+A.at(i, j); // The same but with assertions
 \end{verbatim}
-One can also retrieve a whole row or column through an output iterator. For
-example, to read the rows~1 and~3 into a vector,
+It is possible to access the memory buffer directly,
 \begin{verbatim}
-std::vector<ValueType> row13(state.dim() * 2);
-auto first = row13.begin();
-first = state.read_row(1, first);
-first = state.read_row(3, first);
+A.data();       // => &A(0, 0);
+A.row_stride(); // => &A(0, 1) - &A(0, 0);
+A.row_data(i);  // => &A(i, 0);
+A.col_stride(); // => &A(1, 0) - &A(0, 0);
+A.col_data(j);  // => &A(0, j);
 \end{verbatim}
-And similarly, to read columns~2 and~4 into a vector,
+The concept of ``stride'' is important when iterating elements through the
+|row_data| and |col_data|. Depending on the template parameter |Layout|, a
+matrix may have either unit stride row-wise or column-wise.
+
+Other methods such as |reserve|, |swap|, etc., take their usual meanings as in
+the standard library containers. See the reference manual for details.
+
+\subsection{Matrix of states}
+\label{sub:Matrix of states}
+
+Consider a collection of samples $X_{1:N}$ and each $X_i$ is a $d$-vector. In
+this case, it can be conveniently represented by an $N$ by $d$ matrix. The
+dimension $d$ (number of columns) of this matrix is usually fixed and often
+known at compile time, while the sample size $N$ (number of rows) may change as
+an algorithm proceeds. A derived class of |Matrix| is defined for this purpose.
 \begin{verbatim}
-std::vector<ValueType> col24(state.size() * 2);
-auto first = col24.begin();
-first = state.read_col(2, first);
-first = state.read_col(4, first);
+template <MatrixLayout Layout, std::size_t Dim, typename T>
+class StateMatrix : public Matrix<Layout, T>;
 \end{verbatim}
-The methods |read_row| and |read_col| return output iterators that point to one
-pass the last element in the destination range, similar to that of |std::copy|,
-etc. To read the whole matrix into a vector,
+If the template parameter |Dim| denotes the dimension $d$. If it is zero, then
+the dimension can be later changed at compile time. Otherwise, it is fixed.
+Such a matrix can be constructed given it sample size,
 \begin{verbatim}
-std::vector<ValueType> mat(state.size() * state.dim());
-state.read(RowMajor, mat.begin());
+StateMatrix<RowMajor, 4, double> S(n); // And n by 4 matrix of states
 \end{verbatim}
-The first parameter is matrix layout of the output matrix. There are two more
-methods, whose purpose become clear later. The first is,
+It can also be constructed given the sampler size and dimension,
 \begin{verbatim}
-void duplicate(size_type src, size_type dst);
+StateMatrix<RowMajor, 0, double> S(n, d); // And n by d matrix of states
 \end{verbatim}
-Let the value of |src| and |dst| be $p$ and $q$, respectively. This method sets
-$X^q = X^p$. In other words, $X^p$ is duplicated while $X^q$ is eliminated. The
-other method is,
+Note that, the constructor above is only available if |Dim| is zero. A few
+attributes of the matrix can be access,
 \begin{verbatim}
-template <typename IntType, typename InputIter>
-void select(IntType N, InputIter index);
+S.size(); // => S.nrow();
+S.dim();  // => S.ncol();
 \end{verbatim}
-The first argument is the new sample size, say $\hat{N}$ and |index| is an
-$\hat{N}$-vector, say $a_{1:\hat{N}}$. This method selects samples to form a
-new collection $\hat{X}_{1:\hat{N}}$  by setting $\hat{X}_i = X_{a_i}$ for $i =
-1,\dots,\hat{N}$. The new sample size $\hat{N}$ does not have to be the same as
-the original, say $N$. This is closely related to the selection step of \smc
-algorithms. Let $r_i = \sum_{j = 1}^{\hat{N}}\bbI_{\{i\}}(a_j)$. Then it is
-required that $a_i = i$ for all $r_i > 0$, $i = 1,\dots,\min\{N, \hat{N}\}$.
+A few methods are given new overloads over the base class, which may be more
+convenient when the matrix is used in this context,
+\begin{verbatim}
+S.resize(n); // => S.resize(n, S.ncol());
+S.reserve(n);
+\end{verbatim}
+
+\subsection{Matrix of estimates}
+\label{sub:Matrix of estimates}
 
 \section{Weight}
 \label{sec:Weight}
 
-The weights $W_{1:N}$ is abstracted by the class |Weight|. For example,
-\begin{verbatim}
-Weight w(N);
-w.size();    // Get sample size
-w.resize(N); // Set sample size
-\end{verbatim}
-One important property of |Weight| is that, $W_{1:N}$ is always normalized such
-that $\sum_{i=1}^N W_i = 1$. For example, after the construction or resizing,
-the weights are set to be equal, i.e., $W_i = 1 / N$, for $i = 1,\dots,N$. This
-can also be done manually,
-\begin{verbatim}
-w.set_equal();
-\end{verbatim}
-The weights can be manipulated in various ways. Let |v| be an input iterator
-pointing to an $N$-vector $v_{1:N}$. To set $W_i \propto v_i$,
-\begin{verbatim}
-w.set(v);
-\end{verbatim}
-To set $ W_i \propto W_i\EE^{v_i}$,
-\begin{verbatim}
-w.set_log(v);
-\end{verbatim}
-To set weights incrementally, use
-\begin{verbatim}
-w.mul(v);
-w.add_log(v);
-\end{verbatim}
-which set $W_i \propto W_iv_i$ and $W_i \propto W_i \EE^{v_i}$, respectively.
-The value of \ess of the weights can be obtained by,
-\begin{verbatim}
-w.ess();
-\end{verbatim}
-One may also draw an integer $0 \le k < N$ according to the weights by,
-\begin{verbatim}
-w.draw(rng);
-\end{verbatim}
-where |rng| is a \rng engine object. Last, one can obtain a pointer to the raw
-data,
-\begin{verbatim}
-w.data();
-\end{verbatim}
-or read all the weights into an output iterator,
-\begin{verbatim}
-w.read(first);
-\end{verbatim}
-Unlike |StateMatrix|, the pointer returned by the |data| method always provides
-read only access. In other words, |Weight| does not provide any means for user
-to change an individual $W_i$ without changing the others. Conceptually, it is
-the relative weights that matter. And changing one of them is in fact changing
-$W_{1:N}$ as a whole.
+\section{Particle system}
+\label{sec:Particle system}
 
-\section{Particle}
-\label{sec:Particle}
-
-A particle system, abstracted by the class template,
-\begin{verbatim}
-template <typename T>
-class Particle;
-\end{verbatim}
-is formed by three parts. The first is an object of type |T|, that abstracts
-the states $X_{1:N}$. The second is a type |Weight| object that abstracts the
-weights $W_{1:N}$. And the third is a collection of \rng engines. There are
-some restrictions on the type |T|. The constructor of |Particle| is as the
-following,
-\begin{verbatim}
-template <typename... Args>
-explicit Particle(size_type N, Args &&... args)
-\end{verbatim}
-The first argument is the sample size. This and all other arguments, are passed
-down to the constructor of type |T|. For example,
-\begin{verbatim}
-using T = StateMatrix<RowMajor, Dynamic, double>;
-Particle<T> particle(N, d);
-\end{verbatim}
-constructs the |StateMatrix| object with arguments |N| and |d|. Therefore, |T|
-must has a constructor that accepts an integer value as its first argument. The
-additional acceptable arguments of the constructor of |Particle| is the same as
-those of |T|. Second, |T| has to provide a |select| method similar to that of
-|StateMatrix|. The library does not impose any restriction on the internal
-structure of |T|. And thus it cannot perform the selection by itself. However,
-for more complicated situations, one can always define a class, say |ValueType|
-to represent the space $E$, and use a one dimension |StateMatrix| as the type
-|T|. For example,
-\begin{verbatim}
-class ValueType; // User defined type
-using T = StateMatrix<RowMajor, 1, ValueType>;
-Particle<T> particle(N);
-\end{verbatim}
-More usefully, one can create a new type by deriving from |StateMatrix|. Note
-that, though the |select| method of |StateMatrix| is written as a function
-template that can accept any integers and input iterators as its arguments, the
-user defined type |T| only needs to support the following signature,
-\begin{verbatim}
-ReturnType select(size_type N, const size_type *index);
-\end{verbatim}
-where |size_type| is |T::size_type| if such a type exists, and |size_t|
-otherwise. To replace the type of \rng class within |Particle|, add the
-following definition of member type within the class |T|,
-\begin{verbatim}
-class T
-{
-    public:
-    using rng_set_type = RNGSet<RNGType>;
-};
-\end{verbatim}
-where |RNGType| is the desired type of \rng engine. See
-section~\ref{sec:Multiple RNG streams} for details of the class template
-|RNGSet|.
-
-The |Weight| type object is constructed with a single argument, the sample size
-$N$. To retrieve references to the type |T| and |Weight| objects, one can call,
-\begin{verbatim}
-particle.state();
-particle.weight();
-\end{verbatim}
-respectively. Last but not least, the |Particle| class also contains a
-collection of \rng engines. The method,
-\begin{verbatim}
-particle.rng(i);
-\end{verbatim}
-returns a reference to an \rng engine, specific to the $i$\ith particle. For $i
-\ne j$, if the following,
-\begin{verbatim}
-auto &rng_i = particle.rng(i);
-auto &rng_j = particle.rng(j);
-\end{verbatim}
-are called from two different threads, then |rng_i| and |rng_j| are instances
-of two independent \rng engines. The details are in section~\ref{sec:Multiple
-RNG streams}. The |Particle| class also contains an \rng engine independent of
-any particle,
-\begin{verbatim}
-auto &rng = particle.rng();
-\end{verbatim}
-
-\subsection{Resize the particle system}
-\label{sub:Resize the particle system}
-
-The sample size of a particle system can be obtained by,
-\begin{verbatim}
-particle.size();
-\end{verbatim}
-It can be changed. However, in Monte Carlo algorithms, one does not change the
-sample size arbitrarily. Which samples to be preserved and possibly duplicated
-and which samples to be eliminated, has to be done according to some algorithms
-that produce desirable effects. There are a few methods to resize a particle
-system. They share two common properties. They take the new sample size, say
-$M$, as their first argument. The other is that in the end, they call the
-|select| method on the type |T| object, with $M$ and an input iterator, say
-|index|, that points to an $M$-vector $a_{1:M}$ as arguments. In addition they
-all call the |resize| method on the type |Weight| object with $M$ as the
-argument. How the type |T| handles the call to the |select| method is up to the
-user. But usually it should behave similarly to that of |StateMatrix|. Below is
-descriptions of each method for resizing a particle system. They differ in how
-they generate the index vector $a_{1:M}$. We use $N$ denote the original sample
-size. Also, for clarity, in the mathematical description of the vectors, we are
-using indices starting with $1$, while in the actual program, the indices
-starts with zero, as usual.
-
-\subsubsection{Resize with given index vectors}
-
-\begin{verbatim}
-template <typename InputIter>
-void resize_by_index(size_type M, InputIter index);
-\end{verbatim}
-This method takes the index vector as its input and passes it directly to the
-|select| method of |T|.
-
-\subsubsection{Resize with resampling algorithms}
-
-\begin{verbatim}
-template <typename ResampleType>
-void resize_by_resample(size_type M, ResampleType &&res)
-\end{verbatim}
-This method generates the index vector according to a resampling algorithm. A
-resampling algorithm produce the number of replications of each particle in the
-original system. The function |res| shall accept a call as the following,
-\begin{verbatim}
-res(N, M, rng, w, r);
-\end{verbatim}
-where $N$ and $M$ are the original and new sample size, |rng| is a reference to
-an \rng engine, |w| is a pointer of type |double|, that points to the
-$N$-vector of normalized weights. And last, |r| is a pointer of type
-|size_type| that points to the $N$-vector of the number of duplicates of each
-particles $r_{1:N}$. It is required that, the results shall satisfy $r_i\ge0$
-for $i=1,\dots,N$ and $\sum_{i=1}^N r_i = M$. The index vector is generated
-such that, $a_i = i$ if $r_i > 0$ for $i = 1,\dots,\min\{N, M\}$ and
-$\sum_{i=1}^M\bbI_{\{j\}}(a_i) = r_j$ for $j = 1,\dots,N$.
-
-\subsubsection{Resize with uniform selection}
-
-\begin{verbatim}
-void resize_by_uniform(size_type M);
-\end{verbatim}
-The index vector is generated such that, $\Prob(a_i = j) = 1/M$, for $i =
-1,\dots,M$, $j = 1,\dots,N$. This is equivalent to Multinomial resampling with
-equal weights.
-
-\subsection{Clone the particle system}
-\label{sub:Clone the particle system}
-
-The |Particle<T>| class has the usual special members, such as the copy
-constructor, assignment operator, etc. They work just as usual. For example,
-\begin{verbatim}
-auto new_particle = particle;
-\end{verbatim}
-This creates a new particle system as an exact duplicate of the original.
-However, this ``exactness'' is often undesired. The duplicated particle system
-has exactly the same states of \rng engines as the original. And therefore, any
-random samples generated from this new system are exactly the same as the
-original. This is hardly the desired effects in algorithms where duplicating a
-particle system into multiple copies is required. In this situation, one can
-use the |clone| method,
-\begin{verbatim}
-auto new_particle = particle.clone();
-\end{verbatim}
-In contrast to the copy constructor, this creates a new particle system exactly
-the same as the original, except that all \rng engines within the new system is
-re-seeded.
-
-\subsection{Iterate the particle system}
-\label{sub:Iterate the particle system}
-
-As mentioned before, the library does not impose restrictions on how the states
-shall be structured or accessed. Therefore it is not possible to access $X_i$
-using methods of |Particle|. Instead, one has to use methods of |T|, the type
-of the template parameter. For example,
-\begin{verbatim}
-using T = StateMatrix<RowMajor, d, double>;
-Particle<T> particle(N);
-particle.state()(i, j);
-particle.state().dim();
-\end{verbatim}
-This is rather cumbersome and somehow too limited. The library provides a class
-template,
-\begin{verbatim}
-template <typename T>
-class ParticleIndex;
-\end{verbatim}
-that represents the index of particles within the system. It is constructed by
-the index of the particle and a pointer to the particle system that it belongs
-to. For example,
-\begin{verbatim}
-ParticleIndex<T> idx(i, &particle);
-\end{verbatim}
-or alternatively,
-\begin{verbatim}
-auto idx = particle.index(i);
-\end{verbatim}
-To access the particle system, use
-\begin{verbatim}
-idx.particle();     // A reference to particle
-idx.particle_ptr(); // A pointer to particle
-\end{verbatim}
-For any type |T|, the type |ParticleIndex<T>| has the following methods,
-\begin{verbatim}
-idx.i();   // The index used to construct idx, i
-idx.rng(); // => particle.rng(i);
-\end{verbatim}
-If |T| is a derived class of |StateMatrix|, then
-\begin{verbatim}
-idx.dim();    // => particle.state().dim();
-idx.stride(); // => particle.state().row_stride();
-idx.data();   // => particle.state().row_data(i);
-idx(j);       // => particle.state()(i, j);
-idx.at(j);    // => particle.state().at(i, j);
-\end{verbatim}
-That is, |ParticleIndex| has an interface that depends on the type |T|. One can
-extend its interface by defining a special member class template inside |T|.
-For example,
-\begin{verbatim}
-using Base = StateMatrix<RowMajor, d, double>;
-
-class T : public Base
-{
-    public:
-    template <typename S>
-    using idx = Base::particle_index_type<S>;
-
-    template <typename S>
-    class particle_index_type : public idx<S>
-    {
-        public:
-        particle_index_type(size_type i, Particle<S> *pptr) : idx<S>(i, pptr) {}
-    };
-};
-\end{verbatim}
-The class |ParticleIndex<T>| derives from |T::particle_index_type<T>| if such a
-member type exists. Otherwise, it has methods as described earlier for any type
-|T|. Therefore, it is possible to give it methods that are more convenient for
-a particular problem. Examples can be found later in section~\ref{sec:Example
-(PF)}.
-
-The |ParticleIndex| type can also be used like an random access iterator. For
-example,
-\begin{verbatim}
-auto idx = particle(i);
-auto jdx = particle(j);
-++idx;      // => particle.index(i + 1);
-idx--;      // => particle.index(i - 1);
-idx + n;    // => particle.index(i + n);
-idx - jdx;  // => i - j;
-idx == jdx; // => i == j;
-\end{verbatim}
-Other comparison operators such as |!=|, |<|, etc., are also defined. Note
-that, comparing or subtracting two indices from two different particles systems
-is meaningless. This results in runtime errors unless debugging is disabled
-(see section~\ref{sec:Error handling}). The increment and decrement operators
-follow usual prefix and postfix semantics. However, it is important to note
-that, |ParticleIndex| \emph{is not} an iterator even though it shares many
-common methods. Recall that, |Particle| does not have methods to access $X_i$
-directly. And therefore it is not possible to dereference a |ParticleIndex|
-object to get a reference to $X_i$. Instead, dereferencing an |ParticleIndex|
-object returns a reference to itself. This is similar for the member access
-operator and the index operator. For example,
-\begin{verbatim}
-*idx;       // => idx
-idx->rng(); // => idx.rng();
-idx[n];     // => idx + n
-\end{verbatim}
-These methods may at first seem pointless. However, it makes it possible to
-iterate a |Particle| object. For example,
-\begin{verbatim}
-for (auto idx : particle) {
-    idx(0) = /* initialize the first dimension */;
-    idx(1) = /* initialize the second dimension */;
-    // ...
-}
-\end{verbatim}
-This is equivalent to
-\begin{verbatim}
-for (size_t i = 0; i != particle.size(); ++i) {
-    auto idx = particle.index(i);
-    // ...
-}
-\end{verbatim}
-More importantly, it allows the use of |Particle| with algorithms. For example,
-\begin{verbatim}
-auto s = std::accumulate(particle.begin(), particle.end(), 0.0,
-    [](double s, ParticleIndex<T> idx) { return s + idx(0); });
-\end{verbatim}
-
-\section{Monitor}
-\label{sec:Monitor}
-
-Let $\varphi(S_{1:N})$ be some estimator with values in $\Real^d$. It is often
-of interest to monitor its value as the algorithm progresses. In the library,
-this is done through the class template |Monitor|. It has the following
-constructor,
-\begin{verbatim}
-Monitor(size_t dim, const eval_type &eval, bool record_only = false,
-    MonitorStage stage = MonitorMCMC);
-\end{verbatim}
-The first parameter |dim| is the dimension of $\varphi$, $d$. The second is a
-user defined callback function. More specifically,
-\begin{verbatim}
-using eval_type = std::function<void(size_t, size_t, Particle<T> &, double *)>;
-\end{verbatim}
-When this function is called. The first argument passed to it is $t$, the
-iteration number. The second is $d$, the dimension. The third is a reference to
-the particle system at iteration $t$. And the last is a pointer to a vector for
-output. The third parameter of the constructor, |record_only|, determines how
-shall the function above behave. If it is true, then the function |phi| shall
-return the value of $\varphi$ directly, and the output parameter |r| points to
-a $d$-vector. In this case, |Monitor| merely records the values of $\varphi$ at
-each iteration. On the other hand, if |record_only| is false, then it is
-assumed that $\varphi$ takes the form, $\varphi(X_{1:N}) = \sum_{i=1}^N W_i
-\varphi_i(X_i)$. And the output parameter |r| is an $N$ by $d$ row major
-matrix, with the $d$-vector value $\varphi_i(X_i)$ written into each row of
-this matrix. And each time |phi| is called, |Monitor| computes and store the
-result of the summation above. The last parameter of the constructor of
-|Monitor| specifies when shall the calculation of $\varphi$ be carried out. We
-defer its discussion until we introduce the sampler in the next section. The
-evaluation object can be replaced later by the following method,
-\begin{verbatim}
-void eval(
-    const eval_type &e, bool record_only = false, MonitorStage stage = MonitorMCMC);
-\end{verbatim}
-One can retrieve the results in various ways. Every time a monitor being
-evaluated, it records two values. The first is the iteration number $t$, at
-which it was evaluated. The other is the value of $\varphi$. One can retrieve
-these values using the following methods,
-\begin{verbatim}
-mon.iter_size();  // Total number of evaluations
-mon.index(j);     // Iteration number of the j-th evaluation
-mon.record(i, j); // The value of the i-th component
-                  // of the result at the j-th evaluation
-\end{verbatim}
-Note that, the monitor does not have to be added to a sampler before it
-starting initialization. It can also be removed before the sampler finishing
-all iterations. Therefore, the iteration numbers of a monitor being evaluated
-are not necessarily the sequence $0,1,\dots,n$, where $n$ is the total number
-of iterations.
-
-\section{Sampler}
-\label{sec:Sampler}
-
-\subsection{Construction and configuration}
-\label{sec:Construction and configuration}
-
-A sampler is formed by the particle system together with all the operations on
-it. It is abstracted by the class template,
-\begin{verbatim}
-template <typename T>
-class Sampler;
-\end{verbatim}
-The template parameter |T| is the same as that of |Particle|. Its constructor
-takes arbitrary arguments,
-\begin{verbatim}
-template <typename... Args>
-explicit Sampler(Args &&... args)
-\end{verbatim}
-and all arguments are passed down to the constructor of |Particle|. For
-example,
-\begin{verbatim}
-using T = StateMatrix<RowMajor, Dynamic, double>;
-Sampler<T> sampler(N, d);
-\end{verbatim}
-Any callable objects that is convertible to the following can be used as
-operations on the particle system,
-\begin{verbatim}
-using eval_type = std::function<void(size_t, Particle<T> &)>;
-\end{verbatim}
-For example,
-\begin{verbatim}
-void eval(size_t iter, Particle<T> &particle);
-\end{verbatim}
-Conceptually, such a function implement an operator $M(S_{1:N})$ such that a
-new particle system $\hat{S}_{1:\hat{N}}$ is produced given the iteration
-number $t$ and the original. It it often possible to decompose the operator $M$
-into multiple simpler ones. And thus a sampler can have a sequence of
-evaluation objects. Each of these evaluation objects can be added to the
-sampler by the |eval| method,
-\begin{verbatim}
-Sampler<T> &eval(const eval_type &e, SamplerStage stage);
-\end{verbatim}
-For example,
-\begin{verbatim}
-sampler.eval(eval, SamplerInit | SamplerMove, true);
-\end{verbatim}
-The first argument is the evaluation object. The sampler maintains a sequence
-of evaluation steps. The new evaluation object is appended to the existing
-sequence. Note that, the order at which these objects being evaluated is the
-same as the one they are added to the sampler. One can clear the sequence by,
-\begin{verbatim}
-sampler.eval_clear();
-\end{verbatim}
-The second argument is explained in the next section. The sampler can also have
-an optional resampling step. This can be added to the sampler by the following
-method,
-\begin{verbatim}
-Sampler<T> &resample_method(
-    ResampleScheme scheme, double threshold = resample_threshold_always());
-\end{verbatim}
-which uses a builtin resampling scheme of the library, listed in
-table~\ref{tab:Built-in resampling schemes}. See section~\ref{sec:Algorithm
-(Resample)} for details of the algorithms. Alternatively, any evaluation object
-can be used for resampling,
-\begin{verbatim}
-Sampler<T> &resample_method(
-    const eval_type &res_eval, double threshold = resample_threshold_always());
-\end{verbatim}
-In either case, the parameter |threshold| specifies the condition under which
-the resampling step is actually performed. Let its value be $\alpha$,
-resampling is performed if and only if $\ess < \alpha N$.
-
-\begin{table}
-  \begin{tabularx}{\textwidth}{LL}
-    \toprule
-    \texttt{ResampleScheme} & Algorithm \\
-    \midrule
-    \texttt{Multinomial}
-    & Multinomial resampling \\
-    \texttt{Stratified}
-    & Stratified resampling \\
-    \texttt{Systematic}
-    & Systematic resampling \\
-    \texttt{ResidualMultinomial}
-    & Residual resampling \\
-    \texttt{ResidualStratified}
-    & Stratified resampling on residuals \\
-    \texttt{ResidualSystematic}
-    & Systematic resampling on residuals \\
-    \bottomrule
-  \end{tabularx}
-  \caption{Built-in resampling schemes}
-  \label{tab:Built-in resampling schemes}
-\end{table}
-
-Multiple monitors can be added to a sampler. For example,
-\begin{verbatim}
-Monitor<T> mon(d, phi, false, MonitorMCMC);
-sampler.monitor("name", mon);
-\end{verbatim}
-A reference to the named monitor can be retrieved,
-\begin{verbatim}
-auto &m = sampler.monitor("name");
-\end{verbatim}
-
-\subsection{Initialization and iteration}
-\label{sub:Initialization and iteration}
-
-The sampler can be initialized,
-\begin{verbatim}
-sampler.initialize();
-\end{verbatim}
-This performs a few things. First, any record of previous operations on the
-sampler is cleared. The iteration number $t$ is set to zero. And then, there
-are three evaluation stages and three monitoring stages. They are performed in
-the following order:
-
-\begin{enumerate}
-  \item |SamplerInit|
-  \item |MonitorMove|
-  \item Resample if $\ess < \alpha N$
-  \item |MonitorResample|
-  \item |SamplerMCMC|
-  \item |MonitorMCMC|
-\end{enumerate}
-
-Each evaluation object, added to the sampler through,
-\begin{verbatim}
-Sampler<T> &eval(const eval_type &e, SamplerStage stage);
-\end{verbatim}
-is evaluated at the |SamplerInit|, etc., steps if the corresponding stage is
-set (i.e., the value of |stage & SamplerInit| is non-zero). Similarly, every
-monitor, constructed by,
-\begin{verbatim}
-Monitor(size_t dim, const eval_type &eval, bool record_only = false,
-    MonitorStage stage = MonitorMCMC);
-\end{verbatim}
-is evaluated if the corresponding stage is the same (e.g., |stage| \emph{equal}
-to |MonitorMove|). The sampler can be iterated,
-\begin{verbatim}
-sampler.iterate();  // iterate once
-sampler.iterate(n); // iterate n times
-\end{verbatim}
-At each iteration, the steps performed is the same as initialization, except
-that |SamplerInit| is replaced by |SamplerMove|. Therefore, one can distinguish
-between operations for initialization or iteration only, and those for every
-step. An example is provided in the next section.
-
-\section{Example}
-\label{sec:Example (PF)}
-
-This is an example used in~\cite{Johansen:2009wd}. Through this example, we
-show how to implement a simple particle filter. It shall walk one through the
-basic features of the library introduced above.
-
-The state space model, known as the almost constant velocity model in the
-tracking literature, provides a simple scenario. The state vector,
-\begin{equation*}
-  X^t = (\xpos^t, \ypos^t, \xvel^t, \yvel^t)^{\transpose}
-\end{equation*}
-contains the position and velocity of an object moving in a plane. Imperfect
-observations $Y^t = (\xobs^t, \yobs^t)^{\transpose}$ of the positions are
-possible at each time instance. The state and observation equations are linear
-with additive noises,
-\begin{align*}
-  X^t &= AX^{t-1} + U^t \\
-  Y^t &= BX^t + \delta V^t
-\end{align*}
-where
-\begin{equation*}
-  A = \begin{pmatrix}
-    1 & 0 & \Delta & 0      \\
-    0 & 1 & 0      & \Delta \\
-    0 & 0 & 1      & 0      \\
-    0 & 0 & 0      & 1
-  \end{pmatrix} \qquad
-  B = \begin{pmatrix}
-    1 & 0 & 0 & 0 \\
-    0 & 1 & 0 & 0 \\
-  \end{pmatrix} \qquad
-  \delta = 0.1
-\end{equation*}
-and we assume that the elements of the noise vector $U_t$ are independent
-Gaussian with variance $0.02$ and $0.001$ for position and velocity,
-respectively. The observation noise, $V_t$ comprises i.i.d.\ $t$-distributed
-random variables with degree of freedom $\nu = 10$. The prior at time $0$
-corresponds to an axis-aligned Gaussian with variance $4$ for the position
-coordinates and $1$ for the velocity coordinates. The particle filter algorithm
-is shown in Algorithm~\ref{alg:pf}.
-
-\begin{algorithm}[t]
-  \begin{algorithmic}
-    \tophrule
-    \STATE \COMMENT{Initialization}
-    \STATE Set $t\leftarrow0$.
-    \STATE Sample $\xpos^{0,i},\ypos^{0,i}\sim\calN(0,4)$ and
-    $\xvel^{0,i},\yvel^{0,i}\sim\calN(0,1)$.
-    \STATE Weight $W_i^0 \propto \exp\{\ell(X_i^0 \vert Y_0)\}$
-
-    \REPEAT
-    \STATE \COMMENT{Iteration}
-    \STATE Set $t\leftarrow t + 1$.
-    \STATE Sample
-    \begin{align*}
-      \xpos^{t,i}&\sim\calN(\xpos^{t-1,i} + \Delta\xvel^{t-1,i}, 0.02) &
-      \xvel^{t,i}&\sim\calN(\xvel^{t-1,i}, 0.001) \\
-      \ypos^{t,i}&\sim\calN(\ypos^{t-1,i} + \Delta\yvel^{t-1,i}, 0.02) &
-      \yvel^{t,i}&\sim\calN(\yvel^{t-1,i}, 0.001)
-    \end{align*}
-    \STATE Weight $W_i^t \propto W_i^{t - 1}\exp\{\ell(X_i^t \vert Y_t)\}$.
-    \UNTIL{All data are processed}
-    \bottomhrule
-  \end{algorithmic}
-  \caption{Particle filter for the almost constant velocity model}
-  \label{alg:pf}
-\end{algorithm}
-
-\subsection{Implementation}
-\label{sub:Implementation (PF)}
-
-We work through a complete implementation using a top-down approach. First, we
-show the contents |main| function.
-\begin{verbatim}
-const size_t N = 1000;
-Sampler<PF> sampler(N);
-
-sampler.resample_method(Stratified, 0.5)
-    .eval(PFInit, SamplerInit)
-    .eval(PFMove, SamplerMove)
-    .eval(PFWeight, SamplerInit | SamplerMove)
-    .monitor("pos", Monitor<PF>(2, PFEstimate));
-
-sampler.initialize();
-sampler.iterate(sampler.particle().state().n() - 1);
-
-std::ofstream out("pf.out");
-out << sampler;
-out.close();
-\end{verbatim}
-Within the |main| function, a |Sampler| object is first constructed with the
-specified number of particles. Then we configure the sampler. First, it  uses
-stratified resampling when $\ess < N / 2$. The sampling step within the
-\emph{Initialization} and \emph{Iteration} in Algorithm~\ref{alg:pf} is
-implemented by two functions, |PFInit| and |PFMove|, respectively. The
-weighting is done through the function |PFWeight|. And the estimate is
-monitored through the function |PFEstimate|. These are added to the sampler
-through the |eval| and |monitor| methods as shown above. It then initialized
-and iterated $n - 1$ times, where $n$ is the total number of observations. In
-the end, we write a summary of the sampler into the file |pf.out|.
-
-\subsubsection{State}
-
-First all of, we need a class to represent the state space, which is $\Real^4$.
-A sensible base class is thus,
-\begin{verbatim}
-using PFBase = StateMatrix<RowMajor, 4, double>;
-\end{verbatim}
-The class |PF| is declared as below,
-\begin{verbatim}
-class PF : public PFBase
-{
-    public:
-    template <typename T>
-    class particle_index_type;
-
-    PF(size_t N);
-    size_t n() const { return obs_x_.size(); };
-
-    private:
-    std::vector<double> obs_x_;
-    std::vector<double> obs_y_;
-};
-\end{verbatim}
-The constructor initializes the observations,
-\begin{verbatim}
-PF(size_t N) : PFBase(N)
-{
-    double x = 0;
-    double y = 0;
-    std::ifstream data("pf_cv.data");
-    while (data >> x >> y) {
-        obs_x_.push_back(x);
-        obs_y_.push_back(y);
-    }
-    data.close();
-}
-\end{verbatim}
-Again, in a real application, the data is unlikely to be initialized in this
-way. The method |n| simply return the size of |obs_x_|. Last, we would like to
-extend the |ParticleIndex<PF>| class, by defining a |particle_index_type|
-member class template,
-\begin{verbatim}
-template <typename T>
-using PFIndexBase = PFBase::particle_index_type<T>;
-
-template <typename T>
-class particle_index_type : public PFIndexBase<T>
-{
-    public:
-    particle_index_type(size_t i, Particle<T> *pptr) : PFIndexBase<T>(i, pptr) {}
-
-    double &pos_x() { return this->at(0); }
-    double &pos_y() { return this->at(1); }
-    double &vel_x() { return this->at(2); }
-    double &vel_y() { return this->at(3); }
-
-    double log_likelihood(size_t iter);
-};
-\end{verbatim}
-First of all, we don't want to later refer to the states $\xpos$, etc., by
-integer index values in the reset of the program, which is error prone even for
-this simple example. Second, we would like to compute the log-likelihood of any
-given particle. This is implemented through the |log_likelihood| method, which
-is a simple translation of the mathematical formulation,
-\begin{verbatim}
-double log_likelihood(size_t iter)
-{
-    const double x = this->particle().state().obs_x_[iter];
-    const double y = this->particle().state().obs_y_[iter];
-    const double scale = 10;
-    const double nu = 10;
-
-    double llh_x = scale * (pos_x() - x);
-    double llh_y = scale * (pos_y() - y);
-    llh_x = std::log(1 + llh_x * llh_x / nu);
-    llh_y = std::log(1 + llh_y * llh_y / nu);
-
-    return -0.5 * (nu + 1) * (llh_x + llh_y);
-}
-\end{verbatim}
-
-\subsubsection{Initialization and iteration}
-
-The function that sample the state values from the prior is as the following,
-\begin{verbatim}
-void PFInit(size_t, Particle<PF> &particle)
-{
-    const double sd_pos = 2;
-    const double sd_vel = 1;
-    std::normal_distribution<double> rpos(0, sd_pos);
-    std::normal_distribution<double> rvel(0, sd_vel);
-    auto &rng = particle.rng();
-
-    for (auto idx : particle) {
-        idx.pos_x() = rpos(rng);
-        idx.pos_y() = rpos(rng);
-        idx.vel_x() = rvel(rng);
-        idx.vel_y() = rvel(rng);
-    }
-}
-\end{verbatim}
-We construct two Normal distribution objects using for the position and
-velocity components of the states. And initialize each particle with them. The
-function to sample new states in each iteration later is similar,
-\begin{verbatim}
-void PFMove(size_t, Particle<PF> &particle)
-{
-    const double sd_pos = std::sqrt(0.02);
-    const double sd_vel = std::sqrt(0.001);
-    std::normal_distribution<double> rpos(0, sd_pos);
-    std::normal_distribution<double> rvel(0, sd_vel);
-    auto &rng = particle.rng();
-    const double delta = 0.1;
-
-    for (auto idx : particle) {
-        idx.pos_x() += rpos(rng) + delta * idx.vel_x();
-        idx.pos_y() += rpos(rng) + delta * idx.vel_y();
-        idx.vel_x() += rvel(rng);
-        idx.vel_y() += rvel(rng);
-    }
-}
-\end{verbatim}
-Both of these two functions are really simple translations of the mathematical
-formulation of the algorithm.
-
-\subsubsection{Weighting}
-
-In each iteration, we weight the particles using its log-likelihood. This is
-computed with the |log_likelihood| method of |particle_index_type| defined
-earlier,
-\begin{verbatim}
-void PFWeight(size_t iter, Particle<PF> &particle)
-{
-    std::vector<double> weight(particle.size());
-    for (auto idx : particle)
-        weight[idx.i()] = idx.log_likelihood(iter);
-    particle.weight().add_log(weight.data());
-}
-\end{verbatim}
-The last step in the function above add the logarithm of the incremental
-weights to the particle system. Note that, each time the |initialize| method of
-|Sampler| is called, the weights are set to be equal first. And thus the
-function above is correct for both initialization and iterations.
-
-\subsubsection{Estimation}
-
-Last, we would like to record the value of $\varphi^t(X_i^t) =
-(\xpos^{t,i},\ypos^{t,i})^{\transpose}$. This is done by defining the function,
-\begin{verbatim}
-void PFEstimate(size_t, size_t, Particle<PF> &particle, double *r)
-{
-    for (auto idx : particle) {
-        *r++ = idx.pos_x();
-        *r++ = idx.pos_y();
-    }
-}
-\end{verbatim}
-The out parameter |r| points to an $N$ by $d$ row major matrix, $d = 2$.
-
-\subsubsection{Summary}
-
-As we see above, the implementation of all the functions added to the sampler
-object is straightforward. In fact, half of the program is within the
-definition of the |PF| class. This is in fact a common pattern of programs
-using this library. The class that represent the state space also contains
-methods and data that is specific to the model.
-
-The first few lines of the output of the program, written by
-\begin{verbatim}
-std::ofstream out("pf.out");
-out << sampler;
-out.close();
-\end{verbatim}
-is shown below
-\begin{verbatim}
-ESS   Resampled       Size    pos.0   pos.1
-2.13795       1       1000    -1.29499        3.11821
-357.471       1       1000    -1.22486        3.18716
-152.535       1       1000    -1.31156        2.99123
-\end{verbatim}
-One can read this text file into a statistical program, for exmaple
-R\footnote{\url{http://r-project.org}}, to produce figure~\ref{fig:pf}. More
-advanced methods for saving summaries and histories of a sampler is given in
-section~\ref{sec:Store objects in HDF5 format}, using the \hdf format.
-
-\begin{figure}
-  \includegraphics{fig/pf}
-  \caption{Estimates and observations of the particle filter}
-  \label{fig:pf}
-\end{figure}
+\section{Estimator of iterative algorithms}
+\label{sec:Estimator of iterative algorithms}

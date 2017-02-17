@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,31 +33,12 @@
 #define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/philox_avx2_2x32.hpp>
+#include <mckl/random/internal/philox_avx2_4x32.hpp>
+#include <mckl/random/internal/philox_common.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
 #include <mckl/random/internal/philox_unroll.hpp>
-#include <mckl/random/internal/u01_avx2.hpp>
-#include <mckl/random/internal/uniform_real_avx2.hpp>
 #include <mckl/random/increment.hpp>
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(                       \
-    lr, bits, Lower, Upper)                                                   \
-    template <typename RealType>                                              \
-    static void u01_##lr##_u##bits(Counter<T, K> &ctr,                        \
-        const std::array<T, K / 2> &key, std::size_t n, RealType *r)          \
-    {                                                                         \
-        eval<U01AVX2Impl<std::uint##bits##_t, RealType, Lower, Upper>>(       \
-            ctr, key, n, r);                                                  \
-    }
-
-#define MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_UNIFORM_REAL(bits)         \
-    template <typename RealType>                                              \
-    static void uniform_real_u##bits(Counter<T, K> &ctr,                      \
-        const std::array<T, K / 2> &key, std::size_t n, RealType *r,          \
-        RealType a, RealType b)                                               \
-    {                                                                         \
-        eval<UniformRealAVX2Impl<std::uint##bits##_t, RealType>>(             \
-            ctr, key, n, r, a, b);                                            \
-    }
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -80,20 +61,20 @@ class PhiloxGeneratorAVX2Impl32Permute<2>
 {
     public:
     template <std::size_t S>
-    MCKL_FLATTEN static void first(std::array<__m256i, S> &)
+    MCKL_INLINE static void first(std::array<__m256i, S> &)
     {
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void round(std::array<__m256i, S> &s)
+    MCKL_INLINE static void round(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void last(std::array<__m256i, S> &s)
+    MCKL_INLINE static void last(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 }; // class PhiloxGeneratorAVX2Impl32Permute
 
@@ -102,21 +83,21 @@ class PhiloxGeneratorAVX2Impl32Permute<4>
 {
     public:
     template <std::size_t S>
-    MCKL_FLATTEN static void first(std::array<__m256i, S> &s)
+    MCKL_INLINE static void first(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xC6>(s); // 3 0 1 2
+        shuffle_epi32<0xC6>(s);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void round(std::array<__m256i, S> &s)
+    MCKL_INLINE static void round(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0x93>(s); // 2 1 0 3
+        shuffle_epi32<0x93>(s);
     }
 
     template <std::size_t S>
-    MCKL_FLATTEN static void last(std::array<__m256i, S> &s)
+    MCKL_INLINE static void last(std::array<__m256i, S> &s)
     {
-        shuffle_epi32<0xB1>(s); // 2 3 0 1
+        shuffle_epi32<0xB1>(s);
     }
 }; // class PhiloxGeneratorAVX2Impl32Permute
 
@@ -124,97 +105,47 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorAVX2Impl32
 {
     public:
-    static constexpr bool batch()
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
-        return std::numeric_limits<T>::digits == 32 && K != 0 && 4 % K == 0;
-    }
-
-    static void eval(std::array<T, K> &s, const std::array<T, K / 2> &key)
-    {
-        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(s, key);
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            plain, cipher, key);
     }
 
     template <typename ResultType>
-    static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
-        std::size_t n, ResultType *r)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K / 2> &key)
     {
-        eval<transform>(ctr, key, n, r);
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(ctr, r, key);
     }
 
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(cc, 32, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(co, 32, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oc, 32, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oo, 32, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_UNIFORM_REAL(32)
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K / 2> &key)
+    {
+        constexpr std::size_t S = 8;
+        constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(cc, 64, Closed, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(co, 64, Closed, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oc, 64, Open, Closed)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_U01(oo, 64, Open, Open)
-    MCKL_DEFINE_RANDOM_INTERNAL_PHILOX_AVX2_32_UNIFORM_REAL(64)
+        const std::array<__m256i, Rounds> rk(round_key(key));
+        while (n >= N) {
+            std::array<__m256i, S> s;
+            MCKL_INLINE_CALL increment_si256(ctr, s);
+            MCKL_INLINE_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
+            MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, s, rk);
+            MCKL_INLINE_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
+            std::memcpy(r, s.data(), sizeof(T) * K * N);
+            n -= N;
+            r += N * R;
+        }
+
+        alignas(32) std::array<ResultType, N * R> t;
+        PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, n, t.data(), key);
+        std::memcpy(r, t.data(), sizeof(T) * K * n);
+    }
 
     private:
-    class transform
-    {
-        public:
-        using uint_type = T;
-
-        template <std::size_t S, typename ResultType>
-        MCKL_FLATTEN static ResultType *eval(
-            const std::array<__m256i, S> &s, ResultType *r)
-        {
-            std::memcpy(r, s.data(), sizeof(s));
-
-            return r + sizeof(s) / sizeof(ResultType);
-        }
-
-        template <typename ResultType>
-        MCKL_FLATTEN static ResultType *eval(
-            std::size_t n, const uint_type *s, ResultType *r)
-        {
-            std::memcpy(r, s, sizeof(uint_type) * n);
-
-            return r + sizeof(uint_type) * n / sizeof(ResultType);
-        }
-    }; // class transform
-
-    template <typename Transform, typename ResultType, typename... Args>
-    static void eval(Counter<T, K> &ctr, const std::array<T, K / 2> &key,
-        std::size_t n, ResultType *r, Args &&... args)
-    {
-        using uint_type = typename Transform::uint_type;
-
-        constexpr std::size_t S = 8;
-        constexpr std::size_t nstride = sizeof(__m256i) * S / (sizeof(T) * K);
-        constexpr std::size_t ustride = sizeof(T) * K / sizeof(uint_type);
-
-        std::array<__m256i, S> s;
-        std::array<__m256i, Rounds> rk;
-        MCKL_FLATTEN_CALL set_key(rk, key);
-        while (n >= nstride) {
-            MCKL_FLATTEN_CALL increment_si256(ctr, s);
-            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::first(s);
-            MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0);
-            MCKL_FLATTEN_CALL PhiloxGeneratorAVX2Impl32Permute<K>::last(s);
-            MCKL_FLATTEN_CALL r =
-                Transform::eval(s, r, std::forward<Args>(args)...);
-            n -= nstride;
-        }
-
-        alignas(32) union {
-            std::array<std::array<T, K>, nstride> s;
-            std::array<Counter<T, K>, nstride> c;
-            std::array<uint_type, nstride * ustride> u;
-        } buf;
-        for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.c[i] = ctr;
-            eval(buf.s[i], key);
-        }
-        MCKL_FLATTEN_CALL Transform::eval(
-            n * ustride, buf.u.data(), r, std::forward<Args>(args)...);
-    }
-
     template <std::size_t, std::size_t S>
     static void round(std::array<__m256i, S> &,
         const std::array<__m256i, Rounds> &, std::false_type)
@@ -225,11 +156,11 @@ class PhiloxGeneratorAVX2Impl32
     static void round(std::array<__m256i, S> &s,
         const std::array<__m256i, Rounds> &rk, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N);
+        MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk);
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_FLATTEN static void rbox(
+    MCKL_INLINE static void rbox(
         std::array<__m256i, S> &s, const std::array<__m256i, Rounds> &rk)
     {
         rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
@@ -267,16 +198,19 @@ class PhiloxGeneratorAVX2Impl32
         permute<N>(s);
     }
 
-    MCKL_FLATTEN static void set_key(
-        std::array<__m256i, Rounds> &rk, const std::array<T, K / 2> &key)
+    MCKL_INLINE static std::array<__m256i, Rounds> round_key(
+        const std::array<T, K / 2> &k)
     {
-        const int k0 = static_cast<int>(std::get<0 % (K / 2)>(key));
-        const int k1 = static_cast<int>(std::get<1 % (K / 2)>(key));
-        const int k2 = static_cast<int>(std::get<2 % (K / 2)>(key));
-        const int k3 = static_cast<int>(std::get<3 % (K / 2)>(key));
+        const int k0 = static_cast<int>(std::get<0 % (K / 2)>(k));
+        const int k1 = static_cast<int>(std::get<1 % (K / 2)>(k));
+        const int k2 = static_cast<int>(std::get<2 % (K / 2)>(k));
+        const int k3 = static_cast<int>(std::get<3 % (K / 2)>(k));
 
+        std::array<__m256i, Rounds> rk;
         set_key<0>(rk, _mm256_set_epi32(k3, 0, k2, 0, k1, 0, k0, 0),
             std::true_type());
+
+        return rk;
     }
 
     template <std::size_t>
@@ -320,6 +254,18 @@ class PhiloxGeneratorAVX2Impl32
         PhiloxGeneratorAVX2Impl32Permute<K>::round(s);
     }
 }; // class PhiloxGeneratorImplAVX2
+
+template <typename T, typename Constants>
+class PhiloxGeneratorAVX2Impl32<T, 2, 10, Constants>
+    : public Philox2x32GeneratorAVX2Impl<T, Constants>
+{
+}; // class PhiloxGeneratorAVX2Impl32
+
+template <typename T, typename Constants>
+class PhiloxGeneratorAVX2Impl32<T, 4, 10, Constants>
+    : public Philox4x32GeneratorAVX2Impl<T, Constants>
+{
+}; // class PhiloxGeneratorAVX2Impl32
 
 } // namespace mckl::internal
 

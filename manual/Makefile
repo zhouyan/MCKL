@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -29,21 +29,12 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-.PHONY : all tab fig clean
-
-BUILD_CMD ?= ninja
-BUILD_DIR ?= ../build/release-llvm
+.PHONY : all clean
 
 all :
-	latexmk -silent -f manual.tex >/dev/null
-
-tab :
 	make -C tab
-
-fig :
-	$(BUILD_CMD) -C $(BUILD_DIR) pf_core-pdf
-	mkdir -p fig
-	cp $(BUILD_DIR)/example/pf/pf_core.pdf fig/pf.pdf
+	make -C fig
+	latexmk -silent -f manual.tex >/dev/null
 
 clean:
 	latexmk -c manual.tex

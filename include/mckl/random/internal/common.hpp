@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -44,22 +44,22 @@
         "**" #Name                                                            \
         "Distribution** used with RealType other than float or double");
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Name, MinType)        \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Name, MinBits)        \
     static_assert(std::is_integral<IntType>::value,                           \
         "**" #Name                                                            \
         "Distribution** used with IntType other than integer types");         \
-    static_assert(sizeof(IntType) >= sizeof(MinType),                         \
-        "**" #Name                                                            \
-        "Distribution** used with IntType smaller than " #MinType);
+    static_assert(std::numeric_limits<IntType>::digits >= MinBits,            \
+        "**" #Name "Distribution** used with IntType smaller than " #MinBits  \
+        " bits");
 
-#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(Name, MinType)       \
+#define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(Name, MinBits)       \
     static_assert(std::is_unsigned<UIntType>::value,                          \
         "**" #Name                                                            \
         "Distribution** used with UIntType other than unsigned integer "      \
         "types");                                                             \
-    static_assert(sizeof(UIntType) >= sizeof(MinType),                        \
-        "**" #Name                                                            \
-        "Distribution** used with IntType smaller than " #MinType);
+    static_assert(std::numeric_limits<UIntType>::digits >= MinBits,           \
+        "**" #Name "Distribution** used with IntType smaller than " #MinBits  \
+        " bits");
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Name)                \
     static_assert(std::is_floating_point<RealType>::value,                    \
@@ -981,12 +981,15 @@ inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
         r[i] = distribution(rng);
 }
 
-template <typename RNGType>
-class SeedType
+template <typename>
+class SeedTrait
 {
     public:
     using type = unsigned;
-}; // class SeedType
+}; // class SeedTrait
+
+template <typename RNGType>
+using SeedType = typename SeedTrait<RNGType>::type;
 
 template <typename = double>
 class ArcsineDistribution;
@@ -1000,7 +1003,7 @@ class CauchyDistribution;
 template <typename = double>
 class ChiSquaredDistribution;
 
-template <typename = double, std::size_t = Dynamic>
+template <typename = double>
 class DirichletDistribution;
 
 template <typename = int>
@@ -1033,7 +1036,7 @@ class LognormalDistribution;
 template <typename = double>
 class NormalDistribution;
 
-template <typename = double, std::size_t = Dynamic>
+template <typename = double>
 class NormalMVDistribution;
 
 template <typename = double>

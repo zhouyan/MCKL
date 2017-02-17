@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -34,73 +34,6 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/increment.hpp>
-#include <mckl/random/u01_distribution.hpp>
-
-#define MCKL_DEFINE_RANDOM_COUNTER_U01(lr, bits)                              \
-    template <typename RealType>                                              \
-    void u01_##lr##_u##bits(std::size_t n, RealType *r)                       \
-    {                                                                         \
-        static_assert(std::numeric_limits<ResultType>::digits == bits,        \
-            "**CounterEngine::u01_" #lr "_u" #bits                            \
-            "** is used with ResultType not a " #bits                         \
-            "-bit unsigned integer type");                                    \
-                                                                              \
-        const std::size_t remain = static_cast<std::size_t>(M_ - index_);     \
-        if (n < remain) {                                                     \
-            ::mckl::u01_##lr(n, result_.data() + index_, r);                  \
-            index_ += static_cast<unsigned>(n);                               \
-            return;                                                           \
-        }                                                                     \
-                                                                              \
-        ::mckl::u01_##lr(remain, result_.data() + index_, r);                 \
-        r += remain;                                                          \
-        n -= remain;                                                          \
-        index_ = M_;                                                          \
-                                                                              \
-        const std::size_t m = n / M_;                                         \
-        generator_.u01_##lr##_u##bits(ctr_, m, r);                            \
-        r += m * M_;                                                          \
-        n -= m * M_;                                                          \
-                                                                              \
-        generator_(ctr_, result_.data());                                     \
-        ::mckl::u01_##lr(n, result_.data(), r);                               \
-        index_ = static_cast<unsigned>(n);                                    \
-    }
-
-#define MCKL_DEFINE_RANDOM_COUNTER_UNIFORM_REAL(bits)                         \
-    template <typename RealType>                                              \
-    void uniform_real_u##bits(                                                \
-        std::size_t n, RealType *r, RealType a, RealType b)                   \
-    {                                                                         \
-        static_assert(std::numeric_limits<ResultType>::digits == bits,        \
-            "**CounterEngine::uniform_real_u" #bits                           \
-            "** is used with ResultType not a " #bits                         \
-            "-bit unsigned integer type");                                    \
-                                                                              \
-        const std::size_t remain = static_cast<std::size_t>(M_ - index_);     \
-        if (n < remain) {                                                     \
-            ::mckl::u01_co(n, result_.data() + index_, r);                    \
-            ::mckl::fma(n, r, b - a, a, r);                                   \
-            index_ += static_cast<unsigned>(n);                               \
-            return;                                                           \
-        }                                                                     \
-                                                                              \
-        ::mckl::u01_co(remain, result_.data() + index_, r);                   \
-        ::mckl::fma(remain, r, b - a, a, r);                                  \
-        r += remain;                                                          \
-        n -= remain;                                                          \
-        index_ = M_;                                                          \
-                                                                              \
-        const std::size_t m = n / M_;                                         \
-        generator_.uniform_real_u##bits(ctr_, m, r, a, b);                    \
-        r += m * M_;                                                          \
-        n -= m * M_;                                                          \
-                                                                              \
-        generator_(ctr_, result_.data());                                     \
-        ::mckl::u01_co(n, result_.data(), r);                                 \
-        ::mckl::fma(n, r, b - a, a, r);                                       \
-        index_ = static_cast<unsigned>(n);                                    \
-    }
 
 namespace mckl
 {
@@ -113,15 +46,15 @@ namespace mckl
 /// block
 /// - Requirement
 /// ~~~{.cpp}
-/// ctr_type; // counter type
-/// key_type; // key type
-/// static constexpr std::size_t size(); // Size of the result block in bytes
-/// void reset(const key_type &key);     // reset generator key
+/// ctr_type; /* counter type */
+/// key_type; /* key type */
+/// static constexpr std::size_t size(); /* Size of the result block in byte */
+/// void reset(const key_type &key);     /* reset generator key */
 ///
-/// // Increment counter once and generate one result block
+/// /* Increment counter once and generate one result block */
 /// void operator()(ctr_type &ctr, result_type *r);
 ///
-/// // Increment counter n times and generate n result blocks
+/// /* Increment counter n times and generate n result blocks */
 /// void operator()(ctr_type &ctr, std::size_t n, result_type *r);
 /// ~~~
 /// - Restrictions: `size() % sizeof(ResultType) == 0`
@@ -153,7 +86,7 @@ class CounterEngine
 
     template <typename SeedSeq>
     explicit CounterEngine(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
         : index_(M_)
     {
         seed(seq);
@@ -171,7 +104,7 @@ class CounterEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
     {
         key_type key;
         seq.generator(key.begin(), key.end());
@@ -210,7 +143,7 @@ class CounterEngine
     {
         const std::size_t remain = static_cast<std::size_t>(M_ - index_);
 
-        if (n < remain) {
+        if (n <= remain) {
             std::memcpy(r, result_.data() + index_, sizeof(result_type) * n);
             index_ += static_cast<unsigned>(n);
             return;
@@ -230,18 +163,6 @@ class CounterEngine
         std::memcpy(r, result_.data(), sizeof(result_type) * n);
         index_ = static_cast<unsigned>(n);
     }
-
-    MCKL_DEFINE_RANDOM_COUNTER_U01(cc, 32)
-    MCKL_DEFINE_RANDOM_COUNTER_U01(co, 32)
-    MCKL_DEFINE_RANDOM_COUNTER_U01(oc, 32)
-    MCKL_DEFINE_RANDOM_COUNTER_U01(oo, 32)
-    MCKL_DEFINE_RANDOM_COUNTER_UNIFORM_REAL(32)
-
-    MCKL_DEFINE_RANDOM_COUNTER_U01(cc, 64)
-    MCKL_DEFINE_RANDOM_COUNTER_U01(co, 64)
-    MCKL_DEFINE_RANDOM_COUNTER_U01(oc, 64)
-    MCKL_DEFINE_RANDOM_COUNTER_U01(oo, 64)
-    MCKL_DEFINE_RANDOM_COUNTER_UNIFORM_REAL(64)
 
     /// \brief Discard the result
     ///
@@ -359,11 +280,11 @@ class CounterEngine
 }; // class CounterEngine
 
 template <typename ResultType, typename Generator>
-class SeedType<CounterEngine<ResultType, Generator>>
+class SeedTrait<CounterEngine<ResultType, Generator>>
 {
     public:
     using type = typename CounterEngine<ResultType, Generator>::key_type;
-}; // class SeedType
+}; // class SeedTrait
 
 template <typename ResultType, typename Generator>
 inline void rand(

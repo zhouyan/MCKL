@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -42,12 +42,22 @@ namespace internal
 {
 
 template <typename RealType>
+inline bool dirichlet_distribution_check_param(
+    std::size_t dim, RealType *alpha)
+{
+    for (std::size_t i = 0; i != dim; ++i)
+        if (alpha[i] <= 0)
+            return false;
+    return true;
+}
+
+template <typename RealType>
 inline void dirichlet_distribution_avg(
     std::size_t n, std::size_t dim, RealType *r)
 {
     for (std::size_t i = 0; i != n; ++i, r += dim) {
         RealType s = std::accumulate(r, r + dim, const_zero<RealType>());
-        mul(dim, 1 / s, r, r);
+        mul<RealType>(dim, 1 / s, r, r);
     }
 }
 
@@ -57,6 +67,9 @@ template <typename RealType, typename RNGType>
 inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType alpha)
 {
+    if (n * dim == 0)
+        return;
+
     gamma_distribution(rng, n * dim, r, alpha, const_one<RealType>());
     internal::dirichlet_distribution_avg(n, dim, r);
 }
@@ -73,62 +86,51 @@ inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
         gamma_distribution(rng, n, s.data(), alpha[i], const_one<RealType>());
         RealType *t = r + i;
         for (std::size_t j = 0; j != n; ++j, t += dim)
-            *t = s[i];
+            *t = s[j];
     }
     internal::dirichlet_distribution_avg(n, dim, r);
 }
 
-template <typename RealType, std::size_t Dim>
+template <typename RealType>
 class DirichletDistribution
 {
     MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Dirichlet)
 
     public:
     using result_type = RealType;
-    using distribution_type = DirichletDistribution<RealType, Dim>;
+    using distribution_type = DirichletDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = DirichletDistribution<RealType, Dim>;
+        using distribution_type = DirichletDistribution<RealType>;
 
-        explicit param_type(result_type alpha) : is_scalar_(true)
+        explicit param_type(std::size_t dim = 1)
+            : alpha_(dim, 1), is_scalar_(true)
         {
-            static_assert(Dim != Dynamic,
-                "**DirichletDistribution::param_type** object declared with "
-                "dynamic dimension");
-
-            init_alpha(alpha);
+            runtime_assert(internal::dirichlet_distribution_check_param(
+                               this->dim(), this->alpha()),
+                "**DirichletDistribution** constructed with invalid "
+                "arguments");
         }
 
-        explicit param_type(const result_type *alpha) : is_scalar_(false)
+        param_type(std::size_t dim, result_type alpha)
+            : alpha_(dim, alpha), is_scalar_(true)
         {
-            static_assert(Dim != Dynamic,
-                "**DirichletDistribution::param_type** object declared with "
-                "dynamic dimension");
-
-            init_alpha(alpha);
+            runtime_assert(internal::dirichlet_distribution_check_param(
+                               this->dim(), this->alpha()),
+                "**DirichletDistribution** constructed with invalid "
+                "arguments");
         }
 
-        explicit param_type(std::size_t dim, result_type alpha)
-            : alpha_(dim), is_scalar_(false)
+        param_type(std::size_t dim, const result_type *alpha)
+            : alpha_(alpha, alpha + dim), is_scalar_(false)
         {
-            static_assert(Dim == Dynamic,
-                "**DirichletDistribution::param_type** object delcared with "
-                "fixed dimension");
-
-            init_alpha(alpha);
-        }
-
-        explicit param_type(std::size_t dim, const result_type *alpha)
-            : alpha_(dim), is_scalar_(false)
-        {
-            static_assert(Dim == Dynamic,
-                "**DirichletDistribution::param_type** object delcared with "
-                "fixed dimension");
-
-            init_alpha(alpha);
+            runtime_assert(internal::dirichlet_distribution_check_param(
+                               this->dim(), this->alpha()),
+                "**DirichletDistribution** constructed with invalid "
+                "arguments");
         }
 
         std::size_t dim() const { return alpha_.size(); }
@@ -166,58 +168,41 @@ class DirichletDistribution
 
         template <typename CharT, typename Traits>
         friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, const param_type &param)
+            std::basic_istream<CharT, Traits> &is, param_type &param)
         {
             if (!is)
                 return is;
 
-            internal::StaticVector<result_type, Dim> alpha;
-            bool is_scalar;
+            param_type tmp;
+            is >> std::ws >> tmp.alpha_;
+            is >> std::ws >> tmp.is_scalar_;
 
-            is >> std::ws >> alpha;
-            is >> std::ws >> is_scalar;
-
-            if (is) {
-                param.alpha_ = std::move(alpha);
-                param.is_scalar_ = is_scalar;
-            } else {
+            if (is)
+                param = std::move(tmp);
+            else
                 is.setstate(std::ios_base::failbit);
-            }
 
             return is;
         }
 
         private:
-        internal::StaticVector<result_type, Dim> alpha_;
+        Vector<result_type> alpha_;
         bool is_scalar_;
 
         friend distribution_type;
-
-        void init_alpha(result_type alpha)
-        {
-            std::fill(alpha_.begin(), alpha_.end(), alpha);
-        }
-
-        void init_alpha(const result_type *alpha)
-        {
-            std::copy_n(alpha, alpha_.size(), alpha_.begin());
-        }
     }; // class param_type
 
-    /// \brief Only usable when `Dim != Dynamic`
-    explicit DirichletDistribution(result_type alpha) : param_(alpha) {}
+    /// \brief Construct a distribution with scalar shape
+    DirichletDistribution(std::size_t dim = 1) : param_(dim) {}
 
-    /// \brief Only usable when `Dim != Dynamic`
-    explicit DirichletDistribution(const result_type *alpha) : param_(alpha) {}
-
-    /// \brief Only usable when `Dim == Dynamic`
-    explicit DirichletDistribution(std::size_t dim, result_type alpha)
+    /// \brief Construct a distribution with scalar shape
+    DirichletDistribution(std::size_t dim, result_type alpha)
         : param_(dim, alpha)
     {
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Construct a distribution with vector shapes
     DirichletDistribution(std::size_t dim, const result_type *alpha)
         : param_(dim, alpha)
     {
@@ -235,9 +220,17 @@ class DirichletDistribution
         reset();
     }
 
-    void min(result_type *x) const { std::fill_n(x, dim(), 0); }
+    template <typename OutputIter>
+    OutputIter min(OutputIter first) const
+    {
+        return std::fill_n(first, dim(), 0);
+    }
 
-    void max(result_type *x) const { std::fill_n(x, dim(), 1); }
+    template <typename OutputIter>
+    OutputIter max(OutputIter first) const
+    {
+        return std::fill_n(first, dim(), 1);
+    }
 
     void reset() {}
 
@@ -345,21 +338,20 @@ class DirichletDistribution
             }
         }
         result_type s = std::accumulate(r, r + d, const_zero<result_type>());
-        mul(d, 1 / s, r, r);
+        mul<result_type>(d, 1 / s, r, r);
     }
 }; // class DirichletDistribution
 
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(RNGType &rng,
-    DirichletDistribution<RealType, Dim> &distribution, RealType *r)
+template <typename RealType, typename RNGType>
+inline void rand(
+    RNGType &rng, DirichletDistribution<RealType> &distribution, RealType *r)
 {
     distribution(rng, r);
 }
 
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(RNGType &rng,
-    DirichletDistribution<RealType, Dim> &distribution, std::size_t n,
-    RealType *r)
+template <typename RealType, typename RNGType>
+inline void rand(RNGType &rng, DirichletDistribution<RealType> &distribution,
+    std::size_t n, RealType *r)
 {
     distribution(rng, n, r);
 }

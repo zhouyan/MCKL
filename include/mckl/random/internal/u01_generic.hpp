@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,8 @@ namespace internal
 {
 
 template <int W, typename UIntType>
-using U01UIntLeastType = typename std::conditional<W <= 32, std::uint32_t,
-    typename std::conditional<W <= 64, std::uint64_t, UIntType>::type>::type;
+using U01UIntLeastType = std::conditional_t<W <= 32, std::uint32_t,
+    std::conditional_t<W <= 64, std::uint64_t, UIntType>>;
 
 template <typename UIntType, typename, typename, typename>
 class U01GenericImpl;
@@ -90,7 +90,6 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed>
 template <typename UIntType, typename RealType>
 class U01GenericImpl<UIntType, RealType, Closed, Open>
 {
-
     public:
     static RealType eval(UIntType u)
     {
@@ -161,6 +160,39 @@ class U01GenericImpl<UIntType, RealType, Open, Open>
             r[i] = eval(u[i]);
     }
 }; // class U01GenericImpl
+
+template <typename UIntType, typename RealType, int Q>
+class U01CanonicalGenericImpl
+{
+    public:
+    static RealType eval(const UIntType *u)
+    {
+        return eval<0>(u, std::true_type());
+    }
+
+    static void eval(std::size_t n, const UIntType *u, RealType *r)
+    {
+        for (std::size_t i = 0; i != n; ++i, u += Q)
+            r[i] = eval(u);
+    }
+
+    private:
+    template <std::size_t>
+    static RealType eval(const UIntType *, std::false_type)
+    {
+        return 0;
+    }
+
+    template <std::size_t N>
+    static RealType eval(const UIntType *u, std::true_type)
+    {
+        constexpr int W = std::numeric_limits<UIntType>::digits;
+
+        return static_cast<RealType>(u[N]) *
+            Pow2<RealType, -static_cast<int>((Q - N) * W)>::value +
+            eval<N + 1>(u, std::integral_constant<bool, N + 1 < Q>());
+    }
+}; // class U01CanonicalGenericImpl
 
 } // namespace mckl::internal
 

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -40,30 +40,15 @@ namespace mckl
 
 /// \brief A placeholder type
 /// \ingroup Definitions
-class NullType;
-
-/// \brief Dynamic dimension
-/// \ingroup Definitions
-enum { Dynamic = 0 };
+class Virtual;
 
 /// \brief Matrix layout
 /// \ingroup Definitions
-enum MatrixLayout { RowMajor = 101, ColMajor = 102 };
+enum class MatrixLayout { RowMajor = 101, ColMajor = 102 };
 
-/// \brief Alias to MatrixOrder
-/// \ingroup Definitions
-using MatrixOrder = MatrixLayout;
+constexpr MatrixLayout RowMajor = MatrixLayout::RowMajor;
 
-/// \brief Resampling schemes
-/// \ingroup Definitions
-enum ResampleScheme {
-    Multinomial,        ///< Multinomial resampling
-    Stratified,         ///< Stratified resampling
-    Systematic,         ///< Systematic resampling
-    Residual,           ///< Residual resampling
-    ResidualStratified, ///< Stratified resampling on residuals
-    ResidualSystematic  ///< Systematic resampling on residuals
-};                      // enum ResampleScheme
+constexpr MatrixLayout ColMajor = MatrixLayout::ColMajor;
 
 template <typename T, std::size_t K = 1>
 class BufferSize

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,43 +32,43 @@
 #ifndef MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP
 #define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP
 
-#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N)                               \
-    MCKL_FLATTEN_CALL rbox<N + 0x0>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x0>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x1>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x1>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x2>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x2>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x3>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x3>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x4>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x4>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x5>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x5>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x6>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x6>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x7>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x7>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x8>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x8>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0x9>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0x9>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0xA>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0xA>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0xB>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0xB>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0xC>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0xC>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0xD>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0xD>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0xE>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0xE>(s, par);                                  \
-    MCKL_FLATTEN_CALL rbox<N + 0xF>(s);                                       \
-    MCKL_FLATTEN_CALL kbox<N + 0xF>(s, par);
+#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N, s, par)                       \
+    MCKL_INLINE_CALL rbox<N + 0x0>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x0>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x1>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x1>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x2>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x2>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x3>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x3>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x4>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x4>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x5>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x5>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x6>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x6>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x7>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x7>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x8>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x8>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0x9>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0x9>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0xA>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0xA>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0xB>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0xB>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0xC>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0xC>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0xD>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0xD>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0xE>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0xE>(s, par);                                   \
+    MCKL_INLINE_CALL rbox<N + 0xF>(s);                                        \
+    MCKL_INLINE_CALL kbox<N + 0xF>(s, par);
 
-#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N)                         \
-    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x00)                            \
-    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x10)                            \
+#define MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par)                 \
+    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x00, s, par)                    \
+    MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL(N + 0x10, s, par)                    \
     round<N + 0x20>(                                                          \
         s, par, std::integral_constant<bool, N + 0x20 <= Rounds>());
 

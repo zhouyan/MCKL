@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
+#include <cassert>
+
 #include <immintrin.h>
 
 int main()
@@ -37,6 +39,7 @@ int main()
     unsigned r32;
     _rdrand16_step(&r16);
     _rdrand32_step(&r32);
+    assert(r16 != r32);
 
     return 0;
 }

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -232,7 +232,7 @@ class IncrementBlock<T, K, 1>
         Increment<T, K>::eval(ctr);
         std::get<0>(ctr_block) = ctr;
     }
-}; // IncrementBlock
+}; // class IncrementBlock
 
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 2>
@@ -247,7 +247,7 @@ class IncrementBlock<T, K, 2>
         increment(std::get<1>(ctr_block), std::integral_constant<T, 2>());
         ctr = std::get<1>(ctr_block);
     }
-}; // IncrementBlock
+}; // class IncrementBlock
 
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 4>
@@ -266,7 +266,7 @@ class IncrementBlock<T, K, 4>
         increment(std::get<3>(ctr_block), std::integral_constant<T, 4>());
         ctr = std::get<3>(ctr_block);
     }
-}; // IncrementBlock
+}; // class IncrementBlock
 
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 8>
@@ -293,7 +293,7 @@ class IncrementBlock<T, K, 8>
         increment(std::get<7>(ctr_block), std::integral_constant<T, 8>());
         ctr = std::get<7>(ctr_block);
     }
-}; // IncrementBlock
+}; // class IncrementBlock
 
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 16>
@@ -336,14 +336,14 @@ class IncrementBlock<T, K, 16>
         increment(std::get<0xF>(ctr_block), std::integral_constant<T, 0x10>());
         ctr = std::get<0xF>(ctr_block);
     }
-}; // IncrementBlock
+}; // class IncrementBlock
 
 } // namespace mckl::internal
 
 /// \brief Increment a counter by one
 /// \ingroup Random
 template <typename T, std::size_t K>
-inline void increment(std::array<T, K> &ctr)
+MCKL_INLINE inline void increment(std::array<T, K> &ctr)
 {
     internal::Increment<T, K>::eval(ctr);
 }

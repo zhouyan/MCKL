@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -145,6 +145,7 @@
 #include <mckl/math/beta.hpp>
 #include <mckl/math/erf.hpp>
 #include <mckl/math/gamma.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include "random_common.hpp"
 
 #if MCKL_EXAMPLE_RANDOM_STABLE_DISTRIBUTION
@@ -1330,6 +1331,8 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
     using dist_type = mckl::UniformIntDistribution<IntType>;
     using std_type = std::uniform_int_distribution<IntType>;
 
+    static constexpr bool invariant() { return true; }
+
     std::string distname() const { return "UniformInt"; }
 
     mckl::Vector<std::array<IntType, 2>> params() const
@@ -1667,7 +1670,9 @@ inline void random_distribution_pval(std::size_t N, std::size_t M)
         N, M, nwid, twid, std::is_floating_point<ResultType>());
 }
 
-struct RandomDistributionPerf {
+class RandomDistributionPerf
+{
+    public:
     std::string name;
     bool pass;
     double e1;
@@ -1676,21 +1681,23 @@ struct RandomDistributionPerf {
     double c2;
     double c3;
     double c4;
-}; // struct RandomDistributionPerf
+}; // class RandomDistributionPerf
 
-template <typename T>
-inline void random_distribution_perf_e(
-    std::size_t, T *, T *, T &, T &, std::false_type)
+template <typename T, bool IsFloat>
+inline void random_distribution_perf_e(std::size_t, T *, T *, T &, T &,
+    std::false_type, std::integral_constant<bool, IsFloat>)
 {
     std::make_pair(mckl::const_zero<T>(), mckl::const_zero<T>());
 }
 
 template <typename T>
 inline void random_distribution_perf_e(
-    std::size_t n, T *r1, T *r2, T &e1, T &e2, std::true_type)
+    std::size_t n, T *r1, T *r2, T &e1, T &e2, std::true_type, std::true_type)
 {
     mckl::sub(n, r1, r2, r1);
     mckl::div(n, r1, r2, r2);
+    mckl::abs(n, r1, r1);
+    mckl::abs(n, r2, r2);
     T f1 = 0;
     T f2 = 0;
     for (std::size_t i = 0; i != n; ++i)
@@ -1701,6 +1708,25 @@ inline void random_distribution_perf_e(
     f2 /= std::numeric_limits<T>::epsilon();
     e1 = std::max(e1, f1);
     e2 = std::max(e2, f2);
+}
+
+template <typename T>
+inline void random_distribution_perf_e(
+    std::size_t n, T *r1, T *r2, T &e1, T &e2, std::true_type, std::false_type)
+{
+    using int_type = typename std::make_signed<T>::type;
+
+    mckl::Vector<int_type> s1(n);
+    mckl::Vector<int_type> s2(n);
+    std::copy_n(r1, n, s1.data());
+    std::copy_n(r2, n, s2.data());
+    mckl::sub(n, s1.data(), s2.data(), s1.data());
+    mckl::abs(n, s1.data(), s1.data());
+    int_type f = 0;
+    for (std::size_t i = 0; i != n; ++i)
+        f = std::max(f, s1[i]);
+    e1 = std::max(e1, static_cast<T>(f));
+    e2 = std::max(e2, static_cast<T>(f));
 }
 
 template <typename MCKLDistType, typename ParamType, std::size_t ParamNum>
@@ -1715,7 +1741,7 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
     MCKLRNGType rng1;
     MCKLRNGType rng2;
 
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
     MCKLDistType dist(random_distribution_init<MCKLDistType>(param));
     bool pass = true;
 
@@ -1744,7 +1770,8 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
             mckl::rand(rng2, dist, K, r2.data());
             pass = pass && r1 == r2;
             random_distribution_perf_e(K, r1.data(), r2.data(), e1, e2,
-                std::integral_constant<bool, invariant>());
+                std::integral_constant<bool, invariant>(),
+                std::is_floating_point<result_type>());
         }
 
         std::stringstream ss1;
@@ -1758,6 +1785,7 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
         pass = pass && r1 == r2;
 
         std::stringstream ssb;
+        ssb.precision(20);
         ssb << dist;
         mckl::rand(rng1, dist, K, r1.data());
         ssb >> dist;
@@ -1813,7 +1841,7 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
     MKLRNGType rng_mkl;
 #endif
 
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
     MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));
     std_type dist_std(random_distribution_init<std_type>(param));
     bool pass = true;
@@ -1969,16 +1997,16 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
     std::cout << std::setw(twid) << std::right << "MKL";
 #endif
-    std::cout << std::setw(10) << std::right << "vMath";
+    std::cout << std::setw(10) << std::right << "VMF";
     std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
 
 #if MCKL_USE_MKL_VML
-    std::string vmath = "VML";
+    std::string vmf = "VML";
 #else
-    std::string vmath = "C++";
+    std::string vmf = "VMF";
 #endif
 
     for (std::size_t i = 0; i != perf_p.size(); ++i) {
@@ -1989,7 +2017,7 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 #if MCKL_HAS_MKL
         std::cout << std::setw(twid) << std::right << perf_p[i].c4;
 #endif
-        std::cout << std::setw(10) << std::right << vmath;
+        std::cout << std::setw(10) << std::right << vmf;
 
         std::stringstream ss;
         ss << "(";

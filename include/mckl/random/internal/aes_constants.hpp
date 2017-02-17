@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_INTERNAL_AES_COSNTANTS_HPP
-#define MCKL_RANDOM_INTERNAL_AES_COSNTANTS_HPP
+#ifndef MCKL_RANDOM_INTERNAL_AES_CONSTANTS_HPP
+#define MCKL_RANDOM_INTERNAL_AES_CONSTANTS_HPP
 
 #include <mckl/random/internal/common.hpp>
 
@@ -293,7 +293,7 @@ class ARSConstantsWeyl
     public:
     static constexpr std::uint64_t value[2] = {
         0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
-};
+}; // class ARSConstantsWeyl
 
 } // namespace mckl::internal
 
@@ -307,4 +307,4 @@ class ARSConstants
 
 } // namespace mckl
 
-#endif // MCKL_RANDOM_INTERNAL_AES_COSNTANTS_HPP
+#endif // MCKL_RANDOM_INTERNAL_AES_CONSTANTS_HPP

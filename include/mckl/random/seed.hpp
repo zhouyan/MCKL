@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/skein.hpp>
 #include <mckl/random/threefry.hpp>
+#include <atomic>
 
 /// \brief SeedGeneartor by default use randomized output
 /// \ingroup Config
@@ -74,9 +75,8 @@ class SeedGenerator
     public:
     /// \brief The type of the internal seed
     using seed_type =
-        typename std::conditional<sizeof(ResultType) % sizeof(std::uint64_t) ==
-                0,
-            std::uint64_t, std::uint32_t>::type;
+        std::conditional_t<sizeof(ResultType) % sizeof(std::uint64_t) == 0,
+            std::uint64_t, std::uint32_t>;
 
     using result_type = ResultType;
 
@@ -160,8 +160,7 @@ class SeedGenerator
     seed_type np_;
     seed_type rank_;
     seed_type maxs_;
-    typename std::conditional<Atomic, std::atomic<seed_type>, seed_type>::type
-        seed_;
+    std::conditional_t<Atomic, std::atomic<seed_type>, seed_type> seed_;
 
     SeedGenerator() : seed_(1) { partition(1, 0); }
 
@@ -333,9 +332,9 @@ class SeedGenerator
 /// \brief RNG default seed generator
 /// \ingroup Random
 template <typename RNGType>
-class Seed : public SeedGenerator<typename SeedType<RNGType>::type>
+class Seed : public SeedGenerator<SeedType<RNGType>>
 {
-};
+}; // class Seed
 
 } // namespace mckl
 

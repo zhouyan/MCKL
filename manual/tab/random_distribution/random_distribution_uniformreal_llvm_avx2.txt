@@ -1,4 +1,4 @@
-UniformReal<float>(-1.3,1.3)         17.76       16.78        1.52        1.48       VML    (0)--Passed
-UniformReal<double>(-1.3,1.3)        36.85       17.15        1.97        1.96       VML    (0)--Passed
-UniformReal<float>(-1.3,1.3)         17.77       16.78        1.51        1.49       C++    (0)--Passed
-UniformReal<double>(-1.3,1.3)        36.84       17.29        1.96        1.97       C++    (0)--Passed
+UniformReal<float>(-1.3,1.3)          7.29        6.37        1.53        1.46       VML    (0)--Passed
+UniformReal<double>(-1.3,1.3)        12.25        5.90        2.12        1.97       VML    (0)--Passed
+UniformReal<float>(-1.3,1.3)          7.29        6.37        1.52        1.42       VMF    (0)--Passed
+UniformReal<double>(-1.3,1.3)        12.27        5.90        2.11        1.97       VMF    (0)--Passed

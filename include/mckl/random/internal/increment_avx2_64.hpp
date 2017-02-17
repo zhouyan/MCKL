@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -76,12 +76,9 @@ inline void increment_si256(
 }
 
 template <typename T, std::size_t K, std::size_t S>
-MCKL_FLATTEN inline void increment_si256(
+MCKL_INLINE inline void increment_si256(
     std::array<T, K> &ctr, std::array<__m256i, S> &s)
 {
-    static_assert((sizeof(__m256i) * S) % (sizeof(T) * K) == 0,
-        "**increment_si256** invalid blocks size");
-
     constexpr bool direct = S == 4 || S == 8 || S == 16;
     constexpr bool bits = std::numeric_limits<T>::digits == 64;
 

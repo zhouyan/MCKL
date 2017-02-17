@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,9 @@
 
 #include <mckl/internal/compiler.h>
 
+// ASM library header file
+#include <mckl/mckl.h>
+
 // Assertion macros
 
 #ifndef MCKL_NO_RUNTIME_ASSERT
@@ -46,34 +49,16 @@
 #endif
 #endif
 
-#ifndef MCKL_NO_RUNTIME_WARNING
-#ifndef NDEBUG
-#define MCKL_NO_RUNTIME_WARNING 0
-#else
-#define MCKL_NO_RUNTIME_WARNING 1
-#endif
-#endif
-
 /// \brief Turn MCKL runtime assertions into exceptions
 /// \ingroup Config
 #ifndef MCKL_RUNTIME_ASSERT_AS_EXCEPTION
 #define MCKL_RUNTIME_ASSERT_AS_EXCEPTION 0
 #endif
 
-/// \brief Turn MCKL runtime warnings into exceptions
-/// \ingroup Config
-#ifndef MCKL_RUNTIME_WARNING_AS_EXCEPTION
-#define MCKL_RUNTIME_WARNING_AS_EXCEPTION 0
-#endif
-
 /// \brief Produce exact the same results regardless of endianness
 /// \ingroup Config
 #ifndef MCKL_REQUIRE_ENDIANNESS_NEUTURAL
 #define MCKL_REQUIRE_ENDIANNESS_NEUTURAL 0
-#endif
-
-#ifndef MCKL_CROSS_COMPILING
-#define MCKL_CROSS_COMPILING 0
 #endif
 
 // OS dependent macros
@@ -109,6 +94,18 @@
 
 // Optional libraries
 
+#ifndef MCKL_USE_ASM_LIBRARY
+#define MCKL_USE_ASM_LIBRARY 0
+#endif
+
+#ifndef MCKL_USE_ASM_FMA
+#define MCKL_USE_ASM_FMA MCKL_USE_FMA
+#endif
+
+#ifndef MCKL_USE_ASM_VMF
+#define MCKL_USE_ASM_VMF 0
+#endif
+
 #ifndef MCKL_HAS_OMP
 #ifdef _OPENMP
 #define MCKL_HAS_OMP 1
@@ -123,6 +120,14 @@
 
 #ifndef MCKL_HAS_TBB
 #define MCKL_HAS_TBB 0
+#endif
+
+#ifndef MCKL_HAS_JEMALLOC
+#define MCKL_HAS_JEMALLOC 0
+#endif
+
+#ifndef MCKL_USE_JEMALLOC
+#define MCKL_USE_JEMALLOC MCKL_HAS_JEMALLOC
 #endif
 
 #ifndef MCKL_USE_TBB
@@ -151,10 +156,6 @@
 
 #ifndef MCKL_USE_MKL_VSL
 #define MCKL_USE_MKL_VSL MCKL_HAS_MKL
-#endif
-
-#ifndef MCKL_HAS_BLAS
-#define MCKL_HAS_BLAS MCKL_HAS_MKL
 #endif
 
 #ifndef MCKL_USE_CBLAS

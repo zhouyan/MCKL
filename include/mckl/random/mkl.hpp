@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -700,18 +700,18 @@ namespace internal
 template <MKL_INT BRNG>
 class MKLMaxOffset : public std::integral_constant<MKL_INT, 0>
 {
-}; // MKLMaxOffset;
+}; // class MKLMaxOffset;
 
 template <>
 class MKLMaxOffset<VSL_BRNG_MT2203>
     : public std::integral_constant<MKL_INT, 6024>
 {
-}; // MKLMaxOffset
+}; // class MKLMaxOffset
 
 template <>
 class MKLMaxOffset<VSL_BRNG_WH> : public std::integral_constant<MKL_INT, 273>
 {
-}; // MKLMaxOffset
+}; // class MKLMaxOffset
 
 template <MKL_INT BRNG, MKL_INT MaxOffset = MKLMaxOffset<BRNG>::value>
 class MKLOffset
@@ -776,7 +776,7 @@ class MKLUniformBits<BRNG, 64>
 
 } // namespace mckl::internal
 
-/// \brief MKL RNG C++11 engine
+/// \brief Use MKL BRNG as RNG engine
 /// \ingroup MKL
 ///
 /// \tparam BRNG A MKL BRNG. It need to support either `viRngUniformBits32` or
@@ -803,7 +803,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
         : index_(M_)
     {
         seed(seq);
@@ -819,7 +819,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     explicit MKLEngine(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
         : index_(M_)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
@@ -838,7 +838,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed(SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
     {
         MKL_INT brng = stream_.empty() ? BRNG : stream_.get_brng();
         Vector<MKL_UINT> params;
@@ -860,7 +860,7 @@ class MKLEngine
 
     template <typename SeedSeq>
     void seed(MKL_INT offset, SeedSeq &seq,
-        typename std::enable_if<is_seed_seq<SeedSeq>::value>::type * = nullptr)
+        std::enable_if_t<is_seed_seq<SeedSeq>::value> * = nullptr)
     {
         static_assert(internal::MKLMaxOffset<BRNG>::value > 0,
             "**MKLEngine** does not support offseting");
@@ -888,7 +888,7 @@ class MKLEngine
 
         const std::size_t remain = M_ - index_;
 
-        if (n < remain) {
+        if (n <= remain) {
             std::memcpy(r, result_.data() + index_, sizeof(result_type) * n);
             index_ += n;
             return;
@@ -899,14 +899,7 @@ class MKLEngine
         n -= remain;
         index_ = M_;
 
-        const std::size_t m = n / M_ * M_;
-        generate(m, r);
-        r += m;
-        n -= m;
-
-        generate();
-        std::memcpy(r, result_.data(), sizeof(result_type) * n);
-        index_ = static_cast<unsigned>(n);
+        generate(n, r);
     }
 
     /// \brief Discard the result
@@ -1169,9 +1162,9 @@ class MKLStreamState
 template <typename RNGType>
 inline constexpr int mkl_nseeds()
 {
-    return sizeof(typename SeedType<RNGType>::type) < sizeof(unsigned) ?
+    return sizeof(SeedType<RNGType>) < sizeof(unsigned) ?
         1 :
-        sizeof(typename SeedType<RNGType>::type) / sizeof(unsigned);
+        sizeof(SeedType<RNGType>) / sizeof(unsigned);
 }
 
 template <typename RNGType>
@@ -1199,7 +1192,7 @@ inline int mkl_init(
         } else {
             constexpr std::size_t ns = mkl_nseeds<RNGType>();
             union {
-                typename SeedType<RNGType>::type seed;
+                SeedType<RNGType> seed;
                 std::array<unsigned, ns> useed;
             } buf;
             std::copy_n(param, std::min(static_cast<std::size_t>(n), ns),
@@ -1238,7 +1231,7 @@ inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
 
 } // namespace mckl::internal
 
-/// \brief Register a C++11 RNG as MKL BRNG
+/// \brief Register an RNG as MKL BRNG
 /// \ingroup MKL
 ///
 /// \details

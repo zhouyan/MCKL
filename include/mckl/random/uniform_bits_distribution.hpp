@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,7 @@ inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r,
 template <typename UIntType>
 class UniformBitsDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(UniformBits, short)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_UINT_TYPE(UniformBits, 16)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_0(UniformBits, uniform_bits, UIntType)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 

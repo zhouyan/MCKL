@@ -1,5 +1,5 @@
-R123_Threefry4x32         80       8           4.76           4.68      ---Passed
-R123_Threefry4x32         80       8           4.76           4.68      ---Passed
-R123_Threefry4x32         80       8           4.76           4.68      ---Passed
-R123_Threefry4x32         80       8           4.78           4.69      ---Passed
-R123_Threefry4x32         80       8           4.76           4.68      ---Passed
+R123_Threefry4x32                    80     8      4.99      4.89      ---Passed
+R123_Threefry4x32                    80     8      4.90      4.85      ---Passed
+R123_Threefry4x32                    80     8      5.03      4.95      ---Passed
+R123_Threefry4x32                    80     8      4.91      4.82      ---Passed
+R123_Threefry4x32                    80     8      4.93      4.84      ---Passed

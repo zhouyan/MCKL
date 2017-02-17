@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,10 @@
 #define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_32_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/random/internal/threefry_common.hpp>
 #include <mckl/random/internal/threefry_generic.hpp>
+#include <mckl/random/internal/threefry_sse2_2x32.hpp>
+#include <mckl/random/internal/threefry_sse2_4x32.hpp>
 #include <mckl/random/internal/threefry_unroll.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -54,46 +57,44 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorSSE2Impl32
 {
     public:
-    static constexpr bool batch()
+    static void eval(
+        const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
-        return std::numeric_limits<T>::digits == 32 && K != 0 && 16 % K == 0;
-    }
-
-    static void eval(std::array<T, K> &s, const std::array<T, K + 4> &par)
-    {
-        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(s, par);
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            plain, cipher, par);
     }
 
     template <typename ResultType>
-    static void eval(Counter<T, K> &ctr, const std::array<T, K + 4> &par,
-        std::size_t n, ResultType *r)
+    static void eval(
+        Counter<T, K> &ctr, ResultType *r, const std::array<T, K + 4> &par)
+    {
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, r, par);
+    }
+
+    template <typename ResultType>
+    static void eval(Counter<T, K> &ctr, std::size_t n, ResultType *r,
+        const std::array<T, K + 4> &par)
     {
         constexpr std::size_t S = K <= 8 ? 8 : K;
-        constexpr std::size_t cstride = sizeof(__m128i) * S;
-        constexpr std::size_t nstride = cstride / (sizeof(T) * K);
-        constexpr std::size_t rstride = cstride / sizeof(ResultType);
+        constexpr std::size_t N = sizeof(__m128i) * S / (sizeof(T) * K);
+        constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        std::array<__m128i, S> s;
-        while (n >= nstride) {
-            MCKL_FLATTEN_CALL increment_si128(ctr, s);
-            MCKL_FLATTEN_CALL transpose4x32_load_si128(s);
-            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0);
-            MCKL_FLATTEN_CALL transpose4x32_store_si128(s);
-            std::memcpy(r, s.data(), cstride);
-            n -= nstride;
-            r += rstride;
+        while (n >= N) {
+            std::array<__m128i, S> s;
+            MCKL_INLINE_CALL increment_si128(ctr, s);
+            MCKL_INLINE_CALL transpose4x32_load_si128(s);
+            MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, s, par);
+            MCKL_INLINE_CALL transpose4x32_store_si128(s);
+            std::memcpy(r, s.data(), sizeof(T) * K * N);
+            n -= N;
+            r += N * R;
         }
 
-        alignas(32) union {
-            std::array<std::array<T, K>, nstride> s;
-            std::array<Counter<T, K>, nstride> c;
-        } buf;
-        for (std::size_t i = 0; i != n; ++i) {
-            MCKL_FLATTEN_CALL increment(ctr);
-            buf.c[i] = ctr;
-            eval(buf.s[i], par);
-        }
-        std::memcpy(r, buf.s.data(), sizeof(T) * K * n);
+        alignas(32) std::array<ResultType, N * R> t;
+        ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
+            ctr, n, t.data(), par);
+        std::memcpy(r, t.data(), sizeof(T) * K * n);
     }
 
     private:
@@ -107,11 +108,11 @@ class ThreefryGeneratorSSE2Impl32
     static void round(std::array<__m128i, S> &s,
         const std::array<T, K + 4> &par, std::true_type)
     {
-        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N);
+        MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(N, s, par);
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_FLATTEN static void kbox(
+    MCKL_INLINE static void kbox(
         std::array<__m128i, S> &s, const std::array<T, K + 4> &par)
     {
         kbox<N>(s, par,
@@ -183,7 +184,7 @@ class ThreefryGeneratorSSE2Impl32
     }
 
     template <std::size_t N, std::size_t S>
-    MCKL_FLATTEN static void rbox(std::array<__m128i, S> &s)
+    MCKL_INLINE static void rbox(std::array<__m128i, S> &s)
     {
         rbox<N>(s, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
@@ -304,83 +305,83 @@ class ThreefryGeneratorSSE2Impl32
     template <std::size_t N>
     static void set_key(std::array<__m128i, 2> &k, const std::array<T, 6> &par)
     {
-        std::get<0>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 2, N, Constants>::template key<0>(par)));
-        std::get<1>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 2, N, Constants>::template key<1>(par)));
+        std::get<0>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 2, N>::template key<0>(par)));
+        std::get<1>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 2, N>::template key<1>(par)));
     }
 
     template <std::size_t N>
     static void set_key(std::array<__m128i, 4> &k, const std::array<T, 8> &par)
     {
-        std::get<0>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 4, N, Constants>::template key<0>(par)));
-        std::get<1>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 4, N, Constants>::template key<1>(par)));
-        std::get<2>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 4, N, Constants>::template key<2>(par)));
-        std::get<3>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 4, N, Constants>::template key<3>(par)));
+        std::get<0>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 4, N>::template key<0>(par)));
+        std::get<1>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 4, N>::template key<1>(par)));
+        std::get<2>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 4, N>::template key<2>(par)));
+        std::get<3>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 4, N>::template key<3>(par)));
     }
 
     template <std::size_t N>
     static void set_key(
         std::array<__m128i, 8> &k, const std::array<T, 12> &par)
     {
-        std::get<0>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<0>(par)));
-        std::get<1>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<1>(par)));
-        std::get<2>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<2>(par)));
-        std::get<3>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<3>(par)));
-        std::get<4>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<4>(par)));
-        std::get<5>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<5>(par)));
-        std::get<6>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<6>(par)));
-        std::get<7>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 8, N, Constants>::template key<7>(par)));
+        std::get<0>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<0>(par)));
+        std::get<1>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<1>(par)));
+        std::get<2>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<2>(par)));
+        std::get<3>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<3>(par)));
+        std::get<4>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<4>(par)));
+        std::get<5>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<5>(par)));
+        std::get<6>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<6>(par)));
+        std::get<7>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 8, N>::template key<7>(par)));
     }
 
     template <std::size_t N>
     static void set_key(
         std::array<__m128i, 16> &k, const std::array<T, 20> &par)
     {
-        std::get<0x0>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x0>(par)));
-        std::get<0x1>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x1>(par)));
-        std::get<0x2>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x2>(par)));
-        std::get<0x3>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x3>(par)));
-        std::get<0x4>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x4>(par)));
-        std::get<0x5>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x5>(par)));
-        std::get<0x6>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x6>(par)));
-        std::get<0x7>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x7>(par)));
-        std::get<0x8>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x8>(par)));
-        std::get<0x9>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0x9>(par)));
-        std::get<0xA>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0xA>(par)));
-        std::get<0xB>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0xB>(par)));
-        std::get<0xC>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0xC>(par)));
-        std::get<0xD>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0xD>(par)));
-        std::get<0xE>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0xE>(par)));
-        std::get<0xF>(k) = _mm_set1_epi32(static_cast<int>(
-            ThreefryKBox<T, 16, N, Constants>::template key<0xF>(par)));
+        std::get<0x0>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x0>(par)));
+        std::get<0x1>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x1>(par)));
+        std::get<0x2>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x2>(par)));
+        std::get<0x3>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x3>(par)));
+        std::get<0x4>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x4>(par)));
+        std::get<0x5>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x5>(par)));
+        std::get<0x6>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x6>(par)));
+        std::get<0x7>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x7>(par)));
+        std::get<0x8>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x8>(par)));
+        std::get<0x9>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0x9>(par)));
+        std::get<0xA>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0xA>(par)));
+        std::get<0xB>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0xB>(par)));
+        std::get<0xC>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0xC>(par)));
+        std::get<0xD>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0xD>(par)));
+        std::get<0xE>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0xE>(par)));
+        std::get<0xF>(k) = _mm_set1_epi32(
+            static_cast<int>(ThreefryKBox<T, 16, N>::template key<0xF>(par)));
     }
 
     template <std::size_t S>
@@ -400,6 +401,18 @@ class ThreefryGeneratorSSE2Impl32
         ThreefryPBox<__m128i, K, Constants>::eval(s.data() + I * K);
         permute<I + 1>(s, std::integral_constant<bool, I + 1 < S / K>());
     }
+}; // class ThreefryGeneratorSSE2Impl32
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl32<T, 2, 20, ThreefryConstants<T, 2>>
+    : public Threefry2x32GeneratorSSE2Impl<T>
+{
+}; // class ThreefryGeneratorSSE2Impl32
+
+template <typename T>
+class ThreefryGeneratorSSE2Impl32<T, 4, 20, ThreefryConstants<T, 4>>
+    : public Threefry4x32GeneratorSSE2Impl<T>
+{
 }; // class ThreefryGeneratorSSE2Impl32
 
 } // namespace mckl::internal

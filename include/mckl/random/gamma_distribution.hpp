@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -194,7 +194,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     u01_oo_distribution(rng, n, u);
     normal_distribution(
         rng, n, w, const_zero<RealType>(), const_one<RealType>());
-    fma(n, c, w, const_one<RealType>(), v);
+    muladd(n, c, w, const_one<RealType>(), v);
     NormalDistribution<RealType> rnorm(0, 1);
     for (std::size_t i = 0; i != n; ++i) {
         if (v[i] <= 0) {
@@ -208,7 +208,7 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
     mul(n, v, e, v);
     sqr(n, w, e);
     sqr(n, e, e);
-    fma(n, -static_cast<RealType>(0.0331), e, const_one<RealType>(), e);
+    muladd(n, -static_cast<RealType>(0.0331), e, const_one<RealType>(), e);
     mul(n, d * beta, v, x);
 
     std::size_t m = 0;

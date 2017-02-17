@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 #include <mckl/internal/config.h>
 
 #include <cassert>
+#include <cmath>
 #include <exception>
 #include <iostream>
 #include <limits>
@@ -59,7 +60,9 @@ class RuntimeAssert : public std::runtime_error
 
 #if MCKL_NO_RUNTIME_ASSERT
 
-inline void runtime_assert(bool, const char *, bool) {}
+inline void runtime_assert(bool, const char *, bool = false) {}
+
+inline void runtime_assert(bool, const std::string &, bool = false) {}
 
 #else // MCKL_NO_RUNTIME_ASSERT
 
@@ -76,12 +79,25 @@ inline void runtime_assert(bool cond, const char *msg, bool soft = false)
 #endif // MCKL_RUNTIME_ASSERT_AS_EXCEPTION
 }
 
-#endif // MCKL_NO_RUNTIME_ASSERT
-
 inline void runtime_assert(
     bool cond, const std::string &msg, bool soft = false)
 {
     runtime_assert(cond, msg.c_str(), soft);
+}
+
+#endif // MCKL_NO_RUNTIME_ASSERT
+
+template <typename Except>
+inline void runtime_assert(bool cond, const char *msg)
+{
+    if (!cond)
+        throw Except(msg);
+}
+
+template <typename Except>
+inline void runtime_assert(bool cond, const std::string &msg)
+{
+    runtime_assert<Except>(cond, msg.c_str());
 }
 
 namespace internal
@@ -131,7 +147,7 @@ inline void size_check(SizeType n, const char *f)
 template <typename T>
 inline bool is_equal(const T &a, const T &b, std::true_type)
 {
-    return !(a < b || a > b);
+    return !(std::isnan(a) || std::isnan(b) || a < b || a > b);
 }
 
 template <typename T>
@@ -191,11 +207,10 @@ inline bool is_nullptr(T, std::false_type)
 template <typename T>
 inline bool is_nullptr(T ptr)
 {
-    return is_nullptr(
-        ptr, std::integral_constant<bool,
-                 (std::is_pointer<T>::value ||
-                     std::is_same<std::nullptr_t,
-                         typename std::remove_cv<T>::type>::value)>());
+    return is_nullptr(ptr,
+        std::integral_constant<bool,
+            (std::is_pointer<T>::value ||
+                std::is_same<std::nullptr_t, std::remove_cv_t<T>>::value)>());
 }
 
 inline bool is_nullptr(std::nullptr_t) { return true; }

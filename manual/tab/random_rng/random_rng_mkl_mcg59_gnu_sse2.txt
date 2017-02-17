@@ -1,5 +1,5 @@
-MKL_MCG59               1040       8           2.23           0.88      ---Passed
-MKL_MCG59               1040       8           2.23           0.81      ---Passed
-MKL_MCG59               1040       8           2.23           0.88      ---Passed
-MKL_MCG59               1040       8           2.24           0.81      ---Passed
-MKL_MCG59               1040       8           2.80           1.10      ---Passed
+MKL_MCG59                          1040     8      2.24      0.80      ---Passed
+MKL_MCG59                          1040     8      2.25      0.87      ---Passed
+MKL_MCG59                          1040     8      2.24      0.84      ---Passed
+MKL_MCG59                          1040     8      2.24      0.87      ---Passed
+MKL_MCG59                          1040     8      2.24      0.87      ---Passed

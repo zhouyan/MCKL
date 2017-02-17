@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # SSE2_FOUND - TRUE if SSE2 is found and work correctly
 
-IF(DEFINED SSE2_FOUND)
-    RETURN()
-ENDIF(DEFINED SSE2_FOUND)
+if(DEFINED SSE2_FOUND)
+    return()
+endif(DEFINED SSE2_FOUND)
 
-FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindSSE2.cpp SSE2_TEST_SOURCE)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindSSE2.cpp SSE2_TEST_SOURCE)
 
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("${SSE2_TEST_SOURCE}" SSE2_TEST)
-IF(SSE2_TEST)
-    SET(SSE2_FOUND TRUE CACHE BOOL "Found SSE2 support")
-ELSE(SSE2_TEST)
-    SET(SSE2_FOUND FALSE CACHE BOOL "NOT Found SSE2 support")
-ENDIF(SSE2_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${SSE2_TEST_SOURCE}" SSE2_TEST)
+if(SSE2_TEST)
+    set(SSE2_FOUND TRUE CACHE BOOL "Found SSE2 support")
+else(SSE2_TEST)
+    set(SSE2_FOUND FALSE CACHE BOOL "NOT Found SSE2 support")
+endif(SSE2_TEST)

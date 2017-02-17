@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 #define MCKL_SMP_BACKEND_STD_HPP
 
 #include <mckl/smp/backend_base.hpp>
+#include <future>
+#include <thread>
 
 namespace mckl
 {
@@ -92,11 +94,11 @@ inline void backend_std_range(
 
 } // namespace mckl::internal
 
-/// \brief Sampler<T>::eval_type subtype using the standard library
+/// \brief SMCSampler<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-class SamplerEvalSMP<T, Derived, BackendSTD>
-    : public SamplerEvalBase<T, Derived>
+class SMCSamplerEvalSMP<T, Derived, BackendSTD>
+    : public SMCSamplerEvalBase<T, Derived>
 {
     public:
     void operator()(std::size_t iter, Particle<T> &particle)
@@ -105,7 +107,7 @@ class SamplerEvalSMP<T, Derived, BackendSTD>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(STD, SamplerEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(STD, SMCSamplerEval)
 
     void run(std::size_t iter, Particle<T> &particle)
     {
@@ -134,13 +136,13 @@ class SamplerEvalSMP<T, Derived, BackendSTD>
             task.wait();
         this->eval_last(iter, particle);
     }
-}; // class SamplerEvalSMP
+}; // class SMCSamplerEvalSMP
 
-/// \brief Monitor<T>::eval_type subtype using the standard library
+/// \brief SMCEstimator<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-class MonitorEvalSMP<T, Derived, BackendSTD>
-    : public MonitorEvalBase<T, Derived>
+class SMCEstimatorEvalSMP<T, Derived, BackendSTD>
+    : public SMCEstimatorEvalBase<T, Derived>
 {
     public:
     void operator()(
@@ -150,7 +152,7 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(STD, MonitorEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(STD, SMCEstimatorEval)
 
     void run(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
@@ -182,17 +184,17 @@ class MonitorEvalSMP<T, Derived, BackendSTD>
             task.wait();
         this->eval_last(iter, particle);
     }
-}; // class MonitorEvalSMP
+}; // class SMCEstimatorEvalSMP
 
-/// \brief Sampler<T>::eval_type subtype using the standard library
+/// \brief SMCSampler<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-using SamplerEvalSTD = SamplerEvalSMP<T, Derived, BackendSTD>;
+using SMCSamplerEvalSTD = SMCSamplerEvalSMP<T, Derived, BackendSTD>;
 
-/// \brief Monitor<T>::eval_type subtype using the standard library
+/// \brief SMCEstimator<T>::eval_type subtype using the standard library
 /// \ingroup STD
 template <typename T, typename Derived>
-using MonitorEvalSTD = MonitorEvalSMP<T, Derived, BackendSTD>;
+using SMCEstimatorEvalSTD = SMCEstimatorEvalSMP<T, Derived, BackendSTD>;
 
 } // namespace mckl
 

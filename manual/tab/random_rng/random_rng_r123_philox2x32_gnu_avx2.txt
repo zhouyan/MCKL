@@ -1,5 +1,5 @@
-R123_Philox2x32           40       8           2.12           2.11      ---Passed
-R123_Philox2x32           40       8           2.16           2.16      ---Passed
-R123_Philox2x32           40       8           2.13           2.12      ---Passed
-R123_Philox2x32           40       8           2.22           2.27      ---Passed
-R123_Philox2x32           40       8           2.12           2.12      ---Passed
+R123_Philox2x32                      40     8      2.16      2.16      ---Passed
+R123_Philox2x32                      40     8      2.11      2.11      ---Passed
+R123_Philox2x32                      40     8      2.11      2.11      ---Passed
+R123_Philox2x32                      40     8      2.11      2.11      ---Passed
+R123_Philox2x32                      40     8      2.11      2.11      ---Passed

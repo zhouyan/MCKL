@@ -3,7 +3,7 @@
 % ----------------------------------------------------------------------------
 %  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
-%  Copyright (c) 2013-2016, Yan Zhou
+%  Copyright (c) 2013-2017, Yan Zhou
 %  All rights reserved.
 %
 %  Redistribution and use in source and binary forms, with or without
@@ -54,12 +54,48 @@ algorithm in~\cite{Salmon:2011um} (see section~\ref{sub:Threefry}). See the
 reference manual\footnote{\url{http://zhouyan.github.io/MCKLDoc/master}} for
 the header file for each class and function defined in \mckl.
 
+\section{Optional runtime library}
+\label{sec:Optional runtime library}
+
+In addition to the header-only library, one can optionally build and use a
+runtime library. To build the library, one need a recent version of
+\nasm\footnote{\url{http://www.nasm.us}} assembler and the
+\cmake\footnote{\url{https://cmake.org}} program. The library is only supported
+on x86-64 \cpu{}s and 64-bit \unix-alike systems.
+
+To build and install the library,
+\begin{verbatim}
+cd /path/to/mckl/source
+mkdir -p build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/prefix/to/install/directory
+make lib
+make install
+\end{verbatim}
+To use and link to the library in a user program, say |prog.cpp|,
+\begin{verbatim}
+c++ -DMCKL_USE_ASM_LIB=1 -o prog prog.cpp -lmckl
+\end{verbatim}
+
+The runtime library provides optimized implementation of selected \rng{}s.
+Performance of the header-only implementation might vary considerably depending
+on the compiler. Though even the worst case, the performance is still better
+than most alternatives, the best performance of some \rng{}s can provide best
+performance regardless of the choice of compiler.
+
+Further, one can define a configuration macro |MCKL_USE_ASM_VMF| to a non-zero
+value, to use an assembly implementation of selected vectorized math functions
+when \mkl \vml is unavailable, see~\ref{sec:Vectorized functions}. This feature
+is highly experimental. These functions are fast, but have slightly lower
+accuracy for some values of input than the standard library or \mkl \vml in
+high accuracy mode.
+
 \begin{table}[ht]
   \begin{tabularx}{\textwidth}{LL}
     \toprule
     Header & Documents \\
     \midrule
-    \texttt{mckl/core.hpp}     & Chapter~\ref{chap:Core concepts}             \\
+    \texttt{mckl/core.hpp}     & Chapter~\ref{chap:Building blocks}           \\
     \texttt{mckl/smp.hpp}      & Chapter~\ref{chap:Symmetric multiprocessing} \\
     \texttt{mckl/resample.hpp} & Chapter~\ref{chap:Resampling}                \\
     \texttt{mckl/math.hpp}     & Chapter~\ref{chap:Mathemtical functions}     \\

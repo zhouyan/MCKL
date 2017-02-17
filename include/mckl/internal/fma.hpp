@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ namespace mckl
 namespace internal
 {
 
-MCKL_FLATTEN inline void fmadd_ps(
+MCKL_INLINE inline void fmadd_ps(
     std::array<__m256i, 4> &s, const __m256i &a, const __m256i &b)
 {
     std::get<0>(s) = _mm256_castps_si256(
@@ -65,7 +65,7 @@ MCKL_FLATTEN inline void fmadd_ps(
             _mm256_castsi256_ps(a), _mm256_castsi256_ps(b)));
 }
 
-MCKL_FLATTEN inline void fmadd_pd(
+MCKL_INLINE inline void fmadd_pd(
     std::array<__m256i, 4> &s, const __m256i &a, const __m256i &b)
 {
     std::get<0>(s) = _mm256_castpd_si256(
@@ -82,7 +82,7 @@ MCKL_FLATTEN inline void fmadd_pd(
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(b)));
 }
 
-MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 4> &s, const __m256i &a,
+MCKL_INLINE inline void fmadd_pd(std::array<__m256i, 4> &s, const __m256i &a,
     const std::array<__m256i, 4> &b)
 {
     std::get<0>(s) = _mm256_castpd_si256(
@@ -99,7 +99,7 @@ MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 4> &s, const __m256i &a,
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<3>(b))));
 }
 
-MCKL_FLATTEN inline void fmadd_ps(
+MCKL_INLINE inline void fmadd_ps(
     std::array<__m256i, 8> &s, const __m256i &a, const __m256i &b)
 {
     std::get<0>(s) = _mm256_castps_si256(
@@ -128,7 +128,7 @@ MCKL_FLATTEN inline void fmadd_ps(
             _mm256_castsi256_ps(a), _mm256_castsi256_ps(b)));
 }
 
-MCKL_FLATTEN inline void fmadd_pd(
+MCKL_INLINE inline void fmadd_pd(
     std::array<__m256i, 8> &s, const __m256i &a, const __m256i &b)
 {
     std::get<0>(s) = _mm256_castpd_si256(
@@ -157,7 +157,7 @@ MCKL_FLATTEN inline void fmadd_pd(
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(b)));
 }
 
-MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 8> &s, const __m256i &a,
+MCKL_INLINE inline void fmadd_pd(std::array<__m256i, 8> &s, const __m256i &a,
     const std::array<__m256i, 8> &b)
 {
     std::get<0>(s) = _mm256_castpd_si256(
@@ -186,7 +186,7 @@ MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 8> &s, const __m256i &a,
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<7>(b))));
 }
 
-MCKL_FLATTEN inline void fmadd_ps(
+MCKL_INLINE inline void fmadd_ps(
     std::array<__m256i, 16> &s, const __m256i &a, const __m256i &b)
 {
     std::get<0x0>(s) = _mm256_castps_si256(
@@ -239,7 +239,7 @@ MCKL_FLATTEN inline void fmadd_ps(
             _mm256_castsi256_ps(a), _mm256_castsi256_ps(b)));
 }
 
-MCKL_FLATTEN inline void fmadd_pd(
+MCKL_INLINE inline void fmadd_pd(
     std::array<__m256i, 16> &s, const __m256i &a, const __m256i &b)
 {
     std::get<0x0>(s) = _mm256_castpd_si256(
@@ -292,7 +292,7 @@ MCKL_FLATTEN inline void fmadd_pd(
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(b)));
 }
 
-MCKL_FLATTEN inline void fmadd_pd(std::array<__m256i, 16> &s, const __m256i &a,
+MCKL_INLINE inline void fmadd_pd(std::array<__m256i, 16> &s, const __m256i &a,
     const std::array<__m256i, 16> &b)
 {
     std::get<0x0>(s) = _mm256_castpd_si256(

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,11 @@
 #define MCKL_UTILITY_HDF5_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/matrix.hpp>
 
 #ifdef MCKL_INTEL
 #pragma warning(push)
-#pragma warning(disable : 2282)
+#pragma warning(disable : 2282) // unrecognized GCC pragma
 #endif
 
 #include <hdf5.h>
@@ -90,95 +91,10 @@ MCKL_DEFINE_UTILITY_HDF5_TYPE(DataType, T)
 MCKL_DEFINE_UTILITY_HDF5_TYPE(File, F)
 MCKL_DEFINE_UTILITY_HDF5_TYPE(Group, G)
 
-template <typename T>
-class HDF5StoreDataPtr
-{
-    public:
-    template <typename InputIter>
-    HDF5StoreDataPtr(std::size_t n, InputIter first) : ptr_(nullptr)
-    {
-        set(n, first, std::is_convertible<InputIter, const T *>());
-    }
-
-    const T *get() const { return ptr_ == nullptr ? data_.data() : ptr_; }
-
-    private:
-    Vector<T> data_;
-    const T *ptr_;
-
-    template <typename InputIter>
-    void set(std::size_t, InputIter first, std::true_type)
-    {
-        ptr_ = static_cast<const T *>(first);
-    }
-
-    template <typename InputIter>
-    void set(std::size_t n, InputIter first, std::false_type)
-    {
-        data_.resize(n);
-        std::copy_n(first, n, data_.begin());
-    }
-}; // class HDF5StoreDataPtr
-
-inline void hdf5_dim(
-    MatrixLayout layout, std::size_t nrow, std::size_t ncol, ::hsize_t *dim)
-{
-    runtime_assert(layout == RowMajor || layout == ColMajor,
-        "**hdf5_dim** invalid layout parameter");
-
-    if (layout == RowMajor) {
-        dim[0] = nrow;
-        dim[1] = ncol;
-    }
-
-    if (layout == ColMajor) {
-        dim[0] = ncol;
-        dim[1] = nrow;
-    }
-}
-
-template <typename IntType>
-inline bool hdf5_use_int(std::size_t n, IntType *r, std::false_type)
-{
-    if (sizeof(int) > sizeof(IntType))
-        return true;
-
-    bool flag = true;
-    for (std::size_t i = 0; i != n; ++i) {
-        if (r[i] > std::numeric_limits<int>::max()) {
-            flag = false;
-            break;
-        }
-    }
-
-    return flag;
-}
-
-template <typename IntType>
-inline bool hdf5_use_int(std::size_t n, IntType *r, std::true_type)
-{
-    if (sizeof(int) > sizeof(IntType))
-        return true;
-
-    bool flag = true;
-    for (std::size_t i = 0; i != n; ++i) {
-        if (r[i] < std::numeric_limits<int>::min()) {
-            flag = false;
-            break;
-        }
-        if (r[i] > std::numeric_limits<int>::max()) {
-            flag = false;
-            break;
-        }
-    }
-
-    return flag;
-}
-
 inline ::hid_t hdf5_datafile(
-    const std::string &filename, bool append, bool read_only)
+    const std::string &filename, bool open_only, bool read_only)
 {
-    if (!append)
+    if (!open_only)
         return ::H5Fcreate(
             filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -313,103 +229,9 @@ inline ::hid_t hdf5_datatype<long double>()
     return ::H5Tcopy(H5T_NATIVE_LDOUBLE);
 }
 
-/// \brief The number of elements in HDF5 data
-/// \ingroup HDF5
-inline std::size_t hdf5load_size(
-    const std::string &filename, const std::string &dataname)
-{
-    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
-    if (!datafile)
-        return 0;
-
-    internal::HDF5DataSet dataset(
-        ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset)
-        return 0;
-
-    internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace)
-        return 0;
-
-    ::hssize_t n = ::H5Sget_simple_extent_npoints(dataspace.id());
-    if (n < 0)
-        return 0;
-
-    return static_cast<std::size_t>(n);
-}
-
-/// \brief Load HDF5 data
-/// \ingroup HDF5
-template <typename OutputIter>
-inline OutputIter hdf5load(
-    const std::string &filename, const std::string &dataname, OutputIter first)
-{
-    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
-    if (!datafile)
-        return first;
-
-    internal::HDF5DataSet dataset(
-        ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset)
-        return first;
-
-    internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace)
-        return first;
-
-    ::hssize_t n = ::H5Sget_simple_extent_npoints(dataspace.id());
-    if (n < 0)
-        return first;
-
-    using T = typename std::iterator_traits<OutputIter>::value_type;
-    std::size_t N = static_cast<std::size_t>(n);
-    ::herr_t err = 0;
-
-    internal::HDF5DataType src_datatype(::H5Dget_type(dataset.id()));
-    if (!src_datatype)
-        return first;
-
-    internal::HDF5DataType dst_datatype(hdf5_datatype<T>());
-    if (!dst_datatype)
-        return first;
-
-    ::htri_t is_eq = ::H5Tequal(src_datatype.id(), dst_datatype.id());
-    if (is_eq < 0)
-        return first;
-
-    std::size_t src_size = ::H5Tget_size(src_datatype.id());
-    std::size_t dst_size = ::H5Tget_size(dst_datatype.id());
-    std::size_t buf_size = std::max(src_size, dst_size);
-    std::size_t buf_rate =
-        buf_size / dst_size + (buf_size % dst_size == 0 ? 0 : 1);
-    Vector<T> buf(N * buf_rate);
-    err = ::H5Dread(dataset.id(), src_datatype.id(), H5S_ALL, H5S_ALL,
-        H5P_DEFAULT, buf.data());
-    if (err < 0)
-        return first;
-
-    if (is_eq == 0) {
-        err = ::H5Tconvert(src_datatype.id(), dst_datatype.id(), N, buf.data(),
-            nullptr, H5P_DEFAULT);
-        if (err < 0)
-            return first;
-    }
-
-    return std::copy_n(buf.begin(), N, first);
-}
-
-/// \brief Load HDF5 data
-template <typename T>
-inline Vector<T> hdf5load(
-    const std::string &filename, const std::string &dataname)
-{
-    Vector<T> vector(hdf5load_size(filename, dataname));
-    hdf5load(filename, dataname, vector.data());
-}
-
 /// \brief Create a new HDF5 file
 /// \ingroup HDF5
-inline void hdf5store(const std::string &filename)
+inline void hdf5file(const std::string &filename)
 {
     internal::HDF5File datafile(
         internal::hdf5_datafile(filename, false, false));
@@ -417,7 +239,7 @@ inline void hdf5store(const std::string &filename)
 
 /// \brief Create a new HDF5 group
 /// \ingroup HDF5
-inline void hdf5store(
+inline void hdf5group(
     const std::string &filename, const std::string dataname, bool append)
 {
     internal::HDF5File datafile(
@@ -428,101 +250,12 @@ inline void hdf5store(
     }
 }
 
-/// \brief Store one dimensional vector
-/// \ingroup HDF5
-template <typename InputIter>
-inline void hdf5store(std::size_t N, InputIter first,
-    const std::string &filename, const std::string &dataname, bool append)
-{
-    using T = typename std::iterator_traits<InputIter>::value_type;
-
-    if (N == 0)
-        return;
-
-    internal::HDF5File datafile(
-        internal::hdf5_datafile(filename, append, false));
-    if (!datafile)
-        return;
-
-    internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype)
-        return;
-
-    ::hsize_t dim[1] = {N};
-    internal::HDF5DataSpace dataspace(::H5Screate_simple(1, dim, nullptr));
-    if (!dataspace)
-        return;
-
-    internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
-        datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    if (!dataset)
-        return;
-
-    internal::HDF5StoreDataPtr<T> dataptr(N, first);
-    ::H5Dwrite(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT,
-        dataptr.get());
-}
-
-/// \brief Store one dimensional vector
+/// \brief Store a Vector in the HDF5 format
 /// \ingroup HDF5
 template <typename T, typename Alloc>
-inline void hdf5store(const std::vector<T, Alloc> &vector,
+inline void hdf5store(const Vector<T, Alloc> &vector,
     const std::string &filename, const std::string &dataname, bool append)
 {
-    hdf5store(vector.size(), vector.data(), filename, dataname, append);
-}
-
-/// \brief Store a matrix in the HDF5 format from an input iterator
-/// \ingroup HDF5
-///
-/// \note
-/// HDF5 store data in row major layout. For example,
-/// ~~~{.cpp}
-/// double data[6] = {1, 2, 3, 4, 5, 6};
-///
-/// // Store matrix
-/// // 1 2
-/// // 3 4
-/// // 5 6
-/// hdf5store_matrix<double>(RowMajor, 3, 2, data, "row.hdf5", "data");
-///
-/// // Store matrix
-/// // 1 4
-/// // 2 5
-/// // 3 6
-/// hdf5store_matrix<double>(ColMajor, 3, 2, data, "col.hdf5", "data");
-/// ~~~
-/// When the results are read by other program, for example R, a transpose may
-/// be needed. For instance,
-/// ~~~{.r}
-/// library(rhdf5)
-/// row <- h5read("row.hdf5", "/data")
-/// print(row) # produce
-/// #      [,1] [,2] [,3]
-/// # [1,]    1    3    5
-/// # [2,]    2    4    6
-/// col <- h5read("col.hdf5", "/data")
-/// print(col)  # produce
-/// #      [,1] [,2]
-/// # [1,]    1    4
-/// # [2,]    2    5
-/// # [3,]    3    6
-/// #
-/// ~~~
-/// That is, when the data is stored in column major layout in C++ memory, then
-/// the read in R produces exactly the same output. If the data is stored as
-/// row major matrix in C++ memory, the read in R produces the transpose the
-/// original matrix though they are identical in memory.
-template <typename InputIter>
-inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
-    InputIter first, const std::string &filename, const std::string &dataname,
-    bool append)
-{
-    using T = typename std::iterator_traits<InputIter>::value_type;
-
-    if (nrow == 0 || ncol == 0)
-        return;
-
     internal::HDF5File datafile(
         internal::hdf5_datafile(filename, append, false));
     if (!datafile)
@@ -532,9 +265,8 @@ inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
     if (!datatype)
         return;
 
-    ::hsize_t dim[2];
-    internal::hdf5_dim(layout, nrow, ncol, dim);
-    internal::HDF5DataSpace dataspace(::H5Screate_simple(2, dim, nullptr));
+    ::hsize_t dims[1] = {vector.size()};
+    internal::HDF5DataSpace dataspace(::H5Screate_simple(1, dims, nullptr));
     if (!dataspace)
         return;
 
@@ -543,55 +275,131 @@ inline void hdf5store(MatrixLayout layout, std::size_t nrow, std::size_t ncol,
     if (!dataset)
         return;
 
-    internal::HDF5StoreDataPtr<T> dataptr(nrow * ncol, first);
     ::H5Dwrite(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT,
-        dataptr.get());
+        vector.data());
 }
 
-/// \brief Store a StateMatrix in the HDF5 format
+/// \brief Load data in HDF5 format into a vector given the destination type
 /// \ingroup HDF5
-template <MatrixLayout Layout, std::size_t Dim, typename T>
-inline void hdf5store(const StateMatrix<Layout, Dim, T> &state_matrix,
+template <typename T>
+inline Vector<T> hdf5load(
+    const std::string &filename, const std::string &dataname)
+{
+    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
+    if (!datafile)
+        return Vector<T>();
+
+    internal::HDF5DataSet dataset(
+        ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
+    if (!dataset)
+        return Vector<T>();
+
+    internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
+    if (!dataspace)
+        return Vector<T>();
+
+    ::hssize_t n = ::H5Sget_simple_extent_npoints(dataspace.id());
+    if (n <= 0)
+        return Vector<T>();
+
+    internal::HDF5DataType datatype(hdf5_datatype<T>());
+    if (!datatype)
+        return Vector<T>();
+
+    Vector<T> vector(static_cast<std::size_t>(n));
+    ::herr_t err = ::H5Dread(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL,
+        H5P_DEFAULT, vector.data());
+    if (err < 0)
+        return Vector<T>();
+
+    return vector;
+}
+
+/// \brief Store a row major Matrix in the HDF5 format
+/// \ingroup HDF5
+template <typename T>
+inline void hdf5store(const Matrix<RowMajor, T> &matrix,
     const std::string &filename, const std::string &dataname, bool append)
 {
-    hdf5store(Layout, state_matrix.size(), state_matrix.dim(),
-        state_matrix.data(), filename, dataname, append);
+    internal::HDF5File datafile(
+        internal::hdf5_datafile(filename, append, false));
+    if (!datafile)
+        return;
+
+    internal::HDF5DataType datatype(hdf5_datatype<T>());
+    if (!datatype)
+        return;
+
+    ::hsize_t dims[2] = {matrix.nrow(), matrix.ncol()};
+    internal::HDF5DataSpace dataspace(::H5Screate_simple(2, dims, nullptr));
+    if (!dataspace)
+        return;
+
+    internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
+        datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
+    if (!dataset)
+        return;
+
+    ::H5Dwrite(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT,
+        matrix.data());
 }
 
-/// \brief Store a Particle in the HDF5 format
+/// \brief Store a Matrix in the HDF5 format
 /// \ingroup HDF5
 template <typename T>
-inline void hdf5store(const Particle<T> &particle, const std::string &filename,
-    const std::string &dataname, bool append)
+inline void hdf5store(const Matrix<ColMajor, T> &matrix,
+    const std::string &filename, const std::string &dataname, bool append)
 {
-    hdf5store(filename, dataname, append);
-    hdf5store(particle.state(), filename, dataname + "/State", true);
-    hdf5store(static_cast<std::size_t>(particle.weight().size()),
-        particle.weight().data(), filename, dataname + "/Weight", true);
+    Matrix<RowMajor, T> tmp(matrix);
+    hdf5store(tmp, filename, dataname, append);
 }
 
-/// \brief Store a Monitor in the HDF5 format
+/// \brief Load data in HDF5 format into a Matrix given destination layout and
+/// type
 /// \ingroup HDF5
-template <typename T>
-inline void hdf5store(const Monitor<T> &monitor, const std::string &filename,
-    const std::string &dataname, bool append)
+template <MatrixLayout Layout, typename T>
+inline Matrix<Layout, T> hdf5load(
+    const std::string &filename, const std::string &dataname)
 {
-    std::map<std::string, Vector<double>> df = monitor.summary();
-    hdf5store(filename, dataname, append);
-    for (const auto &v : df)
-        hdf5store(v.second, filename, dataname + "/" + v.first, append);
-}
+    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
+    if (!datafile)
+        return Matrix<Layout, T>();
 
-/// \brief Store a Sampler in the HDF5 format
-/// \ingroup HDF5
-template <typename T>
-inline void hdf5store(const Sampler<T> &sampler, const std::string &filename,
-    const std::string &dataname, bool append)
-{
-    std::map<std::string, Vector<double>> df = sampler.summary();
-    hdf5store(filename, dataname, append);
-    for (const auto &v : df)
-        hdf5store(v.second, filename, dataname + "/" + v.first, append);
+    internal::HDF5DataSet dataset(
+        ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
+    if (!dataset)
+        return Matrix<Layout, T>();
+
+    internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
+    if (!dataspace)
+        return Matrix<Layout, T>();
+
+    int ndims = ::H5Sget_simple_extent_ndims(dataspace.id());
+    if (ndims != 2)
+        return Matrix<Layout, T>();
+
+    ::hsize_t dims[2];
+    ndims = ::H5Sget_simple_extent_dims(dataspace.id(), dims, nullptr);
+    if (ndims != 2)
+        return Matrix<Layout, T>();
+
+    std::size_t nrow = static_cast<std::size_t>(dims[0]);
+    std::size_t ncol = static_cast<std::size_t>(dims[1]);
+
+    if (nrow * ncol == 0)
+        return Matrix<Layout, T>(nrow, ncol);
+
+    internal::HDF5DataType datatype(hdf5_datatype<T>());
+    if (!datatype)
+        return Matrix<Layout, T>();
+
+    Matrix<RowMajor, T> matrix(nrow, ncol);
+    ::herr_t err = ::H5Dread(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL,
+        H5P_DEFAULT, matrix.data());
+    if (err < 0)
+        return Matrix<Layout, T>();
+
+    return Matrix<Layout, T>(std::move(matrix));
 }
 
 } // namespace mckl

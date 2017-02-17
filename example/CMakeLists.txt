@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -29,46 +29,24 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample CXX)
+project(MCKLExample CXX)
 
-IF(CMAKE_CROSSCOMPILING)
-    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=1)
-ELSE(CMAKE_CROSSCOMPILING)
-    ADD_DEFINITIONS(-DMCKL_EXAMPLE_CROSS_COMPILING=0)
-ENDIF(CMAKE_CROSSCOMPILING)
-
-ADD_DEFINITIONS(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
+add_definitions(-DMCKL_REQUIRE_ENDIANNESS_NEUTURAL=1)
 
 ##############################################################################
-# Check examples
+# Examples
 ##############################################################################
 
-SET(EXAMPLES ${EXAMPLES} "mckl")
-ADD_SUBDIRECTORY(mckl)
+set(EXAMPLES ${EXAMPLES} algorithm)
+set(EXAMPLES ${EXAMPLES} core)
+set(EXAMPLES ${EXAMPLES} math)
+set(EXAMPLES ${EXAMPLES} mckl)
+set(EXAMPLES ${EXAMPLES} random)
+set(EXAMPLES ${EXAMPLES} utility)
 
-SET(EXAMPLES ${EXAMPLES} "gmm")
-ADD_SUBDIRECTORY(gmm)
-
-SET(EXAMPLES ${EXAMPLES} "math")
-ADD_SUBDIRECTORY(math)
-
-SET(EXAMPLES ${EXAMPLES} "pf")
-ADD_SUBDIRECTORY(pf)
-
-SET(EXAMPLES ${EXAMPLES} "random")
-ADD_SUBDIRECTORY(random)
-
-SET(EXAMPLES ${EXAMPLES} "resample")
-ADD_SUBDIRECTORY(resample)
-
-SET(EXAMPLES ${EXAMPLES} "utility")
-ADD_SUBDIRECTORY(utility)
-
-##############################################################################
-# Enable examples
-##############################################################################
-
-MESSAGE(STATUS "=================== Examples ==========================")
-FOREACH(example ${EXAMPLES})
-    MESSAGE(STATUS ${example})
-ENDFOREACH(example ${EXAMPLES})
+message(STATUS "=================== Examples ==========================")
+foreach(example ${EXAMPLES})
+    message(STATUS ${example})
+    add_subdirectory(${example})
+endforeach(example ${EXAMPLES})
+message(STATUS "=======================================================")

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,7 @@
 int main()
 {
     MCKL_EXAMPLE_CONFIG(NO_RUNTIME_ASSERT)
-    MCKL_EXAMPLE_CONFIG(NO_RUNTIME_WARNING)
     MCKL_EXAMPLE_CONFIG(RUNTIME_ASSERT_AS_EXCEPTION)
-    MCKL_EXAMPLE_CONFIG(RUNTIME_WARNING_AS_EXCEPTION)
     MCKL_EXAMPLE_CONFIG(REQUIRE_ENDIANNESS_NEUTURAL)
     MCKL_EXAMPLE_CONFIG(HAS_POSIX)
     MCKL_EXAMPLE_CONFIG(HAS_OMP)
@@ -80,9 +78,6 @@ int main()
 
     std::cout << std::setw(40) << std::left << "is_big_endian()"
               << mckl::internal::is_big_endian() << std::endl;
-
-    std::cout << std::setw(40) << std::left << "hardware_concurrency()"
-              << std::thread::hardware_concurrency() << std::endl;
 
     return 0;
 }

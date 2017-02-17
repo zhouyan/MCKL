@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # POSIX_FOUND - TRUE if POSIX is found and work correctly
 
-IF(DEFINED POSIX_FOUND)
-    RETURN()
-ENDIF(DEFINED POSIX_FOUND)
+if(DEFINED POSIX_FOUND)
+    return()
+endif(DEFINED POSIX_FOUND)
 
-FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindPOSIX.cpp POSIX_TEST_SOURCE)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindPOSIX.cpp POSIX_TEST_SOURCE)
 
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("${POSIX_TEST_SOURCE}" POSIX_TEST)
-IF(POSIX_TEST)
-    SET(POSIX_FOUND TRUE CACHE BOOL "Found POSIX support")
-ELSE(POSIX_TEST)
-    SET(POSIX_FOUND FALSE CACHE BOOL "NOT Found POSIX support")
-ENDIF(POSIX_TEST)
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("${POSIX_TEST_SOURCE}" POSIX_TEST)
+if(POSIX_TEST)
+    set(POSIX_FOUND TRUE CACHE BOOL "Found POSIX support")
+else(POSIX_TEST)
+    set(POSIX_FOUND FALSE CACHE BOOL "NOT Found POSIX support")
+endif(POSIX_TEST)

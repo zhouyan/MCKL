@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ inline void uniform_int_distribution_impl(RNGType &rng, std::size_t n,
     double rb = static_cast<double>(b);
     double *const u = s.data();
     u01_co_distribution(rng, n, u);
-    fma(n, u, rb - ra + const_one<double>(), ra, u);
+    muladd(n, u, rb - ra + const_one<double>(), ra, u);
     floor(n, u, u);
     for (std::size_t i = 0; i != n; ++i)
         r[i] = static_cast<IntType>(u[i]);
@@ -135,7 +135,7 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
 template <typename IntType>
 class UniformIntDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(UniformInt, short)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(UniformInt, 16)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_2(UniformInt, uniform_int, IntType,
         result_type, a, 0, result_type, b,
         std::numeric_limits<result_type>::max())
@@ -152,7 +152,7 @@ class UniformIntDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        using UIntType = typename std::make_unsigned<result_type>::type;
+        using UIntType = std::make_unsigned_t<result_type>;
 
         constexpr result_type imin = std::numeric_limits<result_type>::min();
         constexpr result_type imax = std::numeric_limits<result_type>::max();
@@ -181,9 +181,9 @@ class UniformIntDistribution
     result_type generate(RNGType &rng, const param_type &param, std::true_type)
     {
         U01CODistribution<double> u01;
-        double ra = static_cast<double>(param.a());
-        double rb = static_cast<double>(param.b());
-        double u = ra + (rb - ra + const_one<double>()) * u01(rng);
+        const double ra = static_cast<double>(param.a());
+        const double rb = static_cast<double>(param.b());
+        const double u = ra + (rb - ra + const_one<double>()) * u01(rng);
 
         return static_cast<result_type>(std::floor(u));
     }

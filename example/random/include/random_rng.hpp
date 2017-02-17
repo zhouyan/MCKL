@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -62,6 +62,7 @@
 
 #include <mckl/random/u01_distribution.hpp>
 #include <mckl/random/uniform_bits_distribution.hpp>
+#include <mckl/random/uniform_int_distribution.hpp>
 #include "random_common.hpp"
 
 #if MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_R123_RNG ||            \
@@ -74,7 +75,7 @@ inline bool random_rng_k(const RNGType &)
 }
 
 #else // MCKL_EXAMPLE_RANDOM_STD_RNG || MCKL_EXAMPLE_RANDOM_R123_RNG ||
-      // MCKL_EXAMPLE_RANDOM_MKL_RNG || MCKL_EXAMPLE_RANDOM_RDRAND_RNG
+// MCKL_EXAMPLE_RANDOM_MKL_RNG || MCKL_EXAMPLE_RANDOM_RDRAND_RNG
 
 template <typename RNGType>
 inline bool random_rng_k(const RNGType &, const std::string &filename)
@@ -220,18 +221,20 @@ inline bool random_rng_k(const mckl::Threefish1024Engine<ResultType> &rng)
 
 #endif // MCKL_EXAMPLE_RANDOM_THREEFRY_RNG
 
-struct RandomRNGPerf {
+class RandomRNGPerf
+{
+    public:
     bool pass;
     double c1;
     double c2;
-}; // struct RandomRNGPerf
+}; // class RandomRNGPerf
 
 template <typename RNGType>
 inline bool random_rng_d(std::size_t N, std::size_t M)
 {
     using result_type = typename RNGType::result_type;
 
-    std::uniform_int_distribution<std::size_t> rsize(0, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(0, N);
     mckl::UniformBitsDistribution<std::uint16_t> ubits16;
     mckl::UniformBitsDistribution<std::uint32_t> ubits32;
     mckl::UniformBitsDistribution<std::uint64_t> ubits64;
@@ -326,7 +329,7 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 
     RNGType rng;
     DistributionType dist;
-    std::uniform_int_distribution<std::size_t> rsize(N / 2, N);
+    mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);
     bool pass = true;
 
     RNGType rng1;
@@ -386,10 +389,10 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
 template <typename RNGType>
 inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
 {
-    const int nwid = 20;
-    const int swid = 8;
-    const int twid = 15;
-    const std::size_t lwid = nwid + swid * 2 + twid * 3;
+    const int nwid = 33;
+    const int swid = 6;
+    const int twid = 10;
+    const std::size_t lwid = nwid + swid * 2 + twid * 2 + 15;
 
     bool pass_k = random_rng_k(RNGType());
     bool pass_d = random_rng_d<RNGType>(N, M);
@@ -411,7 +414,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
         std::cout << std::setw(twid) << std::right << "GB/s (S)";
         std::cout << std::setw(twid) << std::right << "GB/s (B)";
     }
-    std::cout << std::setw(twid) << std::right << "Deterministics";
+    std::cout << std::setw(15) << std::right << "Deterministics";
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;
@@ -426,7 +429,7 @@ inline void random_rng(std::size_t N, std::size_t M, const std::string &name)
     pass += pass_d ? "-" : "*";
     pass += perf_ubits.pass ? "-" : "*";
     pass += random_pass(pass_k && pass_d && perf_ubits.pass);
-    std::cout << std::setw(twid) << std::right << pass;
+    std::cout << std::setw(15) << std::right << pass;
     std::cout << std::endl;
 
     std::cout << std::string(lwid, '-') << std::endl;

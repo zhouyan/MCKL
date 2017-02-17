@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -80,6 +80,10 @@
 #define MCKL_HAS_FMA MCKL_HAS_AVX2
 #endif
 
+#ifndef MCKL_HAS_RDPMC
+#define MCKL_HAS_RDPMC 0
+#endif
+
 #ifndef MCKL_HAS_RDTSC
 #define MCKL_HAS_RDTSC MCKL_HAS_X86
 #endif
@@ -138,6 +142,10 @@
 
 #ifndef MCKL_USE_FMA
 #define MCKL_USE_FMA MCKL_HAS_FMA
+#endif
+
+#ifndef MCKL_USE_RDPMC
+#define MCKL_USE_RDPMC MCKL_HAS_RDPMC
 #endif
 
 #ifndef MCKL_USE_RDTSC

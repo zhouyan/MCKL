@@ -1,5 +1,5 @@
-RDRAND32                   1       1          60.87          57.58      ---Passed
-RDRAND32                   1       1          61.37          58.89      ---Passed
-RDRAND32                   1       1          60.83          57.80      ---Passed
-RDRAND32                   1       1          61.41          58.95      ---Passed
-RDRAND32                   1       1          60.65          57.51      ---Passed
+RDRAND32                              1     1     62.59     59.35      ---Passed
+RDRAND32                              1     1     60.89     57.58      ---Passed
+RDRAND32                              1     1     61.45     58.90      ---Passed
+RDRAND32                              1     1     60.56     57.31      ---Passed
+RDRAND32                              1     1     62.19     59.09      ---Passed

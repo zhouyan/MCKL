@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -123,19 +123,19 @@ inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
     RealType *const w = s.data() + n;
     RealType *const t = s.data() + n * 2;
     u01_oo_distribution(rng, n, u);
-    fma(n, u, const_pi<RealType>(), -const_pi_by2<RealType>(), u);
+    muladd(n, u, const_pi<RealType>(), -const_pi_by2<RealType>(), u);
     u01_oo_distribution(rng, n, w);
     log(n, w, w);
     mul(n, -const_one<RealType>(), w, w);
-    fma(n, u, beta, const_pi_by2<RealType>(), t);
+    muladd(n, u, beta, const_pi_by2<RealType>(), t);
     tan(n, u, r);
     mul(n, t, r, r);
     cos(n, u, u);
     mul(n, w, u, u);
     div(n, const_pi_by2<RealType>(), t, t);
     mul(n, u, t, t);
-    fma(n, t, -beta, r, r);
-    fma(n, r, 1 / xi, c, r);
+    muladd(n, t, -beta, r, r);
+    muladd(n, r, 1 / xi, c, r);
 }
 
 template <std::size_t K, typename RealType, typename RNGType>
@@ -151,11 +151,11 @@ inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
     RealType *const p = s.data() + n * 2;
     RealType *const t = s.data() + n * 3;
     u01_oo_distribution(rng, n, u);
-    fma(n, u, const_pi<RealType>(), -const_pi_by2<RealType>(), u);
+    muladd(n, u, const_pi<RealType>(), -const_pi_by2<RealType>(), u);
     u01_oo_distribution(rng, n, w);
     log(n, w, w);
     mul(n, -const_one<RealType>(), w, w);
-    fma(n, u, alpha, alpha * xi, t);
+    muladd(n, u, alpha, alpha * xi, t);
     sin(n, t, r);
     cos(n, u, p);
     pow(n, p, 1 / alpha, p);
@@ -183,10 +183,10 @@ inline void stable_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
                 rng, n, r, alpha, beta, a, b, constant);
             break;
     }
-    fma(n, r, b, a, r);
+    muladd(n, r, b, a, r);
 }
 
-} // namepsace mckl::internal
+} // namespace mckl::internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_4(Stable, stable, RealType, RealType,
     alpha, RealType, beta, RealType, a, RealType, b)

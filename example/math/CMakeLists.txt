@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,28 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-PROJECT(MCKLExample-math CXX)
+project(MCKLExample-math CXX)
 
-MCKL_ADD_EXAMPLE(math)
+mckl_add_example(math)
 
-MCKL_ADD_TEST(math vmath)
+mckl_add_test(math vmf)
+
+if(AVX2_FOUND AND FMA_FOUND)
+    mckl_add_test(math fma)
+    if(MCKL_ENABLE_LIBRARY)
+        add_custom_target(math_asm)
+        add_custom_target(math_asm-check)
+        set(MATH_ASM_FUNCTIONS
+            sqrtf sqrt
+            expf exp exp2f exp2 expm1f expm1
+            logf log log2f log2 log10f log10 log1pf log1p
+            sin cos sincos tan)
+        foreach(f ${MATH_ASM_FUNCTIONS})
+            mckl_add_test(math ${f})
+            add_dependencies(math_asm math_${f})
+            add_dependencies(math_asm-check math_${f}-check)
+        endforeach(f ${MATH_ASM_FUNCTIONS})
+    endif(MCKL_ENABLE_LIBRARY)
+endif(AVX2_FOUND AND FMA_FOUND)
+
+mckl_add_plot(math asm)

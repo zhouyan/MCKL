@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#include <iostream>
+#include <cassert>
 
 #ifdef _MSC_VER
 #include <immintrin.h>
@@ -41,12 +41,12 @@ int main()
 {
     __m128i m = _mm_setzero_si128();
     char a[32];
-    for (std::size_t i = 0; i != 32; ++i)
+    for (int i = 0; i != 32; ++i)
         a[i] = static_cast<char>(i);
     m = _mm_loadu_si128(reinterpret_cast<const __m128i *>(a));
     m = _mm_aeskeygenassist_si128(m, 1);
     _mm_storeu_si128(reinterpret_cast<__m128i *>(a), m);
-    std::cout << a[0] << std::endl;
+    assert(a[0] != 0);
 
     return 0;
 }

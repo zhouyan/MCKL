@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
 template <typename IntType>
 class GeometricDistribution
 {
-    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Geometric, short)
+    MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Geometric, 16)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_1(
         Geometric, geometric, IntType, double, p, 0.5)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(double, lnpinv_)

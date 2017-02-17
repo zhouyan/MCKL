@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,6 @@
 #include <mckl/math/constants.hpp>
 #include <mckl/math/erf.hpp>
 #include <mckl/math/gamma.hpp>
-#include <mckl/math/vmath.hpp>
+#include <mckl/math/vmf.hpp>
 
 #endif // MCKL_MATH_HPP

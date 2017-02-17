@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ inline T swap_bytes(T x)
     static_assert(sizeof(T) % Bytes == 0,
         "**swap_bytes** sizeof(T) is not divisible by Bytes");
 
-    using U = typename std::make_unsigned<T>::type;
+    using U = std::make_unsigned_t<T>;
 
     return static_cast<T>(swap_bytes<Bytes, 0>(static_cast<U>(x),
         std::integral_constant<bool, Bytes <= sizeof(U)>()));
@@ -104,11 +104,16 @@ inline T swap_bytes(T x)
 
 // Let in the following union
 // union {
-//    U u[sizeof(T) * sizeof(K) / sizeof(U);
-//    T t[K]
+//    U v[sizeof(T) * sizeof(K) / sizeof(U);
+//    T r[K]
 // } buf;
-// buf.u is given the exact value
-// transform buf.t such that its value will be as if we are using little endian
+// buf.v is given the exact value
+// transform buf.r such that its value will be as if we are using little endian
+template <typename, typename T>
+inline void union_le(std::size_t, T *)
+{
+}
+
 template <typename, typename T>
 inline void union_le(T &)
 {
@@ -116,92 +121,64 @@ inline void union_le(T &)
 
 #else // MCKL_HAS_LITTLE_ENDIAN
 
-template <typename U, typename T, std::size_t K>
-inline void union_le_array(
-    std::array<T, K> &, std::false_type, std::false_type)
+template <typename, typename T>
+inline void union_le(std::size_t, T *, std::false_type, std::false_type)
 {
 }
 
-template <typename U, typename T, std::size_t K>
-inline void union_le_array(
-    std::array<T, K> &buf, std::false_type, std::true_type)
+template <typename U, typename T>
+inline void union_le(std::size_t n, T *r, std::false_type, std::true_type)
 {
-    constexpr std::size_t m = sizeof(U) / sizeof(T);
-    constexpr std::size_t l = K / m;
+    const std::size_t m = sizeof(U) / sizeof(T);
+    const std::size_t l = n / m;
 
-    T *b = buf.data();
-    for (std::size_t i = 0; i != l; ++i, b += m)
-        std::reverse(b, b + m);
+    for (std::size_t i = 0; i != l; ++i, r += m)
+        std::reverse(r, r + m);
 }
 
-template <typename U, typename T, std::size_t K>
-inline void union_le_array(
-    std::array<T, K> &buf, std::true_type, std::false_type)
+template <typename U, typename T>
+inline void union_le(std::size_t n, T *r, std::true_type, std::false_type)
 {
-    for (std::size_t i = 0; i != K; ++i)
-        buf[i] = swap_bytes<sizeof(U)>(buf[i]);
+    for (std::size_t i = 0; i != n; ++i)
+        r[i] = swap_bytes<sizeof(U)>(r[i]);
 }
 
-template <typename U, typename T, std::size_t K>
-inline void union_le_array(std::array<T, K> &buf)
+template <typename U, typename T>
+inline void union_le(std::size_t n, T *r)
 {
     static_assert(sizeof(U) % sizeof(T) == 0 || sizeof(T) % sizeof(U) == 0,
-        "**union_le** called with sizeof(U) and sizeof(T) with neither of "
-        "them a multiple of the other");
+        "**union_le** used with sizeof(U) and sizeof(T) with neither of them "
+        "a multiple of the other");
 
 #if MCKL_HAS_BIG_ENDIAN
-    union_le_array<U>(buf,
-        std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+    union_le<U>(n, r, std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
         std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
 #else
-    if (is_big_endian()) {
-        union_le_array<U>(buf,
-            std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
-            std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
-    }
+    if (is_little_endian())
+        return;
+    union_le<U>(n, r, std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
+        std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
 #endif
 }
 
 template <typename U, typename T>
-inline void union_le_scalar(T &x)
-{
-    static_assert(sizeof(U) % sizeof(T) == 0 || sizeof(T) % sizeof(U) == 0,
-        "**union_le** called with sizeof(U) and sizeof(T) with neither of "
-        "them a multiple of the other");
-
-    std::array<T, 1> buf = {{x}};
-#if MCKL_HAS_BIG_ENDIAN
-    union_le_array<U>(buf,
-        std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
-        std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
-#else
-    if (is_big_endian()) {
-        union_le_array<U>(buf,
-            std::integral_constant<bool, (sizeof(U) < sizeof(T))>(),
-            std::integral_constant<bool, (sizeof(U) > sizeof(T))>());
-    }
-#endif
-    x = std::get<0>(buf);
-}
-
-template <typename U, typename T>
-class UnionLe
+class UnionLE
 {
     public:
-    static void eval(T &x) { union_le_scalar<U>(x); }
-}; // class UnionLe
+    static void eval(T &r) { union_le<U>(1, &r); }
+}; // class UnionLE
 
 template <typename U, typename T, std::size_t K>
-class UnionLe<U, std::array<T, K>>
+class UnionLE<U, std::array<T, K>>
 {
     public:
-    static void eval(std::array<T, K> &x) { union_le_array<U>(x); }
-}; // class UnionLe
+    static void eval(std::array<T, K> &r) { union_le<U>(K, r.data()); }
+}; // class UnionLE
 
 template <typename U, typename T>
-inline void union_le(T &x)
+inline void union_le(T &r)
 {
-    UnionLe<U, T>::eval(x);
+    UnionLE<U, T>::eval(r);
 }
 
 #endif // MCKL_HAS_LITTLE_ENDIAN

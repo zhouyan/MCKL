@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -179,9 +179,9 @@ inline std::size_t beta_distribution_impl_as(RNGType &rng, std::size_t n,
     const BetaDistributionConstant<RealType> &)
 {
     u01_oo_distribution(rng, n, r);
-    fma(n, const_pi<RealType>(), r, -const_pi_by2<RealType>(), r);
+    muladd(n, const_pi<RealType>(), r, -const_pi_by2<RealType>(), r);
     sin(n, r, r);
-    fma(n, static_cast<RealType>(0.5), r, static_cast<RealType>(0.5), r);
+    muladd(n, static_cast<RealType>(0.5), r, static_cast<RealType>(0.5), r);
 
     return n;
 }
@@ -252,8 +252,8 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     mul(n, u1, u2, u2);
     log(n, u2, u2);
     log(n, y, u1);
-    fma(n, -a, u1, p, u1);
-    fma(n, t, v, -ln_4, v);
+    muladd(n, -a, u1, p, u1);
+    muladd(n, t, v, -ln_4, v);
     add(n, v, u1, u1);
 
     std::size_t m = 0;

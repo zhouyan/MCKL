@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -184,25 +184,25 @@ static inline void mckl_philox2x32_gen(const mckl_philox2x32_ctr_t *ctr,
     mckl_philox2x32_par_t par;
     mckl_philox2x32_initpar(key, &par);
 
-    mckl_philox2x32_round(state, &par); // Round 1
-    mckl_philox2x32_bumpkey(&par);      // Round 2
-    mckl_philox2x32_round(state, &par); // Round 2
-    mckl_philox2x32_bumpkey(&par);      // Round 3
-    mckl_philox2x32_round(state, &par); // Round 3
-    mckl_philox2x32_bumpkey(&par);      // Round 4
-    mckl_philox2x32_round(state, &par); // Round 4
-    mckl_philox2x32_bumpkey(&par);      // Round 5
-    mckl_philox2x32_round(state, &par); // Round 5
-    mckl_philox2x32_bumpkey(&par);      // Round 6
-    mckl_philox2x32_round(state, &par); // Round 6
-    mckl_philox2x32_bumpkey(&par);      // Round 7
-    mckl_philox2x32_round(state, &par); // Round 7
-    mckl_philox2x32_bumpkey(&par);      // Round 8
-    mckl_philox2x32_round(state, &par); // Round 8
-    mckl_philox2x32_bumpkey(&par);      // Round 9
-    mckl_philox2x32_round(state, &par); // Round 9
-    mckl_philox2x32_bumpkey(&par);      // Round 10
-    mckl_philox2x32_round(state, &par); // Round 10
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
+    mckl_philox2x32_bumpkey(&par);
+    mckl_philox2x32_round(state, &par);
 }
 
 /// \brief Generate Philox4x32 RNG state
@@ -214,25 +214,25 @@ static inline void mckl_philox4x32_gen(const mckl_philox4x32_ctr_t *ctr,
     mckl_philox4x32_par_t par;
     mckl_philox4x32_initpar(key, &par);
 
-    mckl_philox4x32_round(state, &par); // Round 1
-    mckl_philox4x32_bumpkey(&par);      // Round 2
-    mckl_philox4x32_round(state, &par); // Round 2
-    mckl_philox4x32_bumpkey(&par);      // Round 3
-    mckl_philox4x32_round(state, &par); // Round 3
-    mckl_philox4x32_bumpkey(&par);      // Round 4
-    mckl_philox4x32_round(state, &par); // Round 4
-    mckl_philox4x32_bumpkey(&par);      // Round 5
-    mckl_philox4x32_round(state, &par); // Round 5
-    mckl_philox4x32_bumpkey(&par);      // Round 6
-    mckl_philox4x32_round(state, &par); // Round 6
-    mckl_philox4x32_bumpkey(&par);      // Round 7
-    mckl_philox4x32_round(state, &par); // Round 7
-    mckl_philox4x32_bumpkey(&par);      // Round 8
-    mckl_philox4x32_round(state, &par); // Round 8
-    mckl_philox4x32_bumpkey(&par);      // Round 9
-    mckl_philox4x32_round(state, &par); // Round 9
-    mckl_philox4x32_bumpkey(&par);      // Round 10
-    mckl_philox4x32_round(state, &par); // Round 10
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
+    mckl_philox4x32_bumpkey(&par);
+    mckl_philox4x32_round(state, &par);
 }
 
 /// \brief Initialize Philox2x32 RNG state

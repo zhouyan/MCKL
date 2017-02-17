@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -42,12 +42,12 @@ int main()
 {
     __m256i ymm = _mm256_set_epi64x(3, 2, 1, 0);
     ymm = _mm256_add_epi64(ymm, ymm);
-    std::int64_t x[4];
-    _mm256_storeu_si256(reinterpret_cast<__m256i *>(x), ymm);
-    assert(x[0] == 0);
-    assert(x[1] == 2);
-    assert(x[2] == 4);
-    assert(x[3] == 6);
+    std::uint64_t y[4];
+    _mm256_storeu_si256(reinterpret_cast<__m256i *>(y), ymm);
+    assert(y[0] == 0);
+    assert(y[1] == 2);
+    assert(y[2] == 4);
+    assert(y[3] == 6);
 
     return 0;
 }

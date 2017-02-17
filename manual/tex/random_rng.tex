@@ -3,7 +3,7 @@
 % ----------------------------------------------------------------------------
 %  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
-%  Copyright (c) 2013-2016, Yan Zhou
+%  Copyright (c) 2013-2017, Yan Zhou
 %  All rights reserved.
 %
 %  Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,30 @@ UniformBitsDistribution<typename RNGType::result_type> ubits;
 for (std:size_t i = 0; i != n; ++i)
     r[i] = rand(rng, ubits);
 \end{verbatim}
+For \rng{}s that output random integers uniform on the set $\Curly{0,\dots,2^W
+  - 1}$, where $W$ is the number of bits in its output integer type, this is
+equivalent to
+\begin{verbatim}
+for (std::size_t i = 0; i != n; ++i)
+    r[i] = rng();
+\end{verbatim}
 The second is the vectorized performance,
 \begin{verbatim}
 rand(rng, ubits, n, r.data());
 \end{verbatim}
-In both cases, we repeat the simulations 100 times, each time with the number
-of elements $n$ chosen randomly between 5,000 and 10,000. The total number of
-cycles of the 100 simulations are recorded, and then divided by the total
-number of bytes generated. This gives the performance measurement in \cpb. This
-experiment is repeated ten times, and the best results are shown. The two cases
-are labeled ``\single'' and ``\batch'', respectively, in the tables below.
+For \rng{}s that output random integers uniform on the set $\Curly{0,\dots,2^W
+  - 1}$, where $W$ is the number of bits in its output integer type, this is
+equivalent to
+\begin{verbatim}
+rand(rng, n, r.data());
+\end{verbatim}
+See section~\ref{sec:Vectorized random number generating}. In both cases, we
+repeat the simulations 100 times, each time with the number of elements $n$
+chosen randomly between 5,000 and 10,000. The total number of cycles of the 100
+simulations are recorded, and then divided by the total number of bytes
+generated. This gives the performance measurement in \cpb. This experiment is
+repeated ten times, and the best results are shown. The two cases are labeled
+``\single'' and ``\batch'', respectively, in the tables below.
 
 \perftable{rng}{std}{\rng{}s in the standard library}{%
 RNG in the standard library}

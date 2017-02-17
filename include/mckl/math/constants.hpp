@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,22 +38,26 @@
 
 #define MCKL_DEFINE_MATH_CONSTANTS(name, val)                                 \
     template <typename T>                                                     \
-    inline constexpr T const_##name()                                         \
+    inline constexpr T const_##name() noexcept(                               \
+        std::is_floating_point<T>::value || std::is_integral<T>::value)       \
     {                                                                         \
         return static_cast<T>(val##l);                                        \
     }                                                                         \
+                                                                              \
     template <>                                                               \
-    inline constexpr float const_##name<float>()                              \
+    inline constexpr float const_##name<float>() noexcept                     \
     {                                                                         \
         return val##f;                                                        \
     }                                                                         \
+                                                                              \
     template <>                                                               \
-    inline constexpr double const_##name<double>()                            \
+    inline constexpr double const_##name<double>() noexcept                   \
     {                                                                         \
         return val;                                                           \
     }                                                                         \
+                                                                              \
     template <>                                                               \
-    inline constexpr long double const_##name<long double>()                  \
+    inline constexpr long double const_##name<long double>() noexcept         \
     {                                                                         \
         return val##l;                                                        \
     }
@@ -72,7 +76,7 @@ inline constexpr T const_inf()
     return std::numeric_limits<T>::infinity();
 }
 
-/// \brief Quiet NaN
+/// \brief Non-signalling NaN
 /// \ingroup Constants
 template <typename T>
 inline constexpr T const_nan()

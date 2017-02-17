@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # AESNI_FOUND - TRUE if AES-NI is found and work correctly
 
-IF(DEFINED AESNI_FOUND)
-    RETURN()
-ENDIF(DEFINED AESNI_FOUND)
+if(DEFINED AESNI_FOUND)
+    return()
+endif(DEFINED AESNI_FOUND)
 
-FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindAESNI.cpp AESNI_TEST_SOURCE)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindAESNI.cpp AESNI_TEST_SOURCE)
 
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("${AESNI_TEST_SOURCE}" AESNI_TEST)
-IF(AESNI_TEST)
-    SET(AESNI_FOUND TRUE CACHE BOOL "Found AES-NI support")
-ELSE(AESNI_TEST)
-    SET(AESNI_FOUND FALSE CACHE BOOL "NOT Found AES-NI support")
-ENDIF(AESNI_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${AESNI_TEST_SOURCE}" AESNI_TEST)
+if(AESNI_TEST)
+    set(AESNI_FOUND TRUE CACHE BOOL "Found AES-NI support")
+else(AESNI_TEST)
+    set(AESNI_FOUND FALSE CACHE BOOL "NOT Found AES-NI support")
+endif(AESNI_TEST)

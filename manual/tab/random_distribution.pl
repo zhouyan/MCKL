@@ -5,7 +5,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,8 @@
 use v5.16;
 use Getopt::Long;
 
+`mkdir -p random_distribution`;
+
 my $run = 0;
 my $build = 0;
 my $llvm = "../../build/release-llvm";
@@ -43,6 +45,7 @@ my $compiler = "llvm";
 my $name;
 my $write = 0;
 my $pdf = 0;
+my $scale = 1;
 GetOptions(
     "run"        => \$run,
     "build"      => \$build,
@@ -53,6 +56,7 @@ GetOptions(
     "name=s"     => \$name,
     "write"      => \$write,
     "pdf"        => \$pdf,
+    "scale"      => \$scale,
 );
 $build = 1 if $run;
 
@@ -105,6 +109,11 @@ my $simd;
 $simd = "sse2" if $cpuid =~ "SSE2";
 $simd = "avx2" if $cpuid =~ "AVX2";
 my @simd = qw(sse2 avx2);
+unless ($scale) {
+    $scale = 1;
+    $scale *= 3.33 / 3.06 if $simd eq "sse2";
+    $scale *= 3.80 / 2.60 if $simd eq "avx2";
+}
 
 my %compiler = (llvm => $llvm, gnu => $gnu, intel => $intel);
 my @compiler = qw(llvm gnu intel);
@@ -119,8 +128,8 @@ $nomkl{$_} = 1 for @nomkl;
 
 my %cpe_s;
 my %cpe_m;
-my %cpe_b;
-my %cpe_v;
+my %cpe_f;
+my %cpe_l;
 my %cpe_i;
 
 &build;
@@ -197,23 +206,27 @@ sub read {
             my @lines = <$txtfile>;
             my @result = grep { /$r<(double|int64_t)>/ } @lines;
             for (@result) {
-                my ($name, $cpe_s, $cpe_m, $cpe_b, $cpe_i, $lib) = (split);
+                my ($name, $cpe_s, $cpe_m, $cpe_v, $cpe_i, $lib) = (split);
+                $cpe_s *= $scale;
+                $cpe_m *= $scale;
+                $cpe_v *= $scale;
+                $cpe_i *= $scale;
                 $name =~ s/(.*)<.*>(.*)/$1$2/;
                 $cpe_s{$s}{$name} = 0xFFFF unless $cpe_s{$s}{$name};
                 $cpe_m{$s}{$name} = 0xFFFF unless $cpe_m{$s}{$name};
-                $cpe_b{$s}{$name} = 0xFFFF unless $cpe_b{$s}{$name};
-                $cpe_v{$s}{$name} = 0xFFFF unless $cpe_v{$s}{$name};
+                $cpe_f{$s}{$name} = 0xFFFF unless $cpe_f{$s}{$name};
+                $cpe_l{$s}{$name} = 0xFFFF unless $cpe_l{$s}{$name};
                 $cpe_i{$s}{$name} = 0xFFFF unless $cpe_i{$s}{$name};
-                if ($lib eq "C++") {
+                if ($lib eq "VMF") {
                     $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
                     $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
-                    $cpe_b{$s}{$name} = $cpe_b if $cpe_b < $cpe_b{$s}{$name};
+                    $cpe_f{$s}{$name} = $cpe_v if $cpe_v < $cpe_f{$s}{$name};
                     $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
                 }
                 if ($lib eq "VML") {
                     $cpe_s{$s}{$name} = $cpe_s if $cpe_s < $cpe_s{$s}{$name};
                     $cpe_m{$s}{$name} = $cpe_m if $cpe_m < $cpe_m{$s}{$name};
-                    $cpe_v{$s}{$name} = $cpe_b if $cpe_b < $cpe_v{$s}{$name};
+                    $cpe_l{$s}{$name} = $cpe_v if $cpe_v < $cpe_l{$s}{$name};
                     $cpe_i{$s}{$name} = $cpe_i if $cpe_i < $cpe_i{$s}{$name};
                 }
             }
@@ -226,7 +239,7 @@ sub table {
     $header .= '\tbfigures' . "\n";
     $header .= '\begin{tabularx}{\textwidth}{p{2in}RRRRR}' . "\n";
     $header .= ' ' x 2 . '\toprule' . "\n";
-    $header .= ' ' x 2 . 'Distribution & \std & \mckl & \batch & \vml & \mkl';
+    $header .= ' ' x 2 . 'Distribution & \std & \mckl & \vmf & \vml & \mkl';
     $header .= " \\\\\n";
     $header .= ' ' x 2 . '\midrule' . "\n";
 
@@ -248,8 +261,8 @@ sub table {
                         $table .= &format($cpe_s{$s}{$name});
                     }
                     $table .= " & " . &format($cpe_m{$s}{$name});
-                    $table .= " & " . &format($cpe_b{$s}{$name});
-                    $table .= " & " . &format($cpe_v{$s}{$name});
+                    $table .= " & " . &format($cpe_f{$s}{$name});
+                    $table .= " & " . &format($cpe_l{$s}{$name});
                     $table .= " & ";
                     if ($nomkl{$r}) {
                         $table .= &format("--");

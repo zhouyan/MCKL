@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -32,27 +32,26 @@
 #ifndef MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_HPP
 #define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_HPP
 
-#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(N)                                 \
-    MCKL_FLATTEN_CALL rbox<N + 0x0>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x1>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x2>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x3>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x4>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x5>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x6>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x7>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x8>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0x9>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0xA>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0xB>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0xC>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0xD>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0xE>(s, rk);                                   \
-    MCKL_FLATTEN_CALL rbox<N + 0xF>(s, rk);
+#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(N, s, rk)                          \
+    MCKL_INLINE_CALL rbox<N + 0x0>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x1>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x2>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x3>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x4>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x5>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x6>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x7>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x8>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0x9>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0xA>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0xB>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0xC>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0xD>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0xE>(s, rk);                                    \
+    MCKL_INLINE_CALL rbox<N + 0xF>(s, rk);
 
-#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N)                           \
-    MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(0x00)                                  \
+#define MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk)                    \
+    MCKL_RANDOM_INTERNAL_PHILOX_UNROLL(0x00, s, rk)                           \
     round<N + 0x10>(s, rk, std::integral_constant<bool, N + 0x10 <= Rounds>());
 
-#endif // MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_HPP
-
+#endif // MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_HPP

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,10 @@
 #define MCKL_SMP_BACKEND_OMP_HPP
 
 #include <mckl/smp/backend_base.hpp>
+
+#if MCKL_HAS_OMP
 #include <omp.h>
+#endif
 
 namespace mckl
 {
@@ -42,24 +45,29 @@ namespace internal
 {
 
 template <typename IntType>
-inline void backend_omp_range(IntType N, IntType &first, IntType &last)
+inline void backend_omp_range(IntType N, IntType &ibegin, IntType &iend)
 {
+#if MCKL_HAS_OMP
     const IntType np = static_cast<IntType>(::omp_get_num_threads());
     const IntType id = static_cast<IntType>(::omp_get_thread_num());
+#else
+    const IntType np = 1;
+    const IntType id = 0;
+#endif
     const IntType m = N / np;
     const IntType r = N % np;
     const IntType n = m + (id < r ? 1 : 0);
-    first = id < r ? n * id : (n + 1) * r + n * (id - r);
-    last = first + n;
+    ibegin = id < r ? n * id : (n + 1) * r + n * (id - r);
+    iend = ibegin + n;
 }
 
 } // namespace mckl::internal
 
-/// \brief Sampler<T>::eval_type subtype using OpenMP
+/// \brief SMCSampler<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class SamplerEvalSMP<T, Derived, BackendOMP>
-    : public SamplerEvalBase<T, Derived>
+class SMCSamplerEvalSMP<T, Derived, BackendOMP>
+    : public SMCSamplerEvalBase<T, Derived>
 {
     public:
     void operator()(std::size_t iter, Particle<T> &particle)
@@ -68,7 +76,7 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SamplerEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SMCSamplerEval)
 
     void run(std::size_t iter, Particle<T> &particle)
     {
@@ -82,22 +90,24 @@ class SamplerEvalSMP<T, Derived, BackendOMP>
 
         this->eval_first(iter, particle);
         Particle<T> *pptr = &particle;
+#if MCKL_HAS_OMP
 #pragma omp parallel default(none) firstprivate(pptr, iter)
+#endif
         {
-            size_type first = 0;
-            size_type last = 0;
-            internal::backend_omp_range(pptr->size(), first, last);
-            this->eval_range(iter, pptr->range(first, last));
+            size_type ibegin = 0;
+            size_type iend = 0;
+            internal::backend_omp_range(pptr->size(), ibegin, iend);
+            this->eval_range(iter, pptr->range(ibegin, iend));
         }
         this->eval_last(iter, particle);
     }
-}; // class SamplerEvalSMP
+}; // class SMCSamplerEvalSMP
 
-/// \brief Monitor<T>::eval_type subtype using OpenMP
+/// \brief SMCEstimator<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-class MonitorEvalSMP<T, Derived, BackendOMP>
-    : public MonitorEvalBase<T, Derived>
+class SMCEstimatorEvalSMP<T, Derived, BackendOMP>
+    : public SMCEstimatorEvalBase<T, Derived>
 {
     public:
     void operator()(
@@ -107,7 +117,7 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
     }
 
     protected:
-    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, MonitorEval)
+    MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SMCEstimatorEval)
 
     void run(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
@@ -123,27 +133,29 @@ class MonitorEvalSMP<T, Derived, BackendOMP>
 
         this->eval_first(iter, particle);
         Particle<T> *pptr = &particle;
+#if MCKL_HAS_OMP
 #pragma omp parallel default(none) firstprivate(pptr, iter, dim, r)
+#endif
         {
-            size_type first = 0;
-            size_type last = 0;
-            internal::backend_omp_range(pptr->size(), first, last);
-            this->eval_range(iter, dim, pptr->range(first, last),
-                r + static_cast<std::size_t>(first) * dim);
+            size_type ibegin = 0;
+            size_type iend = 0;
+            internal::backend_omp_range(pptr->size(), ibegin, iend);
+            this->eval_range(iter, dim, pptr->range(ibegin, iend),
+                r + static_cast<std::size_t>(ibegin) * dim);
         }
         this->eval_last(iter, particle);
     }
-}; // class MonitorEvalSMP
+}; // class SMCEstimatorEvalSMP
 
-/// \brief Sampler<T>::eval_type subtype using OpenMP
+/// \brief SMCSampler<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using SamplerEvalOMP = SamplerEvalSMP<T, Derived, BackendOMP>;
+using SMCSamplerEvalOMP = SMCSamplerEvalSMP<T, Derived, BackendOMP>;
 
-/// \brief Monitor<T>::eval_type subtype using OpenMP
+/// \brief SMCEstimator<T>::eval_type subtype using OpenMP
 /// \ingroup OMP
 template <typename T, typename Derived>
-using MonitorEvalOMP = MonitorEvalSMP<T, Derived, BackendOMP>;
+using SMCEstimatorEvalOMP = SMCEstimatorEvalSMP<T, Derived, BackendOMP>;
 
 } // namespace mckl
 

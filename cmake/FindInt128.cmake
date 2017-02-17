@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -36,24 +36,24 @@
 # INT128_FOUND - TRUE if 128-bits integer type is found and works correctly
 # INT128_TYPE  - The type of the 128-bits integer
 
-IF(DEFINED INT128_FOUND)
-    RETURN()
-ENDIF(DEFINED INT128_FOUND)
+if(DEFINED INT128_FOUND)
+    return()
+endif(DEFINED INT128_FOUND)
 
-SET(SAFE_CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS})
+set(SAFE_CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS})
 
-FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindInt128.cpp INT128_TEST_SOURCE)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindInt128.cpp INT128_TEST_SOURCE)
 
-SET(INT128_TRY_TYPE "__int128")
-SET(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS}
+set(INT128_TRY_TYPE "__int128")
+set(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS}
     -DINT128=${INT128_TRY_TYPE})
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("${INT128_TEST_SOURCE}" INT128_TEST)
-IF(INT128_TEST)
-    SET(INT128_TYPE ${INT128_TRY_TYPE} CACHE STRING "128-bit type")
-    SET(INT128_FOUND TRUE CACHE BOOL "Found 128-bits integer type")
-ELSE(INT128_TEST)
-    SET(INT128_FOUND FALSE CACHE BOOL "NOT Found 128-bit integer type")
-ENDIF(INT128_TEST)
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("${INT128_TEST_SOURCE}" INT128_TEST)
+if(INT128_TEST)
+    set(INT128_TYPE ${INT128_TRY_TYPE} CACHE STRING "128-bit type")
+    set(INT128_FOUND TRUE CACHE BOOL "Found 128-bits integer type")
+else(INT128_TEST)
+    set(INT128_FOUND FALSE CACHE BOOL "NOT Found 128-bit integer type")
+endif(INT128_TEST)
 
-SET(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS})
+set(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS})

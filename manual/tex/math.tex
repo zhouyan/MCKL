@@ -3,7 +3,7 @@
 % ----------------------------------------------------------------------------
 %  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
-%  Copyright (c) 2013-2016, Yan Zhou
+%  Copyright (c) 2013-2017, Yan Zhou
 %  All rights reserved.
 %
 %  Redistribution and use in source and binary forms, with or without
@@ -47,64 +47,6 @@ The compiler evaluates these values at compile-time and thus there is no
 performance difference from hard-coding the constants in the program, while the
 readability is improved. All defined constants are listed in
 table~\ref{tab:Mathematical constants}.
-
-\section{Vectorized functions}
-\label{sec:Vectorized functions}
-
-\mckl provides a set of vectorized elementary mathematical functions. For
-example, to perform additions of two vectors,
-\begin{verbatim}
-size_t n = 1000;
-Vector<double> a(n), b(n), y(n);
-// Fill vectors a and b
-add(n, a.data(), b.data(), y.data());
-\end{verbatim}
-This is equivalent to,
-\begin{verbatim}
-for (size_t i = 0; i != n; ++i)
-    y[i] = a[i] + b[i];
-\end{verbatim}
-The functions defined are listed in tables~\ref{tab:Arithmetic functions}
-to~\ref{tab:Rounding functions}. For each function, the first parameter is
-always the length of the vector, and the last is a pointer to the output vector
-(except for |sincos| and |modf|, which have two output parameters). For all
-functions, the output parameters are always vectors. If there are more than one
-input parameters, then some of them, but not all, can be scalars. For example,
-for the function call |fma(n, a, b, c, y)| in table~\ref{tab:Arithmetic
-functions}, the input parameters are |a|, |b|, and |c|. Some of them, not all,
-can be scalars instead of pointers to vectors. The output parameter |y| has to
-be a pointer to a vector. Therefore, there are seven versions of this function
-for each type of the parameters.
-
-The input of these functions  can be either real numbers (|double|, etc.), or
-complex numbers (|std::complex<double>|, etc.), or both. The supported data
-types are also listed in the tables. In most cases, output data type is the
-same as the input. There are a few exceptions. The |abs| and |arg| functions
-always have real numbers as output. The |cis| function takes real numbers as
-input and complex numbers as output. Note that, mixed precision is not allowed.
-For example,
-\begin{verbatim}
-Vector<double> a(n);
-Vector<double> b(n);
-Vector<double> y(n);
-fma(n, a.data(), b.data(), 2, y.data());
-\end{verbatim}
-causes compile-time error because the fourth argument is an integer while the
-others are floating points. The correct call shall be,
-\begin{verbatim}
-fma(n, a.data(), b.data(), 2.0, y.data());
-\end{verbatim}
-The same principle applies to mixed types functions (|abs|, |arg| and |cis|).
-That is, a |double| input can only be paired with a |std::complex<double>|
-output for |cis| and \emph{vice versa} for |abs| and |arg|.
-
-Without any third-party libraries, these functions do not provide performance
-advantage compared to simple loops. When \mkl is available, some functions can
-have substantial performance improvement when all input arguments are vectors
-of types |float| or |double|, or their complex counterparts. The performance of
-vectorized random number generating introduced later in
-section~\ref{sec:Vectorized random number generating} heavily depends on these
-functions.
 
 \begin{table}
   \begin{tabularx}{\textwidth}{p{1.25in}Lp{1.25in}L}
@@ -173,20 +115,91 @@ functions.
   \label{tab:Mathematical constants}
 \end{table}
 
+\clearpage
+
+\section{Vectorized functions}
+\label{sec:Vectorized functions}
+
+\mckl provides a set of vectorized elementary mathematical functions. For
+example, to perform additions of two vectors,
+\begin{verbatim}
+size_t n = 1000;
+Vector<double> a(n), b(n), y(n);
+// Fill vectors a and b
+add(n, a.data(), b.data(), y.data());
+\end{verbatim}
+This is equivalent to,
+\begin{verbatim}
+for (size_t i = 0; i != n; ++i)
+    y[i] = a[i] + b[i];
+\end{verbatim}
+The functions defined are listed in tables~\ref{tab:Arithmetic functions}
+to~\ref{tab:Rounding functions}. For each function, the first parameter is
+always the length of the vector, and the last is a pointer to the output vector
+(except for |sincos| and |modf|, which have two output parameters). For all
+functions, the output parameters are always vectors. If there are more than one
+input parameters, then some of them, but not all, can be scalars. For example,
+for the function call |muladd(n, a, b, c, y)| in table~\ref{tab:Arithmetic
+  functions}, the input parameters are |a|, |b|, and |c|. Some of them, not
+all, can be scalars instead of pointers to vectors. The output parameter |y|
+has to be a pointer to a vector. Therefore, there are seven versions of this
+function for each type of the parameters.
+
+The input of these functions can be either real numbers (|double|, etc.), or
+complex numbers (|std::complex<double>|, etc.), or both. The supported data
+types are also listed in the tables. In most cases, output data type is the
+same as the input. There are a few exceptions. The |abs| and |arg| functions
+always have real numbers as output. The |cis| function takes real numbers as
+input and complex numbers as output. Note that, mixed precision is not allowed.
+For example,
+\begin{verbatim}
+Vector<double> a(n);
+Vector<double> b(n);
+Vector<double> y(n);
+muladd(n, a.data(), b.data(), 2, y.data());
+\end{verbatim}
+causes compile-time error because the fourth argument is an integer while the
+others are floating points. The correct call shall be,
+\begin{verbatim}
+muladd(n, a.data(), b.data(), 2.0, y.data());
+\end{verbatim}
+The same principle applies to mixed types functions (|abs|, |arg| and |cis|).
+That is, a |double| input can only be paired with a |std::complex<double>|
+output for |cis| and \emph{vice versa} for |abs| and |arg|.
+
+With only the standard library, these functions do not provide performance
+advantage compared to simple loops. When \mkl \vml is available, some functions
+can have substantial performance improvement when all input arguments are
+vectors of types |float| or |double|, or their complex counterparts. The
+performance of vectorized random number generating introduced later in
+section~\ref{sec:Vectorized random number generating} heavily depends on these
+functions.
+
+The input and output pointers are allowed to alias to each other in the sense
+that they might pointing to the same memory locations. However, if they point
+different locations but the vectors overlap, the behavior is undefined.
+
 \begin{table}
   \begin{tabularx}{\textwidth}{LLL}
     \toprule
     Function & Operation & Data type \\
     \midrule
-    \texttt{add(n, a, b, y)}       & $y = a + b$           & Real, Complex \\
-    \texttt{sub(n, a, b, y)}       & $y = a - b$           & Real, Complex \\
-    \texttt{sqr(n, a, y)}          & $y = a^2$             & Real          \\
-    \texttt{mul(n, a, b, y)}       & $y = ab$              & Real, Complex \\
-    \texttt{mulbyconj(n, a, b, y)} & $y = a\bar{b}$        & Complex       \\
-    \texttt{conj(n, a, y)}         & $y = \bar{a}$         & Complex       \\
-    \texttt{abs(n, a, y)}          & $y = \Abs{a}$         & Real, Complex \\
-    \texttt{arg(n, a, y)}          & $y = \mathrm{arg}(a)$ & Complex       \\
-    \texttt{fma(n, a, b, c, y)}    & $y = ab + c$          & Real, Complex \\
+    \texttt{add(n, a, b, y)}        & $y = a + b$           & Real, Complex \\
+    \texttt{sub(n, a, b, y)}        & $y = a - b$           & Real, Complex \\
+    \texttt{sqr(n, a, y)}           & $y = a^2$             & Real          \\
+    \texttt{mul(n, a, b, y)}        & $y = ab$              & Real, Complex \\
+    \texttt{mulbyconj(n, a, b, y)}  & $y = a\bar{b}$        & Complex       \\
+    \texttt{conj(n, a, y)}          & $y = \bar{a}$         & Complex       \\
+    \texttt{abs(n, a, y)}           & $y = \Abs{a}$         & Real, Complex \\
+    \texttt{arg(n, a, y)}           & $y = \mathrm{arg}(a)$ & Complex       \\
+    \texttt{muladd(n, a, b, c, y)}  & $y = ab + c$          & Real, Complex \\
+    \texttt{mulsub(n, a, b, c, y)}  & $y = ab - c$          & Real, Complex \\
+    \texttt{nmuladd(n, a, b, c, y)} & $y = -ab + c$         & Real, Complex \\
+    \texttt{nmulsub(n, a, b, c, y)} & $y = -ab - c$         & Real, Complex \\
+    \texttt{fmadd(n, a, b, c, y)}   & $y = ab + c$ (fused)  & Real          \\
+    \texttt{fmsub(n, a, b, c, y)}   & $y = ab - c$ (fused)  & Real          \\
+    \texttt{fnmadd(n, a, b, c, y)}  & $y = -ab + c$ (fused) & Real          \\
+    \texttt{fnmsub(n, a, b, c, y)}  & $y = -ab - c$ (fused) & Real          \\
     \bottomrule
   \end{tabularx}
   \caption{Arithmetic functions}
@@ -306,3 +319,343 @@ functions.
 \end{table}
 
 \clearpage
+
+\section{Fused multiplication and addition}
+\label{sec:Fused multiplication and addition}
+
+The |muladd| and |fmadd| functions in the last section differs in that |fmadd|
+always does fused multiplication and addition through |std::fma| while |muladd|
+use one multiplication and one addition. Also |muladd| supports complex numbers
+as input while |fmadd| does not. However, the compiler may or may not be able
+to make use the hardware \fma support. And it may not vectorize the loop in
+|fmadd| etc., as most modern \cpp compilers would do for simpler operations
+such as addition and multiplication.
+
+When software implementation of |std::fma| is used, it will be much slower than
+using one multiplication and one addition. In this case, there are assembly
+implementations that take advantage of the hardware support for |float| and
+|double| precision. To enable this feature, one need to build and link to the
+runtime library (see section~\ref{sec:Optional runtime library}). One also need
+to set the configuration macro |MCKL_USE_ASM_LIB| to true. In addition, this
+feature is only enabled for platforms with \fma{}3 instruction set support.
+
+The library detects the availability of these instructions through compiler
+pre-defined macros. If this mechanism is not adequate, one can manually enable
+or disable them through the configuration macro |MCKL_HAS_FMA|. Note that, when
+the compiler is able to generate vectorized loop for |std::fma|, the assembly
+library may or may not outperform the compiler generated binary. If the
+compiler generated binary is preferred but the runtime library is also enabled
+for its other features, then one can define the configuration macro
+|MCKL_USE_ASM_FMA| to false to disable this feature.
+
+The same principles also applies to other related functions such as |mulsub|
+and |fmsub|. Last but not least, when the runtime library is used, it also
+replace |float| and |double| precisions of |muladd|, etc., with their
+corresponding fused version, which is faster and more accurate.
+
+\section{Experimental vectorized implementation}
+\label{sec:Experimental vectorized implementation}
+
+Optionally, one can enable an experimental implementation of a few selected
+functions, listed in table~\ref{tab:Functions with experimental vectorized
+  implementation}, to enhance their performance of |double| precision. The
+exponential, logarithm and related functions also enhance performance of
+|float| precision. To enable this feature, one need to build and link to the
+runtime library (see section~\ref{sec:Optional runtime library}). One also need
+to set the configuration macros |MCKL_USE_ASM_LIB| and |MCKL_USE_ASM_VMF| to
+true. In addition, this feature is only enabled for platforms with \avx{}2 and
+\fma{}3 instruction sets support. The library detects the availability of these
+instructions through compiler pre-defined macros. If this mechanism is not
+adequate, one can manually enable or disable them through the configuration
+macros, |MCKL_HAS_AVX2| and |MCKL_HAS_FMA|, respectively.
+
+\subsection{Caveats}
+\label{sub:Caveats}
+
+The three exponential functions have slightly reduced upper bounds of ranges.
+The four trigonometric functions have reduced ranges. They only give meaningful
+results for input $\Abs{a} < A$ where $A \approx 2^{30.5}$. For finite values
+with larger magnitudes, finite results will be given but the accuracy
+degenerate quickly. For $A < \Abs{a} < 2^{43}$, there are at least three
+accurate decimal digits. For values with even larger magnitudes, the results
+are useless.
+
+\subsection{Subnormal numbers}
+\label{sub:Subnormal numbers}
+
+Positive subnormal inputs for |log|, |log2| and |log10| will give $-\infty$ as
+results. Subnormal inputs for |exp| and |exp2| will give $0$ as results. For
+other functions, subnormal inputs are treated the same way as normal numbers.
+
+\subsection{Special values}
+\label{sub:Special values}
+
+The handling of special values, $-0.0$, $0.0$, $-\infty$, $\infty$, \nan,
+underflows, and overflows follows the \ieee~754 standard, except for the
+treatment of subnormal numbers as described above.
+
+\subsection{Measured accuracy}
+\label{sub:Measured accuracy}
+
+These functions have reduced accuracy compared to the standard library.
+Reputable implementations of math functions usually give results with error
+bounded by 1~\ulp. Some of these functions, especially the trigonometric
+functions, give considerably larger errors. Tables~\ref{tab:Measured accuracy
+  of vectorized implementation of exp} to~\ref{tab:Measured accuracy of
+  vectorized implementation of tan} give the measured upper bounds of errors
+and the intervals on which they are measured. The measurement was done by
+generating one billion random inputs. In the tables, $\delta$ denotes the
+smallest normal floating numbers for the respective precision.
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLL}
+    \toprule
+    Function & Operation & Data type \\
+    \midrule
+    \texttt{exp(n, a, y)}       & $y = \EE^a$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{exp2(n, a, y)}      & $y = 2^a$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{expm1(n, a, y)}     & $y = \EE^a - 1$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{log(n, a, y)}       & $y = \ln a$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{log2(n, a, y)}      & $y = \log_2 a$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{log10(n, a, y)}     & $y = \log_{10} a$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{log1p(n, a, y)}     & $y = \ln(a + 1)$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{cos(n, a, y)}       & $y = \cos(a)$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{sin(n, a, y)}       & $y = \sin(a)$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{sincos(n, a, y, z)} & $y = \sin(a)$, $z = \cos(a)$
+    & \texttt{float}, \texttt{double} \\
+    \texttt{tan(n, a, y)}       & $y = \tan(a)$
+    & \texttt{float}, \texttt{double} \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Functions with experimental vectorized implementation}
+  \label{tab:Functions with experimental vectorized implementation}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLLL}
+    \toprule
+    \multicolumn{2}{c}{Single precision} &
+    \multicolumn{2}{c}{Double precision} \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    Range & Error (\ulp) & Range & Error (\ulp) \\
+    \midrule
+    $[-87.3, -87)$      & $1$ & $[-708.4, -707)$    & $1$ \\
+    $[-87, -70)$        & $1$ & $[-707, -500)$      & $1$ \\
+    $[-70, -1)$         & $1$ & $[-500, -1)$        & $1$ \\
+    $[-1, -\delta)$     & $1$ & $[-1, -\delta)$     & $1$ \\
+    $[-\delta, \delta)$ & $0$ & $[-\delta, \delta)$ & $0$ \\
+    $[\delta, 1)$       & $1$ & $[\delta, 1)$       & $1$ \\
+    $[1, 70)$           & $1$ & $[1, 500)$          & $1$ \\
+    $[70, 87)$          & $1$ & $[500, 707)$        & $1$ \\
+    $[87, 88.4)$        & $1$ & $[707, 709.4)$      & $1$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{exp}}
+  \label{tab:Measured accuracy of vectorized implementation of exp}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLLL}
+    \toprule
+    \multicolumn{2}{c}{Single precision} &
+    \multicolumn{2}{c}{Double precision} \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    Range & Error (\ulp) & Range & Error (\ulp) \\
+    \midrule
+    $[-126, -100)$      & $1$ & $[-1022, -1000)$    & $1$ \\
+    $[-100, -50)$       & $1$ & $[-1000, -500)$     & $1$ \\
+    $[-50, -1)$         & $1$ & $[-500, -1)$        & $1$ \\
+    $[-1, -\delta)$     & $1$ & $[-1, -\delta)$     & $1$ \\
+    $[-\delta, \delta)$ & $0$ & $[-\delta, \delta)$ & $0$ \\
+    $[\delta, 1)$       & $1$ & $[\delta, 1)$       & $1$ \\
+    $[1, 50)$           & $1$ & $[1, 500)$          & $1$ \\
+    $[50, 100)$         & $1$ & $[500, 1000)$       & $1$ \\
+    $[100, 127)$        & $1$ & $[1000, 1023)$      & $1$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{exp2}}
+  \label{tab:Measured accuracy of vectorized implementation of exp2}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLLL}
+    \toprule
+    \multicolumn{2}{c}{Single precision} &
+    \multicolumn{2}{c}{Double precision} \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    Range & Error (\ulp) & Range & Error (\ulp) \\
+    \midrule
+    $[-87.3, -87)$           & $0$ & $[-708.4, -707)$         & $0$ \\
+    $[-87, -70)$             & $0$ & $[-707, -500)$           & $0$ \\
+    $[-70, -1)$              & $1$ & $[-500, -1)$             & $1$ \\
+    $[-1, -\ln(2))$          & $1$ & $[-1, -\ln(2))$          & $1$ \\
+    $[-\ln(2), -\ln(2) / 2)$ & $2$ & $[-\ln(2), -\ln(2) / 2)$ & $2$ \\
+    $[-\ln(2) / 2, -\delta)$ & $2$ & $[-\ln(2) / 2, -\delta)$ & $1$ \\
+    $[-\delta, \delta)$      & $0$ & $[-\delta, \delta)$      & $0$ \\
+    $[\delta, \ln(2) / 2)$   & $1$ & $[\delta, \ln(2) / 2)$   & $1$ \\
+    $[\ln(2) / 2, \ln(2))$   & $2$ & $[\ln(2) / 2, \ln(2))$   & $2$ \\
+    $[\ln(2), 1)$            & $1$ & $[\ln(2), 1)$            & $1$ \\
+    $[1, 70)$                & $2$ & $[1, 500)$               & $1$ \\
+    $[70, 87)$               & $1$ & $[500, 707)$             & $1$ \\
+    $[87, 88.4)$             & $1$ & $[707, 709.44)$          & $1$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{expm1}}
+  \label{tab:Measured accuracy of vectorized implementation of expm1}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLLL}
+    \toprule
+    \multicolumn{2}{c}{Single precision} &
+    \multicolumn{2}{c}{Double precision} \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    Range & Error (\ulp) & Range & Error (\ulp) \\
+    \midrule
+    $[\delta, \sqrt{2} / 2)$  & $1$ & $[\delta, \sqrt{2} / 2)$  & $1$ \\
+    $[\sqrt{2} / 2, sqrt{2})$ & $1$ & $[\sqrt{2} / 2, sqrt{2})$ & $1$ \\
+    $[\sqrt{2}, 10)$          & $1$ & $[\sqrt{2}, 10)$          & $1$ \\
+    $[10, 10^2)$              & $1$ & $[10, 10^2)$              & $1$ \\
+    $[10^2, 10^3)$            & $1$ & $[10^2, 10^3)$            & $1$ \\
+    $[10^3, 10^4)$            & $1$ & $[10^3, 10^4)$            & $1$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{log}}
+  \label{tab:Measured accuracy of vectorized implementation of log}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLLL}
+    \toprule
+    \multicolumn{2}{c}{Single precision} &
+    \multicolumn{2}{c}{Double precision} \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    Range & Error (\ulp) & Range & Error (\ulp) \\
+    \midrule
+    $[\delta, \sqrt{2} / 2)$  & $1$ & $[\delta, \sqrt{2} / 2)$  & $1$ \\
+    $[\sqrt{2} / 2, sqrt{2})$ & $2$ & $[\sqrt{2} / 2, sqrt{2})$ & $2$ \\
+    $[\sqrt{2}, 10)$          & $1$ & $[\sqrt{2}, 10)$          & $1$ \\
+    $[10, 10^2)$              & $1$ & $[10, 10^2)$              & $1$ \\
+    $[10^2, 10^3)$            & $1$ & $[10^2, 10^3)$            & $1$ \\
+    $[10^3, 10^4)$            & $1$ & $[10^3, 10^4)$            & $1$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{log2}}
+  \label{tab:Measured accuracy of vectorized implementation of log2}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLLL}
+    \toprule
+    \multicolumn{2}{c}{Single precision} &
+    \multicolumn{2}{c}{Double precision} \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    Range & Error (\ulp) & Range & Error (\ulp) \\
+    \midrule
+    $[\delta, \sqrt{2} / 2)$  & $2$ & $[\delta, \sqrt{2} / 2)$  & $1$ \\
+    $[\sqrt{2} / 2, sqrt{2})$ & $2$ & $[\sqrt{2} / 2, sqrt{2})$ & $2$ \\
+    $[\sqrt{2}, 10)$          & $2$ & $[\sqrt{2}, 10)$          & $1$ \\
+    $[10, 10^2)$              & $2$ & $[10, 10^2)$              & $1$ \\
+    $[10^2, 10^3)$            & $1$ & $[10^2, 10^3)$            & $1$ \\
+    $[10^3, 10^4)$            & $1$ & $[10^3, 10^4)$            & $1$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{log10}}
+  \label{tab:Measured accuracy of vectorized implementation of log10}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LLLL}
+    \toprule
+    \multicolumn{2}{c}{Single precision} &
+    \multicolumn{2}{c}{Double precision} \\
+    \cmidrule(lr){1-2}\cmidrule(lr){3-4}
+    Range & Error (\ulp) & Range & Error (\ulp) \\
+    \midrule
+    $[-1, \sqrt{2} / 2 - 1)$  & $2$ & $[-1, \sqrt{2} / 2 - 1)$      & $3$ \\
+    $[\sqrt{2}/2-1, -\delta)$ & $1$ & $[\sqrt{2} / 2 - 1, -\delta)$ & $1$ \\
+    $[-\delta, \delta)$       & $0$ & $[-\delta, \delta)$           & $0$ \\
+    $[\delta, \sqrt{2} - 1)$  & $1$ & $[\delta, \sqrt{2} - 1)$      & $1$ \\
+    $[\sqrt{2} - 1, 1)$       & $2$ & $[\sqrt{2} - 1, 1)$           & $2$ \\
+    $[1, 10)$                 & $2$ & $[1, 10)$                     & $2$ \\
+    $[10, 10^2)$              & $1$ & $[10, 10^2)$                  & $1$ \\
+    $[10^2, 10^3)$            & $1$ & $[10^2, 10^3)$                & $1$ \\
+    $[10^3, 10^4)$            & $1$ & $[10^3, 10^4)$                & $1$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{log1p}}
+  \label{tab:Measured accuracy of vectorized implementation of log1p}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Range & Error (\ulp, double precision only) \\
+    \midrule
+    $[-1.7\times10^9, -1)$ & $2$ \\
+    $[-1, -\delta)$        & $2$ \\
+    $[-\delta, \delta)$    & $0$ \\
+    $[\delta, 1)$          & $2$ \\
+    $[1, 1.7\times10^9)$   & $2$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{cos}}
+  \label{tab:Measured accuracy of vectorized implementation of cos}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Range & Error (\ulp, double precision only) \\
+    \midrule
+    $[-1.7\times10^9, -1)$ & $2$ \\
+    $[-1, -\delta)$        & $2$ \\
+    $[-\delta, \delta)$    & $0$ \\
+    $[\delta, 1)$          & $2$ \\
+    $[1, 1.7\times10^9)$   & $2$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{sin}}
+  \label{tab:Measured accuracy of vectorized implementation of sin}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Range & Error (\ulp, double precision only) \\
+    \midrule
+    $[-1.7\times10^9, -1)$ & $2$ \\
+    $[-1, -\delta)$        & $2$ \\
+    $[-\delta, \delta)$    & $0$ \\
+    $[\delta, 1)$          & $2$ \\
+    $[1, 1.7\times10^9)$   & $2$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{sincos}}
+  \label{tab:Measured accuracy of vectorized implementation of sincos}
+\end{table}
+
+\begin{table}
+  \begin{tabularx}{\textwidth}{LL}
+    \toprule
+    Range & Error (\ulp, double precision only) \\
+    \midrule
+    $[-1.7\times10^9, -1)$ & $4$ \\
+    $[-1, -\delta)$        & $4$ \\
+    $[-\delta, \delta)$    & $0$ \\
+    $[\delta, 1)$          & $4$ \\
+    $[1, 1.7\times10^9)$   & $4$ \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Measured accuracy of vectorized implementation of \texttt{tan}}
+  \label{tab:Measured accuracy of vectorized implementation of tan}
+\end{table}

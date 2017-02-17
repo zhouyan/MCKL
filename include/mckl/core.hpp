@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,10 @@
 #define MCKL_CORE_HPP
 
 #include <mckl/internal/config.h>
-#include <mckl/core/monitor.hpp>
+#include <mckl/core/estimate_matrix.hpp>
+#include <mckl/core/estimator.hpp>
+#include <mckl/core/matrix.hpp>
+#include <mckl/core/memory.hpp>
 #include <mckl/core/particle.hpp>
 #include <mckl/core/sampler.hpp>
 #include <mckl/core/state_matrix.hpp>

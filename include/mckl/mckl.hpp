@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_HPP
-#define MCKL_HPP
+#ifndef MCKL_MCKL_HPP
+#define MCKL_MCKL_HPP
 
 /// \defgroup Config Configuration
 /// \brief Configuration macros and default values if undefined
@@ -45,11 +45,27 @@
 /// \brief Constructing samplers with operations on the whole particle set
 
 /// \defgroup Algorithm Algorithm
-/// \brief Monte Carlo algorithms
+/// \brief Algorithm
+
+/// \defgroup MCMC Markov chain Monte Carlo
+/// \ingroup Algorithm
+/// \brief Markov chain Monte Carlo
 
 /// \defgroup MH Metropolis-Hastings
 /// \ingroup Algorithm
-/// \brief Metropolis-Hastings algorithm
+/// \brief Metropolis-Hastings
+
+/// \defgroup PMCMC Particle Markov chain Monte Carlo
+/// \ingroup Algorithm
+/// \brief Particle Markov chain Monte Carlo
+
+/// \defgroup Resample Resampling
+/// \ingroup Algorithm
+/// \brief Resampling
+
+/// \defgroup SMC Sequential Monte Carlo
+/// \ingroup Algorithm
+/// \brief Sequential Monte Carlo
 
 /// \defgroup SMP Symmetric multiprocessing
 /// \brief Parallel samplers using multi-threading on SMP architecture
@@ -81,7 +97,7 @@
 /// \ingroup Math
 /// \brief Special functions
 
-/// \defgroup vMath Vectorized functions
+/// \defgroup VMF Vectorized functions
 /// \ingroup Math
 /// \brief Vectorized functions
 
@@ -135,15 +151,8 @@
 /// \ingroup RandomC
 /// \brief Converting random integers to uniform floating points
 
-/// \defgroup Resample Resampling algorithms
-/// \brief Resampling algorithm functor classes
-
 /// \defgroup Utility Utility
 /// \brief Utilities
-
-/// \defgroup AlignedMemory Aligned memory alignment
-/// \ingroup Utility
-/// \brief Memory allocation with alignment requirement
 
 /// \defgroup Covariance Covariance
 /// \ingroup Utility
@@ -163,8 +172,7 @@
 #include <mckl/math.hpp>
 #include <mckl/random.hpp>
 #include <mckl/randomc.h>
-#include <mckl/resample.hpp>
 #include <mckl/smp.hpp>
 #include <mckl/utility.hpp>
 
-#endif // MCKL_HPP
+#endif // MCKL_MCKL_HPP

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
         for (std::size_t j = 0; j <= i; ++j)
             cholf[i * dim + j] = *chol++;
     internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
-    if (!is_zero(mean))
+    if (!internal::is_zero(mean))
         add(n * dim, mean, r, r);
 }
 
@@ -98,7 +98,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
 
     normal_distribution(rng, n * dim, r, const_zero<RealType>(), chol);
     for (std::size_t i = 0; i != n; ++i, r += dim)
-        add(dim, mean, r, r);
+        add<RealType>(dim, mean, r, r);
 }
 
 template <typename RealType, typename RNGType>
@@ -116,7 +116,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
             cholf[i * dim + j] = *chol++;
     internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
     for (std::size_t i = 0; i != n; ++i, r += dim)
-        add(dim, mean, r, r);
+        add<RealType>(dim, mean, r, r);
 }
 
 /// \brief Multivariate Normal distribution
@@ -126,120 +126,63 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
 /// The distribution is parameterized by its mean vector and the lower
 /// triangular elements of the Cholesky decomposition of the covaraince matrix,
 /// packed row by row.
-template <typename RealType, std::size_t Dim>
+template <typename RealType>
 class NormalMVDistribution
 {
     MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_BLAS_TYPE(NormalMV)
 
     public:
     using result_type = RealType;
-    using distribution_type = NormalMVDistribution<RealType, Dim>;
+    using distribution_type = NormalMVDistribution<RealType>;
 
     class param_type
     {
         public:
         using result_type = RealType;
-        using distribution_type = NormalMVDistribution<RealType, Dim>;
+        using distribution_type = NormalMVDistribution<RealType>;
 
-        param_type(result_type mean, result_type chol)
-            : is_scalar_mean_(true), is_scalar_chol_(true)
-        {
-            static_assert(Dim != Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "dynamic dimension");
-
-            init_mean(mean);
-            init_chol(chol);
-        }
-
-        param_type(result_type mean, const result_type *chol)
-            : is_scalar_mean_(true), is_scalar_chol_(false)
-        {
-            static_assert(Dim != Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "dynamic dimension");
-
-            init_mean(mean);
-            init_chol(chol);
-        }
-
-        param_type(const result_type *mean, result_type chol)
-            : is_scalar_mean_(false), is_scalar_chol_(true)
-        {
-            static_assert(Dim != Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "dynamic dimension");
-
-            init_mean(mean);
-            init_chol(chol);
-        }
-
-        param_type(const result_type *mean, const result_type *chol)
-            : is_scalar_mean_(false), is_scalar_chol_(false)
-        {
-            static_assert(Dim != Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "dynamic dimension");
-
-            init_mean(mean);
-            init_chol(chol);
-        }
-
-        param_type(std::size_t dim, result_type mean, result_type chol)
-            : mean_(dim)
-            , chol_(dim * (dim + 1) / 2)
+        explicit param_type(std::size_t dim = 1)
+            : mean_(dim, 0)
+            , chol_(dim * (dim + 1) / 2, 0)
             , is_scalar_mean_(true)
             , is_scalar_chol_(true)
         {
-            static_assert(Dim == Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "fixed dimension");
+            scalar_chol(1);
+        }
 
-            init_mean(mean);
-            init_chol(chol);
+        param_type(std::size_t dim, result_type mean, result_type chol)
+            : mean_(dim, mean)
+            , chol_(dim * (dim + 1) / 2, 0)
+            , is_scalar_mean_(true)
+            , is_scalar_chol_(true)
+        {
+            scalar_chol(chol);
         }
 
         param_type(std::size_t dim, result_type mean, const result_type *chol)
-            : mean_(dim)
-            , chol_(dim * (dim + 1) / 2)
+            : mean_(dim, mean)
+            , chol_(chol, chol + dim * (dim + 1) / 2)
             , is_scalar_mean_(true)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "fixed dimension");
-
-            init_mean(mean);
-            init_chol(chol);
         }
 
         param_type(std::size_t dim, const result_type *mean, result_type chol)
-            : mean_(dim)
-            , chol_(dim * (dim + 1) / 2)
+            : mean_(mean, mean + dim)
+            , chol_(dim * (dim + 1) / 2, 0)
             , is_scalar_mean_(false)
-            , is_scalar_chol_(false)
+            , is_scalar_chol_(true)
         {
-            static_assert(Dim == Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "fixed dimension");
-
-            init_mean(mean);
-            init_chol(chol);
+            scalar_chol(chol);
         }
 
         param_type(
             std::size_t dim, const result_type *mean, const result_type *chol)
-            : mean_(dim)
-            , chol_(dim * (dim + 1) / 2)
+            : mean_(mean, mean + dim)
+            , chol_(chol, chol + dim * (dim + 1) / 2)
             , is_scalar_mean_(false)
             , is_scalar_chol_(false)
         {
-            static_assert(Dim == Dynamic,
-                "**NormalMVDistribution::param_type** object declared with "
-                "fixed dimension");
-
-            init_mean(mean);
-            init_chol(chol);
         }
 
         std::size_t dim() const { return mean_.size(); }
@@ -285,164 +228,101 @@ class NormalMVDistribution
 
         template <typename CharT, typename Traits>
         friend std::basic_istream<CharT, Traits> &operator>>(
-            std::basic_istream<CharT, Traits> &is, const param_type &param)
+            std::basic_istream<CharT, Traits> &is, param_type &param)
         {
             if (!is)
                 return is;
 
-            internal::StaticVector<result_type, Dim> mean;
-            internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol;
-            bool is_scalar_mean;
-            bool is_scalar_chol;
+            param_type tmp;
 
-            is >> std::ws >> mean;
-            is >> std::ws >> chol;
-            is >> std::ws >> is_scalar_mean;
-            is >> std::ws >> is_scalar_chol;
+            is >> std::ws >> tmp.mean_;
+            is >> std::ws >> tmp.chol_;
+            is >> std::ws >> tmp.is_scalar_mean_;
+            is >> std::ws >> tmp.is_scalar_chol_;
 
-            if (is) {
-                param.mean_ = std::move(mean);
-                param.chol_ = std::move(chol);
-                param.is_scalar_mean_ = is_scalar_mean;
-                param.is_scalar_chol_ = is_scalar_chol;
-            } else {
+            if (is)
+                param = std::move(tmp);
+            else
                 is.setstate(std::ios_base::failbit);
-            }
 
             return is;
         }
 
         private:
-        internal::StaticVector<result_type, Dim> mean_;
-        internal::StaticVector<result_type, Dim *(Dim + 1) / 2> chol_;
+        Vector<result_type> mean_;
+        Vector<result_type> chol_;
         bool is_scalar_mean_;
         bool is_scalar_chol_;
 
         friend distribution_type;
 
-        void init_mean(result_type mean)
+        void scalar_chol(result_type chol)
         {
-            std::fill(mean_.begin(), mean_.end(), mean);
-        }
-
-        void init_mean(const result_type *mean)
-        {
-            std::memcpy(
-                mean_.data(), mean, sizeof(result_type) * mean_.size());
-        }
-
-        void init_chol(result_type chol)
-        {
-            std::memset(chol_.data(), 0, sizeof(result_type) * chol_.size());
             for (std::size_t i = 0; i != dim(); ++i)
-                chol_[i * (i + 1) / 2 + i] = chol;
-        }
-
-        void init_chol(const result_type *chol)
-        {
-            std::memcpy(
-                chol, chol_.data(), sizeof(result_type) * chol_.size());
+                chol_[(i + 1) * (i + 2) / 2 - 1] = chol;
         }
     }; // class param_type
 
-    /// \brief Only usable when `Dim != Dynamic`
-    NormalMVDistribution(result_type mean, result_type chol)
-        : param_(mean, chol)
+    /// \brief Construct a distribution with scalar mean and scalar covariance
+    explicit NormalMVDistribution(std::size_t dim = 1) : param_(dim)
     {
-        internal::size_check<MCKL_BLAS_INT>(
-            Dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
-    /// \brief Only usable when `Dim != Dynamic`
-    NormalMVDistribution(result_type mean, const result_type *chol)
-        : param_(mean, chol)
-    {
-        internal::size_check<MCKL_BLAS_INT>(
-            Dim, "NormalMVDistribution::NormalMVDistribution");
-        reset();
-    }
-
-    /// \brief Only usable when `Dim != Dynamic`
-    NormalMVDistribution(const result_type *mean, result_type chol)
-        : param_(mean, chol)
-    {
-        internal::size_check<MCKL_BLAS_INT>(
-            Dim, "NormalMVDistribution::NormalMVDistribution");
-        reset();
-    }
-
-    /// \brief Only usable when `Dim != Dynamic`
-    NormalMVDistribution(const result_type *mean, const result_type *chol)
-        : param_(mean, chol)
-    {
-        internal::size_check<MCKL_BLAS_INT>(
-            Dim, "NormalMVDistribution::NormalMVDistribution");
-        reset();
-    }
-
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Construct a distribution with scalar mean and scalar covariance
     NormalMVDistribution(std::size_t dim, result_type mean, result_type chol)
         : param_(dim, mean, chol)
     {
-        internal::size_check<MCKL_BLAS_INT>(
-            dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Construct a distribution with scalar mean and vector covariance
     NormalMVDistribution(
         std::size_t dim, result_type mean, const result_type *chol)
         : param_(dim, mean, chol)
     {
-        internal::size_check<MCKL_BLAS_INT>(
-            dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Construct a distribution with vector mean and scalar covariance
     NormalMVDistribution(
         std::size_t dim, const result_type *mean, result_type chol)
         : param_(dim, mean, chol)
     {
-        internal::size_check<MCKL_BLAS_INT>(
-            dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
-    /// \brief Only usable when `Dim == Dynamic`
+    /// \brief Construct a distribution with vector mean and vector covariance
     NormalMVDistribution(
         std::size_t dim, const result_type *mean, const result_type *chol)
         : param_(dim, mean, chol)
     {
-        internal::size_check<MCKL_BLAS_INT>(
-            dim, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
     explicit NormalMVDistribution(const param_type &param) : param_(param)
     {
-        internal::size_check<MCKL_BLAS_INT>(
-            param.dim_, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
     explicit NormalMVDistribution(param_type &&param)
         : param_(std::move(param))
     {
-        internal::size_check<MCKL_BLAS_INT>(
-            param.dim_, "NormalMVDistribution::NormalMVDistribution");
         reset();
     }
 
-    void min(result_type *x) const
+    template <typename OutputIter>
+    OutputIter min(OutputIter first) const
     {
-        std::fill_n(x, dim(), std::numeric_limits<result_type>::lowest());
+        return std::fill_n(
+            first, dim(), std::numeric_limits<result_type>::lowest());
     }
 
-    void max(result_type *x) const
+    template <typename OutputIter>
+    OutputIter max(OutputIter first) const
     {
-        std::fill_n(x, dim(), std::numeric_limits<result_type>::max());
+        return std::fill_n(
+            first, dim(), std::numeric_limits<result_type>::max());
     }
 
     void reset() {}
@@ -554,22 +434,25 @@ class NormalMVDistribution
         if (param.is_scalar_mean_ && param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(
                 param.mean()[0], param.chol()[0]);
-            normal(rng, param.dim(), r);
+            for (std::size_t i = 0; i != param.dim(); ++i)
+                r[i] = normal(rng);
         } else if (param.is_scalar_mean_ && !param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(0, 1);
-            normal(rng, param.dim(), r);
+            for (std::size_t i = 0; i != param.dim(); ++i)
+                r[i] = normal(rng);
             mulchol(r, param);
             if (!internal::is_zero(param.mean()[0]))
-                add(param.dim(), param.mean(), r, r);
+                add<result_type>(param.dim(), param.mean(), r, r);
         } else if (!param.is_scalar_mean_ && param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(0, param.chol()[0]);
-            normal(rng, param.dim(), r);
-            add(param.dim(), param.mean(), r, r);
+            for (std::size_t i = 0; i != param.dim(); ++i)
+                r[i] = normal(rng);
+            add<result_type>(param.dim(), param.mean(), r, r);
         } else if (!param.is_scalar_mean_ && !param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(0, 1);
             normal(rng, param.dim(), r);
             mulchol(r, param);
-            add(param.dim(), param.mean(), r, r);
+            add<result_type>(param.dim(), param.mean(), r, r);
         }
     }
 
@@ -588,21 +471,20 @@ class NormalMVDistribution
     }
 }; // class NormalMVDistribution
 
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(RNGType &rng,
-    NormalMVDistribution<RealType, Dim> &distribution, RealType *r)
+template <typename RealType, typename RNGType>
+inline void rand(
+    RNGType &rng, NormalMVDistribution<RealType> &distribution, RealType *r)
 {
     distribution(rng, r);
 }
 
-template <typename RealType, std::size_t Dim, typename RNGType>
-inline void rand(RNGType &rng,
-    NormalMVDistribution<RealType, Dim> &distribution, std::size_t n,
-    RealType *r)
+template <typename RealType, typename RNGType>
+inline void rand(RNGType &rng, NormalMVDistribution<RealType> &distribution,
+    std::size_t n, RealType *r)
 {
     distribution(rng, n, r);
 }
 
 } // namespace mckl
 
-#endif // MCKL_RANDOM_NORMAL_DISTRIBUTION_HPP
+#endif // MCKL_RANDOM_NORMAL_MV_DISTRIBUTION_HPP

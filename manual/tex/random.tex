@@ -3,7 +3,7 @@
 % ----------------------------------------------------------------------------
 %  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
-%  Copyright (c) 2013-2016, Yan Zhou
+%  Copyright (c) 2013-2017, Yan Zhou
 %  All rights reserved.
 %
 %  Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,9 @@ void rand(RNGType &rng, size_t n, typename RNGType::result_type *r);
 \end{verbatim}
 For example,
 \begin{verbatim}
-RNGType rng;
+RNG rng;
 constexpr std::size_t n = 1024;
-typename RNGType::result_type r[n];
+RNG::result_type r[n];
 rand(rng, n, r);
 \end{verbatim}
 The effect of the function call above is equivalent to the following loop,
@@ -76,7 +76,7 @@ void rand(RNGType &rng, DistributionType &distribution, size_t n,
 \end{verbatim}
 For example,
 \begin{verbatim}
-RNGType rng;
+RNG rng;
 NormalDistribution<double> normal(mean, sd);
 constexpr std::size_t n = 1024;
 double r[n];
@@ -87,7 +87,7 @@ This is similar to the following loop,
 for (size_t i = 0; i != n; ++i)
     r[i] = normal(rng);
 \end{verbatim}
-Depending on the type of |rng| and the distribution (including its parameters),
+Depending on the type of \rng and the distribution (including its parameters),
 the vectorized function may have superior performance. See
 appendix~\ref{chap:Performance of distribution}. However, the results are not
 always the same as using a loop. The uniform bits distribution (see
@@ -95,18 +95,18 @@ section~\ref{sec:Uniform bits distribution}) and the standard uniform
 distributions (see section~\ref{sec:Standard uniform distribution}) will always
 produce exactly the same results as using a loop. For some distributions, such
 as those using the inverse method, the difference is up to rounding errors. For
-others, completely different sequence of random numbers might be generated.
+others, completely different sequences of random numbers might be generated.
 
 \section{Counter-based \texorpdfstring{\rng}{RNG}}
 \label{sec:Counter-based RNG}
 
 The development by~\cite{Salmon:2011um} made high performance parallel \rng
 much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
-such that, for a sequence $\{c_i = i\}_{i\ge0}$, the sequence $\{y_i =
-f_k(c_i)\}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
+such that, for a sequence $\Curly{c_i = i}_{i\ge0}$, the sequence $\Curly{y_i =
+f_k(c_i)}_{i\ge0}$ appears random. In addition, for $k_1 \ne k_2$, $f_{k_1}$
 and $f_{k_2}$ generate two sequences that appear statistically independent.
 Compared to more conventional \rng{}s which use recursions $y_i = f_k(y_{i -
-1})$, these counter-based \rng{}s are much easier to setup in a parallelized
+1})$, these counter-based \rng{}s are much easier to use in a parallelized
 environment. If~$c$, the counter, is an unsigned integer with~$b$ bits,
 and~$k$, the key, is an unsigned integer with~$d$ bits. Then for each $k$, the
 \rng has a period~$2^b$. And there can be at most~$2^d$ independent streams.
@@ -124,7 +124,7 @@ algorithm.
 
 \subsection{\texorpdfstring{\aes}{AES} round function based
 \texorpdfstring{\rng}{RNG}}
-\label{sub:AES-NI instructions based RNG}
+\label{sub:AES round function based RNG}
 
 \aes\footnote{\url{https://en.wikipedia.org/wiki/Advanced_Encryption_Standard}}
 round function based \rng{}s in~\cite{Salmon:2011um} are implemented in the
@@ -140,9 +140,9 @@ using AESEngine = CounterEngine<ResultType, AESGenerator<KeySeqType>;
 \end{verbatim}
 where |KeySeqType| is the class used to generate the sequences of round keys.
 When \aesni\footnote{\url{https://en.wikipedia.org/wiki/AES_instruction_set}}
-instructions are available, they are used to for performance boost. Without
-going into details, there are four types of sequence of round keys implemented
-by \mckl,
+instructions are available, they are used for performance boost. Without going
+into details, there are four types of sequences of round keys implemented by
+\mckl,
 \begin{verbatim}
 template <std::size_t Rounds = MCKL_AES128_ROUNDS>
 class AES128KeySeq;
@@ -157,7 +157,7 @@ template <std::size_t Rounds = MCKL_ARS_ROUNDS, typename Constants = ARSConstant
 class ARSKeySeq;
 \end{verbatim}
 The default rounds of the first three are~10, 12 and~14, respectively. And thus
-they are equivalent to \aes-128, \aes-192, and \aes-256 block ciphers,
+they are equivalent to the \aes-128, \aes-192, and \aes-256 block ciphers,
 respectively. The last one is the \ars algorithm in~\cite{Salmon:2011um}. The
 default rounds is~5, instead of~7 as in the paper, but the same as its \mkl
 implementation. The trait class |Constants| defines the Weyl's sequence
@@ -167,8 +167,8 @@ expressions are valid,
 constexpr uint64_t w0 = Constants::weyl::value[0];
 constexpr uint64_t w1 = Constants::weyl::value[1];
 \end{verbatim}
-The member data |value| will not be \odr used. The default constant is taken
-from the paper. Correspondingly there are four \rng engines,
+The member data |value| will not be \odr used. The default constants are taken
+from the paper. Correspondingly, there are four \rng engines,
 \begin{verbatim}
 template <typename ResultType, std::size_t Rounds = MCKL_AES128_ROUNDS>
 using AES128Engine = AESEngine<ResultType, AES128KeySeq<Rounds>>;
@@ -431,7 +431,7 @@ number of bits of |ResultType|, that is,
 constexpr int N = sizeof(ResultType) * CHAR_BIT;
 \end{verbatim}
 If $N$ is not a multiple of~32, then a compile time error will be raised.
-Otherwise, let $S = \min\{N,64\}$ and $M = N / S$. The generator keeps an
+Otherwise, let $S = \min\Curly{N,64}$ and $M = N / S$. The generator keeps an
 $S$-bit unsigned integer as its internal counter, say $c$. Use the |set| method
 to set the value of this internal integer. For example,
 \begin{verbatim}
@@ -439,7 +439,7 @@ seed.set(101);
 \end{verbatim}
 Each time a new seed is requested, this counter is incremented. If the template
 parameter |Atomic| is true, then this increment is atomic and thread-safe. Let
-the old value be $s$. That is,
+the old value be $s$, that is,
 \begin{equation*}
   s \leftarrow c,\qquad c \leftarrow c + 1.
 \end{equation*}
@@ -451,7 +451,7 @@ following.
     s + 2^{N - S}r    &\text{otherwise}
   \end{cases},
 \end{equation*}
-where $m = (2^S - 1 - r) / p + 1$ and $p = 1$ and $r = 0$ by default. To change
+where $m = (2^S - 1 - r) / p + 1$, $p = 1$ and $r = 0$ by default. To change
 their values, use the |partition| method. For example,
 \begin{verbatim}
 seed.partition(10, 3); // p = 10, r = 3
@@ -461,10 +461,10 @@ possible reordering of bytes on big-endian platforms such that the results are
 exactly the same as on little-endian platforms. Otherwise, i.e., |Randomize| is
 true, then $t$ is transformed through a randomize function. If $N = 32$, then
 it is transformed using a~32-bit Speck block
-cipher\footnote{\url{https://en.wikipedia.org/wiki/Speck_(cipher)}} with zero
+cipher\footnote{\url{https://en.wikipedia.org/wiki/Speck_(cipher)}} with a zero
 key. If $N = 2^W$, $W = 5,\dots,10$, then it is transformed with the bijection
 of |Threefry2x32|, |Threefry2x64|, |Threefry4x64|, |Threefry8x64|, and
-|Threefry16x64| \rng{}s with zero key, respectively. Otherwise, it is
+|Threefry16x64| \rng{}s with zero keys, respectively. Otherwise, it is
 transformed with the Skein-512 hash function.
 
 It is clear that, if $N = 2^W$, $W = 5,\dots,10$, or |Randomize| is false, then
@@ -472,8 +472,8 @@ the seeds generated are always distinctive if the values of the internal
 counter $c$ are distinctive. Therefore, the seed generator has a period of
 $\Floor{2^S / p}$ if $M = 1$ and $2^S$ if $M > 1$. Moreover, the values of $t$
 belongs to the equivalent class $t \equiv r \pmod{p}$ if $M = 1$ and $\Floor{t
-/ 2^{N - S}} = r$ if $M > 1$. Therefore, using the |partition| method, one can
-generate distinctive seeds across multiple computing nodes or multiple
+/ 2^{N - S}} \equiv r$ if $M > 1$. Therefore, using the |partition| method, one
+can generate distinctive seeds across multiple computing nodes or multiple
 programs.
 
 One can save and restore the seed generator using standard library streams. For
@@ -482,7 +482,7 @@ example,
 std::ifstream is("seed.txt");
 if (is)
     is >> Seed<RNG>::instance();    // Read seed from a file
-else
+if (!is)
     Seed<RNG>::instance().set(101); // Set it manually
 is.close();
 // Using Seed
@@ -500,19 +500,19 @@ class Seed;
 \end{verbatim}
 which is a derived class of the following generator,
 \begin{verbatim}
-SeedGenerator<typename SeedType<RNGType>::type>;
+SeedGenerator<typename SeedType<RNGType>>;
 \end{verbatim}
-where |SeedType| is defined and partially specialized as the following,
+where |SeedType| is an alias to |SeedTrait<RNGType>::type|,
 \begin{verbatim}
 template <typename RNGType>
-class SeedType
+class SeedTrait
 {
     public:
     using type = unsigned;
 };
 
 template <typename ResultType, typename Generator>
-class SeedType<CounterEngine<ResultType, Generator>>
+class SeedTrait<CounterEngine<ResultType, Generator>>
 {
     public:
     using type = typename CounterEngine<ResultType, Generator>::key_type;
@@ -548,7 +548,7 @@ significant. The method calls |rng_set[i]| and |rng_set[j]| return independent
 \rng{}s if $i \ne j$. If \tbb is available, there is a third implementation,
 |RNGSetTBB|, which uses thread-local storage (\tls). It has much smaller memory
 footprint than |RNGSetVector| while maintains better thread-safety. The type
-alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is available, otherwise it
+alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is available. Otherwise it
 is defined to be |RNGSetVector|.
 
 \section{Uniform bits distribution}
@@ -561,9 +561,9 @@ class UniformBitsDistribution;
 \end{verbatim}
 is similar to the standard library's |std::independent_bits_engine|, except
 that it always generates full size random integers and |UIntType| must have
-size at least of that of |short|. That is, let~$W$ be the number of bits of
-|UIntType|, then the output is uniform on the set $\{0,\dots,2^W - 1\}$. For
-example,
+a size of at least of 16 bits. That is, let~$W$ be the number of bits of
+|UIntType|, then the output is uniform on the set $\Curly{0,\dots,2^W - 1}$.
+For example,
 \begin{verbatim}
 UniformBitsDistribution<uint32_t> ubits;
 ubits(rng); // Return 32-bit random integers
@@ -601,8 +601,8 @@ In the following, let~$W$ be the number of bits of the integer type, and~$M$ be
 the number of significant bits (including the implicit one) of |RealType|. We
 also denote the input random integers as~$U$ and the output random real numbers
 as~$X$. The type |U01Distribution| is aliased to |U01CanonicalDistribution| if
-the configuration macro |MCKL_U01_USE_FIXED_POINT| is set to true. Otherwise it
-is aliased to |U01CODistribution|.
+the configuration macro |MCKL_U01_USE_FIXED_POINT| is set to false (the
+default). Otherwise it is aliased to |U01CODistribution|.
 
 \subsection{Canonical form}
 \label{sub:Canonical form}
@@ -616,7 +616,7 @@ implements the uniform distribution on $[0, 1)$. It is implemented through the
 mapping,
 \begin{equation*}
   P = \Floor{(W + M - 1) / W},\qquad
-  K = \max\{1, P\},\qquad
+  K = \max\Curly{1, P},\qquad
   X = \sum_{k=0}^{K - 1} U_k 2^{-(K - k)W}
 \end{equation*}
 This is equivalent to the standard library |std::generate_canonical|. The
@@ -632,12 +632,12 @@ class U01CCDistribution;
 \end{verbatim}
 implements the uniform distribution on $[0, 1]$ through the mapping,
 \begin{align*}
-  P &= \min\{W - 1, M\} &
+  P &= \min\Curly{W - 1, M}, &
   V &= \begin{cases}
     U &\text{if } P + 1 < W \\
     \Floor{(U \bmod 2^{W - 1}) / 2^{W - P -2}} &\text{otherwise}
-  \end{cases} \\
-  Z &= (V \bmod 2) + V &
+  \end{cases}, \\
+  Z &= (V \bmod 2) + V, &
   X &= 2^{-(P + 1)} Z.
 \end{align*}
 The minimum and maximum are~$0$ and~$1$, respectively.
@@ -652,9 +652,9 @@ class U01CODistribution;
 \end{verbatim}
 implements the uniform distribution on $[0, 1)$ through the mapping,
 \begin{equation*}
-  P = \min\{W, M\},\qquad
+  P = \min\Curly{W, M},\qquad
   V = \Floor{U / 2^{W - P}},\qquad
-  X = 2^{-P} V
+  X = 2^{-P} V.
 \end{equation*}
 The minimum and maximum are~$0$ and~$1 - 2^{-P}$, respectively.
 
@@ -668,9 +668,9 @@ class U01OCDistribution;
 \end{verbatim}
 implements the uniform distribution on $(0, 1]$ through the mapping,
 \begin{equation*}
-  P = \min\{W, M\},\qquad
+  P = \min\Curly{W, M},\qquad
   V = \Floor{U / 2^{W - P}},\qquad
-  X = 2^{-P} V + 2^{-P}
+  X = 2^{-P} V + 2^{-P}.
 \end{equation*}
 The minimum and maximum are~$2^{-P}$ and~$1$, respectively.
 
@@ -684,9 +684,9 @@ class U01CODistribution;
 \end{verbatim}
 implements the uniform distribution on $(0, 1)$ through the mapping,
 \begin{equation*}
-  P = \min\{W + 1, M\},\qquad
+  P = \min\Curly{W + 1, M},\qquad
   V = \Floor{U / 2^{W + 1 - P}},\qquad
-  X = 2^{-(P - 1)} V + 2^{-P}
+  X = 2^{-(P - 1)} V + 2^{-P}.
 \end{equation*}
 The minimum and maximum are~$2^{-P}$ and~$1 - 2^{-P}$, respectively.
 
@@ -758,7 +758,7 @@ class ChiSquaredDistribution;
 implements the distribution with \pdf,
 \begin{equation*}
   f(x;n) = \frac{x^{n/2 - 1}\EE^{-x/2}}{2^{n/2}\Gamma(n/2)},\qquad
-  x \in (0,\infty),\quad n \in (0,\infty),
+  x \in (0,\infty),\quad n \in (0,\infty).
 \end{equation*}
 The implementation uses the fact that if~$X$ is a Gamma random variable with
 shape $n / 2$ and scale~$2$, then~$X$ is also $\chi^2$-distributed with degree
@@ -905,8 +905,8 @@ implements the distribution with \pdf,
   x \in (0, \infty),\quad m \in \Real,\quad s \in (0, \infty).
 \end{equation*}
 The implementation uses the fact that if~$Z$ is a standard Normal random
-variable, then $X = \exp\{m + sZ\}$ is Log-normal distributed with location~$m$
-and scale~$s$.
+variable, then $X = \exp\Curly{m + sZ}$ is Log-normal distributed with
+location~$m$ and scale~$s$.
 
 \subsection{Normal distribution}
 \label{sub:Normal distribution}
@@ -970,7 +970,8 @@ implements the distribution with \pdf,
   \frac{1}{2\pi}\int_{\infty}^{\infty}
   \varphi(t;\alpha,\beta,a,b)\EE^{-ixt}\intd t\\
   &\varphi(t;\alpha,\beta,a,b) =
-  \exp\{ita - \Abs{bt}^{\alpha}(1 - i\beta\mathrm{sgn}(t)\Phi(t;\alpha))\} \\
+  \exp\Curly{
+    ita - \Abs{bt}^{\alpha}(1 - i\beta\mathrm{sgn}(t)\Phi(t;\alpha))} \\
   &\Phi(t;\alpha) = \begin{cases}
     \tan\Round[big]{\frac{\pi}{2}\alpha} & \alpha \ne 1 \\
     -\frac{2}{\pi}\log\Abs{t}            & \alpha = 1
@@ -979,22 +980,7 @@ implements the distribution with \pdf,
   \alpha \in (0, 2],\quad \beta \in [-1, 1],\quad
   a \in \Real,\quad b \in (0, \infty).
 \end{align*}
-The implementation uses the method in~\cite{Chambers:1976dv}. Note that, some
-other distributions implemented in \mckl, such as the Cauchy distribution
-($\alpha = 1$, $\beta = 0$), the Levy distribution ($\alpha = 1/2$, $\beta =
-1$), and the Normal distribution ($\alpha = 2$), are all special cases of the
-stable distribution. It is possible to use implementations of those
-distributions to speed up the stable distribution in special cases. However,
-\mckl does not do so. Every distribution implemented in \mckl goes through some
-basic statistical tests to ensure correctness. Without a tractable distribution
-function in general, the stable distribution is somehow more difficult to test
-than others. Therefore, we use these special cases to tests the implementation,
-which is generic with respect to parameter values. In applications, for
-generating random numbers from distributions of those special cases, use the
-dedicated classes instead of this one. There are also a few distributions not
-implemented by \mckl, but are special cases of the stable distribution, such as
-the Landau distribution ($\alpha = 1$, $\beta = 1$) and Holtsmark distribution
-($\alpha = 3/2$, $\beta = 0$), to name just two of them.
+The implementation uses the method in~\cite{Chambers:1976dv}.
 
 \subsection{Student's \texorpdfstring{$t$}{t}-distribution}
 \label{sub:Student's t-distribution}
@@ -1062,12 +1048,12 @@ class BernoulliDistribution;
 implements the distribution with \pdf,
 \begin{equation*}
   \Prob(X = k;p) = kp + (1 - k)(1 - p),\qquad
-  k \in \{0, 1\},\quad p \in [0, 1].
+  k \in \Curly{0, 1},\quad p \in [0, 1].
 \end{equation*}
 Unlike other discrete distributions, the Bernoulli distribution supports any
-integer type, including those with sizes smaller than that of |short|. The
-implementation uses the simple fact that if~$U$ is a standard uniform random
-variable, than $\bbI_{[0,p)}(U)$ is Bernoulli distributed with success
+integer type, while others require an integer type with size larger than 16
+bits. The implementation uses the simple fact that if~$U$ is a standard uniform
+random variable, than $\bbI_{[0,p)}(U)$ is Bernoulli distributed with success
 probability~$p$. This is not a drop-in replacement for
 |std::bernoulli_distribution|, which is not a class template.
 
@@ -1099,16 +1085,16 @@ class UniformIntDistribution;
 implements the distribution with \pdf,
 \begin{equation*}
   \Prob(X = k;a,b) = \frac{1}{b - a + 1},\qquad
-  k \in \{a,\dots,b\},\quad
-  a \in \Integer,\quad b \in \{x \in \Integer: x \ge a\}.
+  k \in \Curly{a,\dots,b},\quad
+  a \in \Integer,\quad b \in \Set{x \in \Integer \mid x \ge a}.
 \end{equation*}
 The specific algorithm used depends on the parameters. If $a = b$, then it
-simply returns~$a$. If $b - a + 1 = 2^W$ where~$W$ is the number of bits of
+simply returns~$a$. If $b - a + 1 = 2^W$, where~$W$ is the number of bits of
 |IntType|, then |UniformBitsDistribution| is used (see section~\ref{sec:Uniform
-bits distribution}). If $\max\{\Abs{a}, b\} < 2^{32}$, then it uses the fact
-that if~$U$ is a standard uniform random variable, then $X = \Floor{a + (b - a
-+ 1) U}$ is uniform on the set $\{a,\dots,b\}$. Otherwise the standard library
-is used.
+bits distribution}). If $\max\Curly{\Abs{a}, b} < 2^{32}$, then it uses the
+fact that if~$U$ is a standard uniform random variable, then $X = \Floor{a + (b
+  - a + 1) U}$ is uniform on the set $\Curly{a,\dots,b}$. Otherwise the
+standard library is used.
 
 \section{Multivariate distribution}
 \label{sec:Multivariate distribution}
@@ -1174,7 +1160,7 @@ implements the distribution with \pdf,
   &x_{1:d}\in\Real^d,\quad
   \mu_{1:d}\in\Real^d,\quad
   \Sigma\in
-  \{\,\text{positive semi-definite }d\text{ by }d\text{ matrix}\,\}.
+  \Curly{\text{positive semi-definite }d\text{ by }d\text{ matrix}}.
 \end{align*}
 At the time of writing, only |float| and |double| are supported types for the
 template parameter |RealType|. The second template parameter |Dim| specify the
@@ -1192,8 +1178,8 @@ In either case, the parameter |mean| is a pointer to the mean vector of length
 $d$, and |chol| is a pointer to the lower triangular of the Cholesky
 decomposition of the covariance matrix packed row by row. For those unfamiliar
 with matrix storage schemes, this means that, |chol| is a vector of length
-$d(d+1)/2$. Let~$L$ be the lower triangular of the Cholesky decomposition, that
-is $LL^{\transpose} = \Sigma$, then the vector is
+$d(d + 1) / 2$. Let~$L$ be the lower triangular of the Cholesky decomposition,
+that is $LL^{\transpose} = \Sigma$, then the vector is
 $(L_{1,1},L_{2,1},L_{2,2},\dots,L_{d,d})^{\transpose}$. Further, both |mean|
 and |chol| can also be scalars instead of pointers to vectors. If |mean| is a
 scalar, say $\mu$, then the mean vector is assumed to be a $d$-vector with all

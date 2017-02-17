@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -317,32 +317,32 @@ static inline void mckl_threefry2x32_gen(const mckl_threefry2x32_ctr_t *ctr,
     mckl_threefry2x32_par_t par;
     mckl_threefry2x32_initpar(key, &par);
 
-    mckl_threefry2x32_insertkey(state, &par, 0, 0, 1); // Round 0
-    mckl_threefry2x32_rotate(state, 13);               // Round 1
-    mckl_threefry2x32_rotate(state, 15);               // Round 2
-    mckl_threefry2x32_rotate(state, 26);               // Round 3
-    mckl_threefry2x32_rotate(state, 6);                // Round 4
-    mckl_threefry2x32_insertkey(state, &par, 1, 1, 2); // Round 4
-    mckl_threefry2x32_rotate(state, 17);               // Round 5
-    mckl_threefry2x32_rotate(state, 29);               // Round 6
-    mckl_threefry2x32_rotate(state, 16);               // Round 7
-    mckl_threefry2x32_rotate(state, 24);               // Round 8
-    mckl_threefry2x32_insertkey(state, &par, 2, 2, 0); // Round 8
-    mckl_threefry2x32_rotate(state, 13);               // Round 9
-    mckl_threefry2x32_rotate(state, 15);               // Round 10
-    mckl_threefry2x32_rotate(state, 26);               // Round 11
-    mckl_threefry2x32_rotate(state, 6);                // Round 12
-    mckl_threefry2x32_insertkey(state, &par, 3, 0, 1); // Round 12
-    mckl_threefry2x32_rotate(state, 17);               // Round 13
-    mckl_threefry2x32_rotate(state, 29);               // Round 14
-    mckl_threefry2x32_rotate(state, 16);               // Round 15
-    mckl_threefry2x32_rotate(state, 24);               // Round 16
-    mckl_threefry2x32_insertkey(state, &par, 4, 1, 2); // Round 16
-    mckl_threefry2x32_rotate(state, 13);               // Round 17
-    mckl_threefry2x32_rotate(state, 15);               // Round 18
-    mckl_threefry2x32_rotate(state, 26);               // Round 19
-    mckl_threefry2x32_rotate(state, 6);                // Round 20
-    mckl_threefry2x32_insertkey(state, &par, 5, 2, 0); // Round 20
+    mckl_threefry2x32_insertkey(state, &par, 0, 0, 1);
+    mckl_threefry2x32_rotate(state, 13);
+    mckl_threefry2x32_rotate(state, 15);
+    mckl_threefry2x32_rotate(state, 26);
+    mckl_threefry2x32_rotate(state, 6);
+    mckl_threefry2x32_insertkey(state, &par, 1, 1, 2);
+    mckl_threefry2x32_rotate(state, 17);
+    mckl_threefry2x32_rotate(state, 29);
+    mckl_threefry2x32_rotate(state, 16);
+    mckl_threefry2x32_rotate(state, 24);
+    mckl_threefry2x32_insertkey(state, &par, 2, 2, 0);
+    mckl_threefry2x32_rotate(state, 13);
+    mckl_threefry2x32_rotate(state, 15);
+    mckl_threefry2x32_rotate(state, 26);
+    mckl_threefry2x32_rotate(state, 6);
+    mckl_threefry2x32_insertkey(state, &par, 3, 0, 1);
+    mckl_threefry2x32_rotate(state, 17);
+    mckl_threefry2x32_rotate(state, 29);
+    mckl_threefry2x32_rotate(state, 16);
+    mckl_threefry2x32_rotate(state, 24);
+    mckl_threefry2x32_insertkey(state, &par, 4, 1, 2);
+    mckl_threefry2x32_rotate(state, 13);
+    mckl_threefry2x32_rotate(state, 15);
+    mckl_threefry2x32_rotate(state, 26);
+    mckl_threefry2x32_rotate(state, 6);
+    mckl_threefry2x32_insertkey(state, &par, 5, 2, 0);
 }
 
 /// \brief Generate Threefry4x32 RNG state
@@ -354,32 +354,32 @@ static inline void mckl_threefry4x32_gen(const mckl_threefry4x32_ctr_t *ctr,
     mckl_threefry4x32_par_t par;
     mckl_threefry4x32_initpar(key, &par);
 
-    mckl_threefry4x32_insertkey(state, &par, 0, 0, 1, 2, 3); // Round 0
-    mckl_threefry4x32_rotate(state, 10, 26, 1, 3);           // Round 1
-    mckl_threefry4x32_rotate(state, 11, 21, 3, 1);           // Round 2
-    mckl_threefry4x32_rotate(state, 13, 27, 1, 3);           // Round 3
-    mckl_threefry4x32_rotate(state, 23, 5, 3, 1);            // Round 4
-    mckl_threefry4x32_insertkey(state, &par, 1, 1, 2, 3, 4); // Round 4
-    mckl_threefry4x32_rotate(state, 6, 20, 1, 3);            // Round 5
-    mckl_threefry4x32_rotate(state, 17, 11, 3, 1);           // Round 6
-    mckl_threefry4x32_rotate(state, 25, 10, 1, 3);           // Round 7
-    mckl_threefry4x32_rotate(state, 18, 20, 3, 1);           // Round 8
-    mckl_threefry4x32_insertkey(state, &par, 2, 2, 3, 4, 0); // Round 8
-    mckl_threefry4x32_rotate(state, 10, 26, 1, 3);           // Round 9
-    mckl_threefry4x32_rotate(state, 11, 21, 3, 1);           // Round 10
-    mckl_threefry4x32_rotate(state, 13, 27, 1, 3);           // Round 11
-    mckl_threefry4x32_rotate(state, 23, 5, 3, 1);            // Round 12
-    mckl_threefry4x32_insertkey(state, &par, 3, 3, 4, 0, 1); // Round 12
-    mckl_threefry4x32_rotate(state, 6, 20, 1, 3);            // Round 13
-    mckl_threefry4x32_rotate(state, 17, 11, 3, 1);           // Round 14
-    mckl_threefry4x32_rotate(state, 25, 10, 1, 3);           // Round 15
-    mckl_threefry4x32_rotate(state, 18, 20, 3, 1);           // Round 16
-    mckl_threefry4x32_insertkey(state, &par, 4, 4, 0, 1, 2); // Round 16
-    mckl_threefry4x32_rotate(state, 10, 26, 1, 3);           // Round 17
-    mckl_threefry4x32_rotate(state, 11, 21, 3, 1);           // Round 18
-    mckl_threefry4x32_rotate(state, 13, 27, 1, 3);           // Round 19
-    mckl_threefry4x32_rotate(state, 23, 5, 3, 1);            // Round 20
-    mckl_threefry4x32_insertkey(state, &par, 5, 0, 1, 2, 3); // Round 20
+    mckl_threefry4x32_insertkey(state, &par, 0, 0, 1, 2, 3);
+    mckl_threefry4x32_rotate(state, 10, 26, 1, 3);
+    mckl_threefry4x32_rotate(state, 11, 21, 3, 1);
+    mckl_threefry4x32_rotate(state, 13, 27, 1, 3);
+    mckl_threefry4x32_rotate(state, 23, 5, 3, 1);
+    mckl_threefry4x32_insertkey(state, &par, 1, 1, 2, 3, 4);
+    mckl_threefry4x32_rotate(state, 6, 20, 1, 3);
+    mckl_threefry4x32_rotate(state, 17, 11, 3, 1);
+    mckl_threefry4x32_rotate(state, 25, 10, 1, 3);
+    mckl_threefry4x32_rotate(state, 18, 20, 3, 1);
+    mckl_threefry4x32_insertkey(state, &par, 2, 2, 3, 4, 0);
+    mckl_threefry4x32_rotate(state, 10, 26, 1, 3);
+    mckl_threefry4x32_rotate(state, 11, 21, 3, 1);
+    mckl_threefry4x32_rotate(state, 13, 27, 1, 3);
+    mckl_threefry4x32_rotate(state, 23, 5, 3, 1);
+    mckl_threefry4x32_insertkey(state, &par, 3, 3, 4, 0, 1);
+    mckl_threefry4x32_rotate(state, 6, 20, 1, 3);
+    mckl_threefry4x32_rotate(state, 17, 11, 3, 1);
+    mckl_threefry4x32_rotate(state, 25, 10, 1, 3);
+    mckl_threefry4x32_rotate(state, 18, 20, 3, 1);
+    mckl_threefry4x32_insertkey(state, &par, 4, 4, 0, 1, 2);
+    mckl_threefry4x32_rotate(state, 10, 26, 1, 3);
+    mckl_threefry4x32_rotate(state, 11, 21, 3, 1);
+    mckl_threefry4x32_rotate(state, 13, 27, 1, 3);
+    mckl_threefry4x32_rotate(state, 23, 5, 3, 1);
+    mckl_threefry4x32_insertkey(state, &par, 5, 0, 1, 2, 3);
 }
 
 /// \brief Generate Threefry2x64 RNG state
@@ -391,32 +391,32 @@ static inline void mckl_threefry2x64_gen(const mckl_threefry2x64_ctr_t *ctr,
     mckl_threefry2x64_par_t par;
     mckl_threefry2x64_initpar(key, &par);
 
-    mckl_threefry2x64_insertkey(state, &par, 0, 0, 1); // Round 0
-    mckl_threefry2x64_rotate(state, 16);               // Round 1
-    mckl_threefry2x64_rotate(state, 42);               // Round 2
-    mckl_threefry2x64_rotate(state, 12);               // Round 3
-    mckl_threefry2x64_rotate(state, 31);               // Round 4
-    mckl_threefry2x64_insertkey(state, &par, 1, 1, 2); // Round 4
-    mckl_threefry2x64_rotate(state, 16);               // Round 5
-    mckl_threefry2x64_rotate(state, 32);               // Round 6
-    mckl_threefry2x64_rotate(state, 24);               // Round 7
-    mckl_threefry2x64_rotate(state, 21);               // Round 8
-    mckl_threefry2x64_insertkey(state, &par, 2, 2, 0); // Round 8
-    mckl_threefry2x64_rotate(state, 16);               // Round 9
-    mckl_threefry2x64_rotate(state, 42);               // Round 10
-    mckl_threefry2x64_rotate(state, 12);               // Round 11
-    mckl_threefry2x64_rotate(state, 31);               // Round 12
-    mckl_threefry2x64_insertkey(state, &par, 3, 0, 1); // Round 12
-    mckl_threefry2x64_rotate(state, 16);               // Round 13
-    mckl_threefry2x64_rotate(state, 32);               // Round 14
-    mckl_threefry2x64_rotate(state, 24);               // Round 15
-    mckl_threefry2x64_rotate(state, 21);               // Round 16
-    mckl_threefry2x64_insertkey(state, &par, 4, 1, 2); // Round 16
-    mckl_threefry2x64_rotate(state, 16);               // Round 17
-    mckl_threefry2x64_rotate(state, 42);               // Round 18
-    mckl_threefry2x64_rotate(state, 12);               // Round 19
-    mckl_threefry2x64_rotate(state, 31);               // Round 20
-    mckl_threefry2x64_insertkey(state, &par, 5, 2, 0); // Round 20
+    mckl_threefry2x64_insertkey(state, &par, 0, 0, 1);
+    mckl_threefry2x64_rotate(state, 16);
+    mckl_threefry2x64_rotate(state, 42);
+    mckl_threefry2x64_rotate(state, 12);
+    mckl_threefry2x64_rotate(state, 31);
+    mckl_threefry2x64_insertkey(state, &par, 1, 1, 2);
+    mckl_threefry2x64_rotate(state, 16);
+    mckl_threefry2x64_rotate(state, 32);
+    mckl_threefry2x64_rotate(state, 24);
+    mckl_threefry2x64_rotate(state, 21);
+    mckl_threefry2x64_insertkey(state, &par, 2, 2, 0);
+    mckl_threefry2x64_rotate(state, 16);
+    mckl_threefry2x64_rotate(state, 42);
+    mckl_threefry2x64_rotate(state, 12);
+    mckl_threefry2x64_rotate(state, 31);
+    mckl_threefry2x64_insertkey(state, &par, 3, 0, 1);
+    mckl_threefry2x64_rotate(state, 16);
+    mckl_threefry2x64_rotate(state, 32);
+    mckl_threefry2x64_rotate(state, 24);
+    mckl_threefry2x64_rotate(state, 21);
+    mckl_threefry2x64_insertkey(state, &par, 4, 1, 2);
+    mckl_threefry2x64_rotate(state, 16);
+    mckl_threefry2x64_rotate(state, 42);
+    mckl_threefry2x64_rotate(state, 12);
+    mckl_threefry2x64_rotate(state, 31);
+    mckl_threefry2x64_insertkey(state, &par, 5, 2, 0);
 }
 
 /// \brief Generate Threefry4x64 RNG state
@@ -428,32 +428,32 @@ static inline void mckl_threefry4x64_gen(const mckl_threefry4x64_ctr_t *ctr,
     mckl_threefry4x64_par_t par;
     mckl_threefry4x64_initpar(key, &par);
 
-    mckl_threefry4x64_insertkey(state, &par, 0, 0, 1, 2, 3); // Round 0
-    mckl_threefry4x64_rotate(state, 14, 16, 1, 3);           // Round 1
-    mckl_threefry4x64_rotate(state, 52, 57, 3, 1);           // Round 2
-    mckl_threefry4x64_rotate(state, 23, 40, 1, 3);           // Round 3
-    mckl_threefry4x64_rotate(state, 5, 37, 3, 1);            // Round 4
-    mckl_threefry4x64_insertkey(state, &par, 1, 1, 2, 3, 4); // Round 4
-    mckl_threefry4x64_rotate(state, 25, 33, 1, 3);           // Round 5
-    mckl_threefry4x64_rotate(state, 46, 12, 3, 1);           // Round 6
-    mckl_threefry4x64_rotate(state, 58, 22, 1, 3);           // Round 7
-    mckl_threefry4x64_rotate(state, 32, 32, 3, 1);           // Round 8
-    mckl_threefry4x64_insertkey(state, &par, 2, 2, 3, 4, 0); // Round 8
-    mckl_threefry4x64_rotate(state, 14, 16, 1, 3);           // Round 9
-    mckl_threefry4x64_rotate(state, 52, 57, 3, 1);           // Round 10
-    mckl_threefry4x64_rotate(state, 23, 40, 1, 3);           // Round 11
-    mckl_threefry4x64_rotate(state, 5, 37, 3, 1);            // Round 12
-    mckl_threefry4x64_insertkey(state, &par, 3, 3, 4, 0, 1); // Round 12
-    mckl_threefry4x64_rotate(state, 25, 33, 1, 3);           // Round 13
-    mckl_threefry4x64_rotate(state, 46, 12, 3, 1);           // Round 14
-    mckl_threefry4x64_rotate(state, 58, 22, 1, 3);           // Round 15
-    mckl_threefry4x64_rotate(state, 32, 32, 3, 1);           // Round 16
-    mckl_threefry4x64_insertkey(state, &par, 4, 4, 0, 1, 2); // Round 16
-    mckl_threefry4x64_rotate(state, 14, 16, 1, 3);           // Round 17
-    mckl_threefry4x64_rotate(state, 52, 57, 3, 1);           // Round 18
-    mckl_threefry4x64_rotate(state, 23, 40, 1, 3);           // Round 19
-    mckl_threefry4x64_rotate(state, 5, 37, 3, 1);            // Round 20
-    mckl_threefry4x64_insertkey(state, &par, 5, 0, 1, 2, 3); // Round 20
+    mckl_threefry4x64_insertkey(state, &par, 0, 0, 1, 2, 3);
+    mckl_threefry4x64_rotate(state, 14, 16, 1, 3);
+    mckl_threefry4x64_rotate(state, 52, 57, 3, 1);
+    mckl_threefry4x64_rotate(state, 23, 40, 1, 3);
+    mckl_threefry4x64_rotate(state, 5, 37, 3, 1);
+    mckl_threefry4x64_insertkey(state, &par, 1, 1, 2, 3, 4);
+    mckl_threefry4x64_rotate(state, 25, 33, 1, 3);
+    mckl_threefry4x64_rotate(state, 46, 12, 3, 1);
+    mckl_threefry4x64_rotate(state, 58, 22, 1, 3);
+    mckl_threefry4x64_rotate(state, 32, 32, 3, 1);
+    mckl_threefry4x64_insertkey(state, &par, 2, 2, 3, 4, 0);
+    mckl_threefry4x64_rotate(state, 14, 16, 1, 3);
+    mckl_threefry4x64_rotate(state, 52, 57, 3, 1);
+    mckl_threefry4x64_rotate(state, 23, 40, 1, 3);
+    mckl_threefry4x64_rotate(state, 5, 37, 3, 1);
+    mckl_threefry4x64_insertkey(state, &par, 3, 3, 4, 0, 1);
+    mckl_threefry4x64_rotate(state, 25, 33, 1, 3);
+    mckl_threefry4x64_rotate(state, 46, 12, 3, 1);
+    mckl_threefry4x64_rotate(state, 58, 22, 1, 3);
+    mckl_threefry4x64_rotate(state, 32, 32, 3, 1);
+    mckl_threefry4x64_insertkey(state, &par, 4, 4, 0, 1, 2);
+    mckl_threefry4x64_rotate(state, 14, 16, 1, 3);
+    mckl_threefry4x64_rotate(state, 52, 57, 3, 1);
+    mckl_threefry4x64_rotate(state, 23, 40, 1, 3);
+    mckl_threefry4x64_rotate(state, 5, 37, 3, 1);
+    mckl_threefry4x64_insertkey(state, &par, 5, 0, 1, 2, 3);
 }
 
 /// \brief Initialize Threefry2x32 RNG state

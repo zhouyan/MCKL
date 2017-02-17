@@ -3,7 +3,7 @@
 % ----------------------------------------------------------------------------
 %  MCKL: Monte Carlo Kernel Library
 % ----------------------------------------------------------------------------
-%  Copyright (c) 2013-2016, Yan Zhou
+%  Copyright (c) 2013-2017, Yan Zhou
 %  All rights reserved.
 %
 %  Redistribution and use in source and binary forms, with or without
@@ -36,14 +36,17 @@
 \UseAbbr{blas}
 \UseAbbr{brng}
 \UseAbbr{cdf}
+\UseAbbr{cmake}
 \UseAbbr{cpb}
 \UseAbbr{cpe}
 \UseAbbr{cpu}
 \UseAbbr{crtp}
 \UseAbbr{ess}
+\UseAbbr{fma}
 \UseAbbr{gcc}
 \UseAbbr{gnu}
 \UseAbbr{icc}
+\UseAbbr{ieee}
 \UseAbbr{intel}
 \UseAbbr{lapack}
 \UseAbbr{llvm}
@@ -51,6 +54,8 @@
 \UseAbbr{mcmc}
 \UseAbbr{mkl}
 \UseAbbr{msvc}
+\UseAbbr{nan}
+\UseAbbr{nasm}
 \UseAbbr{odr}
 \UseAbbr{pdf}
 \UseAbbr{pmf}
@@ -65,7 +70,9 @@
 \UseAbbr{stl}
 \UseAbbr{tbb}
 \UseAbbr{tls}
+\UseAbbr{ulp}
 \UseAbbr{unix}
+\UseAbbr{vmf}
 \UseAbbr{vml}
 \UseAbbr{vsl}
 
@@ -95,25 +102,25 @@
 \def\yvel{Y_{\mathrm{vel}}}
 
 \def\system{Two \cpu and operation system combinations are tested. The first is
-  an Intel Xeon~W3550, running at~3.07~GHz base frequency with four physical
-  cores and eight logical ones through hyperthreading, with CentOS
-  (verison~7.2) and the second is an Intel Core~i7-4960\textsc{hq}, running
-  at~2.60~Ghz base frequency with four physical cores and eight logical ones
+  an Intel Xeon~W3550, running at~3.06~GHz base frequency and~3.33~GHz maximum
+  turbo boost frequency, with four physical cores and eight logical ones
+  through hyperthreading, with CentOS (verison~7.2) and the second is an Intel
+  Core~i7-4960\textsc{hq}, running at~2.60~Ghz base frequency and~3.80~GHz
+  maximum turbo boost freqency, with four physical cores and eight logical ones
   through hyperthreading, with macOS Sierra (version~10.12.1). They are labeled
   as ``Nehalem'' and ``Haswell'', respectively, based on their \cpu
-  microarchitecture. Both single core and parallel (using number of threads
-  equal the number of the \cpu logical cores) performance are tested. They are
-labeled as ``sequential'' and ``parallel'', respectively.}
+  microarchitecture.}
 
 \def\compiler{Three compilers are tested on each system, \llvm clang
   (version~3.9.1 on CentOS and version Apple~8.0.0 on macOS), \gnu \gcc
-(version~6.2.0), and Intel \cpp compiler (version~17.0.0).}
+  (version~6.2.0 on bosth systems), and Intel \cpp compiler (version~17.0.0 on
+  CentOS and version~17.0.1 on macOS).}
 
 \def\compilerone{\compiler{} The results shown here is with the \llvm clang
-compiler.}
+  compiler.}
 
 \def\compilerthree{\compiler{} They are labeled as ``\llvm'', ``\gnu'' and
-``\intel'', respectively.}
+  ``\intel'', respectively.}
 
 \ExplSyntaxOn
 \def\perftable#1#2#3#4{

@@ -1,5 +1,5 @@
-MKL_ARS5_64             2064       8           0.82           0.28      ---Passed
-MKL_ARS5_64             2064       8           0.84           0.28      ---Passed
-MKL_ARS5_64             2064       8           0.85           0.29      ---Passed
-MKL_ARS5_64             2064       8           0.82           0.28      ---Passed
-MKL_ARS5_64             2064       8           0.83           0.28      ---Passed
+MKL_ARS5_64                        2064     8      0.78      0.27      ---Passed
+MKL_ARS5_64                        2064     8      0.78      0.27      ---Passed
+MKL_ARS5_64                        2064     8      0.78      0.27      ---Passed
+MKL_ARS5_64                        2064     8      0.78      0.27      ---Passed
+MKL_ARS5_64                        2064     8      0.78      0.27      ---Passed

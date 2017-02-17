@@ -1,4 +1,4 @@
-U01CC<float>                         31.77       31.05        7.76        8.97       VML    (0)--Passed
-U01CC<double>                        70.82       31.55       10.13       11.86       VML    (0)--Passed
-U01CC<float>                         31.75       31.03        7.75        8.98       C++    (0)--Passed
-U01CC<double>                        70.94       31.45       10.15       11.84       C++    (0)--Passed
+U01CC<float>                         37.87       36.18        6.92        8.64       VML    (0)--Passed
+U01CC<double>                        76.63       37.81        9.04       10.99       VML    (0)--Passed
+U01CC<float>                         37.80       36.13        6.72        8.45       VMF    (0)--Passed
+U01CC<double>                        76.31       37.74        9.04       11.05       VMF    (0)--Passed

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/aes_constants.hpp>
 #include <mckl/random/internal/aes_generic.hpp>
+#include <mckl/random/internal/aes_key_seq.hpp>
 #include <mckl/random/counter.hpp>
 #include <mckl/random/increment.hpp>
 
@@ -42,46 +43,6 @@
 #include <mckl/random/internal/aes_aesni.hpp>
 #else
 #endif
-
-#define MCKL_DEFINE_RANDOM_AES_U01(lr, bits)                                  \
-    template <typename RealType>                                              \
-    void u01_##lr##_u##bits(ctr_type &ctr, std::size_t n, RealType *r) const  \
-    {                                                                         \
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());                  \
-        internal::AESGeneratorImpl<KeySeqType>::u01_##lr##_u##bits(           \
-            ctr, rk, n, r);                                                   \
-    }
-
-#define MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(lr, rbits, ftype)             \
-    template <typename ResultType, typename KeySeqType>                       \
-    inline void u01_##lr##_distribution(                                      \
-        AESEngine<ResultType, KeySeqType> &rng, std::size_t n, ftype *r,      \
-        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
-            rbits>::type * = nullptr)                                         \
-    {                                                                         \
-        rng.u01_##lr##_u##rbits(n, r);                                        \
-    }
-
-#define MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL(bits)                             \
-    template <typename RealType>                                              \
-    void uniform_real_u##bits(ctr_type &ctr, std::size_t n, RealType *r,      \
-        RealType a, RealType b) const                                         \
-    {                                                                         \
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());                  \
-        internal::AESGeneratorImpl<KeySeqType>::uniform_real_u##bits(         \
-            ctr, rk, n, r, a, b);                                             \
-    }
-
-#define MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(rbits, ftype)        \
-    template <typename ResultType, typename KeySeqType>                       \
-    inline void uniform_real_distribution(                                    \
-        AESEngine<ResultType, KeySeqType> &rng, std::size_t n, ftype *r,      \
-        ftype a, ftype b,                                                     \
-        typename std::enable_if<std::numeric_limits<ResultType>::digits ==    \
-            rbits>::type * = nullptr)                                         \
-    {                                                                         \
-        rng.uniform_real_u##rbits(n, r, a, b);                                \
-    }
 
 #ifdef MCKL_GCC
 #if MCKL_GCC_VERSION >= 60000
@@ -146,174 +107,25 @@ using AESGeneratorImpl = AESGeneratorGenericImpl<KeySeqType>;
 
 #endif // MCKL_USE_AESNI
 
-template <std::size_t Rounds, typename KeySeqGenerator>
-class AESKeySeqImpl
-{
-    public:
-    using key_type = typename KeySeqGenerator::key_type;
-    using rk_type = typename KeySeqGenerator::rk_type;
-
-    static constexpr std::size_t rounds() { return Rounds; }
-
-    key_type key() const { return KeySeqGenerator::key(rk_); }
-
-    void set(const key_type &key)
-    {
-        KeySeqGenerator generator;
-        generator(key, rk_);
-    }
-
-    const std::array<rk_type, rounds() + 1> get() const { return rk_; }
-
-    friend bool operator==(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
-    {
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks1;
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks2;
-        std::memcpy(ks1.data(), seq1.rk_.data(),
-            sizeof(std::uint64_t) * 2 * (rounds() + 1));
-        std::memcpy(ks2.data(), seq2.rk_.data(),
-            sizeof(std::uint64_t) * 2 * (rounds() + 1));
-
-        return ks1 == ks2;
-    }
-
-    friend bool operator!=(const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq1,
-        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq2)
-    {
-        return !(seq1 == seq2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
-    {
-        if (!os)
-            return os;
-
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
-        std::memcpy(ks.data(), seq.rk_.data(),
-            sizeof(std::uint64_t) * 2 * (rounds() + 1));
-        ostream(os, ks);
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
-    {
-        if (!is)
-            return is;
-
-        std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
-        istream(is, ks);
-        if (is) {
-            std::memcpy(seq.rk_.data(), ks.data(),
-                sizeof(std::uint64_t) * 2 * (rounds() + 1));
-        }
-
-        return is;
-    }
-
-    private:
-    std::array<rk_type, rounds() + 1> rk_;
-}; // class AESKeySeqImpl
-
-template <std::size_t Rounds, typename Constants>
-class ARSKeySeqImpl
-{
-    public:
-    using key_type = typename ARSKeySeqGenerator<Constants>::key_type;
-    using rk_type = typename ARSKeySeqGenerator<Constants>::rk_type;
-
-    static constexpr std::size_t rounds() { return Rounds; }
-
-    key_type key() const { return key_; }
-
-    void set(const key_type &key) { key_ = key; }
-
-    std::array<rk_type, rounds() + 1> get() const
-    {
-        ARSKeySeqGenerator<Constants> generator;
-        std::array<rk_type, rounds() + 1> rk;
-        generator(key_, rk);
-
-        return rk;
-    }
-
-    friend bool operator==(const ARSKeySeqImpl<Rounds, Constants> &seq1,
-        const ARSKeySeqImpl<Rounds, Constants> &seq2)
-    {
-        return seq1.key_ == seq2.key_;
-    }
-
-    friend bool operator!=(const ARSKeySeqImpl<Rounds, Constants> &seq1,
-        const ARSKeySeqImpl<Rounds, Constants> &seq2)
-    {
-        return !(seq1 == seq2);
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_ostream<CharT, Traits> &operator<<(
-        std::basic_ostream<CharT, Traits> &os,
-        const ARSKeySeqImpl<Rounds, Constants> &seq)
-    {
-        if (!os)
-            return os;
-
-        ostream(os, seq.key_);
-
-        return os;
-    }
-
-    template <typename CharT, typename Traits>
-    friend std::basic_istream<CharT, Traits> &operator>>(
-        std::basic_istream<CharT, Traits> &is,
-        ARSKeySeqImpl<Rounds, Constants> &seq)
-    {
-        if (!is)
-            return is;
-
-        key_type k = {{0}};
-        istream(is, k);
-        if (is)
-            seq.key_ = k;
-
-        return is;
-    }
-
-    private:
-    key_type key_;
-}; // class ARSKeySeqImpl
-
 } // namespace mck::internal
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES128_ROUNDS>
-class AES128KeySeq
-    : public internal::AESKeySeqImpl<Rounds, internal::AES128KeySeqGenerator>
-{
-}; // class AES128KeySeq
+using AES128KeySeq =
+    internal::AESKeySeqImpl<Rounds, internal::AES128KeySeqGenerator>;
 
 /// \brief AES192Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES192_ROUNDS>
-class AES192KeySeq
-    : public internal::AESKeySeqImpl<Rounds, internal::AES192KeySeqGenerator>
-{
-}; // class AES192KeySeq
+using AES192KeySeq =
+    internal::AESKeySeqImpl<Rounds, internal::AES192KeySeqGenerator>;
 
 /// \brief AES256Engine key sequence generator
 /// \ingroup AES
 template <std::size_t Rounds = MCKL_AES256_ROUNDS>
-class AES256KeySeq
-    : public internal::AESKeySeqImpl<Rounds, internal::AES256KeySeqGenerator>
-{
-}; // class AES256KeySeq
+using AES256KeySeq =
+    internal::AESKeySeqImpl<Rounds, internal::AES256KeySeqGenerator>;
 
 /// \brief Default ARSEngine key sequence generator
 /// \ingroup AES
@@ -322,9 +134,8 @@ class AES256KeySeq
 /// \tparam Constants A trait class that defines algorithm constants
 template <std::size_t Rounds = MCKL_ARS_ROUNDS,
     typename Constants = ARSConstants>
-class ARSKeySeq : public internal::ARSKeySeqImpl<Rounds, Constants>
-{
-}; // class ARSKeySeq
+using ARSKeySeq =
+    internal::ARSKeySeqImpl<Rounds, internal::ARSKeySeqGenerator<Constants>>;
 
 /// \brief RNG generator using AES round functions
 /// \ingroup AES
@@ -338,7 +149,7 @@ class AESGenerator
     using ctr_type = Counter<std::uint32_t, 4>;
     using key_type = typename KeySeqType::key_type;
 
-    static constexpr std::size_t size() { return 128 / CHAR_BIT; }
+    static constexpr std::size_t size() { return sizeof(std::uint32_t) * 4; }
 
     key_type key() const { return key_seq_.key(); }
 
@@ -346,46 +157,20 @@ class AESGenerator
 
     void operator()(const void *plain, void *cipher) const
     {
-        alignas(32) union {
-            std::array<std::uint32_t, 4> s;
-            std::array<char, size()> r;
-        } buf;
-
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-
-        std::memcpy(buf.s.data(), plain, size());
-        internal::union_le<char>(buf.s);
-        internal::AESGeneratorImpl<KeySeqType>::eval(buf.s, rk);
-        internal::union_le<std::uint32_t>(buf.r);
-        std::memcpy(cipher, buf.s.data(), size());
+        internal::AESGeneratorImpl<KeySeqType>::eval(plain, cipher, key_seq_);
     }
 
     template <typename ResultType>
     void operator()(ctr_type &ctr, ResultType *r) const
     {
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        generate(ctr, r, rk);
+        internal::AESGeneratorImpl<KeySeqType>::eval(ctr, r, key_seq_);
     }
 
     template <typename ResultType>
     void operator()(ctr_type &ctr, std::size_t n, ResultType *r) const
     {
-        generate(
-            ctr, n, r, std::integral_constant<bool,
-                           internal::AESGeneratorImpl<KeySeqType>::batch()>());
+        internal::AESGeneratorImpl<KeySeqType>::eval(ctr, n, r, key_seq_);
     }
-
-    MCKL_DEFINE_RANDOM_AES_U01(cc, 32)
-    MCKL_DEFINE_RANDOM_AES_U01(co, 32)
-    MCKL_DEFINE_RANDOM_AES_U01(oc, 32)
-    MCKL_DEFINE_RANDOM_AES_U01(oo, 32)
-    MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL(32)
-
-    MCKL_DEFINE_RANDOM_AES_U01(cc, 64)
-    MCKL_DEFINE_RANDOM_AES_U01(co, 64)
-    MCKL_DEFINE_RANDOM_AES_U01(oc, 64)
-    MCKL_DEFINE_RANDOM_AES_U01(oo, 64)
-    MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL(64)
 
     friend bool operator==(const AESGenerator<KeySeqType> &gen1,
         const AESGenerator<KeySeqType> &gen2)
@@ -429,52 +214,7 @@ class AESGenerator
     }
 
     private:
-    using rk_type = typename KeySeqType::rk_type;
-
-    static constexpr std::size_t rounds_ = KeySeqType::rounds();
-
     KeySeqType key_seq_;
-
-    template <typename ResultType>
-    void generate(ctr_type &ctr, ResultType *r,
-        const std::array<rk_type, rounds_ + 1> &rk) const
-    {
-        alignas(32) union {
-            std::array<std::uint32_t, 4> s;
-            ctr_type c;
-            std::array<ResultType, size() / sizeof(ResultType)> r;
-        } buf;
-
-        MCKL_FLATTEN_CALL increment(ctr);
-        buf.c = ctr;
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-        internal::union_le<typename ctr_type::value_type>(buf.s);
-#endif
-        internal::AESGeneratorImpl<KeySeqType>::eval(buf.s, rk);
-#if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
-        internal::union_le<std::uint32_t>(buf.r);
-#endif
-        std::memcpy(r, buf.r.data(), size());
-    }
-
-    template <typename ResultType>
-    void generate(
-        ctr_type &ctr, std::size_t n, ResultType *r, std::false_type) const
-    {
-        constexpr std::size_t stride = size() / sizeof(ResultType);
-
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        for (std::size_t i = 0; i != n; ++i, r += stride)
-            generate(ctr, r, rk);
-    }
-
-    template <typename ResultType>
-    void generate(
-        ctr_type &ctr, std::size_t n, ResultType *r, std::true_type) const
-    {
-        std::array<rk_type, rounds_ + 1> rk(key_seq_.get());
-        internal::AESGeneratorImpl<KeySeqType>::eval(ctr, rk, n, r);
-    }
 }; // class AESGenerator
 
 /// \brief RNG engine using AES round function
@@ -534,32 +274,6 @@ using AES256_64 = AES256Engine<std::uint64_t>;
 /// \brief ARS RNG engine with 64-bit integers output
 /// \ingroup AES
 using ARS_64 = ARSEngine<std::uint64_t>;
-
-#if MCKL_USE_AESNI && MCKL_USE_AVX2
-
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 32, float)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 32, float)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 32, float)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 32, float)
-MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(32, float)
-
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 64, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 64, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 64, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 64, double)
-MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(64, double)
-
-#if !MCKL_U01_USE_64BITS_DOUBLE
-
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(cc, 32, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(co, 32, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oc, 32, double)
-MCKL_DEFINE_RANDOM_AES_U01_DISTRIBUTION(oo, 32, double)
-MCKL_DEFINE_RANDOM_AES_UNIFORM_REAL_DISTRIBUTION(32, double)
-
-#endif // !MCKL_U01_USE_64BITS_DOUBLE
-
-#endif // MCKL_USE_AESNI && MCKL_USE_AVX2
 
 } // namespace mckl
 

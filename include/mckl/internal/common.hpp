@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@
 
 #include <mckl/internal/assert.hpp>
 #include <mckl/internal/defines.hpp>
-#include <mckl/internal/forward.hpp>
 #include <mckl/internal/traits.hpp>
 
 #include <mckl/internal/byte_order.hpp>
@@ -60,42 +59,30 @@
 #include <mckl/internal/fma.hpp>
 #endif
 
+#include <mckl/core/memory.hpp>
 #include <mckl/math.hpp>
-#include <mckl/utility/aligned_memory.hpp>
 
 // Utilities
-#include <bitset>
-#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
-#include <tuple>
 #include <type_traits>
 #include <utility>
 
 // Numeric limits
 #include <cfloat>
-#include <cinttypes>
 #include <climits>
 #include <cstdint>
 #include <limits>
 
 // String
-#include <cctype>
 #include <cstring>
 #include <string>
 
 // Containers
 #include <array>
-#include <deque>
-#include <forward_list>
-#include <list>
 #include <map>
-#include <queue>
 #include <set>
-#include <stack>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 // Algorithms
@@ -105,26 +92,14 @@
 #include <iterator>
 
 // Numerics
-#include <cfenv>
 #include <cmath>
 #include <complex>
 #include <numeric>
 #include <random>
-#include <ratio>
 
 // Input/Output
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
-
-// Atomic operation
-#include <atomic>
-
-// Thread support
-#include <condition_variable>
-#include <future>
-#include <mutex>
-#include <thread>
 
 #endif // MCKL_INTERNAL_COMMON_HPP

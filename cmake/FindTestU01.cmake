@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -44,46 +44,46 @@
 # TestU01_INC_PATH - The path CMake shall try to find headers first
 # TestU01_LIB_PATH - The path CMake shall try to find libraries first
 
-IF(DEFINED TestU01_FOUND)
-    RETURN()
-ENDIF(DEFINED TestU01_FOUND)
+if(DEFINED TestU01_FOUND)
+    return()
+endif(DEFINED TestU01_FOUND)
 
-IF(NOT DEFINED TestU01_LINK_LIBRARIES)
-    FIND_LIBRARY(TestU01 testu01
+if(NOT DEFINED TestU01_LINK_LIBRARIES)
+    find_library(TestU01 testu01
         PATHS ${TestU01_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
-    FIND_LIBRARY(TestU01 testu01)
+    find_library(TestU01 testu01)
 
-    FIND_LIBRARY(TestU01_PROBDIST probdist
+    find_library(TestU01_PROBDIST probdist
         PATHS ${TestU01_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
-    FIND_LIBRARY(TestU01_PROBDIST probdist)
+    find_library(TestU01_PROBDIST probdist)
 
-    FIND_LIBRARY(TestU01_MYLIB mylib
+    find_library(TestU01_MYLIB mylib
         PATHS ${TestU01_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
-    FIND_LIBRARY(TestU01_MYLIB mylib)
+    find_library(TestU01_MYLIB mylib)
 
-    IF(TestU01 AND TestU01_PROBDIST AND TestU01_MYLIB)
-        SET(TestU01_LINK_LIBRARIES
+    if(TestU01 AND TestU01_PROBDIST AND TestU01_MYLIB)
+        set(TestU01_LINK_LIBRARIES
             ${TestU01} ${TestU01_PROBDIST} ${TestU01_MYLIB}
             CACHE STRING "TestU01 Libraries")
-        MESSAGE(STATUS "Found TestU01 libraries: ${TestU01_LINK_LIBRARIES}")
-    ELSE(TestU01 AND TestU01_PROBDIST AND TestU01_MYLIB)
-        MESSAGE(STATUS "NOT Found TestU01 libraries")
-    ENDIF(TestU01 AND TestU01_PROBDIST AND TestU01_MYLIB)
-ENDIF(NOT DEFINED TestU01_LINK_LIBRARIES)
+        message(STATUS "Found TestU01 libraries: ${TestU01_LINK_LIBRARIES}")
+    else(TestU01 AND TestU01_PROBDIST AND TestU01_MYLIB)
+        message(STATUS "NOT Found TestU01 libraries")
+    endif(TestU01 AND TestU01_PROBDIST AND TestU01_MYLIB)
+endif(NOT DEFINED TestU01_LINK_LIBRARIES)
 
-IF(NOT DEFINED TestU01_INCLUDE_DIR)
-    FIND_PATH(TestU01_INCLUDE_DIR TestU01.h
+if(NOT DEFINED TestU01_INCLUDE_DIR)
+    find_path(TestU01_INCLUDE_DIR TestU01.h
         PATHS ${TestU01_INC_PATH} ENV CPATH NO_DEFAULT_PATH)
-    FIND_PATH(TestU01_INCLUDE_DIR TestU01.h)
-    IF(TestU01_INCLUDE_DIR)
-        MESSAGE(STATUS "Found TestU01 headers: ${TestU01_INCLUDE_DIR}")
-    ELSE(TestU01_INCLUDE_DIR)
-        MESSAGE(STATUS "NOT Found TestU01 headers")
-    ENDIF(TestU01_INCLUDE_DIR)
-ENDIF(NOT DEFINED TestU01_INCLUDE_DIR)
+    find_path(TestU01_INCLUDE_DIR TestU01.h)
+    if(TestU01_INCLUDE_DIR)
+        message(STATUS "Found TestU01 headers: ${TestU01_INCLUDE_DIR}")
+    else(TestU01_INCLUDE_DIR)
+        message(STATUS "NOT Found TestU01 headers")
+    endif(TestU01_INCLUDE_DIR)
+endif(NOT DEFINED TestU01_INCLUDE_DIR)
 
-IF(TestU01_LINK_LIBRARIES AND TestU01_INCLUDE_DIR)
-    SET(TestU01_FOUND TRUE CACHE BOOL "Found TestU01")
-ELSE(TestU01_LINK_LIBRARIES AND TestU01_INCLUDE_DIR)
-    SET(TestU01_FOUND FALSE CACHE BOOL "NOT Found TestU01")
-ENDIF(TestU01_LINK_LIBRARIES AND TestU01_INCLUDE_DIR)
+if(TestU01_LINK_LIBRARIES AND TestU01_INCLUDE_DIR)
+    set(TestU01_FOUND TRUE CACHE BOOL "Found TestU01")
+else(TestU01_LINK_LIBRARIES AND TestU01_INCLUDE_DIR)
+    set(TestU01_FOUND FALSE CACHE BOOL "NOT Found TestU01")
+endif(TestU01_LINK_LIBRARIES AND TestU01_INCLUDE_DIR)

@@ -1,0 +1,8 @@
+========= Summary results of BigCrush =========
+ Generator:        U01CC
+ Number of statistics:  160
+ ----------------------------------------------
+ 32  CouponCollector, r = 20         0.9994
+ ----------------------------------------------
+ All other tests were passed
+

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ namespace mckl
 namespace internal
 {
 
-MCKL_FLATTEN inline void aesenc_si128(
+MCKL_INLINE inline void aesenc_si128(
     std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), a);
@@ -57,7 +57,7 @@ MCKL_FLATTEN inline void aesenc_si128(
     std::get<3>(s) = _mm_aesenc_si128(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void aesdec_si128(
+MCKL_INLINE inline void aesdec_si128(
     std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesdec_si128(std::get<0>(s), a);
@@ -66,7 +66,7 @@ MCKL_FLATTEN inline void aesdec_si128(
     std::get<3>(s) = _mm_aesdec_si128(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void aesenclast_si128(
+MCKL_INLINE inline void aesenclast_si128(
     std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesenclast_si128(std::get<0>(s), a);
@@ -75,7 +75,7 @@ MCKL_FLATTEN inline void aesenclast_si128(
     std::get<3>(s) = _mm_aesenclast_si128(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void aesdeclast_si128(
+MCKL_INLINE inline void aesdeclast_si128(
     std::array<__m128i, 4> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesdeclast_si128(std::get<0>(s), a);
@@ -84,7 +84,7 @@ MCKL_FLATTEN inline void aesdeclast_si128(
     std::get<3>(s) = _mm_aesdeclast_si128(std::get<3>(s), a);
 }
 
-MCKL_FLATTEN inline void aesenc_si128(
+MCKL_INLINE inline void aesenc_si128(
     std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesenc_si128(std::get<0>(s), a);
@@ -97,7 +97,7 @@ MCKL_FLATTEN inline void aesenc_si128(
     std::get<7>(s) = _mm_aesenc_si128(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void aesdec_si128(
+MCKL_INLINE inline void aesdec_si128(
     std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesdec_si128(std::get<0>(s), a);
@@ -110,7 +110,7 @@ MCKL_FLATTEN inline void aesdec_si128(
     std::get<7>(s) = _mm_aesdec_si128(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void aesenclast_si128(
+MCKL_INLINE inline void aesenclast_si128(
     std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesenclast_si128(std::get<0>(s), a);
@@ -123,7 +123,7 @@ MCKL_FLATTEN inline void aesenclast_si128(
     std::get<7>(s) = _mm_aesenclast_si128(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void aesdeclast_si128(
+MCKL_INLINE inline void aesdeclast_si128(
     std::array<__m128i, 8> &s, const __m128i &a)
 {
     std::get<0>(s) = _mm_aesdeclast_si128(std::get<0>(s), a);
@@ -136,7 +136,7 @@ MCKL_FLATTEN inline void aesdeclast_si128(
     std::get<7>(s) = _mm_aesdeclast_si128(std::get<7>(s), a);
 }
 
-MCKL_FLATTEN inline void aesenc_si128(
+MCKL_INLINE inline void aesenc_si128(
     std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_aesenc_si128(std::get<0x0>(s), a);
@@ -157,7 +157,7 @@ MCKL_FLATTEN inline void aesenc_si128(
     std::get<0xF>(s) = _mm_aesenc_si128(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void aesdec_si128(
+MCKL_INLINE inline void aesdec_si128(
     std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_aesdec_si128(std::get<0x0>(s), a);
@@ -178,7 +178,7 @@ MCKL_FLATTEN inline void aesdec_si128(
     std::get<0xF>(s) = _mm_aesdec_si128(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void aesenclast_si128(
+MCKL_INLINE inline void aesenclast_si128(
     std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_aesenclast_si128(std::get<0x0>(s), a);
@@ -199,7 +199,7 @@ MCKL_FLATTEN inline void aesenclast_si128(
     std::get<0xF>(s) = _mm_aesenclast_si128(std::get<0xF>(s), a);
 }
 
-MCKL_FLATTEN inline void aesdeclast_si128(
+MCKL_INLINE inline void aesdeclast_si128(
     std::array<__m128i, 16> &s, const __m128i &a)
 {
     std::get<0x0>(s) = _mm_aesdeclast_si128(std::get<0x0>(s), a);

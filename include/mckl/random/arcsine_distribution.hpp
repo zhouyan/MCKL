@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2016, Yan Zhou
+// Copyright (c) 2013-2017, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ inline void arcsine_distribution_impl(
     mul(n, const_pi_by2<RealType>(), r, r);
     sin(n, r, r);
     sqr(n, r, r);
-    fma(n, r, b - a, a, r);
+    muladd(n, r, b - a, a, r);
 }
 
 } // namespace mckl::internal

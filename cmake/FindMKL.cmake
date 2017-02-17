@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -45,50 +45,50 @@
 # MKL_INC_PATH - The path CMake shall try to find headers first
 # MKL_LIB_PATH - The path CMake shall try to find libraries first
 
-IF(DEFINED MKL_FOUND)
-    RETURN()
-ENDIF(DEFINED MKL_FOUND)
+if(DEFINED MKL_FOUND)
+    return()
+endif(DEFINED MKL_FOUND)
 
-IF(NOT DEFINED MKL_LINK_LIBRARIES)
-    INCLUDE(FindThreads)
-    FIND_LIBRARY(MKL_LINK_LIBRARIES mkl_rt
+if(NOT DEFINED MKL_LINK_LIBRARIES)
+    include(FindThreads)
+    find_library(MKL_LINK_LIBRARIES mkl_rt
         PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
-    FIND_LIBRARY(MKL_LINK_LIBRARIES mkl_rt)
+    find_library(MKL_LINK_LIBRARIES mkl_rt)
 
-    FIND_LIBRARY(MKL_BLAS95_LINK_LIBRARIES mkl_blas95
+    find_library(MKL_BLAS95_LINK_LIBRARIES mkl_blas95
         PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
-    FIND_LIBRARY(MKL_BLAS95_LINK_LIBRARIES mkl_blas95)
+    find_library(MKL_BLAS95_LINK_LIBRARIES mkl_blas95)
 
-    FIND_LIBRARY(MKL_BLAS95_LP64_LINK_LIBRARIES mkl_blas95_lp64
+    find_library(MKL_BLAS95_LP64_LINK_LIBRARIES mkl_blas95_lp64
         PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
-    FIND_LIBRARY(MKL_BLAS95_LP64_LINK_LIBRARIES mkl_blas95_lp64)
+    find_library(MKL_BLAS95_LP64_LINK_LIBRARIES mkl_blas95_lp64)
 
-    FIND_LIBRARY(MKL_BLAS95_ILP64_LINK_LIBRARIES mkl_blas95_ilp64
+    find_library(MKL_BLAS95_ILP64_LINK_LIBRARIES mkl_blas95_ilp64
         PATHS ${MKL_LIB_PATH} ENV LIBRARY_PATH NO_DEFAULT_PATH)
-    FIND_LIBRARY(MKL_BLAS95_ILP64_LINK_LIBRARIES mkl_blas95_ilp64)
+    find_library(MKL_BLAS95_ILP64_LINK_LIBRARIES mkl_blas95_ilp64)
 
-    IF(MKL_LINK_LIBRARIES)
-        SET(MKL_LINK_LIBRARIES ${MKL_LINK_LIBRARIES}
+    if(MKL_LINK_LIBRARIES)
+        set(MKL_LINK_LIBRARIES ${MKL_LINK_LIBRARIES}
             ${CMAKE_THREAD_LIBS_INIT} CACHE STRING "MKL Libraries")
-        MESSAGE(STATUS "Found MKL libraries: ${MKL_LINK_LIBRARIES}")
-    ELSE(MKL_LINK_LIBRARIES)
-        MESSAGE(STATUS "NOT Found MKL libraries")
-    ENDIF(MKL_LINK_LIBRARIES)
-ENDIF(NOT DEFINED MKL_LINK_LIBRARIES)
+        message(STATUS "Found MKL libraries: ${MKL_LINK_LIBRARIES}")
+    else(MKL_LINK_LIBRARIES)
+        message(STATUS "NOT Found MKL libraries")
+    endif(MKL_LINK_LIBRARIES)
+endif(NOT DEFINED MKL_LINK_LIBRARIES)
 
-IF(NOT DEFINED MKL_INCLUDE_DIR)
-    FIND_PATH(MKL_INCLUDE_DIR mkl_vml.h
+if(NOT DEFINED MKL_INCLUDE_DIR)
+    find_path(MKL_INCLUDE_DIR mkl_vml.h
         PATHS ${MKL_INC_PATH} ENV CPATH NO_DEFAULT_PATH)
-    FIND_PATH(MKL_INCLUDE_DIR mkl_vml.h)
-    IF(MKL_INCLUDE_DIR)
-        MESSAGE(STATUS "Found MKL headers: ${MKL_INCLUDE_DIR}")
-    ELSE(MKL_INCLUDE_DIR)
-        MESSAGE(STATUS "NOT Found MKL headers")
-    ENDIF(MKL_INCLUDE_DIR)
-ENDIF(NOT DEFINED MKL_INCLUDE_DIR)
+    find_path(MKL_INCLUDE_DIR mkl_vml.h)
+    if(MKL_INCLUDE_DIR)
+        message(STATUS "Found MKL headers: ${MKL_INCLUDE_DIR}")
+    else(MKL_INCLUDE_DIR)
+        message(STATUS "NOT Found MKL headers")
+    endif(MKL_INCLUDE_DIR)
+endif(NOT DEFINED MKL_INCLUDE_DIR)
 
-IF(MKL_LINK_LIBRARIES AND MKL_INCLUDE_DIR)
-    SET(MKL_FOUND TRUE CACHE BOOL "Found MKL")
-ELSE(MKL_LINK_LIBRARIES AND MKL_INCLUDE_DIR)
-    SET(MKL_FOUND FALSE CACHE BOOL "NOT Found MKL")
-ENDIF(MKL_LINK_LIBRARIES AND MKL_INCLUDE_DIR)
+if(MKL_LINK_LIBRARIES AND MKL_INCLUDE_DIR)
+    set(MKL_FOUND TRUE CACHE BOOL "Found MKL")
+else(MKL_LINK_LIBRARIES AND MKL_INCLUDE_DIR)
+    set(MKL_FOUND FALSE CACHE BOOL "NOT Found MKL")
+endif(MKL_LINK_LIBRARIES AND MKL_INCLUDE_DIR)

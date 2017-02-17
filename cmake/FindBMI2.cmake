@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2016, Yan Zhou
+#  Copyright (c) 2013-2017, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,16 @@
 #
 # BMI2_FOUND - TRUE if BMI2 is found and work correctly
 
-IF(DEFINED BMI2_FOUND)
-    RETURN()
-ENDIF(DEFINED BMI2_FOUND)
+if(DEFINED BMI2_FOUND)
+    return()
+endif(DEFINED BMI2_FOUND)
 
-FILE(READ ${CMAKE_CURRENT_LIST_DIR}/FindBMI2.cpp BMI2_TEST_SOURCE)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindBMI2.cpp BMI2_TEST_SOURCE)
 
-INCLUDE(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("${BMI2_TEST_SOURCE}" BMI2_TEST)
-IF(BMI2_TEST)
-    SET(BMI2_FOUND TRUE CACHE BOOL "Found BMI2 support")
-ELSE(BMI2_TEST)
-    SET(BMI2_FOUND FALSE CACHE BOOL "NOT Found BMI2 support")
-ENDIF(BMI2_TEST)
+include(CheckCXXSourceRuns)
+check_cxx_source_runs("${BMI2_TEST_SOURCE}" BMI2_TEST)
+if(BMI2_TEST)
+    set(BMI2_FOUND TRUE CACHE BOOL "Found BMI2 support")
+else(BMI2_TEST)
+    set(BMI2_FOUND FALSE CACHE BOOL "NOT Found BMI2 support")
+endif(BMI2_TEST)

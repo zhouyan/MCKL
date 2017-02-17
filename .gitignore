@@ -9,9 +9,10 @@
 *.pdf
 *.run.xml
 *.swp
+*.synctex.gz
 *.toc
 .DS_Store
 /build
+/manual/manual.tex.latexmain
 /manual/tab/*.tex
 /manual/tex/inc.tex
-/manual/manual.tex.latexmain
