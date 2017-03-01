@@ -29,7 +29,11 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\overfullrule=1ex
+\SetFontScale{mono}{footnotesize}
+
+\makeatletter
+\global\let\tikz@ensure@dollar@catcode=\relax
+\makeatother
 
 \UseAbbr{aes}
 \UseAbbr{ars}

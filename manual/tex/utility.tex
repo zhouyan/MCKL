@@ -103,9 +103,9 @@ to estimate the sample covariance $\Sigma$, for samples $x\in\Real^p$, $p\ge1$,
   \sum_{k=1}^N w_k (x_{k,i} - \bar{x}_i)(x_{k,j} - \bar{x}_j) \\
   \bar{x}_i &= \frac{1}{\sum_{i=1}^N w_i}\sum_{k=1}^N w_k x_{k,i}
 \end{align*}
-where $x_{i,j}$ is the $j$\sth component of the $i$\sth sample, and $w_i$ is
-the weight of the $i$\sth sample. At the time of writing, only |float| and
-|double| are supported. The class has the following operator as its interface,
+where $x_{i,j}$ is the $j$th component of the $i$th sample, and $w_i$ is the
+weight of the $i$th sample. At the time of writing, only |float| and |double|
+are supported. The class has the following operator as its interface,
 \begin{verbatim}
 void operator()(MatrixLayout layout, size_t n, size_t p, const RealType *x,
     const RealType *w, RealType *mean, RealType *cov,
