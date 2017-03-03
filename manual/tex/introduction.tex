@@ -32,8 +32,8 @@
 \chapter{Introduction}
 \label{chap:Introduction}
 
-\section{Organization of headers}
-\label{sec:Organization of headers}
+\section{Organization of Headers}
+\label{sec:Organization of Headers}
 
 \mckl is a header-only library. All headers files are under the |mckl|
 directory. To include all functionalities,
@@ -54,8 +54,8 @@ algorithm in~\cite{Salmon:2011um} (see section~\ref{sub:Threefry}). See the
 reference manual\footnote{\url{http://zhouyan.github.io/MCKLDoc/master}} for
 the header file for each class and function defined in \mckl.
 
-\section{Optional runtime library}
-\label{sec:Optional runtime library}
+\section{Optional Runtime Library}
+\label{sec:Optional Runtime Library}
 
 In addition to the header-only library, one can optionally build and use a
 runtime library. To build the library, one need a recent version of the
@@ -85,7 +85,7 @@ performance regardless of the choice of compiler.
 
 Further, one can define a configuration macro |MCKL_USE_ASM_VMF| to a non-zero
 value, to use an assembly implementation of selected vectorized math functions
-when \mkl \vml is unavailable, see~\ref{sec:Vectorized functions}. This feature
+when \mkl \vml is unavailable, see~\ref{sec:Vectorized Functions}. This feature
 is highly experimental. These functions are fast, but have slightly lower
 accuracy for some values of input than the standard library or \mkl \vml in
 high accuracy mode.
@@ -101,11 +101,11 @@ high accuracy mode.
     \texttt{mckl/math.hpp}     & Chapter~\ref{chap:Mathemtical Functions}    \\
     \texttt{mckl/random.hpp}   & Chapter~\ref{chap:Random Number Generating} \\
     \texttt{mckl/random/rng.hpp}
-    & Sections~\ref{sec:Counter-based random number generators}
-    to~\ref{sec:Non-deterministic random number generators} \\
+    & Sections~\ref{sec:Counter-Based Random Number Generators}
+    to~\ref{sec:Non-Deterministic Random Number Generators} \\
     \texttt{mckl/random/distribution.hpp}
-    & Sections~\ref{sec:Uniform bits distribution}
-    to~\ref{sec:Multivariate distribution} \\
+    & Sections~\ref{sec:Uniform Bits Distribution}
+    to~\ref{sec:Multivariate Distribution} \\
     \texttt{mckl/utility.hpp} & Chapter~\ref{chap:Utilities} \\
     \bottomrule
   \end{tabularx}

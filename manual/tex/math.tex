@@ -117,8 +117,8 @@ table~\ref{tab:Mathematical constants}.
 
 \clearpage
 
-\section{Vectorized functions}
-\label{sec:Vectorized functions}
+\section{Vectorized Functions}
+\label{sec:Vectorized Functions}
 
 \mckl provides a set of vectorized elementary mathematical functions. For
 example, to perform additions of two vectors,
@@ -172,7 +172,7 @@ advantage compared to simple loops. When \mkl \vml is available, some functions
 can have substantial performance improvement when all input arguments are
 vectors of types single or double precision floating point types, or their
 complex counterparts. The performance of vectorized random number generating
-(see section~\ref{sec:Vectorized random number generating}) heavily depends on
+(see section~\ref{sec:Vectorized Random Number Generating}) heavily depends on
 these functions.
 
 The input and output pointers are allowed to alias to each other in the sense
@@ -318,8 +318,8 @@ different locations but the vectors overlap, the behavior is undefined.
 
 \clearpage
 
-\section{Fused multiplication and addition}
-\label{sec:Fused multiplication and addition}
+\section{Fused Multiplication and Addition}
+\label{sec:Fused Multiplication and Addition}
 
 The |muladd| and |fmadd| functions in the last section differs in that |fmadd|
 always does fused multiplication and addition by |std::fma| while |muladd| use
@@ -332,7 +332,7 @@ When software implementation of |std::fma| is used, it will be much slower than
 using one multiplication and one addition. In this case, there are assembly
 implementations that take advantage of the platform support for single and
 double precision. To enable this feature, one need to build and link to the
-optional runtime library (see section~\ref{sec:Optional runtime library}). One
+optional runtime library (see section~\ref{sec:Optional Runtime Library}). One
 also need to set the configuration macro |MCKL_USE_ASM_LIB| to true. In
 addition, this feature is only enabled for platforms with \fma{}3 instruction
 set support.
@@ -351,15 +351,15 @@ and |fmsub|. Last but not least, when the runtime library is used, it also
 replace single and double precisions of |muladd|, etc., with their
 corresponding fused version.
 
-\section{Experimental vectorized implementation}
-\label{sec:Experimental vectorized implementation}
+\section{Experimental Vectorized Implementation}
+\label{sec:Experimental Vectorized Implementation}
 
 Optionally, one can enable experimental implementations of a few selected
 functions, listed in table~\ref{tab:Functions with experimental vectorized
 implementation}, to enhance their performance of double precision. The
 exponential, logarithm and related functions also enhance performance of single
 precision. To enable this feature, one needs to build and link to the optinal 
-runtime library (see section~\ref{sec:Optional runtime library}). One also
+runtime library (see section~\ref{sec:Optional Runtime Library}). One also
 needs to set the following configuration macros to true,
 \begin{verbatim}
 #define MCKL_USE_ASM_LIB 1
@@ -382,22 +382,22 @@ degenerate quickly. For $A < \Abs{a} < 2^{43}$, there are at least three
 accurate decimal digits. For values with even larger magnitudes, the results
 are useless.
 
-\subsection{Subnormal numbers}
-\label{sub:Subnormal numbers}
+\subsection{Subnormal Numbers}
+\label{sub:Subnormal Numbers}
 
 Positive subnormal inputs for |log|, |log2| and |log10| will give $-\infty$ as
 results. Subnormal inputs for |exp| and |exp2| will give $0$ as results. For
 other functions, subnormal inputs are treated the same way as normal numbers.
 
-\subsection{Special values}
-\label{sub:Special values}
+\subsection{Special Values}
+\label{sub:Special Values}
 
 The handling of special values, $-0.0$, $0.0$, $-\infty$, $\infty$, \nan,
 underflows, and overflows follows the \ieee~754 standard, except for the
 treatment of subnormal numbers.
 
-\subsection{Measured accuracy}
-\label{sub:Measured accuracy}
+\subsection{Measured Accuracy}
+\label{sub:Measured Accuracy}
 
 These functions have reduced accuracy compared to the standard library.
 Reputable implementations of math functions usually give results with error

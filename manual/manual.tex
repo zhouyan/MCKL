@@ -29,33 +29,32 @@
 %  POSSIBILITY OF SUCH DAMAGE.
 % ============================================================================
 
-\documentclass[bib,paper=a4paper]{mbook}
+\documentclass[bib,paper=a4paper,twoside=false]{mbook}
 
 \input{tex/macro}
-\input{tex/inc.tex}
 
 \addbibresource{manual.bib}
 
 \begin{document}
 
 \frontmatter
-\include{tex/front}
+\input{tex/front}
 
 \mainmatter
-\include{tex/introduction}
-\include{tex/core}
-\include{tex/algorithm}
-\include{tex/smp}
-\include{tex/math}
-\include{tex/random}
-\include{tex/utility}
+\input{tex/introduction}
+\input{tex/core}
+\input{tex/algorithm}
+\input{tex/smp}
+\input{tex/math}
+\input{tex/random}
+\input{tex/utility}
 
 \printbibliography
 
 \appendix
-\include{tex/config}
-\include{tex/random_rng}
-\include{tex/random_distribution}
-\include{tex/random_testu01}
+\input{tex/config}
+\input{tex/random_rng}
+\input{tex/random_distribution}
+\input{tex/random_testu01}
 
 \end{document}

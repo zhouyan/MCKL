@@ -58,10 +58,10 @@ See section~\ref{sec:Vectorized random number generating}. The difference is
 that we first test the performance without the \mkl \vml library and then with
 it. When \mkl \vml is not used, the assembly implementation of selected
 functions are used. For all the four above, the |ARS| \rng is used
-(section~\ref{sub:AES round function based random number generators}). The last
+(section~\ref{sub:AES Round Function Based Random Number Generators}). The last
 is when there are \mkl routines for generating random numbers from the
 distribution, either directly or indirectly. In this case, we use the
-|MKL_ARS5| \rng (see section~\ref{sec:MKL random number generators}),
+|MKL_ARS5| \rng (see section~\ref{sec:MKL Random Number Generators}),
 \begin{verbatim}
 MKL_ARS5 rng_mkl;
 rand(rng_mkl, rnorm_mckl, n, r.data());

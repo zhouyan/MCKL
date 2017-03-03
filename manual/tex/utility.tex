@@ -32,8 +32,8 @@
 \chapter{Utilities}
 \label{chap:Utilities}
 
-\section{Aligned memory allocation}
-\label{sec:Aligned memory allocation}
+\section{Aligned Memory Allocation}
+\label{sec:Aligned Memory Allocation}
 
 The standard library class |std::allocator| is used by containers to allocate
 memory. It works fine in most cases. However, sometime it is desirable to
@@ -88,8 +88,8 @@ template <typename T, typename Alloc>
 void func(std::vector<T, Alloc> &vec);
 \end{verbatim}
 
-\section{Sample covariance}
-\label{sec:Sample covariance}
+\section{Sample Covariance}
+\label{sec:Sample Covariance}
 
 The library provides the class template
 \begin{verbatim}
@@ -159,8 +159,8 @@ NormalMVDistribution<double, p> normal_mv(mean, chol);
 normal_mv(rng, y);
 \end{verbatim}
 
-\section{Store objects in \texorpdfstring{\hdf}{HDF5} format}
-\label{sec:Store objects in HDF5 format}
+\section{Store Objects in HDF5 Format}
+\label{sec:Store Objects in HDF5 Format}
 
 If the \hdf library is available (|MCKL_HAS_HDF5|), it is possible to store
 |Sampler| objects, etc., in the \hdf format. For example,
@@ -187,8 +187,8 @@ and the following creates a new group named |dataname|,
 hdf5store(filename, dataname, append);
 \end{verbatim}
 
-\section{Stop watch}
-\label{sec:Stop watch}
+\section{Stop Watch}
+\label{sec:Stop Watch}
 
 Performance can only be improved after it is first properly profiled. There are
 advanced profiling programs for this purpose. However, sometime simple timing

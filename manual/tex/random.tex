@@ -33,18 +33,19 @@
 \label{chap:Random Number Generating}
 
 In this chapter, we first introduce vectorized random number generating in
-section~\ref{sec:Vectorized random number generating}. Then a set of \rng
-engines are discussed in sections~\ref{sec:Counter-based random number
-generators} to~\ref{sec:Non-deterministic random number generators}.
-Section~\ref{sec:Seeding random number generators} shows how to seed multiple
+section~\ref{sec:Vectorized Random Number Generating}. Then a set of \rng
+engines are discussed in sections~\ref{sec:Counter-Based Random Number
+Generators} to~\ref{sec:Non-Deterministic Random Number Generators}.
+Section~\ref{sec:Seeding Random Number Generators} shows how to seed multiple
 distinctive \rng instances, either within a single program or across multiple
-computing nodes. Section~\ref{sec:Multiple random number generators} shows how
-multiple \rng instances in a parallelized program can be managed. Last, a set
-of distribution generators are discussed in sections~\ref{sec:Uniform bits
-distribution} to~\ref{sec:Multivariate distribution}.
+computing nodes. Section~\ref{sec:Using Multiple Random Number Generators}
+shows how multiple \rng instances in a parallelized program can be managed.
+Last, a set of distribution generators are discussed in
+sections~\ref{sec:Uniform Bits Distribution} to~\ref{sec:Multivariate
+Distribution}.
 
-\section{Vectorized random number generating}
-\label{sec:Vectorized random number generating}
+\section{Vectorized Random Number Generating}
+\label{sec:Vectorized Random Number Generating}
 
 The generic function |rand| provides vectorized random number generating. There
 are two main variants. The first operates on \rng engines and generates random
@@ -66,7 +67,7 @@ for (size_t i = 0; i != n; ++i)
     r[i] = rng();
 \end{verbatim}
 The results are always the same unless a non-deterministic \rng is used (see
-section~\ref{sec:Non-deterministic random number generators}). For some \rng{}s
+section~\ref{sec:Non-Deterministic Random Number Generators}). For some \rng{}s
 implemented in \mckl, the vectorized function may have considerable performance
 advantage. See appendix~\ref{chap:Performance of Random Number Generators}. The
 second variant of |rand| is for generating distribution random variates,
@@ -92,14 +93,14 @@ Depending on the type of \rng and the distribution (including its parameters),
 the vectorized function may have superior performance. See
 appendix~\ref{chap:Performance of Distributions}. However, the results are not
 always the same as using a loop. The uniform bits distribution (see
-section~\ref{sec:Uniform bits distribution}) and the standard uniform
-distributions (see section~\ref{sec:Standard uniform distribution}) will always
+section~\ref{sec:Uniform Bits Distribution}) and the standard uniform
+distributions (see section~\ref{sec:Standard Uniform Distribution}) will always
 produce exactly the same results as using a loop. For some distributions, such
 as those using the inverse method, the difference is up to rounding errors. For
 others, completely different sequences of random numbers might be generated.
 
-\section{Counter-based random number generators}
-\label{sec:Counter-based random number generators}
+\section{Counter-Based Random Number Generators}
+\label{sec:Counter-Based Random Number Generators}
 
 The development by~\cite{Salmon:2011um} made high performance parallel \rng
 much more accessible. The \rng{}s introduced in the paper use bijection $f_k$,
@@ -123,9 +124,8 @@ classes such as |std::mt19937|. A few generators are implemented in \mckl and
 discussed briefly in this section. See~\cite{Salmon:2011um} for details of each
 algorithm.
 
-\subsection{\texorpdfstring{\aes}{AES} round function based random number
-generators}
-\label{sub:AES round function based random number generators}
+\subsection{AES Round Function Based Random Number Generators}
+\label{sub:AES Round Function Based Random Number Generators}
 
 \aes\footnote{\url{https://en.wikipedia.org/wiki/Advanced_Encryption_Standard}}
 round function based \rng{}s in~\cite{Salmon:2011um} are implemented in the
@@ -339,8 +339,8 @@ using Threefish512_64  = Threefish512Engine<uint64_t>;
 using Threefish1024_64 = Threefish1024Engine<uint64_t>;
 \end{verbatim}
 
-\section{\texorpdfstring{\mkl}{MKL} random number generators}
-\label{sec:MKL random number generators}
+\section{MKL Random Number Generators}
+\label{sec:MKL Random Number Generators}
 
 \mkl provides some high performance \rng{}s. \mckl implements a wrapper class
 \begin{verbatim}
@@ -372,8 +372,8 @@ Note that, \mkl \rng{}s perform the best when they are used to generate vectors
 of random numbers. These wrappers use a buffer to store such vectors. And thus
 they have much larger state space than usual \rng{}s. When there are \mkl
 routines for generating distribution random variates for one of the
-distributions discussed later in sections~\ref{sec:Continuous distribution}
-and~\ref{sec:Discrete distribution}, \mckl automatically uses these routines
+distributions discussed later in sections~\ref{sec:Continuous Distribution}
+and~\ref{sec:Discrete Distribution}, \mckl automatically uses these routines
 for vectorized random number generating if the \rng is one of that listed
 above. For example,
 \begin{verbatim}
@@ -390,8 +390,8 @@ $t$-distribution. In addition, it is also applicable if a distribution is a
 special case of one of the distributions supported by \mkl, e.g., the
 $\chi^2$-distribution.
 
-\section{Non-deterministic random number generators}
-\label{sec:Non-deterministic random number generators}
+\section{Non-Deterministic Random Number Generators}
+\label{sec:Non-Deterministic Random Number Generators}
 
 If \rdrand\footnote{\url{https://en.wikipedia.org/wiki/RdRand}} instructions
 are supported, \mckl also implements three non-deterministic \rng{}s,
@@ -403,8 +403,8 @@ A value of zero, the default, means the number of trials is unlimited. If it is
 a positive number, and if after the specified number of trials no random
 integer is returned by \rdrand instructions, zero is returned.
 
-\section{Seeding random number generators}
-\label{sec:Seeding random number generators}
+\section{Seeding Random Number Generators}
+\label{sec:Seeding Random Number Generators}
 
 The following singleton class template,
 \begin{verbatim}
@@ -525,8 +525,8 @@ they share the same internal counter $c$. For counter-based \rng{}s implemented
 in \mckl, keys will be generated as seeds and \rng{}s with the same key width
 will share the same internal counter $c$.
 
-\section{Multiple random number generators}
-\label{sec:Multiple random number generators}
+\section{Using Multiple Random Number Generators}
+\label{sec:Using Multiple Random Number Generators}
 
 The class template |RNGSet| can be used to manage multiple \rng instances
 within a parallel program. Three of them are implemented in \mckl. They all
@@ -544,8 +544,8 @@ wrapper of a single \rng. All calls to |rng_set[i]| returns a reference to the
 same \rng. It is only useful when an |RNGSet| interface is required while the
 thread-safety and other issues are not important. The second implementation is
 |RNGSetVector|. It is an array of \rng{}s with length~$N$. It has memory cost
-$O(N)$. Many of the counter-based \rng{}s (see section~\ref{sec:Counter-based
-random number generators}) have small state sizes and thus for moderate~$N$,
+$O(N)$. Many of the counter-based \rng{}s (see section~\ref{sec:Counter-Based
+Random Number Generators}) have small state sizes and thus for moderate~$N$,
 this cost is not significant. The method calls |rng_set[i]| and |rng_set[j]|
 return independent \rng{}s if $i \ne j$. If \tbb is available, there is a third
 implementation, |RNGSetTBB|, which uses thread-local storage (\tls). It has
@@ -553,8 +553,8 @@ much smaller memory footprint than |RNGSetVector| while maintains better
 thread-safety. The type alias |RNGSet| is defined to be |RNGSetTBB| if \tbb is
 available. Otherwise it is defined to be |RNGSetVector|.
 
-\section{Uniform bits distribution}
-\label{sec:Uniform bits distribution}
+\section{Uniform Bits Distribution}
+\label{sec:Uniform Bits Distribution}
 
 The class template,
 \begin{verbatim}
@@ -586,8 +586,8 @@ that the distribution does exactly nothing and returns the results of |rng()|
 directly. If there does not exist an integer $V > 0$ such that $R = 2^V$, then
 |std::indepdent_bits_engine| is used.
 
-\section{Standard uniform distribution}
-\label{sec:Standard uniform distribution}
+\section{Standard Uniform Distribution}
+\label{sec:Standard Uniform Distribution}
 
 \mckl provides five standard uniform distributions. They are all class
 templates with a single template type parameter |RealType|. The random integers
@@ -606,8 +606,8 @@ as~$X$. The type |U01Distribution| is aliased to |U01CanonicalDistribution| if
 the |MCKL_U01_USE_FIXED_POINT| is set to false (the default). Otherwise it is
 aliased to |U01CODistribution|.
 
-\subsection{Canonical form}
-\label{sub:Canonical form}
+\subsection{Canonical Form}
+\label{sub:Canonical Form}
 
 The class template,
 \begin{verbatim}
@@ -624,8 +624,8 @@ mapping,
 This is equivalent to the standard library |std::generate_canonical|. The
 minimum and maximum are~$0$ and~$1 - 2^{-KW}$, respectively.
 
-\subsection{Closed-closed interval}
-\label{sub:Closed-closed interval}
+\subsection{Closed-Closed Interval}
+\label{sub:Closed-Closed Interval}
 
 The class template,
 \begin{verbatim}
@@ -644,8 +644,8 @@ implements the uniform distribution on $[0, 1]$ through the mapping,
 \end{align*}
 The minimum and maximum are~$0$ and~$1$, respectively.
 
-\subsection{Closed-open interval}
-\label{sub:Closed-open interval}
+\subsection{Closed-Open Interval}
+\label{sub:Closed-Open Interval}
 
 The class template,
 \begin{verbatim}
@@ -660,8 +660,8 @@ implements the uniform distribution on $[0, 1)$ through the mapping,
 \end{equation*}
 The minimum and maximum are~$0$ and~$1 - 2^{-P}$, respectively.
 
-\subsection{Open-closed interval}
-\label{sub:Open-closed interval}
+\subsection{Open-Closed Interval}
+\label{sub:Open-Closed Interval}
 
 The class template,
 \begin{verbatim}
@@ -676,8 +676,8 @@ implements the uniform distribution on $(0, 1]$ through the mapping,
 \end{equation*}
 The minimum and maximum are~$2^{-P}$ and~$1$, respectively.
 
-\subsection{Open-open interval}
-\label{sub:Open-open interval}
+\subsection{Open-Open Interval}
+\label{sub:Open-Open Interval}
 
 The class template,
 \begin{verbatim}
@@ -692,11 +692,11 @@ implements the uniform distribution on $(0, 1)$ through the mapping,
 \end{equation*}
 The minimum and maximum are~$2^{-P}$ and~$1 - 2^{-P}$, respectively.
 
-\section{Continuous distribution}
-\label{sec:Continuous distribution}
+\section{Continuous Distribution}
+\label{sec:Continuous Distribution}
 
-\subsection{Arcsine distribution}
-\label{sub:Arcsine distribution}
+\subsection{Arcsine Distribution}
+\label{sub:Arcsine Distribution}
 
 The class template,
 \begin{verbatim}
@@ -710,8 +710,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Beta distribution}
-\label{sub:Beta distribution}
+\subsection{Beta Distribution}
+\label{sub:Beta Distribution}
 
 The class template,
 \begin{verbatim}
@@ -733,8 +733,8 @@ $\alpha < 1$, $\beta < 1$ and $D \le 0$, then Jöhnk's
 method~\cite[sec.~3.5]{Devroye:1986gi} is used. In all other cases, one of the
 switching algorithms in~\cite{Atkinson:1979es} is used.
 
-\subsection{Cauchy distribution}
-\label{sub:Cauchy distribution}
+\subsection{Cauchy Distribution}
+\label{sub:Cauchy Distribution}
 
 The class template,
 \begin{verbatim}
@@ -749,8 +749,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{\texorpdfstring{$\chi^2$}{Chi-squared}-distribution}
-\label{Chi-squared-distribution}
+\subsection{\texorpdfstring{$\chi^2$}{Chi-squared}-Distribution}
+\label{Chi-Squared-Distribution}
 
 The class template,
 \begin{verbatim}
@@ -766,8 +766,8 @@ The implementation uses the fact that if~$X$ is a Gamma random variable with
 shape $n / 2$ and scale~$2$, then~$X$ is also $\chi^2$-distributed with degree
 of freedom $n$.
 
-\subsection{Exponential distribution}
-\label{sub:Exponential distribution}
+\subsection{Exponential Distribution}
+\label{sub:Exponential Distribution}
 
 The class template,
 \begin{verbatim}
@@ -781,8 +781,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Extreme value distribution}
-\label{sub:Extreme value distribution}
+\subsection{Extreme Value Distribution}
+\label{sub:Extreme Value Distribution}
 
 The class template,
 \begin{verbatim}
@@ -798,7 +798,7 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Fisher's \texorpdfstring{$F$}{F}-distribution}
+\subsection{Fisher's \texorpdfstring{$F$}{F}-Distribution}
 \label{sub:Fisher's F-distribution}
 
 The class template,
@@ -820,8 +820,8 @@ random variables with degrees of freedom~$m$ and~$n$, respectively, and they
 are independent, then $X = (U / V)(m / n)$ is a Fisher's $F$-distributed random
 variable with the respective degrees of freedom.
 
-\subsection{Gamma distribution}
-\label{sub:Gamma distribution}
+\subsection{Gamma Distribution}
+\label{sub:Gamma Distribution}
 
 The class template,
 \begin{verbatim}
@@ -842,8 +842,8 @@ rejection method from the Weibull distribution is
 used~\cite[sec.~3.4]{Devroye:1986gi}. If $\alpha > 1$, then the method
 in~\cite{Marsaglia:2000vq} is used.
 
-\subsection{Laplace distribution}
-\label{sub:Laplace distribution}
+\subsection{Laplace Distribution}
+\label{sub:Laplace Distribution}
 
 The class template,
 \begin{verbatim}
@@ -857,8 +857,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Levy distribution}
-\label{sub:Levy distribution}
+\subsection{Levy Distribution}
+\label{sub:Levy Distribution}
 
 The class template,
 \begin{verbatim}
@@ -876,8 +876,8 @@ The implementation uses the fact that if~$Z$ is a standard Normal random
 variable, then $X = a + b / Z^2$ is Levy distributed with location~$a$ and
 scale~$b$.
 
-\subsection{Logistic distribution}
-\label{sub:Logistic distribution}
+\subsection{Logistic Distribution}
+\label{sub:Logistic Distribution}
 
 The class template,
 \begin{verbatim}
@@ -891,8 +891,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Log-normal distribution}
-\label{sub:Log-normal distribution}
+\subsection{Log-Normal Distribution}
+\label{sub:Log-Normal Distribution}
 
 The class template,
 \begin{verbatim}
@@ -910,8 +910,8 @@ The implementation uses the fact that if~$Z$ is a standard Normal random
 variable, then $X = \exp\Curly{m + sZ}$ is Log-normal distributed with
 location~$m$ and scale~$s$.
 
-\subsection{Normal distribution}
-\label{sub:Normal distribution}
+\subsection{Normal Distribution}
+\label{sub:Normal Distribution}
 
 The class template,
 \begin{verbatim}
@@ -927,8 +927,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the Box-Muller method~\cite{Box:1958hv}.
 
-\subsection{Pareto distribution}
-\label{sub:Pareto distribution}
+\subsection{Pareto Distribution}
+\label{sub:Pareto Distribution}
 
 The class template,
 \begin{verbatim}
@@ -942,8 +942,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Rayleigh distribution}
-\label{sub:Rayleigh distribution}
+\subsection{Rayleigh Distribution}
+\label{sub:Rayleigh Distribution}
 
 The class template,
 \begin{verbatim}
@@ -958,8 +958,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Stable distribution}
-\label{sub:Stable distribution}
+\subsection{Stable Distribution}
+\label{sub:Stable Distribution}
 
 The class template,
 \begin{verbatim}
@@ -984,8 +984,8 @@ implements the distribution with \pdf,
 \end{align*}
 The implementation uses the method in~\cite{Chambers:1976dv}.
 
-\subsection{Student's \texorpdfstring{$t$}{t}-distribution}
-\label{sub:Student's t-distribution}
+\subsection{Student's \texorpdfstring{$t$}{t}-Distribution}
+\label{sub:Student's t-Distribution}
 
 The class template,
 \begin{verbatim}
@@ -1005,8 +1005,8 @@ variable, $V$ is a $\chi^2$-distributed random variable with degree of freedom
 $n$, and they are independent, then $X = Z/\sqrt{V / n}$ is Student's
 $t$-distributed with the respective degree of freedom.
 
-\subsection{Uniform real distribution}
-\label{sub:Uniform real distribution}
+\subsection{Uniform Real Distribution}
+\label{sub:Uniform Real Distribution}
 
 The class template,
 \begin{verbatim}
@@ -1020,8 +1020,8 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\subsection{Weibull distribution}
-\label{sub:Weibull distribution}
+\subsection{Weibull Distribution}
+\label{sub:Weibull Distribution}
 
 The class template,
 \begin{verbatim}
@@ -1036,11 +1036,11 @@ implements the distribution with \pdf,
 \end{equation*}
 using the inverse method.
 
-\section{Discrete distribution}
-\label{sec:Discrete distribution}
+\section{Discrete Distribution}
+\label{sec:Discrete Distribution}
 
-\subsection{Bernoulli distribution}
-\label{sub:Bernoulli distribution}
+\subsection{Bernoulli Distribution}
+\label{sub:Bernoulli Distribution}
 
 The class template,
 \begin{verbatim}
@@ -1059,8 +1059,8 @@ random variable, than $\bbI_{[0,p)}(U)$ is Bernoulli distributed with success
 probability~$p$. This is not a drop-in replacement for
 |std::bernoulli_distribution|, which is not a class template.
 
-\subsection{Geometric distribution}
-\label{sub:Geometric distribution}
+\subsection{Geometric Distribution}
+\label{sub:Geometric Distribution}
 
 The class template,
 \begin{verbatim}
@@ -1076,8 +1076,8 @@ The implementation uses the fact that if~$U$ is a standard uniform random
 variable, then $X = \Floor{\ln U / \ln(1-p)}$ is a Geometric random variable
 with success probability~$p$.
 
-\subsection{Uniform integer distribution}
-\label{sub:Uniform integer distribution}
+\subsection{Uniform Integer Distribution}
+\label{sub:Uniform Integer Distribution}
 
 The class template,
 \begin{verbatim}
@@ -1093,16 +1093,16 @@ implements the distribution with \pdf,
 The specific algorithm used depends on the parameters. If $a = b$, then it
 simply returns~$a$. If $b - a + 1 = 2^W$, where~$W$ is the number of bits of
 |IntType|, then |UniformBitsDistribution| is used (see section~\ref{sec:Uniform
-bits distribution}). If $\max\Curly{\Abs{a}, b} < 2^{32}$, then it uses the
+Bits Distribution}). If $\max\Curly{\Abs{a}, b} < 2^{32}$, then it uses the
 fact that if~$U$ is a standard uniform random variable, then $X = \Floor{a + (b
   - a + 1) U}$ is uniform on the set $\Curly{a,\dots,b}$. Otherwise the
 standard library is used.
 
-\section{Multivariate distribution}
-\label{sec:Multivariate distribution}
+\section{Multivariate Distribution}
+\label{sec:Multivariate Distribution}
 
-\subsection{Dirichlet distribution}
-\label{sub:Dirichlet distribution}
+\subsection{Dirichlet Distribution}
+\label{sub:Dirichlet Distribution}
 
 The class template,
 \begin{verbatim}
@@ -1146,8 +1146,8 @@ rand(rng, dirichlet, n, r);
 where the output parameter |r| is a pointer to an~$n$ by~$d$ matrix of row
 major order.
 
-\subsection{Multivariate Normal distribution}
-\label{sub:Multivariate Normal distribution}
+\subsection{Multivariate Normal Distribution}
+\label{sub:Multivariate Normal Distribution}
 
 The class template,
 \begin{verbatim}

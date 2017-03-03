@@ -48,7 +48,7 @@ macro.
 
 A concrete example of the relations among these three types of configuration
 macros is the memory allocation functions used by the library. The details are
-in section~\ref{sec:Aligned memory allocation}. In short, they library has
+in section~\ref{sec:Aligned Memory Allocation}. In short, they library has
 three implementations for aligned memory allocation. The preferred method is to
 use functions from the \tbb library. It is defined through a class called
 |AlignedMemoryTBB|. This class is only defined if and only if |MCKL_HAS_TBB| is
@@ -62,7 +62,7 @@ prefers operating system dependent memory allocation functions such as
 |posix_memalign|. Now, suppose this is still undesirable, and one wants to use
 a memory allocation function not directly supported by the library. In this
 case, one can implement a aligned memory class (see section~\ref{sec:Aligned
-memory allocation} for details), and then define the macro
+Memory Allocation} for details), and then define the macro
 |MCKL_ALIGNED_MEOMRY_TYPE| to this class. For example, to use the memory
 allocation functions from the \mkl library,
 \begin{verbatim}
@@ -95,8 +95,8 @@ situations, it is sufficient to use the first two to configure the features of
 the library. The third kind is for more advanced users. Below we details all
 configuration macros.
 
-\section{Platform characteristics}
-\label{sec:Platform characteristics}
+\section{Platform Characteristics}
+\label{sec:Platform Characteristics}
 
 The following macros have default values that depend on the compiler, operating
 system or \cpu types. Their default values are therefore platform dependent.
@@ -133,8 +133,8 @@ little- and big-endian at the same time.
 \paragraph{\texttt{MCKL\_HAS\_POSIX}} Determine if the operating system is
 \posix compatible.
 
-\section{Third-party libraries}
-\label{sec:Third-party libraries}
+\section{Third-party Libraries}
+\label{sec:Third-party Libraries}
 
 The following macros determine if certain third-party libraries are available.
 All macros with the prefix |MCKL_HAS_| are define to false by default. All
@@ -147,10 +147,10 @@ unless stated otherwise.
 \paragraph{\texttt{MCKL\_USE\_OMP}} Allow the library to use OpenMP for
 parallelization. Currently this macro has no affect. The use of OpenMP for
 parallelization is explicitly through |SamplerEvalOMP| etc., see
-section~\ref{sec:Programming models}.
+section~\ref{sec:Programming Models}.
 
 \paragraph{\texttt{MCKL\_HAS\_HDF5}} Determine if the \hdf library is
-available. The functions in section~\ref{sec:Store objects in HDF5 format} are
+available. The functions in section~\ref{sec:Store Objects in HDF5 Format} are
 only defined if this macro is true. One can include the following header
 directly to bypass this check,
 \begin{verbatim}
@@ -158,14 +158,14 @@ directly to bypass this check,
 \end{verbatim}
 
 \paragraph{\texttt{MCKL\_HAS\_TBB}} Determine if the \tbb library is available.
-The class template |RNGSetTBB| in section~\ref{sec:Multiple random number
-  generators} and the class |AlignedMemoryTBB| in section~\ref{sec:Aligned
-memory allocation} are only defined if this macro is true.
+The class template |RNGSetTBB| in section~\ref{sec:Using Multiple Random Number
+  Generators} and the class |AlignedMemoryTBB| in section~\ref{sec:Aligned
+Memory Allocation} are only defined if this macro is true.
 
 \paragraph{\texttt{MCKL\_USE\_TBB}} Allow the library to use the \tbb library
 for parallelization. Currently this macro has no affect. The use of \tbb for
 parallelization is explicitly through |SamplerEvalTBB| etc., see
-section~\ref{sec:Programming models}.
+section~\ref{sec:Programming Models}.
 
 \paragraph{\texttt{MCKL\_USE\_TBB\_MALLOC}} Allow the library to use
 |AlignedMemoryTBB| as the default memory allocation method.
@@ -174,7 +174,7 @@ section~\ref{sec:Programming models}.
 as the default multiple \rng stream management method.
 
 \paragraph{\texttt{MCKL\_HAS\_MKL}} Determine if the \mkl library is available.
-The \rng{}s in section~\ref{sec:MKL random number generators} are only defined
+The \rng{}s in section~\ref{sec:MKL Random Number Generators} are only defined
 if this macro is true. One can include the following header directly to bypass
 this check,
 \begin{verbatim}
@@ -186,7 +186,7 @@ this check,
 for \blas support.
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_VML}} Allow the library to accelerate the
-vector functions in section~\ref{sec:Vectorized functions} using the \vml
+vector functions in section~\ref{sec:Vectorized Functions} using the \vml
 component of \mkl.
 
 \paragraph{\texttt{MCKL\_USE\_MKL\_VSL}} Allow the library to use the \vsl
@@ -217,8 +217,8 @@ true. Otherwise it is |int|. If the \blas interface uses another integer type,
 such as the \ilp interface of some implementations on \lp platforms, then one
 should redefine this macro to the correct type.
 
-\section{Memory allocation}
-\label{sec:Memory allocation}
+\section{Memory Allocation}
+\label{sec:Memory Allocation}
 
 \paragraph{\texttt{MCKL\_ALIGNMENT}} The default alignment for scalar types,
 such as |int|. More specifically, this affects types such that
@@ -230,14 +230,14 @@ The value must be a power of two and positive.
 The default is 16. The value must be a power of two and positive.
 
 \paragraph{\texttt{MCKL\_MEMORY\_TYPE}} The default type of the |Memroy|
-template parameter of |Allocator| (see section~\ref{sec:Aligned memory
-  allocation}). The default depends on the other configuration macros. If
+template parameter of |Allocator| (see section~\ref{sec:Aligned Memory
+  Allocation}). The default depends on the other configuration macros. If
 |MCKL_USE_TBB_MALLOC| is true, then the default is |AlignedMemoryTBB|.
 Otherwise it is |AlignedMemorySYS| if it is defined. Otherwise
 |AlignedMemmorySTD| is used as a last resort.
 
-\section{Error handling}
-\label{sec:Error handling}
+\section{Error Handling}
+\label{sec:Error Handling}
 
 \paragraph{\texttt{MCKL\_NO\_RUNTIME\_ASSERT}} Determine if all runtime
 assertions shall be disabled. The default is true if and only if |NDEBUG| is
