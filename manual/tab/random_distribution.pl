@@ -189,9 +189,9 @@ sub run {
                 print $_ if /<(double|int64_t)>.*VML/;
             }
             if ($write) {
-                open my $txtfile, ">", "random_distribution/" .
+                open my $txt, ">", "random_distribution/" .
                 "\Lrandom_distribution_${r}_${c}_${simd}.txt";
-                print $txtfile $_ for @result;
+                print $txt $_ for @result;
             }
         }
     }
@@ -201,9 +201,10 @@ sub run {
 sub read {
     for my $s (@simd) {
         for my $r (@distribution) {
-            open my $txtfile, "<", "random_distribution/" .
+            open my $txt, "<", "random_distribution/" .
             "\Lrandom_distribution_${r}_${compiler}_${s}.txt";
-            my @lines = <$txtfile>;
+            return unless $txt;
+            my @lines = <$txt>;
             my @result = grep { /$r<(double|int64_t)>/ } @lines;
             for (@result) {
                 my ($name, $cpe_s, $cpe_m, $cpe_v, $cpe_i, $lib) = (split);
@@ -273,11 +274,11 @@ sub table {
                 }
             }
             if ($table) {
-                open my $texfile, ">",
+                open my $tex, ">",
                 "\Lrandom_distribution_${k}_${s}.tex";
-                print $texfile $header;
-                print $texfile $table;
-                print $texfile $footer;
+                print $tex $header;
+                print $tex $table;
+                print $tex $footer;
             }
         }
     }

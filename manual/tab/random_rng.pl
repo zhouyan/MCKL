@@ -179,9 +179,9 @@ sub run {
                 say $line;
             }
             if ($write and $count) {
-                open my $txtfile, ">",
+                open my $txt, ">",
                 "\Lrandom_rng/random_rng_${r}_${c}_${simd}.txt";
-                print $txtfile $_ for @result;
+                print $txt $_ for @result;
             }
         }
     }
@@ -191,9 +191,10 @@ sub read {
     for my $c (@compiler) {
         for my $s (@simd) {
             for my $r (@rng) {
-                open my $txtfile, "<",
+                open my $txt, "<",
                 "\Lrandom_rng/random_rng_${r}_${c}_${s}.txt";
-                my @result = <$txtfile>;
+                return unless $txt;
+                my @result = <$txt>;
                 if (@result) {
                     $cpb_s{$c}{$s}{$r} = 0xFFFF unless $cpb_s{$c}{$s}{$r};
                     $cpb_b{$c}{$s}{$r} = 0xFFFF unless $cpb_b{$c}{$s}{$r};
@@ -259,10 +260,10 @@ sub table {
                 }
             }
             if ($table) {
-                open my $texfile, ">", "\Lrandom_rng_${k}_${s}.tex";
-                print $texfile $header;
-                print $texfile $table;
-                print $texfile $footer;
+                open my $tex, ">", "\Lrandom_rng_${k}_${s}.tex";
+                print $tex $header;
+                print $tex $table;
+                print $tex $footer;
             }
         }
     }
