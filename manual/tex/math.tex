@@ -136,7 +136,7 @@ for (size_t i = 0; i != n; ++i)
 The functions defined are listed in tables~\ref{tab:Arithmetic functions}
 to~\ref{tab:Rounding functions}. For each function, the first parameter is
 always the length of the vector, and the last is a pointer to the output vector
-(except for |sincos| and |modf|, which have two output parameters). The output
+(except for |sincos| and |modf|, which have two output vecrors). The output
 parameters are always vectors. Some of the input parameters may be scalars. For
 example, in the function call,
 \begin{verbatim}
@@ -358,7 +358,7 @@ Optionally, one can enable experimental implementations of a few selected
 functions, listed in table~\ref{tab:Functions with experimental vectorized
 implementation}, to enhance their performance of double precision. The
 exponential, logarithm and related functions also enhance performance of single
-precision. To enable this feature, one needs to build and link to the optinal 
+precision. To enable this feature, one needs to build and link to the optional
 runtime library (see section~\ref{sec:Optional Runtime Library}). One also
 needs to set the following configuration macros to true,
 \begin{verbatim}

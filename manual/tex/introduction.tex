@@ -44,7 +44,7 @@ There are a few other headers that include a subset of functionalities of
 \mckl, each documented in a subsequent chapter in this manual. They are listed
 in table~\ref{tab:headers}. These headers does not define anything other than
 including other headers that each implements a specific feature. If only a few
-features are needed, then one can include only headers that implements those
+features are needed, then one can include only the header that implements those
 features to save compilation time. For example,
 \begin{verbatim}
 #include <mckl/random/threefry.hpp>
@@ -52,7 +52,7 @@ features to save compilation time. For example,
 includes the header that implements \rng engines based on the Threefry
 algorithm in~\cite{Salmon:2011um} (see section~\ref{sub:Threefry}). See the
 reference manual\footnote{\url{http://zhouyan.github.io/MCKLDoc/master}} for
-the header file for each class and function defined in \mckl.
+the header file of each class and function defined in \mckl.
 
 \section{Optional Runtime Library}
 \label{sec:Optional Runtime Library}
@@ -61,9 +61,8 @@ In addition to the header-only library, one can optionally build and use a
 runtime library. To build the library, one need a recent version of the
 \nasm\footnote{\url{http://www.nasm.us}} assembler and the
 \cmake\footnote{\url{https://cmake.org}} program. The library is only supported
-on x86-64 \cpu{}s and 64-bit \unix and compatible systems.
-
-To build and install the library,
+on x86-64 \cpu{}s and 64-bit \unix and compatible systems. To build and install
+the library,
 \begin{verbatim}
 cd /path/to/mckl/source
 mkdir -p build
@@ -77,18 +76,17 @@ To use and link to the library in a user program, say |prog.cpp|,
 c++ -DMCKL_USE_ASM_LIB=1 -o prog prog.cpp -lmckl
 \end{verbatim}
 
-The runtime library provides optimized implementation of selected \rng{}s.
-Performance of the header-only implementation might vary considerably depending
-on the compiler. Though even the worst case, the performance is still better
-than most alternatives, the best performance of some \rng{}s can provide best
-performance regardless of the choice of compiler.
+The runtime library provides optimized implementation of selected vectorized
+random number generators (section~\ref{sec:Vectorized Random Number Generating}
+and~\ref{sec:Counter-Based Random Number Generators}). Performance of the
+header-only implementation might vary considerably depending on the compiler.
 
-Further, one can define a configuration macro |MCKL_USE_ASM_VMF| to a non-zero
-value, to use an assembly implementation of selected vectorized math functions
-when \mkl \vml is unavailable, see~\ref{sec:Vectorized Functions}. This feature
-is highly experimental. These functions are fast, but have slightly lower
-accuracy for some values of input than the standard library or \mkl \vml in
-high accuracy mode.
+Further, one can set the configuration macro |MCKL_USE_ASM_VMF| to use an
+assembly implementation of selected vectorized math functions when \mkl \vml is
+unavailable (section~\ref{sec:Vectorized Functions}). This feature is highly
+experimental. These functions are fast, but have slightly lower accuracy for
+some values of input than the standard library or \mkl \vml in high accuracy
+mode.
 
 \begin{table}[ht]
   \begin{tabularx}{\textwidth}{LL}
