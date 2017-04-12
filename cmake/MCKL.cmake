@@ -82,10 +82,10 @@ endfunction(mckl_add_example)
 function(mckl_add_test exname testname)
     set(src ${exname}_${testname})
     if("${ARGN}" MATCHES "BIN")
-        MCKL_ADD_EXECUTABLE(${src}
+        mckl_add_executable(${src}
             ${PROJECT_BINARY_DIR}/src/${src}.cpp ${ARGN})
     else("${ARGN}" MATCHES "BIN")
-        MCKL_ADD_EXECUTABLE(${src}
+        mckl_add_executable(${src}
             ${PROJECT_SOURCE_DIR}/src/${src}.cpp ${ARGN})
     endif("${ARGN}" MATCHES "BIN")
     add_dependencies(${exname} ${src})
