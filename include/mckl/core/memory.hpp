@@ -360,8 +360,8 @@ class Allocator : public std::allocator<T>
     Allocator() = default;
 
     template <typename U>
-    Allocator(Allocator<U, Mem> &&other) noexcept
-        : std::allocator<T>(std::move(static_cast<std::allocator<U>>(other)))
+    Allocator(const Allocator<U, Mem> &other) noexcept
+        : std::allocator<T>(static_cast<std::allocator<U>>(other))
     {
     }
 
@@ -382,6 +382,24 @@ class Allocator : public std::allocator<T>
         noexcept(Mem::deallocate(ptr, size)))
     {
         Mem::deallocate(ptr, size);
+    }
+
+    template <typename U>
+    void construct(U *p)
+    {
+        construct_dispatch(p, std::is_scalar<U>());
+    }
+
+    private:
+    template <typename U>
+    void construct_dispatch(U *, std::true_type)
+    {
+    }
+
+    template <typename U>
+    void construct_dispatch(U *p, std::false_type)
+    {
+        ::new (static_cast<void *>(p)) U();
     }
 }; // class Allocator
 
