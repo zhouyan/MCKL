@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-# Doxyfile 1.8.12
+# Doxyfile 1.8.13
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project.
@@ -2069,28 +2069,28 @@ INCLUDE_FILE_PATTERNS  = *.h \
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED             = __TBB_TASK_GROUP_CONTEXT \
-                         __clang__                \
-                         __x86__                  \
-                         __x86_64__               \
-                         __SSE2__                 \
-                         __SSE3__                 \
-                         __SSSE3__                \
-                         __SSE4_1__               \
-                         __SSE4_2__               \
-                         __AVX__                  \
-                         __AVX2__                 \
-                         __AES__                  \
-                         __RDRND__                \
-                         __BMI__                  \
-                         __BMI2__                 \
-                         __BYTE_ORDER__           \
-                         __ORDER_LITTLE_ENDIAN__  \
-                         MCKL_HAS_POSIX           \
-                         MCKL_HAS_INT128          \
-                         MCKL_HAS_OMP             \
-                         MCKL_HAS_TBB             \
-                         MCKL_HAS_MKL             \
-                         MCKL_HAS_JEMALLOC        \
+                         __clang__ \
+                         __x86__ \
+                         __x86_64__ \
+                         __SSE2__ \
+                         __SSE3__ \
+                         __SSSE3__ \
+                         __SSE4_1__ \
+                         __SSE4_2__ \
+                         __AVX__ \
+                         __AVX2__ \
+                         __AES__ \
+                         __RDRND__ \
+                         __BMI__ \
+                         __BMI2__ \
+                         __BYTE_ORDER__ \
+                         __ORDER_LITTLE_ENDIAN__ \
+                         MCKL_HAS_POSIX \
+                         MCKL_HAS_INT128 \
+                         MCKL_HAS_OMP \
+                         MCKL_HAS_TBB \
+                         MCKL_HAS_MKL \
+                         MCKL_HAS_JEMALLOC
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
@@ -2411,6 +2411,11 @@ DIAFILE_DIRS           =
 # will not generate output for the diagram.
 
 PLANTUML_JAR_PATH      =
+
+# When using plantuml, the PLANTUML_CFG_FILE tag can be used to specify a
+# configuration file for plantuml.
+
+PLANTUML_CFG_FILE      =
 
 # When using plantuml, the specified paths are searched for files specified by
 # the !include statement in a plantuml block.
