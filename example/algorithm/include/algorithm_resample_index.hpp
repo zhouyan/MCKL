@@ -183,9 +183,9 @@ inline void algorithm_resample_index(
     auto weight = algorithm_resample_weight(rng, size);
     auto index = algorithm_resample_index(rng, size, weight);
     bool passed = algorithm_resample_index_check(
-        algorithm_resample_index_trace<Layout1>(size, value, index), fixed ?
-            algorithm_resample_index_fixed<Layout2>(size, value, index) :
-            algorithm_resample_index_rands<Layout2>(size, value, index));
+        algorithm_resample_index_trace<Layout1>(size, value, index),
+        fixed ? algorithm_resample_index_fixed<Layout2>(size, value, index) :
+                algorithm_resample_index_rands<Layout2>(size, value, index));
 
     std::cout << std::setw(60) << std::left << "Test result" << std::setw(20)
               << std::right << std::fixed << (passed ? "Passed" : "Failed")

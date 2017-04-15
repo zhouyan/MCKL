@@ -114,8 +114,8 @@ class MKLStream
         if (this != &other) {
             ::VSLStreamStatePtr ptr = nullptr;
             if (internal::mkl_error_check(::vslCopyStream(&ptr, other.ptr_),
-                    "MKLStream::operator=",
-                    "::vslCopyStream") == VSL_ERROR_OK) {
+                    "MKLStream::operator=", "::vslCopyStream") ==
+                VSL_ERROR_OK) {
                 reset(ptr);
             }
         }

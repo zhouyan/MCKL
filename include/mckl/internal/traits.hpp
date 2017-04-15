@@ -185,8 +185,8 @@ using is_blas_floating_point = std::integral_constant<bool,
 
 template <typename T, typename RNGType,
     typename KeyType = typename RNGType::result_type>
-using is_seed_seq = std::integral_constant<bool, std::is_class<T>::value &&
-        !std::is_convertible<T, RNGType>::value &&
+using is_seed_seq = std::integral_constant<bool,
+    std::is_class<T>::value && !std::is_convertible<T, RNGType>::value &&
         !std::is_convertible<T, typename RNGType::result_type>::value &&
         !std::is_convertible<T, KeyType>::value>;
 
