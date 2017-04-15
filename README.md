@@ -16,7 +16,7 @@ the contents of the `include` directory into a proper place, e.g.,
 [Doxygen][doxygen] generated reference manuals for the
 [master][MCKLDoxygenMaster] and [develop][MCKLDoxygenDevelop] branches, as well
 as for individual releases can be found online (see [release
-notes][MCKLReleases] for links). A [Manual][MCKLManualMaster] is also provided.
+notes][MCKLReleases] for links).
 
 # Third-party dependencies
 
@@ -100,6 +100,4 @@ in the `LICENSE` file distributed with the source.
 [tbb]: http://threadingbuildingblocks.org
 [MCKLDoxygenDevelop]: http://zhouyan.github.io/MCKLDoc/develop
 [MCKLDoxygenMaster]: http://zhouyan.github.io/MCKLDoc/master
-[MCKLManualDevelop]: http://zhouyan.github.io/MCKLDoc/develop/manual.pdf
-[MCKLManualMaster]: http://zhouyan.github.io/MCKLDoc/master/manual.pdf
 [MCKLReleases]: https://github.com/zhouyan/MCKL/releases
