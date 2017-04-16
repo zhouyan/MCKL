@@ -13,6 +13,7 @@
 *.toc
 .DS_Store
 /build
+/docs/_build
 /manual/manual.tex.latexmain
 /manual/tab/*.tex
 /manual/tex/inc.tex
