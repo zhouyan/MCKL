@@ -1661,8 +1661,8 @@ generating is also possible,
     dirichlet(rng, n, r);
     ::mckl::rand(rng, dirichlet, n, r);
 
-where the output parameter ``r`` is a pointer to an :math:`n` by :math:`d`
-matrix of row major order.
+where the output parameter ``r`` is a pointer to an :math:`n \times d` matrix
+of row major order.
 
 .. _sub-Multivariate Normal Distribution:
 
@@ -1690,7 +1690,7 @@ implements the distribution with PDF,
     & x_{1:d}\in\mathbb{R}^d,\quad
       \mu_{1:d}\in\mathbb{R}^d,\quad
       \Sigma\in
-      \{\text{positive semi-definite }d\text{ by }d\text{ matrix}\}.
+      \{\text{positive semi-definite }d \times d\text{ matrix}\}.
 
 At the time of writing, only ``float`` and ``double`` are supported types for
 the template parameter ``RealType``. The second template parameter ``Dim``
@@ -1736,8 +1736,8 @@ generating is also possible,
     normal_mv(rng, n, r);
     ::mckl::rand(rng, normal_mv, n, r);
 
-where the output parameter ``r`` is a pointer to an :math:`n` by :math:`d`
-matrix of row major order.
+where the output parameter ``r`` is a pointer to an :math:`n \times d` matrix
+of row major order.
 
 .. _Intel TBB:
     https://www.threadingbuildingblocks.org
