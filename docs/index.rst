@@ -10,13 +10,5 @@ Welcome to MCKL's documentation!
     :maxdepth: 2
     :caption: Contents:
 
+    intro
     math
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
