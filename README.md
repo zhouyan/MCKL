@@ -1,3 +1,5 @@
+# Monte Carlo Kernel Library
+
 # Introduction
 
 The MCKL library provides a framework for implementing Monte Carlo algorithms.
@@ -13,25 +15,35 @@ the contents of the `include` directory into a proper place, e.g.,
 
 # Documentation
 
-[Doxygen][doxygen] generated reference manuals for the
-[master][MCKLDoxygenMaster] and [develop][MCKLDoxygenDevelop] branches, as well
-as for individual releases can be found online (see [release
-notes][MCKLReleases] for links).
+The [documents](http://mckl.readthedocs.io) are hosted by [Read the
+Docs](https://readthedocs.org). To generate the documents, the following is
+required: [Doxygen](http://www.stack.nl/~dimitri/doxygen/),
+[Sphinx](http://www.sphinx-doc.org/en/stable/) and the [RTD
+theme](https://github.com/rtfd/sphinx_rtd_theme).
+
+```
+cd /path/to/mckl/source
+cd docs
+doxygen
+make html
+```
 
 # Third-party dependencies
 
 This library requires a working BLAS implementation. Some of the library's
 functionalities can only be used if a optional dependencies are present.
-Notably, [HDF5][hdf5], [TBB][tbb], [OpenMP][omp] and [MKL][mkl]. One can tell
-the library that these optional features are available by defining
-configuration macros such as `-DMCKL_HAS_HDF5=1` during compilation.
+Notably, [HDF5](http://www.hdfgroup.org),
+[TBB](http://threadingbuildingblocks.org), [OpenMP](http://www.openmp.org) and
+[MKL](https://software.intel.com/en-us/intel-mkl). One can tell the library
+that these optional features are available by defining configuration macros
+such as `-DMCKL_HAS_HDF5=1` during compilation.
 
 # Optional runtime library
 
 In addition to the header-only library, one can optionally build and use a
 runtime library. To build the library, one need a recent version of
-[NASM][NASM] assembler and the [CMake][CMake] program. The library is only
-supported on x86-64 CPUs and 64-bit Unix-alike systems.
+[NASM](http://nasm.us) assembler and the [CMake](http://www.cmake.org) program.
+The library is only supported on x86-64 CPUs and 64-bit Unix-alike systems.
 
 To build and install the library,
 ```
@@ -64,8 +76,9 @@ than the standard library or MKL VML in high accuracy mode.
 This library makes heavy use of some template metaprogramming techniques. It
 requires a C++14 standard conforming compiler.
 
-This library has been regularly tested with recent [Clang][clang], [GCC][gcc]
-and [Intel C++ Compiler][icpc] in C++14 mode.
+This library has been regularly tested with recent
+[clang](http://clang.llvm.org), [GCC](http://gcc.gnu.org) and [Intel C++
+Compiler](http://software.intel.com/en-us/intel-compilers) in C++14 mode.
 
 Other compilers might work but are not tested. Complete C++14 implementation is
 required with thread-local storage as an exception.
@@ -87,17 +100,3 @@ Some examples may only be built if optional dependencies are present.
 
 The MCKL library is distributed with a 2-clause BSD license which can be found
 in the `LICENSE` file distributed with the source.
-
-[clang]: http://clang.llvm.org
-[CMake]: http://www.cmake.org
-[doxygen]: http://www.stack.nl/~dimitri/doxygen
-[gcc]: http://gcc.gnu.org
-[NASM]: http://nasm.us
-[hdf5]: http://www.hdfgroup.org
-[icpc]: http://software.intel.com/en-us/intel-compilers
-[mkl]: https://software.intel.com/en-us/intel-mkl
-[omp]: http://www.openmp.org
-[tbb]: http://threadingbuildingblocks.org
-[MCKLDoxygenDevelop]: http://zhouyan.github.io/MCKLDoc/develop
-[MCKLDoxygenMaster]: http://zhouyan.github.io/MCKLDoc/master
-[MCKLReleases]: https://github.com/zhouyan/MCKL/releases
