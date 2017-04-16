@@ -1,6 +1,41 @@
+.. ============================================================================
+..  MCKL/docs/math.rst
+.. ----------------------------------------------------------------------------
+..  MCKL: Monte Carlo Kernel Library
+.. ----------------------------------------------------------------------------
+..  Copyright (c) 2013-2017, Yan Zhou
+..  All rights reserved.
+
+..  Redistribution and use in source and binary forms, with or without
+..  modification, are permitted provided that the following conditions are met:
+
+..    Redistributions of source code must retain the above copyright notice,
+..    this list of conditions and the following disclaimer.
+
+..    Redistributions in binary form must reproduce the above copyright notice,
+..    this list of conditions and the following disclaimer in the documentation
+..    and/or other materials provided with the distribution.
+
+..  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+..  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+..  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+..  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+..  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+..  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+..  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+..  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+..  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+..  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+..  POSSIBILITY OF SUCH DAMAGE.
+.. ============================================================================
+
+.. _chap-Mathematical Functions:
+
 **********************
 Mathematical Functions
 **********************
+
+.. _sec-Constants:
 
 Constants
 =========
@@ -11,17 +46,18 @@ precision, one can use the following,
 
 .. code-block:: cpp
 
-    constexpr float       pi_f = const_pi<float>();
-    constexpr double      pi_d = const_pi<double>();
-    constexpr long double pi_l = const_pi<long double>();
+    constexpr float       pi_f = ::mckl::const_pi<float>();
+    constexpr double      pi_d = ::mckl::const_pi<double>();
+    constexpr long double pi_l = ::mckl::const_pi<long double>();
 
 The compiler evaluates these values at compile-time and thus there is no
-performance difference from hard-coding the constants in the program, while the
-readability is improved. All defined constants are listed in the table below.
+performance difference between the function call and hard-coding the constants
+in the program, while the readability is improved. All defined constants are
+listed in :ref:`the table below <tab-Mathematical Constants>`.
 
-.. _tab-mathematical-constants:
+.. _tab-Mathematical Constants:
 
-.. csv-table:: Mathematical constants
+.. csv-table:: Mathematical Constants
     :delim: &
     :header: Function, Value
 
@@ -82,6 +118,8 @@ readability is improved. All defined constants are listed in the table below.
     ``const_ln_inv_10``    & :math:`1/\ln{10}`
     ``const_ln_ln_2``      & :math:`\ln\ln{2}`
 
+.. _sec-Vectorized Functions:
+
 Vectorized Functions
 ====================
 
@@ -91,9 +129,9 @@ example, to perform additions of two vectors,
 .. code-block:: cpp
 
     size_t n = 1000;
-    mckl::Vector<double> a(n), b(n), y(n);
+    ::mckl::Vector<double> a(n), b(n), y(n);
     // Fill vectors a and b
-    mckl::add(n, a.data(), b.data(), y.data());
+    ::mckl::add(n, a.data(), b.data(), y.data());
 
 This is equivalent to,
 
@@ -102,60 +140,91 @@ This is equivalent to,
     for (size_t i = 0; i != n; ++i)
         y[i] = a[i] + b[i];
 
-The functions defined are listed in tables below. For each function, the first
-parameter is always the length of the vector, and the last is a pointer to the
-output vector (except for ``sincos`` and ``modf`` which have two output
-vecrors). The output parameters are always vectors. Some of the input
-parameters may be scalars. For example, in the function call,
+.. _sub-Types of Function Parameters:
+
+Conventions of Parameters
+-------------------------
+
+For each function, the first parameter is always the length of the vectors, and
+the last is a pointer to the output vector (except for ``sincos`` and ``modf``
+which have two output vectors). The output parameters are always vectors. Some
+of the input parameters may be scalars. For example, the ``muladd`` function
+Functions` has the following seven overloads,
 
 .. code-block:: cpp
 
-    mckl::muladd(n, a, b, c, y);
+    namespace mckl {
 
-in :ref:`tab-arithmetic-functions`, the input parameters are ``a``, ``b``, and
-``c``. Some of them, (but not all), can be scalars instead of pointers to
-vectors. The output parameter ``y`` has to be a pointer to a vector. Therefore,
-there are seven versions of this function for each type of the parameters.
+    template <typename T>
+    void muladd(size_t n, const T *a, const T *b, const T *c, T *y);
+
+    template <typename T>
+    void muladd(size_t n, const T *a, const T *b, T c, T *y);
+
+    template <typename T>
+    void muladd(size_t n, const T *a, T b, const T *c, T *y);
+
+    template <typename T>
+    void muladd(size_t n, T a, const T *b, const T *c, T *y);
+
+    template <typename T>
+    void muladd(size_t n, T a, T b, const T *c, T *y);
+
+    template <typename T>
+    void muladd(size_t n, T a, const T *b, T c, T *y);
+
+    template <typename T>
+    void muladd(size_t n, const T *a, T b, T c, T *y);
+
+    } // namespace mckl
 
 The input of these functions can be either real numbers (floating point types),
 or complex numbers (``std::complex<double>``, etc.), or both. The supported
-data types are also listed in the tables. In most cases, output data type is
-the same as the input. There are a few exceptions. The ``abs`` and ``arg``
-functions always have real numbers as output. The ``cis`` function takes real
-numbers as input and complex numbers as output. Note that, mixed precision is
-not allowed. For example,
+data types are also listed in :ref:`the tables <sub-List of Functions>`. In
+most cases, output data type is the same as the input. There are a few
+exceptions. The ``abs`` and ``arg`` functions always have real numbers as
+output. The ``cis`` function takes real numbers as input and complex numbers as
+output. Note that, mixed precision is not allowed. For example,
 
 .. code-block:: cpp
 
-    mckl::Vector<double> a(n);
-    mckl::Vector<double> b(n);
-    mckl::Vector<double> y(n);
-    mckl::muladd(n, a.data(), b.data(), 2, y.data());
+    ::mckl::Vector<double> a(n);
+    ::mckl::Vector<double> b(n);
+    ::mckl::Vector<double> y(n);
+    ::mckl::muladd(n, a.data(), b.data(), 2, y.data());
 
 causes compile-time error because the fourth argument is an integer while the
 others are floating point types. The correct call shall be,
 
 .. code-block:: cpp
 
-    mckl::muladd(n, a.data(), b.data(), 2.0, y.data());
+    ::mckl::muladd(n, a.data(), b.data(), 2.0, y.data());
 
-The same principle applies to mixed types functions (``abs``, ``arg`` and
+The same principle applies to mixed type functions (``abs``, ``arg`` and
 ``cis``).
-
-With only the standard library, these functions do not provide performance
-advantage compared to simple loops. When MCL VML is available, some functions
-can have substantial performance improvement when all input arguments are
-vectors of types single or double precision floating point types, or their
-complex counterparts.
-.. The performance of vectorized random number generating
-.. (see section~\ref{sec:Vectorized Random Number Generating}) heavily depends
-.. on these functions.
 
 The input and output pointers are allowed to alias to each other in the sense
 that they might pointing to the same memory locations. However, if they point
 different locations but the vectors overlap, the behavior is undefined.
 
-.. _tab-arithmetic-functions:
+.. _sub-Vectorized Performance:
+
+Vectorized Performance
+----------------------
+
+With only the standard library, these functions do not provide performance
+advantage compared to simple loops. When `Intel MKL`_ is available, some
+functions can have substantial performance improvement when all input arguments
+are vectors of types ``float`` or ``double``, ``std::complex<float>`` or
+``std::complex<double>``. The performance of :ref:`sec-Vectorized Random Number
+Generating` heavily depends on these functions.
+
+.. _sub-List of Functions:
+
+List of Functions
+-----------------
+
+.. _tab-Arithmetic Functions:
 
 .. csv-table:: Arithmetic Functions
     :delim: &
@@ -167,7 +236,7 @@ different locations but the vectors overlap, the behavior is undefined.
     ``mul``       & :math:`y = ab`              & Real, Complex
     ``mulbyconj`` & :math:`y = a\bar{b}`        & Complex
     ``conj``      & :math:`y = \bar{a}`         & Complex
-    ``abs``       & :math:`y = \lvert a\rvert`  & Real, Complex
+    ``abs``       & :math:`y = \lvert{a}\rvert` & Real, Complex
     ``arg``       & :math:`y = \mathrm{arg}(a)` & Complex
     ``muladd``    & :math:`y = ab + c`          & Real, Complex
     ``mulsub``    & :math:`y = ab - c`          & Real, Complex
@@ -178,7 +247,7 @@ different locations but the vectors overlap, the behavior is undefined.
     ``fnmadd``    & :math:`y = -ab + c` (fused) & Real
     ``fnmsub``    & :math:`y = -ab - c` (fused) & Real
 
-.. _tab-power-and-root-functions:
+.. _tab-Power and Root Functions:
 
 .. csv-table:: Power and Root Functions
     :delim: &
@@ -195,7 +264,7 @@ different locations but the vectors overlap, the behavior is undefined.
     ``pow``     & :math:`y = a^b`              & Real, Complex
     ``hypot``   & :math:`y = \sqrt{a^2 + b^2}` & Real
 
-.. _tab-exponential-and-logarithm-functions:
+.. _tab-Exponential and Logarithm Functions:
 
 .. csv-table:: Exponential and Logarithm Functions
     :delim: &
@@ -209,7 +278,7 @@ different locations but the vectors overlap, the behavior is undefined.
     ``log10`` & :math:`y = \log_{10} a`      & Real, Complex
     ``log1p`` & :math:`y = \ln(a + 1)`       & Real
 
-.. _tab-trigonometric-functions:
+.. _tab-Trigonometric Functions:
 
 .. csv-table:: Trigonometric Functions
     :delim: &
@@ -225,7 +294,7 @@ different locations but the vectors overlap, the behavior is undefined.
     ``atan``   & :math:`y = \arctan(a)`         & Real, Complex
     ``atan2``  & :math:`y = \arctan(a / b)`     & Real
 
-.. _tab-hyperbolic-functions:
+.. _tab-Hyperbolic Functions:
 
 .. csv-table:: Hyperbolic Functions
     :delim: &
@@ -238,7 +307,7 @@ different locations but the vectors overlap, the behavior is undefined.
     ``asinh`` & :math:`y = \mathrm{arc}\sinh(a)` & Real, Complex
     ``atanh`` & :math:`y = \mathrm{arc}\tanh(a)` & Real, Complex
 
-.. _tab-special-functions:
+.. _tab-Special Functions:
 
 .. csv-table:: Special Functions
     :delim: &
@@ -250,7 +319,7 @@ different locations but the vectors overlap, the behavior is undefined.
     ``lgamma``  & :math:`y = \ln\Gamma(a)`                         & Real
     ``tgamma``  & :math:`y = \Gamma(a)`                            & Real
 
-.. _tab-rounding-functions:
+.. _tab-Rounding Functions:
 
 .. csv-table:: Rounding Functions
     :delim: &
@@ -264,34 +333,37 @@ different locations but the vectors overlap, the behavior is undefined.
     ``rint``      & :math:`y = \text{nearest integer of }a`      & Real
     ``modf``      & :math:`z = a - y`                            & Real
 
+.. _sec-Fused Multiplication and Addition:
+
 Fused Multiplication and Addition
 =================================
 
-The ``muladd`` and ``fmadd`` functions in :ref:`tab-arithmetic-functions`
-differs in that ``fmadd`` always does fused multiplication and addition by
-``std::fma`` while ``muladd`` use one multiplication and one addition. However,
-the compiler may or may not be able to make use the platform FMA support. And
-it may not vectorize the loop in ``fmadd`` etc., as most modern C++ compilers
-would do for simpler operations such as addition and multiplication.
+The ``muladd``, ``fmadd`` and related functions differ in that ``fmadd`` always
+does `fused multiply-add
+<https://en.wikipedia.org/wiki/Multiply–accumulate_operation#Fused_multiply.E2.80.93add>`_
+(FMA) by ``std::fma`` while ``muladd`` use one multiplication and one addition.
+However, the compiler may or may not be able to make use the hardware FMA
+support. And it may not vectorize the loop in ``fmadd`` etc., as most modern
+C++ compilers would do for simpler operations such as addition and
+multiplication.
 
 When software implementation of ``std::fma`` is used, it will be much slower
 than using one multiplication and one addition. In this case, there are
 assembly implementations that take advantage of the platform support for single
-and double precision. To enable this feature, one need to build and link to the
-:ref:`optional runtime library <optional-runtime-library>`. One also need to
-set the configuration macro ``MCKL_USE_ASM_LIB`` to true. In addition, this
-feature is only enabled for platforms with FMA3 instruction set support.
+and double precision. To enable this feature, one needs to build and link to
+the :ref:`sec-Optional Runtime Library`. One also needs to use preprocessor
+configuration ``#define MCKL_USE_ASM_LIB 1``. In addition, this feature is only
+enabled for platforms with `FMA3
+<https://en.wikipedia.org/wiki/FMA_instruction_set#FMA3_instruction_set>`_
+instruction set support.
 
-The library detects the availability of these instructions using compiler
-macros. If this mechanism is not adequate, one can manually enable or disable
-them using the configuration macro ``MCKL_HAS_FMA``. Note that, when the
-compiler is able to generate vectorized loop for ``std::fma``, the assembly
-library may or may not outperform the compiler generated binary. If the
-compiler generated binary is preferred but the runtime library is also enabled
-for its other features, then one can define the configuration macro
-``MCKL_USE_ASM_FMA`` to false to disable this feature.
+The library detects the availability of FMA3 instructions using compiler
+predefined macros. If this mechanism is not adequate, one can manually enable
+them using preprocessor configuration ``#define MCKL_HAS_FMA 1``. Note that,
+when the compiler is able to generate vectorized loop for ``std::fma``, the
+assembly library may or may not outperform the compiler generated binary. If
+the compiler generated binary is preferred but the runtime library is also used
+for its other features, then one can use the preprocessor configuration
+``#define MCKL_USE_ASM_FMA 0``.
 
-The same principles also applies to other related functions such as ``mulsub``
-and ``fmsub``. Last but not least, when the runtime library is used, it also
-replace single and double precisions of ``muladd``, etc., with their
-corresponding fused version.
+.. _Intel MKL: https://software.intel.com/en-us/intel-mkl/

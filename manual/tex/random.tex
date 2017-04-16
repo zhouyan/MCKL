@@ -69,8 +69,9 @@ for (size_t i = 0; i != n; ++i)
 The results are always the same unless a non-deterministic \rng is used (see
 section~\ref{sec:Non-Deterministic Random Number Generators}). For some \rng{}s
 implemented in \mckl, the vectorized function may have considerable performance
-advantage. See appendix~\ref{chap:Performance of Random Number Generators}. The
-second variant of |rand| is for generating distribution random variates,
+advantage. See appendix~\ref{chap:Performance of Random Number Generators}.
+
+The second variant of |rand| is for generating distribution random variates,
 \begin{verbatim}
 template <typename RNGType, typename DistributionType>
 void rand(RNGType &rng, DistributionType &distribution, size_t n,
