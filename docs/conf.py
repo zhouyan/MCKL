@@ -60,3 +60,4 @@ html_theme_options = {
         'navigation_depth': 3,
         }
 html_static_path = ['_static']
+html_extra_path = ['doxygen']

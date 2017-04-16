@@ -35,5 +35,5 @@
 API References
 **************
 
-The `API documents <../doxygen/index.html>`_ are generated with `Doxygen
+The `API documents <doxygen/index.html>`_ are generated with `Doxygen
 <http://www.stack.nl/~dimitri/doxygen/>`_
