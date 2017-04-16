@@ -55,30 +55,6 @@ option(MCKL_ENABLE_EXAMPLE "Enable building of example" ON)
 option(MCKL_ENABLE_LIBRARY "Enable building of library" ON)
 
 ##############################################################################
-# Documentations
-##############################################################################
-
-include(FindDoxygen)
-if(DOXYGEN_FOUND)
-    file(READ ${PROJECT_SOURCE_DIR}/README.md README)
-    file(READ ${PROJECT_SOURCE_DIR}/NEWS.md NEWS)
-    configure_file(${PROJECT_SOURCE_DIR}/config/Doxyfile.in
-        ${PROJECT_BINARY_DIR}/config/Doxyfile)
-    configure_file(${PROJECT_SOURCE_DIR}/config/main.md.in
-        ${PROJECT_BINARY_DIR}/config/main.md)
-    configure_file(${PROJECT_SOURCE_DIR}/config/news.md.in
-        ${PROJECT_BINARY_DIR}/config/news.md)
-    add_custom_target(doxygen
-        DEPENDS
-        ${PROJECT_BINARY_DIR}/config/Doxyfile
-        ${PROJECT_BINARY_DIR}/config/main.md
-        ${PROJECT_BINARY_DIR}/config/news.md
-        COMMAND ${DOXYGEN_EXECUTABLE} config/Doxyfile
-        COMMENT "Generating doxygen"
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-endif(DOXYGEN_FOUND)
-
-##############################################################################
 # Installation
 ##############################################################################
 

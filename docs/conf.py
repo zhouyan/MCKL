@@ -31,7 +31,11 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-import sphinx_rtd_theme
+import sphinx_rtd_theme, subprocess, os
+
+# Generate Doxygen
+if os.environ.get('READTHEDOCS', None) == 'True':
+    subprocess.call('doxygen', shell = True)
 
 # General configuration
 extensions = ['sphinx.ext.mathjax']

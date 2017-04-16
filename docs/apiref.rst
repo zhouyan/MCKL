@@ -29,15 +29,11 @@
 ..  POSSIBILITY OF SUCH DAMAGE.
 .. ============================================================================
 
-********************************
-Welcome to MCKL’s documentation!
-********************************
+.. _chap-API References:
 
-.. toctree::
-    :maxdepth: 2
-    :caption: Contents:
+**************
+API References
+**************
 
-    intro
-    math
-    random
-    apiref
+The `API documents <../doxygen/index.html>`_ are generated with `Doxygen
+<http://www.stack.nl/~dimitri/doxygen/>`_
