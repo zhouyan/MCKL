@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # ============================================================================
 #  MCKL/docs/conf.py
 # ----------------------------------------------------------------------------
@@ -35,12 +33,12 @@ import os
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
-if not on_rtd:
-    import sphinx_rtd_theme, subprocess
-
 # Generate Doxygen
 if on_rtd:
+    import subprocess
     subprocess.call('doxygen', shell = True)
+else :
+    import sphinx_rtd_theme
 
 # General configuration
 extensions = ['sphinx.ext.mathjax']
