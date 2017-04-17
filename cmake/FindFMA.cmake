@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-# Find AES-NI support
+# Find FMA support
 #
 # The following variable is set
 #

@@ -29,7 +29,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-# Find AES-NI support
+# Find AVX2 support
 #
 # The following variable is set
 #

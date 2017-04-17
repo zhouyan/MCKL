@@ -39,7 +39,6 @@ if os.environ.get('READTHEDOCS', None) == 'True':
 
 # General configuration
 extensions = ['sphinx.ext.mathjax']
-templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 project = u'MCKL'
@@ -48,7 +47,7 @@ author = u'Yan Zhou'
 version = u'v1.0'
 release = u'v1.0'
 language = None
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = []
 todo_include_todos = False
 
 # Options for HTML output
@@ -59,5 +58,4 @@ html_theme_options = {
         'display_version': False,
         'navigation_depth': 3,
         }
-html_static_path = ['_static']
 html_extra_path = ['doxygen']

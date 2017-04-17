@@ -41,12 +41,22 @@
 #
 # The following variables affect the behavior of this module
 #
+# TestU01_ROOT     - The root path that CMake shall try
 # TestU01_INC_PATH - The path CMake shall try to find headers first
 # TestU01_LIB_PATH - The path CMake shall try to find libraries first
 
 if(DEFINED TestU01_FOUND)
     return()
 endif(DEFINED TestU01_FOUND)
+
+if(${TestU01_ROOT})
+    if(NOT ${TestU01_INC_PATH})
+        set(TestU01_INC_PATH ${TestU01_ROOT}/include)
+    endif(NOT ${TestU01_INC_PATH})
+    if(NOT ${TestU01_LIB_PATH})
+        set(TestU01_LIB_PATH ${TestU01_ROOT}/lib)
+    endif(NOT ${TestU01_LIB_PATH})
+endif(${TestU01_ROOT})
 
 if(NOT DEFINED TestU01_LINK_LIBRARIES)
     find_library(TestU01 testu01

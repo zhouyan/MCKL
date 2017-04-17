@@ -33,20 +33,30 @@
 #
 # The following variable are set
 #
-# JEMALLOC_FOUND          - TRUE if jemalloc is found and work correctly
+# JEMalloc_FOUND          - TRUE if jemalloc is found and work correctly
 # JEMalloc_INCLUDE_DIR    - The directory containing jemalloc headers
 # JEMalloc_LINK_LIBRARIES - jemalloc libraries that shall be linked to
 #
 # The following variables affect the behavior of this module
 #
+# JEMalloc_ROOT     - The root path that CMake shall try
 # JEMalloc_INC_PATH - The path CMake shall try to find headers first
 # JEMalloc_LIB_PATH - The path CMake shall try to find libraries first
 
-if(DEFINED JEMALLOC_FOUND)
+if(DEFINED JEMalloc_FOUND)
     return()
-endif(DEFINED JEMALLOC_FOUND)
+endif(DEFINED JEMalloc_FOUND)
 
-file(READ ${CMAKE_CURRENT_LIST_DIR}/FindJEMalloc.cpp JEMALLOC_TEST_SOURCE)
+if(${JEMalloc_ROOT})
+    if(NOT ${JEMalloc_INC_PATH})
+        set(JEMalloc_INC_PATH ${JEMalloc_ROOT}/include)
+    endif(NOT ${JEMalloc_INC_PATH})
+    if(NOT ${JEMalloc_LIB_PATH})
+        set(JEMalloc_LIB_PATH ${JEMalloc_ROOT}/lib)
+    endif(NOT ${JEMalloc_LIB_PATH})
+endif(${JEMalloc_ROOT})
+
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindJEMalloc.cpp JEMalloc_TEST_SOURCE)
 
 if(NOT DEFINED JEMalloc_INCLUDE_DIR)
     find_path(JEMalloc_INCLUDE_DIR jemalloc/jemalloc.h
@@ -73,17 +83,19 @@ endif(NOT DEFINED JEMalloc_LINK_LIBRARIES)
 if(JEMalloc_INCLUDE_DIR AND JEMalloc_LINK_LIBRARIES)
     include(CheckCXXSourceCompiles)
     set(SAFE_CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS})
+    set(SAFE_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
     set(SAFE_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
     set(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS}
         -DJEMALLOC_NO_DEMANGLE)
     set(CMAKE_REQUIRED_LIBRARIES ${SAFE_CMAKE_REQUIRED_LIBRARIES}
         ${JEMalloc_LINK_LIBRARIES})
-    check_cxx_source_compiles("${JEMALLOC_TEST_SOURCE}" JEMALLOC_TEST)
-    if(JEMALLOC_TEST)
-        set(JEMALLOC_FOUND TRUE CACHE BOOL "Found jemalloc support")
-    else(JEMALLOC_TEST)
-        set(JEMALLOC_FOUND FALSE CACHE BOOL "NOT Found jemalloc support")
-    endif(JEMALLOC_TEST)
-    set(SAFE_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+    check_cxx_source_compiles("${JEMalloc_TEST_SOURCE}" JEMalloc_TEST)
+    if(JEMalloc_TEST)
+        set(JEMalloc_FOUND TRUE CACHE BOOL "Found jemalloc support")
+    else(JEMalloc_TEST)
+        set(JEMalloc_FOUND FALSE CACHE BOOL "NOT Found jemalloc support")
+    endif(JEMalloc_TEST)
     set(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS})
+    set(CMAKE_REQUIRED_INCLUDES ${SAFE_CMAKE_REQUIRED_INCLUDES})
+    set(CMAKE_REQUIRED_LIBRARIES ${SAFE_CMAKE_REQUIRED_LIBRARIES})
 endif(JEMalloc_INCLUDE_DIR AND JEMalloc_LINK_LIBRARIES)

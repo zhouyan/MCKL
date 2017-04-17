@@ -35,7 +35,7 @@ Welcome to MCKL’s documentation!
 
 .. toctree::
     :maxdepth: 2
-    :caption: Contents:
+    :caption: Contents
 
     intro
     math
@@ -43,4 +43,5 @@ Welcome to MCKL’s documentation!
     random_rng
     random_distribution
     random_testu01
-    apiref
+
+`API References <./doxygen/index.html>`_
