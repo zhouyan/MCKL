@@ -42,4 +42,5 @@ Welcome to MCKL’s documentation!
     random
     random_rng
     random_distribution
+    random_testu01
     apiref
