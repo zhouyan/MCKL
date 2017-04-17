@@ -1,4 +1,0 @@
-Normal<float>(0,1)                   53.98       49.78        4.98        5.56       VML    (0)--Passed
-Normal<double>(0,1)                  64.17       67.19       12.74       10.49       VML    (0)--Passed
-Normal<float>(0,1)                   48.78       49.68       28.76        5.60       VMF    (0)--Passed
-Normal<double>(0,1)                  63.90       67.10       12.65       10.39       VMF    (0)--Passed

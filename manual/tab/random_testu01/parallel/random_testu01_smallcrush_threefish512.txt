@@ -1,8 +1,0 @@
-========= Summary results of SmallCrush =========
- Generator:        U01CO
- Number of statistics:  15
- ----------------------------------------------
- 10  RandomWalk1 M                   0.9991
- ----------------------------------------------
- All other tests were passed
-

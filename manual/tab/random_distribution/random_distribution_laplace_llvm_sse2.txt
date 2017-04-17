@@ -1,4 +1,0 @@
-Laplace<float>(0,1)                  86.73       75.43       15.98       21.81       VML    (0)--Passed
-Laplace<double>(0,1)                108.29       86.48       30.34       31.91       VML    (0)--Passed
-Laplace<float>(0,1)                  86.72       75.87       35.90       21.80       VMF    (0)--Passed
-Laplace<double>(0,1)                108.51       86.43       52.73       31.94       VMF    (0)--Passed

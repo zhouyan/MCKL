@@ -1,4 +1,0 @@
-U01Canonical<float>                   8.23        5.99        1.44        1.92       VML    (0)--Passed
-U01Canonical<double>                 12.61       10.03        3.17        4.15       VML    (0)--Passed
-U01Canonical<float>                   8.23        6.01        1.44        1.93       VMF    (0)--Passed
-U01Canonical<double>                 12.61       10.04        3.15        4.19       VMF    (0)--Passed

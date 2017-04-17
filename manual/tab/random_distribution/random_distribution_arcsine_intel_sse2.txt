@@ -1,4 +1,0 @@
-Arcsine<float>(0,1)                  82.17       81.98       16.74       18.46       VML    (0)--Passed
-Arcsine<double>(0,1)                 95.59       95.59       29.78       31.65       VML    (0)--Passed
-Arcsine<float>(0,1)                  81.77       81.86       44.19       45.88       VMF    (0)--Passed
-Arcsine<double>(0,1)                 95.66       95.56       54.24       55.77       VMF    (0)--Passed

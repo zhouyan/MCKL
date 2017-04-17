@@ -1,9 +1,0 @@
-========= Summary results of BigCrush =========
- Generator:        STD
- Number of statistics:  4
- ----------------------------------------------
- 81  LinearComp, r = 29             1 - eps1
- 81  LinearComp, r = 29             1 - eps1
- ----------------------------------------------
- All other tests were passed
-

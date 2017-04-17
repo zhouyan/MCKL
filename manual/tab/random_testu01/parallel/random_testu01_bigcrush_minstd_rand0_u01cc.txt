@@ -1,9 +1,0 @@
-========= Summary results of BigCrush =========
- Generator:        U01CC
- Number of statistics:  6
- ----------------------------------------------
- 89  PeriodsInStrings, r = 20       1 -  2.7e-6
- 89  PeriodsInStrings, r = 20        0.9996
- ----------------------------------------------
- All other tests were passed
-

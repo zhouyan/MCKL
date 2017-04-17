@@ -1,5 +1,0 @@
-MKL_MCG59_64                       2064     8      1.21      0.83      ---Passed
-MKL_MCG59_64                       2064     8      1.21      0.78      ---Passed
-MKL_MCG59_64                       2064     8      1.21      0.83      ---Passed
-MKL_MCG59_64                       2064     8      1.22      0.83      ---Passed
-MKL_MCG59_64                       2064     8      1.21      0.81      ---Passed

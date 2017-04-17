@@ -1,5 +1,0 @@
-ranlux24                            120     8     64.41     64.27      ---Passed
-ranlux24                            120     8     64.50     64.32      ---Passed
-ranlux24                            120     8     64.47     64.30      ---Passed
-ranlux24                            120     8     64.45     64.35      ---Passed
-ranlux24                            120     8     64.40     64.28      ---Passed

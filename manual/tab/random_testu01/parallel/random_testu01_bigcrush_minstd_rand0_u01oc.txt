@@ -1,8 +1,0 @@
-========= Summary results of BigCrush =========
- Generator:        U01OC
- Number of statistics:  2
- ----------------------------------------------
- 45  CollisionPermut, r = 10         0.9992
- ----------------------------------------------
- All other tests were passed
-

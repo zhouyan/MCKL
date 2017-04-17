@@ -1,8 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01
- Number of statistics:  144
- ----------------------------------------------
- 35  Run of U01, r = 0               0.9994
- ----------------------------------------------
- All other tests were passed
-

@@ -1,9 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01OO
- Number of statistics:  144
- ----------------------------------------------
- 54  WeightDistrib, r = 24           0.9993
- 76  LongestHeadRun, r = 0           0.9990
- ----------------------------------------------
- All other tests were passed
-

@@ -1,4 +1,0 @@
-Rayleigh<float>(1)                   26.25       26.24        3.59        3.42       VML    (0)--Passed
-Rayleigh<double>(1)                  35.15       35.11       10.00       10.12       VML    (0)--Passed
-Rayleigh<float>(1)                   26.24       26.24       18.76        3.53       VMF    (0)--Passed
-Rayleigh<double>(1)                  35.15       35.11       13.60        9.78       VMF    (0)--Passed

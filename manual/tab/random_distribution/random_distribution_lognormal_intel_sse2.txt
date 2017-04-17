@@ -1,4 +1,0 @@
-Lognormal<float>(0,1)               435.82      123.00       26.98       22.85       VML    (0)--Passed
-Lognormal<double>(0,1)              519.48      153.48       53.53       39.51       VML    (0)--Passed
-Lognormal<float>(0,1)               437.78      124.70       83.93       22.97       VMF    (0)--Passed
-Lognormal<double>(0,1)              519.27      152.89      121.56       39.35       VMF    (0)--Passed

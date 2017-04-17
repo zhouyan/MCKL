@@ -1,4 +1,0 @@
-Logistic<float>(0,1)                 30.76       30.75        4.56        5.01       VML    (0)--Passed
-Logistic<double>(0,1)                43.13       43.12       12.96       13.57       VML    (0)--Passed
-Logistic<float>(0,1)                 30.78       30.76       14.77       15.24       VMF    (0)--Passed
-Logistic<double>(0,1)                43.17       43.12       14.01       14.68       VMF    (0)--Passed

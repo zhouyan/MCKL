@@ -1,8 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01CC
- Number of statistics:  144
- ----------------------------------------------
- 73  LempelZiv                       8.6e-4
- ----------------------------------------------
- All other tests were passed
-

@@ -1,4 +1,0 @@
-Cauchy<float>(0,1)                  325.16       76.14       22.11       15.68       VML    (0)--Passed
-Cauchy<double>(0,1)                 397.54      116.55       48.57       25.84       VML    (0)--Passed
-Cauchy<float>(0,1)                  329.15       76.43       53.73       15.65       VMF    (0)--Passed
-Cauchy<double>(0,1)                 395.69      117.20       77.20       25.85       VMF    (0)--Passed

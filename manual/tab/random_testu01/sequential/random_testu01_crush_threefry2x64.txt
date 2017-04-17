@@ -1,9 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01
- Number of statistics:  144
- ----------------------------------------------
- 68  RandomWalk1 C (L = 1000)        4.5e-4
- 86  HammingIndep, L = 30            0.9998
- ----------------------------------------------
- All other tests were passed
-

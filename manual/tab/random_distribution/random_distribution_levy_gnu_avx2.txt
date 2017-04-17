@@ -1,4 +1,0 @@
-Levy<float>(0,1)                     94.34       94.94        8.73        9.67       VML    (0)--Passed
-Levy<double>(0,1)                    89.39       89.69       21.31       19.62       VML    (0)--Passed
-Levy<float>(0,1)                     94.81       94.60       32.11        9.53       VMF    (0)--Passed
-Levy<double>(0,1)                    89.03       88.84       21.15       19.50       VMF    (0)--Passed

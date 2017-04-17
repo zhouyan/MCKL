@@ -1,5 +1,0 @@
-Threefry4x32_64                      72     8      4.51      0.67      ---Passed
-Threefry4x32_64                      72     8      4.52      0.67      ---Passed
-Threefry4x32_64                      72     8      4.52      0.67      ---Passed
-Threefry4x32_64                      72     8      4.52      0.67      ---Passed
-Threefry4x32_64                      72     8      4.52      0.67      ---Passed

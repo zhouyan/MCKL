@@ -1,8 +1,0 @@
-========= Summary results of Crush =========
- Generator:        U01OC
- Number of statistics:  144
- ----------------------------------------------
- 95  AutoCor, d = 30                 0.9993
- ----------------------------------------------
- All other tests were passed
-

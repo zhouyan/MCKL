@@ -1,5 +1,0 @@
-MKL_NONDETERM_64                   2064     8     29.50     29.16      ---Passed
-MKL_NONDETERM_64                   2064     8     30.03     29.65      ---Passed
-MKL_NONDETERM_64                   2064     8     29.33     29.01      ---Passed
-MKL_NONDETERM_64                   2064     8     29.88     29.47      ---Passed
-MKL_NONDETERM_64                   2064     8     29.28     28.99      ---Passed

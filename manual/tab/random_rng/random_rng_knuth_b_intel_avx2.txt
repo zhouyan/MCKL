@@ -1,5 +1,0 @@
-knuth_b                            1032     4     21.13     21.06      ---Passed
-knuth_b                            1032     4     21.01     21.03      ---Passed
-knuth_b                            1032     4     21.01     21.05      ---Passed
-knuth_b                            1032     4     21.02     21.00      ---Passed
-knuth_b                            1032     4     20.94     21.02      ---Passed

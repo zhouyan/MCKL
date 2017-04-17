@@ -1,4 +1,0 @@
-U01Canonical<float>                 279.27       28.26        6.89        8.63       VML    (0)--Passed
-U01Canonical<double>                308.35       51.87       15.54       19.04       VML    (0)--Passed
-U01Canonical<float>                 280.02       28.37        6.89        8.62       VMF    (0)--Passed
-U01Canonical<double>                308.61       51.95       15.53       19.06       VMF    (0)--Passed

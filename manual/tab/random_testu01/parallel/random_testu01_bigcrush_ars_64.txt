@@ -1,8 +1,0 @@
-========= Summary results of BigCrush =========
- Generator:        U01
- Number of statistics:  160
- ----------------------------------------------
- 12  CollisionOver, t = 21           0.9992
- ----------------------------------------------
- All other tests were passed
-

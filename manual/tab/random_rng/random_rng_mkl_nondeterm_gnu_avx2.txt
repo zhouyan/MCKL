@@ -1,5 +1,0 @@
-MKL_NONDETERM                      1040     8     30.66     29.25      ---Passed
-MKL_NONDETERM                      1040     8     30.76     29.50      ---Passed
-MKL_NONDETERM                      1040     8     30.54     29.34      ---Passed
-MKL_NONDETERM                      1040     8     30.31     29.16      ---Passed
-MKL_NONDETERM                      1040     8     30.17     28.90      ---Passed

@@ -1,9 +1,0 @@
-========= Summary results of BigCrush =========
- Generator:        U01CO
- Number of statistics:  16
- ----------------------------------------------
- 87  LongestHeadRun, r = 27          1.6e-7
- 87  LongestHeadRun, r = 27          4.7e-5
- ----------------------------------------------
- All other tests were passed
-

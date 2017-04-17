@@ -1,5 +1,0 @@
-MKL_PHILOX4X32X10_64               2064     8      2.58      1.78      ---Passed
-MKL_PHILOX4X32X10_64               2064     8      2.58      1.78      ---Passed
-MKL_PHILOX4X32X10_64               2064     8      2.58      1.78      ---Passed
-MKL_PHILOX4X32X10_64               2064     8      2.58      1.78      ---Passed
-MKL_PHILOX4X32X10_64               2064     8      2.58      1.78      ---Passed

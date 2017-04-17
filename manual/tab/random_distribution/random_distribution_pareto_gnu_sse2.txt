@@ -1,4 +1,0 @@
-Pareto<float>(1,1)                  102.76      102.64       18.75       18.79       VML    (0)--Passed
-Pareto<double>(1,1)                 147.44      146.63       38.62       33.70       VML    (0)--Passed
-Pareto<float>(1,1)                  102.72      102.48       52.95       33.24       VMF    (0)--Passed
-Pareto<double>(1,1)                 147.05      145.63       80.89       53.47       VMF    (0)--Passed

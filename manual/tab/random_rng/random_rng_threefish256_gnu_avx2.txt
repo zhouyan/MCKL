@@ -1,5 +1,0 @@
-Threefish256                        136     8      6.07      1.89      ---Passed
-Threefish256                        136     8      6.07      1.89      ---Passed
-Threefish256                        136     8      6.07      1.89      ---Passed
-Threefish256                        136     8      6.07      1.89      ---Passed
-Threefish256                        136     8      6.07      1.89      ---Passed

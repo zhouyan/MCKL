@@ -1,5 +1,0 @@
-ranlux48_base                       112     8      3.16      3.21      ---Passed
-ranlux48_base                       112     8      3.16      3.21      ---Passed
-ranlux48_base                       112     8      3.16      3.22      ---Passed
-ranlux48_base                       112     8      3.16      3.21      ---Passed
-ranlux48_base                       112     8      3.16      3.21      ---Passed
