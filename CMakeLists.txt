@@ -44,7 +44,6 @@ endif(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 ##############################################################################
 
 project(MCKL C CXX)
-set(MCKL_VERSION 1.0)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
 ##############################################################################

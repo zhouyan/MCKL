@@ -29,32 +29,31 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-import os
-
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+import subprocess, sphinx_rtd_theme
 
 # Generate Doxygen
-if on_rtd:
-    import subprocess
-    subprocess.call('doxygen', shell = True)
-else :
-    import sphinx_rtd_theme
+subprocess.call('doxygen', shell = True)
 
 # General configuration
 extensions = ['sphinx.ext.mathjax']
+
 source_suffix = '.rst'
 master_doc = 'index'
+
 project = u'MCKL'
+version = u'1.0'
+release = u'1.0.0'
+
 copyright = u'2013-2017, Yan Zhou'
 author = u'Yan Zhou'
 
 # Options for HTML output
 html_extra_path = ['doxygen']
-if not on_rtd:
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-    html_theme_options = {
-            'collapse_navigation': True,
-            'display_version': False,
-            'navigation_depth': 3,
-            }
+
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme_options = {
+        'collapse_navigation': True,
+        'display_version': True,
+        'navigation_depth': 3,
+        }

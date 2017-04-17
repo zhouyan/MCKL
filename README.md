@@ -1,8 +1,5 @@
 # Monte Carlo Kernel Library
 
-[![Documentation Status](https://readthedocs.org/projects/mckl/badge/?version=latest)](http://mckl.readthedocs.io/en/latest/?badge=latest)
-[![Documentation Status](https://readthedocs.org/projects/mckl/badge/?version=stable)](http://mckl.readthedocs.io/en/stable/?badge=stable)
-
 # Introduction
 
 The MCKL library provides a framework for implementing Monte Carlo algorithms.
