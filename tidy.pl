@@ -51,38 +51,22 @@ sub update
         chomp;
         my $path = $dir . "/" . $_;
         if (-f $path) {
-            next if $path =~ /NEWS\.md$/;
             next if $path =~ /README\.md$/;
-            next if $path =~ /\.aux$/;
-            next if $path =~ /\.bbl$/;
-            next if $path =~ /\.bcf$/;
-            next if $path =~ /\.blg$/;
             next if $path =~ /\.data$/;
-            next if $path =~ /\.fdb_latexmk$/;
-            next if $path =~ /\.fls$/;
-            next if $path =~ /\.latexmain$/;
-            next if $path =~ /\.log$/;
-            next if $path =~ /\.out$/;
-            next if $path =~ /\.pdf$/;
-            next if $path =~ /\.run.xml$/;
-            next if $path =~ /\.toc$/;
-            next if $path =~ /config\/.*\.md\.in$/;
-            next if $path =~ /example\/random\/random_.*\.txt$/;
+            next if $path =~ /\.txt$/;
             next if $path =~ /tidy\.pl$/;
-            next if $path =~ /inc\.tex$/;
-            next if $path =~ /manual\/tab\/random_.*\.tex$/;
-            next if $path =~ /manual\/tab\/math_vml\/.*\.txt/;
             &filename($path);
             &copyright($path);
             if ($path =~ /\.(c|h|cpp|hpp|cl|cpp\.in)$/) {
                 system "$clang_format -i $path";
             }
         } elsif (-d $path) {
-            next if $path =~ ".git";
-            next if $path =~ "build";
-            next if $path =~ "manual/tab/random_distribution";
-            next if $path =~ "manual/tab/random_rng";
-            next if $path =~ "manual/tab/random_testu01";
+            next if $path =~ /\.git$/;
+            next if $path =~ /build$/;
+            next if $path =~ /docs\/_build$/;
+            next if $path =~ /docs\/doxygen$/;
+            next if $path =~ /docs\/tabs\/random_distribution$/;
+            next if $path =~ /docs\/tabs\/random_rng$/;
             &update($path);
         }
     }
@@ -120,7 +104,7 @@ sub filename
     }
 
     $line = shift @lines;
-    if ($line =~ /^(.. )MCKL\//) {
+    if ($line =~ /^(;; |\/\/ |#  |\.\.  )MCKL\//) {
         print $out $1, $file, "\n";
     } else {
         print $out $line;
@@ -139,7 +123,7 @@ sub copyright
     for (@lines) {
         if (/Copyright/) {
             $found = 1;
-            $_ =~ s/2013-2016/2013-2017/;
+            $_ =~ s/201.-201./2013-2017/;
             last;
         }
     }

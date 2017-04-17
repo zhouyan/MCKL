@@ -114,7 +114,7 @@ inline bool random_rng_k(const mckl::AES128Engine<ResultType, Rounds> &rng)
     std::string filename("random_aes128");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -125,7 +125,7 @@ inline bool random_rng_k(const mckl::AES192Engine<ResultType, Rounds> &rng)
     std::string filename("random_aes192");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -136,7 +136,7 @@ inline bool random_rng_k(const mckl::AES256Engine<ResultType, Rounds> &rng)
     std::string filename("random_aes256");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -147,7 +147,7 @@ inline bool random_rng_k(const mckl::ARSEngine<ResultType, Rounds> &rng)
     std::string filename("random_ars");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -164,7 +164,7 @@ inline bool random_rng_k(const mckl::PhiloxEngine<ResultType, T, K> &rng)
     filename += std::to_string(std::numeric_limits<T>::digits);
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -181,7 +181,7 @@ inline bool random_rng_k(const mckl::ThreefryEngine<ResultType, T, K> &rng)
     filename += std::to_string(std::numeric_limits<T>::digits);
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -192,7 +192,7 @@ inline bool random_rng_k(const mckl::Threefish256Engine<ResultType> &rng)
     std::string filename("random_threefish256");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -203,7 +203,7 @@ inline bool random_rng_k(const mckl::Threefish512Engine<ResultType> &rng)
     std::string filename("random_threefish512");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
@@ -214,7 +214,7 @@ inline bool random_rng_k(const mckl::Threefish1024Engine<ResultType> &rng)
     std::string filename("random_threefish1024");
     if (std::numeric_limits<ResultType>::digits == 64)
         filename += "_64";
-    filename += ".txt";
+    filename += ".data";
 
     return random_rng_k(rng, filename);
 }
