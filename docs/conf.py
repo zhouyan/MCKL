@@ -39,7 +39,6 @@ if os.environ.get('READTHEDOCS', None) == 'True':
 
 # General configuration
 extensions = ['sphinx.ext.mathjax']
-mathjax_path = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0'
 source_suffix = '.rst'
 master_doc = 'index'
 project = u'MCKL'
