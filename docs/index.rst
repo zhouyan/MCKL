@@ -30,12 +30,11 @@
 .. ============================================================================
 
 ********************************
-Welcome to MCKL’s documentation!
+MCKL – Monte Carlo Kernl Library
 ********************************
 
 .. toctree::
     :maxdepth: 2
-    :caption: Contents
 
     intro
     math

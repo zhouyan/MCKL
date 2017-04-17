@@ -31,10 +31,15 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-import sphinx_rtd_theme, subprocess, os
+import os
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if not on_rtd:
+    import sphinx_rtd_theme, subprocess
 
 # Generate Doxygen
-if os.environ.get('READTHEDOCS', None) == 'True':
+if on_rtd:
     subprocess.call('doxygen', shell = True)
 
 # General configuration
@@ -44,18 +49,14 @@ master_doc = 'index'
 project = u'MCKL'
 copyright = u'2013-2017, Yan Zhou'
 author = u'Yan Zhou'
-version = u'v1.0'
-release = u'v1.0'
-language = None
-exclude_patterns = []
-todo_include_todos = False
 
 # Options for HTML output
-html_theme = 'sphinx_rtd_theme'
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-html_theme_options = {
-        'collapse_navigation': True,
-        'display_version': False,
-        'navigation_depth': 3,
-        }
 html_extra_path = ['doxygen']
+if not on_rtd:
+    html_theme = 'sphinx_rtd_theme'
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+    html_theme_options = {
+            'collapse_navigation': True,
+            'display_version': False,
+            'navigation_depth': 3,
+            }
