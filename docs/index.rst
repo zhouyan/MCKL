@@ -40,4 +40,6 @@ Welcome to MCKL’s documentation!
     intro
     math
     random
+    random_rng
+    random_distribution
     apiref
