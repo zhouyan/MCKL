@@ -240,14 +240,6 @@ sub table {
         $table .= ".. csv-table:: Performance of $caption{$k}\n";
         $table .= " " x 4 . ":delim: &\n";
         $table .= " " x 4 . ":header: Distribution, STD, MKL, VMF, VML, MKL\n\n";
-        $table .= " " x 4;
-        $table .= sprintf("%-30s", "Distribution");
-        $table .= sprintf(" & %-6s", "STD");
-        $table .= sprintf(" & %-6s", "MCKL");
-        $table .= sprintf(" & %-6s", "VMF");
-        $table .= sprintf(" & %-6s", "VML");
-        $table .= sprintf(" & %-6s", "MKL");
-        $table .= "\n";
 
         for my $r (@{$distribution{$k}}) {
             my @name = sort grep { /^$r(\(|$)/ } keys %cpe_s;
@@ -272,8 +264,18 @@ sub table {
             }
         }
     }
+    $table =~ s/  *$//gm;
 
-    open my $rst, ">>", "../random_distribution.rst";
+    open my $rst, "<", "../random_distribution.rst";
+    my @lines;
+    for (<$rst>) {
+        last if /^\.\. _tab-/;
+        push @lines, $_;
+    }
+    pop @lines;
+
+    open my $rst, ">", "../random_distribution.rst";
+    print $rst $_ for @lines;
     print $rst $table;
 }
 

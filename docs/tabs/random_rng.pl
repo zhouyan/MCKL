@@ -250,8 +250,18 @@ sub table {
             }
         }
     }
+    $table =~ s/  *$//gm;
 
-    open my $rst, ">>", "../random_rng.rst";
+    open my $rst, "<", "../random_rng.rst";
+    my @lines;
+    for (<$rst>) {
+        last if /^\.\. _tab/;
+        push @lines, $_;
+    }
+    pop @lines;
+
+    open my $rst, ">", "../random_rng.rst";
+    print $rst $_ for @lines;
     print $rst $table;
 }
 

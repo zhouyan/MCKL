@@ -100,7 +100,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``U01Canonical``               & 16.6   & 16.2   & 4.03   & 8.58   & —
     ``U01CC``                      & —      & 10.9   & 2.56   & 5.32   & —
     ``U01CO``                      & 16.7   & 7.88   & 2.56   & 2.54   & 3.48
@@ -113,7 +112,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``Arcsine(0,1)``               & —      & 64.4   & 12.9   & 40.1   & —
     ``Cauchy(0,1)``                & 97.2   & 72.2   & 15.9   & 19.7   & 11.7
     ``Exponential(1)``             & 68.6   & 48.4   & 12.2   & 29.3   & 9.65
@@ -131,7 +129,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``Beta(0.3,0.3)``              & —      & 246    & 168    & 72.7   & 51.8
     ``Beta(0.5,0.5)``              & —      & 77.8   & 12.8   & 13.8   & 57.0
     ``Beta(0.5,1)``                & —      & 98.7   & 18.0   & 15.9   & 14.7
@@ -150,7 +147,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``ChiSquared(0.2)``            & 199    & 181    & 46.0   & 42.5   & 47.3
     ``ChiSquared(1)``              & 259    & 235    & 81.5   & 77.5   & 68.5
     ``ChiSquared(1.4)``            & 272    & 264    & 67.5   & 60.1   & 50.8
@@ -165,7 +161,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``Gamma(0.1,1)``               & 198    & 179    & 46.1   & 42.4   & 47.3
     ``Gamma(0.5,1)``               & 257    & 233    & 81.7   & 77.8   & 68.5
     ``Gamma(0.7,1)``               & 270    & 261    & 67.5   & 60.2   & 50.8
@@ -180,7 +175,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``FisherF(0.5,0.5)``           & 444    & 407    & 169    & 155    & 140
     ``FisherF(0.5,1)``             & 482    & 432    & 193    & 180    & 153
     ``FisherF(0.5,1.5)``           & 494    & 454    & 186    & 173    & 130
@@ -213,7 +207,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``Normal(0,1)``                & 87.9   & 77.2   & 17.7   & 56.6   & 15.4
     ``Lognormal(0,1)``             & 143    & 119    & 23.6   & 24.3   & 19.9
     ``Levy(0,1)``                  & —      & 83.3   & 29.3   & 30.4   & 27.7
@@ -224,7 +217,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``Stable(0.5,1,0,1)``          & —      & 391    & 202    & 66.8   & —
     ``Stable(1,0,0,1)``            & —      & 194    & 49.0   & 51.6   & —
     ``Stable(2,0,0,1)``            & —      & 389    & 202    & 74.7   & —
@@ -235,7 +227,6 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``StudentT(0.2)``              & 299    & 289    & 91.6   & 87.0   & 87.3
     ``StudentT(1)``                & 363    & 335    & 138    & 133    & 111
     ``StudentT(1.4)``              & 374    & 358    & 148    & 139    & 92.0
@@ -250,6 +241,5 @@ repeated ten times, and the best results are shown. The five cases are labeled
     :delim: &
     :header: Distribution, STD, MKL, VMF, VML, MKL
 
-    Distribution                   & STD    & MCKL   & VMF    & VML    & MKL
     ``Geometric(0.5)``             & 119    & 50.8   & 15.7   & 14.0   & 14.7
     ``UniformInt(-10,10)``         & 142    & 26.9   & 6.43   & 6.85   & 7.38
