@@ -766,10 +766,10 @@ of ``rng()``. If there exists an integer :math:`V > 0` such that :math:`R =
 
     U = \sum_{k = 0}^{K - 1} (r_k - r_{\mathrm{min}}) 2^{kV} \bmod 2^W
 
-where :math:`K = \Ceil{W / V}`. Unlike ``std::independent_bits_engine``, the
-calculation can be vectorized, which leads to better performance. Note that,
-all constants in the algorithm are computed at compile-time and the summation
-is fully unrolled. There is no runtime overhead. In the case
+where :math:`K = \lceil W / V \rceil`. Unlike ``std::independent_bits_engine``,
+the calculation can be vectorized, which leads to better performance. Note
+that, all constants in the algorithm are computed at compile-time and the
+summation is fully unrolled. There is no runtime overhead. In the case
 :math:`r_{\mathrm{min}} = 0` and :math:`V = W`, most optimizing compilers shall
 be able to generate instructions such that the distribution does exactly
 nothing and returns the results of ``rng()`` directly. If there does not exist
@@ -1719,9 +1719,9 @@ Further, both ``mean`` and ``chol`` can also be scalars instead of pointers to
 vectors. If ``mean`` is a scalar, say :math:`\mu`, then the mean vector is
 assumed to be a :math:`d`-vector with all elements equal to :math:`\mu`. If
 ``chol`` is a scalar, say :math:`\sigma`, then it is assumed that :math:`L =
-\sigma I_d` and thus the covariance matrix is :math:`\Sigma = \sigma^2
-I_d:math:`, where :math:`I_d` is the identity matrix. To generate a single
-multivariate Normal random number,
+\sigma I_d` and thus the covariance matrix is :math:`\Sigma = \sigma^2 I_d`,
+where :math:`I_d` is the identity matrix. To generate a single multivariate
+Normal random number,
 
 .. code-block:: cpp
 
