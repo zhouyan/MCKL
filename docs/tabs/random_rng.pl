@@ -38,23 +38,16 @@ use utf8;
 
 system "mkdir -p random_rng";
 
-my $run = 0;
-my $build = 0;
 my $llvm = "../../build/release-llvm";
 my $gnu = "../../build/release-gnu";
 my $intel = "../../build/release-intel";
-my $name;
 my $scale = 3.8 / 2.6;
 GetOptions(
-    "run"      => \$run,
-    "build"    => \$build,
     "llvm=s"   => \$llvm,
     "gnu=s"    => \$gnu,
     "intel=s"  => \$intel,
-    "name=s"   => \$name,
     "scale"    => \$scale,
 );
-$build = 1 if $run;
 
 my @std = qw(mt19937 mt19937_64 minstd_rand0 minstd_rand ranlux24_base
 ranlux48_base ranlux24 ranlux48 knuth_b);
@@ -74,10 +67,8 @@ Threefry2x32_64 Threefry4x32_64 Threefry2x64_64 Threefry4x64_64 Threefry8x64_64
 Threefry16x64_64 Threefish256_64 Threefish512_64 Threefish1024_64);
 
 my @mkl = qw(MKL_ARS5 MKL_PHILOX4X32X10 MKL_MCG59 MKL_MT19937 MKL_MT2203
-MKL_SFMT19937 MKL_NONDETERM MKL_ARS5_64 MKL_PHILOX4X32X10_64 MKL_MCG59_64
-MKL_MT19937_64 MKL_MT2203_64 MKL_SFMT19937_64 MKL_NONDETERM_64);
-
-my @rdrand = qw(RDRAND16 RDRAND32 RDRAND64);
+MKL_SFMT19937 MKL_ARS5_64 MKL_PHILOX4X32X10_64 MKL_MCG59_64 MKL_MT19937_64
+MKL_MT2203_64 MKL_SFMT19937_64);
 
 my %rng = (
     std      => [@std],
@@ -86,10 +77,9 @@ my %rng = (
     philox   => [@philox],
     threefry => [@threefry],
     mkl      => [@mkl],
-    rdrand   => [@rdrand],
 );
 
-my @keys = qw(std r123 aes philox threefry mkl rdrand);
+my @keys = qw(std r123 aes philox threefry mkl);
 
 my %caption = (
     std      => "RNGs in the Standard Library",
@@ -98,13 +88,12 @@ my %caption = (
     philox   => "``PhiloxEngine``",
     threefry => "``ThreefryEngine``",
     mkl      => "``MKLEngine``",
-    rdrand   => "Non-Determinstic RNGs",
 );
 
 my @rng;
 for my $k (@keys) {
     for my $r (@{$rng{$k}}) {
-        push @rng, $r if $r =~ /$name/i or $k =~ /$name/i or !$name;
+        push @rng, $r;
     }
 }
 
@@ -120,33 +109,21 @@ my %cpb_b;
 &table;
 
 sub build {
-    return unless $build;
-
-    my @target;
-    push @target, "\Lrandom_rng_$_" for @rng;
-    if (@target) {
-        for my $c (@compiler) {
-            my $d = $compiler{$c};
-            next if (not -d $d);
-            say $d;
-            if ($name) {
-                `ninja -C $d @target 2>&1`;
-            } else {
-                `ninja -C $d random_rng 2>&1`;
-            }
-        }
+    for my $c (@compiler) {
+        my $dir = $compiler{$c};
+        next unless -d $dir;
+        say $dir;
+        `ninja -C $dir random_rng 2>&1`;
     }
 }
 
 sub run {
-    return unless $run;
-
     for my $c (@compiler) {
-        my $d = $compiler{$c};
-        next if (not -d $d);
-        say $d;
+        my $dir = $compiler{$c};
+        next unless -d $dir;
+        say $dir;
         for my $r (@rng) {
-            my $cmd = "ninja -C $d \Lrandom_rng_$r-check 2>&1";
+            my $cmd = "ninja -C $dir \Lrandom_rng_$r-check 2>&1";
             my $cpb_s = 0xFFFF;
             my $cpb_b = 0xFFFF;
             my $count = 0;
@@ -168,7 +145,7 @@ sub run {
             }
             my $line;
             if ($count) {
-                $line .= sprintf("%-25s", $r);
+                $line .= sprintf("%-25s", &rng_name($r));
                 $line .= &format($cpb_s);
                 $line .= &format($cpb_b);
                 $line .= $pass ? "Passed" : "Failed";
@@ -242,8 +219,7 @@ sub table {
                     $line_b .= &format($cpb_b{$c}{$r});
                 }
             }
-            my $name = $r;
-            $name =~ s/R123_/r123::/g;
+            my $name = &rng_name($r);
             $name = " " x 4 . sprintf("%-25s", "``$name``");
             if ($line_s and $line_b) {
                 $table .= $name . $line_s . $line_b . "\n";
@@ -265,8 +241,15 @@ sub table {
     print $rst $table;
 }
 
-sub format
-{
+sub rng_name {
+    my $name = shift;
+    my $stdnames = "@std";
+    $name =~ s/R123_/r123::/g;
+    $name = "std::$name" if $stdnames =~ /\b$name\b/;
+    $name;
+}
+
+sub format {
     my $num = shift;
     if ($num eq "—") {
         sprintf("%-6s", $num);
