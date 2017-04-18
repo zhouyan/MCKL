@@ -1410,7 +1410,7 @@ implements the distribution with PDF,
     & \Phi(t;\alpha) = \begin{cases}
         \tan\Bigl(\frac{\pi}{2}\alpha\Bigr) & \alpha \ne 1 \\
         -\frac{2}{\pi}\log\lvert{t}\rvert   & \alpha = 1
-      \end{cases} \\
+      \end{cases}, \\
     & x \in \mathbb{R},\quad
       \alpha \in (0, 2],\quad \beta \in [-1, 1],\quad
       a \in \mathbb{R},\quad b \in (0, \infty).
