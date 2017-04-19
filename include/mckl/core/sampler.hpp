@@ -58,7 +58,7 @@ class Sampler
                 e.reserve(n);
     }
 
-    /// \brief Remove all evaluation methods
+    /// \brief Remove all evaluation and estimation methods
     void reset()
     {
         for (auto &eval : eval_)
