@@ -409,8 +409,8 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
 
     void do_estimate(std::size_t step)
     {
-        for (auto &e : this->estimator(step))
-            e.estimate(iter_, particle_);
+        for (auto &est : this->estimator(step))
+            est.estimate(iter_, particle_);
     }
 }; // class SMCSampler
 
