@@ -988,10 +988,10 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;\alpha,\beta) = \frac{1}{\pi\sqrt{(x - \alpha)(\beta - x)}},\\
-    & x \in [a, b],\quad
-      a \in (0, \infty),\quad
-      b \in (0, \infty),
+    f(x;\alpha,\beta) = \frac{1}{\pi\sqrt{(x - \alpha)(\beta - x)}},\\
+    x \in [a, b],\quad
+    a \in (0, \infty),\quad
+    b \in (0, \infty),
 
 using the inverse method.
 
@@ -1016,12 +1016,12 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;\alpha,\beta) =
-      \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}
-      x^{\alpha - 1}(1 - x)^{\beta - 1},\\
-    & x \in (0, 1),\quad
-      \alpha \in (0, \infty),\quad
-      \beta \in (0, \infty).
+    f(x;\alpha,\beta) = \frac{\Gamma(\alpha + \beta)}
+                             {\Gamma(\alpha)\Gamma(\beta)}
+                        x^{\alpha - 1}(1 - x)^{\beta - 1},\\
+    x \in (0, 1),\quad
+    \alpha \in (0, \infty),\quad
+    \beta \in (0, \infty).
 
 The specific algorithm used depends on the parameters. If :math:`\alpha = 1/2`
 and :math:`\beta = 1/2`, or :math:`\alpha = 1` or :math:`\beta = 1`, then the
@@ -1052,11 +1052,10 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) =
-      \frac{1}{\pi b\Bigl(1 + \Bigl(\frac{x - a}{b}\Bigr)^2\Bigr)},\\
-    & x \in \mathbb{R},\quad
-      a \in \mathbb{R},\quad
-      b \in (0,\infty),
+    f(x;a,b) = \frac{1}{\pi b\Bigl(1 + \Bigl(\frac{x - a}{b}\Bigr)^2\Bigr)},\\
+    x \in \mathbb{R},\quad
+    a \in \mathbb{R},\quad
+    b \in (0,\infty),
 
 using the inverse method.
 
@@ -1081,9 +1080,9 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;n) = \frac{x^{n/2 - 1}\mathrm{e}^{-x/2}}{2^{n/2}\Gamma(n/2)},\\
-    & x \in (0, \infty),\quad
-      n \in (0, \infty).
+    f(x;n) = \frac{x^{n/2 - 1}\mathrm{e}^{-x/2}}{2^{n/2}\Gamma(n/2)},\\
+    x \in (0, \infty),\quad
+    n \in (0, \infty).
 
 The implementation uses the fact that if :math:`X` is a Gamma random variable
 with shape :math:`n / 2` and scale :math:`2`, then :math:`X` is also
@@ -1110,9 +1109,9 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;\lambda) = \lambda\mathrm{e}^{-\lambda x},\\
-    & x \in [0, \infty),\quad
-      \lambda \in (0, \infty),
+    f(x;\lambda) = \lambda\mathrm{e}^{-\lambda x},\\
+    x \in [0, \infty),\quad
+    \lambda \in (0, \infty),
 
 using the inverse method.
 
@@ -1137,11 +1136,12 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) = \frac{1}{b}
-    \exp\Bigl\{\frac{a - x}{b} - \exp\Bigl\{\frac{a - x}{b}\}\Bigr\},\\
-    & x \in \mathbb{R},\quad
-      a \in \mathbb{R},\quad
-      b \in (0, \infty),
+    f(x;a,b) = \frac{1}{b} \exp\Bigl\{
+                 \frac{a - x}{b} - \exp\Bigl\{\frac{a - x}{b}\}
+               \Bigr\},\\
+    x \in \mathbb{R},\quad
+    a \in \mathbb{R},\quad
+    b \in (0, \infty),
 
 using the inverse method.
 
@@ -1166,14 +1166,14 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;m,n) =
-      \frac{\Gamma\Bigl(\frac{m + n}{2}\Bigr)}
-           {\Gamma\Bigl(\frac{m}{2}\Bigr)\Gamma\Bigl(\frac{n}{2}\Bigr)}
-      \Bigl(\frac{m}{n}\Bigr)^{m/2} x^{m / 2 - 1}
-      \Bigl(1 + \frac{m}{n}x\Bigr)^{-(m + n) / 2} \\
-    & x \in [0, \infty),\quad
-      m \in (0, \infty),\quad
-      n \in (0, \infty).
+    f(x;m,n) =
+    \frac{\Gamma\Bigl(\frac{m + n}{2}\Bigr)}
+         {\Gamma\Bigl(\frac{m}{2}\Bigr)\Gamma\Bigl(\frac{n}{2}\Bigr)}
+    \Bigl(\frac{m}{n}\Bigr)^{m/2} x^{m / 2 - 1}
+    \Bigl(1 + \frac{m}{n}x\Bigr)^{-(m + n) / 2} \\
+    x \in [0, \infty),\quad
+    m \in (0, \infty),\quad
+    n \in (0, \infty).
 
 The implementation uses the fact that if :math:`U` and :math:`V` are
 :math:`\chi^2`-distributed random variables with degrees of freedom :math:`m`
@@ -1202,12 +1202,11 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;\alpha,\beta) =
-      \frac{\mathrm{e}^{-x/\beta}}{\Gamma(\alpha)}
-      \beta^{-\alpha}x^{\alpha-1},\\
-    & x \in (0, \infty),\quad
-      \alpha \in (0, \infty),\quad
-      \beta \in (0, \infty).
+    f(x;\alpha,\beta) = \frac{\mathrm{e}^{-x/\beta}}{\Gamma(\alpha)}
+                        \beta^{-\alpha}x^{\alpha-1},\\
+    x \in (0, \infty),\quad
+    \alpha \in (0, \infty),\quad
+    \beta \in (0, \infty).
 
 The specific algorithm used depends on the parameters. If :math:`\alpha = 1`,
 it becomes the exponential distribution. If :math:`0 < \alpha < 0.6`, it is
@@ -1237,10 +1236,9 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) =
-      \frac{1}{2b}\exp\Bigl\{-\frac{\lvert{x - a}\rvert}{b}\Bigr\},\\
-    & x \in \mathbb{R},\quad
-      b \in (0, \infty),
+    f(x;a,b) = \frac{1}{2b}\exp\Bigl\{-\frac{\lvert{x - a}\rvert}{b}\Bigr\},\\
+    x \in \mathbb{R},\quad
+    b \in (0, \infty),
 
 using the inverse method.
 
@@ -1265,12 +1263,11 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) =
-      \sqrt{\frac{b}{2\pi}}
-      \frac{\exp\Bigl\{-\frac{b}{2(x - a)}\Bigr\}}{(x - a)^{3/2}},\\
-    & x \in [a, \infty),\quad
-      a \in \mathbb{R},\quad
-      b \in (0, \infty).
+    f(x;a,b) = \sqrt{\frac{b}{2\pi}}
+               \frac{\exp\Bigl\{-\frac{b}{2(x - a)}\Bigr\}}{(x - a)^{3/2}},\\
+    x \in [a, \infty),\quad
+    a \in \mathbb{R},\quad
+    b \in (0, \infty).
 
 The implementation uses the fact that if :math:`Z` is a standard Normal random
 variable, then :math:`X = a + b / Z^2` is Levy distributed with location
@@ -1297,10 +1294,10 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) = \frac{1}{4b}\mathrm{sech}^2\Bigl(\frac{x - a}{2b}\Bigr),\\
-    & x \in \mathbb{R},\quad
-      a \in \mathbb{R},\quad
-      b \in (0, \infty),
+    f(x;a,b) = \frac{1}{4b}\mathrm{sech}^2\Bigl(\frac{x - a}{2b}\Bigr),\\
+    x \in \mathbb{R},\quad
+    a \in \mathbb{R},\quad
+    b \in (0, \infty),
 
 using the inverse method.
 
@@ -1325,12 +1322,11 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;m,s) =
-      \frac{1}{x\sigma\sqrt{2\pi}}
-      \exp\Bigl\{-\frac{(\ln x - m)^2}{2\sigma^2}\Bigr\},\\
-    & x \in (0, \infty),\quad
-      m \in \mathbb{R},\quad
-      s \in (0, \infty).
+    f(x;m,s) = \frac{1}{x\sigma\sqrt{2\pi}}
+               \exp\Bigl\{-\frac{(\ln x - m)^2}{2\sigma^2}\Bigr\},\\
+    x \in (0, \infty),\quad
+    m \in \mathbb{R},\quad
+    s \in (0, \infty).
 
 The implementation uses the fact that if :math:`Z` is a standard Normal random
 variable, then :math:`X = \exp\{m + sZ\}` is Log-normal distributed with
@@ -1357,12 +1353,11 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;\mu,\sigma) =
-      \frac{1}{\sqrt{2\pi\sigma^2}}
-      \exp\Bigl\{-\frac{(x-\mu)^2}{2\sigma^2}\Bigr\},\\
-    & x \in \mathbb{R},\quad
-      \mu \in \mathbb{R},\quad
-      \sigma \in (0, \infty),
+    f(x;\mu,\sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}
+                      \exp\Bigl\{-\frac{(x-\mu)^2}{2\sigma^2}\Bigr\},\\
+    x \in \mathbb{R},\quad
+    \mu \in \mathbb{R},\quad
+    \sigma \in (0, \infty),
 
 using the Box-Muller method [Box1958]_.
 
@@ -1387,10 +1382,10 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) = \frac{a b^a}{x^{a + 1}},\\
-    & x \in [b, \infty),\quad
-      a \in [0, \infty),\quad
-      b \in [0, \infty),
+    f(x;a,b) = \frac{a b^a}{x^{a + 1}},\\
+    x \in [b, \infty),\quad
+    a \in [0, \infty),\quad
+    b \in [0, \infty),
 
 using the inverse method.
 
@@ -1415,10 +1410,9 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;\sigma) =
-      \frac{x}{\sigma^2}\exp\Bigl\{-\frac{x^2}{2\sigma^2}\Bigr\},\\
-    & x \in [0, \infty),\quad
-      \sigma \in (0, \infty),
+    f(x;\sigma) = \frac{x}{\sigma^2}\exp\Bigl\{-\frac{x^2}{2\sigma^2}\Bigr\},\\
+    x \in [0, \infty),\quad
+    \sigma \in (0, \infty),
 
 using the inverse method.
 
@@ -1443,20 +1437,19 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;\alpha,\beta,a,b) =
-      \frac{1}{2\pi}\int_{\infty}^{\infty}
-      \varphi(t;\alpha,\beta,a,b)\mathrm{e}^{-ixt} \,dt\\
-    & \varphi(t;\alpha,\beta,a,b) =
-      \exp\{
-        ita - \lvert{bt}\rvert^{\alpha}
-        (1 - i\beta\mathrm{sgn}(t)\Phi(t;\alpha))\} \\
-    & \Phi(t;\alpha) = \begin{cases}
-        \tan\Bigl(\frac{\pi}{2}\alpha\Bigr) & \alpha \ne 1 \\
-        -\frac{2}{\pi}\log\lvert{t}\rvert   & \alpha = 1
-      \end{cases}, \\
-    & x \in \mathbb{R},\quad
-      \alpha \in (0, 2],\quad \beta \in [-1, 1],\quad
-      a \in \mathbb{R},\quad b \in (0, \infty).
+    f(x;\alpha,\beta,a,b) = \frac{1}{2\pi}\int_{\infty}^{\infty}
+                            \varphi(t;\alpha,\beta,a,b)\mathrm{e}^{-ixt} \,dt\\
+    \varphi(t;\alpha,\beta,a,b) = \exp\{
+      ita - \lvert{bt}\rvert^{\alpha}
+      (1 - i\beta\mathrm{sgn}(t)\Phi(t;\alpha))
+    \} \\
+    \Phi(t;\alpha) = \begin{cases}
+      \tan\Bigl(\frac{\pi}{2}\alpha\Bigr) & \alpha \ne 1 \\
+      -\frac{2}{\pi}\log\lvert{t}\rvert   & \alpha = 1
+    \end{cases}, \\
+    x \in \mathbb{R},\quad
+    \alpha \in (0, 2],\quad \beta \in [-1, 1],\quad
+    a \in \mathbb{R},\quad b \in (0, \infty).
 
 The implementation uses the method in [Chambers1976]_.
 
@@ -1481,11 +1474,10 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;n) =
-      \frac{\Gamma\Bigl(\frac{n + 1}{2}\Bigr)}
-      {\sqrt{n\pi}\Gamma\Bigl(\frac{n}{2}\Bigr)}
-      \Bigl(1 + \frac{x^2}{n}\Bigr)^{-(n + 1)/2},\\
-    & x \in \mathbb{R},\quad n \in (0, \infty).
+    f(x;n) = \frac{\Gamma\Bigl(\frac{n + 1}{2}\Bigr)}
+                  {\sqrt{n\pi}\Gamma\Bigl(\frac{n}{2}\Bigr)}
+             \Bigl(1 + \frac{x^2}{n}\Bigr)^{-(n + 1)/2},\\
+    x \in \mathbb{R},\quad n \in (0, \infty).
 
 The implementation uses the fact that if :math:`Z` is a standard Normal random
 variable, :math:`V` is a :math:`\chi^2`-distributed random variable with degree
@@ -1513,8 +1505,8 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) = \frac{1}{b - a},\\
-    & x \in [a, b),\quad a \in \mathbb{R},\quad b \in (a, \infty),
+    f(x;a,b) = \frac{1}{b - a},\\
+    x \in [a, b),\quad a \in \mathbb{R},\quad b \in (a, \infty),
 
 using the inverse method.
 
@@ -1539,9 +1531,9 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x;a,b) = \frac{a}{b}\Bigl(\frac{x}{b}\Bigr)^{a - 1}
-      \exp\Bigl\{-\Bigl(\frac{x}{b}\Bigr)^a\Bigr\},\\
-    & x \in [0, \infty),\quad a \in (0, \infty),\quad b \in (0, \infty),
+    f(x;a,b) = \frac{a}{b}\Bigl(\frac{x}{b}\Bigr)^{a - 1}
+               \exp\Bigl\{-\Bigl(\frac{x}{b}\Bigr)^a\Bigr\},\\
+    x \in [0, \infty),\quad a \in (0, \infty),\quad b \in (0, \infty),
 
 using the inverse method.
 
@@ -1571,8 +1563,8 @@ implements the distribution with PDF,
 
 .. math::
 
-    & \mathbb{P}(X = k;p) = kp + (1 - k)(1 - p),\\
-    & k \in \{0, 1\},\quad p \in [0, 1].
+    \mathbb{P}(X = k;p) = kp + (1 - k)(1 - p),\\
+    k \in \{0, 1\},\quad p \in [0, 1].
 
 Unlike other discrete distributions, the Bernoulli distribution supports any
 integer type, while others require an integer type with size larger than 16
@@ -1602,9 +1594,9 @@ implements the distribution with PDF,
 
 .. math::
 
-    & \mathbb{P}(X = k;p) = p(1-p)^k,\\
-    & k \in \mathrm{N},\quad
-      p \in (0, 1].
+    \mathbb{P}(X = k;p) = p(1-p)^k,\\
+    k \in \mathrm{N},\quad
+    p \in (0, 1].
 
 The implementation uses the fact that if :math:`U` is a standard uniform random
 variable, then :math:`X = \lfloor{\ln U / \ln(1-p)}\rfloor` is a Geometric
@@ -1631,10 +1623,10 @@ implements the distribution with PDF,
 
 .. math::
 
-    & \mathbb{P}(X = k;a,b) = \frac{1}{b - a + 1},\\
-    & k \in \{a,\dots,b\},\quad
-      a \in \mathbb{Z},\quad
-      b \in \{x \in \mathbb{Z} \mid x \ge a\}.
+    \mathbb{P}(X = k;a,b) = \frac{1}{b - a + 1},\\
+    k \in \{a,\dots,b\},\quad
+    a \in \mathbb{Z},\quad
+    b \in \{x \in \mathbb{Z} \mid x \ge a\}.
 
 The specific algorithm used depends on the parameters. If :math:`a = b`, then
 it simply returns :math:`a`. If :math:`b - a + 1 = 2^W`, where :math:`W` is the
@@ -1678,7 +1670,34 @@ Where the iterators points to the range of probabilies. The optional argument
 ``normalized`` specify if they are normalized. This operator has :math:`O(1)`
 memory cost and :math:`O(n)` runtime cost.
 
-.. _sub-Multivariate Distribution:
+.. sub-Sampling Distribution:
+
+Sampling Distribution
+---------------------
+
+The class template,
+
+.. code-block:: cpp
+
+    namespace mckl
+    {
+
+    template <typename IntType>
+    class SamplingDistribution;
+
+    }
+
+implements the sampling distribution with PDF,
+
+.. math::
+
+    \mathbb{P}(S = s; n, m) = \binom{n}{m}^{-1} \\
+    s \in \{\text{size } m \text{ subsets of }\{0,\dots,n-1\}\},\quad
+    n\in\mathbb{N},\quad
+    m\in\mathbb{N},\quad
+    0 < m \le n\quad.
+
+.. _sec-Multivariate Distribution:
 
 Multivariate Distribution
 =========================
@@ -1704,11 +1723,10 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x_{1:d};\alpha_{1:d}) =
-      \frac{\Gamma\Bigl(\sum_{i=1}^d\alpha_i\Bigr)}
-           {\prod_{i=1}^d\Gamma(\alpha_i)}
-      \prod_{i=1}^d x_i^{\alpha_i - 1},\\
-    & \sum_{i=1}^d x_i = 1,\quad
+    f(x_{1:d};\alpha_{1:d}) = \frac{\Gamma\Bigl(\sum_{i=1}^d\alpha_i\Bigr)}
+                                   {\prod_{i=1}^d\Gamma(\alpha_i)}
+                                   \prod_{i=1}^d x_i^{\alpha_i - 1},\\
+    \sum_{i=1}^d x_i = 1,\quad
       x_{1:d}\in(0,1)^d,\quad
       \alpha_{1:d}\in(0,\infty)^d.
 
@@ -1769,13 +1787,15 @@ implements the distribution with PDF,
 
 .. math::
 
-    & f(x_{1:d};\mu_{1:d},\Sigma) = \frac{1}{\sqrt{(2\pi)^d\lvert{\Sigma}\rvert}}
-    \exp\Bigl\{-\frac{1}{2}(x_{1:d} -
-      \mu_{1:d})^{\mathrm{T}}\Sigma^{-1}(x_{1:d} - \mu_{1:d})\Bigr\},\\
-    & x_{1:d}\in\mathbb{R}^d,\quad
+    f(x_{1:d};\mu_{1:d},\Sigma) = \frac{1}{\sqrt{(2\pi)^d\lvert{\Sigma}\rvert}}
+                                  \exp\Bigl\{
+                                    -\frac{1}{2}(x_{1:d} -
+                                    \mu_{1:d})^{\mathrm{T}}\Sigma^{-1}(x_{1:d}
+                                    - \mu_{1:d})
+                                   \Bigr\},\\
+    x_{1:d}\in\mathbb{R}^d,\quad
       \mu_{1:d}\in\mathbb{R}^d,\quad
-      \Sigma\in
-      \{\text{positive semi-definite }d \times d\text{ matrix}\}.
+      \Sigma\in\{\text{positive semi-definite }d \times d\text{ matrix}\}.
 
 At the time of writing, only ``float`` and ``double`` are supported types for
 the template parameter ``RealType``. The second template parameter ``Dim``

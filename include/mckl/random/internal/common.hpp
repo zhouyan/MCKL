@@ -1006,9 +1006,6 @@ class ChiSquaredDistribution;
 template <typename = double>
 class DirichletDistribution;
 
-template <typename = int>
-class DiscreteDistribution;
-
 template <typename = double>
 class ExponentialDistribution;
 
@@ -1080,6 +1077,12 @@ class BernoulliDistribution;
 
 template <typename = int>
 class GeometricDistribution;
+
+template <typename = int>
+class DiscreteDistribution;
+
+template <typename = int>
+class SamplingDistribution;
 
 template <typename = int>
 class UniformIntDistribution;

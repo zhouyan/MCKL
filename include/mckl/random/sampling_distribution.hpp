@@ -55,18 +55,18 @@ class SamplingDistribution
         using result_type = IntType;
         using distribution_type = SamplingDistribution<IntType>;
 
-        explicit param_type(result_type n = 1, result_type k = 1)
-            : n_(n), k_(k)
+        explicit param_type(result_type n = 1, result_type m = 1)
+            : n_(n), m_(m)
         {
         }
 
         result_type n() const { return n_; }
-        result_type k() const { return k_; }
+        result_type m() const { return m_; }
 
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            return param1.n_ == param2.n_ && param1.k_ == param2.k_;
+            return param1.n_ == param2.n_ && param1.m_ == param2.m_;
         }
 
         friend bool operator!=(
@@ -83,7 +83,7 @@ class SamplingDistribution
                 return os;
 
             os << param.n_ << ' ';
-            os << param.k_;
+            os << param.m_;
 
             return os;
         }
@@ -96,13 +96,13 @@ class SamplingDistribution
                 return is;
 
             result_type n;
-            result_type k;
-            is >> std::ws >> n >> k;
+            result_type m;
+            is >> std::ws >> n >> m;
 
             if (is) {
-                if (n >= k && k > 0) {
+                if (n >= m && m > 0) {
                     param.n_ = n;
-                    param.k_ = k;
+                    param.m_ = m;
                 } else {
                     is.setstate(std::ios_base::failbit);
                 }
@@ -113,38 +113,51 @@ class SamplingDistribution
 
         private:
         result_type n_;
-        result_type k_;
+        result_type m_;
 
         friend distribution_type;
     }; // class param_type
 
-    explicit SamplingDistribution(result_type n = 1, result_type k = 1)
-        : param_(n, k)
+    explicit SamplingDistribution(result_type n = 1, result_type m = 1)
+        : param_(n, m)
     {
     }
 
+    void min(result_type *r) const
+    {
+        for (result_type i = 0; i != m(); ++i)
+            *r++ = i;
+    }
+
+    void max(result_type *r) const
+    {
+        for (result_type i = n() - m(); i != n(); ++i)
+            *r++ = i;
+    }
+
     result_type n() const { return param_.n_; }
-    result_type k() const { return param_.k_; }
+
+    result_type m() const { return param_.m_; }
 
     template <typename RNGType>
     void operator()(RNGType &rng, result_type *r) const
     {
         const result_type n = param_.n_;
-        const result_type k = param_.k_;
+        const result_type m = param_.m_;
         result_type t = 0;
-        result_type m = 0;
+        result_type s = 0;
         U01CODistribution<double> u01;
 
         while (true) {
             double u = u01(rng);
-            if ((n - t) * u >= k - m) {
+            if ((n - t) * u >= m - s) {
                 ++t;
                 continue;
             }
             *r++ = t;
             ++t;
-            ++m;
-            if (m >= k)
+            ++s;
+            if (s >= m)
                 return;
         }
     }
