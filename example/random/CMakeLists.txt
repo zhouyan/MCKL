@@ -235,6 +235,7 @@ foreach(Dist ${MCKL_DISTRIBUTION})
 endforeach(Dist ${MCKL_DISTRIBUTION})
 
 mckl_add_test(random aes)
+mckl_add_test(random sampling)
 mckl_add_test(random seed)
 mckl_add_test(random skein)
 mckl_add_test(random threefish)

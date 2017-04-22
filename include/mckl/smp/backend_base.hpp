@@ -67,7 +67,7 @@
         default;                                                              \
     Name##Base(Name##Base<T, Virtual> &&) = default;                          \
     Name##Base<T, Virtual> &operator=(Name##Base<T, Virtual> &&) = default;   \
-    virtual ~Name##Base() {}
+    virtual ~Name##Base() = default;
 
 #define MCKL_DEFINE_SMP_BACKEND_SPECIAL(Impl, Name)                           \
     Name##SMP() = default;                                                    \

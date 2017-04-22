@@ -54,7 +54,7 @@ class DiscreteDistribution
         using result_type = IntType;
         using distribution_type = DiscreteDistribution<IntType>;
 
-        param_type() {}
+        param_type() = default;
 
         template <typename InputIter>
         param_type(InputIter first, InputIter last) : probability_(first, last)
@@ -166,7 +166,7 @@ class DiscreteDistribution
         }
     }; // class param_type
 
-    DiscreteDistribution() {}
+    DiscreteDistribution() = default;
 
     template <typename InputIter>
     DiscreteDistribution(InputIter first, InputIter last) : param_(first, last)
