@@ -604,98 +604,111 @@ MCKL_DEFINE_MATH_FMA_FMA(fnmsub, fnmsub)
 namespace mckl
 {
 
-namespace internal
-{
-
 template <typename T>
-inline T mulbyconj_impl(T a, T b)
+inline T mulbyconj(T a, T b)
 {
     return a * std::conj(b);
 }
 
 template <typename T>
-inline T inv_impl(T a)
+inline T inv(T a)
 {
     return const_one<T>() / a;
 }
 
 template <typename T>
-inline T muladd_impl(T a, T b, T c)
+inline T muladd(T a, T b, T c)
 {
     return a * b + c;
 }
 
 template <typename T>
-inline T mulsub_impl(T a, T b, T c)
+inline T mulsub(T a, T b, T c)
 {
     return a * b - c;
 }
 
 template <typename T>
-inline T nmuladd_impl(T a, T b, T c)
+inline T nmuladd(T a, T b, T c)
 {
     return -(a * b) + c;
 }
 
 template <typename T>
-inline T nmulsub_impl(T a, T b, T c)
+inline T nmulsub(T a, T b, T c)
 {
     return -(a * b + c);
 }
 
 template <typename T>
-inline T fmadd_impl(T a, T b, T c)
+inline T fmadd(T a, T b, T c)
 {
     return std::fma(a, b, c);
 }
 
 template <typename T>
-inline T fmsub_impl(T a, T b, T c)
+inline T fmsub(T a, T b, T c)
 {
     return std::fma(a, b, -c);
 }
 
 template <typename T>
-inline T fnmadd_impl(T a, T b, T c)
+inline T fnmadd(T a, T b, T c)
 {
     return -std::fma(a, b, -c);
 }
 
 template <typename T>
-inline T fnmsub_impl(T a, T b, T c)
+inline T fnmsub(T a, T b, T c)
 {
     return -std::fma(a, b, c);
 }
 
 template <typename T>
-inline T invsqrt_impl(T a)
+inline T invsqrt(T a)
 {
     return inv(std::sqrt(a));
 }
 
 template <typename T>
-inline T invcbrt_impl(T a)
+inline T invcbrt(T a)
 {
     return inv(std::cbrt(a));
 }
 
 template <typename T>
-inline T pow2o3_impl(T a)
+inline T pow2o3(T a)
 {
-    T b = std::cbrt(a);
+    T y = std::cbrt(a);
 
-    return b * b;
+    return y * y;
 }
 
 template <typename T>
-inline T pow3o2_impl(T a)
+inline T pow3o2(T a)
 {
-    T b = std::sqrt(a);
+    T y = std::sqrt(a);
 
-    return b * b * b;
+    return y * y * y;
 }
 
-} // namespace internal
+template <typename T>
+inline T cdfnorm(T a)
+{
+    T y = const_sqrt_1by2<T>() * a;
+    y = std::erf(y);
+
+    return y * static_cast<T>(0.5) + static_cast<T>(0.5);
+}
+
+template <typename T>
+inline T cdfnorminv(T a)
+{
+    T y = a * static_cast<T>(-2) + static_cast<T>(2);
+    y = erfcinv(y);
+
+    return y * const_sqrt_2<T>();
+}
 
 /// \defgroup vArithmetic Arithmetic functions
 /// \ingroup VMF
@@ -737,13 +750,13 @@ MCKL_DEFINE_MATH_VMF_BVS(*, mul)
 MCKL_DEFINE_MATH_VMF_BSV(*, mul)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}_i\f$
-MCKL_DEFINE_MATH_VMF_2(internal::mulbyconj_impl, mulbyconj)
+MCKL_DEFINE_MATH_VMF_2(mulbyconj, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}\f$
-MCKL_DEFINE_MATH_VMF_2VS(internal::mulbyconj_impl, mulbyconj)
+MCKL_DEFINE_MATH_VMF_2VS(mulbyconj, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a \bar{b}_i\f$
-MCKL_DEFINE_MATH_VMF_2SV(internal::mulbyconj_impl, mulbyconj)
+MCKL_DEFINE_MATH_VMF_2SV(mulbyconj, mulbyconj)
 
 /// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = \bar{a}_i\f$
 MCKL_DEFINE_MATH_VMF_1(std::conj, conj)
@@ -778,43 +791,42 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
         for (std::size_t j = 0; j != k; ++j)
-            y[j] = internal::muladd_impl(beta_a, a[j], mu_a);
+            y[j] = muladd(beta_a, a[j], mu_a);
         for (std::size_t j = 0; j != k; ++j)
-            y[j] /= internal::muladd_impl(beta_b, b[j], mu_b);
+            y[j] /= muladd(beta_b, b[j], mu_b);
     }
     for (std::size_t i = 0; i != l; ++i)
-        y[i] = internal::muladd_impl(beta_a, a[i], mu_a);
+        y[i] = muladd(beta_a, a[i], mu_a);
     for (std::size_t i = 0; i != l; ++i)
-        y[i] /= internal::muladd_impl(beta_b, b[i], mu_b);
+        y[i] /= muladd(beta_b, b[i], mu_b);
 }
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(
-    internal::muladd_impl, fma, [[deprecated("use **muladd** instead")]])
+MCKL_DEFINE_MATH_VMF_FMA(muladd, fma, [[deprecated("use **muladd** instead")]])
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::muladd_impl, muladd, )
+MCKL_DEFINE_MATH_VMF_FMA(muladd, muladd, )
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i - c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::mulsub_impl, mulsub, )
+MCKL_DEFINE_MATH_VMF_FMA(mulsub, mulsub, )
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i + c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::nmuladd_impl, nmuladd, )
+MCKL_DEFINE_MATH_VMF_FMA(nmuladd, nmuladd, )
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i - c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::nmulsub_impl, nmulsub, )
+MCKL_DEFINE_MATH_VMF_FMA(nmulsub, nmulsub, )
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::fmadd_impl, fmadd, )
+MCKL_DEFINE_MATH_VMF_FMA(fmadd, fmadd, )
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i - c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::fmsub_impl, fmsub, )
+MCKL_DEFINE_MATH_VMF_FMA(fmsub, fmsub, )
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i + c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::fnmadd_impl, fnmadd, )
+MCKL_DEFINE_MATH_VMF_FMA(fnmadd, fnmadd, )
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i - c_i\f$
-MCKL_DEFINE_MATH_VMF_FMA(internal::fnmsub_impl, fnmsub, )
+MCKL_DEFINE_MATH_VMF_FMA(fnmsub, fnmsub, )
 
 /// @} vArithmetic
 
@@ -823,7 +835,7 @@ MCKL_DEFINE_MATH_VMF_FMA(internal::fnmsub_impl, fnmsub, )
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{-1}\f$
-MCKL_DEFINE_MATH_VMF_1(internal::inv_impl, inv)
+MCKL_DEFINE_MATH_VMF_1(inv, inv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
 MCKL_DEFINE_MATH_VMF_B(/, div)
