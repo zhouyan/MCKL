@@ -526,6 +526,12 @@ MCKL_DEFINE_MATH_FMA_FMA(fnmsub, fnmsub)
     {                                                                         \
         for (std::size_t i = 0; i != n; ++i)                                  \
             y[i] = a[i] op b[i];                                              \
+    }                                                                         \
+                                                                              \
+    template <typename T>                                                     \
+    inline T name(T a, T b)                                                   \
+    {                                                                         \
+        return a op b;                                                        \
     }
 
 #define MCKL_DEFINE_MATH_VMF_BVS(op, name)                                    \
@@ -608,6 +614,12 @@ inline T mulbyconj_impl(T a, T b)
 }
 
 template <typename T>
+inline T inv_impl(T a)
+{
+    return const_one<T>() / a;
+}
+
+template <typename T>
 inline T muladd_impl(T a, T b, T c)
 {
     return a * b + c;
@@ -655,7 +667,35 @@ inline T fnmsub_impl(T a, T b, T c)
     return -std::fma(a, b, c);
 }
 
-} // namespace mckl::internal
+template <typename T>
+inline T invsqrt_impl(T a)
+{
+    return inv(std::sqrt(a));
+}
+
+template <typename T>
+inline T invcbrt_impl(T a)
+{
+    return inv(std::cbrt(a));
+}
+
+template <typename T>
+inline T pow2o3_impl(T a)
+{
+    T b = std::cbrt(a);
+
+    return b * b;
+}
+
+template <typename T>
+inline T pow3o2_impl(T a)
+{
+    T b = std::sqrt(a);
+
+    return b * b * b;
+}
+
+} // namespace internal
 
 /// \defgroup vArithmetic Arithmetic functions
 /// \ingroup VMF
@@ -783,12 +823,7 @@ MCKL_DEFINE_MATH_VMF_FMA(internal::fnmsub_impl, fnmsub, )
 /// @{
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{-1}\f$
-template <typename T>
-inline void inv(std::size_t n, const T *a, T *y)
-{
-    for (std::size_t i = 0; i != n; ++i)
-        y[i] = const_one<T>() / a[i];
-}
+MCKL_DEFINE_MATH_VMF_1(internal::inv_impl, inv)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i / b_i\f$
 MCKL_DEFINE_MATH_VMF_B(/, div)
