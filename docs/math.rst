@@ -153,7 +153,8 @@ Functions` has the following seven overloads,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename T>
     void muladd(size_t n, const T *a, const T *b, const T *c, T *y);
@@ -176,7 +177,7 @@ Functions` has the following seven overloads,
     template <typename T>
     void muladd(size_t n, const T *a, T b, T c, T *y);
 
-    } // namespace mckl
+    }
 
 The input of these functions can be either real numbers (floating point types),
 or complex numbers (``std::complex<double>``, etc.), or both. The supported

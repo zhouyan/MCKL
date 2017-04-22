@@ -47,12 +47,13 @@ The first operates on RNG engines and generates unsigned random integers,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RNGType>
     void rand(RNGType &rng, size_t n, typename RNGType::result_type *r);
 
-    } // namespace mckl
+    }
 
 For example,
 
@@ -78,13 +79,14 @@ The second variant of ``rand`` is for generating distribution random variates,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RNGType, typename DistributionType>
     void rand(RNGType &rng, DistributionType &distribution, size_t n,
         typename DistributionType::result_type *r);
 
-    } // namespace mckl
+    }
 
 For example,
 
@@ -131,12 +133,13 @@ defines the following class template as the interface,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType, typename Generator>
     class CounterEngine;
 
-    } // namespace mckl
+    }
 
 where ``ResultType`` shall be an unsigned integer type and it is the output
 type of the RNG engine. An instance of this class template is compatible with
@@ -156,23 +159,25 @@ generator.
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename KeySeqType>
     class AESGenerator;
 
-    } // namespace mckl
+    }
 
 The corresponding RNG engine is,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType, typename KeySeqType>
     using AESEngine = CounterEngine<ResultType, AESGenerator<KeySeqType>;
 
-    } // namespace mckl
+    }
 
 where ``KeySeqType`` is the class used to generate the sequences of round keys.
 When `AESNI <https://en.wikipedia.org/wiki/AES_instruction_set>`_ instructions
@@ -181,7 +186,8 @@ there are four types of sequences of round keys implemented by MCKL,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <size_t Rounds = MCKL_AES128_ROUNDS>
     class AES128KeySeq;
@@ -196,7 +202,7 @@ there are four types of sequences of round keys implemented by MCKL,
         typename Constants = ARSConstants>
     class ARSKeySeq;
 
-    } // namespace mckl
+    }
 
 The default rounds of the first three are 10, 12 and 14, respectively. And thus
 they are equivalent to the AES-128, AES-192, and AES-256 block ciphers,
@@ -217,7 +223,8 @@ from the paper. Correspondingly, there are four RNG engines,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType, size_t Rounds = MCKL_AES128_ROUNDS>
     using AES128Engine = AESEngine<ResultType, AES128KeySeq<Rounds>>;
@@ -232,13 +239,14 @@ from the paper. Correspondingly, there are four RNG engines,
         typename Constants = ARSConstants>
     using ARSEngine = AESEngine<ResultType, ARSKeySeq<Rounds, Constants>>;
 
-    } // namespace mckl
+    }
 
 A few type aliases are defined for convenience.
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     using AES128 = AES128Engine<uint32_t>;
     using AES192 = AES192Engine<uint32_t>;
@@ -250,7 +258,7 @@ A few type aliases are defined for convenience.
     using AES256_64 = AES256Engine<uint64_t>;
     using ARS_64    = ARSEngine<uint64_t>;
 
-    } // namespace mckl
+    }
 
 .. _sub-Philox:
 
@@ -262,19 +270,21 @@ generator,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename T, size_t K, size_t Rounds = MCKL_PHILOX_ROUNDS,
         typename Constants = PhiloxConstants<T, K>>
     class PhiloxGenerator;
 
-    } // namespace mckl
+    }
 
 The corresponding RNG engine is,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType, typename T, size_t K,
         size_t Rounds = MCKL_PHILOX_ROUNDS,
@@ -282,7 +292,7 @@ The corresponding RNG engine is,
     using PhiloxEngine =
         CounterEngine<ResultType, PhiloxGenerator<T, K, Rounds, Constants>>;
 
-    } // namespace mckl
+    }
 
 The template parameter ``Constants`` is a trait class that defines the Weyl’s
 sequence constants and the multipliers. The only restriction on this trait
@@ -299,7 +309,8 @@ from [Salmon2011]_. Four engines are defined in MCKL,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType>
     using Philox2x32Engine = PhiloxEngine<ResultType, uint32_t, 2>;
@@ -313,13 +324,14 @@ from [Salmon2011]_. Four engines are defined in MCKL,
     template <typename ResultType>
     using Philox4x64Engine = PhiloxEngine<ResultType, uint64_t, 4>;
 
-    } // namespace mckl
+    }
 
 A few type aliases are defined for convenience,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     using Philox2x32 = Philox2x32Engine<uint32_t>;
     using Philox4x32 = Philox4x32Engine<uint32_t>;
@@ -331,7 +343,7 @@ A few type aliases are defined for convenience,
     using Philox2x64_64 = Philox2x64Engine<uint64_t>;
     using Philox4x64_64 = Philox4x64Engine<uint64_t>;
 
-    } // namespace mckl
+    }
 
 .. _sub-Threefry:
 
@@ -343,19 +355,21 @@ generator,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename T, size_t K, size_t Rounds = MCKL_THREEFRY_ROUNDS,
         typename Constants = ThreefryConstants<T, K>>
     class ThreefryGenerator;
 
-    } // namespace mckl
+    }
 
 The corresponding RNG engine is,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType, typename T, size_t K,
         size_t Rounds = MCKL_THREEFRY_ROUNDS,
@@ -363,7 +377,7 @@ The corresponding RNG engine is,
     using ThreefryEngine =
         CounterEngine<ResultType, ThreefryGenerator<T, K, Rounds, Constants>>;
 
-    } // namespace mckl
+    }
 
 The template parameter ``Constants`` is a trait class that defines the parity
 constants, the rotation constants, and the permutation. The only restriction on
@@ -383,7 +397,8 @@ engines are defined in MCKL,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType>
     using Threefry2x32Engine = ThreefryEngine<ResultType, uint32_t, 2>;
@@ -403,14 +418,15 @@ engines are defined in MCKL,
     template <typename ResultType>
     using Threefry16x64Engine = ThreefryEngine<ResultType, uint64_t, 16>;
 
-    } // namespace mckl
+    }
 
 In addition, three engines that are equivalent to Threefish-256, Threefish-512
 and Threefish-1024 block ciphers, respectively, are also defined,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType>
     using Threefish256Engine = ThreefryEngine<ResultType, uint64_t, 4, 72>;
@@ -421,13 +437,14 @@ and Threefish-1024 block ciphers, respectively, are also defined,
     template <typename ResultType>
     using Threefish1024Engine = ThreefryEngine<ResultType, uint64_t, 16, 80>;
 
-    } // namespace mckl
+    }
 
 A few type aliases are defined for convenience,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     using Threefry2x32  = Threefry2x32Engine<uint32_t>;
     using Threefry4x32  = Threefry4x32Engine<uint32_t>;
@@ -451,7 +468,7 @@ A few type aliases are defined for convenience,
     using Threefish512_64  = Threefish512Engine<uint64_t>;
     using Threefish1024_64 = Threefish1024Engine<uint64_t>;
 
-    } // namespace mckl
+    }
 
 .. _sec-MKL Random Number Generators:
 
@@ -463,12 +480,13 @@ class
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <MKL_INT BRNG, int Bits>
     class MKLEngine;
 
-    } // namespace mckl
+    }
 
 that makes them accessible as C++11 engines. The output is either 32- or 64-bit
 unsigned integers. This is determined by the template parameter ``Bits``, which
@@ -478,7 +496,8 @@ any `Intel MKL`_ basic RNG that supports ``viRngUniformBits32`` (``Bits`` is
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     using MKL_ARS5             = MKLEngine<VSL_BRNG_ARS5, 32>;
     using MKL_ARS5_64          = MKLEngine<VSL_BRNG_ARS5, 64>;
@@ -495,14 +514,14 @@ any `Intel MKL`_ basic RNG that supports ``viRngUniformBits32`` (``Bits`` is
     using MKL_NONDETERM        = MKLEngine<VSL_BRNG_NONDETERM, 32>;
     using MKL_NONDETERM_64     = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 
-    } // namespace mckl
+    }
 
 Note that, `Intel MKL`_ RNGs perform the best when they are used to generate
 vectors of random numbers. These wrappers use a buffer to store such vectors.
 And thus they have much larger state space than usual RNGs. When there are
 `Intel MKL`_ routines for generating distribution random variates for one of
-the distributions discussed later in :ref:`sub-Continuous Distribution` and
-:ref:`sub-Discrete Distribution`, MCKL automatically uses these routines for
+the distributions discussed later in :ref:`sec-Continuous Distribution` and
+:ref:`sec-Discrete Distribution`, MCKL automatically uses these routines for
 vectorized random number generating if the RNG is one of that listed above. For
 example,
 
@@ -545,14 +564,15 @@ The following singleton class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename ResultType,
         typename ID = std::integral_constant<size_t, sizeof(ResultType)>,
         bool Randomize = true, bool Atomic = true>
     class SeedGenerator;
 
-    } // namespace mckl
+    }
 
 can be used to generate distinctive seeds. The method ``instance`` returns a
 reference to the singleton. For example,
@@ -674,7 +694,8 @@ where ``SeedType`` is an alias to ``SeedTrait<RNGType>::type``,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RNGType>
     class SeedTrait
@@ -690,7 +711,7 @@ where ``SeedType`` is an alias to ``SeedTrait<RNGType>::type``,
         using type = typename CounterEngine<ResultType, Generator>::key_type;
     };
 
-    } // namespace mckl
+    }
 
 Therefore, for most RNGs, the unsigned integers are generated as seeds and they
 share the same internal counter :math:`c`. For counter-based RNGs implemented
@@ -738,12 +759,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename UIntType>
     class UniformBitsDistribution;
 
-    } // namespace mckl
+    }
 
 is similar to the standard library’s ``std::independent_bits_engine``, except
 that it always generates full size random integers and ``UIntType`` must have a
@@ -807,12 +829,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class U01CanonicalDistribution;
 
-    } // namespace mckl
+    }
 
 implements the uniform distribution on :math:`[0, 1)`. It is implemented
 through the mapping,
@@ -835,12 +858,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class U01CCDistribution;
 
-    } // namespace mckl
+    }
 
 implements the uniform distribution on :math:`[0, 1]` through the mapping,
 
@@ -865,12 +889,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class U01CODistribution;
 
-    } // namespace mckl
+    }
 
 implements the uniform distribution on :math:`[0, 1)` through the mapping,
 
@@ -891,12 +916,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class U01OCDistribution;
 
-    } // namespace mckl
+    }
 
 implements the uniform distribution on :math:`(0, 1]` through the mapping,
 
@@ -917,12 +943,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class U01CODistribution;
 
-    } // namespace mckl
+    }
 
 implements the uniform distribution on :math:`(0, 1)` through the mapping,
 
@@ -935,7 +962,7 @@ implements the uniform distribution on :math:`(0, 1)` through the mapping,
 The minimum and maximum are :math:`2^{-P}` and :math:`1 - 2^{-P}`,
 respectively.
 
-.. _sub-Continuous Distribution:
+.. _sec-Continuous Distribution:
 
 Continuous Distribution
 =======================
@@ -949,12 +976,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class ArcsineDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -976,12 +1004,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class BetaDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1011,12 +1040,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class CauchyDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1039,12 +1069,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class ChiSquaredDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1067,12 +1098,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class ExponentialDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1093,12 +1125,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class ExtremeValueDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1121,12 +1154,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class FisherFDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1156,12 +1190,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class GammaDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1190,12 +1225,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class LaplaceDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1217,12 +1253,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class LevyDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1248,12 +1285,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class LaplaceDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1275,12 +1313,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class LognormalDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1306,12 +1345,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class NormalDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1335,12 +1375,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class ParetoDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1362,12 +1403,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class RayleighDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1389,12 +1431,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class StableDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1426,12 +1469,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class StudentTDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1457,12 +1501,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class UniformRealDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1482,12 +1527,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double>
     class WeibullDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1499,7 +1545,7 @@ implements the distribution with PDF,
 
 using the inverse method.
 
-.. _sub-Discrete Distribution:
+.. _sec-Discrete Distribution:
 
 Discrete Distribution
 =====================
@@ -1513,12 +1559,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename IntType = bool>
     class BernoulliDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1543,12 +1590,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename IntType = int>
     class GeometricDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1571,12 +1619,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename IntType = int>
     class UniformIntDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1595,6 +1644,40 @@ number of bits of ``IntType``, then ``UniformBitsDistribution`` is used (see
 variable, then :math:`X = \lfloor{a + (b - a + 1) U}\rfloor` is uniform on the
 set :math:`\{a,\dots,b\}`. Otherwise the standard library is used.
 
+.. _sub-Discrete Distribution:
+
+Discrete Distribution
+---------------------
+
+The class template,
+
+.. code-block:: cpp
+
+    namespace mckl
+    {
+
+    template <typename IntType = int>
+    class DiscreteDistribution;
+
+    }
+
+implements the `discrete distribution
+<http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution>`_. It
+supports the same interface as the standard library with two modificiations.
+First, the ``probabilities`` method return an ``mckl::Vector<double>`` object
+instead of ``std::vector<double>``. Second, it support the following additonal
+callable operator,
+
+.. code-block:: cpp
+
+    template <typename RNGType, typename InputIter>
+    result_type operator()(RNGType &rng, InputIter first, InputIter last,
+        bool normalized = false) const;
+
+Where the iterators points to the range of probabilies. The optional argument
+``normalized`` specify if they are normalized. This operator has :math:`O(1)`
+memory cost and :math:`O(n)` runtime cost.
+
 .. _sub-Multivariate Distribution:
 
 Multivariate Distribution
@@ -1609,12 +1692,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double, size_t Dim = Dynamic>
     class DirichletDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
@@ -1673,12 +1757,13 @@ The class template,
 
 .. code-block:: cpp
 
-    namespace mckl {
+    namespace mckl
+    {
 
     template <typename RealType = double, size_t Dim = Dynamic>
     class NormalMVDistribution;
 
-    } // namespace mckl
+    }
 
 implements the distribution with PDF,
 
