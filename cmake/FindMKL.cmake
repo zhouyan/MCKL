@@ -42,12 +42,26 @@
 #
 # The following variables affect the behavior of this module
 #
+# MKL_ROOT     - The root path that CMake shall try
 # MKL_INC_PATH - The path CMake shall try to find headers first
 # MKL_LIB_PATH - The path CMake shall try to find libraries first
 
 if(DEFINED MKL_FOUND)
     return()
 endif(DEFINED MKL_FOUND)
+
+if(${MKL_ROOT})
+    if(NOT ${MKL_INC_PATH})
+        set(MKL_INC_PATH ${MKL_ROOT}/include)
+    endif(NOT ${MKL_INC_PATH})
+    if(NOT ${MKL_LIB_PATH})
+        if(APPLE)
+            set(MKL_LIB_PATH ${MKL_ROOT}/lib)
+        else(APPLE)
+            set(MKL_LIB_PATH ${MKL_ROOT}/lib/intel64)
+        endif(APPLE)
+    endif(NOT ${MKL_LIB_PATH})
+endif(${MKL_ROOT})
 
 if(NOT DEFINED MKL_LINK_LIBRARIES)
     include(FindThreads)
@@ -69,7 +83,7 @@ if(NOT DEFINED MKL_LINK_LIBRARIES)
 
     if(MKL_LINK_LIBRARIES)
         set(MKL_LINK_LIBRARIES ${MKL_LINK_LIBRARIES}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING "MKL Libraries")
+            CACHE STRING "MKL Libraries")
         message(STATUS "Found MKL libraries: ${MKL_LINK_LIBRARIES}")
     else(MKL_LINK_LIBRARIES)
         message(STATUS "NOT Found MKL libraries")

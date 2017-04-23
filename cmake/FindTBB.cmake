@@ -43,6 +43,7 @@
 #
 # The following variables affect the behavior of this module
 #
+# TBB_ROOT     - The root path that CMake shall try
 # TBB_INC_PATH - The path CMake shall try to find headers first
 # TBB_LIB_PATH - The path CMake shall try to find libraries first
 
@@ -50,9 +51,20 @@ if(DEFINED TBB_FOUND)
     return()
 endif(DEFINED TBB_FOUND)
 
-file(READ ${CMAKE_CURRENT_LIST_DIR}/FindTBB.cpp TBB_TEST_SOURCE)
+if(${TBB_ROOT})
+    if(NOT ${TBB_INC_PATH})
+        set(TBB_INC_PATH ${TBB_ROOT}/include)
+    endif(NOT ${TBB_INC_PATH})
+    if(NOT ${TBB_LIB_PATH})
+        if(APPLE)
+            set(TBB_LIB_PATH ${TBB_ROOT}/lib)
+        else(APPLE)
+            set(TBB_LIB_PATH ${TBB_ROOT}/lib/intel64/gcc4.7)
+        endif(APPLE)
+    endif(NOT ${TBB_LIB_PATH})
+endif(${TBB_ROOT})
 
-include(FindThreads)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindTBB.cpp TBB_TEST_SOURCE)
 
 if(NOT DEFINED TBB_LINK_LIBRARIES)
     find_library(TBB_LINK_LIBRARIES_RELEASE_FOUND tbb
@@ -65,17 +77,17 @@ if(NOT DEFINED TBB_LINK_LIBRARIES)
         set(TBB_LINK_LIBRARIES
             optimized ${TBB_LINK_LIBRARIES_RELEASE_FOUND}
             debug ${TBB_LINK_LIBRARIES_DEBUG_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING "Link to TBB")
+            CACHE STRING "Link to TBB")
         set(TBB_LINK_LIBRARIES_RELEASE ${TBB_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING "Link to TBB Release")
+            CACHE STRING "Link to TBB Release")
         set(TBB_LINK_LIBRARIES_DEBUG ${TBB_LINK_LIBRARIES_DEBUG_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING "Link to TBB Debug")
+            CACHE STRING "Link to TBB Debug")
         message(STATUS "Found TBB libraries: ${TBB_LINK_LIBRARIES}")
     elseif(TBB_LINK_LIBRARIES_RELEASE_FOUND)
         set(TBB_LINK_LIBRARIES ${TBB_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING "Link to TBB")
+            CACHE STRING "Link to TBB")
         set(TBB_LINK_LIBRARIES_RELEASE ${TBB_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING "Link to TBB Release")
+            CACHE STRING "Link to TBB Release")
         message(STATUS "Found TBB libraries: ${TBB_LINK_LIBRARIES}")
     else(TBB_LINK_LIBRARIES_RELEASE_FOUND AND TBB_LINK_LIBRARIES_DEBUG_FOUND)
         message(STATUS "NOT Found TBB libraries")
@@ -94,27 +106,22 @@ if(NOT DEFINED TBB_MALLOC_LINK_LIBRARIES)
         set(TBB_MALLOC_LINK_LIBRARIES
             optimized ${TBB_MALLOC_LINK_LIBRARIES_RELEASE_FOUND}
             debug ${TBB_MALLOC_LINK_LIBRARIES_DEBUG_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc")
+            CACHE STRING "Link to TBB malloc")
         set(TBB_MALLOC_LINK_LIBRARIES_RELEASE
             ${TBB_MALLOC_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc Release")
+            CACHE STRING "Link to TBB malloc Release")
         set(TBB_MALLOC_LINK_LIBRARIES_DEBUG
             ${TBB_MALLOC_LINK_LIBRARIES_DEBUG_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc Debug")
+            CACHE STRING "Link to TBB malloc Debug")
         message(STATUS
             "Found TBB malloc libraries: ${TBB_MALLOC_LINK_LIBRARIES}")
     elseif(TBB_MALLOC_LINK_LIBRARIES_RELEASE_FOUND)
         set(TBB_MALLOC_LINK_LIBRARIES
             ${TBB_MALLOC_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc")
+            CACHE STRING "Link to TBB malloc")
         set(TBB_MALLOC_LINK_LIBRARIES_RELEASE
             ${TBB_MALLOC_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc Release")
+            CACHE STRING "Link to TBB malloc Release")
         message(STATUS
             "Found TBB malloc libraries: ${TBB_MALLOC_LINK_LIBRARIES}")
     else(TBB_MALLOC_LINK_LIBRARIES_RELEASE_FOUND AND
@@ -140,27 +147,22 @@ if(NOT DEFINED TBB_MALLOC_PROXY_LINK_LIBRARIES)
         set(TBB_MALLOC_PROXY_LINK_LIBRARIES
             optimized ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
             debug ${TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc proxy")
+            CACHE STRING "Link to TBB malloc proxy")
         set(TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE
             ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc proxy Release")
+            CACHE STRING "Link to TBB malloc proxy Release")
         set(TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG
             ${TBB_MALLOC_PROXY_LINK_LIBRARIES_DEBUG_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc proxy Debug")
+            CACHE STRING "Link to TBB malloc proxy Debug")
         message(STATUS
             "Found TBB malloc proxy libraries: ${TBB_MALLOC_PROXY_LINK_LIBRARIES}")
     elseif(TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND)
         set(TBB_MALLOC_PROXY_LINK_LIBRARIES
             ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc proxy")
+            CACHE STRING "Link to TBB malloc proxy")
         set(TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE
             ${TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND}
-            ${CMAKE_THREAD_LIBS_INIT} CACHE STRING
-            "Link to TBB malloc proxy Release")
+            CACHE STRING "Link to TBB malloc proxy Release")
         message(STATUS
             "Found TBB malloc proxy libraries: ${TBB_MALLOC_PROXY_LINK_LIBRARIES}")
     else(TBB_MALLOC_PROXY_LINK_LIBRARIES_RELEASE_FOUND AND
