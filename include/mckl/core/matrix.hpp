@@ -41,8 +41,8 @@ namespace mckl
 /// \brief Matrix container
 /// \ingroup Core
 ///
-/// \tparam Layout The storage layout, either RowMajor or ColMajor
 /// \tparam T The value type
+/// \tparam Layout The storage layout, either RowMajor or ColMajor
 /// \tparam Alloc The allocator type
 template <typename T, MatrixLayout Layout = RowMajor,
     typename Alloc = Allocator<T>>
