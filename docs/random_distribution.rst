@@ -39,9 +39,8 @@ The performance is measured on an MacBook Pro with an Intel Core i7-4960HQ CPU
 running macOS Sierra (version 10.12.4).
 
 Three compilers are tested, LLVM clang (version Apple 8.1.0), GNU GCC (version
-6.3.0), and Intel C++ compiler (version 17.0.2). They are labeled as “LLVM”,
-“GNU” and “Intel”, respectively. Results of the LLVM clang compiler is shown
-here. The results with other compilers are similar.
+6.3.0), and Intel C++ compiler (version 17.0.2). Results of the LLVM clang
+compiler is shown here. The results with other compilers are similar.
 
 Two usage cases of RNGs are considered. The first is generating random integers
 within a loop, each iteration generate a single random integer,

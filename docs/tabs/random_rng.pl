@@ -39,12 +39,12 @@ use utf8;
 system "mkdir -p random_rng";
 
 my $llvm = "../../build/release-llvm";
-my $gnu = "../../build/release-gnu";
+my $gcc = "../../build/release-gcc";
 my $intel = "../../build/release-intel";
 my $scale = 3.8 / 2.6;
 GetOptions(
     "llvm=s"   => \$llvm,
-    "gnu=s"    => \$gnu,
+    "gcc=s"    => \$gcc,
     "intel=s"  => \$intel,
     "scale"    => \$scale,
 );
@@ -97,8 +97,8 @@ for my $k (@keys) {
     }
 }
 
-my %compiler = (llvm => $llvm, gnu => $gnu, intel => $intel);
-my @compiler = qw(llvm gnu intel);
+my %compiler = (llvm => $llvm, gcc => $gcc, intel => $intel);
+my @compiler = qw(llvm gcc intel);
 
 my %cpb_s;
 my %cpb_b;
@@ -199,10 +199,10 @@ sub table {
         $table .= " " x 4;
         $table .= sprintf("%-25s", "RNG");
         $table .= sprintf(" & %-6s", "LLVM");
-        $table .= sprintf(" & %-6s", "GNU");
+        $table .= sprintf(" & %-6s", "GCC");
         $table .= sprintf(" & %-6s", "Intel");
         $table .= sprintf(" & %-6s", "LLVM");
-        $table .= sprintf(" & %-6s", "GNU");
+        $table .= sprintf(" & %-6s", "GCC");
         $table .= sprintf(" & %-6s", "Intel");
         $table .= "\n";
 

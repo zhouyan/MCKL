@@ -40,7 +40,7 @@ running macOS Sierra (version 10.12.4).
 
 Three compilers are tested, LLVM clang (version Apple 8.1.0), GNU GCC (version
 6.3.0), and Intel C++ compiler (version 17.0.2). They are labeled as “LLVM”,
-“GNU” and “Intel”, respectively.
+“GCC” and “Intel”, respectively.
 
 Two usage cases of RNGs are considered. The first is generating random integers
 within a loop, each iteration generate a single random integer,
@@ -90,7 +90,7 @@ respectively, in the tables below.
     :header-rows: 1
     :header: ,,Single,,,Batch,
 
-    RNG                       & LLVM   & GNU    & Intel  & LLVM   & GNU    & Intel
+    RNG                       & LLVM   & GCC    & Intel  & LLVM   & GCC    & Intel
     ``std::mt19937``          & 4.56   & 4.21   & 5.03   & 4.56   & 3.99   & 5.03
     ``std::mt19937_64``       & 2.35   & 2.21   & 2.46   & 2.35   & 2.18   & 2.46
     ``std::minstd_rand0``     & 9.68   & 10.1   & 10.9   & 9.68   & 10.1   & 10.9
@@ -108,7 +108,7 @@ respectively, in the tables below.
     :header-rows: 1
     :header: ,,Single,,,Batch,
 
-    RNG                       & LLVM   & GNU    & Intel  & LLVM   & GNU    & Intel
+    RNG                       & LLVM   & GCC    & Intel  & LLVM   & GCC    & Intel
     ``r123::AESNI4x32``       & 6.58   & 1.56   & 8.93   & 6.61   & 1.52   & 8.83
     ``r123::ARS4x32``         & 5.13   & 1.18   & 6.39   & 5.19   & 1.18   & 6.30
     ``r123::Philox2x32``      & 10.1   & 3.04   & 12.6   & 10.1   & 3.07   & 12.6
@@ -127,7 +127,7 @@ respectively, in the tables below.
     :header-rows: 1
     :header: ,,Single,,,Batch,
 
-    RNG                       & LLVM   & GNU    & Intel  & LLVM   & GNU    & Intel
+    RNG                       & LLVM   & GCC    & Intel  & LLVM   & GCC    & Intel
     ``AES128``                & 1.53   & 1.90   & 1.87   & 0.64   & 0.63   & 0.63
     ``AES192``                & 2.19   & 2.28   & 2.25   & 0.76   & 0.76   & 0.76
     ``AES256``                & 2.57   & 2.63   & 2.63   & 0.89   & 0.89   & 0.89
@@ -144,7 +144,7 @@ respectively, in the tables below.
     :header-rows: 1
     :header: ,,Single,,,Batch,
 
-    RNG                       & LLVM   & GNU    & Intel  & LLVM   & GNU    & Intel
+    RNG                       & LLVM   & GCC    & Intel  & LLVM   & GCC    & Intel
     ``Philox2x32``            & 4.71   & 4.52   & 5.57   & 0.61   & 0.61   & 0.61
     ``Philox4x32``            & 3.74   & 6.27   & 4.34   & 0.63   & 0.63   & 0.63
     ``Philox2x64``            & 2.70   & 2.38   & 3.07   & 1.42   & 1.42   & 1.43
@@ -161,7 +161,7 @@ respectively, in the tables below.
     :header-rows: 1
     :header: ,,Single,,,Batch,
 
-    RNG                       & LLVM   & GNU    & Intel  & LLVM   & GNU    & Intel
+    RNG                       & LLVM   & GCC    & Intel  & LLVM   & GCC    & Intel
     ``Threefry2x32``          & 7.34   & 6.61   & 7.16   & 0.99   & 0.99   & 0.94
     ``Threefry4x32``          & 5.33   & 6.81   & 5.32   & 1.01   & 0.99   & 0.98
     ``Threefry2x64``          & 4.02   & 3.33   & 4.28   & 0.92   & 0.92   & 0.89
@@ -188,7 +188,7 @@ respectively, in the tables below.
     :header-rows: 1
     :header: ,,Single,,,Batch,
 
-    RNG                       & LLVM   & GNU    & Intel  & LLVM   & GNU    & Intel
+    RNG                       & LLVM   & GCC    & Intel  & LLVM   & GCC    & Intel
     ``MKL_ARS5``              & 2.37   & 2.38   & 2.35   & 0.41   & 0.41   & 0.41
     ``MKL_PHILOX4X32X10``     & 2.95   & 2.98   & 2.95   & 0.76   & 0.77   & 0.77
     ``MKL_MCG59``             & 2.09   & 2.13   & 2.10   & 0.44   & 0.44   & 0.44
