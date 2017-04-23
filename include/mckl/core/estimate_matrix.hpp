@@ -47,17 +47,18 @@ namespace mckl
 /// \f$t\f$ by \f$d\f$ matrix \f$E\f$, where \f$E_{i,j} = \eta_i(j)\f$, the
 /// \f$j\f$-th component of the an estimate at iteration \f$i\f$.
 template <typename T>
-class EstimateMatrix : public Matrix<RowMajor, T>
+class EstimateMatrix : public Matrix<T, RowMajor>
 {
     public:
-    using value_type = typename Matrix<RowMajor, T>::value_type;
-    using size_type = typename Matrix<RowMajor, T>::size_type;
-    using estimate_range = typename Matrix<RowMajor, T>::row_range;
-    using variable_range = typename Matrix<RowMajor, T>::col_range;
-    using const_estimate_range = typename Matrix<RowMajor, T>::const_row_range;
-    using const_variable_range = typename Matrix<RowMajor, T>::const_col_range;
+    using matrix_type = Matrix<T, RowMajor>;
+    using value_type = typename matrix_type::value_type;
+    using size_type = typename matrix_type::size_type;
+    using estimate_range = typename matrix_type::row_range;
+    using variable_range = typename matrix_type::col_range;
+    using const_estimate_range = typename matrix_type::const_row_range;
+    using const_variable_range = typename matrix_type::const_col_range;
 
-    EstimateMatrix(size_type dim) : Matrix<RowMajor, T>(0, dim) {}
+    EstimateMatrix(size_type dim) : matrix_type(0, dim) {}
 
     /// \brief The dimension of the estimator
     std::size_t dim() const noexcept { return this->ncol(); }
@@ -71,7 +72,7 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     /// \brief Reserve space for *additional* iterations
     void reserve(std::size_t n)
     {
-        Matrix<RowMajor, T>::reserve(num_iter() + n, dim());
+        matrix_type::reserve(num_iter() + n, dim());
     }
 
     /// \brief Range of an estimate
@@ -131,8 +132,8 @@ class EstimateMatrix : public Matrix<RowMajor, T>
     }
 
     private:
-    using Matrix<RowMajor, T>::resize;
-    using Matrix<RowMajor, T>::push_back_col;
+    using matrix_type::resize;
+    using matrix_type::push_back_col;
 
     template <typename InputIter>
     void insert_estimate_dispatch(

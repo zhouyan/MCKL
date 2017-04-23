@@ -317,8 +317,8 @@ inline Vector<T> hdf5load(
 
 /// \brief Store a row major Matrix in the HDF5 format
 /// \ingroup HDF5
-template <typename T>
-inline void hdf5store(const Matrix<RowMajor, T> &matrix,
+template <typename T, typename Alloc>
+inline void hdf5store(const Matrix<T, RowMajor, Alloc> &matrix,
     const std::string &filename, const std::string &dataname, bool append)
 {
     internal::HDF5File datafile(
@@ -346,60 +346,62 @@ inline void hdf5store(const Matrix<RowMajor, T> &matrix,
 
 /// \brief Store a Matrix in the HDF5 format
 /// \ingroup HDF5
-template <typename T>
-inline void hdf5store(const Matrix<ColMajor, T> &matrix,
+template <typename T, typename Alloc>
+inline void hdf5store(const Matrix<T, ColMajor, Alloc> &matrix,
     const std::string &filename, const std::string &dataname, bool append)
 {
-    Matrix<RowMajor, T> tmp(matrix);
+    Matrix<T, RowMajor, Alloc> tmp(matrix);
     hdf5store(tmp, filename, dataname, append);
 }
 
 /// \brief Load data in HDF5 format into a Matrix given destination layout and
 /// type
 /// \ingroup HDF5
-template <MatrixLayout Layout, typename T>
-inline Matrix<Layout, T> hdf5load(
+template <typename T, MatrixLayout Layout, typename Alloc = Allocator<T>>
+inline Matrix<T, Layout, Alloc> hdf5load(
     const std::string &filename, const std::string &dataname)
 {
+    using matrix_type = Matrix<T, Layout, Alloc>;
+
     internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
     if (!datafile)
-        return Matrix<Layout, T>();
+        return matrix_type();
 
     internal::HDF5DataSet dataset(
         ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
     if (!dataset)
-        return Matrix<Layout, T>();
+        return matrix_type();
 
     internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
     if (!dataspace)
-        return Matrix<Layout, T>();
+        return matrix_type();
 
     int ndims = ::H5Sget_simple_extent_ndims(dataspace.id());
     if (ndims != 2)
-        return Matrix<Layout, T>();
+        return matrix_type();
 
     ::hsize_t dims[2];
     ndims = ::H5Sget_simple_extent_dims(dataspace.id(), dims, nullptr);
     if (ndims != 2)
-        return Matrix<Layout, T>();
+        return matrix_type();
 
     std::size_t nrow = static_cast<std::size_t>(dims[0]);
     std::size_t ncol = static_cast<std::size_t>(dims[1]);
 
     if (nrow * ncol == 0)
-        return Matrix<Layout, T>(nrow, ncol);
+        return matrix_type(nrow, ncol);
 
     internal::HDF5DataType datatype(hdf5_datatype<T>());
     if (!datatype)
-        return Matrix<Layout, T>();
+        return matrix_type();
 
-    Matrix<RowMajor, T> matrix(nrow, ncol);
+    Matrix<T, RowMajor, Alloc> matrix(nrow, ncol);
     ::herr_t err = ::H5Dread(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL,
         H5P_DEFAULT, matrix.data());
     if (err < 0)
-        return Matrix<Layout, T>();
+        return matrix_type();
 
-    return Matrix<Layout, T>(std::move(matrix));
+    return matrix_type(std::move(matrix));
 }
 
 } // namespace mckl

@@ -60,7 +60,7 @@ inline void core_matrix(std::size_t N, std::size_t M)
         const std::uint64_t n = rsize(rng);
         const std::uint64_t m = rsize(rng);
         l += n * m;
-        mckl::Matrix<Layout, std::uint64_t> mat(
+        mckl::Matrix<std::uint64_t, Layout> mat(
             static_cast<std::size_t>(n), static_cast<std::size_t>(m));
         for (std::uint64_t i = 0; i != n; ++i) {
             for (std::uint64_t j = 0; j != m; ++j) {
@@ -68,7 +68,7 @@ inline void core_matrix(std::size_t N, std::size_t M)
                     (i << 32) + j;
             }
         }
-        const mckl::Matrix<Layout, std::uint64_t> cmat(mat);
+        const mckl::Matrix<std::uint64_t, Layout> cmat(mat);
 
         constexpr std::uint64_t zero = 0;
 

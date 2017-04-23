@@ -76,8 +76,8 @@ class Sampler
     }
 
     /// \brief Return a combined matrix of all estimates
-    template <MatrixLayout Layout, typename T>
-    Matrix<Layout, T> summary() const
+    template <typename T, MatrixLayout Layout>
+    Matrix<T, Layout> summary() const
     {
         const std::size_t nrow =
             static_cast<const Derived *>(this)->num_iter();
@@ -87,7 +87,7 @@ class Sampler
             for (auto &e : est)
                 ncol += e.dim();
 
-        Matrix<Layout, T> mat(nrow, ncol);
+        Matrix<T, Layout> mat(nrow, ncol);
         if (nrow * ncol == 0)
             return mat;
 
@@ -117,7 +117,7 @@ class Sampler
     std::basic_ostream<CharT, Traits> &print(
         std::basic_ostream<CharT, Traits> &os, char sepchar = ' ') const
     {
-        const auto mat = summary<RowMajor, double>();
+        const auto mat = summary<double, RowMajor>();
         const std::size_t n = mat.nrow();
         const std::size_t m = mat.ncol();
 

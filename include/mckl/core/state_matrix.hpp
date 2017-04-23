@@ -51,30 +51,30 @@ namespace mckl
 /// \f$N\f$ samples is stored as an \f$N\f$ by \f$D\f$ matrix. The value of the
 /// template parameter `Dim` only specifies the initial value of \f$D\f$.
 template <MatrixLayout Layout, typename T, std::size_t Dim = 0>
-class StateMatrix : public Matrix<Layout, T>
+class StateMatrix : public Matrix<T, Layout>
 {
     using layout_dispatch = std::integral_constant<MatrixLayout, Layout>;
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
     public:
-    using value_type = typename Matrix<Layout, T>::value_type;
-    using size_type = typename Matrix<Layout, T>::size_type;
-    using difference_type = typename Matrix<Layout, T>::difference_type;
-    using reference = typename Matrix<Layout, T>::reference;
-    using pointer = typename Matrix<Layout, T>::pointer;
+    using matrix_type = Matrix<T, Layout>;
+    using value_type = typename matrix_type::value_type;
+    using size_type = typename matrix_type::size_type;
+    using difference_type = typename matrix_type::difference_type;
+    using reference = typename matrix_type::reference;
+    using pointer = typename matrix_type::pointer;
 
     /// \brief ParticleIndex base class
     template <typename S>
     class particle_index_type : public ParticleIndexBase<S>
     {
         public:
-        using iterator = typename Matrix<Layout, T>::row_iterator;
-        using const_iterator = typename Matrix<Layout, T>::const_row_iterator;
-        using reverse_iterator =
-            typename Matrix<Layout, T>::reverse_row_iterator;
+        using iterator = typename matrix_type::row_iterator;
+        using const_iterator = typename matrix_type::const_row_iterator;
+        using reverse_iterator = typename matrix_type::reverse_row_iterator;
         using const_reverse_iterator =
-            typename Matrix<Layout, T>::const_reverse_row_iterator;
+            typename matrix_type::const_reverse_row_iterator;
 
         particle_index_type() = default;
 
@@ -152,10 +152,10 @@ class StateMatrix : public Matrix<Layout, T>
     }; // class particle_index_type
 
     /// \brief `Matrix::Matrix(N, Dim)`
-    explicit StateMatrix(size_type N = 0) : Matrix<Layout, T>(N, Dim) {}
+    explicit StateMatrix(size_type N = 0) : matrix_type(N, Dim) {}
 
     /// \brief `Matrix::Matrix(N, dim)`
-    StateMatrix(size_type N, size_type dim) : Matrix<Layout, T>(N, dim)
+    StateMatrix(size_type N, size_type dim) : matrix_type(N, dim)
     {
         static_assert(Dim == 0,
             "**StateMatrix::StateMatrix** used with an object with fixed "
@@ -168,12 +168,12 @@ class StateMatrix : public Matrix<Layout, T>
     /// \brief `Matrix::ncol()`
     size_type dim() const { return this->ncol(); }
 
-    using Matrix<Layout, T>::reserve;
+    using matrix_type::reserve;
 
     /// \brief `Matrix::reserve(N, dim())`
     void reserve(size_type N) { this->reserve(N, dim()); }
 
-    using Matrix<Layout, T>::resize;
+    using matrix_type::resize;
 
     /// \brief `Matrix::resize(N, dim())`
     void resize(size_type N) { this->resize(N, dim()); }
@@ -251,7 +251,7 @@ class StateMatrix : public Matrix<Layout, T>
                     dst[i] = src[*idx];
             }
         } else {
-            Matrix<ColMajor, T> tmp(n, dim());
+            Matrix<T, ColMajor> tmp(n, dim());
             for (size_type j = 0; j != dim(); ++j) {
                 idx = index;
                 const value_type *src = this->col_data(j);
@@ -259,7 +259,7 @@ class StateMatrix : public Matrix<Layout, T>
                 for (size_type i = 0; i != n; ++i, ++idx)
                     dst[i] = src[*idx];
             }
-            Matrix<ColMajor, T>::operator=(std::move(tmp));
+            Matrix<T, ColMajor>::operator=(std::move(tmp));
         }
 
         return;

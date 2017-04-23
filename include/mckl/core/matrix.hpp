@@ -44,7 +44,8 @@ namespace mckl
 /// \tparam Layout The storage layout, either RowMajor or ColMajor
 /// \tparam T The value type
 /// \tparam Alloc The allocator type
-template <MatrixLayout Layout, typename T, typename Alloc = Allocator<T>>
+template <typename T, MatrixLayout Layout = RowMajor,
+    typename Alloc = Allocator<T>>
 class Matrix
 {
     using layout_dispatch = std::integral_constant<MatrixLayout, Layout>;
@@ -95,7 +96,7 @@ class Matrix
     using const_reverse_col_range = Range<const_reverse_col_iterator>;
 
     using transpose_type =
-        Matrix<Layout == RowMajor ? ColMajor : RowMajor, T, Alloc>;
+        Matrix<T, Layout == RowMajor ? ColMajor : RowMajor, Alloc>;
 
     /// \brief Construct an empty matrix
     Matrix() noexcept(

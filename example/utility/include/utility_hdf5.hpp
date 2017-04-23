@@ -143,7 +143,7 @@ inline void utility_hdf5(std::size_t N, std::size_t M)
         const std::size_t ncol = k == 1 ? 0 : rsize(rng);
         n += nrow * ncol;
 
-        mckl::Matrix<Layout1, T1> m1(nrow, ncol);
+        mckl::Matrix<T1, Layout1> m1(nrow, ncol);
         mckl::rand(rng, u01, nrow * ncol, m1.data());
 
         watch1.start();
@@ -151,15 +151,15 @@ inline void utility_hdf5(std::size_t N, std::size_t M)
         watch1.stop();
 
         watch2.start();
-        auto m2 = mckl::hdf5load<Layout2, T2>(filename, dataname);
+        auto m2 = mckl::hdf5load<T2, Layout2>(filename, dataname);
         watch2.stop();
 
         passed = passed && m1.nrow() == m2.nrow() && m1.ncol() == m2.ncol();
         if (!passed)
             break;
 
-        mckl::Matrix<mckl::RowMajor, float> f1(nrow, ncol);
-        mckl::Matrix<mckl::RowMajor, float> f2(nrow, ncol);
+        mckl::Matrix<float, mckl::RowMajor> f1(nrow, ncol);
+        mckl::Matrix<float, mckl::RowMajor> f2(nrow, ncol);
         for (std::size_t i = 0; i != nrow; ++i)
             for (std::size_t j = 0; j != ncol; ++j)
                 f1(i, j) = static_cast<float>(m1(i, j));
@@ -171,10 +171,10 @@ inline void utility_hdf5(std::size_t N, std::size_t M)
             break;
     }
 
-    const std::string n1("Matrix<" + utility_hdf5_layoutname<Layout1>() +
-        ", " + utility_hdf5_typename<T1>() + ">");
-    const std::string n2("Matrix<" + utility_hdf5_layoutname<Layout2>() +
-        ", " + utility_hdf5_typename<T2>() + ">");
+    const std::string n1("Matrix<" + utility_hdf5_typename<T1>() + ", " +
+        utility_hdf5_layoutname<Layout1>() + ">");
+    const std::string n2("Matrix<" + utility_hdf5_typename<T2>() + ", " +
+        utility_hdf5_layoutname<Layout2>() + ">");
     const std::size_t bytes1 = n * sizeof(T1);
     const std::size_t bytes2 = n * sizeof(T2);
 

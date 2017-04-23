@@ -64,10 +64,10 @@ inline void random_normal_mv(std::size_t N, std::size_t M,
 
     bool pass = true;
 
-    mckl::Matrix<mckl::RowMajor, RealType> r1;
-    mckl::Matrix<mckl::RowMajor, RealType> r2;
+    mckl::Matrix<RealType, mckl::RowMajor> r1;
+    mckl::Matrix<RealType, mckl::RowMajor> r2;
 #if MCKL_HAS_MKL
-    mckl::Matrix<mckl::RowMajor, RealType> r3;
+    mckl::Matrix<RealType, mckl::RowMajor> r3;
 #endif
     for (std::size_t i = 0; i != M; ++i) {
         std::size_t K = rsize(rng);
