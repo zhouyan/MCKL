@@ -58,9 +58,11 @@ endif (APPLE)
 
 add_library(libmckl STATIC ${MCKL_LIB_ASM})
 set_target_properties(libmckl PROPERTIES OUTPUT_NAME mckl)
-add_dependencies(lib libmckl)
+if("${CMAKE_SOURCED_DIR}/lib" STREQUAL "${PROJECT_SOURCE_DIR}")
+    add_dependencies(lib libmckl)
+endif("${CMAKE_SOURCED_DIR}/lib" STREQUAL "${PROJECT_SOURCE_DIR}")
 
 if(NOT DEFINED MCKL_INSTALL_LIB_DIR)
-    SET(MCKL_INSTALL_LIB_DIR lib)
+    set(MCKL_INSTALL_LIB_DIR lib)
 endif(NOT DEFINED MCKL_INSTALL_LIB_DIR)
 install(TARGETS libmckl DESTINATION ${MCKL_INSTALL_LIB_DIR})
