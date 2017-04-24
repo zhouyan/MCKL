@@ -41,8 +41,8 @@ endif(DEFINED BMI2_FOUND)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/FindBMI2.cpp BMI2_TEST_SOURCE)
 
-include(CheckCXXSourceRuns)
-check_cxx_source_runs("${BMI2_TEST_SOURCE}" BMI2_TEST)
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("${BMI2_TEST_SOURCE}" BMI2_TEST)
 if(BMI2_TEST)
     set(BMI2_FOUND TRUE CACHE BOOL "Found BMI2 support")
 else(BMI2_TEST)
