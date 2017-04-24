@@ -53,7 +53,7 @@ namespace internal
 template <typename Constants>
 class ARSKeySeqGeneratorAESNIImpl
 {
-    public:
+  public:
     using key_type = std::array<std::uint32_t, 4>;
     using rk_type = __m128i;
 
@@ -76,7 +76,7 @@ class ARSKeySeqGeneratorAESNIImpl
         generate<0>(rk, std::integral_constant<bool, 0 < Rp1>());
     }
 
-    private:
+  private:
     __m128i key_;
 
     template <std::size_t, std::size_t Rp1>
@@ -104,7 +104,7 @@ class ARSGeneratorAESNIImpl
     using KeySeqType =
         ARSKeySeqImpl<5, ARSKeySeqGeneratorAESNIImpl<Constants>>;
 
-    public:
+  public:
     static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
         constexpr MCKL_INT64 w0 =
@@ -174,7 +174,7 @@ class ARSGeneratorAESNIImpl
 
     MCKL_RANDOM_INTERNAL_AES_AESNI_EVAL
 
-    private:
+  private:
     template <typename ResultType>
     static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)

@@ -79,7 +79,7 @@ inline std::string random_u01_maximum(RealType x)
 
 class RandomU01Range
 {
-    public:
+  public:
     bool pass_b;
     bool pass_l;
     bool pass_u;

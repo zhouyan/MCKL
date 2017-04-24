@@ -55,7 +55,7 @@ class UniformRealSSE2Impl;
 template <typename UIntType, typename RealType>
 class UniformRealSSE2ImplBase
 {
-    public:
+  public:
     MCKL_INLINE static RealType eval(UIntType u, RealType a, RealType b)
     {
         return U01GenericImpl<UIntType, RealType, Closed, Open>::eval(u) *
@@ -87,7 +87,7 @@ template <typename UIntType>
 class UniformRealSSE2Impl<UIntType, float, 32>
     : public UniformRealSSE2ImplBase<UIntType, float>
 {
-    public:
+  public:
     using UniformRealSSE2ImplBase<UIntType, float>::eval;
 
     template <std::size_t S>
@@ -112,7 +112,7 @@ template <typename UIntType>
 class UniformRealSSE2Impl<UIntType, double, 32>
     : public UniformRealSSE2ImplBase<UIntType, double>
 {
-    public:
+  public:
     using UniformRealSSE2ImplBase<UIntType, double>::eval;
 
     template <std::size_t S>
@@ -141,7 +141,7 @@ template <typename UIntType>
 class UniformRealSSE2Impl<UIntType, double, 64>
     : public UniformRealSSE2ImplBase<UIntType, double>
 {
-    public:
+  public:
     using UniformRealSSE2ImplBase<UIntType, double>::eval;
 
     template <std::size_t S>

@@ -44,7 +44,7 @@ namespace mckl
 template <typename Base>
 class StepIterator
 {
-    public:
+  public:
     using difference_type = std::make_signed_t<
         typename std::iterator_traits<Base>::difference_type>;
     using value_type = typename std::iterator_traits<Base>::value_type;
@@ -306,7 +306,7 @@ class StepIterator
         return distance(iter2.base_, iter1.base_) / iter1.step_;
     }
 
-    private:
+  private:
     Base base_;
     difference_type step_;
 }; // class StepIterator
@@ -325,7 +325,7 @@ class Range;
 template <typename IntType>
 class Range<IntType, true>
 {
-    public:
+  public:
     using size_type = std::size_t;
     using iterator = IntType;
 
@@ -385,7 +385,7 @@ class Range<IntType, true>
     /// \brief The upper bound of the range
     iterator end() const { return end_; }
 
-    private:
+  private:
     iterator begin_;
     iterator end_;
     size_type grainsize_;
@@ -402,7 +402,7 @@ class Range<IntType, true>
 template <typename Iterator>
 class Range<Iterator, false>
 {
-    public:
+  public:
     using size_type = std::size_t;
     using iterator = Iterator;
     using value_type = typename std::iterator_traits<iterator>::value_type;
@@ -517,7 +517,7 @@ class Range<Iterator, false>
     /// \pre `Iterator` is a bidirectional iterator
     reference back() const { return *(--end_); }
 
-    private:
+  private:
     iterator begin_;
     iterator end_;
     size_type grainsize_;

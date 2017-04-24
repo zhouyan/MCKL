@@ -94,7 +94,7 @@ class ThreefryGenerator
     static_assert(
         Rounds != 0, "**ThreefryGenerator** used with rounds equal to zero");
 
-    public:
+  public:
     using ctr_type = Counter<T, K>;
     using key_type = std::array<T, K>;
 
@@ -198,7 +198,7 @@ class ThreefryGenerator
         return is;
     }
 
-    private:
+  private:
     std::array<T, K + 4> par_;
 }; // class ThreefryGenerator
 

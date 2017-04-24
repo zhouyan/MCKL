@@ -45,7 +45,7 @@ namespace mckl
 template <std::size_t NTrialMax = std::numeric_limits<std::size_t>::max()>
 class GapTest : public ChiSquaredTest<GapTest<NTrialMax>>
 {
-    public:
+  public:
     /// \brief Construct a Gap test
     ///
     /// \param n The number of gaps if `Cyclic` is false, otherwise the number
@@ -121,7 +121,7 @@ class GapTest : public ChiSquaredTest<GapTest<NTrialMax>>
         return static_cast<double>(np_.size() - 1);
     }
 
-    private:
+  private:
     std::size_t n_;
     double alpha_;
     double beta_;

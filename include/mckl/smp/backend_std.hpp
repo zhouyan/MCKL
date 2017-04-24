@@ -42,7 +42,7 @@ namespace mckl
 
 class BackendSTD
 {
-    public:
+  public:
     BackendSTD(const BackendSTD &) = delete;
     BackendSTD &operator=(const BackendSTD &) = delete;
 
@@ -59,7 +59,7 @@ class BackendSTD
 
     void np(unsigned n) { np_ = n; }
 
-    private:
+  private:
     unsigned np_;
 
     BackendSTD() : np_(std::thread::hardware_concurrency()) {}
@@ -97,13 +97,13 @@ template <typename T, typename Derived>
 class SMCSamplerEvalSMP<T, Derived, BackendSTD>
     : public SMCSamplerEvalBase<T, Derived>
 {
-    public:
+  public:
     void operator()(std::size_t iter, Particle<T> &particle)
     {
         run(iter, particle);
     }
 
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_SPECIAL(STD, SMCSamplerEval)
 
     void run(std::size_t iter, Particle<T> &particle)
@@ -134,14 +134,14 @@ template <typename T, typename Derived>
 class SMCEstimatorEvalSMP<T, Derived, BackendSTD>
     : public SMCEstimatorEvalBase<T, Derived>
 {
-    public:
+  public:
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         run(iter, dim, particle, r);
     }
 
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_SPECIAL(STD, SMCEstimatorEval)
 
     void run(

@@ -148,7 +148,7 @@ class MemorySTD
     static_assert(Alignment >= sizeof(void *),
         "**MemorySTD** used with Alignment less than sizeof(void *)");
 
-    public:
+  public:
     static constexpr std::size_t alignment() { return Alignment; }
 
     static void *allocate(std::size_t n, const void * = nullptr) noexcept
@@ -197,7 +197,7 @@ class MemorySYS
     static_assert(Alignment >= sizeof(void *),
         "**MemorySYS** used with Alignment less than sizeof(void *)");
 
-    public:
+  public:
     static constexpr std::size_t alignment() { return Alignment; }
 
     static void *allocate(std::size_t n, const void * = nullptr) noexcept
@@ -233,7 +233,7 @@ class MemorySYS
     static_assert(Alignment >= sizeof(void *),
         "**MemorySYS** used with Alignment less than sizeof(void *)");
 
-    public:
+  public:
     static constexpr std::size_t alignment() { return Alignment; }
 
     static void *allocate(std::size_t n, const void * = nullptr) noexcept
@@ -268,7 +268,7 @@ class MemoryJEM
     static_assert(Alignment >= sizeof(void *),
         "**MemoryJEM** used with Alignment less than sizeof(void *)");
 
-    public:
+  public:
     static constexpr std::size_t alignment() { return Alignment; }
 
     static void *allocate(std::size_t n, const void * = nullptr) noexcept
@@ -303,7 +303,7 @@ class MemoryTBB
     static_assert(Alignment >= sizeof(void *),
         "**MemoryTBB** used with Alignment less than sizeof(void *)");
 
-    public:
+  public:
     static constexpr std::size_t alignment() { return Alignment; }
 
     static void *allocate(std::size_t n, const void * = nullptr) noexcept
@@ -349,11 +349,11 @@ using Memory = MCKL_MEMORY_TYPE<Alignment>;
 template <typename T, typename Mem = Memory<AlignOf<T>>>
 class Allocator : public std::allocator<T>
 {
-    public:
+  public:
     template <typename U>
     class rebind
     {
-        public:
+      public:
         using other = Allocator<U, Mem>;
     };
 
@@ -390,7 +390,7 @@ class Allocator : public std::allocator<T>
         construct_dispatch(p, std::is_scalar<U>());
     }
 
-    private:
+  private:
     template <typename U>
     void construct_dispatch(U *, std::true_type)
     {
@@ -406,7 +406,7 @@ class Allocator : public std::allocator<T>
 template <typename Mem>
 class Allocator<void, Mem>
 {
-    public:
+  public:
     using value_type = void;
     using pointer = void *;
     using const_pointer = const void *;
@@ -416,7 +416,7 @@ class Allocator<void, Mem>
     template <typename U>
     class rebind
     {
-        public:
+      public:
         using other = Allocator<U, Mem>;
     };
 }; // class Allocator
@@ -424,7 +424,7 @@ class Allocator<void, Mem>
 template <typename Mem>
 class Allocator<const void, Mem>
 {
-    public:
+  public:
     using value_type = const void;
     using pointer = const void *;
     using const_pointer = const void *;
@@ -434,7 +434,7 @@ class Allocator<const void, Mem>
     template <typename U>
     class rebind
     {
-        public:
+      public:
         using other = Allocator<U, Mem>;
     };
 }; // class Allocator

@@ -45,7 +45,7 @@
 
 class MathPerf
 {
-    public:
+  public:
     std::string name;
     float e1;
     float e2;

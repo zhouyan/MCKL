@@ -49,7 +49,7 @@ class PermutationTest : public ChiSquaredTest<PermutationTest<T>>
 
     static_assert(T <= 20, "**PermutationTest** used with T larger than 20");
 
-    public:
+  public:
     /// \brief Construct a Permutation test
     ///
     /// \param n The number of tuples
@@ -73,7 +73,7 @@ class PermutationTest : public ChiSquaredTest<PermutationTest<T>>
 
     double degree_of_freedom() const { return M_ - 1; }
 
-    private:
+  private:
     static constexpr std::size_t M_ =
         internal::Factorial<std::size_t, T>::value;
 

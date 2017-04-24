@@ -51,7 +51,7 @@ class SerialTestImpl<D, T, false>
 
     static_assert(T > 0, "**SerialTest** used with T equal to zero");
 
-    public:
+  public:
     SerialTestImpl(std::size_t n)
         : n_(n), np_(static_cast<double>(n) / M_), count_(M_)
     {
@@ -79,7 +79,7 @@ class SerialTestImpl<D, T, false>
 
     double degree_of_freedom() const { return static_cast<double>(M_ - 1); }
 
-    private:
+  private:
     static constexpr std::size_t M_ = Pow<std::size_t, D, T>::value;
 
     std::size_t n_;
@@ -106,7 +106,7 @@ class SerialTestImpl<D, T, true>
 
     static_assert(T > 1, "**SerialOverTest** used with T less than 2");
 
-    public:
+  public:
     SerialTestImpl(std::size_t n)
         : n_(n)
         , np1_(static_cast<double>(n) / M1_)
@@ -169,7 +169,7 @@ class SerialTestImpl<D, T, true>
 
     double degree_of_freedom() const { return static_cast<double>(M1_ - M2_); }
 
-    private:
+  private:
     static constexpr std::size_t M1_ = Pow<std::size_t, D, T>::value;
     static constexpr std::size_t M2_ = Pow<std::size_t, D, T - 1>::value;
 

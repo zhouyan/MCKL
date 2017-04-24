@@ -96,13 +96,13 @@ class DirichletDistribution
 {
     MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_REAL_TYPE(Dirichlet)
 
-    public:
+  public:
     using result_type = RealType;
     using distribution_type = DirichletDistribution<RealType>;
 
     class param_type
     {
-        public:
+      public:
         using result_type = RealType;
         using distribution_type = DirichletDistribution<RealType>;
 
@@ -185,7 +185,7 @@ class DirichletDistribution
             return is;
         }
 
-        private:
+      private:
         Vector<result_type> alpha_;
         bool is_scalar_;
 
@@ -321,7 +321,7 @@ class DirichletDistribution
         return is;
     }
 
-    private:
+  private:
     param_type param_;
 
     template <typename RNGType>

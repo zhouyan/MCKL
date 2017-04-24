@@ -42,7 +42,7 @@ namespace mckl
 template <typename Derived>
 class ChiSquaredTest
 {
-    public:
+  public:
     using result_type = double;
 
     bool pass(double alpha, result_type s) const
@@ -69,7 +69,7 @@ class ChiSquaredTest
             0.5 * s);
     }
 
-    protected:
+  protected:
     double stat(std::size_t m, const double *count, const double *np) const
     {
         return stat_dispatch(m, count, np);
@@ -80,7 +80,7 @@ class ChiSquaredTest
         return stat_dispatch(m, count, np);
     }
 
-    private:
+  private:
     template <typename NPType>
     double stat_dispatch(std::size_t m, const double *count, NPType np) const
     {

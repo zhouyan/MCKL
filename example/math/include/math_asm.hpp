@@ -281,7 +281,7 @@
 template <typename T>
 class MathBound
 {
-    public:
+  public:
     MathBound(T lb, T ub, const std::string &lbs = std::string(),
         const std::string &ubs = std::string())
         : lb_(lb), ub_(ub), lbs_(lbs), ubs_(ubs)
@@ -309,7 +309,7 @@ class MathBound
             os << ubs_;
     }
 
-    private:
+  private:
     T lb_;
     T ub_;
     std::string lbs_;

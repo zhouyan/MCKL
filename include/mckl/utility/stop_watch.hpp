@@ -162,7 +162,7 @@ inline std::uint64_t cycle_stop() { return 0; }
 template <typename WatchType>
 class StopWatchGuard
 {
-    public:
+  public:
     using watch_type = WatchType;
 
     StopWatchGuard(watch_type &watch, bool start = true)
@@ -178,7 +178,7 @@ class StopWatchGuard
             watch_.stop();
     }
 
-    private:
+  private:
     const bool start_;
     watch_type &watch_;
 }; // class StopWatchGuard
@@ -188,7 +188,7 @@ class StopWatchGuard
 template <typename ClockType = std::chrono::high_resolution_clock>
 class StopWatchClockAdapter
 {
-    public:
+  public:
     using clock_type = ClockType;
 
     StopWatchClockAdapter()
@@ -298,7 +298,7 @@ class StopWatchClockAdapter
     /// \brief Equivalent to `time<double, std::ratio<3600>>()`
     double hours() const { return time<double, std::ratio<3600>>(); }
 
-    private:
+  private:
     typename clock_type::duration time_;
     typename clock_type::time_point time_start_;
     std::uint64_t cycles_;

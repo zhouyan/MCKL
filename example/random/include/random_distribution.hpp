@@ -174,7 +174,7 @@ using MKLRNGType = mckl::MKL_PHILOX4X32X10;
 template <typename RNGType>
 class RNG01 : public RNGType
 {
-    public:
+  public:
     using result_type = typename RNGType::result_type;
 
     result_type operator()()
@@ -198,7 +198,7 @@ class RNG01 : public RNGType
 template <typename ResultType, std::size_t ParamNum>
 class RandomDistributionTraitBase
 {
-    public:
+  public:
     RandomDistributionTraitBase() = default;
     RandomDistributionTraitBase(
         const RandomDistributionTraitBase<ResultType, ParamNum> &) = default;
@@ -216,7 +216,7 @@ class RandomDistributionTraitBase
         return name_dispatch(distname(), param);
     }
 
-    protected:
+  protected:
     template <typename QuantileType, typename DistType>
     mckl::Vector<ResultType> partition_quantile(
         std::size_t n, QuantileType &&quantile, const DistType &dist) const
@@ -278,7 +278,7 @@ class RandomDistributionTraitBase
         param.push_back(tmp);
     }
 
-    private:
+  private:
     template <typename ParamType>
     static std::string name_dispatch(
         const std::string &distname, const std::array<ParamType, 0> &)
@@ -333,7 +333,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::ArcsineDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::ArcsineDistribution<RealType>;
     using std_type = dist_type;
 
@@ -373,7 +373,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::BetaDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::BetaDistribution<RealType>;
     using std_type = dist_type;
 
@@ -423,7 +423,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::CauchyDistribution<RealType>;
     using std_type = std::cauchy_distribution<RealType>;
 
@@ -463,7 +463,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::GammaDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::GammaDistribution<RealType>;
     using std_type = std::gamma_distribution<RealType>;
 
@@ -508,7 +508,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
 {
-    public:
+  public:
     using dist_type = mckl::ChiSquaredDistribution<RealType>;
     using std_type = std::chi_squared_distribution<RealType>;
 
@@ -549,7 +549,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::ExponentialDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
 {
-    public:
+  public:
     using dist_type = mckl::ExponentialDistribution<RealType>;
     using std_type = std::exponential_distribution<RealType>;
 
@@ -586,7 +586,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::ExtremeValueDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::ExtremeValueDistribution<RealType>;
     using std_type = std::extreme_value_distribution<RealType>;
 
@@ -624,7 +624,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::FisherFDistribution<RealType>;
     using std_type = std::fisher_f_distribution<RealType>;
 
@@ -667,7 +667,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::LaplaceDistribution<RealType>;
     using std_type = dist_type;
 
@@ -709,7 +709,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::LevyDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::LevyDistribution<RealType>;
     using std_type = dist_type;
 
@@ -747,7 +747,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::LogisticDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::LogisticDistribution<RealType>;
     using std_type = dist_type;
 
@@ -785,7 +785,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::LognormalDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::LognormalDistribution<RealType>;
     using std_type = std::lognormal_distribution<RealType>;
 
@@ -825,7 +825,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::NormalDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::NormalDistribution<RealType>;
     using std_type = std::normal_distribution<RealType>;
 
@@ -864,7 +864,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::ParetoDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::ParetoDistribution<RealType>;
     using std_type = dist_type;
 
@@ -903,7 +903,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::RayleighDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
 {
-    public:
+  public:
     using dist_type = mckl::RayleighDistribution<RealType>;
     using std_type = dist_type;
 
@@ -941,7 +941,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::StableDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 4>
 {
-    public:
+  public:
     using dist_type = mckl::StableDistribution<RealType>;
     using std_type = dist_type;
 
@@ -988,7 +988,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::StudentTDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 1>
 {
-    public:
+  public:
     using dist_type = mckl::StudentTDistribution<RealType>;
     using std_type = std::student_t_distribution<RealType>;
 
@@ -1030,7 +1030,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::U01CanonicalDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
 {
-    public:
+  public:
     using dist_type = mckl::U01CanonicalDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
@@ -1063,7 +1063,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::U01CCDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
 {
-    public:
+  public:
     using dist_type = mckl::U01CCDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
@@ -1096,7 +1096,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::U01CODistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
 {
-    public:
+  public:
     using dist_type = mckl::U01CODistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
@@ -1129,7 +1129,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::U01OCDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
 {
-    public:
+  public:
     using dist_type = mckl::U01OCDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
@@ -1162,7 +1162,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::U01OODistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 0>
 {
-    public:
+  public:
     using dist_type = mckl::U01OODistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
@@ -1195,7 +1195,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::UniformRealDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::UniformRealDistribution<RealType>;
     using std_type = std::uniform_real_distribution<RealType>;
 
@@ -1235,7 +1235,7 @@ template <typename RealType>
 class RandomDistributionTrait<mckl::WeibullDistribution<RealType>>
     : public RandomDistributionTraitBase<RealType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::WeibullDistribution<RealType>;
     using std_type = std::weibull_distribution<RealType>;
 
@@ -1274,7 +1274,7 @@ template <typename IntType>
 class RandomDistributionTrait<mckl::GeometricDistribution<IntType>>
     : public RandomDistributionTraitBase<IntType, 1>
 {
-    public:
+  public:
     using dist_type = mckl::GeometricDistribution<IntType>;
     using std_type = std::geometric_distribution<IntType>;
 
@@ -1327,7 +1327,7 @@ template <typename IntType>
 class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
     : public RandomDistributionTraitBase<IntType, 2>
 {
-    public:
+  public:
     using dist_type = mckl::UniformIntDistribution<IntType>;
     using std_type = std::uniform_int_distribution<IntType>;
 
@@ -1360,7 +1360,7 @@ class RandomDistributionTrait<mckl::UniformIntDistribution<IntType>>
         return mckl::Vector<double>(static_cast<std::size_t>(b - a + 1), p);
     }
 
-    private:
+  private:
     mckl::Vector<std::array<IntType, 2>> params(std::true_type) const
     {
         mckl::Vector<std::array<IntType, 2>> params;
@@ -1672,7 +1672,7 @@ inline void random_distribution_pval(std::size_t N, std::size_t M)
 
 class RandomDistributionPerf
 {
-    public:
+  public:
     std::string name;
     bool pass;
     double e1;

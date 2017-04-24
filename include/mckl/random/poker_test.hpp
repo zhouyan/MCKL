@@ -51,7 +51,7 @@ class PokerTest : public ChiSquaredTest<PokerTest<D, T>>
 
     static_assert(T > 0, "**PockerTest** used with T equal to zero");
 
-    public:
+  public:
     PokerTest(std::size_t n) : n_(n), tmin_(0), tmax_(0)
     {
         internal::StirlingMatrix2 stirling(T, K_);
@@ -91,7 +91,7 @@ class PokerTest : public ChiSquaredTest<PokerTest<D, T>>
         return static_cast<double>(np_.size() - 1);
     }
 
-    private:
+  private:
     static constexpr std::size_t K_ = D < T ? D : T;
 
     std::size_t n_;

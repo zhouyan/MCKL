@@ -59,7 +59,7 @@ class PhiloxGeneratorSSE2Impl32Permute;
 template <>
 class PhiloxGeneratorSSE2Impl32Permute<2>
 {
-    public:
+  public:
     template <std::size_t S>
     MCKL_INLINE static void first(std::array<__m128i, S> &)
     {
@@ -81,7 +81,7 @@ class PhiloxGeneratorSSE2Impl32Permute<2>
 template <>
 class PhiloxGeneratorSSE2Impl32Permute<4>
 {
-    public:
+  public:
     template <std::size_t S>
     MCKL_INLINE static void first(std::array<__m128i, S> &s)
     {
@@ -104,7 +104,7 @@ class PhiloxGeneratorSSE2Impl32Permute<4>
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class PhiloxGeneratorSSE2Impl32
 {
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
@@ -145,7 +145,7 @@ class PhiloxGeneratorSSE2Impl32
         std::memcpy(r, t.data(), sizeof(__m128i) * n);
     }
 
-    private:
+  private:
     template <std::size_t, std::size_t S>
     static void round(std::array<__m128i, S> &,
         const std::array<__m128i, Rounds> &, std::false_type)

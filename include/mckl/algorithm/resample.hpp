@@ -257,7 +257,7 @@ inline void u01_rand_systematic(RNGType &rng, std::size_t N, RealType *r)
 /// \ingroup Resample
 class U01SequenceSorted
 {
-    public:
+  public:
     template <typename RealType>
     void operator()(std::size_t N, const RealType *u01, RealType *r) const
     {
@@ -275,7 +275,7 @@ class U01SequenceSorted
 /// \ingroup Resample
 class U01SequenceStratified
 {
-    public:
+  public:
     template <typename RealType>
     void operator()(std::size_t N, const RealType *u01, RealType *r) const
     {
@@ -293,7 +293,7 @@ class U01SequenceStratified
 /// \ingroup Resample
 class U01SequenceSystematic
 {
-    public:
+  public:
     template <typename RealType>
     void operator()(std::size_t N, const RealType *u01, RealType *r) const
     {
@@ -452,7 +452,7 @@ inline OutputIter resample_trans_rep_index(
 template <typename T>
 class ResampleEval
 {
-    public:
+  public:
     using eval_type = std::function<void(std::size_t, std::size_t,
         typename Particle<T>::rng_type &, const double *,
         typename Particle<T>::size_type *)>;
@@ -488,7 +488,7 @@ class ResampleEval
         particle.select(particle.size(), idx.data());
     }
 
-    private:
+  private:
     eval_type eval_;
 }; // class ResampleEval
 
@@ -497,7 +497,7 @@ class ResampleEval
 template <typename U01SeqType, bool Residual>
 class ResampleAlgorithm
 {
-    public:
+  public:
     /// \brief Generate replication numbers from normalized weights
     ///
     /// \param N Sample size before resampling
@@ -513,7 +513,7 @@ class ResampleAlgorithm
             std::integral_constant<bool, Residual>());
     }
 
-    private:
+  private:
     U01SeqType u01seq_;
 
     template <typename RNGType, typename InputIter, typename OutputIter>
@@ -578,7 +578,7 @@ using ResampleResidualSystematic =
 template <typename IntType = std::size_t>
 class ResampleIndex
 {
-    public:
+  public:
     using index_type = IntType;
 
     ResampleIndex() : num_iter_(0) {}
@@ -790,7 +790,7 @@ class ResampleIndex
         return first + static_cast<difference_type>(N * R);
     }
 
-    private:
+  private:
     std::size_t num_iter_;
     Vector<index_type> identity_;
     Vector<Vector<index_type>> index_;

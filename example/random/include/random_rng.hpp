@@ -223,7 +223,7 @@ inline bool random_rng_k(const mckl::Threefish1024Engine<ResultType> &rng)
 
 class RandomRNGPerf
 {
-    public:
+  public:
     bool pass;
     double c1;
     double c2;

@@ -58,7 +58,7 @@ namespace internal
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorSSE2Impl64
 {
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
@@ -99,7 +99,7 @@ class ThreefryGeneratorSSE2Impl64
         std::memcpy(r, t.data(), sizeof(T) * K * n);
     }
 
-    private:
+  private:
     template <std::size_t, std::size_t S>
     static void round(std::array<__m128i, S> &, const std::array<T, K + 4> &,
         std::false_type)

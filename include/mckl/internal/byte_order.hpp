@@ -164,14 +164,14 @@ inline void union_le(std::size_t n, T *r)
 template <typename U, typename T>
 class UnionLE
 {
-    public:
+  public:
     static void eval(T &r) { union_le<U>(1, &r); }
 }; // class UnionLE
 
 template <typename U, typename T, std::size_t K>
 class UnionLE<U, std::array<T, K>>
 {
-    public:
+  public:
     static void eval(std::array<T, K> &r) { union_le<U>(K, r.data()); }
 }; // class UnionLE
 

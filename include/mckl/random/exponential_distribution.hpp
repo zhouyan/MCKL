@@ -71,14 +71,14 @@ class ExponentialDistribution
         Exponential, exponential, RealType, result_type, lambda, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
-    public:
+  public:
     result_type min() const { return 0; }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() {}
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

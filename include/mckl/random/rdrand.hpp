@@ -101,7 +101,7 @@ class RDRANDEngine
         "**RDRANDEngine** used with ResultType of size other than 16, 32 or "
         "64 bits");
 
-    public:
+  public:
     using result_type = ResultType;
 
     RDRANDEngine() = default;
@@ -161,7 +161,7 @@ class RDRANDEngine
         return is;
     }
 
-    private:
+  private:
     result_type generate(std::true_type)
     {
         result_type r;

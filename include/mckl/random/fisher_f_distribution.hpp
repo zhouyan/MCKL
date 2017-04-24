@@ -75,7 +75,7 @@ class FisherFDistribution
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_2(ChiSquaredDistribution<RealType>,
         chi_squared_m_, ChiSquaredDistribution<RealType>, chi_squared_n_)
 
-    public:
+  public:
     result_type min() const { return 0; }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
@@ -86,7 +86,7 @@ class FisherFDistribution
         chi_squared_n_ = ChiSquaredDistribution<RealType>(n());
     }
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

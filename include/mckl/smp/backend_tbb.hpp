@@ -61,7 +61,7 @@ class SMCSamplerEvalSMP<T, Derived, BackendTBB>
 {
     class work_type
     {
-        public:
+      public:
         using size_type = typename Particle<T>::size_type;
 
         work_type(SMCSamplerEvalSMP<T, Derived, BackendTBB> *wptr,
@@ -75,19 +75,19 @@ class SMCSamplerEvalSMP<T, Derived, BackendTBB>
             wptr_->eval_range(iter_, pptr_->range(range.begin(), range.end()));
         }
 
-        private:
+      private:
         SMCSamplerEvalSMP<T, Derived, BackendTBB> *const wptr_;
         const std::size_t iter_;
         Particle<T> *const pptr_;
     }; // class work_type
 
-    public:
+  public:
     void operator()(std::size_t iter, Particle<T> &particle)
     {
         run(iter, particle);
     }
 
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_SPECIAL(TBB, SMCSamplerEval)
 
     void run(std::size_t iter, Particle<T> &particle)
@@ -116,7 +116,7 @@ class SMCEstimatorEvalSMP<T, Derived, BackendTBB>
 {
     class work_type
     {
-        public:
+      public:
         using size_type = typename Particle<T>::size_type;
 
         work_type(SMCEstimatorEvalSMP<T, Derived, BackendTBB> *wptr,
@@ -132,7 +132,7 @@ class SMCEstimatorEvalSMP<T, Derived, BackendTBB>
                 r_ + static_cast<std::size_t>(range.begin()) * dim_);
         }
 
-        private:
+      private:
         SMCEstimatorEvalSMP<T, Derived, BackendTBB> *const wptr_;
         const std::size_t iter_;
         const std::size_t dim_;
@@ -140,14 +140,14 @@ class SMCEstimatorEvalSMP<T, Derived, BackendTBB>
         double *const r_;
     }; // class work_type
 
-    public:
+  public:
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         run(iter, dim, particle, r);
     }
 
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_SPECIAL(TBB, SMCEstimatorEval)
 
     void run(

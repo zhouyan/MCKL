@@ -61,7 +61,7 @@ class Philox2x32GeneratorAVX2Impl
     static constexpr std::size_t K = 2;
     static constexpr std::size_t Rounds = 10;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
@@ -98,7 +98,7 @@ class Philox2x32GeneratorAVX2Impl
         eval_kernel(ctr, n, r, key);
     }
 
-    private:
+  private:
     template <typename ResultType>
     static void eval_kernel(std::array<std::uint64_t, 1> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K / 2> &key)

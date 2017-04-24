@@ -141,14 +141,14 @@ class UniformIntDistribution
         std::numeric_limits<result_type>::max())
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
-    public:
+  public:
     result_type min() const { return a(); }
 
     result_type max() const { return b(); }
 
     void reset() {}
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

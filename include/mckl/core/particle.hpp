@@ -49,7 +49,7 @@ class Particle;
 template <typename T>
 class ParticleIndexBase
 {
-    public:
+  public:
     ParticleIndexBase() : pptr_(nullptr), i_(0) {}
 
     ParticleIndexBase(typename Particle<T>::size_type i, Particle<T> *pptr)
@@ -67,7 +67,7 @@ class ParticleIndexBase
 
     typename Particle<T>::rng_type &rng() const { return pptr_->rng(i_); }
 
-    private:
+  private:
     Particle<T> *pptr_;
     typename Particle<T>::size_type i_;
 }; // class ParticleIndexBase
@@ -85,7 +85,7 @@ MCKL_DEFINE_TYPE_TEMPLATE_DISPATCH_TRAIT(
 template <typename T>
 class ParticleIndex final : public ParticleIndexBaseType<T>
 {
-    public:
+  public:
     using difference_type =
         std::make_signed_t<typename Particle<T>::size_type>;
     using value_type = ParticleIndex;
@@ -250,7 +250,7 @@ class ParticleIndex final : public ParticleIndexBaseType<T>
 template <typename T>
 class ParticleRange : public Range<ParticleIndex<T>>
 {
-    public:
+  public:
     using Range<ParticleIndex<T>>::Range;
 
     Particle<T> &particle() const { return this->begin()->particle(); }
@@ -278,7 +278,7 @@ class ParticleRange : public Range<ParticleIndex<T>>
 template <typename T>
 class Particle
 {
-    public:
+  public:
     using size_type = SizeType<T>;
     using state_type = T;
     using weight_type = WeightType<T>;
@@ -402,7 +402,7 @@ class Particle
             grainsize);
     }
 
-    private:
+  private:
     state_type state_;
     weight_type weight_;
     rng_set_type rng_set_;

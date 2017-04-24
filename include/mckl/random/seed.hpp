@@ -72,7 +72,7 @@ class SeedGenerator
     static_assert(sizeof(ResultType) % sizeof(std::uint32_t) == 0,
         "**SeedGenerator** size of ResultType is not a multiple of uint32_t");
 
-    public:
+  public:
     /// \brief The type of the internal seed
     using seed_type =
         std::conditional_t<sizeof(ResultType) % sizeof(std::uint64_t) == 0,
@@ -154,7 +154,7 @@ class SeedGenerator
         return is;
     }
 
-    private:
+  private:
     static constexpr std::size_t M_ = sizeof(result_type) / sizeof(seed_type);
 
     seed_type np_;

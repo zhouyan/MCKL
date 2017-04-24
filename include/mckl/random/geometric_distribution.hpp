@@ -74,14 +74,14 @@ class GeometricDistribution
         Geometric, geometric, IntType, double, p, 0.5)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(double, lnpinv_)
 
-    public:
+  public:
     result_type min() const { return 0; }
 
     result_type max() const { return std::numeric_limits<IntType>::max(); }
 
     void reset() { lnpinv_ = 1 / std::log(1 - p()); }
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

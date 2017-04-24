@@ -41,7 +41,7 @@ using AlgorithmPFBase = mckl::StateMatrix<mckl::ColMajor, double, 4>;
 
 class AlgorithmPF : public AlgorithmPFBase
 {
-    public:
+  public:
     AlgorithmPF(std::size_t N) : AlgorithmPFBase(N)
     {
         double x = 0;
@@ -58,7 +58,7 @@ class AlgorithmPF : public AlgorithmPFBase
     double x(std::size_t iter) { return x_[iter]; }
     double y(std::size_t iter) { return y_[iter]; }
 
-    private:
+  private:
     mckl::Vector<double> x_;
     mckl::Vector<double> y_;
 }; // class AlgorithmPF
@@ -67,7 +67,7 @@ template <typename Backend>
 class AlgorithmPFSelection : public mckl::SMCSamplerEvalSMP<AlgorithmPF,
                                  AlgorithmPFSelection<Backend>, Backend>
 {
-    public:
+  public:
     void operator()(std::size_t iter, mckl::Particle<AlgorithmPF> &particle)
     {
         this->run(iter, particle, 1000);
@@ -149,7 +149,7 @@ class AlgorithmPFSelection : public mckl::SMCSamplerEvalSMP<AlgorithmPF,
         range.begin().rng() = rng;
     }
 
-    private:
+  private:
     mckl::Vector<double> w_;
     mckl::Vector<double> v_;
 }; // AlgorithmPFSelection
@@ -158,7 +158,7 @@ template <typename Backend>
 class AlgorithmPFPos : public mckl::SMCEstimatorEvalSMP<AlgorithmPF,
                            AlgorithmPFPos<Backend>, Backend>
 {
-    public:
+  public:
     void eval_each(std::size_t, std::size_t,
         mckl::ParticleIndex<AlgorithmPF> idx, double *r)
     {

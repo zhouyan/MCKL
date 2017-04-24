@@ -52,7 +52,7 @@ class IncrementBlockSI128<T, 1, 32, 64>
 {
     static constexpr std::size_t K_ = 1;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i c = _mm_set1_epi64x(static_cast<MCKL_INT64>(std::get<0>(ctr)));
@@ -81,7 +81,7 @@ class IncrementBlockSI128<T, 2, 16, 64>
 {
     static constexpr std::size_t K_ = 2;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
@@ -111,7 +111,7 @@ class IncrementBlockSI128<T, 4, 8, 64>
 {
     static constexpr std::size_t K_ = 4;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
@@ -143,7 +143,7 @@ class IncrementBlockSI128<T, 8, 4, 64>
 {
     static constexpr std::size_t K_ = 8;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
@@ -179,7 +179,7 @@ class IncrementBlockSI128<T, 16, 2, 64>
 {
     static constexpr std::size_t K_ = 16;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         __m128i c = _mm_set_epi64x(static_cast<MCKL_INT64>(std::get<0x1>(ctr)),
@@ -223,7 +223,7 @@ class IncrementBlockSI128<T, 32, 1, 64>
 {
     static constexpr std::size_t K_ = 64;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 16> &s)
     {
         std::memcpy(s.data(), ctr.data(), 256);

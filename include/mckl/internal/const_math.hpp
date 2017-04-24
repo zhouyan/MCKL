@@ -48,7 +48,7 @@ namespace internal
 
 class StirlingMatrix2
 {
-    public:
+  public:
     StirlingMatrix2(std::size_t n, std::size_t m)
         : ncol_(m + 1), data_((n + 1) * (m + 1))
     {
@@ -66,7 +66,7 @@ class StirlingMatrix2
         return data_[i * ncol_ + j];
     }
 
-    private:
+  private:
     std::size_t ncol_;
     Vector<double> data_;
 
@@ -79,21 +79,21 @@ class Log2L
 {
     static constexpr unsigned long long M = 1ULL << N;
 
-    public:
+  public:
     static constexpr int value = M <= U ? N : Log2L<U, N - 1>::value;
 }; // class Log2L
 
 template <unsigned long long U>
 class Log2L<U, 0>
 {
-    public:
+  public:
     static constexpr int value = 0;
 }; // class Log2L
 
 template <int N>
 class Log2L<0, N>
 {
-    public:
+  public:
     static constexpr int value = N + 1;
 }; // class Log2L
 
@@ -107,28 +107,28 @@ class PowL
 {
     static constexpr unsigned long long b = PowL<B, N / 2>::value;
 
-    public:
+  public:
     static constexpr unsigned long long value = b * b;
 }; // class PowL
 
 template <unsigned long long B, unsigned N>
 class PowL<B, N, false>
 {
-    public:
+  public:
     static constexpr unsigned long long value = B * PowL<B, N - 1>::value;
 }; // class PowL
 
 template <unsigned long long B>
 class PowL<B, 0, true>
 {
-    public:
+  public:
     static constexpr unsigned long long value = 1;
 }; // class PowL
 
 template <typename UIntType, unsigned long long B, unsigned N>
 class Pow
 {
-    public:
+  public:
     static constexpr UIntType value = static_cast<UIntType>(PowL<B, N>::value);
 }; // class Pow
 
@@ -141,7 +141,7 @@ template <int P,
     bool = (Q < P)>
 class Pow2L
 {
-    public:
+  public:
     static constexpr long double value =
         static_cast<long double>(1ULL << Q) * Pow2L<P - Q>::value;
 }; // class Pow2L
@@ -149,21 +149,21 @@ class Pow2L
 template <int P, int Q>
 class Pow2L<P, Q, false>
 {
-    public:
+  public:
     static constexpr long double value = static_cast<long double>(1ULL << P);
 }; // class Pow2L
 
 template <typename RealType, int P, bool = P >= 0>
 class Pow2Impl
 {
-    public:
+  public:
     static constexpr RealType value = static_cast<RealType>(Pow2L<P>::value);
 }; // class Pow2
 
 template <typename RealType, int P>
 class Pow2Impl<RealType, P, false>
 {
-    public:
+  public:
     static constexpr RealType value =
         static_cast<RealType>(1.0L / Pow2L<-P>::value);
 }; // class Pow2
@@ -174,21 +174,21 @@ using Pow2 = Pow2Impl<RealType, P>;
 template <typename UIntType, unsigned N>
 class Factorial
 {
-    public:
+  public:
     static constexpr UIntType value = N * Factorial<UIntType, N - 1>::value;
 }; // class Factorial
 
 template <typename UIntType>
 class Factorial<UIntType, 1>
 {
-    public:
+  public:
     static constexpr UIntType value = 1;
 }; // class Factorial
 
 template <typename UIntType>
 class Factorial<UIntType, 0>
 {
-    public:
+  public:
     static constexpr UIntType value = 1;
 }; // class Factorial
 

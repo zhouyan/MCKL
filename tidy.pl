@@ -34,7 +34,7 @@
 use v5.16;
 use Getopt::Long;
 
-my $clang_format = "/opt/LLVM/bin/clang-format";
+my $clang_format = "$ENV{HOME}/.opt/llvm/bin/clang-format";
 GetOptions("clang_format=s" => \$clang_format);
 
 my $root = $0;

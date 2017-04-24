@@ -42,7 +42,7 @@ namespace mckl
 /// \ingroup Core
 class Weight
 {
-    public:
+  public:
     using size_type = std::size_t;
 
     explicit Weight(size_type N = 0) : ess_(0), data_(N) { set_equal(); }
@@ -145,7 +145,7 @@ class Weight
         return dist(rng, data_.begin(), data_.end(), true);
     }
 
-    private:
+  private:
     double ess_;
     Vector<double> data_;
 

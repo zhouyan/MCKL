@@ -58,7 +58,7 @@ enum GammaDistributionAlgorithm {
 template <typename RealType>
 class GammaDistributionConstant
 {
-    public:
+  public:
     GammaDistributionConstant(RealType alpha = 1, RealType = 1)
     {
         if (alpha < static_cast<RealType>(0.6))
@@ -105,7 +105,7 @@ class GammaDistributionConstant
         return true;
     }
 
-    private:
+  private:
     RealType d_;
     RealType c_;
     GammaDistributionAlgorithm algorithm_;
@@ -302,7 +302,7 @@ class GammaDistribution
     MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
         Gamma, gamma, RealType, result_type, alpha, 1, result_type, beta, 1)
 
-    public:
+  public:
     result_type min() const { return 0; }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
@@ -313,7 +313,7 @@ class GammaDistribution
             internal::GammaDistributionConstant<RealType>(alpha(), beta());
     }
 
-    private:
+  private:
     internal::GammaDistributionConstant<RealType> constant_;
 
     bool is_equal(const distribution_type &other) const

@@ -44,7 +44,7 @@ namespace internal
 
 class AES128KeySeqGeneratorGenericImpl
 {
-    public:
+  public:
     using key_type = std::array<std::uint32_t, 4>;
     using rk_type = std::array<std::uint32_t, 4>;
 
@@ -67,7 +67,7 @@ class AES128KeySeqGeneratorGenericImpl
         generate<1>(rk, std::integral_constant<bool, 1 < Rp1>());
     }
 
-    private:
+  private:
     std::array<std::uint32_t, 4> tmp0_;
 
     template <std::size_t, std::size_t Rp1>
@@ -101,7 +101,7 @@ class AES128KeySeqGeneratorGenericImpl
 
 class AES192KeySeqGeneratorGenericImpl
 {
-    public:
+  public:
     using key_type = std::array<std::uint32_t, 6>;
     using rk_type = std::array<std::uint32_t, 4>;
 
@@ -128,7 +128,7 @@ class AES192KeySeqGeneratorGenericImpl
         std::memcpy(rk.data(), rs.data(), sizeof(std::uint32_t) * Rp1 * 4);
     }
 
-    private:
+  private:
     std::array<std::uint32_t, 6> tmp0_;
 
     template <std::size_t, std::size_t Rs1>
@@ -164,7 +164,7 @@ class AES192KeySeqGeneratorGenericImpl
 
 class AES256KeySeqGeneratorGenericImpl
 {
-    public:
+  public:
     using key_type = std::array<std::uint32_t, 8>;
     using rk_type = std::array<std::uint32_t, 4>;
 
@@ -195,7 +195,7 @@ class AES256KeySeqGeneratorGenericImpl
         generate<2>(rk, std::integral_constant<bool, 2 < Rp1>());
     }
 
-    private:
+  private:
     std::array<std::uint32_t, 4> tmp0_;
     std::array<std::uint32_t, 4> tmp1_;
 
@@ -256,7 +256,7 @@ class AES256KeySeqGeneratorGenericImpl
 template <typename Constants>
 class ARSKeySeqGeneratorGenericImpl
 {
-    public:
+  public:
     using key_type = std::array<std::uint32_t, 4>;
     using rk_type = std::array<std::uint32_t, 4>;
 
@@ -281,7 +281,7 @@ class ARSKeySeqGeneratorGenericImpl
         generate<0>(rk, std::integral_constant<bool, 0 < Rp1>());
     }
 
-    private:
+  private:
     std::array<std::uint64_t, 2> key_;
 
     template <std::size_t, std::size_t Rp1>
@@ -310,7 +310,7 @@ class ARSKeySeqGeneratorGenericImpl
 template <typename KeySeqType>
 class AESGeneratorGenericImpl
 {
-    public:
+  public:
     static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
         alignas(32) union {
@@ -393,7 +393,7 @@ class AESGeneratorGenericImpl
         }
     }
 
-    private:
+  private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
 
     template <std::size_t>

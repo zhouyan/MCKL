@@ -69,13 +69,13 @@ template <typename T, typename Derived>
 class SMCSamplerEvalSMP<T, Derived, BackendOMP>
     : public SMCSamplerEvalBase<T, Derived>
 {
-    public:
+  public:
     void operator()(std::size_t iter, Particle<T> &particle)
     {
         run(iter, particle);
     }
 
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SMCSamplerEval)
 
     void run(std::size_t iter, Particle<T> &particle)
@@ -109,14 +109,14 @@ template <typename T, typename Derived>
 class SMCEstimatorEvalSMP<T, Derived, BackendOMP>
     : public SMCEstimatorEvalBase<T, Derived>
 {
-    public:
+  public:
     void operator()(
         std::size_t iter, std::size_t dim, Particle<T> &particle, double *r)
     {
         run(iter, dim, particle, r);
     }
 
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_SPECIAL(OMP, SMCEstimatorEval)
 
     void run(

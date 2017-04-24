@@ -558,7 +558,7 @@ class U01AVX2Impl : public U01GenericImpl<UIntType, RealType, Lower, Upper>
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 class U01AVX2ImplBase
 {
-    public:
+  public:
     MCKL_INLINE static RealType eval(UIntType u)
     {
         return U01GenericImpl<UIntType, RealType, Lower, Upper>::eval(u);
@@ -591,7 +591,7 @@ class U01CanonicalAVX2Impl
 template <typename UIntType, typename RealType, int Q>
 class U01CanonicalAVX2ImplBase
 {
-    public:
+  public:
     MCKL_INLINE static RealType eval(const UIntType *u)
     {
         return U01CanonicalGenericImpl<UIntType, RealType, Q>::eval(u);
@@ -618,10 +618,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Closed, 32>
     : public U01AVX2ImplBase<UIntType, float, Closed, Closed>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, float, Closed, Closed>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, float, Closed, Closed>;
 
     MCKL_INLINE static void eval(const UIntType *u, float *r)
@@ -642,10 +642,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Closed, Open, 32>
     : public U01AVX2ImplBase<UIntType, float, Closed, Open>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, float, Closed, Open>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, float, Closed, Open>;
 
     MCKL_INLINE static void eval(const UIntType *u, float *r)
@@ -664,10 +664,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Closed, 32>
     : public U01AVX2ImplBase<UIntType, float, Open, Closed>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, float, Open, Closed>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, float, Open, Closed>;
 
     MCKL_INLINE static void eval(const UIntType *u, float *r)
@@ -686,10 +686,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, float, Open, Open, 32>
     : public U01AVX2ImplBase<UIntType, float, Open, Open>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, float, Open, Open>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, float, Open, Open>;
 
     MCKL_INLINE static void eval(const UIntType *u, float *r)
@@ -709,10 +709,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Closed, 32>
     : public U01AVX2ImplBase<UIntType, double, Closed, Closed>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Closed, Closed>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -731,10 +731,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Open, 32>
     : public U01AVX2ImplBase<UIntType, double, Closed, Open>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Closed, Open>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -752,10 +752,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Closed, 32>
     : public U01AVX2ImplBase<UIntType, double, Open, Closed>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Open, Closed>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -773,10 +773,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Open, 32>
     : public U01AVX2ImplBase<UIntType, double, Open, Open>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Open, Open>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -795,10 +795,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Closed, 64>
     : public U01AVX2ImplBase<UIntType, double, Closed, Closed>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Closed, Closed>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Closed, Closed>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -819,10 +819,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Closed, Open, 64>
     : public U01AVX2ImplBase<UIntType, double, Closed, Open>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Closed, Open>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Closed, Open>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -841,10 +841,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Closed, 64>
     : public U01AVX2ImplBase<UIntType, double, Open, Closed>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Open, Closed>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Open, Closed>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -863,10 +863,10 @@ template <typename UIntType>
 class U01AVX2Impl<UIntType, double, Open, Open, 64>
     : public U01AVX2ImplBase<UIntType, double, Open, Open>
 {
-    public:
+  public:
     using U01AVX2ImplBase<UIntType, double, Open, Open>::eval;
 
-    private:
+  private:
     friend U01AVX2ImplBase<UIntType, double, Open, Open>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -886,10 +886,10 @@ template <typename UIntType>
 class U01CanonicalAVX2Impl<UIntType, float, 1, 32>
     : public U01CanonicalAVX2ImplBase<UIntType, float, 1>
 {
-    public:
+  public:
     using U01CanonicalAVX2ImplBase<UIntType, float, 1>::eval;
 
-    private:
+  private:
     friend U01CanonicalAVX2ImplBase<UIntType, float, 1>;
 
     MCKL_INLINE static void eval(const UIntType *u, float *r)
@@ -907,10 +907,10 @@ template <typename UIntType>
 class U01CanonicalAVX2Impl<UIntType, double, 2, 32>
     : public U01CanonicalAVX2ImplBase<UIntType, double, 2>
 {
-    public:
+  public:
     using U01CanonicalAVX2ImplBase<UIntType, double, 2>::eval;
 
-    private:
+  private:
     friend U01CanonicalAVX2ImplBase<UIntType, double, 2>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)
@@ -1053,10 +1053,10 @@ template <typename UIntType>
 class U01CanonicalAVX2Impl<UIntType, double, 1, 64>
     : public U01CanonicalAVX2ImplBase<UIntType, double, 1>
 {
-    public:
+  public:
     using U01CanonicalAVX2ImplBase<UIntType, double, 1>::eval;
 
-    private:
+  private:
     friend U01CanonicalAVX2ImplBase<UIntType, double, 1>;
 
     MCKL_INLINE static void eval(const UIntType *u, double *r)

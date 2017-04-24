@@ -50,7 +50,7 @@ class U01GenericImpl;
 template <typename UIntType, typename RealType>
 class U01GenericImpl<UIntType, RealType, Closed, Closed>
 {
-    public:
+  public:
     static RealType eval(UIntType u)
     {
         constexpr int W = std::numeric_limits<UIntType>::digits;
@@ -73,7 +73,7 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed>
             r[i] = eval(u[i]);
     }
 
-    private:
+  private:
     template <typename UIntLeastType>
     static RealType trans(UIntLeastType u, std::true_type)
     {
@@ -90,7 +90,7 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed>
 template <typename UIntType, typename RealType>
 class U01GenericImpl<UIntType, RealType, Closed, Open>
 {
-    public:
+  public:
     static RealType eval(UIntType u)
     {
         constexpr int W = std::numeric_limits<UIntType>::digits;
@@ -114,7 +114,7 @@ class U01GenericImpl<UIntType, RealType, Closed, Open>
 template <typename UIntType, typename RealType>
 class U01GenericImpl<UIntType, RealType, Open, Closed>
 {
-    public:
+  public:
     static RealType eval(UIntType u)
     {
         constexpr int W = std::numeric_limits<UIntType>::digits;
@@ -139,7 +139,7 @@ class U01GenericImpl<UIntType, RealType, Open, Closed>
 template <typename UIntType, typename RealType>
 class U01GenericImpl<UIntType, RealType, Open, Open>
 {
-    public:
+  public:
     static RealType eval(UIntType u)
     {
         constexpr int W = std::numeric_limits<UIntType>::digits;
@@ -164,7 +164,7 @@ class U01GenericImpl<UIntType, RealType, Open, Open>
 template <typename UIntType, typename RealType, int Q>
 class U01CanonicalGenericImpl
 {
-    public:
+  public:
     static RealType eval(const UIntType *u)
     {
         return eval<0>(u, std::true_type());
@@ -176,7 +176,7 @@ class U01CanonicalGenericImpl
             r[i] = eval(u);
     }
 
-    private:
+  private:
     template <std::size_t>
     static RealType eval(const UIntType *, std::false_type)
     {

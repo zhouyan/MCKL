@@ -58,7 +58,7 @@ namespace mckl
 template <typename RNGType = RNG>
 class RNGSetScalar
 {
-    public:
+  public:
     using rng_type = RNGType;
     using size_type = std::size_t;
 
@@ -72,7 +72,7 @@ class RNGSetScalar
 
     rng_type &operator[](size_type) { return rng_; }
 
-    private:
+  private:
     std::size_t size_;
     rng_type rng_;
 }; // class RNGSetScalar
@@ -82,7 +82,7 @@ class RNGSetScalar
 template <typename RNGType = RNG>
 class RNGSetVector
 {
-    public:
+  public:
     using rng_type = RNGType;
     using size_type = typename Vector<rng_type>::size_type;
 
@@ -112,7 +112,7 @@ class RNGSetVector
 
     rng_type &operator[](size_type id) { return rng_[id % size()]; }
 
-    private:
+  private:
     Vector<rng_type> rng_;
 }; // class RNGSetVector
 
@@ -125,7 +125,7 @@ template <typename RNGType = RNG,
     ::tbb::ets_key_usage_type ETSKeyType = ::tbb::ets_no_key>
 class RNGSetTBBEnumerable
 {
-    public:
+  public:
     using rng_type = RNGType;
     using size_type = std::size_t;
 
@@ -143,7 +143,7 @@ class RNGSetTBBEnumerable
 
     rng_type &operator[](size_type) { return rng_.local(); }
 
-    private:
+  private:
     std::size_t size_;
     ::tbb::enumerable_thread_specific<rng_type, Alloc, ETSKeyType> rng_;
 }; // class RNGSetTBBEnumerable

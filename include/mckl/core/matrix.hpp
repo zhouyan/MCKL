@@ -54,7 +54,7 @@ class Matrix
 
     Vector<T, Alloc> data_;
 
-    public:
+  public:
     using value_type = T;
     using allocator_type = Alloc;
     using size_type = std::size_t;
@@ -560,7 +560,7 @@ class Matrix
         return !(m1 == m2);
     }
 
-    private:
+  private:
     std::size_t nrow_;
     std::size_t ncol_;
 

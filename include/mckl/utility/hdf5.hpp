@@ -49,7 +49,7 @@
 #define MCKL_DEFINE_UTILITY_HDF5_TYPE(CPPName, CName)                         \
     class HDF5##CPPName : public HDF5ID<HDF5##CPPName>                        \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         HDF5##CPPName(::hid_t id) : HDF5ID<HDF5##CPPName>(id) {}              \
                                                                               \
         static void close(::hid_t id) { ::H5##CName##close(id); }             \
@@ -64,7 +64,7 @@ namespace internal
 template <typename Derived>
 class HDF5ID
 {
-    public:
+  public:
     HDF5ID(::hid_t id) : id_(id) {}
 
     ~HDF5ID()
@@ -81,7 +81,7 @@ class HDF5ID
 
     explicit operator bool() const { return good(); }
 
-    private:
+  private:
     ::hid_t id_;
 }; // class HDFID
 

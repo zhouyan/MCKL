@@ -49,7 +49,7 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     int = std::numeric_limits<T>::digits>
 class PhiloxGeneratorGenericImpl
 {
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
@@ -97,7 +97,7 @@ class PhiloxGeneratorGenericImpl
             eval(ctr, r, key);
     }
 
-    private:
+  private:
     template <std::size_t>
     static void round(
         std::array<T, K> &, const std::array<T, K / 2> &, std::false_type)

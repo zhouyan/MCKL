@@ -57,7 +57,7 @@ inline void increment1(std::array<T, K> &ctr, std::true_type)
 template <typename T, std::size_t K>
 class Increment
 {
-    public:
+  public:
     static void eval(std::array<T, K> &ctr)
     {
         internal::increment1<0>(ctr, std::true_type());
@@ -67,14 +67,14 @@ class Increment
 template <typename T>
 class Increment<T, 1>
 {
-    public:
+  public:
     static void eval(std::array<T, 1> &ctr) { ++std::get<0>(ctr); }
 }; // class Increment
 
 template <typename T>
 class Increment<T, 2>
 {
-    public:
+  public:
     static void eval(std::array<T, 2> &ctr)
     {
         if (++std::get<0>(ctr))
@@ -86,7 +86,7 @@ class Increment<T, 2>
 template <typename T>
 class Increment<T, 4>
 {
-    public:
+  public:
     static void eval(std::array<T, 4> &ctr)
     {
         if (++std::get<0>(ctr))
@@ -102,7 +102,7 @@ class Increment<T, 4>
 template <typename T>
 class Increment<T, 8>
 {
-    public:
+  public:
     static void eval(std::array<T, 8> &ctr)
     {
         if (++std::get<0>(ctr))
@@ -126,7 +126,7 @@ class Increment<T, 8>
 template <typename T>
 class Increment<T, 16>
 {
-    public:
+  public:
     static void eval(std::array<T, 16> &ctr)
     {
         if (++std::get<0x0>(ctr))
@@ -197,14 +197,14 @@ namespace internal
 template <typename T, std::size_t K, std::size_t Blocks>
 class IncrementBlock
 {
-    public:
+  public:
     static void eval(
         std::array<T, K> &ctr, std::array<std::array<T, K>, Blocks> &ctr_block)
     {
         eval<0>(ctr, ctr_block, std::integral_constant<bool, 0 < Blocks>());
     }
 
-    private:
+  private:
     template <std::size_t>
     static void eval(std::array<T, K> &,
         std::array<std::array<T, K>, Blocks> &, std::false_type)
@@ -225,7 +225,7 @@ class IncrementBlock
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 1>
 {
-    public:
+  public:
     static void eval(
         std::array<T, K> &ctr, std::array<std::array<T, K>, 1> &ctr_block)
     {
@@ -237,7 +237,7 @@ class IncrementBlock<T, K, 1>
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 2>
 {
-    public:
+  public:
     static void eval(
         std::array<T, K> &ctr, std::array<std::array<T, K>, 2> &ctr_block)
     {
@@ -252,7 +252,7 @@ class IncrementBlock<T, K, 2>
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 4>
 {
-    public:
+  public:
     static void eval(
         std::array<T, K> &ctr, std::array<std::array<T, K>, 4> &ctr_block)
     {
@@ -271,7 +271,7 @@ class IncrementBlock<T, K, 4>
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 8>
 {
-    public:
+  public:
     static void eval(
         std::array<T, K> &ctr, std::array<std::array<T, K>, 8> &ctr_block)
     {
@@ -298,7 +298,7 @@ class IncrementBlock<T, K, 8>
 template <typename T, std::size_t K>
 class IncrementBlock<T, K, 16>
 {
-    public:
+  public:
     static void eval(
         std::array<T, K> &ctr, std::array<std::array<T, K>, 16> &ctr_block)
     {

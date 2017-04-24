@@ -52,7 +52,7 @@ namespace mckl
 
 class RuntimeAssert : public std::runtime_error
 {
-    public:
+  public:
     explicit RuntimeAssert(const char *msg) : std::runtime_error(msg) {}
 
     explicit RuntimeAssert(const std::string &msg) : std::runtime_error(msg) {}

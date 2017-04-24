@@ -57,7 +57,7 @@ namespace internal
 template <typename KeySeqType>
 class AESGeneratorAESNIImpl
 {
-    public:
+  public:
     static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
         const std::array<__m128i, rounds_ + 1> rk(ks.get());
@@ -117,7 +117,7 @@ class AESGeneratorAESNIImpl
         std::memcpy(r, t.data(), sizeof(__m128i) * n);
     }
 
-    private:
+  private:
     static constexpr std::size_t rounds_ = KeySeqType::rounds();
 
     template <std::size_t>

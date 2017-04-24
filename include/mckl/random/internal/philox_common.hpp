@@ -48,7 +48,7 @@ class PhiloxHiLo;
 template <typename T>
 class PhiloxHiLo<T, 32>
 {
-    public:
+  public:
     static T eval(T a, T b, T &h)
     {
         union {
@@ -77,7 +77,7 @@ class PhiloxHiLo<T, 32>
 template <typename T>
 class PhiloxHiLo<T, 64>
 {
-    public:
+  public:
     static T eval(T a, T b, T &h)
     {
 #if MCKL_USE_BMI2 && MCKL_HAS_X86_64
@@ -91,7 +91,7 @@ class PhiloxHiLo<T, 64>
 #endif
     }
 
-    private:
+  private:
     static T eval_generic(T a, T b, T &h)
     {
         const T mask = (const_one<T>() << 32) - 1;
@@ -174,7 +174,7 @@ class PhiloxHiLo<T, 64>
 template <>
 class PhiloxHiLo<unsigned MCKL_INT64, 64>
 {
-    public:
+  public:
     static unsigned MCKL_INT64 eval(
         unsigned MCKL_INT64 a, unsigned MCKL_INT64 b, unsigned MCKL_INT64 &h)
     {
@@ -187,7 +187,7 @@ class PhiloxHiLo<unsigned MCKL_INT64, 64>
 template <typename T, std::size_t K, std::size_t N, typename Constants>
 class PhiloxRBox
 {
-    public:
+  public:
     static void eval(std::array<T, K> &s, const std::array<T, K / 2> &k)
     {
         std::array<T, K> t;
@@ -195,7 +195,7 @@ class PhiloxRBox
         sbox<0>(s, t, k, std::integral_constant<bool, 0 < K / 2>());
     }
 
-    private:
+  private:
     template <std::size_t>
     static void sbox(std::array<T, K> &, const std::array<T, K> &,
         const std::array<T, K / 2> &, std::false_type)
@@ -239,7 +239,7 @@ class PhiloxRBox
 template <typename T, std::size_t N, typename Constants>
 class PhiloxRBox<T, 2, N, Constants>
 {
-    public:
+  public:
     static void eval(std::array<T, 2> &s, const std::array<T, 1> &k)
     {
         constexpr T w0 = Constants::weyl::value[0] * static_cast<T>(N - 1);
@@ -255,7 +255,7 @@ class PhiloxRBox<T, 2, N, Constants>
 template <typename T, std::size_t N, typename Constants>
 class PhiloxRBox<T, 4, N, Constants>
 {
-    public:
+  public:
     static void eval(std::array<T, 4> &s, const std::array<T, 2> &k)
     {
         constexpr T w0 = Constants::weyl::value[0] * static_cast<T>(N - 1);

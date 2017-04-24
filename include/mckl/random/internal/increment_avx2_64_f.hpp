@@ -52,7 +52,7 @@ class IncrementBlockSI256<T, 1, 64, 64>
 {
     static constexpr std::size_t K_ = 1;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 16> &s)
     {
         __m256i c =
@@ -92,7 +92,7 @@ class IncrementBlockSI256<T, 2, 32, 64>
 {
     static constexpr std::size_t K_ = 2;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 16> &s)
     {
         __m256i c =
@@ -135,7 +135,7 @@ class IncrementBlockSI256<T, 4, 16, 64>
 {
     static constexpr std::size_t K_ = 4;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 16> &s)
     {
         __m256i c =
@@ -170,7 +170,7 @@ class IncrementBlockSI256<T, 8, 8, 64>
 {
     static constexpr std::size_t K_ = 8;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 16> &s)
     {
         __m256i c =
@@ -207,7 +207,7 @@ class IncrementBlockSI256<T, 16, 4, 64>
 {
     static constexpr std::size_t K_ = 16;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 16> &s)
     {
         __m256i c =
@@ -252,7 +252,7 @@ class IncrementBlockSI256<T, 32, 2, 64>
 {
     static constexpr std::size_t K_ = 32;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 16> &s)
     {
         __m256i c =
@@ -313,7 +313,7 @@ class IncrementBlockSI256<T, 64, 1, 64>
 {
     static constexpr std::size_t K_ = 64;
 
-    public:
+  public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 16> &s)
     {
         std::memcpy(s.data(), ctr.data(), 512);

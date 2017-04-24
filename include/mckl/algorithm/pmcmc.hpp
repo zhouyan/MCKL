@@ -44,7 +44,7 @@ namespace mckl
 template <typename Param, MatrixLayout Layout, typename T, std::size_t Dim = 0>
 class PMCMCStateMatrix : public StateMatrix<Layout, T, Dim>
 {
-    public:
+  public:
     using param_type = Param;
 
     using StateMatrix<Layout, T, Dim>::StateMatrix;
@@ -61,7 +61,7 @@ class PMCMCStateMatrix : public StateMatrix<Layout, T, Dim>
         log_nc_ = nc;
     }
 
-    private:
+  private:
     param_type param_;
     double log_nc_;
 }; // class PMCMCStateMatrix
@@ -71,7 +71,7 @@ class PMCMCStateMatrix : public StateMatrix<Layout, T, Dim>
 template <typename Param, typename T, typename U = double>
 class PMCMCMutation
 {
-    public:
+  public:
     using param_type = Param;
     using state_type = T;
     using size_type = typename Particle<T>::size_type;
@@ -154,7 +154,7 @@ class PMCMCMutation
         return u < prob ? 1 : 0;
     }
 
-    private:
+  private:
     std::size_t M_;
     prior_type prior_;
     pf_type pf_;

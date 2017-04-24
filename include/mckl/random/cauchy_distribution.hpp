@@ -72,7 +72,7 @@ class CauchyDistribution
         Cauchy, cauchy, RealType, result_type, a, 0, result_type, b, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0
 
-    public:
+  public:
     result_type min() const
     {
         return std::numeric_limits<result_type>::lowest();
@@ -82,7 +82,7 @@ class CauchyDistribution
 
     void reset() {}
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

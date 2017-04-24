@@ -96,7 +96,7 @@ class Threefry2x64GeneratorGenericImpl
     static constexpr std::size_t Rounds = 20;
     using Constants = ThreefryConstants<T, 2>;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {

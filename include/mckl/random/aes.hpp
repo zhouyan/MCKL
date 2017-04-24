@@ -145,7 +145,7 @@ class AESGenerator
     static_assert(KeySeqType::rounds() != 0,
         "**AESGenerate** used with KeySeqType::rounds() equal to zero");
 
-    public:
+  public:
     using ctr_type = Counter<std::uint32_t, 4>;
     using key_type = typename KeySeqType::key_type;
 
@@ -213,7 +213,7 @@ class AESGenerator
         return is;
     }
 
-    private:
+  private:
     KeySeqType key_seq_;
 }; // class AESGenerator
 

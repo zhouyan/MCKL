@@ -46,7 +46,7 @@ class SamplerTrait;
 template <typename Derived>
 class Sampler
 {
-    public:
+  public:
     using eval_type = typename SamplerTrait<Derived>::eval_type;
     using estimator_type = typename SamplerTrait<Derived>::estimator_type;
 
@@ -142,7 +142,7 @@ class Sampler
         return sampler.print(os);
     }
 
-    protected:
+  protected:
     Sampler(std::size_t steps) : num_iter_(0), eval_(steps), estimator_(steps)
     {
     }
@@ -202,7 +202,7 @@ class Sampler
         return estimator_.at(step).at(k);
     }
 
-    private:
+  private:
     std::size_t num_iter_;
     Vector<Vector<eval_type>> eval_;
     Vector<Vector<estimator_type>> estimator_;

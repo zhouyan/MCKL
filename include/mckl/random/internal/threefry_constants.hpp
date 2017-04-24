@@ -46,14 +46,14 @@ class ThreefryConstantsParity;
 template <typename T>
 class ThreefryConstantsParity<T, 32>
 {
-    public:
+  public:
     static constexpr T value = 0x1BD11BDA;
 }; // class ThreefryConstantsParity
 
 template <typename T>
 class ThreefryConstantsParity<T, 64>
 {
-    public:
+  public:
     static constexpr T value = 0x1BD11BDAA9FC1A22;
 }; // class ThreefryConstantsParity
 
@@ -63,14 +63,14 @@ class ThreefryConstantsRotate;
 template <typename T>
 class ThreefryConstantsRotate<T, 2, 32>
 {
-    public:
+  public:
     static constexpr int value[1][8] = {{13, 15, 26, 6, 17, 29, 16, 24}};
 }; // class ThreefryConstantsRotate
 
 template <typename T>
 class ThreefryConstantsRotate<T, 4, 32>
 {
-    public:
+  public:
     static constexpr int value[2][8] = {
         {10, 11, 13, 23, 6, 17, 25, 18}, {26, 21, 27, 5, 20, 11, 10, 20}};
 }; // class ThreefryConstantsRotate
@@ -78,14 +78,14 @@ class ThreefryConstantsRotate<T, 4, 32>
 template <typename T>
 class ThreefryConstantsRotate<T, 2, 64>
 {
-    public:
+  public:
     static constexpr int value[1][8] = {{16, 42, 12, 31, 16, 32, 24, 21}};
 }; // class ThreefryConstantsRotate
 
 template <typename T>
 class ThreefryConstantsRotate<T, 4, 64>
 {
-    public:
+  public:
     static constexpr int value[2][8] = {
         {14, 52, 23, 5, 25, 46, 58, 32}, {16, 57, 40, 37, 33, 12, 22, 32}};
 }; // class ThreefryConstantsRotate
@@ -93,7 +93,7 @@ class ThreefryConstantsRotate<T, 4, 64>
 template <typename T>
 class ThreefryConstantsRotate<T, 8, 64>
 {
-    public:
+  public:
     static constexpr int value[4][8] = {{46, 33, 17, 44, 39, 13, 25, 8},
         {36, 27, 49, 9, 30, 50, 29, 35}, {19, 14, 36, 54, 34, 10, 39, 56},
         {37, 42, 39, 56, 24, 17, 43, 22}};
@@ -102,7 +102,7 @@ class ThreefryConstantsRotate<T, 8, 64>
 template <typename T>
 class ThreefryConstantsRotate<T, 16, 64>
 {
-    public:
+  public:
     static constexpr int value[8][8] = {{24, 38, 33, 5, 41, 16, 31, 9},
         {13, 19, 4, 20, 9, 34, 44, 48}, {8, 10, 51, 48, 37, 56, 47, 35},
         {47, 55, 13, 41, 31, 51, 46, 52}, {8, 49, 34, 47, 12, 4, 19, 23},
@@ -116,21 +116,21 @@ class ThreefryConstantsPermute;
 template <>
 class ThreefryConstantsPermute<2>
 {
-    public:
+  public:
     static constexpr std::size_t value[2] = {0, 1};
 }; // class ThreefryConstantsPermute
 
 template <>
 class ThreefryConstantsPermute<4>
 {
-    public:
+  public:
     static constexpr std::size_t value[4] = {0, 3, 2, 1};
 }; // class ThreefryConstantsPermute
 
 template <>
 class ThreefryConstantsPermute<8>
 {
-    public:
+  public:
     static constexpr std::size_t value[8] = {2, 1, 4, 7, 6, 5, 0, 3};
 }; // class ThreefryConstantsPermute
 
@@ -148,7 +148,7 @@ class ThreefryConstantsPermute<16>
 template <typename T, std::size_t K>
 class ThreefryConstants
 {
-    public:
+  public:
     using parity = internal::ThreefryConstantsParity<T>;
     using rotate = internal::ThreefryConstantsRotate<T, K>;
     using permute = internal::ThreefryConstantsPermute<K>;

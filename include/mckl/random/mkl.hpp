@@ -80,7 +80,7 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
 /// \ingroup MKL
 class MKLStream
 {
-    public:
+  public:
     explicit MKLStream(::VSLStreamStatePtr ptr = nullptr) : ptr_(nullptr)
     {
         reset(ptr);
@@ -615,7 +615,7 @@ class MKLStream
             "MKLStream::neg_binomial", "::viRngNegbinomial");
     }
 
-    private:
+  private:
     ::VSLStreamStatePtr ptr_;
 }; // class MKLStream
 
@@ -716,14 +716,14 @@ class MKLMaxOffset<VSL_BRNG_WH> : public std::integral_constant<MKL_INT, 273>
 template <MKL_INT BRNG, MKL_INT MaxOffset = MKLMaxOffset<BRNG>::value>
 class MKLOffset
 {
-    public:
+  public:
     static MKL_INT eval(MKL_INT offset) { return BRNG + offset % MaxOffset; }
 }; // class MKLOffset
 
 template <MKL_INT BRNG>
 class MKLOffset<BRNG, 0>
 {
-    public:
+  public:
     static MKL_INT eval(MKL_INT) { return BRNG; }
 }; // class MKLOffset
 
@@ -733,7 +733,7 @@ class MKLUniformBits;
 template <MKL_INT BRNG>
 class MKLUniformBits<BRNG, 32>
 {
-    public:
+  public:
     using result_type = unsigned;
 
     static constexpr result_type min()
@@ -755,7 +755,7 @@ class MKLUniformBits<BRNG, 32>
 template <MKL_INT BRNG>
 class MKLUniformBits<BRNG, 64>
 {
-    public:
+  public:
     using result_type = unsigned MKL_INT64;
 
     static constexpr result_type min()
@@ -790,15 +790,15 @@ class MKLEngine
     static_assert(Bits == 32 || Bits == 64,
         "**MKLEngine** used with bits other than 32, or 64");
 
-    public:
+  public:
     using result_type =
         typename internal::MKLUniformBits<BRNG, Bits>::result_type;
 
-    private:
+  private:
     template <typename T>
     using is_seed_seq = internal::is_seed_seq<T, MKLEngine<BRNG, Bits>>;
 
-    public:
+  public:
     explicit MKLEngine(result_type s = 1) : index_(M_) { seed(s); }
 
     template <typename SeedSeq>
@@ -1050,7 +1050,7 @@ class MKLEngine
         return is;
     }
 
-    private:
+  private:
     static constexpr std::size_t M_ = 256;
 
     std::array<result_type, M_> result_;
@@ -1153,7 +1153,7 @@ namespace internal
 template <typename RNGType>
 class MKLStreamState
 {
-    public:
+  public:
     unsigned reserved1[2];
     unsigned reserved2[2];
     RNGType rng;

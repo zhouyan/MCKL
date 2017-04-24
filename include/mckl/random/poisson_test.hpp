@@ -42,7 +42,7 @@ namespace mckl
 template <typename Derived>
 class PoissonTest
 {
-    public:
+  public:
     using result_type = std::size_t;
 
     bool pass(double alpha, result_type s) const

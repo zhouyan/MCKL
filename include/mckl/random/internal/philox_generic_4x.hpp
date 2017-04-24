@@ -90,7 +90,7 @@ class Philox4xGeneratorGenericImpl
     static constexpr std::size_t K = 4;
     static constexpr std::size_t Rounds = 10;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
@@ -149,7 +149,7 @@ class Philox4x64GeneratorGenericImpl
     static constexpr std::size_t K = 4;
     static constexpr std::size_t Rounds = 10;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {

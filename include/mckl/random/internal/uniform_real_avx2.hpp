@@ -55,7 +55,7 @@ class UniformRealAVX2Impl;
 template <typename UIntType, typename RealType>
 class UniformRealAVX2ImplBase
 {
-    public:
+  public:
     static RealType eval(UIntType u, RealType a, RealType b)
     {
 #if MCKL_USE_FMA
@@ -93,7 +93,7 @@ template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, float, 32>
     : public UniformRealAVX2ImplBase<UIntType, float>
 {
-    public:
+  public:
     using UniformRealAVX2ImplBase<UIntType, float>::eval;
 
     template <std::size_t S>
@@ -131,7 +131,7 @@ template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, double, 32>
     : public UniformRealAVX2ImplBase<UIntType, double>
 {
-    public:
+  public:
     using UniformRealAVX2ImplBase<UIntType, double>::eval;
 
     template <typename T, std::size_t S>
@@ -164,7 +164,7 @@ template <typename UIntType>
 class UniformRealAVX2Impl<UIntType, double, 64>
     : public UniformRealAVX2ImplBase<UIntType, double>
 {
-    public:
+  public:
     using UniformRealAVX2ImplBase<UIntType, double>::eval;
 
     template <std::size_t S>

@@ -47,7 +47,7 @@ class RunTestCheck;
 template <>
 class RunTestCheck<true>
 {
-    public:
+  public:
     template <typename ResultType>
     static bool eval(ResultType u, ResultType v)
     {
@@ -58,7 +58,7 @@ class RunTestCheck<true>
 template <>
 class RunTestCheck<false>
 {
-    public:
+  public:
     template <typename ResultType>
     static bool eval(ResultType u, ResultType v)
     {
@@ -72,7 +72,7 @@ class RunTestImpl;
 template <bool Up>
 class RunTestImpl<false, Up> : public ChiSquaredTest<RunTestImpl<false, Up>>
 {
-    public:
+  public:
     RunTestImpl(std::size_t n) : n_(n) {}
 
     MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
@@ -143,14 +143,14 @@ class RunTestImpl<false, Up> : public ChiSquaredTest<RunTestImpl<false, Up>>
 
     double degree_of_freedom() const { return 6; }
 
-    private:
+  private:
     std::size_t n_;
 }; // class RunTestImpl
 
 template <bool Up>
 class RunTestImpl<true, Up> : public ChiSquaredTest<RunTestImpl<true, Up>>
 {
-    public:
+  public:
     RunTestImpl(std::size_t n) : n_(n) {}
 
     MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
@@ -192,7 +192,7 @@ class RunTestImpl<true, Up> : public ChiSquaredTest<RunTestImpl<true, Up>>
 
     double degree_of_freedom() const { return 5; }
 
-    private:
+  private:
     std::size_t n_;
 }; // class RunTestImpl
 

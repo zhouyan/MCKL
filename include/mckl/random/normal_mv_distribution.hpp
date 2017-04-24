@@ -131,13 +131,13 @@ class NormalMVDistribution
 {
     MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_BLAS_TYPE(NormalMV)
 
-    public:
+  public:
     using result_type = RealType;
     using distribution_type = NormalMVDistribution<RealType>;
 
     class param_type
     {
-        public:
+      public:
         using result_type = RealType;
         using distribution_type = NormalMVDistribution<RealType>;
 
@@ -248,7 +248,7 @@ class NormalMVDistribution
             return is;
         }
 
-        private:
+      private:
         Vector<result_type> mean_;
         Vector<result_type> chol_;
         bool is_scalar_mean_;
@@ -425,7 +425,7 @@ class NormalMVDistribution
         return is;
     }
 
-    private:
+  private:
     param_type param_;
 
     template <typename RNGType>

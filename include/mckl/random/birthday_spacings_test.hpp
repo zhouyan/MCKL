@@ -50,7 +50,7 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
 
     static_assert(T > 0, "**BirthdaySpacingsTest** used with T equal to zero");
 
-    public:
+  public:
     BirthdaySpacingsTest(std::size_t n) : n_(n)
     {
         mean_ = std::exp(3 * std::log(static_cast<double>(n)) -
@@ -91,7 +91,7 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
 
     double mean() const { return mean_; }
 
-    private:
+  private:
     static constexpr std::size_t K_ = internal::Pow<std::size_t, D, T>::value;
 
     std::size_t n_;

@@ -143,7 +143,7 @@ class Threefry8x64GeneratorAVX2Impl
     static constexpr std::size_t Rounds = 20;
     using Constants = ThreefryConstants<T, 8>;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
@@ -180,7 +180,7 @@ class Threefry8x64GeneratorAVX2Impl
         eval_kernel(ctr, n, r, par);
     }
 
-    private:
+  private:
     template <typename ResultType>
     static void eval_kernel(std::array<std::uint64_t, 8> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K + 4> &par)
@@ -323,7 +323,7 @@ class Threefish512GeneratorAVX2Impl
     static constexpr std::size_t Rounds = 20;
     using Constants = ThreefryConstants<T, 8>;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
@@ -360,7 +360,7 @@ class Threefish512GeneratorAVX2Impl
         eval_kernel(ctr, n, r, par);
     }
 
-    private:
+  private:
     template <typename ResultType>
     static void eval_kernel(std::array<std::uint64_t, 8> &ctr, std::size_t n,
         ResultType *r, const std::array<T, K + 4> &par)

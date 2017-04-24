@@ -43,7 +43,7 @@ using AlgorithmPMCMCBase =
 
 class AlgorithmPMCMC : public AlgorithmPMCMCBase
 {
-    public:
+  public:
     AlgorithmPMCMC(std::size_t N) : AlgorithmPMCMCBase(N)
     {
         double y = 0;
@@ -56,13 +56,13 @@ class AlgorithmPMCMC : public AlgorithmPMCMCBase
     std::size_t n() const { return y_.size(); }
     double y(std::size_t iter) const { return y_[iter]; }
 
-    private:
+  private:
     mckl::Vector<double> y_;
 }; // class AlgorithmPMCMC
 
 class AlgorithmPMCMCSelection
 {
-    public:
+  public:
     void operator()(std::size_t iter, mckl::Particle<AlgorithmPMCMC> &particle)
     {
         constexpr double x0 = 0;
@@ -102,13 +102,13 @@ class AlgorithmPMCMCSelection
         particle.state().add_log_nc(std::log(std::accumulate(w, w + N, 0.0)));
     }
 
-    private:
+  private:
     mckl::Vector<double> w_;
 }; // class AlgorithmPMCMCSelection
 
 class AlgorithmPMCMCPrior
 {
-    public:
+  public:
     double operator()(const AlgorithmPMCMCParam &param)
     {
         return -std::get<0>(param) - 2 * std::get<1>(param);
@@ -118,7 +118,7 @@ class AlgorithmPMCMCPrior
 template <std::size_t I>
 class AlgorithmPMCMCUpdate
 {
-    public:
+  public:
     template <typename RNGType>
     double operator()(RNGType &rng, AlgorithmPMCMCParam &s)
     {
@@ -133,7 +133,7 @@ class AlgorithmPMCMCUpdate
 
 class AlgorithmPMCMCEstimate
 {
-    public:
+  public:
     void operator()(
         std::size_t, std::size_t, AlgorithmPMCMCParam &param, double *r)
     {

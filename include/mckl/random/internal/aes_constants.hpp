@@ -263,7 +263,7 @@ inline const std::uint32_t *aes_table()
 
 class AESRCon
 {
-    public:
+  public:
     static constexpr std::uint32_t value[256] = {0x8D, 0x01, 0x02, 0x04, 0x08,
         0x10, 0x20, 0x40, 0x80, 0x1B, 0x36, 0x6C, 0xD8, 0xAB, 0x4D, 0x9A, 0x2F,
         0x5E, 0xBC, 0x63, 0xC6, 0x97, 0x35, 0x6A, 0xD4, 0xB3, 0x7D, 0xFA, 0xEF,
@@ -290,7 +290,7 @@ class AESRCon
 
 class ARSConstantsWeyl
 {
-    public:
+  public:
     static constexpr std::uint64_t value[2] = {
         0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
 }; // class ARSConstantsWeyl
@@ -301,7 +301,7 @@ class ARSConstantsWeyl
 /// \ingroup AES
 class ARSConstants
 {
-    public:
+  public:
     using weyl = internal::ARSConstantsWeyl;
 }; // class ARSConstants
 

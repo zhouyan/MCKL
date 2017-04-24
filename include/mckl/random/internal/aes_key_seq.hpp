@@ -50,7 +50,7 @@ namespace internal
 template <std::size_t Rounds, typename KeySeqGenerator>
 class AESKeySeqImpl
 {
-    public:
+  public:
     using key_type = typename KeySeqGenerator::key_type;
     using rk_type = typename KeySeqGenerator::rk_type;
 
@@ -125,14 +125,14 @@ class AESKeySeqImpl
         return is;
     }
 
-    private:
+  private:
     std::array<rk_type, rounds() + 1> rk_;
 }; // class AESKeySeqImpl
 
 template <std::size_t Rounds, typename KeySeqGenerator>
 class ARSKeySeqImpl
 {
-    public:
+  public:
     using key_type = typename KeySeqGenerator::key_type;
     using rk_type = typename KeySeqGenerator::rk_type;
 
@@ -192,7 +192,7 @@ class ARSKeySeqImpl
         return is;
     }
 
-    private:
+  private:
     key_type key_;
 }; // class ARSKeySeqImpl
 

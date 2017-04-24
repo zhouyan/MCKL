@@ -48,7 +48,7 @@ namespace mckl
 /// \ingroup RandomTest
 class TestU01
 {
-    public:
+  public:
     TestU01(const TestU01 &) = delete;
     TestU01 &operator=(const TestU01 &) = delete;
 
@@ -134,7 +134,7 @@ class TestU01
         battery_repeat(gen_, rep.data());
     }
 
-    private:
+  private:
     TestU01() : gen_(nullptr) {}
 
     ::unif01_Gen *gen_;

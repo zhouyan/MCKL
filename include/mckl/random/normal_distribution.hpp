@@ -112,7 +112,7 @@ class NormalDistribution
         Normal, normal, RealType, result_type, mean, 0, result_type, stddev, 1)
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_2(result_type, v_, bool, saved_)
 
-    public:
+  public:
     result_type min() const
     {
         return std::numeric_limits<result_type>::lowest();
@@ -126,7 +126,7 @@ class NormalDistribution
         saved_ = false;
     }
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

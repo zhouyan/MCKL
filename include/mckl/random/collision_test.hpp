@@ -57,7 +57,7 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
 
     static_assert(T > 0, "**CollisionTest** used with T equal to zero");
 
-    public:
+  public:
     CollisionTest(std::size_t n) : n_(n), mean_(0)
     {
         double p = static_cast<double>(n);
@@ -86,7 +86,7 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
 
     double mean() const { return mean_; }
 
-    private:
+  private:
     static constexpr std::size_t K_ = internal::Pow<std::size_t, D, T>::value;
 
     using occurs_type = std::conditional_t<K_ <= (1U << 27), std::bitset<K_>,

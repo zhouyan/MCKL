@@ -82,7 +82,7 @@ class StudentTDistribution
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_2(ChiSquaredDistribution<RealType>,
         chi_squared_, NormalDistribution<RealType>, normal_)
 
-    public:
+  public:
     result_type min() const
     {
         return std::numeric_limits<result_type>::lowest();
@@ -96,7 +96,7 @@ class StudentTDistribution
         normal_ = NormalDistribution<RealType>(0, 1);
     }
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

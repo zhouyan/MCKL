@@ -38,14 +38,14 @@
 template <typename T, std::size_t K>
 class RandomSeedResultType
 {
-    public:
+  public:
     using type = std::array<T, K>;
 }; // class RandomSeedResultType
 
 template <typename T>
 class RandomSeedResultType<T, 1>
 {
-    public:
+  public:
     using type = T;
 }; // class RandomSeedResultType
 

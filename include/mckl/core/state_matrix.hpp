@@ -57,7 +57,7 @@ class StateMatrix : public Matrix<T, Layout>
     using row_major = std::integral_constant<MatrixLayout, RowMajor>;
     using col_major = std::integral_constant<MatrixLayout, ColMajor>;
 
-    public:
+  public:
     using matrix_type = Matrix<T, Layout>;
     using value_type = typename matrix_type::value_type;
     using size_type = typename matrix_type::size_type;
@@ -69,7 +69,7 @@ class StateMatrix : public Matrix<T, Layout>
     template <typename S>
     class particle_index_type : public ParticleIndexBase<S>
     {
-        public:
+      public:
         using iterator = typename matrix_type::row_iterator;
         using const_iterator = typename matrix_type::const_row_iterator;
         using reverse_iterator = typename matrix_type::reverse_row_iterator;
@@ -214,7 +214,7 @@ class StateMatrix : public Matrix<T, Layout>
             std::integral_constant<bool, (Dim == 0 || 8 < Dim)>());
     }
 
-    private:
+  private:
     template <typename InputIter>
     void select_dispatch(size_type n, InputIter index, row_major)
     {

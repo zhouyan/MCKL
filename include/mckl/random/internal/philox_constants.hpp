@@ -46,28 +46,28 @@ class PhiloxConstantsWeyl;
 template <typename T>
 class PhiloxConstantsWeyl<T, 2, 32>
 {
-    public:
+  public:
     static constexpr T value[1] = {0x9E3779B9};
 }; // class PhiloxConstantsWeyl
 
 template <typename T>
 class PhiloxConstantsWeyl<T, 4, 32>
 {
-    public:
+  public:
     static constexpr T value[2] = {0x9E3779B9, 0xBB67AE85};
 }; // class PhiloxConstantsWeyl
 
 template <typename T>
 class PhiloxConstantsWeyl<T, 2, 64>
 {
-    public:
+  public:
     static constexpr T value[1] = {0x9E3779B97F4A7C15};
 }; // class PhiloxConstantsWeyl
 
 template <typename T>
 class PhiloxConstantsWeyl<T, 4, 64>
 {
-    public:
+  public:
     static constexpr T value[2] = {0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
 }; // class PhiloxConstantsWeyl
 
@@ -77,28 +77,28 @@ class PhiloxConstantsMultiplier;
 template <typename T>
 class PhiloxConstantsMultiplier<T, 2, 32>
 {
-    public:
+  public:
     static constexpr T value[1] = {0xD256D193};
 }; // class PhiloxConstantsMultiplier
 
 template <typename T>
 class PhiloxConstantsMultiplier<T, 4, 32>
 {
-    public:
+  public:
     static constexpr T value[2] = {0xCD9E8D57, 0xD2511F53};
 }; // class PhiloxConstantsMultiplier
 
 template <typename T>
 class PhiloxConstantsMultiplier<T, 2, 64>
 {
-    public:
+  public:
     static constexpr T value[1] = {0xD2B74407B1CE6E93};
 }; // class PhiloxConstantsMultiplier
 
 template <typename T>
 class PhiloxConstantsMultiplier<T, 4, 64>
 {
-    public:
+  public:
     static constexpr T value[2] = {0xCA5A826395121157, 0xD2E7470EE14C6C93};
 }; // class PhiloxConstantsMultiplier
 
@@ -109,7 +109,7 @@ class PhiloxConstantsMultiplier<T, 4, 64>
 template <typename T, std::size_t K>
 class PhiloxConstants
 {
-    public:
+  public:
     using weyl = internal::PhiloxConstantsWeyl<T, K>;
     using multiplier = internal::PhiloxConstantsMultiplier<T, K>;
 }; // class PhiloxConstants

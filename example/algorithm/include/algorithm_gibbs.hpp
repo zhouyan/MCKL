@@ -40,7 +40,7 @@ using AlgorithmGibbs = std::array<double, 2>;
 
 class AlgorithmGibbsMutation
 {
-    public:
+  public:
     AlgorithmGibbsMutation() : xbar_(0)
     {
         double x = 0;
@@ -85,7 +85,7 @@ class AlgorithmGibbsMutation
         return 0;
     }
 
-    protected:
+  protected:
     mckl::Vector<double> x_;
     mckl::Vector<double> r_;
     double n_;
@@ -95,7 +95,7 @@ class AlgorithmGibbsMutation
 
 class AlgorithmGibbsEstimate
 {
-    public:
+  public:
     void operator()(std::size_t, std::size_t, AlgorithmGibbs &state, double *r)
     {
         r[0] = std::get<0>(state);

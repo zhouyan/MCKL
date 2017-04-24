@@ -45,7 +45,7 @@ namespace mckl
 template <typename T, typename U = double>
 class MCMCEstimator : public Estimator<U, std::size_t, std::size_t, T &, U *>
 {
-    public:
+  public:
     using Estimator<U, std::size_t, std::size_t, T &, U *>::Estimator;
     using Estimator<U, std::size_t, std::size_t, T &, U *>::estimate;
 
@@ -61,7 +61,7 @@ class MCMCSampler;
 template <typename T, typename U>
 class SamplerTrait<MCMCSampler<T, U>>
 {
-    public:
+  public:
     using eval_type = std::function<std::size_t(std::size_t, T &)>;
     using estimator_type = MCMCEstimator<T, U>;
 }; // class SamplerTrait
@@ -71,7 +71,7 @@ class SamplerTrait<MCMCSampler<T, U>>
 template <typename T, typename U>
 class MCMCSampler : public Sampler<MCMCSampler<T, U>>
 {
-    public:
+  public:
     using state_type = T;
     using eval_type = typename Sampler<MCMCSampler<T, U>>::eval_type;
     using estimator_type = typename Sampler<MCMCSampler<T, U>>::estimator_type;
@@ -190,7 +190,7 @@ class MCMCSampler : public Sampler<MCMCSampler<T, U>>
         return first;
     }
 
-    private:
+  private:
     state_type state_;
     std::size_t iter_;
     Vector<Vector<std::size_t>> accept_history_;

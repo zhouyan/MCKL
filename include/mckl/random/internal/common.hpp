@@ -151,10 +151,10 @@
     }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_0(Name, T)                 \
-    public:                                                                   \
+  public:                                                                     \
     class param_type                                                          \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using result_type = T;                                                \
         using distribution_type = Name##Distribution<T>;                      \
                                                                               \
@@ -182,16 +182,16 @@
             return is;                                                        \
         }                                                                     \
                                                                               \
-        private:                                                              \
+      private:                                                                \
         friend distribution_type;                                             \
     }; // class param_type
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_1(                         \
     Name, name, T, T1, p1, v1)                                                \
-    public:                                                                   \
+  public:                                                                     \
     class param_type                                                          \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using result_type = T;                                                \
         using distribution_type = Name##Distribution<T>;                      \
                                                                               \
@@ -252,7 +252,7 @@
             return is;                                                        \
         }                                                                     \
                                                                               \
-        private:                                                              \
+      private:                                                                \
         T1 p1##_;                                                             \
                                                                               \
         friend distribution_type;                                             \
@@ -260,10 +260,10 @@
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_2(                         \
     Name, name, T, T1, p1, v1, T2, p2, v2)                                    \
-    public:                                                                   \
+  public:                                                                     \
     class param_type                                                          \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using result_type = T;                                                \
         using distribution_type = Name##Distribution<T>;                      \
                                                                               \
@@ -332,7 +332,7 @@
             return is;                                                        \
         }                                                                     \
                                                                               \
-        private:                                                              \
+      private:                                                                \
         T1 p1##_;                                                             \
         T2 p2##_;                                                             \
                                                                               \
@@ -341,10 +341,10 @@
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_PARAM_TYPE_4(                         \
     Name, name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)            \
-    public:                                                                   \
+  public:                                                                     \
     class param_type                                                          \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using result_type = T;                                                \
         using distribution_type = Name##Distribution<T>;                      \
                                                                               \
@@ -429,7 +429,7 @@
             return is;                                                        \
         }                                                                     \
                                                                               \
-        private:                                                              \
+      private:                                                                \
         T1 p1##_;                                                             \
         T2 p2##_;                                                             \
         T3 p3##_;                                                             \
@@ -439,7 +439,7 @@
     }; // class param_type
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_0(Name, T)                \
-    public:                                                                   \
+  public:                                                                     \
     using result_type = T;                                                    \
     using distribution_type = Name##Distribution<T>;                          \
                                                                               \
@@ -448,7 +448,7 @@
     explicit Name##Distribution(param_type &&) { reset(); }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_1(Name, T, T1, p1, v1)    \
-    public:                                                                   \
+  public:                                                                     \
     using result_type = T;                                                    \
     using distribution_type = Name##Distribution<T>;                          \
                                                                               \
@@ -469,7 +469,7 @@
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_2(                        \
     Name, T, T1, p1, v1, T2, p2, v2)                                          \
-    public:                                                                   \
+  public:                                                                     \
     using result_type = T;                                                    \
     using distribution_type = Name##Distribution<T>;                          \
                                                                               \
@@ -494,7 +494,7 @@
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_CONSTRUCTOR_4(                        \
     Name, T, T1, p1, v1, T2, p2, v2, T3, p3, v3, T4, p4, v4)                  \
-    public:                                                                   \
+  public:                                                                     \
     using result_type = T;                                                    \
     using distribution_type = Name##Distribution<T>;                          \
                                                                               \
@@ -522,7 +522,7 @@
     T4 p4() const { return param_.p4(); }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_0                              \
-    private:                                                                  \
+  private:                                                                    \
     bool is_equal(const distribution_type &) const { return true; }           \
                                                                               \
     template <typename CharT, typename Traits>                                \
@@ -536,7 +536,7 @@
     }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(T1, m1)                      \
-    private:                                                                  \
+  private:                                                                    \
     T1 m1;                                                                    \
                                                                               \
     bool is_equal(const distribution_type &other) const                       \
@@ -569,7 +569,7 @@
     }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_2(T1, m1, T2, m2)              \
-    private:                                                                  \
+  private:                                                                    \
     T1 m1;                                                                    \
     T2 m2;                                                                    \
                                                                               \
@@ -609,7 +609,7 @@
     }
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_OPERATOR(Name, name)                  \
-    public:                                                                   \
+  public:                                                                     \
     const param_type &param() const { return param_; }                        \
                                                                               \
     void param(const param_type &param)                                       \
@@ -688,7 +688,7 @@
         return is;                                                            \
     }                                                                         \
                                                                               \
-    private:                                                                  \
+  private:                                                                    \
     param_type param_;
 
 #define MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Name, T)                         \
@@ -749,7 +749,7 @@ class DummyRNG
 template <typename DistributionType>
 class DummyDistribution
 {
-    public:
+  public:
     using result_type = double;
 
     DummyDistribution(const DistributionType &distribution)
@@ -763,7 +763,7 @@ class DummyDistribution
         return distribution_();
     }
 
-    private:
+  private:
     DistributionType distribution_;
 }; // class DummyDistribution
 
@@ -928,7 +928,7 @@ class RNGTraits
         0 :
         RNGType::max() - RNGType::min() + const_one<result_type>();
 
-    public:
+  public:
     /// \brief If the random integers are uniform on the set
     /// \f$\{0,\dots,2^W - 1\}\f$ for some \f$W > 0\f$.
     static constexpr bool is_full_range =
@@ -984,7 +984,7 @@ inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
 template <typename>
 class SeedTrait
 {
-    public:
+  public:
     using type = unsigned;
 }; // class SeedTrait
 

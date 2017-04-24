@@ -51,7 +51,7 @@ class SMCEstimator
     static_assert(std::is_convertible<U, double>::value,
         "**SMCEsimator** used with estimate type U not convertible to double");
 
-    public:
+  public:
     SMCEstimator() : layout_(RowMajor), record_only_(false) {}
 
     SMCEstimator(std::size_t dim)
@@ -116,7 +116,7 @@ class SMCEstimator
         this->insert_estimate(result_.data());
     }
 
-    private:
+  private:
     Vector<U> u_;
     Vector<double> r_;
     Vector<double> result_;
@@ -140,7 +140,7 @@ class SMCSampler;
 template <typename T, typename U>
 class SamplerTrait<SMCSampler<T, U>>
 {
-    public:
+  public:
     using eval_type = std::function<void(std::size_t, Particle<T> &)>;
     using estimator_type = SMCEstimator<T, U>;
 }; // class SamplerTrait
@@ -150,7 +150,7 @@ class SamplerTrait<SMCSampler<T, U>>
 template <typename T, typename U>
 class SMCSampler : public Sampler<SMCSampler<T, U>>
 {
-    public:
+  public:
     using state_type = T;
     using size_type = typename Particle<T>::size_type;
     using eval_type = typename Sampler<SMCSampler<T, U>>::eval_type;
@@ -376,7 +376,7 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
         return std::copy(ess_history_.begin(), ess_history_.end(), first);
     }
 
-    private:
+  private:
     Particle<T> particle_;
     std::size_t iter_;
     double resample_threshold_;

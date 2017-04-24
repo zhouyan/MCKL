@@ -50,7 +50,7 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
 
     static_assert(T > 0, "**MaximumOfTTest** used with T equal to zero");
 
-    public:
+  public:
     MaximumOfTTest(std::size_t n) : n_(n) {}
 
     MCKL_DEFINE_RANDOM_TEST_OPERATOR(double)
@@ -77,7 +77,7 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
 
     double degree_of_freedom() const { return D - 1; }
 
-    private:
+  private:
     std::size_t n_;
 
     template <typename RNGType, typename U01DistributionType>

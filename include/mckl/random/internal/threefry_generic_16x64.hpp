@@ -213,7 +213,7 @@ class Threefry16x64GeneratorGenericImpl
     static constexpr std::size_t Rounds = 20;
     using Constants = ThreefryConstants<T, 16>;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
@@ -273,7 +273,7 @@ class Threefish1024GeneratorGenericImpl
     static constexpr std::size_t Rounds = 80;
     using Constants = ThreefryConstants<T, 16>;
 
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {

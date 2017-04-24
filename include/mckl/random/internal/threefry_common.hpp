@@ -44,7 +44,7 @@ namespace internal
 template <typename T, std::size_t K, typename Constants>
 class ThreefryPBox
 {
-    public:
+  public:
     static void eval(std::array<T, K> &s)
     {
         std::array<T, K> tmp;
@@ -59,7 +59,7 @@ class ThreefryPBox
         std::memcpy(s, tmp.data(), sizeof(T) * K);
     }
 
-    private:
+  private:
     template <std::size_t>
     static void eval(
         const std::array<T, K> &, std::array<T, K> &, std::false_type)
@@ -94,7 +94,7 @@ class ThreefryPBox
 template <typename T, typename U>
 class ThreefryPBox<T, 2, ThreefryConstants<U, 2>>
 {
-    public:
+  public:
     static void eval(std::array<T, 2> &) {}
 
     static void eval(T *) {}
@@ -103,7 +103,7 @@ class ThreefryPBox<T, 2, ThreefryConstants<U, 2>>
 template <typename T, typename U>
 class ThreefryPBox<T, 4, ThreefryConstants<U, 4>>
 {
-    public:
+  public:
     static void eval(std::array<T, 4> &s)
     {
         T s1 = std::get<1>(s);
@@ -122,7 +122,7 @@ class ThreefryPBox<T, 4, ThreefryConstants<U, 4>>
 template <typename T, typename U>
 class ThreefryPBox<T, 8, ThreefryConstants<U, 8>>
 {
-    public:
+  public:
     static void eval(std::array<T, 8> &s)
     {
         T s0 = std::get<0>(s);
@@ -157,7 +157,7 @@ class ThreefryPBox<T, 8, ThreefryConstants<U, 8>>
 template <typename T, typename U>
 class ThreefryPBox<T, 16, ThreefryConstants<U, 16>>
 {
-    public:
+  public:
     static void eval(std::array<T, 16> &s)
     {
         T s1 = std::get<0x1>(s);
@@ -214,7 +214,7 @@ class ThreefryPBox<T, 16, ThreefryConstants<U, 16>>
 template <typename T, std::size_t K, std::size_t N>
 class ThreefryKBox
 {
-    public:
+  public:
     template <std::size_t I>
     static T key(const std::array<T, K + 4> &par)
     {
@@ -232,7 +232,7 @@ class ThreefryKBox
         eval<0>(s, par, std::integral_constant<bool, 0 < K>());
     }
 
-    private:
+  private:
     template <std::size_t>
     static void eval(
         std::array<T, K> &, const std::array<T, K + 4> &, std::false_type)
@@ -251,14 +251,14 @@ class ThreefryKBox
 template <typename T, std::size_t K, std::size_t N, typename Constants>
 class ThreefryRBox
 {
-    public:
+  public:
     static void eval(std::array<T, K> &s)
     {
         sbox<0>(s, std::integral_constant<bool, 0 < K / 2>());
         ThreefryPBox<T, K, Constants>::eval(s);
     }
 
-    private:
+  private:
     template <std::size_t>
     static void sbox(std::array<T, K> &, std::false_type)
     {

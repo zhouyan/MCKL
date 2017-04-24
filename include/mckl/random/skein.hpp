@@ -43,7 +43,7 @@ namespace mckl
 template <typename Generator>
 class Skein
 {
-    public:
+  public:
     /// \brief Type of the key
     using key_type = typename Generator::key_type;
 
@@ -53,7 +53,7 @@ class Skein
     /// \brief Values of the type field
     class type_field
     {
-        public:
+      public:
         /// \brief Key (for MAC or KDF)
         static constexpr int key() { return 0; }
 
@@ -82,7 +82,7 @@ class Skein
     /// \brief Type of input paramters such as keys and messages
     class param_type
     {
-        public:
+      public:
         /// \brief Construct a parameter given bit strings
         ///
         /// \param N The length of the bit string
@@ -109,7 +109,7 @@ class Skein
         /// \brief The type of the string
         int type() const { return type_; }
 
-        private:
+      private:
         std::size_t N_;
         const char *data_;
         int type_;
@@ -324,7 +324,7 @@ class Skein
         }
     }
 
-    private:
+  private:
     static_assert(bits() >= 64,
         "**Skein** used with a Generator with less than 64 bits");
 

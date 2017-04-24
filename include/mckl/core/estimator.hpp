@@ -43,7 +43,7 @@ namespace mckl
 template <typename T, typename... Args>
 class Estimator : public EstimateMatrix<T>
 {
-    public:
+  public:
     Estimator() = default;
 
     Estimator(std::size_t dim) : EstimateMatrix<T>(0, dim) {}
@@ -94,7 +94,7 @@ class Estimator : public EstimateMatrix<T>
         return std::copy(sum.begin(), sum.end(), first);
     }
 
-    protected:
+  protected:
     template <typename... CallArgs>
     void eval(CallArgs &&... args)
     {
@@ -104,7 +104,7 @@ class Estimator : public EstimateMatrix<T>
         eval_(std::forward<CallArgs>(args)...);
     }
 
-    private:
+  private:
     std::function<void(Args...)> eval_;
 }; // class Estimator
 

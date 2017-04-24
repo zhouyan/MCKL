@@ -45,13 +45,13 @@ template <typename IntType>
 class SamplingDistribution
 {
     MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Sampling, 16)
-    public:
+  public:
     using result_type = IntType;
     using distribution_type = SamplingDistribution<IntType>;
 
     class param_type
     {
-        public:
+      public:
         using result_type = IntType;
         using distribution_type = SamplingDistribution<IntType>;
 
@@ -111,7 +111,7 @@ class SamplingDistribution
             return is;
         }
 
-        private:
+      private:
         result_type n_;
         result_type m_;
 
@@ -194,7 +194,7 @@ class SamplingDistribution
         return is;
     }
 
-    private:
+  private:
     param_type param_;
 }; // class SamplingDistribution
 

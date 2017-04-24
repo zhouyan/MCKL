@@ -58,7 +58,7 @@
         template <typename U>                                                 \
         static char2 test(...);                                               \
                                                                               \
-        public:                                                               \
+      public:                                                                 \
         static constexpr bool value =                                         \
             sizeof(test<T>(nullptr)) == sizeof(char);                         \
     };                                                                        \
@@ -75,14 +75,14 @@
     template <typename T>                                                     \
     class Outer##Dispatch<T, false>                                           \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using type = Default;                                                 \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
     class Outer##Dispatch<T, true>                                            \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using type = typename T::Inner;                                       \
     };                                                                        \
                                                                               \
@@ -91,7 +91,7 @@
     template <typename T>                                                     \
     class Outer##Trait                                                        \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
         using type = typename internal::Outer##Dispatch<T, value>::type;      \
     };                                                                        \
@@ -121,7 +121,7 @@
         template <typename U>                                                 \
         static char2 test(...);                                               \
                                                                               \
-        public:                                                               \
+      public:                                                                 \
         static constexpr bool value =                                         \
             sizeof(test<T>(nullptr)) == sizeof(char);                         \
     };                                                                        \
@@ -138,14 +138,14 @@
     template <typename T>                                                     \
     class Outer##Dispatch<T, false>                                           \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using type = Default<T>;                                              \
     };                                                                        \
                                                                               \
     template <typename T>                                                     \
     class Outer##Dispatch<T, true>                                            \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         using type = typename T::template Inner<T>;                           \
     };                                                                        \
     }                                                                         \
@@ -153,7 +153,7 @@
     template <typename T>                                                     \
     class Outer##Trait                                                        \
     {                                                                         \
-        public:                                                               \
+      public:                                                                 \
         static constexpr bool value = internal::Has##Outer<T>::value;         \
         using type = typename internal::Outer##Dispatch<T, value>::type;      \
     };                                                                        \

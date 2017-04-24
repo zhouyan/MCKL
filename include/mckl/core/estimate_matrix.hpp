@@ -49,7 +49,7 @@ namespace mckl
 template <typename T>
 class EstimateMatrix : public Matrix<T, RowMajor>
 {
-    public:
+  public:
     using matrix_type = Matrix<T, RowMajor>;
     using value_type = typename matrix_type::value_type;
     using size_type = typename matrix_type::size_type;
@@ -131,7 +131,7 @@ class EstimateMatrix : public Matrix<T, RowMajor>
             insert_estimate_dispatch(t, i, first, std::is_floating_point<T>());
     }
 
-    private:
+  private:
     using matrix_type::resize;
     using matrix_type::push_back_col;
 

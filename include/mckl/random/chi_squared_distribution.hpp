@@ -74,14 +74,14 @@ class ChiSquaredDistribution
     MCKL_DEFINE_RANDOM_DISTRIBUTION_MEMBER_1(
         GammaDistribution<RealType>, gamma_)
 
-    public:
+  public:
     result_type min() const { return 0; }
 
     result_type max() const { return std::numeric_limits<result_type>::max(); }
 
     void reset() { gamma_ = GammaDistribution<RealType>(n() / 2, 2); }
 
-    private:
+  private:
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {

@@ -52,7 +52,7 @@ namespace internal
 
 class AES128KeySeqGeneratorAESNIImpl
 {
-    public:
+  public:
     using key_type = std::array<std::uint32_t, 4>;
     using rk_type = __m128i;
 
@@ -76,7 +76,7 @@ class AES128KeySeqGeneratorAESNIImpl
         generate<1>(rk, std::integral_constant<bool, 1 < Rp1>());
     }
 
-    private:
+  private:
     __m128i xmm1_;
     __m128i xmm2_;
     __m128i xmm3_;
@@ -112,7 +112,7 @@ class AES128GeneratorAESNIImpl
 {
     using KeySeqType = AESKeySeqImpl<10, AES128KeySeqGeneratorAESNIImpl>;
 
-    public:
+  public:
     static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
         __m128i xmm0 =
@@ -160,7 +160,7 @@ class AES128GeneratorAESNIImpl
 
     MCKL_RANDOM_INTERNAL_AES_AESNI_EVAL
 
-    private:
+  private:
     template <typename ResultType>
     static void eval_kernel(std::array<std::uint64_t, 2> &ctr, std::size_t n,
         ResultType *r, const KeySeqType &ks)

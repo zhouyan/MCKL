@@ -63,7 +63,7 @@ enum BetaDistributionAlgorithm {
 template <typename RealType>
 class BetaDistributionConstant
 {
-    public:
+  public:
     BetaDistributionConstant(RealType alpha = 1, RealType beta = 1)
     {
         const RealType K = static_cast<RealType>(0.852);
@@ -165,7 +165,7 @@ class BetaDistributionConstant
         return true;
     }
 
-    private:
+  private:
     RealType a_;
     RealType b_;
     RealType t_;
@@ -390,7 +390,7 @@ class BetaDistribution
     MCKL_DEFINE_RANDOM_DISTRIBUTION_2(
         Beta, beta, RealType, result_type, alpha, 1, result_type, beta, 1)
 
-    public:
+  public:
     result_type min() const { return 0; }
 
     result_type max() const { return 1; }
@@ -401,7 +401,7 @@ class BetaDistribution
             internal::BetaDistributionConstant<RealType>(alpha(), beta());
     }
 
-    private:
+  private:
     internal::BetaDistributionConstant<RealType> constant_;
 
     bool is_equal(const distribution_type &other) const

@@ -37,7 +37,7 @@
 
 class add
 {
-    public:
+  public:
     template <typename IntType>
     void operator()(const tbb::blocked_range<IntType> &block) const
     {
@@ -51,7 +51,7 @@ class add
 
 class sum
 {
-    public:
+  public:
     sum() : res_(0) {}
 
     sum(const sum &other, tbb::split) : res_(0) {}
@@ -69,7 +69,7 @@ class sum
 
     long res() const { return res_; }
 
-    private:
+  private:
     long res_;
 }; // class sum
 

@@ -54,7 +54,7 @@ template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     int = std::numeric_limits<T>::digits>
 class ThreefryGeneratorGenericImpl
 {
-    public:
+  public:
     static void eval(
         const void *plain, void *cipher, const std::array<T, K + 4> &par)
     {
@@ -102,7 +102,7 @@ class ThreefryGeneratorGenericImpl
             eval(ctr, r, par);
     }
 
-    private:
+  private:
     template <std::size_t>
     static void round(
         std::array<T, K> &, const std::array<T, K + 4> &, std::false_type)

@@ -92,7 +92,7 @@ class PhiloxGenerator
     static_assert(
         Rounds != 0, "**PhiloxGenerator** used with rounds equal to zero");
 
-    public:
+  public:
     using ctr_type = Counter<T, K>;
     using key_type = std::array<T, K / 2>;
 
@@ -167,7 +167,7 @@ class PhiloxGenerator
         return is;
     }
 
-    private:
+  private:
     key_type key_;
 }; // class PhiloxGenerator
 

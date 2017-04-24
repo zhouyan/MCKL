@@ -50,7 +50,7 @@ class CouponCollectorTest
 {
     static_assert(D > 1, "**CouponCollectorTest** used with D less than two");
 
-    public:
+  public:
     CouponCollectorTest(std::size_t n) : n_(n), tmin_(0), tmax_(0)
     {
         internal::StirlingMatrix2 stirling(T_ - 2, D - 1);
@@ -121,7 +121,7 @@ class CouponCollectorTest
         return static_cast<double>(np_.size() - 1);
     }
 
-    private:
+  private:
     static constexpr std::size_t T_ = D + 256;
 
     std::size_t n_;

@@ -116,7 +116,7 @@ class SMCEstimatorEvalSMP;
 template <typename T, typename Derived>
 class SMCSamplerEvalBase
 {
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL(SMCSamplerEval)
 
     void eval_each(std::size_t iter, ParticleIndex<T> idx)
@@ -139,7 +139,7 @@ class SMCSamplerEvalBase
         eval_last_dispatch(iter, particle, &Derived::eval_last);
     }
 
-    private:
+  private:
     // non-static non-const
 
     template <typename D>
@@ -256,7 +256,7 @@ class SMCSamplerEvalBase
 template <typename T>
 class SMCSamplerEvalBase<T, Virtual>
 {
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(SMCSamplerEval)
 
     virtual void eval_each(std::size_t, ParticleIndex<T>) {}
@@ -277,7 +277,7 @@ class SMCSamplerEvalBase<T, Virtual>
 template <typename T, typename Derived>
 class SMCEstimatorEvalBase
 {
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL(SMCEstimatorEval)
 
     void eval_each(
@@ -302,7 +302,7 @@ class SMCEstimatorEvalBase
         eval_last_dispatch(iter, particle, &Derived::eval_last);
     }
 
-    private:
+  private:
     // non-static non-const
 
     template <typename D>
@@ -432,7 +432,7 @@ class SMCEstimatorEvalBase
 template <typename T>
 class SMCEstimatorEvalBase<T, Virtual>
 {
-    protected:
+  protected:
     MCKL_DEFINE_SMP_BACKEND_BASE_SPECIAL_VIRTUAL(SMCEstimatorEval)
 
     virtual void eval_each(

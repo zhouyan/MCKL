@@ -44,13 +44,13 @@ template <typename IntType>
 class DiscreteDistribution
 {
     MCKL_DEFINE_RANDOM_DISTRIBUTION_ASSERT_INT_TYPE(Discrete, 16)
-    public:
+  public:
     using result_type = IntType;
     using distribution_type = DiscreteDistribution<IntType>;
 
     class param_type
     {
-        public:
+      public:
         using result_type = IntType;
         using distribution_type = DiscreteDistribution<IntType>;
 
@@ -131,7 +131,7 @@ class DiscreteDistribution
             return is;
         }
 
-        private:
+      private:
         Vector<double> probability_;
 
         friend distribution_type;
@@ -297,7 +297,7 @@ class DiscreteDistribution
         return is;
     }
 
-    private:
+  private:
     param_type param_;
 }; // class DiscreteDistribution
 

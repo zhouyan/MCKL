@@ -66,7 +66,7 @@ enum StableDistributionAlgorithm {
 template <typename RealType>
 class StableDistributionConstant
 {
-    public:
+  public:
     StableDistributionConstant(
         RealType alpha = 1, RealType beta = 0, RealType = 0, RealType b = 1)
     {
@@ -105,7 +105,7 @@ class StableDistributionConstant
         return true;
     }
 
-    private:
+  private:
     RealType xi_;
     RealType c_;
     StableDistributionAlgorithm algorithm_;
@@ -200,7 +200,7 @@ class StableDistribution
     MCKL_DEFINE_RANDOM_DISTRIBUTION_4(Stable, stable, RealType, result_type,
         alpha, 1, result_type, beta, 0, result_type, a, 0, result_type, b, 1)
 
-    public:
+  public:
     result_type min() const
     {
         return std::numeric_limits<result_type>::lowest();
@@ -214,7 +214,7 @@ class StableDistribution
             alpha(), beta(), a(), b());
     }
 
-    private:
+  private:
     internal::StableDistributionConstant<RealType> constant_;
 
     bool is_equal(const distribution_type &other) const

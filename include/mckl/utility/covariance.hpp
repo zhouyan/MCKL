@@ -45,7 +45,7 @@ class Covariance
     static_assert(internal::is_blas_floating_point<RealType>::value,
         "**Covariance** used with RealType other than float or double");
 
-    public:
+  public:
     using result_type = RealType;
 
     /// \brief Compute the sample covariance matrix
@@ -136,7 +136,7 @@ class Covariance
         cov_pack(p, cov, layout, cov_layout, cov_upper, cov_packed);
     }
 
-    private:
+  private:
     Vector<result_type> mean_;
     Vector<result_type> cov_;
     Vector<result_type> wsqrt_;
