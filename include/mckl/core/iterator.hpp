@@ -34,8 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Iterator adapter which increment the base iterator in multiple steps
 /// \ingroup Core

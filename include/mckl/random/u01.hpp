@@ -39,11 +39,9 @@
 #include <mckl/random/internal/u01_avx2.hpp>
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 #if MCKL_USE_AVX2
 

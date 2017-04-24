@@ -50,8 +50,7 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Scalar RNG set
 /// \ingroup Random

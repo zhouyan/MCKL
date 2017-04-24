@@ -36,11 +36,9 @@
 #include <chrono>
 #include <ratio>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 #if MCKL_USE_RDPMC
 

@@ -37,11 +37,9 @@
 #include <mkl_version.h>
 #include <mkl_vsl.h>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 #if MCKL_NO_RUNTIME_ASSERT
 
@@ -694,8 +692,7 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     return is;
 }
 
-namespace internal
-{
+namespace internal {
 
 template <MKL_INT BRNG>
 class MKLMaxOffset : public std::integral_constant<MKL_INT, 0>
@@ -1147,8 +1144,7 @@ using MKL_NONDETERM = MKLEngine<VSL_BRNG_NONDETERM, 32>;
 /// \ingroup MKL
 using MKL_NONDETERM_64 = MKLEngine<VSL_BRNG_NONDETERM, 64>;
 
-namespace internal
-{
+namespace internal {
 
 template <typename RNGType>
 class MKLStreamState

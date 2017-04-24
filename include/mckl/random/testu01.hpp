@@ -41,8 +41,7 @@ extern "C" {
 
 } // extern "C"
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Perform TestU01 tests on different RNG and U01 types
 /// \ingroup RandomTest

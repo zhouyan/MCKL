@@ -38,11 +38,9 @@
 #include <omp.h>
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename IntType>
 inline void backend_omp_range(IntType N, IntType &ibegin, IntType &iend)

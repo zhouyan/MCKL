@@ -30,22 +30,35 @@
 # ============================================================================
 
 IncludeCategories :
-  - Regex:    '^<mckl/internal/config.*'
-    Priority: 1
-  - Regex:    '^<mckl/.*/internal/common.*'
-    Priority: 2
-  - Regex:    '^<mckl/.*/internal'
-    Priority: 3
-  - Regex:    '^<mckl/internal/common.*'
-    Priority: 4
-  - Regex:    '^<mckl/internal'
-    Priority: 5
-  - Regex:    '^<mckl/'
-    Priority: 6
-  - Regex:    '^<'
-    Priority: 7
-  - Regex:    '.\*'
-    Priority: 8
+    - Regex:    '^<mckl/internal/config.*'
+      Priority: 1
+    - Regex:    '^<mckl/.*/internal/common.*'
+      Priority: 2
+    - Regex:    '^<mckl/.*/internal'
+      Priority: 3
+    - Regex:    '^<mckl/internal/common.*'
+      Priority: 4
+    - Regex:    '^<mckl/internal'
+      Priority: 5
+    - Regex:    '^<mckl/'
+      Priority: 6
+    - Regex:    '^<'
+      Priority: 7
+    - Regex:    '.*'
+      Priority: 8
+
+BraceWrapping :
+    AfterClass            : true
+    AfterControlStatement : false
+    AfterEnum             : false
+    AfterFunction         : true
+    AfterNamespace        : false
+    AfterObjCDeclaration  : false
+    AfterStruct           : false
+    AfterUnion            : false
+    BeforeCatch           : false
+    BeforeElse            : false
+    IndentBraces          : false
 
 AccessModifierOffset                           : -2
 AlignAfterOpenBracket                          : false
@@ -66,10 +79,9 @@ AlwaysBreakBeforeMultilineStrings              : true
 AlwaysBreakTemplateDeclarations                : true
 BinPackArguments                               : true
 BinPackParameters                              : true
-# BraceWrapping                                  :
 BreakAfterJavaFieldAnnotations                 : false
 BreakBeforeBinaryOperators                     : None
-BreakBeforeBraces                              : Linux
+BreakBeforeBraces                              : Custom
 BreakBeforeTernaryOperators                    : false
 BreakConstructorInitializersBeforeComma        : true
 BreakStringLiterals                            : true

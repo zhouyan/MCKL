@@ -49,11 +49,9 @@
 #define MCKL_BLAS_INT int
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 using ::CblasRowMajor;
 using ::CblasColMajor;
@@ -157,11 +155,9 @@ void MCKL_BLAS_NAME(dsyrk)(const char *uplo, const char *trans,
 
 } // extern "C"
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 enum CBLAS_LAYOUT { CblasRowMajor = 101, CblasColMajor = 102 };
 

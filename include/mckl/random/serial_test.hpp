@@ -34,11 +34,9 @@
 
 #include <mckl/random/chi_squared_test.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <std::size_t, std::size_t, bool>
 class SerialTestImpl;

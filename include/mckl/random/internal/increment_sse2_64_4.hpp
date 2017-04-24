@@ -41,11 +41,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T>
 class IncrementBlockSI128<T, 1, 8, 64>

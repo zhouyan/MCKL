@@ -44,11 +44,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 MCKL_INLINE inline void cvtepu32_epi64(
     const std::array<__m128i, 2> &s, std::array<__m128i, 4> &t)

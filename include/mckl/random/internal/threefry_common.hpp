@@ -35,11 +35,9 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/threefry_constants.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, std::size_t K, typename Constants>
 class ThreefryPBox

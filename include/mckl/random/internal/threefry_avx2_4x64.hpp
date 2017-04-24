@@ -110,11 +110,9 @@
     MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_4X64_RBOX(N * 8 + 8);                  \
     MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_4X64_KBOX(N * 8 + 8);
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T>
 class Threefry4x64GeneratorAVX2Impl

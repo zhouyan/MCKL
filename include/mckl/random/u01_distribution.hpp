@@ -88,11 +88,9 @@
         name<UIntType, RealType>(n, s.data(), r);                             \
     }
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 #if MCKL_U01_USE_64BITS_DOUBLE
 

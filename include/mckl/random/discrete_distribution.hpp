@@ -35,8 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Draw a single sample given weights
 /// \ingroup Distribution

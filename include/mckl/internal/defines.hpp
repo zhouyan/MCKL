@@ -35,8 +35,7 @@
 #include <mckl/internal/config.h>
 #include <type_traits>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief A placeholder type
 /// \ingroup Definitions

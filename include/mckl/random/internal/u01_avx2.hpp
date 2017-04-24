@@ -543,11 +543,9 @@
 
 #endif // MCKL_USE_FMA
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper,
     int = std::numeric_limits<UIntType>::digits>

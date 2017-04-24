@@ -37,8 +37,7 @@
 
 #include <cmath>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Inverse complement error function
 /// \ingroup Special

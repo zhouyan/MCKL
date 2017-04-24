@@ -36,8 +36,7 @@
 #include <mckl/random/sampling_distribution.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Drawing a subset without replacement
 /// \ingroup Distribution

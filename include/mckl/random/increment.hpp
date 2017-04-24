@@ -43,11 +43,9 @@
 #include <mckl/random/internal/increment_avx2_64.hpp>
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, std::size_t K,
     bool = (sizeof(T) * K) % sizeof(std::uint8_t) == 0,

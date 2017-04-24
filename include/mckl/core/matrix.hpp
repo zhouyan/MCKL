@@ -35,8 +35,7 @@
 #include <mckl/internal/common.hpp>
 #include <mckl/core/iterator.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Matrix container
 /// \ingroup Core

@@ -62,8 +62,7 @@
         return val##l;                                                        \
     }
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Infinity
 /// \ingroup Constants

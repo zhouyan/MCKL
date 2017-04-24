@@ -66,8 +66,7 @@
 #include <mckl/random/rdrand.hpp>
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief The default 32-bit RNG
 /// \ingroup Random

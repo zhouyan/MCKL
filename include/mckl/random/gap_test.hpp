@@ -35,8 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/chi_squared_test.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Gap test
 /// \ingroup RandomTest

@@ -49,11 +49,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 class ThreefryGeneratorSSE2Impl64

@@ -36,11 +36,9 @@
 #include <mckl/random/u01_distribution.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename RealType>
 inline bool normal_distribution_check_param(RealType, RealType stddev)

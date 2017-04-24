@@ -85,11 +85,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <std::size_t Alignment, typename UIntType>
 inline constexpr std::size_t alignment_round0(UIntType n)

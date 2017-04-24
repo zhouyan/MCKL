@@ -35,11 +35,9 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/normal_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename RealType>
 inline bool lognormal_distribution_check_param(RealType, RealType s)

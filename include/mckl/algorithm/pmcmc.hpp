@@ -38,8 +38,7 @@
 #include <mckl/core/state_matrix.hpp>
 #include <mckl/random/rng.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 template <typename Param, MatrixLayout Layout, typename T, std::size_t Dim = 0>
 class PMCMCStateMatrix : public StateMatrix<Layout, T, Dim>

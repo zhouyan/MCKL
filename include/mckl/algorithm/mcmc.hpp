@@ -37,8 +37,7 @@
 #include <mckl/core/sampler.hpp>
 #include <mckl/random/rng.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief MCMC estimator
 /// \ingroup MCMC

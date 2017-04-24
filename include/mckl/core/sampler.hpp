@@ -35,8 +35,7 @@
 #include <mckl/internal/common.hpp>
 #include <mckl/core/matrix.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 template <typename>
 class SamplerTrait;

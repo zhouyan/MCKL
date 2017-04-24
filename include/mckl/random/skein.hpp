@@ -35,8 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/threefry.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Skein hash function
 /// \ingroup Random

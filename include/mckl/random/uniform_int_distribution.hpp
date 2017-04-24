@@ -35,11 +35,9 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename IntType>
 inline bool uniform_int_distribution_use_double_big(

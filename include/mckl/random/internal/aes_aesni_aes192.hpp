@@ -44,11 +44,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 class AES192KeySeqGeneratorAESNIImpl
 {

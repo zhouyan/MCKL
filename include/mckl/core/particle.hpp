@@ -38,8 +38,7 @@
 #include <mckl/random/rng_set.hpp>
 #include <mckl/random/seed.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 template <typename>
 class Particle;

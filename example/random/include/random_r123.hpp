@@ -46,8 +46,7 @@
 
 #include <Random123/conventional/Engine.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 using R123_Philox2x32 = r123::Engine<r123::Philox2x32>;
 using R123_Philox4x32 = r123::Engine<r123::Philox4x32>;

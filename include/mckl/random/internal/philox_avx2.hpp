@@ -35,11 +35,9 @@
 #include <mckl/random/internal/philox_avx2_32.hpp>
 #include <mckl/random/internal/philox_generic.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants,
     int = std::numeric_limits<T>::digits>

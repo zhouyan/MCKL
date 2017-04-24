@@ -38,11 +38,9 @@
 #include <algorithm>
 #include <cmath>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 static constexpr std::size_t gammap_approx_n = 18;
 

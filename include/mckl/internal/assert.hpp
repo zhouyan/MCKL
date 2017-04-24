@@ -47,8 +47,7 @@
 #pragma clang diagnostic ignored "-Wweak-vtables"
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
 class RuntimeAssert : public std::runtime_error
 {
@@ -100,8 +99,7 @@ inline void runtime_assert(bool cond, const std::string &msg)
     runtime_assert<Except>(cond, msg.c_str());
 }
 
-namespace internal
-{
+namespace internal {
 
 #if MCKL_NO_RUNTIME_ASSERT
 

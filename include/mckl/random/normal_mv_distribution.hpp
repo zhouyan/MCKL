@@ -35,11 +35,9 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/normal_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 inline void normal_mv_distribution_mulchol(
     std::size_t n, float *r, std::size_t dim, const float *chol)
