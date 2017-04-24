@@ -47,14 +47,14 @@ if(DEFINED JEMalloc_FOUND)
     return()
 endif(DEFINED JEMalloc_FOUND)
 
-if(${JEMalloc_ROOT})
-    if(NOT ${JEMalloc_INC_PATH})
+if(DEFINED JEMalloc_ROOT)
+    if(NOT DEFINED JEMalloc_INC_PATH)
         set(JEMalloc_INC_PATH ${JEMalloc_ROOT}/include)
-    endif(NOT ${JEMalloc_INC_PATH})
-    if(NOT ${JEMalloc_LIB_PATH})
+    endif(NOT DEFINED JEMalloc_INC_PATH)
+    if(NOT DEFINED JEMalloc_LIB_PATH)
         set(JEMalloc_LIB_PATH ${JEMalloc_ROOT}/lib)
-    endif(NOT ${JEMalloc_LIB_PATH})
-endif(${JEMalloc_ROOT})
+    endif(NOT DEFINED JEMalloc_LIB_PATH)
+endif(DEFINED JEMalloc_ROOT)
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/FindJEMalloc.cpp JEMalloc_TEST_SOURCE)
 
@@ -87,6 +87,8 @@ if(JEMalloc_INCLUDE_DIR AND JEMalloc_LINK_LIBRARIES)
     set(SAFE_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
     set(CMAKE_REQUIRED_DEFINITIONS ${SAFE_CMAKE_REQUIRED_DEFINITIONS}
         -DJEMALLOC_NO_DEMANGLE)
+    set(CMAKE_REQUIRED_INCLUDES ${SAFE_CMAKE_REQUIRED_INCLUDES}
+        ${JEMalloc_INCLUDE_DIR})
     set(CMAKE_REQUIRED_LIBRARIES ${SAFE_CMAKE_REQUIRED_LIBRARIES}
         ${JEMalloc_LINK_LIBRARIES})
     check_cxx_source_compiles("${JEMalloc_TEST_SOURCE}" JEMalloc_TEST)
