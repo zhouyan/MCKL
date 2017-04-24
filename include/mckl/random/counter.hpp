@@ -35,8 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/increment.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Counter based RNG engine
 /// \ingroup Random

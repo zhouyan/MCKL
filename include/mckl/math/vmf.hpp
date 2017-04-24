@@ -114,8 +114,7 @@
             reinterpret_cast<::MKL_Complex16 *>(y));                          \
     }
 
-namespace mckl
-{
+namespace mckl {
 
 MCKL_DEFINE_MATH_VMF_VML_2R(Add, add)
 MCKL_DEFINE_MATH_VMF_VML_2C(Add, add)
@@ -340,8 +339,7 @@ inline void modf(std::size_t n, const double *a, double *y, double *z)
         ::mckl_vd_##func(n, a, b, y);                                         \
     }
 
-namespace mckl
-{
+namespace mckl {
 
 #if !MCKL_USE_MKL_VML
 
@@ -471,8 +469,7 @@ MCKL_DEFINE_MATH_VMF_ASM_1D(log2)
         ::mckl_##op##_vss_pd(n, a, b, c, y);                                  \
     }
 
-namespace mckl
-{
+namespace mckl {
 
 MCKL_DEFINE_MATH_FMA_FMA(fmadd, muladd)
 MCKL_DEFINE_MATH_FMA_FMA(fmsub, mulsub)
@@ -601,8 +598,7 @@ MCKL_DEFINE_MATH_FMA_FMA(fnmsub, fnmsub)
             y[i] = op(a[i], b, c);                                            \
     }
 
-namespace mckl
-{
+namespace mckl {
 
 template <typename T>
 inline T mulbyconj(T a, T b)

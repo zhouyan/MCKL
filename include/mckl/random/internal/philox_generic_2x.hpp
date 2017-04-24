@@ -66,11 +66,9 @@
     std::get<0>(buf.s) = s0;                                                  \
     std::get<1>(buf.s) = s1;
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, typename Constants>
 class Philox2xGeneratorGenericImpl

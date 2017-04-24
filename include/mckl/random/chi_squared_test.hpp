@@ -34,8 +34,7 @@
 
 #include <mckl/random/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Tests based on the \f$\chi^2\f$-distribution
 /// \ingroup RandomTest

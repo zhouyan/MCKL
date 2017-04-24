@@ -109,11 +109,9 @@
     MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_4X32_RBOX(N * 8 + 8);                  \
     MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_4X32_KBOX(N * 8 + 8);
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T>
 class Threefry4x32GeneratorSSE2Impl

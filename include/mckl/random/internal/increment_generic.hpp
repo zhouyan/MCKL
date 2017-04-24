@@ -34,11 +34,9 @@
 
 #include <mckl/random/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <std::size_t, typename T, std::size_t K>
 inline void increment1(std::array<T, K> &, std::false_type)
@@ -191,8 +189,7 @@ inline void increment(std::array<T, K> &ctr, T nskip)
     }
 }
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, std::size_t K, std::size_t Blocks>
 class IncrementBlock

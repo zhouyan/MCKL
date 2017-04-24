@@ -34,8 +34,7 @@
 
 #include <mckl/smp/backend_base.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief SMCSampler<T>::eval_type subtype
 /// \ingroup SEQ

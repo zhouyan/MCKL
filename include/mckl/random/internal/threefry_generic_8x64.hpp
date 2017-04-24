@@ -139,11 +139,9 @@
     std::get<6>(buf.s) = s6;                                                  \
     std::get<7>(buf.s) = s7;
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T>
 class Threefry8x64GeneratorGenericImpl

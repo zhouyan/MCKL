@@ -45,11 +45,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, typename Constants>
 class Philox4x32GeneratorAVX2Impl

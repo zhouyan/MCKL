@@ -78,8 +78,7 @@
     Name##SMP<T, Derived, Backend##Impl> &operator=(                          \
         Name##SMP<T, Derived, Backend##Impl> &&) = default;
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief SMP implementation ID for sequential
 /// \ingroup SMP

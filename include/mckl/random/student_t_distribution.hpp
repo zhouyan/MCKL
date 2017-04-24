@@ -36,11 +36,9 @@
 #include <mckl/random/chi_squared_distribution.hpp>
 #include <mckl/random/normal_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename RealType>
 inline bool student_t_distribution_check_param(RealType n)

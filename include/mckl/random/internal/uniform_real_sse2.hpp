@@ -42,11 +42,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename UIntType, typename RealType,
     int = std::numeric_limits<UIntType>::digits>

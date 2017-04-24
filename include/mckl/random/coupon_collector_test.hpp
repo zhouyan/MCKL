@@ -36,8 +36,7 @@
 #include <mckl/random/chi_squared_test.hpp>
 #include <bitset>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Coupon collector's test
 /// \ingroup RandomTest

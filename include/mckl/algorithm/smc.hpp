@@ -39,8 +39,7 @@
 #include <mckl/core/sampler.hpp>
 #include <mckl/core/state_matrix.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief SMC estimator
 /// \ingroup SMC

@@ -36,8 +36,7 @@
 #include <mckl/random/poisson_test.hpp>
 #include <bitset>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Collision test
 /// \ingroup RandomTest

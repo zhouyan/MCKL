@@ -52,11 +52,9 @@
 #define MCKL_PHILOX_ROUNDS 10
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 #if MCKL_USE_AVX2
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>

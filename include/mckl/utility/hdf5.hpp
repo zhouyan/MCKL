@@ -55,11 +55,9 @@
         static void close(::hid_t id) { ::H5##CName##close(id); }             \
     };
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename Derived>
 class HDF5ID

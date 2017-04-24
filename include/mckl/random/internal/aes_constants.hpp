@@ -34,11 +34,9 @@
 
 #include <mckl/random/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 inline const std::uint32_t *aes_table()
 {

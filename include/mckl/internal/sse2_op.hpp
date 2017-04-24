@@ -42,11 +42,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <int imm8>
 MCKL_INLINE inline void slli_epi32(std::array<__m128i, 4> &s)

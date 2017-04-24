@@ -35,8 +35,7 @@
 #include <mckl/internal/common.hpp>
 #include <mckl/random/discrete_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Weights of samples
 /// \ingroup Core

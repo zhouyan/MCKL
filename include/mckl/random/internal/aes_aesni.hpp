@@ -48,11 +48,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename KeySeqType>
 class AESGeneratorAESNIImpl

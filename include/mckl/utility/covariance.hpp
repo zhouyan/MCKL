@@ -34,8 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Covariance
 /// \ingroup Covariance

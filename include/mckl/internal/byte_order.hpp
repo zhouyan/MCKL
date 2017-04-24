@@ -37,11 +37,9 @@
 #include <array>
 #include <climits>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 inline bool is_little_endian()
 {

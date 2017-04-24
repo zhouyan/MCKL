@@ -34,11 +34,9 @@
 
 #include <mckl/random/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <int W, typename UIntType>
 using U01UIntLeastType = std::conditional_t<W <= 32, std::uint32_t,

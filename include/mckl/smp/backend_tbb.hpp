@@ -36,11 +36,9 @@
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename IntType>
 inline ::tbb::blocked_range<IntType> backend_tbb_range(

@@ -34,11 +34,9 @@
 
 #include <mckl/random/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution_impl(

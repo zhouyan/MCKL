@@ -40,8 +40,7 @@
     template <typename T>                                                     \
     class Outer##Trait;                                                       \
                                                                               \
-    namespace internal                                                        \
-    {                                                                         \
+    namespace internal {                                                      \
                                                                               \
     template <typename T>                                                     \
     class Has##Outer##Impl                                                    \
@@ -103,8 +102,7 @@
     template <typename T>                                                     \
     class Outer##Trait;                                                       \
                                                                               \
-    namespace internal                                                        \
-    {                                                                         \
+    namespace internal {                                                      \
                                                                               \
     template <typename T>                                                     \
     class Has##Outer##Impl                                                    \
@@ -161,15 +159,13 @@
     template <typename T>                                                     \
     using Outer = typename Outer##Trait<T>::type;
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Particle::size_type etc., traits
 /// \ingroup Traits
 MCKL_DEFINE_TYPE_DISPATCH_TRAIT(SizeType, size_type, std::size_t)
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, std::size_t K = 1>
 class BufferSize

@@ -40,11 +40,9 @@
 #include <limits>
 #include <type_traits>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 class StirlingMatrix2
 {

@@ -35,11 +35,9 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename RealType>
 inline bool extreme_value_distribution_check_param(RealType, RealType b)

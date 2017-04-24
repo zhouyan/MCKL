@@ -42,11 +42,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 MCKL_INLINE inline void aesenc_si128(
     std::array<__m128i, 4> &s, const __m128i &a)

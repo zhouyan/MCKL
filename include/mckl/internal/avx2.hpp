@@ -48,11 +48,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 MCKL_INLINE inline void set_m128i(
     const std::array<__m128i, 8> &s, std::array<__m256i, 4> &t)

@@ -39,11 +39,9 @@
 #include <algorithm>
 #include <limits>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 inline double betai_acf(double a, double b, double x)
 {

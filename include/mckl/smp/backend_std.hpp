@@ -37,8 +37,7 @@
 #include <future>
 #include <thread>
 
-namespace mckl
-{
+namespace mckl {
 
 class BackendSTD
 {
@@ -65,8 +64,7 @@ class BackendSTD
     BackendSTD() : np_(std::thread::hardware_concurrency()) {}
 }; // class BackendSTD
 
-namespace internal
-{
+namespace internal {
 
 template <typename T>
 inline mckl::Vector<ParticleRange<T>> backend_std_range(Particle<T> &particle)

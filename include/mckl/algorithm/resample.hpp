@@ -36,8 +36,7 @@
 #include <mckl/core/particle.hpp>
 #include <mckl/random/u01_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Resampling schemes
 /// \ingroup Resample
@@ -59,8 +58,7 @@ constexpr ResampleScheme ResidualStratified =
 constexpr ResampleScheme ResidualSystematic =
     ResampleScheme::ResidualSystematic;
 
-namespace internal
-{
+namespace internal {
 
 template <std::size_t K, typename RealType>
 inline void u01_trans_sorted_impl(std::size_t n0, std::size_t n,

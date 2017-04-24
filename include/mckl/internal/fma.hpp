@@ -42,11 +42,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 MCKL_INLINE inline void fmadd_ps(
     std::array<__m256i, 4> &s, const __m256i &a, const __m256i &b)

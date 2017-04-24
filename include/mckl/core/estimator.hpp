@@ -35,8 +35,7 @@
 #include <mckl/internal/common.hpp>
 #include <mckl/core/estimate_matrix.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Estimator for iterative Monte Carlo algorithms
 /// \ingroup Core

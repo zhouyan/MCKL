@@ -41,11 +41,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <std::size_t Rounds, typename KeySeqGenerator>
 class AESKeySeqImpl

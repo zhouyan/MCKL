@@ -35,11 +35,9 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/gamma_distribution.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename RealType>
 inline bool dirichlet_distribution_check_param(

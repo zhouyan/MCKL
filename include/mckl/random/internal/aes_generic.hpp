@@ -36,11 +36,9 @@
 #include <mckl/random/internal/aes_constants.hpp>
 #include <mckl/random/increment.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 class AES128KeySeqGeneratorGenericImpl
 {

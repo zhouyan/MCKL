@@ -47,11 +47,9 @@
 #endif
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <std::size_t>
 class PhiloxGeneratorSSE2Impl32Permute;

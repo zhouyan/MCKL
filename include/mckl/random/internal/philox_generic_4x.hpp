@@ -78,11 +78,9 @@
     std::get<2>(buf.s) = s2;                                                  \
     std::get<3>(buf.s) = s3;
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, typename Constants>
 class Philox4xGeneratorGenericImpl

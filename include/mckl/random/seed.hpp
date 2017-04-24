@@ -49,8 +49,7 @@
 #define MCKL_SEED_ATOMIC 1
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Seed generator
 /// \ingroup Random

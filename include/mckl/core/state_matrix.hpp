@@ -36,8 +36,7 @@
 #include <mckl/core/matrix.hpp>
 #include <mckl/core/particle.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Particle::state_type subtype
 /// \ingroup Core

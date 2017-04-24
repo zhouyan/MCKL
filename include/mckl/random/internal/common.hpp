@@ -736,11 +736,9 @@
         return operator()(rng, dist);                                         \
     }
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 class DummyRNG
 {

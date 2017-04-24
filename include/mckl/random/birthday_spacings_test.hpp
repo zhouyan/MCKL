@@ -35,8 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/poisson_test.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Birthday spacings test
 /// \ingroup RandomTest

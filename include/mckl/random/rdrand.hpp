@@ -38,8 +38,7 @@
 #define MCKL_RDRAND_NTRIAL_MAX 0
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
 /// \brief Invoke the RDRAND instruction and return the carry flag
 /// \ingroup RDRAND

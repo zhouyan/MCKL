@@ -75,11 +75,9 @@
 #define MCKL_ARS_ROUNDS 5
 #endif
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 #if MCKL_USE_AESNI
 

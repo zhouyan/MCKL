@@ -34,11 +34,9 @@
 
 #include <mckl/random/internal/common.hpp>
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T, int = std::numeric_limits<T>::digits>
 class ThreefryConstantsParity;

@@ -196,11 +196,9 @@
     std::get<0xE>(buf.s) = sE;                                                \
     std::get<0xF>(buf.s) = sF;
 
-namespace mckl
-{
+namespace mckl {
 
-namespace internal
-{
+namespace internal {
 
 template <typename T>
 class Threefry16x64GeneratorGenericImpl
