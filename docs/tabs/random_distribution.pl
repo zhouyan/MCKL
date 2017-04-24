@@ -38,9 +38,9 @@ use utf8;
 
 system "mkdir -p random_distribution";
 
-my $llvm = "../../build/release-llvm";
-my $gcc = "../../build/release-gcc";
-my $intel = "../../build/release-intel";
+my $llvm = "../../build/LLVM-Release";
+my $gcc = "../../build/GCC-Release";
+my $intel = "../../build/Intel-Release";
 my $compiler = "llvm";
 my $scale = 3.8 / 2.6;
 GetOptions(
