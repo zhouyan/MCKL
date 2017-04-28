@@ -181,7 +181,7 @@ inline void math_fma(std::size_t N, std::size_t M)
 
     const int nwid = 15;
     const int twid = 10;
-    const int ewid = 15;
+    const int ewid = 12;
     const std::size_t lwid = nwid + twid * 4 + ewid * 4;
 
     std::cout << std::string(lwid, '=') << std::endl;
