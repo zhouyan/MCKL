@@ -1167,6 +1167,119 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
 
 /// @} vRounding
 
+/// \defgroup vFPClassify Floating point classification
+/// \ingroup VMF
+/// @{
+
+#if MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2
+
+#define MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(func)                             \
+    inline std::size_t func(std::size_t n, const float *a)                    \
+    {                                                                         \
+        return ::mckl_vs_##func(n, a);                                        \
+    }                                                                         \
+                                                                              \
+    inline std::size_t func(std::size_t n, const double *a)                   \
+    {                                                                         \
+        return ::mckl_vd_##func(n, a);                                        \
+    }
+
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_normal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_subnormal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_zero)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_inf)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_nan)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_finite)
+
+#endif // MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2
+
+#define MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(func, test)                      \
+    template <typename T>                                                     \
+    inline std::size_t find_##func(std::size_t n, const T *a)                 \
+    {                                                                         \
+        for (std::size_t i = 0; i != n; ++i, ++a)                             \
+            if (test(*a))                                                     \
+                return i;                                                     \
+        return n;                                                             \
+    }
+
+#define MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(func, test)                     \
+    template <typename T>                                                     \
+    inline std::size_t count_##func(std::size_t n, const T *a)                \
+    {                                                                         \
+        std::size_t c = 0;                                                    \
+        for (std::size_t i = 0; i != n; ++i, ++a)                             \
+            if (test(*a))                                                     \
+                ++c;                                                          \
+        return c;                                                             \
+    }
+
+namespace internal {
+
+template <typename T>
+bool issubnormal(T a)
+{
+    static_assert(std::is_floating_point<T>::value,
+        "checking for subnormal used with a type other than floating point");
+
+    T b = std::abs(a);
+
+    return b > 0 && b < std::numeric_limits<T>::min();
+}
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#endif
+template <typename T>
+bool iszero(T a)
+{
+    return a == 0;
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
+} // namespace mckl::internal
+
+/// \brief Return the index of the first element that is normal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(normal, std::isnormal)
+
+/// \brief Return the index of the first element that is subnormal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(subnormal, internal::issubnormal)
+
+/// \brief Return the index of the first element that is zero
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(zero, internal::iszero)
+
+/// \brief Return the index of the first element that is infinite
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(inf, std::isinf)
+
+/// \brief Return the index of the first element that is nan
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(nan, std::isnan)
+
+/// \brief Return the index of the first element that is finite
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(finite, std::isfinite)
+
+/// \brief Return the number of elements that are normal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(normal, std::isnormal)
+
+/// \brief Return the number of elements that are subnormal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(subnormal, internal::issubnormal)
+
+/// \brief Return the number of elements that are zero
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(zero, internal::iszero)
+
+/// \brief Return the number of elements that are infinite
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(inf, std::isinf)
+
+/// \brief Return the number of elements that are nan
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(nan, std::isnan)
+
+/// \brief Return the number of elements that are finite
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(finite, std::isfinite)
+
+/// @} vFPClassify
+
 } // namespace mckl
 
 #endif // MCKL_MATH_VMF_HPP

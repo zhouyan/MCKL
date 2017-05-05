@@ -32,7 +32,7 @@
 ; rdi:n
 ; rsi:a
 ; rdx:y
-%macro math_kernel_a1r1 2 ; function, operand size
+%macro math_kernel_a1r1 2 ; operand size, function
     test rdi, rdi
     jz .return
 
@@ -45,7 +45,8 @@
     test rdi, rdi
     jz .last
 
-.loop: align 16
+align 16
+.loop:
     %2 [rdx], [rsi]
     add rsi, 0x20
     add rdx, 0x20
@@ -72,7 +73,7 @@
 ; rsi:a
 ; rdx:y
 ; rcx:z
-%macro math_kernel_a1r2 2 ; function, operand size
+%macro math_kernel_a1r2 2 ; operand size, function
     test rdi, rdi
     jz .return
 
@@ -85,7 +86,8 @@
     test rdi, rdi
     jz .last
 
-.loop: align 16
+align 16
+.loop:
     %2 [rdx], [rcx], [rsi]
     add rsi, 0x20
     add rdx, 0x20
@@ -107,6 +109,7 @@
     vmaskmovps [rcx], ymm2, ymm1
 
 .return:
+    vzeroupper
     ret
 %endmacro
 

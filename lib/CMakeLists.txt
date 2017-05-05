@@ -34,6 +34,7 @@ project(MCKLLibrary C)
 include_directories(${PROJECT_SOURCE_DIR}/asm)
 
 set(MCKL_LIB_ASM ${MCKL_LIB_ASM}
+    ${PROJECT_SOURCE_DIR}/asm/fpclassify.asm
     ${PROJECT_SOURCE_DIR}/asm/sqrtf.asm
     ${PROJECT_SOURCE_DIR}/asm/sqrt.asm
     ${PROJECT_SOURCE_DIR}/asm/expf.asm

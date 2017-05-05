@@ -107,7 +107,8 @@ default rel
     test rdi, rdi
     jz .last
 
-.loop: align 16
+align 16
+.loop:
     vmovups ymm0, [rsi]
     vmovups ymm1, [rdx]
     v%{3}213p%2 ymm0, ymm1, [rcx]
@@ -149,7 +150,8 @@ default rel
     test rdi, rdi
     jz .last
 
-.loop: align 16
+align 16
+.loop:
     vmovups ymm1, [rsi]
     vmovups ymm2, [rdx]
     v%{3}%{4}p%2 %5, %6, %7
@@ -217,7 +219,8 @@ default rel
     test rdi, rdi
     jz .last
 
-.loop: align 16
+align 16
+.loop:
     vmovups ymm2, [rsi]
     v%{3}%{4}p%2 %5, %6, %7
     vmovups [rdx], %5

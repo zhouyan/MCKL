@@ -91,7 +91,8 @@ mckl_philox4x64_bmi2_kernel:
     vpshufd xmm11, xmm10, 0x4E ; multiplier[1]
     mov rcx, rsi ; n
 
-.loop: align 16
+align 16
+.loop:
     add r8, 1
     jnc .skip
     adc r9, 0

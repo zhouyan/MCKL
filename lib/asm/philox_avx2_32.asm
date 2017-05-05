@@ -191,7 +191,8 @@ default rel
     cmp rax, 0x100 / %1
     jl .last
 
-.loop: align 16
+align 16
+.loop:
     generate %1, %2, %3, %4
     vmovdqu [rdx + 0x00], ymm0
     vmovdqu [rdx + 0x20], ymm1

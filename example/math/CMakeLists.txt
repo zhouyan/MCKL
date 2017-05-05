@@ -34,6 +34,7 @@ project(MCKLExample-math CXX)
 mckl_add_example(math)
 
 mckl_add_test(math vmf)
+mckl_add_test(math fpclassify)
 
 if(AVX2_FOUND AND FMA_FOUND)
     mckl_add_test(math fma)

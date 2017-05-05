@@ -71,7 +71,8 @@ mckl_philox2x64_bmi2_kernel:
     mov rdx, [rcx] ; multiplier
     mov rcx, rsi ; n
 
-.loop: align 16
+align 16
+.loop:
     add r8, 1
     adc r9, 0
     mov r10, r8

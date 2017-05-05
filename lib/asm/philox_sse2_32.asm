@@ -209,7 +209,8 @@ default rel
     cmp rax, 0x80 / %1
     jl .last
 
-.loop: align 16
+align 16
+.loop:
     generate %1, %2, %3, %4
     movdqu [rdx + 0x00], xmm0
     movdqu [rdx + 0x10], xmm1

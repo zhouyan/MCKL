@@ -167,6 +167,20 @@ void mckl_fnmsub_ssv_pd(size_t, double, double, const double *, double *);
 void mckl_fnmsub_svs_pd(size_t, double, const double *, double, double *);
 void mckl_fnmsub_vss_pd(size_t, const double *, double, double, double *);
 
+// fpclassify_avx2.asm
+size_t mckl_vs_count_normal(size_t, const float *);
+size_t mckl_vd_count_normal(size_t, const double *);
+size_t mckl_vs_count_subnormal(size_t, const float *);
+size_t mckl_vd_count_subnormal(size_t, const double *);
+size_t mckl_vs_count_zero(size_t, const float *);
+size_t mckl_vd_count_zero(size_t, const double *);
+size_t mckl_vs_count_inf(size_t, const float *);
+size_t mckl_vd_count_inf(size_t, const double *);
+size_t mckl_vs_count_nan(size_t, const float *);
+size_t mckl_vd_count_nan(size_t, const double *);
+size_t mckl_vs_count_finite(size_t, const float *);
+size_t mckl_vd_count_finite(size_t, const double *);
+
 // aes_aesni_sse2.asm
 void mckl_aes128_aesni_sse2_kernel(uint64_t *, size_t, void *, const void *);
 void mckl_aes192_aesni_sse2_kernel(uint64_t *, size_t, void *, const void *);
