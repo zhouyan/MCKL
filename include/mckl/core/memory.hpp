@@ -74,10 +74,10 @@
 /// \brief Default allocation type
 /// \ingroup Config
 #ifndef MCKL_MEMORY_TYPE
-#if MCKL_USE_JEMALLOC
-#define MCKL_MEMORY_TYPE ::mckl::MemoryJEM
-#elif MCKL_USE_TBB_MALLOC
+#if MCKL_USE_TBB_MALLOC
 #define MCKL_MEMORY_TYPE ::mckl::MemoryTBB
+#elif MCKL_USE_JEMALLOC
+#define MCKL_MEMORY_TYPE ::mckl::MemoryJEM
 #elif MCKL_HAS_POSIX || defined(MCKL_MSVC)
 #define MCKL_MEMORY_TYPE ::mckl::MemorySYS
 #else
