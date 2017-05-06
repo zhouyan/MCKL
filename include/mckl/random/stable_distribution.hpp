@@ -69,7 +69,7 @@ class StableDistributionConstant
         RealType alpha = 1, RealType beta = 0, RealType = 0, RealType b = 1)
     {
         algorithm_ = alpha == 1 ? StableDistributionAlgorithm1 :
-                                  algorithm_ = StableDistributionAlgorithmA;
+                                  StableDistributionAlgorithmA;
 
         RealType zeta = -beta * std::tan(const_pi_by2<RealType>() * alpha);
         xi_ = c_ = 0;
