@@ -954,7 +954,7 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
             return trait.partition(
                 n, mckl::NormalDistribution<RealType>(
                        0, std::sqrt(static_cast<RealType>(2))));
-        } else if (mckl::internal::is_one(dist.alpha())) {
+        } else if (dist.alpha() == 1) {
             RandomDistributionTrait<mckl::CauchyDistribution<RealType>> trait;
             return trait.partition(
                 n, mckl::CauchyDistribution<RealType>(0, 1));

@@ -46,9 +46,7 @@ inline bool random_u01_check_lb(RealType x)
 template <typename Upper, typename RealType>
 inline bool random_u01_check_ub(RealType x)
 {
-    return std::is_same<Upper, mckl::Closed>::value ?
-        mckl::internal::is_one(x) :
-        x < 1;
+    return std::is_same<Upper, mckl::Closed>::value ? x == 1 : x < 1;
 }
 
 template <typename RealType>
@@ -67,7 +65,7 @@ template <typename RealType>
 inline std::string random_u01_maximum(RealType x)
 {
     std::stringstream ss;
-    if (mckl::internal::is_one(x))
+    if (x == 1)
         ss << 1;
     else
         ss << "1 - 2^" << std::log2(static_cast<RealType>(1) - x);
