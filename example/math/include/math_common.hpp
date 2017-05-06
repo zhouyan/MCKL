@@ -75,7 +75,7 @@ inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
         return;
     }
 
-    if (mckl::internal::is_zero(x)) {
+    if (x == 0) {
         os << x;
         return;
     }
@@ -84,32 +84,32 @@ inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
     constexpr T fmax = std::numeric_limits<T>::max();
     constexpr T feps = std::numeric_limits<T>::epsilon();
 
-    if (mckl::internal::is_equal(x, -fmin)) {
+    if (x == -fmin) {
         os << "-" + prefix + "MIN";
         return;
     }
 
-    if (mckl::internal::is_equal(x, fmin)) {
+    if (x == fmin) {
         os << prefix + "MIN";
         return;
     }
 
-    if (mckl::internal::is_equal(x, -fmax)) {
+    if (x == -fmax) {
         os << "-" + prefix + "MAX";
         return;
     }
 
-    if (mckl::internal::is_equal(x, fmax)) {
+    if (x == fmax) {
         os << prefix + "MAX";
         return;
     }
 
-    if (mckl::internal::is_equal(x, -feps)) {
+    if (x == -feps) {
         os << "-" + prefix + "EPS";
         return;
     }
 
-    if (mckl::internal::is_equal(x, feps)) {
+    if (x == feps) {
         os << prefix + "EPS";
         return;
     }

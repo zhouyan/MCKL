@@ -89,7 +89,7 @@ class LevyDistribution
     result_type generate(RNGType &rng, const param_type &param)
     {
         result_type r = 0;
-        while (internal::is_zero(r))
+        while (r == 0)
             r = normal_(rng);
 
         return param.a() + param.b() / (r * r);

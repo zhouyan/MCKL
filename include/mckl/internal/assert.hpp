@@ -143,54 +143,6 @@ inline void size_check(SizeType n, const char *f)
 #endif // MCKL_NO_RUNTIME_ASSERT
 
 template <typename T>
-inline bool is_equal(const T &a, const T &b, std::true_type)
-{
-    return !(std::isnan(a) || std::isnan(b) || a < b || a > b);
-}
-
-template <typename T>
-inline bool is_equal(const T &a, const T &b, std::false_type)
-{
-    return a == b;
-}
-
-template <typename T>
-inline bool is_equal(const T &a, const T &b)
-{
-    return is_equal(a, b, std::is_floating_point<T>());
-}
-
-template <typename T>
-inline bool is_zero(const T &a)
-{
-    return is_equal(a, static_cast<T>(0));
-}
-
-template <typename T>
-inline bool is_one(const T &a)
-{
-    return is_equal(a, static_cast<T>(1));
-}
-
-template <typename T>
-inline bool is_negative(const T &, std::true_type)
-{
-    return false;
-}
-
-template <typename T>
-inline bool is_negative(const T &a, std::false_type)
-{
-    return a < 0;
-}
-
-template <typename T>
-inline bool is_negative(const T &a)
-{
-    return is_negative(a, std::is_unsigned<T>());
-}
-
-template <typename T>
 inline bool is_nullptr(T ptr, std::true_type)
 {
     return ptr == nullptr;

@@ -1248,18 +1248,11 @@ bool issubnormal(T a)
     return b > 0 && b < std::numeric_limits<T>::min();
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wfloat-equal"
-#endif
 template <typename T>
 bool iszero(T a)
 {
     return a == 0;
 }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
 } // namespace mckl::internal
 

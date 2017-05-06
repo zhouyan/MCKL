@@ -100,7 +100,7 @@ class StudentTDistribution
     {
         result_type z = normal_(rng);
         result_type u = const_inf<result_type>();
-        if (internal::is_equal(param.n(), param_.n())) {
+        if (param.n() != param_.n()) {
             while (!std::isfinite(u))
                 u = n() / chi_squared_(rng);
         } else {

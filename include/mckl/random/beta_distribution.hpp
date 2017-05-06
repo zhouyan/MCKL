@@ -67,14 +67,14 @@ class BetaDistributionConstant
         const RealType K = static_cast<RealType>(0.852);
         const RealType C = static_cast<RealType>(-0.956);
         const RealType D = beta + K * alpha * alpha + C;
-        if (is_equal(alpha, static_cast<RealType>(0.5)) &&
-            is_equal(beta, static_cast<RealType>(0.5)))
+        if (alpha == static_cast<RealType>(0.5) &&
+            beta == static_cast<RealType>(0.5))
             algorithm_ = BetaDistributionAlgorithmAS;
-        else if (is_one(alpha) && is_one(beta))
+        else if (a == 1 && beta == 1)
             algorithm_ = BetaDistributionAlgorithm11;
-        else if (is_one(alpha))
+        else if (alpha == 1)
             algorithm_ = BetaDistributionAlgorithm1X;
-        else if (is_one(beta))
+        else if (beta == 1)
             algorithm_ = BetaDistributionAlgorithmX1;
         else if (alpha > 1 && beta > 1)
             algorithm_ = BetaDistributionAlgorithmC;
@@ -150,15 +150,15 @@ class BetaDistributionConstant
     friend bool operator==(const BetaDistribution<RealType> &c1,
         const BetaDistributionConstant<RealType> &c2)
     {
-        if (!is_equal(c1.a_, c2.a_))
+        if (c1.a_ != c2.a_)
             return false;
-        if (!is_equal(c1.b_, c2.b_))
+        if (c1.b_ != c2.b_)
             return false;
-        if (!is_equal(c1.t_, c2.t_))
+        if (c1.t_ != c2.t_)
             return false;
-        if (!is_equal(c1.p_, c2.p_))
+        if (c1.p_ != c2.p_)
             return false;
-        if (!is_equal(c1.algorithm_, c2.algorithm_))
+        if (c1.algorithm_ != c2.algorithm_)
             return false;
         return true;
     }

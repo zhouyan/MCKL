@@ -949,7 +949,7 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
-        if (mckl::internal::is_equal(dist.alpha(), static_cast<RealType>(2))) {
+        if (dist.alpha() == 2) {
             RandomDistributionTrait<mckl::NormalDistribution<RealType>> trait;
             return trait.partition(
                 n, mckl::NormalDistribution<RealType>(

@@ -60,9 +60,9 @@ inline void normal_distribution_impl(
     sqrt(nu, s.data(), s.data());
     mul(nu, const_pi_2<RealType>(), u2, u2);
     sincos(nu, u2, u1, u2);
-    if (!is_one(stddev))
+    if (stddev != 1)
         mul(nu, stddev, s.data(), s.data());
-    if (!is_zero(mean)) {
+    if (mean != 0) {
         muladd(nu, s.data(), u1, mean, u1);
         muladd(nu, s.data(), u2, mean, u2);
     } else {

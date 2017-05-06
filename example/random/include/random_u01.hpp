@@ -40,9 +40,7 @@
 template <typename Lower, typename RealType>
 inline bool random_u01_check_lb(RealType x)
 {
-    return std::is_same<Lower, mckl::Closed>::value ?
-        mckl::internal::is_zero(x) :
-        x > 0;
+    return std::is_same<Lower, mckl::Closed>::value ? x == 0 : x > 0;
 }
 
 template <typename Upper, typename RealType>
@@ -57,7 +55,7 @@ template <typename RealType>
 inline std::string random_u01_minimum(RealType x)
 {
     std::stringstream ss;
-    if (mckl::internal::is_zero(x))
+    if (x == 0)
         ss << 0;
     else
         ss << "2^" << std::log2(x);

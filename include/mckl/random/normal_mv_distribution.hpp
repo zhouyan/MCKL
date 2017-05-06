@@ -83,7 +83,7 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
         for (std::size_t j = 0; j <= i; ++j)
             cholf[i * dim + j] = *chol++;
     internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
-    if (!internal::is_zero(mean))
+    if (mean != 0)
         add(n * dim, mean, r, r);
 }
 
@@ -439,7 +439,7 @@ class NormalMVDistribution
             for (std::size_t i = 0; i != param.dim(); ++i)
                 r[i] = normal(rng);
             mulchol(r, param);
-            if (!internal::is_zero(param.mean()[0]))
+            if (param.mean()[0] != 0)
                 add<result_type>(param.dim(), param.mean(), r, r);
         } else if (!param.is_scalar_mean_ && param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(0, param.chol()[0]);

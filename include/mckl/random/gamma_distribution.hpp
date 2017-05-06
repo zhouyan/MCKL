@@ -94,11 +94,11 @@ class GammaDistributionConstant
     friend bool operator==(const GammaDistributionConstant<RealType> &c1,
         const GammaDistributionConstant<RealType> &c2)
     {
-        if (!is_equal(c1.d_, c2.d_))
+        if (c1.d_ != c2.d_)
             return false;
-        if (!is_equal(c1.c_, c2.c_))
+        if (c1.c_ != c2.c_)
             return false;
-        if (!is_equal(c1.algorithm_, c2.algorithm_))
+        if (c1.algorithm_ != c2.algorithm_)
             return false;
         return true;
     }

@@ -208,7 +208,7 @@
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
-            if (!::mckl::internal::is_equal(param1.p1##_, param2.p1##_))      \
+            if (param1.p1##_ != param2.p1##_)                                 \
                 return false;                                                 \
             return true;                                                      \
         }                                                                     \
@@ -281,9 +281,9 @@
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
-            if (!::mckl::internal::is_equal(param1.p1##_, param2.p1##_))      \
+            if (param1.p1##_ != param2.p1##_)                                 \
                 return false;                                                 \
-            if (!::mckl::internal::is_equal(param1.p2##_, param2.p2##_))      \
+            if (param1.p2##_ != param2.p2##_)                                 \
                 return false;                                                 \
             return true;                                                      \
         }                                                                     \
@@ -366,13 +366,13 @@
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
-            if (!::mckl::internal::is_equal(param1.p1##_, param2.p1##_))      \
+            if (param1.p1##_ != param2.p1##_)                                 \
                 return false;                                                 \
-            if (!::mckl::internal::is_equal(param1.p2##_, param2.p2##_))      \
+            if (param1.p2##_ != param2.p2##_)                                 \
                 return false;                                                 \
-            if (!::mckl::internal::is_equal(param1.p3##_, param2.p3##_))      \
+            if (param1.p3##_ != param2.p3##_)                                 \
                 return false;                                                 \
-            if (!::mckl::internal::is_equal(param1.p4##_, param2.p4##_))      \
+            if (param1.p4##_ != param2.p4##_)                                 \
                 return false;                                                 \
             return true;                                                      \
         }                                                                     \
@@ -541,7 +541,7 @@
                                                                               \
     bool is_equal(const distribution_type &other) const                       \
     {                                                                         \
-        if (!::mckl::internal::is_equal(m1, other.m1))                        \
+        if (m1 != other.m1)                                                   \
             return false;                                                     \
         return true;                                                          \
     }                                                                         \
@@ -575,9 +575,9 @@
                                                                               \
     bool is_equal(const distribution_type &other) const                       \
     {                                                                         \
-        if (!::mckl::internal::is_equal(m1, other.m1))                        \
+        if (m1 != other.m1)                                                   \
             return false;                                                     \
-        if (!::mckl::internal::is_equal(m2, other.m2))                        \
+        if (m2 != other.m2)                                                   \
             return false;                                                     \
         return true;                                                          \
     }                                                                         \

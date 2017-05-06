@@ -68,10 +68,8 @@ class StableDistributionConstant
     StableDistributionConstant(
         RealType alpha = 1, RealType beta = 0, RealType = 0, RealType b = 1)
     {
-        if (is_one(alpha))
-            algorithm_ = StableDistributionAlgorithm1;
-        else
-            algorithm_ = StableDistributionAlgorithmA;
+        algorithm_ = alpha == 1 ? StableDistributionAlgorithm1 :
+                                  algorithm_ = StableDistributionAlgorithmA;
 
         RealType zeta = -beta * std::tan(const_pi_by2<RealType>() * alpha);
         xi_ = c_ = 0;
@@ -94,11 +92,11 @@ class StableDistributionConstant
     friend bool operator==(const StableDistributionConstant<RealType> &c1,
         const StableDistributionConstant<RealType> &c2)
     {
-        if (!is_equal(c1.xi_, c2.xi_))
+        if (c1.xi_ != c2.xi_)
             return false;
-        if (!is_equal(c1.c_, c2.c_))
+        if (c1.c_ != c2.c_)
             return false;
-        if (!is_equal(c1.algorithm_, c2.algorithm_))
+        if (c1.algorithm_ != c2.algorithm_)
             return false;
         return true;
     }

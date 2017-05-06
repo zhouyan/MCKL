@@ -52,7 +52,7 @@ inline void weibull_distribution_impl(
 {
     u01_oo_distribution(rng, n, r);
     log(n, r, r);
-    if (is_one(a)) {
+    if (a == 1) {
         mul(n, -b, r, r);
     } else {
         mul(n, static_cast<RealType>(-1), r, r);
@@ -89,7 +89,7 @@ class WeibullDistribution
     {
         U01OODistribution<RealType> u01;
 
-        return internal::is_one(param.a()) ?
+        return param.a() == 1 ?
             -param.b() * std::log(u01(rng)) :
             param.b() * std::pow(-std::log(u01(rng)), 1 / param.a());
     }
