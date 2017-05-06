@@ -70,7 +70,7 @@ class BetaDistributionConstant
         if (alpha == static_cast<RealType>(0.5) &&
             beta == static_cast<RealType>(0.5))
             algorithm_ = BetaDistributionAlgorithmAS;
-        else if (a == 1 && beta == 1)
+        else if (alpha == 1 && beta == 1)
             algorithm_ = BetaDistributionAlgorithm11;
         else if (alpha == 1)
             algorithm_ = BetaDistributionAlgorithm1X;

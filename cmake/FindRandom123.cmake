@@ -40,11 +40,18 @@
 #
 # The following variables affect the behavior of this module
 #
+# Random123_ROOT     - The root path that CMake shall try
 # Random123_INC_PATH - The path CMake shall try to find headers first
 
 if(DEFINED Random123_FOUND)
     return()
 endif(DEFINED Random123_FOUND)
+
+if(DEFINED Random123_ROOT)
+    if(NOT DEFINED Random123_INC_PATH)
+        set(Random123_INC_PATH ${Random123_ROOT}/include)
+    endif(NOT DEFINED Random123_INC_PATH)
+endif(DEFINED Random123_ROOT)
 
 if(NOT DEFINED Random123_INCLUDE_DIR)
     find_path(Random123_INCLUDE_DIR Random123/aes.h
