@@ -1238,7 +1238,7 @@ MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_finite)
 namespace internal {
 
 template <typename T>
-bool issubnormal(T a)
+inline issubnormal(T a)
 {
     static_assert(std::is_floating_point<T>::value,
         "checking for subnormal used with a type other than floating point");
@@ -1249,7 +1249,7 @@ bool issubnormal(T a)
 }
 
 template <typename T>
-bool iszero(T a)
+inline bool iszero(T a)
 {
     return a == 0;
 }
