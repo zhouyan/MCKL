@@ -29,6 +29,20 @@
 ;; POSSIBILITY OF SUCH DAMAGE.
 ;;============================================================================
 
+global mckl_vs_find_normal
+global mckl_vs_find_subnormal
+global mckl_vs_find_zero
+global mckl_vs_find_inf
+global mckl_vs_find_nan
+global mckl_vs_find_finite
+
+global mckl_vd_find_normal
+global mckl_vd_find_subnormal
+global mckl_vd_find_zero
+global mckl_vd_find_inf
+global mckl_vd_find_nan
+global mckl_vd_find_finite
+
 global mckl_vs_count_normal
 global mckl_vs_count_subnormal
 global mckl_vs_count_zero
@@ -172,6 +186,116 @@ section .rodata
 ; rdi:n
 ; rsi:a
 ; rax:retrun
+%macro find_kernel 2 ; operand size, function
+    xor rcx, rcx
+    test rdi, rdi
+    jz .return
+
+    %{2}_constants
+
+    mov rax, rdi
+    and rax, (0x20 /  %1) - 1
+    sub rdi, rax
+
+    test rdi, rdi
+    jz .last
+
+align 16
+.loop:
+    vmovups ymm0, [rsi]
+    %2 ymm0
+%if %1 == 4
+    vtestps ymm0, ymm0
+%endif
+%if %1 == 8
+    vtestpd ymm0, ymm0
+%endif
+    jnz .index
+    add rcx, 0x20 / %1
+    add rsi, 0x20
+    sub rdi, 0x20 / %1
+    jnz .loop
+
+.last:
+    test rax, rax
+    jz .return
+    lea rdi, [mask%1]
+    shl rax, 5
+    add rax, rdi
+    vmovdqa ymm1, [rax]
+    vmaskmovps ymm0, ymm1, [rsi]
+    %2 ymm0
+    vandps ymm0, ymm0, ymm1
+%if %1 == 4
+    vtestps ymm0, ymm0
+%endif
+%if %1 == 8
+    vtestpd ymm0, ymm0
+%endif
+
+.index:
+    vmovdqu [rsp - 0x20], ymm0
+    vzeroupper
+%if %1 == 4
+    mov eax, [rsp - 4 * 8]
+    test eax, eax
+    jnz .return
+    inc rcx
+    mov eax, [rsp - 4 * 7]
+    test eax, eax
+    jnz .return
+    inc rcx
+    mov eax, [rsp - 4 * 6]
+    test eax, eax
+    jnz .return
+    inc rcx
+    mov eax, [rsp - 4 * 5]
+    test eax, eax
+    jnz .return
+    inc rcx
+    mov eax, [rsp - 4 * 4]
+    test eax, eax
+    jnz .return
+    inc rcx
+    mov eax, [rsp - 4 * 3]
+    test eax, eax
+    jnz .return
+    inc rcx
+    mov eax, [rsp - 4 * 2]
+    test eax, eax
+    jnz .return
+    inc rcx
+    mov eax, [rsp - 4 * 1]
+    test eax, eax
+    jnz .return
+    inc rcx
+%endif
+%if %1 == 8
+    mov rax, [rsp - 8 * 4]
+    test rax, rax
+    jnz .return
+    inc rcx
+    mov rax, [rsp - 8 * 3]
+    test rax, rax
+    jnz .return
+    inc rcx
+    mov rax, [rsp - 8 * 2]
+    test rax, rax
+    jnz .return
+    inc rcx
+    mov rax, [rsp - 8 * 1]
+    test rax, rax
+    jnz .return
+    inc rcx
+%endif
+.return:
+    mov rax, rcx
+    ret
+%endmacro
+
+; rdi:n
+; rsi:a
+; rax:retrun
 %macro count_kernel 2 ; operand size, function
     vpxor ymm0, ymm0, ymm0
     test rdi, rdi
@@ -275,6 +399,20 @@ dq ~0, ~0, ~0,  0
 mask32: times 4 dq 0x00000000FFFFFFFF
 
 section .text
+
+mckl_vs_find_normal:    find_kernel 4, is_vs_normal
+mckl_vs_find_subnormal: find_kernel 4, is_vs_subnormal
+mckl_vs_find_zero:      find_kernel 4, is_vs_zero
+mckl_vs_find_inf:       find_kernel 4, is_vs_inf
+mckl_vs_find_nan:       find_kernel 4, is_vs_nan
+mckl_vs_find_finite:    find_kernel 4, is_vs_finite
+
+mckl_vd_find_normal:    find_kernel 8, is_vd_normal
+mckl_vd_find_subnormal: find_kernel 8, is_vd_subnormal
+mckl_vd_find_zero:      find_kernel 8, is_vd_zero
+mckl_vd_find_inf:       find_kernel 8, is_vd_inf
+mckl_vd_find_nan:       find_kernel 8, is_vd_nan
+mckl_vd_find_finite:    find_kernel 8, is_vd_finite
 
 mckl_vs_count_normal:    count_kernel 4, is_vs_normal
 mckl_vs_count_subnormal: count_kernel 4, is_vs_subnormal

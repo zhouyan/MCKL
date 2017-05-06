@@ -1184,6 +1184,12 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
         return ::mckl_vd_##func(n, a);                                        \
     }
 
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_normal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_subnormal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_zero)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_inf)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_nan)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_finite)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_normal)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_subnormal)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_zero)

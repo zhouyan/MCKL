@@ -168,6 +168,18 @@ void mckl_fnmsub_svs_pd(size_t, double, const double *, double, double *);
 void mckl_fnmsub_vss_pd(size_t, const double *, double, double, double *);
 
 // fpclassify_avx2.asm
+size_t mckl_vs_find_normal(size_t, const float *);
+size_t mckl_vd_find_normal(size_t, const double *);
+size_t mckl_vs_find_subnormal(size_t, const float *);
+size_t mckl_vd_find_subnormal(size_t, const double *);
+size_t mckl_vs_find_zero(size_t, const float *);
+size_t mckl_vd_find_zero(size_t, const double *);
+size_t mckl_vs_find_inf(size_t, const float *);
+size_t mckl_vd_find_inf(size_t, const double *);
+size_t mckl_vs_find_nan(size_t, const float *);
+size_t mckl_vd_find_nan(size_t, const double *);
+size_t mckl_vs_find_finite(size_t, const float *);
+size_t mckl_vd_find_finite(size_t, const double *);
 size_t mckl_vs_count_normal(size_t, const float *);
 size_t mckl_vd_count_normal(size_t, const double *);
 size_t mckl_vs_count_subnormal(size_t, const float *);
