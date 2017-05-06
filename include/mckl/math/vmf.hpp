@@ -1190,12 +1190,27 @@ MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_zero)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_inf)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_nan)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_finite)
+
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_normal)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_subnormal)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_zero)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_inf)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_nan)
 MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_finite)
+
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_not_normal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_not_subnormal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_not_zero)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_not_inf)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_not_nan)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(find_not_finite)
+
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_normal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_subnormal)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_zero)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_inf)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_nan)
+MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_finite)
 
 #endif // MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2
 
@@ -1257,7 +1272,7 @@ MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(subnormal, internal::issubnormal)
 /// \brief Return the index of the first element that is zero
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(zero, internal::iszero)
 
-/// \brief Return the index of the first element that is infinite
+/// \brief Return the index of the first element that is infinity
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(inf, std::isinf)
 
 /// \brief Return the index of the first element that is nan
@@ -1275,7 +1290,7 @@ MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(subnormal, internal::issubnormal)
 /// \brief Return the number of elements that are zero
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(zero, internal::iszero)
 
-/// \brief Return the number of elements that are infinite
+/// \brief Return the number of elements that are infinity
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(inf, std::isinf)
 
 /// \brief Return the number of elements that are nan
@@ -1283,6 +1298,42 @@ MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(nan, std::isnan)
 
 /// \brief Return the number of elements that are finite
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(finite, std::isfinite)
+
+/// \brief Return the index of the first element that is not normal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_normal, !std::isnormal)
+
+/// \brief Return the index of the first element that is not subnormal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_subnormal, !internal::issubnormal)
+
+/// \brief Return the index of the first element that is not zero
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_zero, !internal::iszero)
+
+/// \brief Return the index of the first element that is not infinity
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_inf, !std::isinf)
+
+/// \brief Return the index of the first element that is not nan
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_nan, !std::isnan)
+
+/// \brief Return the index of the first element that is not finite
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_finite, !std::isfinite)
+
+/// \brief Return the number of elements that are not normal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_normal, !std::isnormal)
+
+/// \brief Return the number of elements that are not subnormal
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_subnormal, !internal::issubnormal)
+
+/// \brief Return the number of elements that are not zero
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_zero, !internal::iszero)
+
+/// \brief Return the number of elements that are not infinity
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_inf, !std::isinf)
+
+/// \brief Return the number of elements that are not nan
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_nan, !std::isnan)
+
+/// \brief Return the number of elements that are not finite
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_finite, !std::isfinite)
 
 /// @} vFPClassify
 

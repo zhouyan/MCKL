@@ -57,6 +57,34 @@ global mckl_vd_count_inf
 global mckl_vd_count_nan
 global mckl_vd_count_finite
 
+global mckl_vs_find_not_normal
+global mckl_vs_find_not_subnormal
+global mckl_vs_find_not_zero
+global mckl_vs_find_not_inf
+global mckl_vs_find_not_nan
+global mckl_vs_find_not_finite
+
+global mckl_vd_find_not_normal
+global mckl_vd_find_not_subnormal
+global mckl_vd_find_not_zero
+global mckl_vd_find_not_inf
+global mckl_vd_find_not_nan
+global mckl_vd_find_not_finite
+
+global mckl_vs_count_not_normal
+global mckl_vs_count_not_subnormal
+global mckl_vs_count_not_zero
+global mckl_vs_count_not_inf
+global mckl_vs_count_not_nan
+global mckl_vs_count_not_finite
+
+global mckl_vd_count_not_normal
+global mckl_vd_count_not_subnormal
+global mckl_vd_count_not_zero
+global mckl_vd_count_not_inf
+global mckl_vd_count_not_nan
+global mckl_vd_count_not_finite
+
 default rel
 
 section .rodata
@@ -186,12 +214,15 @@ section .rodata
 ; rdi:n
 ; rsi:a
 ; rax:retrun
-%macro find_kernel 2 ; operand size, function
+%macro find_kernel 3 ; operand size, negation, function
     xor rcx, rcx
     test rdi, rdi
     jz .return
 
-    %{2}_constants
+    %{3}_constants
+%if %2 != 0
+    vmovaps ymm15, [true]
+%endif
 
     mov rax, rdi
     and rax, (0x20 /  %1) - 1
@@ -203,7 +234,10 @@ section .rodata
 align 16
 .loop:
     vmovups ymm0, [rsi]
-    %2 ymm0
+    %3 ymm0
+%if %2 != 0
+    vandnps ymm0, ymm0, ymm15
+%endif
 %if %1 == 4
     vtestps ymm0, ymm0
 %endif
@@ -224,7 +258,7 @@ align 16
     add rax, rdi
     vmovdqa ymm1, [rax]
     vmaskmovps ymm0, ymm1, [rsi]
-    %2 ymm0
+    %3 ymm0
     vandps ymm0, ymm0, ymm1
 %if %1 == 4
     vtestps ymm0, ymm0
@@ -296,15 +330,18 @@ align 16
 ; rdi:n
 ; rsi:a
 ; rax:retrun
-%macro count_kernel 2 ; operand size, function
+%macro count_kernel 3 ; operand size, negation, function
     vpxor ymm0, ymm0, ymm0
     test rdi, rdi
     jz .return
 
-    %{2}_constants
+    %{3}_constants
 
 %if %1 == 4
     vmovdqa ymm4, [mask32]
+%endif
+%if %2 != 0
+    vmovaps ymm15, [true]
 %endif
 
     mov rax, rdi
@@ -317,7 +354,10 @@ align 16
 align 16
 .loop:
     vmovups ymm1, [rsi]
-    %2 ymm1
+    %3 ymm1
+%if %2 != 0
+    vandnps ymm1, ymm1, ymm15
+%endif
 %if %1 == 4
     vpsrld ymm2, ymm1, 31
     vpsrlq ymm1, ymm1, 63
@@ -341,7 +381,10 @@ align 16
     add rax, rdi
     vmovdqa ymm2, [rax]
     vmaskmovps ymm1, ymm2, [rsi]
-    %2 ymm1
+    %3 ymm1
+%if %2 != 0
+    vandnps ymm1, ymm1, ymm15
+%endif
     vpand ymm1, ymm1, ymm2
 %if %1 == 4
     vpsrld ymm2, ymm1, 31
@@ -379,6 +422,7 @@ smin: times 8 dd 0x00800000         ; FLT_MIN
 dmin: times 4 dq 0x0010000000000000 ; DBL_MIN
 smax: times 8 dd 0x7F7FFFFF         ; FLT_MAX
 dmax: times 4 dq 0x7FEFFFFFFFFFFFFF ; DBL_MAX
+true: times 8 dq 0xFFFFFFFFFFFFFFFF
 
 mask4:
 dd  0,  0,  0,  0,  0,  0,  0,  0
@@ -400,32 +444,60 @@ mask32: times 4 dq 0x00000000FFFFFFFF
 
 section .text
 
-mckl_vs_find_normal:    find_kernel 4, is_vs_normal
-mckl_vs_find_subnormal: find_kernel 4, is_vs_subnormal
-mckl_vs_find_zero:      find_kernel 4, is_vs_zero
-mckl_vs_find_inf:       find_kernel 4, is_vs_inf
-mckl_vs_find_nan:       find_kernel 4, is_vs_nan
-mckl_vs_find_finite:    find_kernel 4, is_vs_finite
+mckl_vs_find_normal:    find_kernel 4, 0, is_vs_normal
+mckl_vs_find_subnormal: find_kernel 4, 0, is_vs_subnormal
+mckl_vs_find_zero:      find_kernel 4, 0, is_vs_zero
+mckl_vs_find_inf:       find_kernel 4, 0, is_vs_inf
+mckl_vs_find_nan:       find_kernel 4, 0, is_vs_nan
+mckl_vs_find_finite:    find_kernel 4, 0, is_vs_finite
 
-mckl_vd_find_normal:    find_kernel 8, is_vd_normal
-mckl_vd_find_subnormal: find_kernel 8, is_vd_subnormal
-mckl_vd_find_zero:      find_kernel 8, is_vd_zero
-mckl_vd_find_inf:       find_kernel 8, is_vd_inf
-mckl_vd_find_nan:       find_kernel 8, is_vd_nan
-mckl_vd_find_finite:    find_kernel 8, is_vd_finite
+mckl_vd_find_normal:    find_kernel 8, 0, is_vd_normal
+mckl_vd_find_subnormal: find_kernel 8, 0, is_vd_subnormal
+mckl_vd_find_zero:      find_kernel 8, 0, is_vd_zero
+mckl_vd_find_inf:       find_kernel 8, 0, is_vd_inf
+mckl_vd_find_nan:       find_kernel 8, 0, is_vd_nan
+mckl_vd_find_finite:    find_kernel 8, 0, is_vd_finite
 
-mckl_vs_count_normal:    count_kernel 4, is_vs_normal
-mckl_vs_count_subnormal: count_kernel 4, is_vs_subnormal
-mckl_vs_count_zero:      count_kernel 4, is_vs_zero
-mckl_vs_count_inf:       count_kernel 4, is_vs_inf
-mckl_vs_count_nan:       count_kernel 4, is_vs_nan
-mckl_vs_count_finite:    count_kernel 4, is_vs_finite
+mckl_vs_count_normal:    count_kernel 4, 0, is_vs_normal
+mckl_vs_count_subnormal: count_kernel 4, 0, is_vs_subnormal
+mckl_vs_count_zero:      count_kernel 4, 0, is_vs_zero
+mckl_vs_count_inf:       count_kernel 4, 0, is_vs_inf
+mckl_vs_count_nan:       count_kernel 4, 0, is_vs_nan
+mckl_vs_count_finite:    count_kernel 4, 0, is_vs_finite
 
-mckl_vd_count_normal:    count_kernel 8, is_vd_normal
-mckl_vd_count_subnormal: count_kernel 8, is_vd_subnormal
-mckl_vd_count_zero:      count_kernel 8, is_vd_zero
-mckl_vd_count_inf:       count_kernel 8, is_vd_inf
-mckl_vd_count_nan:       count_kernel 8, is_vd_nan
-mckl_vd_count_finite:    count_kernel 8, is_vd_finite
+mckl_vd_count_normal:    count_kernel 8, 0, is_vd_normal
+mckl_vd_count_subnormal: count_kernel 8, 0, is_vd_subnormal
+mckl_vd_count_zero:      count_kernel 8, 0, is_vd_zero
+mckl_vd_count_inf:       count_kernel 8, 0, is_vd_inf
+mckl_vd_count_nan:       count_kernel 8, 0, is_vd_nan
+mckl_vd_count_finite:    count_kernel 8, 0, is_vd_finite
+
+mckl_vs_find_not_normal:    find_kernel 4, 1, is_vs_normal
+mckl_vs_find_not_subnormal: find_kernel 4, 1, is_vs_subnormal
+mckl_vs_find_not_zero:      find_kernel 4, 1, is_vs_zero
+mckl_vs_find_not_inf:       find_kernel 4, 1, is_vs_inf
+mckl_vs_find_not_nan:       find_kernel 4, 1, is_vs_nan
+mckl_vs_find_not_finite:    find_kernel 4, 1, is_vs_finite
+
+mckl_vd_find_not_normal:    find_kernel 8, 1, is_vd_normal
+mckl_vd_find_not_subnormal: find_kernel 8, 1, is_vd_subnormal
+mckl_vd_find_not_zero:      find_kernel 8, 1, is_vd_zero
+mckl_vd_find_not_inf:       find_kernel 8, 1, is_vd_inf
+mckl_vd_find_not_nan:       find_kernel 8, 1, is_vd_nan
+mckl_vd_find_not_finite:    find_kernel 8, 1, is_vd_finite
+
+mckl_vs_count_not_normal:    count_kernel 4, 1, is_vs_normal
+mckl_vs_count_not_subnormal: count_kernel 4, 1, is_vs_subnormal
+mckl_vs_count_not_zero:      count_kernel 4, 1, is_vs_zero
+mckl_vs_count_not_inf:       count_kernel 4, 1, is_vs_inf
+mckl_vs_count_not_nan:       count_kernel 4, 1, is_vs_nan
+mckl_vs_count_not_finite:    count_kernel 4, 1, is_vs_finite
+
+mckl_vd_count_not_normal:    count_kernel 8, 1, is_vd_normal
+mckl_vd_count_not_subnormal: count_kernel 8, 1, is_vd_subnormal
+mckl_vd_count_not_zero:      count_kernel 8, 1, is_vd_zero
+mckl_vd_count_not_inf:       count_kernel 8, 1, is_vd_inf
+mckl_vd_count_not_nan:       count_kernel 8, 1, is_vd_nan
+mckl_vd_count_not_finite:    count_kernel 8, 1, is_vd_finite
 
 ; vim:ft=nasm

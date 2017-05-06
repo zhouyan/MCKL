@@ -55,7 +55,46 @@ class MathFPUIntType<double>
 }; // class MathFPUIntType
 
 template <typename T, typename RNGType>
-inline T math_random_nan(RNGType &rng)
+inline T math_rand_normal(RNGType &rng)
+{
+    mckl::UniformRealDistribution<T> runif(
+        static_cast<T>(-1e4), static_cast<T>(1e4));
+
+    T f = runif(rng);
+    if (f > 0)
+        f += std::numeric_limits<T>::min();
+    else
+        f -= std::numeric_limits<T>::min();
+
+    return f;
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_subnormal(RNGType &rng)
+{
+    mckl::U01OODistribution<T> r01;
+
+    return r01(rng) * std::numeric_limits<T>::min();
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_zero(RNGType &rng)
+{
+    mckl::BernoulliDistribution<bool> rsign;
+
+    return rsign(rng) ? mckl::const_zero<T>() : -mckl::const_zero<T>();
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_inf(RNGType &rng)
+{
+    mckl::BernoulliDistribution<bool> rsign;
+
+    return rsign(rng) ? mckl::const_inf<T>() : -mckl::const_inf<T>();
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_nan(RNGType &rng)
 {
     using U = typename MathFPUIntType<T>::type;
 
@@ -76,149 +115,304 @@ inline T math_random_nan(RNGType &rng)
     return f;
 }
 
-#define MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(func, FPCLASS)                    \
+template <typename T, typename RNGType>
+inline T math_rand_finite(RNGType &rng)
+{
+    mckl::UniformIntDistribution<int> rint(0, 2);
+    T f = 0;
+    int c = rint(rng);
+    if (c == 0)
+        f = math_rand_normal<T>(rng);
+    if (c == 1)
+        f = math_rand_subnormal<T>(rng);
+    if (c == 2)
+        f = math_rand_zero<T>(rng);
+
+    return f;
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_not_normal(RNGType &rng)
+{
+    mckl::UniformIntDistribution<int> rint(0, 3);
+    T f = 0;
+    int c = rint(rng);
+    if (c == 0)
+        f = math_rand_subnormal<T>(rng);
+    if (c == 1)
+        f = math_rand_zero<T>(rng);
+    if (c == 2)
+        f = math_rand_inf<T>(rng);
+    if (c == 3)
+        f = math_rand_nan<T>(rng);
+
+    return f;
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_not_subnormal(RNGType &rng)
+{
+    mckl::UniformIntDistribution<int> rint(0, 3);
+    T f = 0;
+    int c = rint(rng);
+    if (c == 0)
+        f = math_rand_normal<T>(rng);
+    if (c == 1)
+        f = math_rand_zero<T>(rng);
+    if (c == 2)
+        f = math_rand_inf<T>(rng);
+    if (c == 3)
+        f = math_rand_nan<T>(rng);
+
+    return f;
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_not_zero(RNGType &rng)
+{
+    mckl::UniformIntDistribution<int> rint(0, 3);
+    T f = 0;
+    int c = rint(rng);
+    if (c == 0)
+        f = math_rand_normal<T>(rng);
+    if (c == 1)
+        f = math_rand_subnormal<T>(rng);
+    if (c == 2)
+        f = math_rand_inf<T>(rng);
+    if (c == 3)
+        f = math_rand_nan<T>(rng);
+
+    return f;
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_not_inf(RNGType &rng)
+{
+    mckl::UniformIntDistribution<int> rint(0, 3);
+    T f = 0;
+    int c = rint(rng);
+    if (c == 0)
+        f = math_rand_normal<T>(rng);
+    if (c == 1)
+        f = math_rand_subnormal<T>(rng);
+    if (c == 2)
+        f = math_rand_zero<T>(rng);
+    if (c == 3)
+        f = math_rand_nan<T>(rng);
+
+    return f;
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_not_nan(RNGType &rng)
+{
+    mckl::UniformIntDistribution<int> rint(0, 3);
+    T f = 0;
+    int c = rint(rng);
+    if (c == 0)
+        f = math_rand_normal<T>(rng);
+    if (c == 1)
+        f = math_rand_subnormal<T>(rng);
+    if (c == 2)
+        f = math_rand_zero<T>(rng);
+    if (c == 3)
+        f = math_rand_inf<T>(rng);
+
+    return f;
+}
+
+template <typename T, typename RNGType>
+inline T math_rand_not_finite(RNGType &rng)
+{
+    mckl::UniformIntDistribution<int> rint(0, 1);
+    T f = 0;
+    int c = rint(rng);
+    if (c == 0)
+        f = math_rand_inf<T>(rng);
+    if (c == 1)
+        f = math_rand_nan<T>(rng);
+
+    return f;
+}
+
+#define MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(func, randtrue, randfalse)   \
     template <typename T>                                                     \
-    inline std::pair<bool, bool> math_##func(                                 \
+    inline std::pair<bool, bool> math_find_##func(                            \
         std::size_t N, std::size_t M, mckl::Vector<MathPerf> &perf)           \
     {                                                                         \
         mckl::Vector<T> r(N);                                                 \
         mckl::RNG rng;                                                        \
-        mckl::UniformIntDistribution<int> fpclass(0, 6);                      \
+        mckl::BernoulliDistribution<bool> rtrue(0.3);                         \
         mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
-        mckl::UniformRealDistribution<T> runif(-1e4, 1e4);                    \
-        mckl::UniformRealDistribution<T> rnormal(1, 1e4);                     \
-        mckl::U01Distribution<T> u01;                                         \
                                                                               \
         bool has_cycles = mckl::StopWatch::has_cycles();                      \
                                                                               \
         double c1 = has_cycles ? std::numeric_limits<double>::max() : 0;      \
         double c2 = has_cycles ? std::numeric_limits<double>::max() : 0;      \
-        double c3 = has_cycles ? std::numeric_limits<double>::max() : 0;      \
-        double c4 = has_cycles ? std::numeric_limits<double>::max() : 0;      \
                                                                               \
         bool pass1 = true;                                                    \
         bool pass2 = true;                                                    \
         for (std::size_t k = 0; k != 10; ++k) {                               \
             std::size_t n = 0;                                                \
-            std::size_t m = 0;                                                \
+            mckl::StopWatch watch1;                                           \
+            mckl::StopWatch watch2;                                           \
+            for (std::size_t i = 0; i != M; ++i) {                            \
+                std::size_t K = rsize(rng);                                   \
+                std::size_t index = K;                                        \
+                for (std::size_t j = 0; j != K / 2; ++j)                      \
+                    r[j] = randfalse<T>(rng);                                 \
+                for (std::size_t j = K / 2; j != K; ++j) {                    \
+                    if (rtrue(rng)) {                                         \
+                        r[j] = randtrue<T>(rng);                              \
+                        index = std::min(index, j);                           \
+                    } else {                                                  \
+                        r[j] = randfalse<T>(rng);                             \
+                    }                                                         \
+                }                                                             \
+                                                                              \
+                watch1.start();                                               \
+                std::size_t n1 = mckl::find_##func<T>(K, r.data());           \
+                watch1.stop();                                                \
+                                                                              \
+                watch2.start();                                               \
+                std::size_t n2 = mckl::find_##func(K, r.data());              \
+                watch2.stop();                                                \
+                                                                              \
+                pass1 = pass1 && n1 == index;                                 \
+                pass2 = pass2 && n2 == index;                                 \
+                n += index;                                                   \
+            }                                                                 \
+            if (has_cycles) {                                                 \
+                c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
+                c2 = std::min(c2, 1.0 * watch2.cycles() / n);                 \
+            } else {                                                          \
+                c1 = std::max(c1, n / watch1.seconds() * 1e-6);               \
+                c2 = std::max(c2, n / watch2.seconds() * 1e-6);               \
+            }                                                                 \
+        }                                                                     \
+                                                                              \
+        MathPerf result;                                                      \
+        result.name = "find_" #func;                                          \
+        result.c1 = c1;                                                       \
+        result.c2 = c2;                                                       \
+        perf.push_back(result);                                               \
+                                                                              \
+        return std::make_pair(pass1, pass2);                                  \
+    }
+
+#define MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(func, randtrue, randfalse)  \
+    template <typename T>                                                     \
+    inline std::pair<bool, bool> math_count_##func(                           \
+        std::size_t N, std::size_t M, mckl::Vector<MathPerf> &perf)           \
+    {                                                                         \
+        mckl::Vector<T> r(N);                                                 \
+        mckl::RNG rng;                                                        \
+        mckl::BernoulliDistribution<bool> rtrue(0.3);                         \
+        mckl::UniformIntDistribution<std::size_t> rsize(N / 2, N);            \
+                                                                              \
+        bool has_cycles = mckl::StopWatch::has_cycles();                      \
+                                                                              \
+        double c1 = has_cycles ? std::numeric_limits<double>::max() : 0;      \
+        double c2 = has_cycles ? std::numeric_limits<double>::max() : 0;      \
+                                                                              \
+        bool pass1 = true;                                                    \
+        bool pass2 = true;                                                    \
+        for (std::size_t k = 0; k != 10; ++k) {                               \
+            std::size_t n = 0;                                                \
             mckl::StopWatch watch1;                                           \
             mckl::StopWatch watch2;                                           \
             for (std::size_t i = 0; i != M; ++i) {                            \
                 std::size_t K = rsize(rng);                                   \
                 n += K;                                                       \
                                                                               \
-                std::size_t index[6];                                         \
-                std::size_t count[6];                                         \
-                std::fill_n(index, 6, K);                                     \
-                std::fill_n(count, 6, 0);                                     \
-                index[0] = 0;                                                 \
-                index[5] = 0;                                                 \
-                count[0] = K / 2;                                             \
-                count[5] = K / 2;                                             \
-                mckl::rand(rng, rnormal, K / 2, r.data());                    \
-                for (std::size_t j = K / 2; j != K; ++j) {                    \
-                    switch (fpclass(rng)) {                                   \
-                        case 1:                                               \
-                            r[j] = std::numeric_limits<T>::min() * u01(rng);  \
-                            index[1] = std::min(index[1], j);                 \
-                            index[5] = std::min(index[5], j);                 \
-                            ++count[1];                                       \
-                            ++count[5];                                       \
-                            break;                                            \
-                        case 2:                                               \
-                            r[j] = mckl::const_zero<T>();                     \
-                            index[2] = std::min(index[2], j);                 \
-                            index[5] = std::min(index[5], j);                 \
-                            ++count[2];                                       \
-                            ++count[5];                                       \
-                            break;                                            \
-                        case 3:                                               \
-                            r[j] = -mckl::const_zero<T>();                    \
-                            index[2] = std::min(index[2], j);                 \
-                            index[5] = std::min(index[5], j);                 \
-                            ++count[2];                                       \
-                            ++count[5];                                       \
-                            break;                                            \
-                        case 4:                                               \
-                            r[j] = mckl::const_inf<T>();                      \
-                            index[3] = std::min(index[3], j);                 \
-                            ++count[3];                                       \
-                            break;                                            \
-                        case 5:                                               \
-                            r[j] = -mckl::const_inf<T>();                     \
-                            index[3] = std::min(index[3], j);                 \
-                            ++count[3];                                       \
-                            break;                                            \
-                        case 6:                                               \
-                            r[j] = math_random_nan<T>(rng);                   \
-                            index[4] = std::min(index[4], j);                 \
-                            ++count[4];                                       \
-                            break;                                            \
-                        default:                                              \
-                            r[j] = runif(rng);                                \
-                            if (r[j] > 0)                                     \
-                                r[j] += 2 * std::numeric_limits<T>::min();    \
-                            else                                              \
-                                r[j] -= 2 * std::numeric_limits<T>::min();    \
-                            index[0] = std::min(index[0], j);                 \
-                            index[5] = std::min(index[5], j);                 \
-                            ++count[0];                                       \
-                            ++count[5];                                       \
-                            break;                                            \
+                std::size_t count = 0;                                        \
+                for (std::size_t j = 0; j != K; ++j) {                        \
+                    if (rtrue(rng)) {                                         \
+                        ++count;                                              \
+                        r[j] = randtrue<T>(rng);                              \
+                    } else {                                                  \
+                        r[j] = randfalse<T>(rng);                             \
                     }                                                         \
                 }                                                             \
                                                                               \
                 watch1.start();                                               \
-                std::size_t n1 = mckl::func<T>(K, r.data());                  \
+                std::size_t n1 = mckl::count_##func<T>(K, r.data());          \
                 watch1.stop();                                                \
                                                                               \
                 watch2.start();                                               \
-                std::size_t n2 = mckl::func(K, r.data());                     \
+                std::size_t n2 = mckl::count_##func(K, r.data());             \
                 watch2.stop();                                                \
                                                                               \
-                pass1 =                                                       \
-                    pass1 && (n1 == index[FPCLASS] || n1 == count[FPCLASS]);  \
-                pass2 =                                                       \
-                    pass2 && (n2 == index[FPCLASS] || n2 == count[FPCLASS]);  \
-                                                                              \
-                m += (n1 + 1);                                                \
+                pass1 = pass1 && n1 == count;                                 \
+                pass2 = pass2 && n2 == count;                                 \
             }                                                                 \
             if (has_cycles) {                                                 \
-                c1 = std::min(c1, 1.0 * watch1.cycles() / m);                 \
-                c2 = std::min(c2, 1.0 * watch2.cycles() / m);                 \
-                c3 = std::min(c3, 1.0 * watch1.cycles() / n);                 \
-                c4 = std::min(c4, 1.0 * watch2.cycles() / n);                 \
+                c1 = std::min(c1, 1.0 * watch1.cycles() / n);                 \
+                c2 = std::min(c2, 1.0 * watch2.cycles() / n);                 \
             } else {                                                          \
-                c1 = std::max(c1, m / watch1.seconds() * 1e-6);               \
-                c2 = std::max(c2, m / watch2.seconds() * 1e-6);               \
-                c3 = std::max(c3, n / watch1.seconds() * 1e-6);               \
-                c4 = std::max(c4, n / watch2.seconds() * 1e-6);               \
+                c1 = std::max(c1, n / watch1.seconds() * 1e-6);               \
+                c2 = std::max(c2, n / watch2.seconds() * 1e-6);               \
             }                                                                 \
         }                                                                     \
                                                                               \
         MathPerf result;                                                      \
-        result.name = #func;                                                  \
+        result.name = "count_" #func;                                         \
         result.c1 = c1;                                                       \
         result.c2 = c2;                                                       \
-        result.c3 = c3;                                                       \
-        result.c4 = c4;                                                       \
         perf.push_back(result);                                               \
                                                                               \
         return std::make_pair(pass1, pass2);                                  \
     }
 
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(find_normal, 0)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(find_subnormal, 1)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(find_zero, 2)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(find_inf, 3)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(find_nan, 4)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(find_finite, 5)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(count_normal, 0)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(count_subnormal, 1)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(count_zero, 2)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(count_inf, 3)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(count_nan, 4)
-MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY(count_finite, 5)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    normal, math_rand_normal, math_rand_not_normal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    subnormal, math_rand_subnormal, math_rand_not_subnormal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    zero, math_rand_zero, math_rand_not_zero)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(inf, math_rand_inf, math_rand_not_inf)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(nan, math_rand_nan, math_rand_not_nan)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    finite, math_rand_finite, math_rand_not_finite)
+
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    normal, math_rand_normal, math_rand_not_normal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    subnormal, math_rand_subnormal, math_rand_not_subnormal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    zero, math_rand_zero, math_rand_not_zero)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    inf, math_rand_inf, math_rand_not_inf)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    nan, math_rand_nan, math_rand_not_nan)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    finite, math_rand_finite, math_rand_not_finite)
+
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    not_normal, math_rand_not_normal, math_rand_normal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    not_subnormal, math_rand_not_subnormal, math_rand_subnormal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    not_zero, math_rand_not_zero, math_rand_zero)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    not_inf, math_rand_not_inf, math_rand_inf)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    not_nan, math_rand_not_nan, math_rand_nan)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_FIND(
+    not_finite, math_rand_not_finite, math_rand_finite)
+
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    not_normal, math_rand_not_normal, math_rand_normal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    not_subnormal, math_rand_not_subnormal, math_rand_subnormal)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    not_zero, math_rand_not_zero, math_rand_zero)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    not_inf, math_rand_not_inf, math_rand_inf)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    not_nan, math_rand_not_nan, math_rand_nan)
+MCKL_EXAMPLE_DEFINE_MATH_FPCLASSIFY_COUNT(
+    not_finite, math_rand_not_finite, math_rand_finite)
 
 inline void math_fpclassify(std::size_t N, std::size_t M)
 {
@@ -237,6 +431,7 @@ inline void math_fpclassify(std::size_t N, std::size_t M)
     pass.push_back(math_find_nan<double>(N, M, perf));
     pass.push_back(math_find_finite<float>(N, M, perf));
     pass.push_back(math_find_finite<double>(N, M, perf));
+
     pass.push_back(math_count_normal<float>(N, M, perf));
     pass.push_back(math_count_normal<double>(N, M, perf));
     pass.push_back(math_count_subnormal<float>(N, M, perf));
@@ -250,9 +445,35 @@ inline void math_fpclassify(std::size_t N, std::size_t M)
     pass.push_back(math_count_finite<float>(N, M, perf));
     pass.push_back(math_count_finite<double>(N, M, perf));
 
-    const int nwid = 15;
+    pass.push_back(math_find_not_normal<float>(N, M, perf));
+    pass.push_back(math_find_not_normal<double>(N, M, perf));
+    pass.push_back(math_find_not_subnormal<float>(N, M, perf));
+    pass.push_back(math_find_not_subnormal<double>(N, M, perf));
+    pass.push_back(math_find_not_zero<float>(N, M, perf));
+    pass.push_back(math_find_not_zero<double>(N, M, perf));
+    pass.push_back(math_find_not_inf<float>(N, M, perf));
+    pass.push_back(math_find_not_inf<double>(N, M, perf));
+    pass.push_back(math_find_not_nan<float>(N, M, perf));
+    pass.push_back(math_find_not_nan<double>(N, M, perf));
+    pass.push_back(math_find_not_finite<float>(N, M, perf));
+    pass.push_back(math_find_not_finite<double>(N, M, perf));
+
+    pass.push_back(math_count_not_normal<float>(N, M, perf));
+    pass.push_back(math_count_not_normal<double>(N, M, perf));
+    pass.push_back(math_count_not_subnormal<float>(N, M, perf));
+    pass.push_back(math_count_not_subnormal<double>(N, M, perf));
+    pass.push_back(math_count_not_zero<float>(N, M, perf));
+    pass.push_back(math_count_not_zero<double>(N, M, perf));
+    pass.push_back(math_count_not_inf<float>(N, M, perf));
+    pass.push_back(math_count_not_inf<double>(N, M, perf));
+    pass.push_back(math_count_not_nan<float>(N, M, perf));
+    pass.push_back(math_count_not_nan<double>(N, M, perf));
+    pass.push_back(math_count_not_finite<float>(N, M, perf));
+    pass.push_back(math_count_not_finite<double>(N, M, perf));
+
+    const int nwid = 20;
     const int twid = 10;
-    const int ewid = 12;
+    const int ewid = 10;
     const std::size_t lwid = nwid + twid * 4 + ewid * 4;
 
     std::cout << std::string(lwid, '=') << std::endl;
@@ -289,17 +510,10 @@ inline void math_fpclassify(std::size_t N, std::size_t M)
         ss4 << std::boolalpha << pass[i * 2 + 1].second;
         std::cout << std::fixed << std::setprecision(2);
         std::cout << std::setw(nwid) << std::left << perf[i * 2].name;
-        if (i <= 5) {
-            std::cout << std::setw(twid) << std::right << perf[i * 2].c1;
-            std::cout << std::setw(twid) << std::right << perf[i * 2].c2;
-            std::cout << std::setw(twid) << std::right << perf[i * 2 + 1].c1;
-            std::cout << std::setw(twid) << std::right << perf[i * 2 + 1].c2;
-        } else {
-            std::cout << std::setw(twid) << std::right << perf[i * 2].c3;
-            std::cout << std::setw(twid) << std::right << perf[i * 2].c4;
-            std::cout << std::setw(twid) << std::right << perf[i * 2 + 1].c3;
-            std::cout << std::setw(twid) << std::right << perf[i * 2 + 1].c4;
-        }
+        std::cout << std::setw(twid) << std::right << perf[i * 2].c1;
+        std::cout << std::setw(twid) << std::right << perf[i * 2].c2;
+        std::cout << std::setw(twid) << std::right << perf[i * 2 + 1].c1;
+        std::cout << std::setw(twid) << std::right << perf[i * 2 + 1].c2;
         std::cout << std::setw(ewid) << std::right << ss1.str();
         std::cout << std::setw(ewid) << std::right << ss2.str();
         std::cout << std::setw(ewid) << std::right << ss3.str();
