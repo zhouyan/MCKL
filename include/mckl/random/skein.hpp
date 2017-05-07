@@ -78,6 +78,7 @@ class Skein
         static constexpr int out() { return 63; }
     }; // class type
 
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     /// \brief Type of input paramters such as keys and messages
     class param_type
     {
@@ -113,6 +114,7 @@ class Skein
         const char *data_;
         int type_;
     }; // class param_type
+    MCKL_POP_CLANG_WARNING
 
     /// \brief The number of bytes of internal state
     static constexpr std::size_t bytes() { return sizeof(key_type); }

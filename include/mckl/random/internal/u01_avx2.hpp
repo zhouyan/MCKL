@@ -35,12 +35,7 @@
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/internal/u01_generic.hpp>
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
+MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX2_LOADU_SI256(u)                          \
     const __m256i *uptr = reinterpret_cast<const __m256i *>(u);               \
@@ -1072,10 +1067,6 @@ class U01CanonicalAVX2Impl<UIntType, double, 1, 64>
 
 } // namespace mckl
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
+MCKL_POP_GCC_WARNING
 
 #endif // MCKL_RANDOM_INTERNAL_U01_AVX2_HPP

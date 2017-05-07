@@ -154,10 +154,12 @@ class PMCMCMutation
     }
 
   private:
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     std::size_t M_;
     prior_type prior_;
     pf_type pf_;
     Vector<eval_type> eval_;
+    MCKL_POP_CLANG_WARNING
 }; // class PMCMCMutation
 
 } // namespace mckl

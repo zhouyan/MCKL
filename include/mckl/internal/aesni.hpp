@@ -35,12 +35,7 @@
 #include <mckl/internal/config.h>
 #include <array>
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
+MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
 
 namespace mckl {
 
@@ -1761,10 +1756,6 @@ inline __m128i aeskeygenassist_si128<0xFF>(const __m128i &xmm)
 
 } // namespace mckl
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
+MCKL_POP_GCC_WARNING
 
 #endif // MCKL_INTERNAL_AESNI_HPP

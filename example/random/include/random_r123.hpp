@@ -36,6 +36,8 @@
 #define R123_USE_AES_NI 1
 #endif
 
+#include <mckl/internal/config.h>
+
 #include <Random123/philox.h>
 #include <Random123/threefry.h>
 

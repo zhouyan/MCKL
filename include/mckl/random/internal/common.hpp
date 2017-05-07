@@ -208,9 +208,13 @@
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
+            MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")                          \
+            MCKL_PUSH_INTEL_WARNING(1572) /* floating-point comparison */     \
             if (param1.p1##_ != param2.p1##_)                                 \
                 return false;                                                 \
             return true;                                                      \
+            MCKL_POP_CLANG_WARNING                                            \
+            MCKL_POP_INTEL_WARNING                                            \
         }                                                                     \
                                                                               \
         friend bool operator!=(                                               \
@@ -281,11 +285,15 @@
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
+            MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")                          \
+            MCKL_PUSH_INTEL_WARNING(1572) /* floating-point comparison */     \
             if (param1.p1##_ != param2.p1##_)                                 \
                 return false;                                                 \
             if (param1.p2##_ != param2.p2##_)                                 \
                 return false;                                                 \
             return true;                                                      \
+            MCKL_POP_CLANG_WARNING                                            \
+            MCKL_POP_INTEL_WARNING                                            \
         }                                                                     \
                                                                               \
         friend bool operator!=(                                               \
@@ -366,6 +374,8 @@
         friend bool operator==(                                               \
             const param_type &param1, const param_type &param2)               \
         {                                                                     \
+            MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")                          \
+            MCKL_PUSH_INTEL_WARNING(1572) /* floating-point comparison */     \
             if (param1.p1##_ != param2.p1##_)                                 \
                 return false;                                                 \
             if (param1.p2##_ != param2.p2##_)                                 \
@@ -375,6 +385,8 @@
             if (param1.p4##_ != param2.p4##_)                                 \
                 return false;                                                 \
             return true;                                                      \
+            MCKL_POP_CLANG_WARNING                                            \
+            MCKL_POP_INTEL_WARNING                                            \
         }                                                                     \
                                                                               \
         friend bool operator!=(                                               \

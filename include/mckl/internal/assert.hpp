@@ -42,10 +42,7 @@
 #include <stdexcept>
 #include <string>
 
-#ifdef MCKL_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wweak-vtables"
-#endif
+MCKL_PUSH_CLANG_WARNING("-Wweak-vtables")
 
 namespace mckl {
 
@@ -169,8 +166,6 @@ inline bool is_nullptr(std::nullptr_t) { return true; }
 
 } // namespace mckl
 
-#ifdef MCKL_CLANG
-#pragma clang diagnostic pop
-#endif
+MCKL_POP_CLANG_WARNING
 
 #endif // MCKL_INTERNAL_ASSERT_HPP

@@ -98,6 +98,7 @@ class DirichletDistribution
     using result_type = RealType;
     using distribution_type = DirichletDistribution<RealType>;
 
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     class param_type
     {
       public:
@@ -189,6 +190,7 @@ class DirichletDistribution
 
         friend distribution_type;
     }; // class param_type
+    MCKL_POP_CLANG_WARNING
 
     /// \brief Construct a distribution with scalar shape
     DirichletDistribution(std::size_t dim = 1) : param_(dim) {}

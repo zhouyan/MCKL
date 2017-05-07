@@ -57,4 +57,45 @@
 #define MCKL_INLINE_CALL
 #endif
 
+#define MCKL_PRAGMA(x) _Pragma(#x)
+
+#ifdef MCKL_CLANG
+#define MCKL_PUSH_CLANG_WARNING(warning)                                      \
+    MCKL_PRAGMA(clang diagnostic push)                                        \
+    MCKL_PRAGMA(clang diagnostic ignored warning)
+#define MCKL_POP_CLANG_WARNING MCKL_PRAGMA(clang diagnostic pop)
+#else
+#define MCKL_PUSH_CLANG_WARNING(warning)
+#define MCKL_POP_CLANG_WARNING
+#endif
+
+#ifdef MCKL_GCC
+#define MCKL_PUSH_GCC_WARNING(warning)                                        \
+    MCKL_PRAGMA(GCC diagnostic push)                                          \
+    MCKL_PRAGMA(GCC diagnostic ignored warning)
+#define MCKL_POP_GCC_WARNING MCKL_PRAGMA(GCC diagnostic pop)
+#else
+#define MCKL_PUSH_GCC_WARNING(warning)
+#define MCKL_POP_GCC_WARNING
+#endif
+
+#ifdef MCKL_INTEL
+#define MCKL_PUSH_INTEL_WARNING(wid)                                          \
+    MCKL_PRAGMA(warning(push))                                                \
+    MCKL_PRAGMA(warning(disable : wid))
+#define MCKL_POP_INTEL_WARNING MCKL_PRAGMA(warning(pop))
+#else
+#define MCKL_PUSH_INTEL_WARNING(wid)
+#define MCKL_POP_INTEL_WARNING
+#endif
+
+MCKL_PUSH_CLANG_WARNING("-Wc++98-compat")
+MCKL_PUSH_CLANG_WARNING("-Wc++98-compat-pedantic")
+MCKL_PUSH_CLANG_WARNING("-Wc++11-compat")
+MCKL_PUSH_CLANG_WARNING("-Wc++11-compat-pedantic")
+
+MCKL_PUSH_INTEL_WARNING(383) // reference to temporary used
+MCKL_PUSH_INTEL_WARNING(444) // destructor for base class is not virtual
+MCKL_PUSH_INTEL_WARNING(981) // operands are evaluated in unspecified order
+
 #endif // MCKL_INTERNAL_COMPILER_HPP

@@ -37,12 +37,7 @@
 #include <mckl/random/internal/threefry_constants.hpp>
 #include <mckl/random/internal/threefry_generic_4x32.hpp>
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
+MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_4X32_KBOX(N)                       \
     ymmt0 = _mm256_set1_epi32(                                                \
@@ -282,10 +277,6 @@ class Threefry4x32GeneratorAVX2Impl
 
 } // namespace mckl
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
+MCKL_POP_GCC_WARNING
 
 #endif // MCKL_RANDOM_INTERNAL_THREEFRY_AVX2_4X32_HPP

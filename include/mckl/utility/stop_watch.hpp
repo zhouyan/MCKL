@@ -128,6 +128,7 @@ inline std::uint64_t cycle_stop() { return 0; }
 
 } // namespace mckl::internal
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 /// \brief Start and stop a StopWatch in scope (similiar to a mutex lock
 /// guard)
 /// \ingroup StopWatch
@@ -138,7 +139,7 @@ class StopWatchGuard
     using watch_type = WatchType;
 
     StopWatchGuard(watch_type &watch, bool start = true)
-        : start_(start), watch_(watch)
+        : watch_(watch), start_(start)
     {
         if (start_)
             watch_.start();
@@ -151,10 +152,12 @@ class StopWatchGuard
     }
 
   private:
-    const bool start_;
     watch_type &watch_;
+    const bool start_;
 }; // class StopWatchGuard
+MCKL_POP_CLANG_WARNING
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 /// \brief StopWatch as an adapter of C++ standard library compatible clock
 /// \ingroup StopWatch
 template <typename ClockType = std::chrono::high_resolution_clock>
@@ -277,6 +280,7 @@ class StopWatchClockAdapter
     std::uint64_t cycles_start_;
     bool running_;
 }; // class StopWatchClockAdapter
+MCKL_POP_CLANG_WARNING
 
 /// \brief Stop watch using `<chrono>`
 /// \ingroup StopWatch

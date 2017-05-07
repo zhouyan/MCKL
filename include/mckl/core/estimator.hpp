@@ -104,7 +104,9 @@ class Estimator : public EstimateMatrix<T>
     }
 
   private:
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     std::function<void(Args...)> eval_;
+    MCKL_POP_CLANG_WARNING
 }; // class Estimator
 
 } // namespace mckl

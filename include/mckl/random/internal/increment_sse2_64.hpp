@@ -37,12 +37,7 @@
 #include <mckl/random/internal/increment_sse2_64_8.hpp>
 #include <mckl/random/internal/increment_sse2_64_f.hpp>
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
+MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
 
 namespace mckl {
 
@@ -88,10 +83,6 @@ MCKL_INLINE inline void increment_si128(
 
 } // namespace mckl
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
+MCKL_POP_GCC_WARNING
 
 #endif // MCKL_RANDOM_INTERNAL_INCREMENT_SSE2_64_HPP

@@ -224,9 +224,11 @@ inline bool random_rng_k(const mckl::Threefish1024Engine<ResultType> &rng)
 class RandomRNGPerf
 {
   public:
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     bool pass;
     double c1;
     double c2;
+    MCKL_POP_CLANG_WARNING
 }; // class RandomRNGPerf
 
 template <typename RNGType>

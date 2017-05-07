@@ -141,10 +141,12 @@ class TestU01
     template <typename RNGType, typename U01Type, std::size_t N, std::size_t M>
     static double u01_mt()
     {
+        MCKL_PUSH_CLANG_WARNING("-Wexit-time-destructors")
         static std::size_t index = N * M;
         static Vector<RNGType> rs(M);
         static Vector<double> result(N * M);
         static bool init = false;
+        MCKL_POP_CLANG_WARNING
 
         if (index == N * M) {
             if (!init) {
@@ -168,9 +170,11 @@ class TestU01
     template <typename RNGType, typename U01Type, std::size_t N>
     static double u01_st()
     {
+        MCKL_PUSH_CLANG_WARNING("-Wexit-time-destructors")
         static std::size_t index = N;
         static RNGType rng(mckl::Seed<RNGType>::instance().get());
         static mckl::Vector<double> result(N);
+        MCKL_POP_CLANG_WARNING
 
         if (index == N) {
             U01Type dist;

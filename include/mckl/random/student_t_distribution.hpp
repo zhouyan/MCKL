@@ -100,6 +100,8 @@ class StudentTDistribution
     {
         result_type z = normal_(rng);
         result_type u = const_inf<result_type>();
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (param.n() != param_.n()) {
             while (!std::isfinite(u))
                 u = n() / chi_squared_(rng);
@@ -108,6 +110,8 @@ class StudentTDistribution
             while (!std::isfinite(u))
                 u = param.n() / chi_squared(rng);
         }
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
 
         return z * std::sqrt(u);
     }

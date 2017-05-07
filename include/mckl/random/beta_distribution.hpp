@@ -58,12 +58,15 @@ enum BetaDistributionAlgorithm {
     BetaDistributionAlgorithmA3
 }; // enum BetaDistributionAlgorithm
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 template <typename RealType>
 class BetaDistributionConstant
 {
   public:
     BetaDistributionConstant(RealType alpha = 1, RealType beta = 1)
     {
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         const RealType K = static_cast<RealType>(0.852);
         const RealType C = static_cast<RealType>(-0.956);
         const RealType D = beta + K * alpha * alpha + C;
@@ -88,6 +91,8 @@ class BetaDistributionConstant
             algorithm_ = BetaDistributionAlgorithmA3;
         else
             algorithm_ = BetaDistributionAlgorithmC;
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
 
         a_ = b_ = t_ = p_ = 0;
         switch (algorithm_) {
@@ -150,6 +155,8 @@ class BetaDistributionConstant
     friend bool operator==(const BetaDistribution<RealType> &c1,
         const BetaDistributionConstant<RealType> &c2)
     {
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (c1.a_ != c2.a_)
             return false;
         if (c1.b_ != c2.b_)
@@ -161,6 +168,8 @@ class BetaDistributionConstant
         if (c1.algorithm_ != c2.algorithm_)
             return false;
         return true;
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
     }
 
   private:
@@ -170,6 +179,7 @@ class BetaDistributionConstant
     RealType p_;
     BetaDistributionAlgorithm algorithm_;
 }; // class BetaDistributionConstant
+MCKL_POP_CLANG_WARNING
 
 template <std::size_t, typename RealType, typename RNGType>
 inline std::size_t beta_distribution_impl_as(RNGType &rng, std::size_t n,

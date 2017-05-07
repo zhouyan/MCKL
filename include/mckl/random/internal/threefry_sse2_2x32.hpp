@@ -37,12 +37,7 @@
 #include <mckl/random/internal/threefry_constants.hpp>
 #include <mckl/random/internal/threefry_generic_2x32.hpp>
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
+MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
 
 #define MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_2X32_KBOX(N)                       \
     xmmt0 = _mm_set1_epi32(                                                   \
@@ -278,10 +273,6 @@ class Threefry2x32GeneratorSSE2Impl
 
 } // namespace mckl
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
+MCKL_POP_GCC_WARNING
 
 #endif // MCKL_RANDOM_INTERNAL_THREEFRY_SSE2_2X32_HPP

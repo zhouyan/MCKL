@@ -1251,7 +1251,11 @@ inline bool issubnormal(T a)
 template <typename T>
 inline bool iszero(T a)
 {
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     return a == 0;
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 }
 
 } // namespace mckl::internal

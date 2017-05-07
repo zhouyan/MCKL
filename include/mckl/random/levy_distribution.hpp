@@ -89,8 +89,12 @@ class LevyDistribution
     result_type generate(RNGType &rng, const param_type &param)
     {
         result_type r = 0;
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         while (r == 0)
             r = normal_(rng);
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
 
         return param.a() + param.b() / (r * r);
     }

@@ -83,8 +83,12 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
         for (std::size_t j = 0; j <= i; ++j)
             cholf[i * dim + j] = *chol++;
     internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     if (mean != 0)
         add(n * dim, mean, r, r);
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 }
 
 template <typename RealType, typename RNGType>
@@ -133,6 +137,7 @@ class NormalMVDistribution
     using result_type = RealType;
     using distribution_type = NormalMVDistribution<RealType>;
 
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     class param_type
     {
       public:
@@ -260,6 +265,7 @@ class NormalMVDistribution
                 chol_[(i + 1) * (i + 2) / 2 - 1] = chol;
         }
     }; // class param_type
+    MCKL_POP_CLANG_WARNING
 
     /// \brief Construct a distribution with scalar mean and scalar covariance
     explicit NormalMVDistribution(std::size_t dim = 1) : param_(dim)
@@ -429,6 +435,8 @@ class NormalMVDistribution
     template <typename RNGType>
     void generate(RNGType &rng, result_type *r, const param_type &param)
     {
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (param.is_scalar_mean_ && param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(
                 param.mean()[0], param.chol()[0]);
@@ -452,6 +460,8 @@ class NormalMVDistribution
             mulchol(r, param);
             add<result_type>(param.dim(), param.mean(), r, r);
         }
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
     }
 
     void mulchol(float *r, const param_type &param)

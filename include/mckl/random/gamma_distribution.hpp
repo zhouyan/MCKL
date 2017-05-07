@@ -53,6 +53,7 @@ enum GammaDistributionAlgorithm {
     GammaDistributionAlgorithmE
 }; // enum GammaDistributionAlgorithm
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 template <typename RealType>
 class GammaDistributionConstant
 {
@@ -94,6 +95,8 @@ class GammaDistributionConstant
     friend bool operator==(const GammaDistributionConstant<RealType> &c1,
         const GammaDistributionConstant<RealType> &c2)
     {
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (c1.d_ != c2.d_)
             return false;
         if (c1.c_ != c2.c_)
@@ -101,6 +104,8 @@ class GammaDistributionConstant
         if (c1.algorithm_ != c2.algorithm_)
             return false;
         return true;
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
     }
 
   private:
@@ -108,6 +113,7 @@ class GammaDistributionConstant
     RealType c_;
     GammaDistributionAlgorithm algorithm_;
 }; // class GammaDistributionConstant
+MCKL_POP_CLANG_WARNING
 
 template <std::size_t K, typename RealType, typename RNGType>
 inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,

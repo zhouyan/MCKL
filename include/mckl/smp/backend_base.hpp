@@ -35,18 +35,15 @@
 #include <mckl/internal/common.hpp>
 #include <mckl/core/particle.hpp>
 
-#ifdef MCKL_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wweak-vtables"
-#endif
+MCKL_PUSH_CLANG_WARNING("-Wweak-vtables")
 
 /// \brief Default SMP backend
 /// \ingroup Config
 #ifndef MCKL_SMP_BACKEND
-#if MCKL_HAS_OMP
-#define MCKL_SMP_BACKEND ::mckl::BackendOMP
-#elif MCKL_HAS_TBB
+#if MCKL_HAS_TBB
 #define MCKL_SMP_BACKEND ::mckl::BackendTBB
+#elif MCKL_HAS_OMP
+#define MCKL_SMP_BACKEND ::mckl::BackendOMP
 #else
 #define MCKL_SMP_BACKEND ::mckl::BackendSTD
 #endif
@@ -455,8 +452,6 @@ class SMCEstimatorEvalBase<T, Virtual>
 
 } // namespace mckl
 
-#ifdef MCKL_CLANG
-#pragma clang diagnostic pop
-#endif
+MCKL_POP_CLANG_WARNING
 
 #endif // MCKL_SMP_BACKEND_BASE_HPP

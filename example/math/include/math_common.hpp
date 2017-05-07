@@ -70,6 +70,9 @@ inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
     if (std::is_same<T, long double>::value)
         prefix = "LDBL_";
 
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
+
     if (!std::isfinite(x)) {
         os << x;
         return;
@@ -113,6 +116,9 @@ inline void math_val(T x, std::basic_ostream<CharT, Traits> &os)
         os << prefix + "EPS";
         return;
     }
+
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 
     const T nmin = x / fmin;
     const T nmax = x / fmax;

@@ -37,6 +37,7 @@
 
 namespace mckl {
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 /// \brief Counter based RNG engine
 /// \ingroup Random
 ///
@@ -277,6 +278,7 @@ class CounterEngine
         index_ = M_;
     }
 }; // class CounterEngine
+MCKL_POP_CLANG_WARNING
 
 template <typename ResultType, typename Generator>
 class SeedTrait<CounterEngine<ResultType, Generator>>

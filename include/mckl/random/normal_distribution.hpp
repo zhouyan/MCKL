@@ -60,6 +60,8 @@ inline void normal_distribution_impl(
     sqrt(nu, s.data(), s.data());
     mul(nu, const_pi_2<RealType>(), u2, u2);
     sincos(nu, u2, u1, u2);
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     if (stddev != 1)
         mul(nu, stddev, s.data(), s.data());
     if (mean != 0) {
@@ -69,6 +71,8 @@ inline void normal_distribution_impl(
         mul(nu, s.data(), u1, u1);
         mul(nu, s.data(), u2, u2);
     }
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 }
 
 } // namespace mckl::internal
@@ -100,6 +104,7 @@ inline void normal_distribution(RNGType &rng, std::size_t n, RealType *r,
     normal_distribution(rng, n, r, param.mean(), param.stddev());
 }
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 /// \brief Normal distribution
 /// \ingroup Distribution
 template <typename RealType>
@@ -144,6 +149,7 @@ class NormalDistribution
         return param.mean() + param.stddev() * z;
     }
 }; // class NormalDistribution
+MCKL_POP_CLANG_WARNING
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_RAND(Normal, RealType)
 

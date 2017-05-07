@@ -122,10 +122,7 @@ class PhiloxHiLo<T, 64>
 #if MCKL_HAS_INT128
     static T eval_int128(T a, T b, T &h)
     {
-#ifdef MCKL_GCC
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#endif
+        MCKL_PUSH_GCC_WARNING("-Wpedantic")
         union {
             unsigned MCKL_INT128 p;
             std::array<T, 2> r;
@@ -133,20 +130,16 @@ class PhiloxHiLo<T, 64>
 
         buf.p = static_cast<unsigned MCKL_INT128>(a) *
             static_cast<unsigned MCKL_INT128>(b);
-#ifdef MCKL_GCC
-#pragma GCC diagnostic pop
-#endif
+        MCKL_POP_GCC_WARNING
+
 #if MCKL_HAS_LITTLE_ENDIAN
         h = std::get<1>(buf.r);
-
         return std::get<0>(buf.r);
 #elif MCKL_HAS_BIG_ENDIAN
         h = std::get<0>(buf.r);
-
         return std::get<1>(buf.r);
 #else
         h = static_cast<T>(buf.p >> 64);
-
         return static_cast<T>(buf.p);
 #endif
     }

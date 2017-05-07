@@ -34,17 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/core/matrix.hpp>
-
-#ifdef MCKL_INTEL
-#pragma warning(push)
-#pragma warning(disable : 2282) // unrecognized GCC pragma
-#endif
-
 #include <hdf5.h>
-
-#ifdef MCKL_INTEL
-#pragma warning(pop)
-#endif
 
 #define MCKL_DEFINE_UTILITY_HDF5_TYPE(CPPName, CName)                         \
     class HDF5##CPPName : public HDF5ID<HDF5##CPPName>                        \

@@ -61,9 +61,11 @@ inline double random_rng_u01_impl()
 {
     constexpr std::size_t N = 8192;
 
+    MCKL_PUSH_CLANG_WARNING("-Wexit-time-destructors")
     static std::size_t index = N;
     static RNGType rng(mckl::Seed<RNGType>::instance().get());
     static mckl::Vector<double> result(N);
+    MCKL_POP_CLANG_WARNING
 
     if (index == N) {
         U01Type dist;
@@ -111,10 +113,12 @@ inline double random_rng_u01_mt_impl()
     constexpr std::size_t N = 1024;
     constexpr std::size_t M = 8;
 
+    MCKL_PUSH_CLANG_WARNING("-Wexit-time-destructors")
     static std::size_t index = N * M;
     static mckl::Vector<RNGType> rs(M);
     static mckl::Vector<double> result(N * M);
     static bool init = false;
+    MCKL_POP_CLANG_WARNING
 
     if (index == N * M) {
         if (!init) {

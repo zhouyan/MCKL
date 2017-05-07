@@ -52,6 +52,8 @@ inline void weibull_distribution_impl(
 {
     u01_oo_distribution(rng, n, r);
     log(n, r, r);
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     if (a == 1) {
         mul(n, -b, r, r);
     } else {
@@ -59,6 +61,8 @@ inline void weibull_distribution_impl(
         pow(n, r, 1 / a, r);
         mul(n, b, r, r);
     }
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 }
 
 } // namespace mckl::internal
@@ -89,9 +93,13 @@ class WeibullDistribution
     {
         U01OODistribution<RealType> u01;
 
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         return param.a() == 1 ?
             -param.b() * std::log(u01(rng)) :
             param.b() * std::pow(-std::log(u01(rng)), 1 / param.a());
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
     }
 }; // class WeibullDistribution
 

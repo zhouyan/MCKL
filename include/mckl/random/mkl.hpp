@@ -969,7 +969,7 @@ class MKLEngine
                 }
         };
         generate();
-        index_ = static_cast<unsigned>(nskip % M);
+        index_ = static_cast<std::size_t>(nskip % M);
     }
 
     static constexpr result_type min()
@@ -1052,7 +1052,7 @@ class MKLEngine
 
     std::array<result_type, M_> result_;
     MKLStream stream_;
-    unsigned index_;
+    std::size_t index_;
 
     void generate()
     {

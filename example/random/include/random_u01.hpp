@@ -40,23 +40,35 @@
 template <typename Lower, typename RealType>
 inline bool random_u01_check_lb(RealType x)
 {
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     return std::is_same<Lower, mckl::Closed>::value ? x == 0 : x > 0;
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 }
 
 template <typename Upper, typename RealType>
 inline bool random_u01_check_ub(RealType x)
 {
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     return std::is_same<Upper, mckl::Closed>::value ? x == 1 : x < 1;
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 }
 
 template <typename RealType>
 inline std::string random_u01_minimum(RealType x)
 {
     std::stringstream ss;
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     if (x == 0)
         ss << 0;
     else
         ss << "2^" << std::log2(x);
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 
     return ss.str();
 }
@@ -65,10 +77,14 @@ template <typename RealType>
 inline std::string random_u01_maximum(RealType x)
 {
     std::stringstream ss;
+    MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+    MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
     if (x == 1)
         ss << 1;
     else
         ss << "1 - 2^" << std::log2(static_cast<RealType>(1) - x);
+    MCKL_POP_CLANG_WARNING
+    MCKL_POP_INTEL_WARNING
 
     return ss.str();
 }
@@ -76,6 +92,7 @@ inline std::string random_u01_maximum(RealType x)
 class RandomU01Range
 {
   public:
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     bool pass_b;
     bool pass_l;
     bool pass_u;
@@ -86,6 +103,7 @@ class RandomU01Range
     std::string upper;
     double c1;
     double c2;
+    MCKL_POP_CLANG_WARNING
 }; // class RandomU01Range
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper>

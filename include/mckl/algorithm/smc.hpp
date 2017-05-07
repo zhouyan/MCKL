@@ -41,6 +41,7 @@
 
 namespace mckl {
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 /// \brief SMC estimator
 /// \ingroup SMC
 template <typename T, typename U = double>
@@ -132,6 +133,7 @@ class SMCEstimator
         return r_.data();
     }
 }; // class SMCEstimator
+MCKL_POP_CLANG_WARNING
 
 template <typename, typename = double>
 class SMCSampler;

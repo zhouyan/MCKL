@@ -37,12 +37,7 @@
 #include <mckl/random/internal/aes_key_seq.hpp>
 #include <mckl/random/increment.hpp>
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wignored-attributes"
-#endif
-#endif
+MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
 
 namespace mckl {
 
@@ -257,10 +252,6 @@ class AES256GeneratorAESNIImpl
 
 } // namespace mckl
 
-#ifdef MCKL_GCC
-#if MCKL_GCC_VERSION >= 60000
-#pragma GCC diagnostic pop
-#endif
-#endif
+MCKL_POP_GCC_WARNING
 
 #endif // MCKL_RANDOM_INTERNAL_AES_AESNI_AES256_HPP

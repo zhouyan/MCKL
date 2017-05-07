@@ -171,6 +171,7 @@ using MKLRNGType = mckl::MKL_PHILOX4X32X10;
 #endif
 #endif
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 template <typename RNGType>
 class RNG01 : public RNGType
 {
@@ -194,6 +195,7 @@ class RNG01 : public RNGType
             r[i] = operator()();
     }
 }; // class RNG01
+MCKL_POP_CLANG_WARNING
 
 template <typename ResultType, std::size_t ParamNum>
 class RandomDistributionTraitBase
@@ -949,6 +951,8 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
 
     mckl::Vector<RealType> partition(std::size_t n, const dist_type &dist)
     {
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (dist.alpha() == 2) {
             RandomDistributionTrait<mckl::NormalDistribution<RealType>> trait;
             return trait.partition(
@@ -962,6 +966,8 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
             RandomDistributionTrait<mckl::LevyDistribution<RealType>> trait;
             return trait.partition(n, mckl::LevyDistribution<RealType>(0, 1));
         }
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
     }
 
     mckl::Vector<double> probability(std::size_t n, const dist_type &) const
@@ -1673,6 +1679,7 @@ inline void random_distribution_pval(std::size_t N, std::size_t M)
 class RandomDistributionPerf
 {
   public:
+    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     std::string name;
     bool pass;
     double e1;
@@ -1681,6 +1688,7 @@ class RandomDistributionPerf
     double c2;
     double c3;
     double c4;
+    MCKL_POP_CLANG_WARNING
 }; // class RandomDistributionPerf
 
 template <typename T, bool IsFloat>

@@ -61,6 +61,7 @@ enum StableDistributionAlgorithm {
     StableDistributionAlgorithmA
 }; // enum StableDistributionAlgorithm
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 template <typename RealType>
 class StableDistributionConstant
 {
@@ -68,8 +69,12 @@ class StableDistributionConstant
     StableDistributionConstant(
         RealType alpha = 1, RealType beta = 0, RealType = 0, RealType b = 1)
     {
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         algorithm_ = alpha == 1 ? StableDistributionAlgorithm1 :
                                   StableDistributionAlgorithmA;
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
 
         RealType zeta = -beta * std::tan(const_pi_by2<RealType>() * alpha);
         xi_ = c_ = 0;
@@ -92,6 +97,8 @@ class StableDistributionConstant
     friend bool operator==(const StableDistributionConstant<RealType> &c1,
         const StableDistributionConstant<RealType> &c2)
     {
+        MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
+        MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (c1.xi_ != c2.xi_)
             return false;
         if (c1.c_ != c2.c_)
@@ -99,6 +106,8 @@ class StableDistributionConstant
         if (c1.algorithm_ != c2.algorithm_)
             return false;
         return true;
+        MCKL_POP_CLANG_WARNING
+        MCKL_POP_INTEL_WARNING
     }
 
   private:
@@ -106,6 +115,7 @@ class StableDistributionConstant
     RealType c_;
     StableDistributionAlgorithm algorithm_;
 }; // class StableDistributionConstant
+MCKL_POP_CLANG_WARNING
 
 template <std::size_t K, typename RealType, typename RNGType>
 inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
