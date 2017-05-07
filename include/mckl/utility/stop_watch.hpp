@@ -44,40 +44,28 @@ namespace internal {
 
 inline std::uint64_t cycle_start()
 {
-#ifdef MCKL_MSVC
-    return static_cast<std::uint64_t>(__readpmc(0x40000001));
-#else
     unsigned a = 0;
     unsigned d = 0;
     unsigned c = 0x40000001;
     __asm__ volatile("rdpmc" : "=a"(a), "=d"(d) : "c"(c));
 
     return (static_cast<std::uint64_t>(d) << 32) + a;
-#endif
 }
 
 inline std::uint64_t cycle_stop()
 {
-#ifdef MCKL_MSVC
-    return static_cast<std::uint64_t>(__readpmc(0x40000001));
-#else
     unsigned a = 0;
     unsigned d = 0;
     unsigned c = 0x40000001;
     __asm__ volatile("rdpmc" : "=a"(a), "=d"(d) : "c"(c));
 
     return (static_cast<std::uint64_t>(d) << 32) + a;
-#endif
 }
 
 #elif MCKL_USE_RDTSCP
 
 inline std::uint64_t cycle_start()
 {
-#ifdef MCKL_MSVC
-    unsigned aux;
-    return static_cast<std::uint64_t>(__rdtscp(&aux));
-#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
@@ -87,15 +75,10 @@ inline std::uint64_t cycle_start()
         "mov %%eax, %1\n\t"
         : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
-#endif // MCKL_MSVC
 }
 
 inline std::uint64_t cycle_stop()
 {
-#ifdef MCKL_MSVC
-    unsigned aux;
-    return static_cast<std::uint64_t>(__rdtscp(&aux));
-#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
@@ -105,16 +88,12 @@ inline std::uint64_t cycle_stop()
         "cpuid\n\t"
         : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
-#endif // MCKL_MSVC
 }
 
 #elif MCKL_USE_RDTSC
 
 inline std::uint64_t cycle_start()
 {
-#ifdef MCKL_MSVC
-    return static_cast<std::uint64_t>(__rdtsc());
-#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
@@ -124,14 +103,10 @@ inline std::uint64_t cycle_start()
         "mov %%eax, %1\n\t"
         : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
-#endif // MCKL_MSVC
 }
 
 inline std::uint64_t cycle_stop()
 {
-#ifdef MCKL_MSVC
-    return static_cast<std::uint64_t>(__rdtsc());
-#else  // MCKL_MSVC
     unsigned hi = 0;
     unsigned lo = 0;
     asm volatile(
@@ -141,7 +116,6 @@ inline std::uint64_t cycle_stop()
         "cpuid\n\t"
         : "=r"(hi), "=r"(lo)::"%eax", "%ebx", "%ecx", "%edx");
     return (static_cast<std::uint64_t>(hi) << 32) + lo;
-#endif // MCKL_MSVC
 }
 
 #else // MCKL_USE_RDPMC

@@ -42,8 +42,6 @@
 
 #if MCKL_HAS_POSIX
 #include <stdlib.h>
-#elif defined(MCKL_MSVC)
-#include <malloc.h>
 #endif
 
 #if MCKL_HAS_JEMALLOC
@@ -78,7 +76,7 @@
 #define MCKL_MEMORY_TYPE ::mckl::MemoryTBB
 #elif MCKL_USE_JEMALLOC
 #define MCKL_MEMORY_TYPE ::mckl::MemoryJEM
-#elif MCKL_HAS_POSIX || defined(MCKL_MSVC)
+#elif MCKL_HAS_POSIX
 #define MCKL_MEMORY_TYPE ::mckl::MemorySYS
 #else
 #define MCKL_MEMORY_TYPE ::mckl::MemorySTD
@@ -216,35 +214,6 @@ class MemorySYS
     {
         if (ptr != nullptr)
             ::free(ptr);
-    }
-}; // class MemorySYS
-
-#elif defined(MCKL_MSVC)
-
-template <std::size_t Alignment>
-class MemorySYS
-{
-    static_assert(Alignment != 0 && (Alignment & (Alignment - 1)) == 0,
-        "**MemorySYS** used with Alignment other than a power of two positive "
-        "integer");
-
-    static_assert(Alignment >= sizeof(void *),
-        "**MemorySYS** used with Alignment less than sizeof(void *)");
-
-  public:
-    static constexpr std::size_t alignment() { return Alignment; }
-
-    static void *allocate(std::size_t n, const void * = nullptr) noexcept
-    {
-        const std::size_t m = internal::alignment_round<Alignment>(n);
-
-        return m < n ? nullptr : _aligned_malloc(m, Alignment);
-    }
-
-    static void deallocate(void *ptr, std::size_t = 0) noexcept
-    {
-        if (ptr != nullptr)
-            _aligned_free(ptr);
     }
 }; // class MemorySYS
 

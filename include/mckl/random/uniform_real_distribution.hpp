@@ -50,7 +50,11 @@ inline void uniform_real_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_co_distribution(rng, n, r);
+#if MCKL_USE_FMA
+    fmadd(n, r, b - a, a, r);
+#else
     muladd(n, r, b - a, a, r);
+#endif
 }
 
 } // namespace mckl::internal
@@ -81,7 +85,11 @@ class UniformRealDistribution
     {
         U01CODistribution<RealType> u01;
 
+#if MCKL_USE_FMA
+        return std::fma(u01(rng), param.b() - param.a(), param.a());
+#else
         return param.a() + (param.b() - param.a()) * u01(rng);
+#endif
     }
 }; // class UniformRealDistribution
 

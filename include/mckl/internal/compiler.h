@@ -45,9 +45,6 @@
 #elif defined(__GNUC__)
 #define MCKL_GCC
 #include <mckl/internal/compiler/gcc.h>
-#elif defined(_MSC_VER)
-#define MCKL_MSVC
-#include <mckl/internal/compiler/msvc.h>
 #endif
 #include <mckl/internal/compiler/byte_order.h>
 #include <mckl/internal/compiler/intrin.h>

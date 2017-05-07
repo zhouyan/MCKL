@@ -74,7 +74,7 @@ inline bool rdrand(UIntType *rand, std::integral_constant<int, 32>)
 template <typename UIntType>
 inline bool rdrand(UIntType *rand, std::integral_constant<int, 64>)
 {
-#if defined(MCKL_MSVC) || (defined(MCKL_INTEL) && MCKL_INTEL_VERSION < 1600)
+#if defined(MCKL_INTEL) && MCKL_INTEL_VERSION < 1600
     unsigned __int64 r;
 #else
     unsigned long long r;

@@ -82,8 +82,6 @@ class PhiloxHiLo<T, 64>
         return eval_bmi2(a, b, h);
 #elif MCKL_HAS_INT128
         return eval_int128(a, b, h);
-#elif defined(MCKL_MSVC)
-        return eval_msvc(a, b, h);
 #else
         return eval_generic(a, b, h);
 #endif
@@ -151,18 +149,6 @@ class PhiloxHiLo<T, 64>
 
         return static_cast<T>(buf.p);
 #endif
-    }
-#endif
-
-#ifdef MCKL_MSVC
-    static T eval_msvc(T a, T b, T &h)
-    {
-        unsigned __int64 t = 0;
-        unsigned __int64 l = _umul128(static_cast<unsigned __int64>(a),
-            static_cast<unsigned __int64>(b), &t);
-        h = static_cast<T>(h);
-
-        return static_cast<T>(l);
     }
 #endif
 }; // class PhiloxHiLo
