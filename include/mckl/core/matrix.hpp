@@ -43,7 +43,7 @@ namespace mckl {
 /// \tparam T The value type
 /// \tparam Layout The storage layout, either RowMajor or ColMajor
 /// \tparam Alloc The allocator type
-template <typename T, MatrixLayout Layout = RowMajor,
+template <typename T, MatrixLayout Layout = ColMajor,
     typename Alloc = Allocator<T>>
 class Matrix
 {
