@@ -149,8 +149,6 @@ class DiscreteDistribution
                 probability_.data());
         }
 
-        void reset() {}
-
         static bool is_positive(const Vector<double> &probability, double &sum)
         {
             sum = 0;
@@ -197,6 +195,8 @@ class DiscreteDistribution
     {
         return param_.size() == 0 ? 0 : param_.size() - 1;
     }
+
+    void reset() {}
 
     Vector<double> probability() const { return param_.probability_; }
 
