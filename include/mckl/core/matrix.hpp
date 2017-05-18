@@ -708,6 +708,51 @@ class Matrix
     }
 }; // class Matrix
 
+/// \brief Output operator
+template <typename CharT, typename Traits, typename T, MatrixLayout Layout,
+    typename Alloc>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const Matrix<T, Layout, Alloc> &mat)
+{
+    if (!os)
+        return os;
+
+    os << mat.nrow() << ' ' << mat.ncol();
+    if (!os)
+        return os;
+
+    for (std::size_t j = 0; j != mat.ncol(); ++j)
+        for (std::size_t i = 0; i != mat.nrow(); ++i)
+            os << ' ' << mat(i, j);
+
+    return os;
+}
+
+/// \brief Input operator
+template <typename CharT, typename Traits, typename T, MatrixLayout Layout,
+    typename Alloc>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, Matrix<T, Layout, Alloc> &mat)
+{
+    if (!is)
+        return is;
+
+    std::size_t nrow = 0;
+    std::size_t ncol = 0;
+    is >> nrow >> std::ws >> ncol;
+    if (!is)
+        return is;
+
+    Matrix<T, Layout, Alloc> tmp(nrow, ncol);
+    for (std::size_t j = 0; j != mat.ncol(); ++j)
+        for (std::size_t i = 0; i != mat.nrow(); ++i)
+            is >> std::ws >> tmp(i, j);
+    if (is)
+        mat = std::move(tmp);
+
+    return is;
+}
+
 } // namespace mckl
 
 #endif // MCKL_CORE_MATRIX_HPP

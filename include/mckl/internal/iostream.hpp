@@ -35,6 +35,7 @@
 #include <mckl/internal/config.h>
 #include <array>
 #include <iostream>
+#include <list>
 #include <vector>
 
 namespace mckl {
@@ -119,6 +120,47 @@ inline std::basic_istream<CharT, Traits> &istream(
     return is;
 }
 
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_ostream<CharT, Traits> &ostream(
+    std::basic_ostream<CharT, Traits> &os, const std::list<T, Alloc> &lst)
+{
+    if (!os)
+        return os;
+
+    os << lst.size();
+    if (!os)
+        return os;
+
+    for (const auto &v : lst)
+        os << ' ' << v;
+
+    return os;
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_istream<CharT, Traits> &istream(
+    std::basic_istream<CharT, Traits> &is, std::list<T, Alloc> &lst)
+{
+    if (!is)
+        return is;
+
+    std::size_t n = 0;
+    is >> n;
+    if (!is)
+        return is;
+
+    std::list<T, Alloc> tmp;
+    T val;
+    for (std::size_t i = 0; i != n; ++i) {
+        is >> std::ws >> val;
+        tmp.push_back(val);
+    }
+    if (is)
+        lst = std::move(tmp);
+
+    return is;
+}
+
 } // namespace mckl::internal
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
@@ -147,6 +189,20 @@ inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
 {
     return internal::istream(is, vec);
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_ostream<CharT, Traits> &operator<<(
+    std::basic_ostream<CharT, Traits> &os, const std::list<T, Alloc> &lst)
+{
+    return internal::ostream(os, lst);
+}
+
+template <typename CharT, typename Traits, typename T, typename Alloc>
+inline std::basic_istream<CharT, Traits> &operator>>(
+    std::basic_istream<CharT, Traits> &is, std::list<T, Alloc> &lst)
+{
+    return internal::istream(is, lst);
 }
 
 } // namespace mckl
