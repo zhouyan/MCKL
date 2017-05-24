@@ -99,14 +99,14 @@ endfunction(mckl_add_test)
 
 function(mckl_add_file exname filename)
     if(UNIX)
-        ADD_CUSTOM_COMMAND(
+        add_custom_command(
             OUTPUT  ${PROJECT_BINARY_DIR}/${exname}_${filename}
             DEPENDS ${PROJECT_SOURCE_DIR}/${exname}_${filename}
             COMMAND ${CMAKE_COMMAND} ARGS -E create_symlink
             ${PROJECT_SOURCE_DIR}/${exname}_${filename}
             ${PROJECT_BINARY_DIR}/${exname}_${filename})
     else(UNIX)
-        ADD_CUSTOM_COMMAND(
+        add_custom_command(
             OUTPUT  ${PROJECT_BINARY_DIR}/${exname}_${filename}
             DEPENDS ${PROJECT_SOURCE_DIR}/${exname}_${filename}
             COMMAND ${CMAKE_COMMAND} ARGS -E copy
