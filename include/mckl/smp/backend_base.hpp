@@ -70,7 +70,7 @@ MCKL_PUSH_CLANG_WARNING("-Wweak-vtables")
     Name##SMP() = default;                                                    \
     Name##SMP(const Name##SMP<T, Derived, Backend##Impl> &) = default;        \
     Name##SMP<T, Derived, Backend##Impl> &operator=(                          \
-        Name##SMP<T, Derived, Backend##Impl> &) = default;                    \
+        const Name##SMP<T, Derived, Backend##Impl> &) = default;              \
     Name##SMP(Name##SMP<T, Derived, Backend##Impl> &&) = default;             \
     Name##SMP<T, Derived, Backend##Impl> &operator=(                          \
         Name##SMP<T, Derived, Backend##Impl> &&) = default;
