@@ -100,8 +100,8 @@ inline void utility_hdf5(std::size_t N, std::size_t M)
         if (!passed)
             break;
 
-        mckl::Vector<float> f1(n);
-        mckl::Vector<float> f2(n);
+        mckl::Vector<float> f1(m);
+        mckl::Vector<float> f2(m);
         std::copy(v1.begin(), v1.end(), f1.begin());
         std::copy(v2.begin(), v2.end(), f2.begin());
         passed = passed && f1 == f2;
