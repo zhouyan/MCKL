@@ -72,10 +72,10 @@
 /// \brief Default allocation type
 /// \ingroup Config
 #ifndef MCKL_MEMORY_TYPE
-#if MCKL_USE_TBB_MALLOC
-#define MCKL_MEMORY_TYPE ::mckl::MemoryTBB
-#elif MCKL_USE_JEMALLOC
+#if MCKL_USE_JEMALLOC
 #define MCKL_MEMORY_TYPE ::mckl::MemoryJEM
+#elif MCKL_USE_TBB_MALLOC
+#define MCKL_MEMORY_TYPE ::mckl::MemoryTBB
 #elif MCKL_HAS_POSIX
 #define MCKL_MEMORY_TYPE ::mckl::MemorySYS
 #else
@@ -242,13 +242,13 @@ class MemoryJEM
     {
         const std::size_t m = internal::alignment_round<Alignment>(n);
 
-        return m < n ? nullptr : ::je_aligned_alloc(Alignment, m);
+        return m < n ? nullptr : ::aligned_alloc(Alignment, m);
     }
 
     static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
         if (ptr != nullptr)
-            ::je_free(ptr);
+            ::free(ptr);
     }
 }; // class MemoryJEM
 
