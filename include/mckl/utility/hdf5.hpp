@@ -71,7 +71,7 @@ class HDF5ID
 
   private:
     ::hid_t id_;
-}; // class HDFID
+}; // class HDF5ID
 
 MCKL_DEFINE_UTILITY_HDF5_TYPE(DataSet, D)
 MCKL_DEFINE_UTILITY_HDF5_TYPE(DataSpace, S)
