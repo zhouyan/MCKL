@@ -59,9 +59,11 @@ inline void student_t_distribution_impl(
     div(n, s.data(), r, r);
 
     StudentTDistribution<RealType> dist(df);
-    for (std::size_t i = 0; i != n; ++i)
-        if (!std::isfinite(r[i]))
+    for (std::size_t i = 0; i != n; ++i) {
+        if (!std::isfinite(r[i])) {
             r[i] = dist(rng);
+        }
+    }
 }
 
 } // namespace mckl::internal
@@ -103,12 +105,14 @@ class StudentTDistribution
         MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
         MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (param.n() != param_.n()) {
-            while (!std::isfinite(u))
+            while (!std::isfinite(u)) {
                 u = n() / chi_squared_(rng);
+            }
         } else {
             ChiSquaredDistribution<RealType> chi_squared(param.n());
-            while (!std::isfinite(u))
+            while (!std::isfinite(u)) {
                 u = param.n() / chi_squared(rng);
+            }
         }
         MCKL_POP_CLANG_WARNING
         MCKL_POP_INTEL_WARNING

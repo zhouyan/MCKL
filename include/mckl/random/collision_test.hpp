@@ -76,8 +76,9 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
         Vector<result_type> r(k * T);
         std::size_t s = 0;
         occurs_type occurs;
-        for (std::size_t i = 0; i != m; ++i)
+        for (std::size_t i = 0; i != m; ++i) {
             generate(rng, u01, k, r.data(), s, occurs);
+        }
         generate(rng, u01, l, r.data(), s, occurs);
 
         return s;
@@ -102,25 +103,28 @@ class CollisionTest : public PoissonTest<CollisionTest<D, T>>
         rand(rng, u01, n * T, r);
         mul(n * T, static_cast<typename U01DistributionType::result_type>(D),
             r, r);
-        for (std::size_t i = 0; i != n; ++i, r += T)
+        for (std::size_t i = 0; i != n; ++i, r += T) {
             count(internal::serial_index<D, T>(r), s, occurs);
+        }
     }
 
     void count(std::size_t u, std::size_t &s, std::bitset<K_> &occurs) const
     {
-        if (occurs.test(u))
+        if (occurs.test(u)) {
             ++s;
-        else
+        } else {
             occurs.set(u);
+        }
     }
 
     void count(
         std::size_t u, std::size_t &s, std::set<std::size_t> &occurs) const
     {
-        if (occurs.count(u))
+        if (occurs.count(u)) {
             ++s;
-        else
+        } else {
             occurs.insert(u);
+        }
     }
 }; // class CollisionTest
 

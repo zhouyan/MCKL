@@ -85,8 +85,9 @@ class CouponCollectorTest
             std::size_t v = 0;
             std::bitset<D> occurs;
             while (v < D) {
-                if (t >= NTrialMax)
+                if (t >= NTrialMax) {
                     return 0;
+                }
                 if (uidx == k) {
                     rand(rng, u01, k, r.data());
                     mul(k, static_cast<double>(D), r.data(), r.data());
@@ -100,12 +101,13 @@ class CouponCollectorTest
                 }
                 if (v == D) {
                     t -= D;
-                    if (t <= tmin_)
+                    if (t <= tmin_) {
                         count_.front() += 1;
-                    else if (t >= tmax_)
+                    } else if (t >= tmax_) {
                         count_.back() += 1;
-                    else
+                    } else {
                         count_[t - tmin_] += 1;
+                    }
                     ++s;
                     break;
                 }

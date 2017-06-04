@@ -52,26 +52,32 @@ class Sampler
     /// \brief Reserve space for *additional* iterations
     void reserve(std::size_t n)
     {
-        for (auto &est : estimator_)
-            for (auto &e : est)
+        for (auto &est : estimator_) {
+            for (auto &e : est) {
                 e.reserve(n);
+            }
+        }
     }
 
     /// \brief Remove all evaluation and estimation methods
     void reset()
     {
-        for (auto &eval : eval_)
+        for (auto &eval : eval_) {
             eval.clear();
-        for (auto &est : estimator_)
+        }
+        for (auto &est : estimator_) {
             est.clear();
+        }
     }
 
     /// \brief Clear all estimator histories
     void clear()
     {
-        for (auto &est : estimator_)
-            for (auto &e : est)
+        for (auto &est : estimator_) {
+            for (auto &e : est) {
                 e.clear();
+            }
+        }
     }
 
     /// \brief Return a combined matrix of all estimates
@@ -82,27 +88,35 @@ class Sampler
             static_cast<const Derived *>(this)->num_iter();
 
         std::size_t ncol = 0;
-        for (auto &est : estimator_)
-            for (auto &e : est)
+        for (auto &est : estimator_) {
+            for (auto &e : est) {
                 ncol += e.dim();
+            }
+        }
 
         Matrix<T, Layout> mat(nrow, ncol);
-        if (nrow * ncol == 0)
+        if (nrow * ncol == 0) {
             return mat;
+        }
 
         if (Layout == RowMajor) {
             for (std::size_t i = 0; i != nrow; ++i) {
                 T *first = mat.row_data(i);
-                for (auto &est : estimator_)
-                    for (auto &e : est)
+                for (auto &est : estimator_) {
+                    for (auto &e : est) {
                         first = std::copy(e.row_begin(i), e.row_end(i), first);
+                    }
+                }
             }
         } else {
             T *first = mat.col_data(0);
-            for (auto &est : estimator_)
-                for (auto &e : est)
-                    for (std::size_t j = 0; j != e.dim(); ++j)
+            for (auto &est : estimator_) {
+                for (auto &e : est) {
+                    for (std::size_t j = 0; j != e.dim(); ++j) {
                         first = std::copy(e.col_begin(j), e.col_end(j), first);
+                    }
+                }
+            }
         }
 
         return mat;
@@ -120,13 +134,15 @@ class Sampler
         const std::size_t n = mat.nrow();
         const std::size_t m = mat.ncol();
 
-        if (!os || n * m == 0)
+        if (!os || n * m == 0) {
             return os;
+        }
 
         auto v = mat.data();
         for (std::size_t i = 0; i != n; ++i) {
-            for (std::size_t j = 0; j != m; ++j)
+            for (std::size_t j = 0; j != m; ++j) {
                 os << *v++ << sepchar;
+            }
             os << '\n';
         }
 

@@ -120,8 +120,9 @@ class Philox2xGeneratorGenericImpl
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        for (std::size_t i = 0; i != n; ++i, r += R)
+        for (std::size_t i = 0; i != n; ++i, r += R) {
             eval(ctr, r, key);
+        }
     }
 }; // class Philox2xGeneratorGenericImpl
 

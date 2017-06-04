@@ -97,8 +97,9 @@ inline void uniform_int_distribution_impl(RNGType &rng, std::size_t n,
     u01_co_distribution(rng, n, u);
     muladd(n, u, rb - ra + const_one<double>(), ra, u);
     floor(n, u, u);
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         r[i] = static_cast<IntType>(u[i]);
+    }
 }
 
 template <std::size_t, typename IntType, typename RNGType>
@@ -155,8 +156,9 @@ class UniformIntDistribution
         constexpr result_type imin = std::numeric_limits<result_type>::min();
         constexpr result_type imax = std::numeric_limits<result_type>::max();
 
-        if (param.a() == param.b())
+        if (param.a() == param.b()) {
             return param.a();
+        }
 
         if (param.a() == imin && param.b() == imax) {
             UniformBitsDistribution<UIntType> ubits;

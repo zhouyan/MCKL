@@ -44,10 +44,12 @@ namespace mckl {
 template <typename T>
 inline T erfcinv(T y)
 {
-    if (y >= 2)
+    if (y >= 2) {
         return -const_inf<T>();
-    if (y <= 0)
+    }
+    if (y <= 0) {
         return const_inf<T>();
+    }
 
     constexpr T a = static_cast<T>(0.70771);
     constexpr T b = static_cast<T>(2.30753);

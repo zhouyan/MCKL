@@ -115,8 +115,9 @@ class SeedGenerator
         std::basic_ostream<CharT, Traits> &os,
         const SeedGenerator<ResultType, ID, Randomize, Atomic> &sg)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << sg.np_ << ' ';
         os << sg.rank_ << ' ';
@@ -131,8 +132,9 @@ class SeedGenerator
         std::basic_istream<CharT, Traits> &is,
         SeedGenerator<ResultType, ID, Randomize, Atomic> &sg)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         seed_type np;
         seed_type rank;
@@ -175,18 +177,21 @@ class SeedGenerator
         runtime_assert(np > 0,
             "**SeedGenerator::partition** the number of the partitions is "
             "zero");
-        if (np < 1)
+        if (np < 1) {
             np = 1;
+        }
 
         runtime_assert(np > rank,
             "**SeedGenerator::partition** the rank is not smaller than the "
             "number of partitions");
-        if (rank >= np)
+        if (rank >= np) {
             rank = 0;
+        }
 
         seed_type maxs = std::numeric_limits<seed_type>::max();
-        if (np > 1)
+        if (np > 1) {
             maxs = (maxs - rank) / np + 1;
+        }
 
         np_ = np;
         rank_ = rank;

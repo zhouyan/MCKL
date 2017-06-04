@@ -152,8 +152,9 @@ class MKLStream
         int status =
             internal::mkl_error_check(::vslNewStream(&ptr, brng, seed),
                 "MKLStream::reset", "::vslNewStream");
-        if (status == VSL_ERROR_OK)
+        if (status == VSL_ERROR_OK) {
             reset(ptr);
+        }
 
         return status;
     }
@@ -165,8 +166,9 @@ class MKLStream
         int status =
             internal::mkl_error_check(::vslNewStreamEx(&ptr, brng, n, params),
                 "MKLStream::reset", "::vslNewStreamEx");
-        if (status == VSL_ERROR_OK)
+        if (status == VSL_ERROR_OK) {
             reset(ptr);
+        }
 
         return status;
     }
@@ -174,8 +176,9 @@ class MKLStream
     /// \brief `vslDeleteStream`
     int release()
     {
-        if (ptr_ == nullptr)
+        if (ptr_ == nullptr) {
             return VSL_ERROR_OK;
+        }
 
         int status = internal::mkl_error_check(::vslDeleteStream(&ptr_),
             "MKLStream::release", "::vslDeleteStream");
@@ -200,8 +203,9 @@ class MKLStream
         int status =
             internal::mkl_error_check(::vslSaveStreamF(&ptr, fname.c_str()),
                 "MKLStream::load_f", "::vslSaveStreamF");
-        if (status == VSL_ERROR_OK)
+        if (status == VSL_ERROR_OK) {
             reset(ptr);
+        }
 
         return status;
     }
@@ -219,8 +223,9 @@ class MKLStream
         ::VSLStreamStatePtr ptr = nullptr;
         int status = internal::mkl_error_check(::vslLoadStreamM(&ptr, memptr),
             "MKLStream::load_m", "::vslLoadStreamM");
-        if (status == VSL_ERROR_OK)
+        if (status == VSL_ERROR_OK) {
             reset(ptr);
+        }
 
         return status;
     }
@@ -623,18 +628,21 @@ inline bool operator==(const MKLStream &stream1, const MKLStream &stream2)
 {
     int brng1 = stream1.get_brng();
     int brng2 = stream2.get_brng();
-    if (brng1 != brng2)
+    if (brng1 != brng2) {
         return false;
-    if (brng1 == VSL_BRNG_NONDETERM)
+    }
+    if (brng1 == VSL_BRNG_NONDETERM) {
         return false;
+    }
 
     std::size_t n = static_cast<std::size_t>(stream1.get_size());
     Vector<char> s1(n);
     Vector<char> s2(n);
     stream1.save_m(s1.data());
     stream2.save_m(s2.data());
-    if (s1 != s2)
+    if (s1 != s2) {
         return false;
+    }
 
     return true;
 }
@@ -652,13 +660,15 @@ template <typename CharT, typename Traits>
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const MKLStream &stream)
 {
-    if (!os)
+    if (!os) {
         return os;
+    }
 
     std::size_t n = static_cast<std::size_t>(stream.get_size());
     std::size_t m = sizeof(std::uintmax_t);
-    if (n % m != 0)
+    if (n % m != 0) {
         n += m - n % m;
+    }
     n /= m;
     Vector<std::uintmax_t> s(n);
     stream.save_m(reinterpret_cast<char *>(s.data()));
@@ -675,8 +685,9 @@ template <typename CharT, typename Traits>
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, MKLStream &stream)
 {
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     MKL_INT brng;
     Vector<std::uintmax_t> s;
@@ -913,8 +924,9 @@ class MKLEngine
     void discard(long long nskip)
     {
 
-        if (nskip <= 0)
+        if (nskip <= 0) {
             return;
+        }
 
         const long long remain = static_cast<long long>(M_ - index_);
         if (nskip <= remain) {
@@ -929,8 +941,9 @@ class MKLEngine
         const int bits = properties.NBits;
         const long long M = static_cast<long long>(M_);
         long long m = nskip / M * M;
-        if (Bits >= bits)
+        if (Bits >= bits) {
             m *= Bits / bits + (Bits % bits == 0 ? 0 : 1);
+        }
         switch (stream_.get_brng()) {
             case VSL_BRNG_ARS5:
                 stream_.skip_ahead(m);
@@ -991,12 +1004,15 @@ class MKLEngine
     friend bool operator==(
         const MKLEngine<BRNG, Bits> &eng1, const MKLEngine<BRNG, Bits> &eng2)
     {
-        if (eng1.stream_ != eng2.stream_)
+        if (eng1.stream_ != eng2.stream_) {
             return false;
-        if (eng1.result_ != eng2.result_)
+        }
+        if (eng1.result_ != eng2.result_) {
             return false;
-        if (eng1.index_ != eng2.index_)
+        }
+        if (eng1.index_ != eng2.index_) {
             return false;
+        }
         return true;
     }
 
@@ -1014,8 +1030,9 @@ class MKLEngine
         std::basic_ostream<CharT, Traits> &os,
         const MKLEngine<BRNG, Bits> &eng)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << eng.stream_ << ' ';
         os << eng.result_ << ' ';
@@ -1028,8 +1045,9 @@ class MKLEngine
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, MKLEngine<BRNG, Bits> &eng)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         MKLStream stream;
         std::array<result_type, M_> result;
@@ -1197,11 +1215,13 @@ inline int mkl_init(
         }
     }
 
-    if (method == VSL_INIT_METHOD_LEAPFROG)
+    if (method == VSL_INIT_METHOD_LEAPFROG) {
         return VSL_RNG_ERROR_LEAPFROG_UNSUPPORTED;
+    }
 
-    if (method == VSL_INIT_METHOD_SKIPAHEAD)
+    if (method == VSL_INIT_METHOD_SKIPAHEAD) {
         rng.discard(static_cast<unsigned>(n));
+    }
 
     return 0;
 }

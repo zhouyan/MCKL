@@ -64,8 +64,9 @@ template <std::size_t K, typename RealType>
 inline void u01_trans_sorted_impl(std::size_t n0, std::size_t n,
     const RealType *u01, RealType *r, std::size_t N, RealType &lmax)
 {
-    if (n0 == n)
+    if (n0 == n) {
         return;
+    }
 
     alignas(32) std::array<RealType, K> s;
     std::size_t j = 0;
@@ -83,8 +84,9 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void u01_rand_sorted_impl(RNGType &rng, std::size_t n0, std::size_t n,
     RealType *r, std::size_t N, RealType &lmax)
 {
-    if (n0 == n)
+    if (n0 == n) {
         return;
+    }
 
     u01_distribution(rng, n - n0, r);
     u01_trans_sorted_impl<K>(n0, n, r, r, N, lmax);
@@ -94,12 +96,14 @@ template <typename RealType>
 inline void u01_trans_stratified_impl(std::size_t n0, std::size_t n,
     const RealType *u01, RealType *r, RealType delta)
 {
-    if (n0 == n)
+    if (n0 == n) {
         return;
+    }
 
     std::size_t j = 0;
-    for (std::size_t i = n0; i != n; ++i, ++j)
+    for (std::size_t i = n0; i != n; ++i, ++j) {
         r[j] = u01[j] + static_cast<RealType>(i);
+    }
     mul(n - n0, delta, r, r);
 }
 
@@ -107,8 +111,9 @@ template <typename RealType, typename RNGType>
 inline void u01_rand_stratified_impl(
     RNGType &rng, std::size_t n0, std::size_t n, RealType *r, RealType delta)
 {
-    if (n0 == n)
+    if (n0 == n) {
         return;
+    }
 
     u01_distribution(rng, n - n0, r);
     u01_trans_stratified_impl(n0, n, r, r, delta);
@@ -118,12 +123,14 @@ template <typename RealType>
 inline void u01_trans_systematic_impl(
     std::size_t n0, std::size_t n, RealType u, RealType *r, RealType delta)
 {
-    if (n0 == n)
+    if (n0 == n) {
         return;
+    }
 
     std::size_t j = 0;
-    for (std::size_t i = n0; i != n; ++i, ++j)
+    for (std::size_t i = n0; i != n; ++i, ++j) {
         r[j] = static_cast<RealType>(i);
+    }
     muladd(n - n0, r, delta, u, r);
 }
 
@@ -139,15 +146,17 @@ inline void u01_trans_sorted(std::size_t N, const RealType *u01, RealType *r)
         "**u01_trans_sorted** used with RealType other than floating point "
         "types");
 
-    if (N == 0)
+    if (N == 0) {
         return;
+    }
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const std::size_t m = N / k;
     std::size_t n0 = 0;
     RealType lmax = 0;
-    for (std::size_t i = 0; i != m; ++i, n0 += k, u01 += k, r += k)
+    for (std::size_t i = 0; i != m; ++i, n0 += k, u01 += k, r += k) {
         internal::u01_trans_sorted_impl<k>(n0, n0 + k, u01, r, N, lmax);
+    }
     internal::u01_trans_sorted_impl<k>(n0, N, u01, r, N, lmax);
 }
 
@@ -162,15 +171,17 @@ inline void u01_trans_stratified(
         "**u01_trans_stratified** used with RealType other than floating "
         "point types");
 
-    if (N == 0)
+    if (N == 0) {
         return;
+    }
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const std::size_t m = N / k;
     std::size_t n0 = 0;
     const RealType delta = 1 / static_cast<RealType>(N);
-    for (std::size_t i = 0; i != m; ++i, n0 += k, u01 += k, r += k)
+    for (std::size_t i = 0; i != m; ++i, n0 += k, u01 += k, r += k) {
         internal::u01_trans_stratified_impl(n0, n0 + k, u01, r, delta);
+    }
     internal::u01_trans_stratified_impl(n0, N, u01, r, delta);
 }
 
@@ -185,16 +196,18 @@ inline void u01_trans_systematic(
         "**u01_trans_systematic** used with RealType other than floating "
         "point types");
 
-    if (N == 0)
+    if (N == 0) {
         return;
+    }
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const std::size_t m = N / k;
     std::size_t n0 = 0;
     const RealType delta = 1 / static_cast<RealType>(N);
     const RealType u = u01[0] * delta;
-    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k)
+    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k) {
         internal::u01_trans_systematic_impl(n0, n0 + k, u, r, delta);
+    }
     internal::u01_trans_systematic_impl(n0, N, u, r, delta);
 }
 
@@ -207,15 +220,17 @@ inline void u01_rand_sorted(RNGType &rng, std::size_t N, RealType *r)
         "**u01_rand_sorted** used with RealType other than floating point "
         "types");
 
-    if (N == 0)
+    if (N == 0) {
         return;
+    }
 
     const std::size_t k = internal::BufferSize<RealType>::value;
     const std::size_t m = N / k;
     std::size_t n0 = 0;
     RealType lmax = 0;
-    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k)
+    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k) {
         internal::u01_rand_sorted_impl<k>(rng, n0, n0 + k, r, N, lmax);
+    }
     internal::u01_rand_sorted_impl<k>(rng, n0, N, r, N, lmax);
 }
 
@@ -232,8 +247,9 @@ inline void u01_rand_stratified(RNGType &rng, std::size_t N, RealType *r)
     const std::size_t m = N / k;
     std::size_t n0 = 0;
     const RealType delta = 1 / static_cast<RealType>(N);
-    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k)
+    for (std::size_t i = 0; i != m; ++i, n0 += k, r += k) {
         internal::u01_rand_stratified_impl(rng, n0, n0 + k, r, delta);
+    }
     internal::u01_rand_stratified_impl(rng, n0, N, r, delta);
 }
 
@@ -340,8 +356,9 @@ inline std::size_t resample_trans_residual(std::size_t N, std::size_t M,
     }
 
     const resid_type mul_resid = 1 / sum_resid;
-    for (std::size_t i = 0; i != N; ++i, ++resid)
+    for (std::size_t i = 0; i != N; ++i, ++resid) {
         *resid *= mul_resid;
+    }
 
     return M - static_cast<std::size_t>(sum_integ);
 }
@@ -361,8 +378,9 @@ inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
     using real_type = typename std::iterator_traits<InputIter>::value_type;
     using rep_type = typename std::iterator_traits<OutputIter>::value_type;
 
-    if (N == 0)
+    if (N == 0) {
         return replication;
+    }
 
     if (N == 1) {
         *replication++ = static_cast<rep_type>(M);
@@ -370,8 +388,9 @@ inline OutputIter resample_trans_u01_rep(std::size_t N, std::size_t M,
     }
 
     OutputIter rep = std::fill_n(replication, N, const_zero<rep_type>());
-    if (M == 0)
+    if (M == 0) {
         return rep;
+    }
 
     real_type accw = 0;
     std::size_t j = 0;
@@ -401,8 +420,9 @@ inline OutputIter resample_trans_rep_index(
     using rep_type = typename std::iterator_traits<InputIter>::value_type;
     using idx_type = typename std::iterator_traits<OutputIter>::value_type;
 
-    if (N == 0 || M == 0)
+    if (N == 0 || M == 0) {
         return index;
+    }
 
     const std::size_t K = std::min(N, M);
     rep_type time = 0;
@@ -540,8 +560,9 @@ class ResampleAlgorithm
         Vector<real_type> u01(R);
         u01seq_(rng, R, u01.data());
         resample_trans_u01_rep(N, R, resid.data(), u01.data(), replication);
-        for (std::size_t i = 0; i != N; ++i, ++replication)
+        for (std::size_t i = 0; i != N; ++i, ++replication) {
             *replication += integ[i];
+        }
     }
 }; // class ResampleAlgorithm
 
@@ -587,16 +608,18 @@ class ResampleIndex
     /// \brief The sample size of the last iteration
     std::size_t size() const
     {
-        if (index_.size() == 0)
+        if (index_.size() == 0) {
             return 0;
+        }
         return index_.back().size();
     }
 
     /// \brief The sample size of a given iteration
     std::size_t size(std::size_t iter) const
     {
-        if (iter >= index_.size())
+        if (iter >= index_.size()) {
             return 0;
+        }
         return index_[iter].size();
     }
 
@@ -611,10 +634,11 @@ class ResampleIndex
     {
         ++num_iter_;
         resize_identity(N);
-        if (index_.size() < num_iter_)
+        if (index_.size() < num_iter_) {
             index_.push_back(identity_);
-        else
+        } else {
             index_[num_iter_ - 1] = identity_;
+        }
     }
 
     /// \brief Append a resampling index
@@ -622,10 +646,11 @@ class ResampleIndex
     void push_back(std::size_t N, InputIter first)
     {
         ++num_iter_;
-        if (index_.size() < num_iter_)
+        if (index_.size() < num_iter_) {
             index_.emplace_back(N);
-        else
+        } else {
             index_[num_iter_ - 1].resize(N);
+        }
         std::copy_n(first, N, index_[num_iter_ - 1].begin());
     }
 
@@ -752,8 +777,9 @@ class ResampleIndex
         if (layout == RowMajor) {
             RandomIter back = first + static_cast<difference_type>(R - 1);
             const index_type *idx = index_[iter_back].data();
-            for (std::size_t i = 0; i != N; ++i)
+            for (std::size_t i = 0; i != N; ++i) {
                 back[static_cast<difference_type>(i * R)] = idx[i];
+            }
             for (std::size_t r = 1; r != R; ++r) {
                 const std::size_t j = iter_back - r;
                 RandomIter last = back;
@@ -797,9 +823,11 @@ class ResampleIndex
     {
         std::size_t n = identity_.size();
         identity_.resize(N);
-        if (n < N)
-            for (std::size_t i = n; i != N; ++i)
+        if (n < N) {
+            for (std::size_t i = n; i != N; ++i) {
                 identity_[i] = static_cast<index_type>(i);
+            }
+        }
     }
 }; // class ResampleIndex
 

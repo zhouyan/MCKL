@@ -133,8 +133,9 @@ class PMCMCMutation
 
         double prob = -prior_(param) - lnc;
         param_type p(param);
-        for (auto &eval : eval_)
+        for (auto &eval : eval_) {
             prob += eval(pf_.particle().rng(), p);
+        }
         prob += prior_(p);
 
         pf_.clear();
@@ -145,10 +146,11 @@ class PMCMCMutation
         mckl::U01Distribution<double> u01;
         double u = std::log(u01(pf_.particle().rng()));
 
-        if (u < prob)
+        if (u < prob) {
             param = std::move(p);
-        else
+        } else {
             pf_.particle().state().reset(param, lnc);
+        }
 
         return u < prob ? 1 : 0;
     }

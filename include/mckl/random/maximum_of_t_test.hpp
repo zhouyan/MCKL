@@ -67,8 +67,9 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
         const std::size_t l = n_ % k;
         Vector<result_type> r(k * T);
         Vector<result_type> s(k);
-        for (std::size_t i = 0; i != m; ++i)
+        for (std::size_t i = 0; i != m; ++i) {
             generate(rng, u01, k, r.data(), s.data(), count.data());
+        }
         generate(rng, u01, l, r.data(), s.data(), count.data());
 
         return this->stat(D, count.data(), static_cast<double>(n_) / D);
@@ -87,12 +88,14 @@ class MaximumOfTTest : public ChiSquaredTest<MaximumOfTTest<D, T>>
         using result_type = typename U01DistributionType::result_type;
 
         rand(rng, u01, n * T, r);
-        for (std::size_t i = 0; i != n; ++i, r += T)
+        for (std::size_t i = 0; i != n; ++i, r += T) {
             s[i] = *std::max_element(r, r + T);
+        }
         pow(n, s, static_cast<result_type>(T), s);
         mul(n, static_cast<result_type>(D), s, s);
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             ++count[internal::ftoi<std::size_t, D>(s[i])];
+        }
     }
 }; // class MaximumOfTTest
 

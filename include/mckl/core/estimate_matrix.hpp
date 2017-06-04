@@ -122,12 +122,15 @@ class EstimateMatrix : public Matrix<T, RowMajor>
     void insert_estimate(size_type i, InputIter first)
     {
         const size_type t = num_iter();
-        if (i < t)
+        if (i < t) {
             std::copy_n(first, dim(), this->row_begin(i));
-        if (i == t)
+        }
+        if (i == t) {
             insert_estimate(first);
-        if (i > t)
+        }
+        if (i > t) {
             insert_estimate_dispatch(t, i, first, std::is_floating_point<T>());
+        }
     }
 
   private:
@@ -139,8 +142,9 @@ class EstimateMatrix : public Matrix<T, RowMajor>
         size_type t, size_type i, InputIter first, std::true_type)
     {
         insert_estimate_dispatch(t, i, first, std::false_type());
-        if (i > t)
+        if (i > t) {
             std::fill_n(this->row_begin(t), (i - t) * dim(), -const_nan<T>());
+        }
     }
 
     template <typename InputIter>

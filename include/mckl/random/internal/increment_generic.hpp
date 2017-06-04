@@ -46,8 +46,9 @@ inline void increment1(std::array<T, K> &, std::false_type)
 template <std::size_t N, typename T, std::size_t K>
 inline void increment1(std::array<T, K> &ctr, std::true_type)
 {
-    if (++std::get<N>(ctr))
+    if (++std::get<N>(ctr)) {
         return;
+    }
 
     increment1<N + 1>(ctr, std::integral_constant<bool, N + 1 < K>());
 }
@@ -75,8 +76,9 @@ class Increment<T, 2>
   public:
     static void eval(std::array<T, 2> &ctr)
     {
-        if (++std::get<0>(ctr))
+        if (++std::get<0>(ctr)) {
             return;
+        }
         ++std::get<1>(ctr);
     }
 }; // class Increment
@@ -87,12 +89,15 @@ class Increment<T, 4>
   public:
     static void eval(std::array<T, 4> &ctr)
     {
-        if (++std::get<0>(ctr))
+        if (++std::get<0>(ctr)) {
             return;
-        if (++std::get<1>(ctr))
+        }
+        if (++std::get<1>(ctr)) {
             return;
-        if (++std::get<2>(ctr))
+        }
+        if (++std::get<2>(ctr)) {
             return;
+        }
         ++std::get<3>(ctr);
     }
 }; // class Increment
@@ -103,20 +108,27 @@ class Increment<T, 8>
   public:
     static void eval(std::array<T, 8> &ctr)
     {
-        if (++std::get<0>(ctr))
+        if (++std::get<0>(ctr)) {
             return;
-        if (++std::get<1>(ctr))
+        }
+        if (++std::get<1>(ctr)) {
             return;
-        if (++std::get<2>(ctr))
+        }
+        if (++std::get<2>(ctr)) {
             return;
-        if (++std::get<3>(ctr))
+        }
+        if (++std::get<3>(ctr)) {
             return;
-        if (++std::get<4>(ctr))
+        }
+        if (++std::get<4>(ctr)) {
             return;
-        if (++std::get<5>(ctr))
+        }
+        if (++std::get<5>(ctr)) {
             return;
-        if (++std::get<6>(ctr))
+        }
+        if (++std::get<6>(ctr)) {
             return;
+        }
         ++std::get<7>(ctr);
     }
 }; // class Increment
@@ -127,36 +139,51 @@ class Increment<T, 16>
   public:
     static void eval(std::array<T, 16> &ctr)
     {
-        if (++std::get<0x0>(ctr))
+        if (++std::get<0x0>(ctr)) {
             return;
-        if (++std::get<0x1>(ctr))
+        }
+        if (++std::get<0x1>(ctr)) {
             return;
-        if (++std::get<0x2>(ctr))
+        }
+        if (++std::get<0x2>(ctr)) {
             return;
-        if (++std::get<0x3>(ctr))
+        }
+        if (++std::get<0x3>(ctr)) {
             return;
-        if (++std::get<0x4>(ctr))
+        }
+        if (++std::get<0x4>(ctr)) {
             return;
-        if (++std::get<0x5>(ctr))
+        }
+        if (++std::get<0x5>(ctr)) {
             return;
-        if (++std::get<0x6>(ctr))
+        }
+        if (++std::get<0x6>(ctr)) {
             return;
-        if (++std::get<0x7>(ctr))
+        }
+        if (++std::get<0x7>(ctr)) {
             return;
-        if (++std::get<0x8>(ctr))
+        }
+        if (++std::get<0x8>(ctr)) {
             return;
-        if (++std::get<0x9>(ctr))
+        }
+        if (++std::get<0x9>(ctr)) {
             return;
-        if (++std::get<0xA>(ctr))
+        }
+        if (++std::get<0xA>(ctr)) {
             return;
-        if (++std::get<0xB>(ctr))
+        }
+        if (++std::get<0xB>(ctr)) {
             return;
-        if (++std::get<0xC>(ctr))
+        }
+        if (++std::get<0xC>(ctr)) {
             return;
-        if (++std::get<0xD>(ctr))
+        }
+        if (++std::get<0xD>(ctr)) {
             return;
-        if (++std::get<0xE>(ctr))
+        }
+        if (++std::get<0xE>(ctr)) {
             return;
+        }
         ++std::get<0xF>(ctr);
     }
 }; // class Increment

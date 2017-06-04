@@ -96,8 +96,9 @@ class ThreefryGeneratorGenericImpl
     {
         constexpr std::size_t rstride = sizeof(T) * K / sizeof(ResultType);
 
-        for (std::size_t i = 0; i != n; ++i, r += rstride)
+        for (std::size_t i = 0; i != n; ++i, r += rstride) {
             eval(ctr, r, par);
+        }
     }
 
   private:

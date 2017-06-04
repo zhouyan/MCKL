@@ -732,8 +732,9 @@ MCKL_DEFINE_MATH_VMF_BSV(-, sub)
 template <typename T>
 inline void sqr(std::size_t n, const T *a, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         y[i] = a[i] * a[i];
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i b_i\f$
@@ -764,16 +765,18 @@ MCKL_DEFINE_MATH_VMF_1(std::abs, abs)
 template <typename T>
 inline void abs(std::size_t n, const std::complex<T> *a, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         y[i] = std::abs(a[i]);
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arg(a_i)\f$
 template <typename T>
 inline void arg(std::size_t n, const std::complex<T> *a, T *y)
 {
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         y[i] = std::arg(a[i]);
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute
@@ -786,15 +789,19 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
     const std::size_t m = n / k;
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
-        for (std::size_t j = 0; j != k; ++j)
+        for (std::size_t j = 0; j != k; ++j) {
             y[j] = muladd(beta_a, a[j], mu_a);
-        for (std::size_t j = 0; j != k; ++j)
+        }
+        for (std::size_t j = 0; j != k; ++j) {
             y[j] /= muladd(beta_b, b[j], mu_b);
+        }
     }
-    for (std::size_t i = 0; i != l; ++i)
+    for (std::size_t i = 0; i != l; ++i) {
         y[i] = muladd(beta_a, a[i], mu_a);
-    for (std::size_t i = 0; i != l; ++i)
+    }
+    for (std::size_t i = 0; i != l; ++i) {
         y[i] /= muladd(beta_b, b[i], mu_b);
+    }
 }
 
 /// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
@@ -902,12 +909,14 @@ inline void pow3o2(std::size_t n, const T *a, T *y)
     const std::size_t l = n % k;
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
         sqrt<T>(k, a, y);
-        for (std::size_t j = 0; j != k; ++j)
+        for (std::size_t j = 0; j != k; ++j) {
             y[j] = y[j] * y[j] * y[j];
+        }
     }
     sqrt<T>(l, a, y);
-    for (std::size_t i = 0; i != l; ++i)
+    for (std::size_t i = 0; i != l; ++i) {
         y[i] = y[i] * y[i] * y[i];
+    }
 }
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i^{b_i}\f$
@@ -1161,8 +1170,9 @@ MCKL_DEFINE_MATH_VMF_1(std::rint, rint)
 template <typename T>
 inline void modf(std::size_t n, const T *a, T *y, T *z)
 {
-    for (std::size_t i = 0; i != n; ++i, ++a, ++y, ++z)
+    for (std::size_t i = 0; i != n; ++i, ++a, ++y, ++z) {
         *z = std::modf(*a, y);
+    }
 }
 
 /// @} vRounding

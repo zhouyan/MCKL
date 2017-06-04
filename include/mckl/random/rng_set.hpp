@@ -91,22 +91,26 @@ class RNGSetVector
 
     void resize(std::size_t n)
     {
-        if (n == rng_.size())
+        if (n == rng_.size()) {
             return;
+        }
 
-        if (n < rng_.size())
+        if (n < rng_.size()) {
             rng_.resize(n);
+        }
 
         size_type m = rng_.size();
         rng_.resize(n);
-        for (std::size_t i = m; i != n; ++i)
+        for (std::size_t i = m; i != n; ++i) {
             rng_[i].seed(Seed<rng_type>::instance().get());
+        }
     }
 
     void reset()
     {
-        for (auto &rng : rng_)
+        for (auto &rng : rng_) {
             rng.seed(Seed<rng_type>::instance().get());
+        }
     }
 
     rng_type &operator[](size_type id) { return rng_[id % size()]; }

@@ -72,15 +72,18 @@ class Estimator : public EstimateMatrix<T>
         const std::size_t n = this->num_iter();
         const std::size_t d = this->dim();
 
-        if (cut >= n)
+        if (cut >= n) {
             return first;
+        }
 
         thin = thin < 1 ? 1 : thin;
-        if (n - cut < thin)
+        if (n - cut < thin) {
             return this->read_estimate(cut, first);
+        }
 
-        if (thin < 1)
+        if (thin < 1) {
             thin = 1;
+        }
         Vector<T> sum(d, T());
         std::size_t k = 0;
         while (cut < n) {

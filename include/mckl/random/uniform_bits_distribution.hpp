@@ -43,8 +43,9 @@ inline void uniform_bits_distribution_impl(
     RNGType &rng, std::size_t n, UIntType *r, std::false_type, std::false_type)
 {
     UniformBitsDistribution<UIntType> ubits;
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         r[i] = ubits(rng);
+    }
 }
 
 template <typename UIntType, typename RNGType, bool DownCast>

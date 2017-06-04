@@ -69,20 +69,23 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
         Vector<result_type> r(k * T);
         Vector<std::size_t> spacings(n_);
         std::size_t *s = spacings.data();
-        for (std::size_t i = 0; i != m; ++i, s += k)
+        for (std::size_t i = 0; i != m; ++i, s += k) {
             generate(rng, u01, k, r.data(), s);
+        }
         generate(rng, u01, l, r.data(), s);
 
         std::size_t d0 = spacings.front();
         std::sort(spacings.begin(), spacings.end());
-        for (std::size_t i = 0; i != n_ - 1; ++i)
+        for (std::size_t i = 0; i != n_ - 1; ++i) {
             spacings[i] = spacings[i + 1] - spacings[i];
+        }
         spacings.back() = K_ - spacings.back() + d0;
         std::sort(spacings.begin(), spacings.end());
         std::size_t e = 0;
         for (std::size_t i = 0; i != n_ - 1; ++i) {
-            if (spacings[i] == spacings[i + 1])
+            if (spacings[i] == spacings[i + 1]) {
                 ++e;
+            }
         }
 
         return e;
@@ -103,8 +106,9 @@ class BirthdaySpacingsTest : public PoissonTest<BirthdaySpacingsTest<D, T>>
         rand(rng, u01, n * T, r);
         mul(n * T, static_cast<typename U01DistributionType::result_type>(D),
             r, r);
-        for (std::size_t i = 0; i != n; ++i, r += T)
+        for (std::size_t i = 0; i != n; ++i, r += T) {
             s[i] = internal::serial_index<D, T>(r);
+        }
     }
 }; // class BirthdaySpacingsTest
 

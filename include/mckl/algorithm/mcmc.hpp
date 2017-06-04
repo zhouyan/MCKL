@@ -94,8 +94,9 @@ class MCMCSampler : public Sampler<MCMCSampler<T, U>>
     void reserve(std::size_t n)
     {
         Sampler<MCMCSampler<T, U>>::reserve(n);
-        for (auto &a : accept_history_)
+        for (auto &a : accept_history_) {
             a.reserve(num_iter() + n);
+        }
     }
 
     /// \brief Reset the sampler by clear all history, evaluation objects, and
@@ -146,10 +147,12 @@ class MCMCSampler : public Sampler<MCMCSampler<T, U>>
     /// \brief Iterate the sampler
     void iterate(std::size_t n = 1)
     {
-        if (n > 1)
+        if (n > 1) {
             reserve(n);
-        for (std::size_t i = 0; i != n; ++i)
+        }
+        for (std::size_t i = 0; i != n; ++i) {
             do_iterate();
+        }
     }
 
     /// \brief Read and write access to the state object
@@ -177,13 +180,16 @@ class MCMCSampler : public Sampler<MCMCSampler<T, U>>
             if (accept_history_.size() > 0) {
                 const std::size_t n = accept_history_.front().size();
                 const std::size_t d = accept_history_.size();
-                for (std::size_t i = 0; i != n; ++i)
-                    for (std::size_t j = 0; j != d; ++j)
+                for (std::size_t i = 0; i != n; ++i) {
+                    for (std::size_t j = 0; j != d; ++j) {
                         *first++ = accept_history_[j][i];
+                    }
+                }
             }
         } else {
-            for (std::size_t i = 0; i != accept_history_.size(); ++i)
+            for (std::size_t i = 0; i != accept_history_.size(); ++i) {
                 first = read_accept_history(i, first);
+            }
         }
 
         return first;
@@ -197,11 +203,13 @@ class MCMCSampler : public Sampler<MCMCSampler<T, U>>
     void do_iterate()
     {
         accept_history_.resize(this->eval(0).size());
-        for (std::size_t i = 0; i != this->eval(0).size(); ++i)
+        for (std::size_t i = 0; i != this->eval(0).size(); ++i) {
             accept_history_[i].push_back(this->eval(0)[i](iter_, state_));
+        }
 
-        for (auto &e : Sampler<MCMCSampler<T, U>>::estimator(0))
+        for (auto &e : Sampler<MCMCSampler<T, U>>::estimator(0)) {
             e.estimate(iter_, state_);
+        }
 
         ++iter_;
     }

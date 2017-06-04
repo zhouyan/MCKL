@@ -56,9 +56,11 @@ inline void levy_distribution_impl(
     muladd(n, r, b, a, r);
 
     LevyDistribution<RealType> dist;
-    for (std::size_t i = 0; i != n; ++i)
-        if (!std::isfinite(r[i]))
+    for (std::size_t i = 0; i != n; ++i) {
+        if (!std::isfinite(r[i])) {
             r[i] = dist(rng);
+        }
+    }
 }
 
 } // namespace mckl::internal
@@ -91,8 +93,9 @@ class LevyDistribution
         result_type r = 0;
         MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
         MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
-        while (r == 0)
+        while (r == 0) {
             r = normal_(rng);
+        }
         MCKL_POP_CLANG_WARNING
         MCKL_POP_INTEL_WARNING
 

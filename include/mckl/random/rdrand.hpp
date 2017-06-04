@@ -170,8 +170,9 @@ class RDRANDEngine
             bool success = rdrand<result_type>(
                 &r, std::integral_constant<int,
                         std::numeric_limits<result_type>::digits>());
-            if (success || ntrial > NTrialMax)
+            if (success || ntrial > NTrialMax) {
                 break;
+            }
         }
         runtime_assert(ntrial < NTrialMax,
             "**RDRAND::generator** maximum number of trials exceeded", true);
@@ -186,8 +187,9 @@ class RDRANDEngine
             bool success = rdrand<result_type>(
                 &r, std::integral_constant<int,
                         std::numeric_limits<result_type>::digits>());
-            if (success)
+            if (success) {
                 break;
+            }
         }
 
         return r;

@@ -57,8 +57,9 @@ class HDF5ID
 
     ~HDF5ID()
     {
-        if (good())
+        if (good()) {
             Derived::close(id_);
+        }
     }
 
     ::hid_t id() const { return id_; }
@@ -82,15 +83,17 @@ MCKL_DEFINE_UTILITY_HDF5_TYPE(Group, G)
 inline ::hid_t hdf5_datafile(
     const std::string &filename, bool open_only, bool read_only)
 {
-    if (!open_only)
+    if (!open_only) {
         return ::H5Fcreate(
             filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    }
 
     unsigned flag = 0;
-    if (read_only)
+    if (read_only) {
         flag = H5F_ACC_RDONLY;
-    else
+    } else {
         flag = H5F_ACC_RDWR;
+    }
 
     return ::H5Fopen(filename.c_str(), flag, H5P_DEFAULT);
 }
@@ -246,22 +249,26 @@ inline void hdf5store(const Vector<T, Alloc> &vector,
 {
     internal::HDF5File datafile(
         internal::hdf5_datafile(filename, append, false));
-    if (!datafile)
+    if (!datafile) {
         return;
+    }
 
     internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype)
+    if (!datatype) {
         return;
+    }
 
     ::hsize_t dims[1] = {vector.size()};
     internal::HDF5DataSpace dataspace(::H5Screate_simple(1, dims, nullptr));
-    if (!dataspace)
+    if (!dataspace) {
         return;
+    }
 
     internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
         datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    if (!dataset)
+    if (!dataset) {
         return;
+    }
 
     ::H5Dwrite(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT,
         vector.data());
@@ -274,31 +281,37 @@ inline Vector<T> hdf5load(
     const std::string &filename, const std::string &dataname)
 {
     internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
-    if (!datafile)
+    if (!datafile) {
         return Vector<T>();
+    }
 
     internal::HDF5DataSet dataset(
         ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset)
+    if (!dataset) {
         return Vector<T>();
+    }
 
     internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace)
+    if (!dataspace) {
         return Vector<T>();
+    }
 
     ::hssize_t n = ::H5Sget_simple_extent_npoints(dataspace.id());
-    if (n <= 0)
+    if (n <= 0) {
         return Vector<T>();
+    }
 
     internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype)
+    if (!datatype) {
         return Vector<T>();
+    }
 
     Vector<T> vector(static_cast<std::size_t>(n));
     ::herr_t err = ::H5Dread(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL,
         H5P_DEFAULT, vector.data());
-    if (err < 0)
+    if (err < 0) {
         return Vector<T>();
+    }
 
     return vector;
 }
@@ -311,22 +324,26 @@ inline void hdf5store(const Matrix<T, RowMajor, Alloc> &matrix,
 {
     internal::HDF5File datafile(
         internal::hdf5_datafile(filename, append, false));
-    if (!datafile)
+    if (!datafile) {
         return;
+    }
 
     internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype)
+    if (!datatype) {
         return;
+    }
 
     ::hsize_t dims[2] = {matrix.nrow(), matrix.ncol()};
     internal::HDF5DataSpace dataspace(::H5Screate_simple(2, dims, nullptr));
-    if (!dataspace)
+    if (!dataspace) {
         return;
+    }
 
     internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
         datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    if (!dataset)
+    if (!dataset) {
         return;
+    }
 
     ::H5Dwrite(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT,
         matrix.data());
@@ -352,42 +369,50 @@ inline Matrix<T, Layout, Alloc> hdf5load(
     using matrix_type = Matrix<T, Layout, Alloc>;
 
     internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
-    if (!datafile)
+    if (!datafile) {
         return matrix_type();
+    }
 
     internal::HDF5DataSet dataset(
         ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset)
+    if (!dataset) {
         return matrix_type();
+    }
 
     internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace)
+    if (!dataspace) {
         return matrix_type();
+    }
 
     int ndims = ::H5Sget_simple_extent_ndims(dataspace.id());
-    if (ndims != 2)
+    if (ndims != 2) {
         return matrix_type();
+    }
 
     ::hsize_t dims[2];
     ndims = ::H5Sget_simple_extent_dims(dataspace.id(), dims, nullptr);
-    if (ndims != 2)
+    if (ndims != 2) {
         return matrix_type();
+    }
 
     std::size_t nrow = static_cast<std::size_t>(dims[0]);
     std::size_t ncol = static_cast<std::size_t>(dims[1]);
 
-    if (nrow * ncol == 0)
+    if (nrow * ncol == 0) {
         return matrix_type(nrow, ncol);
+    }
 
     internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype)
+    if (!datatype) {
         return matrix_type();
+    }
 
     Matrix<T, RowMajor, Alloc> matrix(nrow, ncol);
     ::herr_t err = ::H5Dread(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL,
         H5P_DEFAULT, matrix.data());
-    if (err < 0)
+    if (err < 0) {
         return matrix_type();
+    }
 
     return matrix_type(std::move(matrix));
 }

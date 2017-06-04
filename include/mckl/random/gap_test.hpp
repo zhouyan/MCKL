@@ -77,8 +77,9 @@ class GapTest : public ChiSquaredTest<GapTest<NTrialMax>>
         while (true) {
             a *= q;
             b *= q;
-            if (a < c || b < c)
+            if (a < c || b < c) {
                 break;
+            }
             np_.push_back(a);
         }
         mul(np_.size(), static_cast<double>(n), np_.data(), np_.data());
@@ -100,8 +101,9 @@ class GapTest : public ChiSquaredTest<GapTest<NTrialMax>>
         while (s < n_) {
             std::size_t r = 0;
             while (true) {
-                if (r >= NTrialMax)
+                if (r >= NTrialMax) {
                     return 0;
+                }
                 result_type u = u01(rng);
                 if (u >= alpha_ && u < beta_) {
                     count_[std::min(r, t)] += 1;

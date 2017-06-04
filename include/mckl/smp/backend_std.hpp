@@ -120,8 +120,9 @@ class SMCSamplerEvalSMP<T, Derived, BackendSTD>
                     this->eval_range(iter, range);
                 }));
         }
-        for (auto &task : task_group)
+        for (auto &task : task_group) {
             task.wait();
+        }
         this->eval_last(iter, particle);
     }
 }; // class SMCSamplerEvalSMP
@@ -161,8 +162,9 @@ class SMCEstimatorEvalSMP<T, Derived, BackendSTD>
                         r + static_cast<std::size_t>(range.ibegin()) * dim);
                 }));
         }
-        for (auto &task : task_group)
+        for (auto &task : task_group) {
             task.wait();
+        }
         this->eval_last(iter, particle);
     }
 }; // class SMCEstimatorEvalSMP

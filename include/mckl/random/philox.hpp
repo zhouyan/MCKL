@@ -139,8 +139,9 @@ class PhiloxGenerator
         std::basic_ostream<CharT, Traits> &os,
         const PhiloxGenerator<T, K, Rounds, Constants> &gen)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << gen.key_;
 
@@ -152,15 +153,17 @@ class PhiloxGenerator
         std::basic_istream<CharT, Traits> &is,
         PhiloxGenerator<T, K, Rounds, Constants> &gen)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         PhiloxGenerator<T, K, Rounds, Constants> gen_tmp;
         gen_tmp.key_.fill(0);
         is >> std::ws >> gen_tmp.key_;
 
-        if (is)
+        if (is) {
             gen = std::move(gen_tmp);
+        }
 
         return is;
     }

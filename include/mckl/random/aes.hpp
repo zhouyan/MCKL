@@ -182,8 +182,9 @@ class AESGenerator
         std::basic_ostream<CharT, Traits> &os,
         const AESGenerator<KeySeqType> &gen)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << gen.key_seq_;
 
@@ -194,14 +195,16 @@ class AESGenerator
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, AESGenerator<KeySeqType> &gen)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         AESGenerator<KeySeqType> gen_tmp;
         is >> std::ws >> gen_tmp.key_seq_;
 
-        if (is)
+        if (is) {
             gen = std::move(gen_tmp);
+        }
 
         return is;
     }

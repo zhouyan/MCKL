@@ -351,10 +351,12 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
     /// \brief Iterate the sampler
     void iterate(std::size_t n = 1)
     {
-        if (n > 1)
+        if (n > 1) {
             reserve(n);
-        for (std::size_t i = 0; i != n; ++i)
+        }
+        for (std::size_t i = 0; i != n; ++i) {
             do_iterate();
+        }
     }
 
     /// \brief Read and write access to the Particle<T> object
@@ -392,8 +394,9 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
         size_history_.push_back(size());
         ess_history_.push_back(particle_.weight().ess());
 
-        if (ess_history_.back() < size() * resample_threshold_)
+        if (ess_history_.back() < size() * resample_threshold_) {
             do_eval(1);
+        }
         do_estimate(1);
 
         do_eval(2);
@@ -404,14 +407,16 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
 
     void do_eval(std::size_t step)
     {
-        for (auto &eval : this->eval(step))
+        for (auto &eval : this->eval(step)) {
             eval(iter_, particle_);
+        }
     }
 
     void do_estimate(std::size_t step)
     {
-        for (auto &est : this->estimator(step))
+        for (auto &est : this->estimator(step)) {
             est.estimate(iter_, particle_);
+        }
     }
 }; // class SMCSampler
 

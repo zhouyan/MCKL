@@ -143,14 +143,20 @@ class Matrix
     {
         transpose_type mat(nrow_, ncol_);
 
-        if (Layout == RowMajor)
-            for (size_type i = 0; i != nrow_; ++i)
-                for (size_type j = 0; j != ncol_; ++j)
+        if (Layout == RowMajor) {
+            for (size_type i = 0; i != nrow_; ++i) {
+                for (size_type j = 0; j != ncol_; ++j) {
                     mat(i, j) = operator()(i, j);
-        if (Layout == ColMajor)
-            for (size_type j = 0; j != ncol_; ++j)
-                for (size_type i = 0; i != nrow_; ++i)
+                }
+            }
+        }
+        if (Layout == ColMajor) {
+            for (size_type j = 0; j != ncol_; ++j) {
+                for (size_type i = 0; i != nrow_; ++i) {
                     mat(i, j) = operator()(i, j);
+                }
+            }
+        }
 
         return mat;
     }
@@ -496,8 +502,9 @@ class Matrix
             return;
         }
 
-        if (nrow == nrow_ && ncol_ == ncol)
+        if (nrow == nrow_ && ncol_ == ncol) {
             return;
+        }
 
         resize_dispatch(nrow, ncol, layout_dispatch());
     }
@@ -546,10 +553,12 @@ class Matrix
     /// \brief Compare equality
     friend bool operator==(const Matrix &m1, const Matrix &m2)
     {
-        if (m1.nrow_ != m2.nrow_)
+        if (m1.nrow_ != m2.nrow_) {
             return false;
-        if (m1.ncol_ != m2.ncol_)
+        }
+        if (m1.ncol_ != m2.ncol_) {
             return false;
+        }
         return m1.data_ == m2.data_;
     }
 
@@ -630,8 +639,9 @@ class Matrix
         Matrix tmp(nrow, ncol);
         const size_type n = std::min(nrow, nrow_);
         const size_type m = std::min(ncol, ncol_);
-        for (size_type i = 0; i != n; ++i)
+        for (size_type i = 0; i != n; ++i) {
             std::copy_n(row_data(i), m, tmp.row_data(i));
+        }
         swap(tmp);
     }
 
@@ -702,8 +712,9 @@ class Matrix
         Matrix tmp(nrow, ncol);
         const size_type n = std::min(nrow, nrow_);
         const size_type m = std::min(ncol, ncol_);
-        for (size_type i = 0; i != m; ++i)
+        for (size_type i = 0; i != m; ++i) {
             std::copy_n(col_data(i), n, tmp.col_data(i));
+        }
         swap(tmp);
     }
 }; // class Matrix
@@ -714,16 +725,20 @@ template <typename CharT, typename Traits, typename T, MatrixLayout Layout,
 inline std::basic_ostream<CharT, Traits> &operator<<(
     std::basic_ostream<CharT, Traits> &os, const Matrix<T, Layout, Alloc> &mat)
 {
-    if (!os)
+    if (!os) {
         return os;
+    }
 
     os << mat.nrow() << ' ' << mat.ncol();
-    if (!os)
+    if (!os) {
         return os;
+    }
 
-    for (std::size_t j = 0; j != mat.ncol(); ++j)
-        for (std::size_t i = 0; i != mat.nrow(); ++i)
+    for (std::size_t j = 0; j != mat.ncol(); ++j) {
+        for (std::size_t i = 0; i != mat.nrow(); ++i) {
             os << ' ' << mat(i, j);
+        }
+    }
 
     return os;
 }
@@ -734,21 +749,26 @@ template <typename CharT, typename Traits, typename T, MatrixLayout Layout,
 inline std::basic_istream<CharT, Traits> &operator>>(
     std::basic_istream<CharT, Traits> &is, Matrix<T, Layout, Alloc> &mat)
 {
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     std::size_t nrow = 0;
     std::size_t ncol = 0;
     is >> nrow >> std::ws >> ncol;
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     Matrix<T, Layout, Alloc> tmp(nrow, ncol);
-    for (std::size_t j = 0; j != mat.ncol(); ++j)
-        for (std::size_t i = 0; i != mat.nrow(); ++i)
+    for (std::size_t j = 0; j != mat.ncol(); ++j) {
+        for (std::size_t i = 0; i != mat.nrow(); ++i) {
             is >> std::ws >> tmp(i, j);
-    if (is)
+        }
+    }
+    if (is) {
         mat = std::move(tmp);
+    }
 
     return is;
 }

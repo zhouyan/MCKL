@@ -88,8 +88,9 @@ class FisherFDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        if (param == param_)
+        if (param == param_) {
             return (chi_squared_m_(rng) / m()) / (chi_squared_n_(rng) / n());
+        }
 
         ChiSquaredDistribution<RealType> chi_squared_m(param.m());
         ChiSquaredDistribution<RealType> chi_squared_n(param.n());

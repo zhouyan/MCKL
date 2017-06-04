@@ -141,14 +141,16 @@ class StopWatchGuard
     StopWatchGuard(watch_type &watch, bool start = true)
         : watch_(watch), start_(start)
     {
-        if (start_)
+        if (start_) {
             watch_.start();
+        }
     }
 
     ~StopWatchGuard()
     {
-        if (start_)
+        if (start_) {
             watch_.stop();
+        }
     }
 
   private:
@@ -201,8 +203,9 @@ class StopWatchClockAdapter
     /// started earlier.
     bool start()
     {
-        if (running_)
+        if (running_) {
             return false;
+        }
 
         running_ = true;
         time_start_ = clock_type::now();
@@ -221,8 +224,9 @@ class StopWatchClockAdapter
         std::uint64_t c = internal::cycle_stop();
         typename clock_type::time_point t = clock_type::now();
 
-        if (!running_)
+        if (!running_) {
             return false;
+        }
 
         running_ = false;
         cycles_ += c - cycles_start_;

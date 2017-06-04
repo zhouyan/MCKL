@@ -67,8 +67,9 @@ class U01GenericImpl<UIntType, RealType, Closed, Closed>
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = eval(u[i]);
+        }
     }
 
   private:
@@ -104,8 +105,9 @@ class U01GenericImpl<UIntType, RealType, Closed, Open>
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = eval(u[i]);
+        }
     }
 }; // class U01GenericImpl
 
@@ -129,8 +131,9 @@ class U01GenericImpl<UIntType, RealType, Open, Closed>
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = eval(u[i]);
+        }
     }
 }; // class U01GenericImpl
 
@@ -154,8 +157,9 @@ class U01GenericImpl<UIntType, RealType, Open, Open>
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = eval(u[i]);
+        }
     }
 }; // class U01GenericImpl
 
@@ -170,8 +174,9 @@ class U01CanonicalGenericImpl
 
     static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
-        for (std::size_t i = 0; i != n; ++i, u += Q)
+        for (std::size_t i = 0; i != n; ++i, u += Q) {
             r[i] = eval(u);
+        }
     }
 
   private:

@@ -51,9 +51,11 @@ inline void bernoulli_distribution_impl(
     alignas(32) std::array<double, K> s;
     u01_co_distribution(rng, n, s.data());
     std::fill_n(r, n, 0);
-    for (std::size_t i = 0; i != n; ++i)
-        if (s[i] < p)
+    for (std::size_t i = 0; i != n; ++i) {
+        if (s[i] < p) {
             r[i] = 1;
+        }
+    }
 }
 
 } // namespace mckl::internal

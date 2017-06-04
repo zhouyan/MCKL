@@ -49,12 +49,13 @@ class PoissonTest
         double l = cdf(s);
         double r = s > 0 ? 1 - cdf(s - 1) : 1;
         double p = 0;
-        if (r < l)
+        if (r < l) {
             p = r;
-        else if (l < 0.5)
+        } else if (l < 0.5) {
             p = 1 - l;
-        else
+        } else {
             p = 0.5;
+        }
 
         return std::min(p, 1 - p) > 0.5 * alpha;
     }

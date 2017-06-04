@@ -46,15 +46,18 @@ template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &ostream(
     std::basic_ostream<CharT, Traits> &os, const std::array<T, N> &ary)
 {
-    if (!os)
+    if (!os) {
         return os;
+    }
 
     os << N;
-    if (!os)
+    if (!os) {
         return os;
+    }
 
-    for (const auto &v : ary)
+    for (const auto &v : ary) {
         os << ' ' << v;
+    }
 
     return os;
 }
@@ -63,21 +66,25 @@ template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_istream<CharT, Traits> &istream(
     std::basic_istream<CharT, Traits> &is, std::array<T, N> &ary)
 {
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     std::size_t n = 0;
     is >> n;
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     std::array<T, N> tmp;
 
     n = std::min(n, N);
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         is >> std::ws >> tmp[i];
-    if (is)
+    }
+    if (is) {
         ary = std::move(tmp);
+    }
 
     return is;
 }
@@ -86,15 +93,18 @@ template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_ostream<CharT, Traits> &ostream(
     std::basic_ostream<CharT, Traits> &os, const std::vector<T, Alloc> &vec)
 {
-    if (!os)
+    if (!os) {
         return os;
+    }
 
     os << vec.size();
-    if (!os)
+    if (!os) {
         return os;
+    }
 
-    for (const auto &v : vec)
+    for (const auto &v : vec) {
         os << ' ' << v;
+    }
 
     return os;
 }
@@ -103,19 +113,23 @@ template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_istream<CharT, Traits> &istream(
     std::basic_istream<CharT, Traits> &is, std::vector<T, Alloc> &vec)
 {
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     std::size_t n = 0;
     is >> n;
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     std::vector<T, Alloc> tmp(n);
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         is >> std::ws >> tmp[i];
-    if (is)
+    }
+    if (is) {
         vec = std::move(tmp);
+    }
 
     return is;
 }
@@ -124,15 +138,18 @@ template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_ostream<CharT, Traits> &ostream(
     std::basic_ostream<CharT, Traits> &os, const std::list<T, Alloc> &lst)
 {
-    if (!os)
+    if (!os) {
         return os;
+    }
 
     os << lst.size();
-    if (!os)
+    if (!os) {
         return os;
+    }
 
-    for (const auto &v : lst)
+    for (const auto &v : lst) {
         os << ' ' << v;
+    }
 
     return os;
 }
@@ -141,13 +158,15 @@ template <typename CharT, typename Traits, typename T, typename Alloc>
 inline std::basic_istream<CharT, Traits> &istream(
     std::basic_istream<CharT, Traits> &is, std::list<T, Alloc> &lst)
 {
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     std::size_t n = 0;
     is >> n;
-    if (!is)
+    if (!is) {
         return is;
+    }
 
     std::list<T, Alloc> tmp;
     T val;
@@ -155,8 +174,9 @@ inline std::basic_istream<CharT, Traits> &istream(
         is >> std::ws >> val;
         tmp.push_back(val);
     }
-    if (is)
+    if (is) {
         lst = std::move(tmp);
+    }
 
     return is;
 }

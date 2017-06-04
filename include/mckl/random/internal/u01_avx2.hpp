@@ -569,8 +569,9 @@ class U01AVX2ImplBase
             r += N;
         }
 
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = eval(u[i]);
+        }
     }
 }; // class U01AVX2ImplBase
 
@@ -602,8 +603,9 @@ class U01CanonicalAVX2ImplBase
             r += N;
         }
 
-        for (std::size_t i = 0; i != n; ++i, u += Q)
+        for (std::size_t i = 0; i != n; ++i, u += Q) {
             r[i] = eval(u);
+        }
     }
 }; // class U01CanonicalCanonicalAVX2ImplBase
 

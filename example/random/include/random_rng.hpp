@@ -274,33 +274,39 @@ inline bool random_rng_d(std::size_t N, std::size_t M)
         u64_1.resize(K);
         u64_2.resize(K);
 
-        for (std::size_t j = 0; j != K; ++j)
+        for (std::size_t j = 0; j != K; ++j) {
             r1[j] = rng1();
+        }
         mckl::rand(rng2, K, r2.data());
         pass = pass && (r1 == r2 || rng != rng);
 
-        for (std::size_t j = 0; j != K; ++j)
+        for (std::size_t j = 0; j != K; ++j) {
             u16_1[j] = mckl::rand(rng1, ubits16);
+        }
         mckl::rand(rng2, ubits16, K, u16_2.data());
         pass = pass && (u16_1 == u16_2 || rng != rng);
 
-        for (std::size_t j = 0; j != K; ++j)
+        for (std::size_t j = 0; j != K; ++j) {
             u32_1[j] = mckl::rand(rng1, ubits32);
+        }
         mckl::rand(rng2, ubits32, K, u32_2.data());
         pass = pass && (u32_1 == u32_2 || rng != rng);
 
-        for (std::size_t j = 0; j != K; ++j)
+        for (std::size_t j = 0; j != K; ++j) {
             u64_1[j] = mckl::rand(rng1, ubits64);
+        }
         mckl::rand(rng2, ubits64, K, u64_2.data());
         pass = pass && (u64_1 == u64_2 || rng != rng);
 
         rng1.discard(static_cast<unsigned>(K));
         typename RNGType::result_type next = rng1();
-        for (std::size_t j = 0; j != K; ++j)
+        for (std::size_t j = 0; j != K; ++j) {
             rng2();
+        }
         bool find = false;
-        for (std::size_t j = 0; j != 2; ++j)
+        for (std::size_t j = 0; j != 2; ++j) {
             find = find || rng2() == next;
+        }
         pass = pass && (find || rng != rng);
 
         std::stringstream ss;
@@ -355,8 +361,9 @@ inline RandomRNGPerf random_rng_p(std::size_t N, std::size_t M)
             n += K;
 
             watch1.start();
-            for (std::size_t j = 0; j != K; ++j)
+            for (std::size_t j = 0; j != K; ++j) {
                 r1[j] = mckl::rand(rng1, dist);
+            }
             watch1.stop();
 
             watch2.start();

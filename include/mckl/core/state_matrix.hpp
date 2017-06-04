@@ -206,8 +206,9 @@ class StateMatrix : public Matrix<T, Layout>
     /// row of the matrix
     void duplicate(size_type src, size_type dst)
     {
-        if (src == dst)
+        if (src == dst) {
             return;
+        }
 
         duplicate_dispatch(src, dst, layout_dispatch(),
             std::integral_constant<bool, (Dim == 0 || 8 < Dim)>());
@@ -222,12 +223,15 @@ class StateMatrix : public Matrix<T, Layout>
             return;
         }
 
-        if (n > size())
+        if (n > size()) {
             resize(n);
-        for (size_type dst = 0; dst != n; ++dst, ++index)
+        }
+        for (size_type dst = 0; dst != n; ++dst, ++index) {
             duplicate(static_cast<size_type>(*index), dst);
-        if (n < size())
+        }
+        if (n < size()) {
             resize(n);
+        }
 
         return;
     }
@@ -246,8 +250,9 @@ class StateMatrix : public Matrix<T, Layout>
                 idx = index;
                 const value_type *src = this->col_data(j);
                 value_type *dst = this->col_data(j);
-                for (size_type i = 0; i != n; ++i, ++idx)
+                for (size_type i = 0; i != n; ++i, ++idx) {
                     dst[i] = src[*idx];
+                }
             }
         } else {
             Matrix<T, ColMajor> tmp(n, dim());
@@ -255,8 +260,9 @@ class StateMatrix : public Matrix<T, Layout>
                 idx = index;
                 const value_type *src = this->col_data(j);
                 value_type *dst = tmp.col_data(j);
-                for (size_type i = 0; i != n; ++i, ++idx)
+                for (size_type i = 0; i != n; ++i, ++idx) {
                     dst[i] = src[*idx];
+                }
             }
             Matrix<T, ColMajor>::operator=(std::move(tmp));
         }
@@ -295,8 +301,9 @@ class StateMatrix : public Matrix<T, Layout>
     void duplicate_dispatch(
         size_type src, size_type dst, col_major, std::true_type)
     {
-        for (size_type d = 0; d != dim(); ++d)
+        for (size_type d = 0; d != dim(); ++d) {
             this->operator()(dst, d) = this->operator()(src, d);
+        }
     }
 
     void duplicate_dispatch(

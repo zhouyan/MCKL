@@ -90,8 +90,9 @@ class Weight
     template <typename InputIter>
     void mul(InputIter first)
     {
-        for (size_type i = 0; i != size(); ++i, ++first)
+        for (size_type i = 0; i != size(); ++i, ++first) {
             data_[i] *= *first;
+        }
         normalize(false);
     }
 
@@ -118,8 +119,9 @@ class Weight
     void add_log(InputIter first)
     {
         log(size(), data_.data(), data_.data());
-        for (size_type i = 0; i != size(); ++i)
+        for (size_type i = 0; i != size(); ++i) {
             data_[i] += *first;
+        }
         normalize(true);
     }
 
@@ -155,9 +157,11 @@ class Weight
             typename std::iterator_traits<InputIter>::value_type;
 
         value_type v = -const_inf<value_type>();
-        for (size_type i = 0; i != n; ++i, ++first)
-            if (v < *first)
+        for (size_type i = 0; i != n; ++i, ++first) {
+            if (v < *first) {
                 v = *first;
+            }
+        }
 
         return static_cast<double>(v);
     }
@@ -171,8 +175,9 @@ class Weight
         const size_type k = internal::BufferSize<double>::value;
         const size_type m = size() / k;
         const size_type l = size() % k;
-        for (size_type i = 0; i != m; ++i, w += k)
+        for (size_type i = 0; i != m; ++i, w += k) {
             normalize(k, w, accw, essw, use_log, lmax);
+        }
         normalize(l, w, accw, essw, use_log, lmax);
         ::mckl::mul(size(), 1 / accw, data_.data(), data_.data());
         ess_ = accw * accw / essw;

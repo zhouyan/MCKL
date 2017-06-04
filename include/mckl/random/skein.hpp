@@ -152,8 +152,9 @@ class Skein
         void *H, const param_type &K = param_type(), int Yl = 0, int Yf = 0,
         int Ym = 0)
     {
-        if (!check_type(n, M))
+        if (!check_type(n, M)) {
             return;
+        }
 
         Yl &= 0xFF;
         Yf &= 0xFF;
@@ -308,8 +309,9 @@ class Skein
                 key_type M = ctr;
                 generator(M.data(), buf.data());
                 buf.front() ^= M.front();
-                for (std::size_t j = 0; j != M.size(); ++j)
+                for (std::size_t j = 0; j != M.size(); ++j) {
                     buf[j] ^= M[j];
+                }
                 std::memcpy(C, buf.data(), bytes());
                 increment(ctr);
                 C += bytes();
@@ -318,8 +320,9 @@ class Skein
                 key_type M = ctr;
                 internal::union_le<char>(M);
                 generator(M.data(), buf.data());
-                for (std::size_t j = 0; j != M.size(); ++j)
+                for (std::size_t j = 0; j != M.size(); ++j) {
                     buf[j] ^= M[j];
+                }
                 std::memcpy(C, buf.data(), m);
             }
         }
@@ -411,8 +414,9 @@ class Skein
         generator.reset(H);
         generator.tweak(t0, t1);
         generator(M.data(), H.data());
-        for (std::size_t i = 0; i != M.size(); ++i)
+        for (std::size_t i = 0; i != M.size(); ++i) {
             H[i] ^= M[i];
+        }
         internal::union_le<char>(H);
     }
 
@@ -423,17 +427,19 @@ class Skein
         constexpr value_type mask_last = const_one<value_type>() << (N - 1);
         constexpr value_type mask_bpad = const_one<value_type>() << (N - 9);
 
-        if (first)
+        if (first) {
             t1 |= mask_first;
-        else
+        } else {
             t1 &= ~mask_first;
+        }
 
         if (last) {
             t1 |= mask_last;
-            if (bpad)
+            if (bpad) {
                 t1 |= mask_bpad;
-            else
+            } else {
                 t1 &= ~mask_bpad;
+            }
         } else {
             t1 &= ~mask_last;
             t1 &= ~mask_bpad;
@@ -507,8 +513,9 @@ class Skein
 
     static bool check_type(std::size_t n, const param_type *M)
     {
-        if (n == 0)
+        if (n == 0) {
             return false;
+        }
 
         if (M[0].type() <= type_field::cfg()) {
             runtime_assert(

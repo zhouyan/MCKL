@@ -43,9 +43,11 @@ template <typename RealType>
 inline bool dirichlet_distribution_check_param(
     std::size_t dim, RealType *alpha)
 {
-    for (std::size_t i = 0; i != dim; ++i)
-        if (alpha[i] <= 0)
+    for (std::size_t i = 0; i != dim; ++i) {
+        if (alpha[i] <= 0) {
             return false;
+        }
+    }
     return true;
 }
 
@@ -65,8 +67,9 @@ template <typename RealType, typename RNGType>
 inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType alpha)
 {
-    if (n * dim == 0)
+    if (n * dim == 0) {
         return;
+    }
 
     gamma_distribution(rng, n * dim, r, alpha, const_one<RealType>());
     internal::dirichlet_distribution_avg(n, dim, r);
@@ -76,15 +79,17 @@ template <typename RealType, typename RNGType>
 inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,
     std::size_t dim, const RealType *alpha)
 {
-    if (n * dim == 0)
+    if (n * dim == 0) {
         return;
+    }
 
     Vector<RealType> s(n);
     for (std::size_t i = 0; i != dim; ++i) {
         gamma_distribution(rng, n, s.data(), alpha[i], const_one<RealType>());
         RealType *t = r + i;
-        for (std::size_t j = 0; j != n; ++j, t += dim)
+        for (std::size_t j = 0; j != n; ++j, t += dim) {
             *t = s[j];
+        }
     }
     internal::dirichlet_distribution_avg(n, dim, r);
 }
@@ -139,10 +144,12 @@ class DirichletDistribution
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (param1.alpha_ != param2.alpha_)
+            if (param1.alpha_ != param2.alpha_) {
                 return false;
-            if (param1.is_scalar_ != param2.is_scalar_)
+            }
+            if (param1.is_scalar_ != param2.is_scalar_) {
                 return false;
+            }
             return true;
         }
 
@@ -156,8 +163,9 @@ class DirichletDistribution
         friend std::basic_ostream<CharT, Traits> &operator<<(
             std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
-            if (!os)
+            if (!os) {
                 return os;
+            }
 
             os << param.alpha_ << ' ';
             os << param.is_scalar_;
@@ -169,17 +177,19 @@ class DirichletDistribution
         friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, param_type &param)
         {
-            if (!is)
+            if (!is) {
                 return is;
+            }
 
             param_type tmp;
             is >> std::ws >> tmp.alpha_;
             is >> std::ws >> tmp.is_scalar_;
 
-            if (is)
+            if (is) {
                 param = std::move(tmp);
-            else
+            } else {
                 is.setstate(std::ios_base::failbit);
+            }
 
             return is;
         }
@@ -274,17 +284,19 @@ class DirichletDistribution
     void operator()(
         RNGType &rng, std::size_t n, result_type *r, const param_type &param)
     {
-        if (param.is_scalar_)
+        if (param.is_scalar_) {
             dirichlet_distribution(rng, n, r, param.dim(), param.alpha()[0]);
-        else
+        } else {
             dirichlet_distribution(rng, n, r, param.dim(), param.alpha());
+        }
     }
 
     friend bool operator==(
         const distribution_type &dist1, const distribution_type &dist2)
     {
-        if (dist1.param_ != dist2.param_)
+        if (dist1.param_ != dist2.param_) {
             return false;
+        }
         return true;
     }
 
@@ -298,8 +310,9 @@ class DirichletDistribution
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << dist.param_;
 
@@ -310,13 +323,15 @@ class DirichletDistribution
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         param_type param;
         is >> std::ws >> param;
-        if (is)
+        if (is) {
             dist.param_ = std::move(param);
+        }
 
         return is;
     }

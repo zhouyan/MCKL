@@ -54,8 +54,9 @@ class StirlingMatrix2
         get(0, 0) = 1;
         for (std::size_t j = 1; j <= m; ++j) {
             get(j, j) = 1;
-            for (std::size_t i = j + 1; i <= n; ++i)
+            for (std::size_t i = j + 1; i <= n; ++i) {
                 get(i, j) = j * get(i - 1, j) + get(i - 1, j - 1);
+            }
         }
     }
 

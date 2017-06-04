@@ -83,8 +83,9 @@ class ChiSquaredDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        if (param == param_)
+        if (param == param_) {
             return gamma_(rng);
+        }
 
         GammaDistribution<RealType> gamma(param.n() / 2, 2);
 

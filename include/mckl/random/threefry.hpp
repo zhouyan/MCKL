@@ -112,8 +112,9 @@ class ThreefryGenerator
 
         std::memcpy(par_.data(), key.data(), sizeof(T) * K);
         std::get<K>(par_) = p;
-        for (std::size_t i = 0; i != key.size(); ++i)
+        for (std::size_t i = 0; i != key.size(); ++i) {
             std::get<K>(par_) ^= par_[i];
+        }
         std::get<K + 1>(par_) = 0;
         std::get<K + 2>(par_) = 0;
         std::get<K + 3>(par_) = 0;
@@ -170,8 +171,9 @@ class ThreefryGenerator
         std::basic_ostream<CharT, Traits> &os,
         const ThreefryGenerator<T, K, Rounds, Constants> &gen)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << gen.par_;
 
@@ -183,15 +185,17 @@ class ThreefryGenerator
         std::basic_istream<CharT, Traits> &is,
         ThreefryGenerator<T, K, Rounds, Constants> &gen)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         ThreefryGenerator<T, K, Rounds, Constants> gen_tmp;
         gen_tmp.par_.fill(0);
         is >> std::ws >> gen_tmp.par_;
 
-        if (is)
+        if (is) {
             gen = std::move(gen_tmp);
+        }
 
         return is;
     }

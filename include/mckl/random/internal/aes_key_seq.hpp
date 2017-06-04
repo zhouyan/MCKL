@@ -89,8 +89,9 @@ class AESKeySeqImpl
         std::basic_ostream<CharT, Traits> &os,
         const AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
         std::memcpy(ks.data(), seq.rk_.data(),
@@ -105,8 +106,9 @@ class AESKeySeqImpl
         std::basic_istream<CharT, Traits> &is,
         AESKeySeqImpl<Rounds, KeySeqGenerator> &seq)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
         istream(is, ks);
@@ -161,8 +163,9 @@ class ARSKeySeqImpl
         std::basic_ostream<CharT, Traits> &os,
         const ARSKeySeqImpl<Rounds, KeySeqGenerator> &seq)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         ostream(os, seq.key_);
 
@@ -174,13 +177,15 @@ class ARSKeySeqImpl
         std::basic_istream<CharT, Traits> &is,
         ARSKeySeqImpl<Rounds, KeySeqGenerator> &seq)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         key_type k = {{0}};
         istream(is, k);
-        if (is)
+        if (is) {
             seq.key_ = k;
+        }
 
         return is;
     }

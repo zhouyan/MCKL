@@ -79,14 +79,17 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     normal_distribution(
         rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
     Vector<RealType> cholf(dim * dim);
-    for (std::size_t i = 0; i != dim; ++i)
-        for (std::size_t j = 0; j <= i; ++j)
+    for (std::size_t i = 0; i != dim; ++i) {
+        for (std::size_t j = 0; j <= i; ++j) {
             cholf[i * dim + j] = *chol++;
+        }
+    }
     internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
     MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
     MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
-    if (mean != 0)
+    if (mean != 0) {
         add(n * dim, mean, r, r);
+    }
     MCKL_POP_CLANG_WARNING
     MCKL_POP_INTEL_WARNING
 }
@@ -99,8 +102,9 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     internal::size_check<MCKL_BLAS_INT>(dim, "normal_mv_distribution");
 
     normal_distribution(rng, n * dim, r, const_zero<RealType>(), chol);
-    for (std::size_t i = 0; i != n; ++i, r += dim)
+    for (std::size_t i = 0; i != n; ++i, r += dim) {
         add<RealType>(dim, mean, r, r);
+    }
 }
 
 template <typename RealType, typename RNGType>
@@ -113,12 +117,15 @@ inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,
     normal_distribution(
         rng, n * dim, r, const_zero<RealType>(), const_one<RealType>());
     Vector<RealType> cholf(dim * dim);
-    for (std::size_t i = 0; i != dim; ++i)
-        for (std::size_t j = 0; j <= i; ++j)
+    for (std::size_t i = 0; i != dim; ++i) {
+        for (std::size_t j = 0; j <= i; ++j) {
             cholf[i * dim + j] = *chol++;
+        }
+    }
     internal::normal_mv_distribution_mulchol(n, r, dim, cholf.data());
-    for (std::size_t i = 0; i != n; ++i, r += dim)
+    for (std::size_t i = 0; i != n; ++i, r += dim) {
         add<RealType>(dim, mean, r, r);
+    }
 }
 
 /// \brief Multivariate Normal distribution
@@ -197,14 +204,18 @@ class NormalMVDistribution
         friend bool operator==(
             const param_type &param1, const param_type &param2)
         {
-            if (param1.mean_ != param2.mean_)
+            if (param1.mean_ != param2.mean_) {
                 return false;
-            if (param1.chol_ != param2.chol_)
+            }
+            if (param1.chol_ != param2.chol_) {
                 return false;
-            if (param1.is_scalar_mean_ != param2.is_scalar_mean_)
+            }
+            if (param1.is_scalar_mean_ != param2.is_scalar_mean_) {
                 return false;
-            if (param1.is_scalar_chol_ != param2.is_scalar_chol_)
+            }
+            if (param1.is_scalar_chol_ != param2.is_scalar_chol_) {
                 return false;
+            }
             return true;
         }
 
@@ -218,8 +229,9 @@ class NormalMVDistribution
         friend std::basic_ostream<CharT, Traits> &operator<<(
             std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
-            if (!os)
+            if (!os) {
                 return os;
+            }
 
             os << param.mean_ << ' ';
             os << param.chol_ << ' ';
@@ -233,8 +245,9 @@ class NormalMVDistribution
         friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, param_type &param)
         {
-            if (!is)
+            if (!is) {
                 return is;
+            }
 
             param_type tmp;
 
@@ -243,10 +256,11 @@ class NormalMVDistribution
             is >> std::ws >> tmp.is_scalar_mean_;
             is >> std::ws >> tmp.is_scalar_chol_;
 
-            if (is)
+            if (is) {
                 param = std::move(tmp);
-            else
+            } else {
                 is.setstate(std::ios_base::failbit);
+            }
 
             return is;
         }
@@ -261,8 +275,9 @@ class NormalMVDistribution
 
         void scalar_chol(result_type chol)
         {
-            for (std::size_t i = 0; i != dim(); ++i)
+            for (std::size_t i = 0; i != dim(); ++i) {
                 chol_[(i + 1) * (i + 2) / 2 - 1] = chol;
+            }
         }
     }; // class param_type
     MCKL_POP_CLANG_WARNING
@@ -391,8 +406,9 @@ class NormalMVDistribution
     friend bool operator==(
         const distribution_type &dist1, const distribution_type &dist2)
     {
-        if (dist1.param_ != dist2.param_)
+        if (dist1.param_ != dist2.param_) {
             return false;
+        }
         return true;
     }
 
@@ -406,8 +422,9 @@ class NormalMVDistribution
     friend std::basic_ostream<CharT, Traits> &operator<<(
         std::basic_ostream<CharT, Traits> &os, const distribution_type &dist)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << dist.param_;
 
@@ -418,13 +435,15 @@ class NormalMVDistribution
     friend std::basic_istream<CharT, Traits> &operator>>(
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         param_type param;
         is >> std::ws >> param;
-        if (is)
+        if (is) {
             dist.param_ = std::move(param);
+        }
 
         return is;
     }
@@ -440,19 +459,23 @@ class NormalMVDistribution
         if (param.is_scalar_mean_ && param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(
                 param.mean()[0], param.chol()[0]);
-            for (std::size_t i = 0; i != param.dim(); ++i)
+            for (std::size_t i = 0; i != param.dim(); ++i) {
                 r[i] = normal(rng);
+            }
         } else if (param.is_scalar_mean_ && !param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(0, 1);
-            for (std::size_t i = 0; i != param.dim(); ++i)
+            for (std::size_t i = 0; i != param.dim(); ++i) {
                 r[i] = normal(rng);
+            }
             mulchol(r, param);
-            if (param.mean()[0] != 0)
+            if (param.mean()[0] != 0) {
                 add<result_type>(param.dim(), param.mean(), r, r);
+            }
         } else if (!param.is_scalar_mean_ && param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(0, param.chol()[0]);
-            for (std::size_t i = 0; i != param.dim(); ++i)
+            for (std::size_t i = 0; i != param.dim(); ++i) {
                 r[i] = normal(rng);
+            }
             add<result_type>(param.dim(), param.mean(), r, r);
         } else if (!param.is_scalar_mean_ && !param.is_scalar_chol_) {
             NormalDistribution<RealType> normal(0, 1);

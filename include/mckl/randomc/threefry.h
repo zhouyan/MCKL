@@ -140,42 +140,54 @@ typedef struct {
 
 static inline void mckl_threefry2x32_inc(mckl_threefry2x32_ctr_t *ctr)
 {
-    if (++ctr->v[0] != 0)
+    if (++ctr->v[0] != 0) {
         return;
-    if (++ctr->v[1] != 0)
+    }
+    if (++ctr->v[1] != 0) {
         return;
+    }
 }
 
 static inline void mckl_threefry4x32_inc(mckl_threefry4x32_ctr_t *ctr)
 {
-    if (++ctr->v[0] != 0)
+    if (++ctr->v[0] != 0) {
         return;
-    if (++ctr->v[1] != 0)
+    }
+    if (++ctr->v[1] != 0) {
         return;
-    if (++ctr->v[2] != 0)
+    }
+    if (++ctr->v[2] != 0) {
         return;
-    if (++ctr->v[3] != 0)
+    }
+    if (++ctr->v[3] != 0) {
         return;
+    }
 }
 
 static inline void mckl_threefry2x64_inc(mckl_threefry2x64_ctr_t *ctr)
 {
-    if (++ctr->v[0] != 0)
+    if (++ctr->v[0] != 0) {
         return;
-    if (++ctr->v[1] != 0)
+    }
+    if (++ctr->v[1] != 0) {
         return;
+    }
 }
 
 static inline void mckl_threefry4x64_inc(mckl_threefry4x64_ctr_t *ctr)
 {
-    if (++ctr->v[0] != 0)
+    if (++ctr->v[0] != 0) {
         return;
-    if (++ctr->v[1] != 0)
+    }
+    if (++ctr->v[1] != 0) {
         return;
-    if (++ctr->v[2] != 0)
+    }
+    if (++ctr->v[2] != 0) {
         return;
-    if (++ctr->v[3] != 0)
+    }
+    if (++ctr->v[3] != 0) {
         return;
+    }
 }
 
 static inline void mckl_threefry2x32_initpar(

@@ -53,8 +53,9 @@ inline double betai_acf(double a, double b, double x)
     double qam = a - 1;
     double c = 1;
     double d = 1 - qab * x / qap;
-    if (std::abs(d) < fpmin)
+    if (std::abs(d) < fpmin) {
         d = fpmin;
+    }
     d = 1 / d;
     double h = d;
     double m = 0;
@@ -63,25 +64,30 @@ inline double betai_acf(double a, double b, double x)
         double m2 = 2 * m;
         double aa = m * (b - m) * x / ((qam + m2) * (a + m2));
         d = 1 + aa * d;
-        if (std::abs(d) < fpmin)
+        if (std::abs(d) < fpmin) {
             d = fpmin;
+        }
         c = 1 + aa / c;
-        if (std::abs(c) < fpmin)
+        if (std::abs(c) < fpmin) {
             c = fpmin;
+        }
         d = 1 / d;
         h *= d * c;
         aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
         d = 1 + aa * d;
-        if (std::abs(d) < fpmin)
+        if (std::abs(d) < fpmin) {
             d = fpmin;
+        }
         c = 1 + aa / c;
-        if (std::abs(c) < fpmin)
+        if (std::abs(c) < fpmin) {
             c = fpmin;
+        }
         d = 1 / d;
         double del = d * c;
         h *= del;
-        if (std::abs(del - 1) <= eps)
+        if (std::abs(del - 1) <= eps) {
             break;
+        }
     }
 
     return h;
@@ -97,12 +103,14 @@ inline double betai_approx(double a, double b, double x)
     double t = std::sqrt(a * b / ((a + b) * (a + b) * (a + b + 1)));
     double xu = 0;
     if (x > a / (a + b)) {
-        if (x >= 1)
+        if (x >= 1) {
             return 1;
+        }
         xu = std::min(1.0, std::max(mu + 10 * t, x + 5 * t));
     } else {
-        if (x <= 0)
+        if (x <= 0) {
             return 0;
+        }
         xu = std::max(0.0, std::min(mu - 10 * t, x - 5 * t));
     }
     double sum = 0;
@@ -124,16 +132,21 @@ inline double betai_approx(double a, double b, double x)
 /// \ingroup Special
 inline double betai(double a, double b, double x)
 {
-    if (a <= 0.0 || b <= 0.0)
+    if (a <= 0.0 || b <= 0.0) {
         return mckl::const_nan<double>();
-    if (x < 0.0 || x > 1.0)
+    }
+    if (x < 0.0 || x > 1.0) {
         return mckl::const_nan<double>();
-    if (!(x > 0 || x < 0))
+    }
+    if (!(x > 0 || x < 0)) {
         return x;
-    if (!(x > 1 || x < 1))
+    }
+    if (!(x > 1 || x < 1)) {
         return x;
-    if (a > 3000 && b > 3000)
+    }
+    if (a > 3000 && b > 3000) {
         return internal::betai_approx(a, b, x);
+    }
 
     double bt = std::exp(std::lgamma(a + b) - std::lgamma(a) - std::lgamma(b) +
         a * std::log(x) + b * std::log(1 - x));
@@ -147,10 +160,12 @@ inline double betai(double a, double b, double x)
 /// \ingroup Special
 inline double betaiinv(double a, double b, double y)
 {
-    if (y <= 0)
+    if (y <= 0) {
         return 0;
-    if (y >= 1)
+    }
+    if (y >= 1) {
         return 1;
+    }
 
     double eps = 1e-8;
     double a1 = a - 1;
@@ -160,8 +175,9 @@ inline double betaiinv(double a, double b, double y)
         double z = (y < 0.5) ? y : 1 - y;
         double t = std::sqrt(-2 * std::log(z));
         x = (2.30753 + t * 0.27061) / (1 + t * (0.99229 + t * 0.04481)) - t;
-        if (y < 0.5)
+        if (y < 0.5) {
             x = -x;
+        }
         double al = (x * x - 3) / 6;
         double h = 2 / (1 / (2 * a - 1) + 1 / (2 * b - 1));
         double w = (x * std::sqrt(al + h) / h) -
@@ -178,20 +194,25 @@ inline double betaiinv(double a, double b, double y)
     }
     double afac = -std::lgamma(a) - std::lgamma(b) + std::lgamma(a + b);
     for (int i = 0; i != 10; ++i) {
-        if (!(x > 0 || x < 0))
+        if (!(x > 0 || x < 0)) {
             return x;
-        if (!(x > 1 || x < 1))
+        }
+        if (!(x > 1 || x < 1)) {
             return x;
+        }
         double err = betai(a, b, x) - y;
         double t = std::exp(a1 * std::log(x) + b1 * std::log(1 - x) + afac);
         double u = err / t;
         x -= (t = u / (1 - 0.5 * std::min(1.0, u * (a1 / x - b1 / (1 - x)))));
-        if (x <= 0)
+        if (x <= 0) {
             x = 0.5 * (x + t);
-        if (x >= 1)
+        }
+        if (x >= 1) {
             x = 0.5 * (x + t + 1);
-        if (std::abs(t) < eps * x && i > 0)
+        }
+        if (std::abs(t) < eps * x && i > 0) {
             break;
+        }
     }
 
     return x;

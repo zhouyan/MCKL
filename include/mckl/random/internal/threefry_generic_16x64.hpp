@@ -255,8 +255,9 @@ class Threefry16x64GeneratorGenericImpl
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        for (std::size_t i = 0; i != n; ++i, r += R)
+        for (std::size_t i = 0; i != n; ++i, r += R) {
             eval(ctr, r, par);
+        }
     }
 }; // class Threefry16x64GeneratorGenericImpl
 
@@ -315,8 +316,9 @@ class Threefish1024GeneratorGenericImpl
     {
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        for (std::size_t i = 0; i != n; ++i, r += R)
+        for (std::size_t i = 0; i != n; ++i, r += R) {
             eval(ctr, r, par);
+        }
     }
 }; // class Threefish1024GeneratorGenericImpl
 

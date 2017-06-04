@@ -71,26 +71,27 @@ class BetaDistributionConstant
         const RealType C = static_cast<RealType>(-0.956);
         const RealType D = beta + K * alpha * alpha + C;
         if (alpha == static_cast<RealType>(0.5) &&
-            beta == static_cast<RealType>(0.5))
+            beta == static_cast<RealType>(0.5)) {
             algorithm_ = BetaDistributionAlgorithmAS;
-        else if (alpha == 1 && beta == 1)
+        } else if (alpha == 1 && beta == 1) {
             algorithm_ = BetaDistributionAlgorithm11;
-        else if (alpha == 1)
+        } else if (alpha == 1) {
             algorithm_ = BetaDistributionAlgorithm1X;
-        else if (beta == 1)
+        } else if (beta == 1) {
             algorithm_ = BetaDistributionAlgorithmX1;
-        else if (alpha > 1 && beta > 1)
+        } else if (alpha > 1 && beta > 1) {
             algorithm_ = BetaDistributionAlgorithmC;
-        else if (alpha < 1 && beta < 1 && D <= 0)
+        } else if (alpha < 1 && beta < 1 && D <= 0) {
             algorithm_ = BetaDistributionAlgorithmJ;
-        else if (alpha < 1 && beta < 1)
+        } else if (alpha < 1 && beta < 1) {
             algorithm_ = BetaDistributionAlgorithmA1;
-        else if (alpha < 1 && beta > 1)
+        } else if (alpha < 1 && beta > 1) {
             algorithm_ = BetaDistributionAlgorithmA2;
-        else if (alpha > 1 && beta < 1)
+        } else if (alpha > 1 && beta < 1) {
             algorithm_ = BetaDistributionAlgorithmA3;
-        else
+        } else {
             algorithm_ = BetaDistributionAlgorithmC;
+        }
         MCKL_POP_CLANG_WARNING
         MCKL_POP_INTEL_WARNING
 
@@ -109,8 +110,9 @@ class BetaDistributionConstant
             case BetaDistributionAlgorithmC:
                 a_ = alpha + beta;
                 b_ = std::min(alpha, beta);
-                if (b_ > 1)
+                if (b_ > 1) {
                     b_ = std::sqrt((2 * alpha * beta - a_) / (a_ - 2));
+                }
                 b_ = 1 / b_;
                 t_ = alpha + 1 / b_;
                 p_ = a_ * std::log(a_);
@@ -157,16 +159,21 @@ class BetaDistributionConstant
     {
         MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
         MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
-        if (c1.a_ != c2.a_)
+        if (c1.a_ != c2.a_) {
             return false;
-        if (c1.b_ != c2.b_)
+        }
+        if (c1.b_ != c2.b_) {
             return false;
-        if (c1.t_ != c2.t_)
+        }
+        if (c1.t_ != c2.t_) {
             return false;
-        if (c1.p_ != c2.p_)
+        }
+        if (c1.p_ != c2.p_) {
             return false;
-        if (c1.algorithm_ != c2.algorithm_)
+        }
+        if (c1.algorithm_ != c2.algorithm_) {
             return false;
+        }
         return true;
         MCKL_POP_CLANG_WARNING
         MCKL_POP_INTEL_WARNING
@@ -265,9 +272,11 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     add(n, v, u1, u1);
 
     std::size_t m = 0;
-    for (std::size_t i = 0; i != n; ++i)
-        if (u1[i] > u2[i])
+    for (std::size_t i = 0; i != n; ++i) {
+        if (u1[i] > u2[i]) {
             r[m++] = x[i];
+        }
+    }
 
     return m;
 }
@@ -290,9 +299,11 @@ inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
     div(n, x, u, x);
 
     std::size_t m = 0;
-    for (std::size_t i = 0; i != n; ++i)
-        if (u[i] < 1)
+    for (std::size_t i = 0; i != n; ++i) {
+        if (u[i] < 1) {
             r[m++] = x[i];
+        }
+    }
 
     return m;
 }
@@ -366,8 +377,9 @@ inline void beta_distribution(
     while (n > k) {
         std::size_t m = internal::beta_distribution_impl<k>(
             rng, k, r, alpha, beta, constant);
-        if (m == 0)
+        if (m == 0) {
             break;
+        }
         n -= m;
         r += m;
     }
@@ -377,8 +389,9 @@ inline void beta_distribution(
     r += m;
     if (n > 0) {
         BetaDistribution<RealType> dist(alpha, beta);
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = dist(rng);
+        }
     }
 }
 
@@ -431,8 +444,9 @@ class BetaDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        if (param == param_)
+        if (param == param_) {
             return generate(rng, param_, constant_);
+        }
 
         internal::BetaDistributionConstant<RealType> constant(
             param.alpha(), param.beta());
@@ -577,8 +591,9 @@ class BetaDistribution
                         std::pow((1 - u) / (1 - constant.p()), constant.b());
                 v = (1 - param.alpha()) * std::log(x / constant.t());
             }
-            if (v < e)
+            if (v < e) {
                 return x;
+            }
         }
     }
 
@@ -601,8 +616,9 @@ class BetaDistribution
                         std::pow((1 - u) / (1 - constant.p()), constant.b());
                 v = (1 - param.alpha()) * std::log(x / constant.t());
             }
-            if (v < e)
+            if (v < e) {
                 return x;
+            }
         }
     }
 
@@ -625,8 +641,9 @@ class BetaDistribution
                         std::pow((1 - u) / (1 - constant.p()), constant.b());
                 v = (1 - param.beta()) * std::log(x / constant.t());
             }
-            if (v < e)
+            if (v < e) {
                 return 1 - x;
+            }
         }
     }
 }; // class BetaDistribution

@@ -43,16 +43,21 @@ template <typename RealType>
 inline bool stable_distribution_check_param(
     RealType alpha, RealType beta, RealType, RealType b)
 {
-    if (alpha <= 0)
+    if (alpha <= 0) {
         return false;
-    if (alpha > 2)
+    }
+    if (alpha > 2) {
         return false;
-    if (beta < -1)
+    }
+    if (beta < -1) {
         return false;
-    if (beta > 1)
+    }
+    if (beta > 1) {
         return false;
-    if (b <= 0)
+    }
+    if (b <= 0) {
         return false;
+    }
     return true;
 }
 
@@ -99,12 +104,15 @@ class StableDistributionConstant
     {
         MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
         MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
-        if (c1.xi_ != c2.xi_)
+        if (c1.xi_ != c2.xi_) {
             return false;
-        if (c1.c_ != c2.c_)
+        }
+        if (c1.c_ != c2.c_) {
             return false;
-        if (c1.algorithm_ != c2.algorithm_)
+        }
+        if (c1.algorithm_ != c2.algorithm_) {
             return false;
+        }
         return true;
         MCKL_POP_CLANG_WARNING
         MCKL_POP_INTEL_WARNING
@@ -242,8 +250,9 @@ class StableDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        if (param == param_)
+        if (param == param_) {
             return generate(rng, param_, constant_);
+        }
 
         internal::StableDistributionConstant<RealType> constant(
             param.alpha(), param.beta(), param.a(), param.b());

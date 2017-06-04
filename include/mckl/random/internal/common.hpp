@@ -795,8 +795,9 @@ template <std::size_t D, std::size_t T, typename ResultType>
 inline std::size_t serial_index(const ResultType *r)
 {
     std::array<std::size_t, T> s;
-    for (std::size_t i = 0; i != T; ++i)
+    for (std::size_t i = 0; i != T; ++i) {
         s[i] = std::min(static_cast<std::size_t>(r[i]), D - 1);
+    }
 
     return serial_index<0, D, T>(
         s.data(), std::integral_constant<bool, 0 < T>());
@@ -855,16 +856,19 @@ inline void group_np(double n, const Vector<double> &np_all,
 
     kmin = 0;
     while (kmin < K) {
-        if (np_all[kmin] >= npmin)
+        if (np_all[kmin] >= npmin) {
             break;
+        }
         ++kmin;
     }
     kmax = kmin + 1;
-    while (kmax < K && np_all[kmax] >= npmin)
+    while (kmax < K && np_all[kmax] >= npmin) {
         ++kmax;
+    }
     --kmax;
-    if (kmin == kmax)
+    if (kmin == kmax) {
         --kmin;
+    }
     np.clear();
     np.reserve(kmax - kmin + 1);
     np.push_back(0);
@@ -968,8 +972,9 @@ inline typename RNGType::result_type rand(RNGType &rng)
 template <typename RNGType>
 inline void rand(RNGType &rng, std::size_t n, typename RNGType::result_type *r)
 {
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         r[i] = rng();
+    }
 }
 
 /// \brief Generate distribution random variates
@@ -987,8 +992,9 @@ template <typename RNGType, typename DistributionType>
 inline void rand(RNGType &rng, DistributionType &distribution, std::size_t n,
     typename DistributionType::result_type *r)
 {
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         r[i] = distribution(rng);
+    }
 }
 
 template <typename>

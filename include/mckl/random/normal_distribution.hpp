@@ -62,8 +62,9 @@ inline void normal_distribution_impl(
     sincos(nu, u2, u1, u2);
     MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
     MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
-    if (stddev != 1)
+    if (stddev != 1) {
         mul(nu, stddev, s.data(), s.data());
+    }
     if (mean != 0) {
         muladd(nu, s.data(), u1, mean, u1);
         muladd(nu, s.data(), u2, mean, u2);
@@ -84,8 +85,9 @@ inline void normal_distribution(
     const std::size_t k = BufferSize<RealType>::value;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    for (std::size_t i = 0; i != m; ++i, r += k)
+    for (std::size_t i = 0; i != m; ++i, r += k) {
         internal::normal_distribution_impl<k>(rng, k, r, mean, stddev);
+    }
     internal::normal_distribution_impl<k>(rng, l, r, mean, stddev);
     if (n % 2 != 0) {
         U01OCDistribution<RealType> u01;

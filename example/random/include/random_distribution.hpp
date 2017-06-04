@@ -182,17 +182,20 @@ class RNG01 : public RNGType
     {
         result_type u = RNGType::operator()();
         result_type r = u % 3;
-        if (r == 0)
+        if (r == 0) {
             return 0;
-        if (r == 1)
+        }
+        if (r == 1) {
             return std::numeric_limits<result_type>::max();
+        }
         return u;
     }
 
     void operator()(std::size_t n, result_type *r)
     {
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = operator()();
+        }
     }
 }; // class RNG01
 MCKL_POP_CLANG_WARNING
@@ -206,7 +209,7 @@ class RandomDistributionTraitBase
         const RandomDistributionTraitBase<ResultType, ParamNum> &) = default;
     RandomDistributionTraitBase<ResultType, ParamNum> &operator=(
         const RandomDistributionTraitBase<ResultType, ParamNum> &) = default;
-    virtual ~RandomDistributionTraitBase() {}
+    virtual ~RandomDistributionTraitBase() = default;
 
     static constexpr bool invariant() { return false; }
 
@@ -226,8 +229,9 @@ class RandomDistributionTraitBase
         const std::size_t k = n < 2000 ? n / 100 : 20; // The number of cells
         const double p = 1.0 / k;
         mckl::Vector<ResultType> partition(k - 1);
-        for (std::size_t i = 0; i != k - 1; ++i)
+        for (std::size_t i = 0; i != k - 1; ++i) {
             partition[i] = quantile(p * (i + 1));
+        }
         partition.push_back(dist.max());
 
         return partition;
@@ -536,8 +540,9 @@ class RandomDistributionTrait<mckl::ChiSquaredDistribution<RealType>>
         RandomDistributionTrait<mckl::GammaDistribution<RealType>> gamma_trait;
         mckl::Vector<std::array<RealType, 2>> pgamma = gamma_trait.params();
         mckl::Vector<std::array<RealType, 1>> params;
-        for (std::size_t i = 0; i != pgamma.size(); ++i)
+        for (std::size_t i = 0; i != pgamma.size(); ++i) {
             this->add_param(params, pgamma[i][0] * 2);
+        }
 
         return params;
     }
@@ -653,9 +658,11 @@ class RandomDistributionTrait<mckl::FisherFDistribution<RealType>>
     {
         std::array<double, 5> df = {{1, 0.5, 1.5, 3, 30}};
         mckl::Vector<std::array<RealType, 2>> params;
-        for (std::size_t i = 0; i != df.size(); ++i)
-            for (std::size_t j = 0; j != df.size(); ++j)
+        for (std::size_t i = 0; i != df.size(); ++i) {
+            for (std::size_t j = 0; j != df.size(); ++j) {
                 this->add_param(params, df[i], df[j]);
+            }
+        }
 
         return params;
     }
@@ -1455,16 +1462,18 @@ inline double random_distribution_ksad(std::size_t n,
     mckl::Vector<double> chi2(k);
     mckl::Vector<double> head(k);
     mckl::Vector<double> tail(k);
-    for (std::size_t i = 0; i != k; ++i)
+    for (std::size_t i = 0; i != k; ++i) {
         chi2[i] = random_distribution_chi2(m, r + i * m, dist);
+    }
     std::sort(chi2.begin(), chi2.end());
     mckl::log(k, chi2.data(), head.data());
     std::reverse(chi2.begin(), chi2.end());
     mckl::sub(k, 1.0, chi2.data(), chi2.data());
     mckl::log(k, chi2.data(), tail.data());
     mckl::add(k, head.data(), tail.data(), chi2.data());
-    for (std::size_t i = 0; i != k; ++i)
+    for (std::size_t i = 0; i != k; ++i) {
         chi2[i] *= 2 * i + 1;
+    }
     double s = std::accumulate(chi2.begin(), chi2.end(), 0.0);
 
     return -(k + s / k);
@@ -1480,12 +1489,15 @@ inline void random_distribution_pval(const mckl::Vector<double> &chi2,
 
     alpha1 = alpha2 = alpha3 = 0;
     for (std::size_t i = 0; i != chi2.size(); ++i) {
-        if (chi2[i] > 0.0125 && chi2[i] < 1 - 0.0125)
+        if (chi2[i] > 0.0125 && chi2[i] < 1 - 0.0125) {
             ++alpha1;
-        if (chi2[i] > 0.025 && chi2[i] < 1 - 0.025)
+        }
+        if (chi2[i] > 0.025 && chi2[i] < 1 - 0.025) {
             ++alpha2;
-        if (chi2[i] > 0.05 && chi2[i] < 1 - 0.05)
+        }
+        if (chi2[i] > 0.05 && chi2[i] < 1 - 0.05) {
             ++alpha3;
+        }
     }
     pval[0].push_back(100.0 * alpha1 / chi2.size());
     pval[1].push_back(100.0 * alpha2 / chi2.size());
@@ -1493,12 +1505,15 @@ inline void random_distribution_pval(const mckl::Vector<double> &chi2,
 
     alpha1 = alpha2 = alpha3 = 0;
     for (std::size_t i = 0; i != ksad.size(); ++i) {
-        if (ksad[i] < 3.0916)
+        if (ksad[i] < 3.0916) {
             ++alpha1;
-        if (ksad[i] < 2.4986)
+        }
+        if (ksad[i] < 2.4986) {
             ++alpha2;
-        if (ksad[i] < 1.9355)
+        }
+        if (ksad[i] < 1.9355) {
             ++alpha3;
+        }
     }
     pval[3].push_back(100.0 * alpha1 / ksad.size());
     pval[4].push_back(100.0 * alpha2 / ksad.size());
@@ -1508,8 +1523,9 @@ inline void random_distribution_pval(const mckl::Vector<double> &chi2,
 inline void random_distribution_summary_pval(double pval, int twid)
 {
     std::stringstream ss;
-    if (pval < 50)
+    if (pval < 50) {
         ss << '*';
+    }
     ss << pval << '%';
     std::cout << std::setw(twid) << std::right << ss.str();
 }
@@ -1542,33 +1558,39 @@ inline void random_distribution_summary_pval(
         std::cout << std::string(lwid, '-') << std::endl;
 
         std::cout << std::setw(nwid) << std::left << "One level test (2.5%)";
-        for (std::size_t r = 0; r != R; ++r)
+        for (std::size_t r = 0; r != R; ++r) {
             random_distribution_summary_pval(*p0++, twid);
+        }
         std::cout << std::endl;
 
         std::cout << std::setw(nwid) << std::left << "One level test (5%)";
-        for (std::size_t r = 0; r != R; ++r)
+        for (std::size_t r = 0; r != R; ++r) {
             random_distribution_summary_pval(*p1++, twid);
+        }
         std::cout << std::endl;
 
         std::cout << std::setw(nwid) << std::left << "One level test (10%)";
-        for (std::size_t r = 0; r != R; ++r)
+        for (std::size_t r = 0; r != R; ++r) {
             random_distribution_summary_pval(*p2++, twid);
+        }
         std::cout << std::endl;
 
         std::cout << std::setw(nwid) << std::left << "Two level test (2.5%)";
-        for (std::size_t r = 0; r != R; ++r)
+        for (std::size_t r = 0; r != R; ++r) {
             random_distribution_summary_pval(*p3++, twid);
+        }
         std::cout << std::endl;
 
         std::cout << std::setw(nwid) << std::left << "Two level test (5%)";
-        for (std::size_t r = 0; r != R; ++r)
+        for (std::size_t r = 0; r != R; ++r) {
             random_distribution_summary_pval(*p4++, twid);
+        }
         std::cout << std::endl;
 
         std::cout << std::setw(nwid) << std::left << "Two level test (10%)";
-        for (std::size_t r = 0; r != R; ++r)
+        for (std::size_t r = 0; r != R; ++r) {
             random_distribution_summary_pval(*p5++, twid);
+        }
         std::cout << std::endl;
     }
     std::cout << std::string(lwid, '-') << std::endl;
@@ -1595,16 +1617,18 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     mckl::Vector<double> ksad(M);
 
     for (std::size_t i = 0; i != M; ++i) {
-        for (std::size_t j = 0; j != N; ++j)
+        for (std::size_t j = 0; j != N; ++j) {
             r[j] = dist_std(rng);
+        }
         chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);
         ksad[i] = random_distribution_ksad(N, r.data(), dist_mckl);
     }
     random_distribution_pval(chi2, ksad, pval);
 
     for (std::size_t i = 0; i != M; ++i) {
-        for (std::size_t j = 0; j != N; ++j)
+        for (std::size_t j = 0; j != N; ++j) {
             r[j] = dist_mckl(rng);
+        }
         chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);
         ksad[i] = random_distribution_ksad(N, r.data(), dist_mckl);
     }
@@ -1636,8 +1660,9 @@ inline void random_distribution_test_pval(
     mckl::Vector<std::string> names;
     std::array<mckl::Vector<double>, 6> pval;
     auto params = trait.params();
-    for (const auto &param : params)
+    for (const auto &param : params) {
         random_distribution_test_pval<MCKLDistType>(N, M, param, names, pval);
+    }
     random_distribution_summary_pval(names, pval, nwid, twid);
 }
 
@@ -1708,10 +1733,12 @@ inline void random_distribution_perf_e(
     mckl::abs(n, r2, r2);
     T f1 = 0;
     T f2 = 0;
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         f1 = std::max(f1, r1[i]);
-    for (std::size_t i = 0; i != n; ++i)
+    }
+    for (std::size_t i = 0; i != n; ++i) {
         f2 = std::max(f2, r2[i]);
+    }
     f1 /= std::numeric_limits<T>::epsilon();
     f2 /= std::numeric_limits<T>::epsilon();
     e1 = std::max(e1, f1);
@@ -1731,8 +1758,9 @@ inline void random_distribution_perf_e(
     mckl::sub(n, s1.data(), s2.data(), s1.data());
     mckl::abs(n, s1.data(), s1.data());
     int_type f = 0;
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         f = std::max(f, s1[i]);
+    }
     e1 = std::max(e1, static_cast<T>(f));
     e2 = std::max(e2, static_cast<T>(f));
 }
@@ -1773,8 +1801,9 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
         constexpr bool invariant =
             RandomDistributionTrait<MCKLDistType>::invariant();
         if (invariant) {
-            for (std::size_t j = 0; j != K; ++j)
+            for (std::size_t j = 0; j != K; ++j) {
                 r1[j] = dist(rng1);
+            }
             mckl::rand(rng2, dist, K, r2.data());
             pass = pass && r1 == r2;
             random_distribution_perf_e(K, r1.data(), r2.data(), e1, e2,
@@ -1785,11 +1814,13 @@ inline void random_distribution_perf_d(std::size_t N, std::size_t M,
         std::stringstream ss1;
         ss1.precision(20);
         ss1 << dist;
-        for (std::size_t j = 0; j != K; ++j)
+        for (std::size_t j = 0; j != K; ++j) {
             r1[j] = dist(rng1);
+        }
         ss1 >> dist;
-        for (std::size_t j = 0; j != K; ++j)
+        for (std::size_t j = 0; j != K; ++j) {
             r2[j] = dist(rng2);
+        }
         pass = pass && r1 == r2;
 
         std::stringstream ssb;
@@ -1814,8 +1845,9 @@ inline void random_distribution_perf_d(
 {
     RandomDistributionTrait<MCKLDistType> trait;
     auto params = trait.params();
-    for (const auto &param : params)
+    for (const auto &param : params) {
         random_distribution_perf_d<MCKLDistType>(N, M, param, perf);
+    }
 }
 
 template <template <typename> class DistributionType>
@@ -1888,13 +1920,15 @@ inline void random_distribution_perf_p(std::size_t N, std::size_t M,
 #endif
 
             watch1.start();
-            for (std::size_t j = 0; j != K; ++j)
+            for (std::size_t j = 0; j != K; ++j) {
                 r1[j] = mckl::rand(rng, dist_std);
+            }
             watch1.stop();
 
             watch2.start();
-            for (std::size_t j = 0; j != K; ++j)
+            for (std::size_t j = 0; j != K; ++j) {
                 r2[j] = mckl::rand(rng, dist_mckl);
+            }
             watch2.stop();
 
             watch3.start();
@@ -1950,8 +1984,9 @@ inline void random_distribution_perf_p(
 {
     RandomDistributionTrait<MCKLDistType> trait;
     auto params = trait.params();
-    for (const auto &param : params)
+    for (const auto &param : params) {
         random_distribution_perf_p<MCKLDistType>(N, M, param, perf);
+    }
 }
 
 template <template <typename> class DistributionType>
@@ -1995,10 +2030,11 @@ inline void random_distribution_perf(std::size_t N, std::size_t M)
 
     std::cout << std::string(lwid, '=') << std::endl;
 
-    if (mckl::StopWatch::has_cycles())
+    if (mckl::StopWatch::has_cycles()) {
         std::cout << std::setw(nwid) << std::left << "Distribution (cpE)";
-    else
+    } else {
         std::cout << std::setw(nwid) << std::left << "Distribution (ME/s)";
+    }
     std::cout << std::setw(twid) << std::right << "STD";
     std::cout << std::setw(twid) << std::right << "MCKL";
     std::cout << std::setw(twid) << std::right << "Batch";

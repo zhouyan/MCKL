@@ -39,8 +39,9 @@ template <typename IntType>
 inline std::string random_typename()
 {
     std::string type;
-    if (std::is_unsigned<IntType>::value)
+    if (std::is_unsigned<IntType>::value) {
         type += "u";
+    }
     type += "int";
     type += std::to_string(sizeof(IntType) * CHAR_BIT);
     type += "_t";

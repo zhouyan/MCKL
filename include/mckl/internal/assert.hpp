@@ -86,8 +86,9 @@ inline void runtime_assert(
 template <typename Except>
 inline void runtime_assert(bool cond, const char *msg)
 {
-    if (!cond)
+    if (!cond) {
         throw Except(msg);
+    }
 }
 
 template <typename Except>

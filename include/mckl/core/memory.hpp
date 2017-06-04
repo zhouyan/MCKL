@@ -151,13 +151,15 @@ class MemorySTD
     {
         const std::size_t m = internal::alignment_round0<Alignment>(
             n + sizeof(std::uintptr_t) + Alignment);
-        if (m < n)
+        if (m < n) {
             return nullptr;
+        }
 
         std::uintptr_t *const address =
             static_cast<std::uintptr_t *>(std::malloc(m));
-        if (address == nullptr)
+        if (address == nullptr) {
             return nullptr;
+        }
 
         std::uintptr_t *const ptr = reinterpret_cast<std::uintptr_t *>(
             internal::alignment_round0<Alignment>(
@@ -200,20 +202,23 @@ class MemorySYS
     {
         const std::size_t m = internal::alignment_round<Alignment>(n);
 
-        if (m < n)
+        if (m < n) {
             return nullptr;
+        }
 
         void *ptr = nullptr;
-        if (::posix_memalign(&ptr, Alignment, m) != 0)
+        if (::posix_memalign(&ptr, Alignment, m) != 0) {
             ptr = nullptr;
+        }
 
         return ptr;
     }
 
     static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
-        if (ptr != nullptr)
+        if (ptr != nullptr) {
             ::free(ptr);
+        }
     }
 }; // class MemorySYS
 
@@ -247,8 +252,9 @@ class MemoryJEM
 
     static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
-        if (ptr != nullptr)
+        if (ptr != nullptr) {
             ::free(ptr);
+        }
     }
 }; // class MemoryJEM
 
@@ -282,8 +288,9 @@ class MemoryTBB
 
     static void deallocate(void *ptr, std::size_t = 0) noexcept
     {
-        if (ptr != nullptr)
+        if (ptr != nullptr) {
             scalable_aligned_free(ptr);
+        }
     }
 }; // class MemoryTBB
 
@@ -335,12 +342,14 @@ class Allocator : public std::allocator<T>
     T *allocate(std::size_t n, const void *hint = nullptr)
     {
         const std::size_t m = n * sizeof(T);
-        if (m < n)
+        if (m < n) {
             throw std::bad_alloc();
+        }
 
         T *ptr = static_cast<T *>(Mem::allocate(m, hint));
-        if (ptr == nullptr)
+        if (ptr == nullptr) {
             throw std::bad_alloc();
+        }
 
         return ptr;
     }

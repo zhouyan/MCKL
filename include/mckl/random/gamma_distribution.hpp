@@ -60,14 +60,15 @@ class GammaDistributionConstant
   public:
     GammaDistributionConstant(RealType alpha = 1, RealType = 1)
     {
-        if (alpha < static_cast<RealType>(0.6))
+        if (alpha < static_cast<RealType>(0.6)) {
             algorithm_ = GammaDistributionAlgorithmT;
-        else if (alpha < 1)
+        } else if (alpha < 1) {
             algorithm_ = GammaDistributionAlgorithmW;
-        else if (alpha > 1)
+        } else if (alpha > 1) {
             algorithm_ = GammaDistributionAlgorithmN;
-        else
+        } else {
             algorithm_ = GammaDistributionAlgorithmE;
+        }
 
         d_ = c_ = 0;
         switch (algorithm_) {
@@ -97,12 +98,15 @@ class GammaDistributionConstant
     {
         MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
         MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
-        if (c1.d_ != c2.d_)
+        if (c1.d_ != c2.d_) {
             return false;
-        if (c1.c_ != c2.c_)
+        }
+        if (c1.c_ != c2.c_) {
             return false;
-        if (c1.algorithm_ != c2.algorithm_)
+        }
+        if (c1.algorithm_ != c2.algorithm_) {
             return false;
+        }
         return true;
         MCKL_POP_CLANG_WARNING
         MCKL_POP_INTEL_WARNING
@@ -144,9 +148,11 @@ inline std::size_t gamma_distribution_impl_t(RNGType &rng, std::size_t n,
     mul(n, beta, x, x);
 
     std::size_t m = 0;
-    for (std::size_t i = 0; i != n; ++i)
-        if (u[i] < e[i])
+    for (std::size_t i = 0; i != n; ++i) {
+        if (u[i] < e[i]) {
             r[m++] = x[i];
+        }
+    }
 
     return m;
 }
@@ -174,9 +180,11 @@ inline std::size_t gamma_distribution_impl_w(RNGType &rng, std::size_t n,
     mul(n, beta, x, x);
 
     std::size_t m = 0;
-    for (std::size_t i = 0; i != n; ++i)
-        if (u[i] > e[i])
+    for (std::size_t i = 0; i != n; ++i) {
+        if (u[i] > e[i]) {
             r[m++] = x[i];
+        }
+    }
 
     return m;
 }
@@ -221,8 +229,9 @@ inline std::size_t gamma_distribution_impl_n(RNGType &rng, std::size_t n,
             r[m++] = x[i];
         } else {
             e[i] = w[i] * w[i] / 2 + d * (1 - v[i] + std::log(v[i]));
-            if (std::log(u[i]) < e[i])
+            if (std::log(u[i]) < e[i]) {
                 r[m++] = x[i];
+            }
         }
     }
 
@@ -274,8 +283,9 @@ inline void gamma_distribution(
     while (n > k) {
         std::size_t m = internal::gamma_distribution_impl<k>(
             rng, k, r, alpha, beta, constant);
-        if (m == 0)
+        if (m == 0) {
             break;
+        }
         n -= m;
         r += m;
     }
@@ -285,8 +295,9 @@ inline void gamma_distribution(
     r += m;
     if (n > 0) {
         GammaDistribution<RealType> dist(alpha, beta);
-        for (std::size_t i = 0; i != n; ++i)
+        for (std::size_t i = 0; i != n; ++i) {
             r[i] = dist(rng);
+        }
     }
 }
 
@@ -339,8 +350,9 @@ class GammaDistribution
     template <typename RNGType>
     result_type generate(RNGType &rng, const param_type &param)
     {
-        if (param == param_)
+        if (param == param_) {
             return generate(rng, param_, constant_);
+        }
 
         internal::GammaDistributionConstant<RealType> constant(
             param.alpha(), param.beta());
@@ -385,8 +397,9 @@ class GammaDistribution
                 u = constant.d() + param.alpha() * u;
             }
             result_type r = std::exp(constant.c() * std::log(u));
-            if (std::abs(r) < e)
+            if (std::abs(r) < e) {
                 return r;
+            }
         }
     }
 
@@ -425,12 +438,14 @@ class GammaDistribution
             v = v * v * v;
 
             e = 1 - static_cast<result_type>(0.0331) * (w * w) * (w * w);
-            if (u < e)
+            if (u < e) {
                 return constant.d() * v;
+            }
 
             e = w * w / 2 + constant.d() * (1 - v + std::log(v));
-            if (std::log(u) < e)
+            if (std::log(u) < e) {
                 return constant.d() * v;
+            }
         }
     }
 

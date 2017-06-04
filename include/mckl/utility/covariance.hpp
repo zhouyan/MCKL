@@ -72,14 +72,17 @@ class Covariance
         result_type *cov, MatrixLayout cov_layout = RowMajor,
         bool cov_upper = false, bool cov_packed = false)
     {
-        if (n * p == 0)
+        if (n * p == 0) {
             return;
+        }
 
-        if (x == nullptr)
+        if (x == nullptr) {
             return;
+        }
 
-        if (mean == nullptr && cov == nullptr)
+        if (mean == nullptr && cov == nullptr) {
             return;
+        }
 
         internal::size_check<MCKL_BLAS_INT>(p, "Covariance::operator()");
         internal::size_check<MCKL_BLAS_INT>(n, "Covariance::operator()");
@@ -91,8 +94,9 @@ class Covariance
         if (w == nullptr) {
             if (layout == RowMajor) {
                 std::fill(mean_.begin(), mean_.end(), 0);
-                for (std::size_t i = 0; i != n; ++i)
+                for (std::size_t i = 0; i != n; ++i) {
                     add(p, x + i * p, mean_.data(), mean_.data());
+                }
             } else {
                 for (std::size_t i = 0; i != p; ++i) {
                     mean_[i] = std::accumulate(
@@ -107,8 +111,9 @@ class Covariance
             std::memcpy(
                 mean, mean_.data(), sizeof(result_type) * mean_.size());
         }
-        if (cov == nullptr)
+        if (cov == nullptr) {
             return;
+        }
 
         result_type sw2 =
             w == nullptr ? static_cast<result_type>(n) : swsqr(n, w);
@@ -124,11 +129,13 @@ class Covariance
             x_.resize(n * p);
             sqrt(n, w, wsqrt_.data());
             if (layout == RowMajor) {
-                for (std::size_t i = 0; i != n; ++i)
+                for (std::size_t i = 0; i != n; ++i) {
                     mul(p, x + i * p, wsqrt_[i], x_.data() + i * p);
+                }
             } else {
-                for (std::size_t i = 0; i != p; ++i)
+                for (std::size_t i = 0; i != p; ++i) {
                     mul(n, x + i * n, wsqrt_.data(), x_.data() + i * n);
+                }
             }
             cov_update(layout, n, p, x_.data(), B, BW);
         }
@@ -214,15 +221,21 @@ class Covariance
     void cov_pack(std::size_t p, result_type *cov, MatrixLayout layout,
         MatrixLayout cov_layout, bool cov_upper, bool cov_packed)
     {
-        if (layout == RowMajor)
-            for (std::size_t i = 0; i != p; ++i)
-                for (std::size_t j = 0; j != i; ++j)
+        if (layout == RowMajor) {
+            for (std::size_t i = 0; i != p; ++i) {
+                for (std::size_t j = 0; j != i; ++j) {
                     cov_[j * p + i] = cov_[i * p + j];
+                }
+            }
+        }
 
-        if (layout == ColMajor)
-            for (std::size_t i = 0; i != p; ++i)
-                for (std::size_t j = 0; j != i; ++j)
+        if (layout == ColMajor) {
+            for (std::size_t i = 0; i != p; ++i) {
+                for (std::size_t j = 0; j != i; ++j) {
                     cov_[i * p + j] = cov_[j * p + i];
+                }
+            }
+        }
 
         if (!cov_packed) {
             std::memcpy(cov, cov_.data(), sizeof(result_type) * cov_.size());
@@ -234,24 +247,32 @@ class Covariance
         unsigned c = (l << 1) + u;
         switch (c) {
             case 0: // Row, Lower, Pack
-                for (size_t i = 0; i != p; ++i)
-                    for (std::size_t j = 0; j <= i; ++j)
+                for (size_t i = 0; i != p; ++i) {
+                    for (std::size_t j = 0; j <= i; ++j) {
                         *cov++ = cov_[i * p + j];
+                    }
+                }
                 break;
             case 1: // Row, Upper, Pack
-                for (std::size_t i = 0; i != p; ++i)
-                    for (std::size_t j = i; j != p; ++j)
+                for (std::size_t i = 0; i != p; ++i) {
+                    for (std::size_t j = i; j != p; ++j) {
                         *cov++ = cov_[i * p + j];
+                    }
+                }
                 break;
             case 2: // Col, Lower, Pack
-                for (std::size_t j = 0; j != p; ++j)
-                    for (std::size_t i = j; i != p; ++i)
+                for (std::size_t j = 0; j != p; ++j) {
+                    for (std::size_t i = j; i != p; ++i) {
                         *cov++ = cov_[j * p + i];
+                    }
+                }
                 break;
             case 3: // Col, Upper, Pack
-                for (std::size_t j = 0; j != p; ++j)
-                    for (std::size_t i = 0; i <= j; ++i)
+                for (std::size_t j = 0; j != p; ++j) {
+                    for (std::size_t i = 0; i <= j; ++i) {
                         *cov++ = cov_[j * p + i];
+                    }
+                }
                 break;
             default:
                 break;

@@ -74,9 +74,10 @@ class DiscreteDistribution
             probability_.reserve(count);
             double delta = (xmax - xmin) / static_cast<double>(count);
             xmin += 0.5 * delta;
-            for (std::size_t i = 0; i != count; ++i)
+            for (std::size_t i = 0; i != count; ++i) {
                 probability_.push_back(
                     unary_op(xmin + static_cast<double>(i) * delta));
+            }
             invariant();
         }
 
@@ -98,8 +99,9 @@ class DiscreteDistribution
         friend std::basic_ostream<CharT, Traits> &operator<<(
             std::basic_ostream<CharT, Traits> &os, const param_type &param)
         {
-            if (!os)
+            if (!os) {
                 return os;
+            }
 
             os << param.probability_;
 
@@ -110,8 +112,9 @@ class DiscreteDistribution
         friend std::basic_istream<CharT, Traits> &operator>>(
             std::basic_istream<CharT, Traits> &is, param_type &param)
         {
-            if (!is)
+            if (!is) {
                 return is;
+            }
 
             Vector<double> probability;
             is >> std::ws >> probability;
@@ -137,8 +140,9 @@ class DiscreteDistribution
 
         void invariant()
         {
-            if (probability_.size() == 0)
+            if (probability_.size() == 0) {
                 return;
+            }
 
             double sum = 0;
             bool flag = is_positive(probability_, sum);
@@ -155,8 +159,9 @@ class DiscreteDistribution
             bool flag = true;
             for (std::size_t i = 0; i != probability.size(); ++i) {
                 sum += probability[i];
-                if (probability[i] < 0)
+                if (probability[i] < 0) {
                     flag = false;
+                }
             }
 
             return flag && sum > 0;
@@ -242,8 +247,9 @@ class DiscreteDistribution
             result_type index = 0;
             while (first != last) {
                 accw += *first * mulw;
-                if (u <= accw)
+                if (u <= accw) {
                     return index;
+                }
                 ++first;
                 ++index;
             }
@@ -255,8 +261,9 @@ class DiscreteDistribution
         result_type index = 0;
         while (first != last) {
             accw += *first;
-            if (u <= accw)
+            if (u <= accw) {
                 return index;
+            }
             ++first;
             ++index;
         }
@@ -290,8 +297,9 @@ class DiscreteDistribution
         std::basic_istream<CharT, Traits> &is, distribution_type &dist)
     {
         is >> std::ws >> dist.param_;
-        if (is)
+        if (is) {
             dist.reset();
+        }
 
         return is;
     }

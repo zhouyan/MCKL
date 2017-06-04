@@ -232,8 +232,9 @@ class SMCSamplerEvalBase
     void eval_range_dispatch(std::size_t iter, const ParticleRange<T> &range,
         void (SMCSamplerEvalBase::*)(std::size_t, const ParticleRange<T> &))
     {
-        for (auto idx : range)
+        for (auto idx : range) {
             eval_each(iter, idx);
+        }
     }
 
     void eval_first_dispatch(std::size_t, Particle<T> &,
@@ -259,8 +260,9 @@ class SMCSamplerEvalBase<T, Virtual>
 
     virtual void eval_range(std::size_t iter, const ParticleRange<T> &range)
     {
-        for (auto idx : range)
+        for (auto idx : range) {
             eval_each(iter, idx);
+        }
     }
 
     virtual void eval_first(std::size_t, Particle<T> &) {}

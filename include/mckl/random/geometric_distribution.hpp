@@ -53,8 +53,9 @@ inline void geometric_distribution_impl(
     log(n, s.data(), s.data());
     mul(n, 1 / std::log(1 - p), s.data(), s.data());
     floor(n, s.data(), s.data());
-    for (std::size_t i = 0; i != n; ++i)
+    for (std::size_t i = 0; i != n; ++i) {
         r[i] = ftoi<IntType>(s[i]);
+    }
 }
 
 } // namespace mckl::internal

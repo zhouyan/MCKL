@@ -68,8 +68,9 @@ class SerialTestImpl<D, T, false>
         const std::size_t m = n_ / k;
         const std::size_t l = n_ % k;
         Vector<result_type> r(k * T);
-        for (std::size_t i = 0; i != m; ++i)
+        for (std::size_t i = 0; i != m; ++i) {
             generate(rng, u01, k, r.data());
+        }
         generate(rng, u01, l, r.data());
 
         return this->stat(M_, count_.data(), np_);
@@ -91,8 +92,9 @@ class SerialTestImpl<D, T, false>
         rand(rng, u01, n * T, r);
         mul(n * T, static_cast<typename U01DistributionType::result_type>(D),
             r, r);
-        for (std::size_t i = 0; i != n; ++i, r += T)
+        for (std::size_t i = 0; i != n; ++i, r += T) {
             count_[serial_index<D, T>(r)] += 1;
+        }
     }
 }; // class SerialTestImpl
 

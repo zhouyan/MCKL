@@ -78,8 +78,9 @@ class PokerTest : public ChiSquaredTest<PokerTest<D, T>>
         Vector<result_type> r(k * T);
         count_.resize(np_.size());
         std::fill(count_.begin(), count_.end(), 0);
-        for (std::size_t i = 0; i != m; ++i)
+        for (std::size_t i = 0; i != m; ++i) {
             generate(rng, u01, k, r.data());
+        }
         generate(rng, u01, l, r.data());
 
         return this->stat(np_.size(), count_.data(), np_.data());
@@ -108,12 +109,13 @@ class PokerTest : public ChiSquaredTest<PokerTest<D, T>>
             r, r);
         for (std::size_t i = 0; i != n; ++i, r += T) {
             std::size_t t = index(r);
-            if (t <= tmin_)
+            if (t <= tmin_) {
                 count_.front() += 1;
-            else if (t >= tmax_)
+            } else if (t >= tmax_) {
                 count_.back() += 1;
-            else
+            } else {
                 count_[t - tmin_] += 1;
+            }
         }
     }
 

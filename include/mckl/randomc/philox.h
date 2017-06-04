@@ -90,22 +90,28 @@ typedef struct {
 
 static inline void mckl_philox2x32_inc(mckl_philox2x32_ctr_t *ctr)
 {
-    if (++ctr->v[0] != 0)
+    if (++ctr->v[0] != 0) {
         return;
-    if (++ctr->v[1] != 0)
+    }
+    if (++ctr->v[1] != 0) {
         return;
+    }
 }
 
 static inline void mckl_philox4x32_inc(mckl_philox4x32_ctr_t *ctr)
 {
-    if (++ctr->v[0] != 0)
+    if (++ctr->v[0] != 0) {
         return;
-    if (++ctr->v[1] != 0)
+    }
+    if (++ctr->v[1] != 0) {
         return;
-    if (++ctr->v[2] != 0)
+    }
+    if (++ctr->v[2] != 0) {
         return;
-    if (++ctr->v[3] != 0)
+    }
+    if (++ctr->v[3] != 0) {
         return;
+    }
 }
 
 static inline void mckl_philox2x32_initpar(

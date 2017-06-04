@@ -177,8 +177,9 @@ class CounterEngine
 
     void discard(skip_type nskip)
     {
-        if (nskip == 0)
+        if (nskip == 0) {
             return;
+        }
 
         const skip_type remain = static_cast<skip_type>(M_ - index_);
         if (nskip <= remain) {
@@ -210,14 +211,18 @@ class CounterEngine
     friend bool operator==(const CounterEngine<ResultType, Generator> &eng1,
         const CounterEngine<ResultType, Generator> &eng2)
     {
-        if (eng1.result_ != eng2.result_)
+        if (eng1.result_ != eng2.result_) {
             return false;
-        if (eng1.ctr_ != eng2.ctr_)
+        }
+        if (eng1.ctr_ != eng2.ctr_) {
             return false;
-        if (eng1.generator_ != eng2.generator_)
+        }
+        if (eng1.generator_ != eng2.generator_) {
             return false;
-        if (eng1.index_ != eng2.index_)
+        }
+        if (eng1.index_ != eng2.index_) {
             return false;
+        }
         return true;
     }
 
@@ -232,8 +237,9 @@ class CounterEngine
         std::basic_ostream<CharT, Traits> &os,
         const CounterEngine<ResultType, Generator> &eng)
     {
-        if (!os)
+        if (!os) {
             return os;
+        }
 
         os << eng.result_ << ' ';
         os << eng.ctr_ << ' ';
@@ -248,8 +254,9 @@ class CounterEngine
         std::basic_istream<CharT, Traits> &is,
         CounterEngine<ResultType, Generator> &eng)
     {
-        if (!is)
+        if (!is) {
             return is;
+        }
 
         CounterEngine<ResultType, Generator> eng_tmp;
         is >> std::ws >> eng_tmp.result_;
@@ -257,8 +264,9 @@ class CounterEngine
         is >> std::ws >> eng_tmp.generator_;
         is >> std::ws >> eng_tmp.index_;
 
-        if (is)
+        if (is) {
             eng = std::move(eng_tmp);
+        }
 
         return is;
     }

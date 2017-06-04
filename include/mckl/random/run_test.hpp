@@ -93,10 +93,12 @@ class RunTestImpl<false, Up> : public ChiSquaredTest<RunTestImpl<false, Up>>
                 ++s;
                 result_type u = v;
                 v = distribution(rng);
-                if (RunTestCheck<Up>::eval(u, v))
+                if (RunTestCheck<Up>::eval(u, v)) {
                     break;
-                if (s == n_)
+                }
+                if (s == n_) {
                     break;
+                }
             }
             count[std::min(r - 1, t)] += 1;
         }
@@ -131,9 +133,11 @@ class RunTestImpl<false, Up> : public ChiSquaredTest<RunTestImpl<false, Up>>
 
         std::array<double, 36> c;
         std::size_t k = 0;
-        for (std::size_t i = 0; i != 6; ++i)
-            for (std::size_t j = 0; j != 6; ++j)
+        for (std::size_t i = 0; i != 6; ++i) {
+            for (std::size_t j = 0; j != 6; ++j) {
                 c[k++] = count[i] * count[j];
+            }
+        }
         mul(36, a.data(), c.data(), c.data());
 
         return std::accumulate(c.begin(), c.end(), 0.0) / (n_ - 6);
@@ -167,8 +171,9 @@ class RunTestImpl<true, Up> : public ChiSquaredTest<RunTestImpl<true, Up>>
         while (s < n_) {
             std::size_t r = 0;
             while (true) {
-                if (r > n_)
+                if (r > n_) {
                     return 0;
+                }
                 result_type u = v;
                 v = distribution(rng);
                 if (RunTestCheck<Up>::eval(u, v)) {

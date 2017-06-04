@@ -90,8 +90,9 @@ inline double gammap_gser(double a, double x)
         ap += 1;
         del *= x / ap;
         sum += del;
-        if (std::abs(del) < std::abs(sum) * eps)
+        if (std::abs(del) < std::abs(sum) * eps) {
             return sum * std::exp(-x + a * std::log(x) - std::lgamma(a));
+        }
     }
 }
 
@@ -110,16 +111,19 @@ inline double gammap_gcf(double a, double x)
         double an = -n * (n - a);
         b += 2;
         d = an * d + b;
-        if (std::abs(d) < fpmin)
+        if (std::abs(d) < fpmin) {
             d = fpmin;
+        }
         c = b + an / c;
-        if (std::abs(c) < fpmin)
+        if (std::abs(c) < fpmin) {
             c = fpmin;
+        }
         d = 1 / d;
         double del = d * c;
         h *= del;
-        if (std::abs(del - 1) <= eps)
+        if (std::abs(del - 1) <= eps) {
             break;
+        }
     }
 
     return std::exp(-x + a * std::log(x) - std::lgamma(a)) * h;
@@ -131,14 +135,18 @@ inline double gammap_gcf(double a, double x)
 /// \ingroup Special
 inline double gammap(double a, double x)
 {
-    if (x < 0 || a <= 0)
+    if (x < 0 || a <= 0) {
         return const_nan<double>();
-    if (!(x > 0 || x < 0))
+    }
+    if (!(x > 0 || x < 0)) {
         return 0;
-    if (a > 100)
+    }
+    if (a > 100) {
         return internal::gammap_approx(a, x, true);
-    if (x < a + 1)
+    }
+    if (x < a + 1) {
         return internal::gammap_gser(a, x);
+    }
     return 1 - internal::gammap_gcf(a, x);
 }
 
@@ -148,12 +156,15 @@ inline double gammapinv(double a, double y)
 {
     constexpr double eps = 1e-8;
 
-    if (a <= 0)
+    if (a <= 0) {
         return const_nan<double>();
-    if (y >= 1)
+    }
+    if (y >= 1) {
         return const_inf<double>();
-    if (y <= 0)
+    }
+    if (y <= 0) {
         return 0;
+    }
 
     const double a1 = a - 1;
     const double gln = std::lgamma(a);
@@ -167,8 +178,9 @@ inline double gammapinv(double a, double y)
         double z = y < 0.5 ? y : 1 - y;
         double t = std::sqrt(-2 * std::log(z));
         x = (2.30753 + t * 0.27061) / (1 + t * (0.99229 + t * 0.04481)) - t;
-        if (y < 0.5)
+        if (y < 0.5) {
             x = -x;
+        }
         x = std::max(
             1e-3, a * std::pow(1 - 1 / (9 * a) - x / (3 * std::sqrt(a)), 3));
     } else {
@@ -178,8 +190,9 @@ inline double gammapinv(double a, double y)
     }
 
     for (int i = 0; i != 12; ++i) {
-        if (x <= 0)
+        if (x <= 0) {
             return 0;
+        }
 
         double err = gammap(a, x) - y;
         double t = a > 1 ?
@@ -188,11 +201,13 @@ inline double gammapinv(double a, double y)
         double u = err / t;
         t = u / (1 - 0.5 * std::min(1.0, u * (a1 / x - 1)));
         x -= t;
-        if (x <= 0)
+        if (x <= 0) {
             x = 0.5 * (x + t);
+        }
 
-        if (std::abs(t) < eps * x)
+        if (std::abs(t) < eps * x) {
             return x;
+        }
     }
 
     return x;
