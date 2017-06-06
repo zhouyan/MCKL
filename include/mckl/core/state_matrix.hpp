@@ -226,14 +226,14 @@ class StateMatrix : public Matrix<T, Layout>
         if (n > size()) {
             resize(n);
         }
+
         for (size_type dst = 0; dst != n; ++dst, ++index) {
             duplicate(static_cast<size_type>(*index), dst);
         }
+
         if (n < size()) {
             resize(n);
         }
-
-        return;
     }
 
     template <typename InputIter>
@@ -266,8 +266,6 @@ class StateMatrix : public Matrix<T, Layout>
             }
             Matrix<T, ColMajor>::operator=(std::move(tmp));
         }
-
-        return;
     }
 
     void duplicate_dispatch(
