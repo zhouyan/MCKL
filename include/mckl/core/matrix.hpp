@@ -486,6 +486,9 @@ class Matrix
     /// \brief The number of columns
     size_type ncol() const { return ncol_; }
 
+    /// \brief The total number of elements
+    size_type size() const { return nrow_ * ncol_; }
+
     /// \brief Reserve storage space for the matrix
     void reserve(size_type n, size_type m) { data_.reserve(n * m); }
 
