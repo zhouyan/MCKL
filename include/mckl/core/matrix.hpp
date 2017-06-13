@@ -474,6 +474,9 @@ class Matrix
         return col_stride_dispatch(layout_dispatch());
     }
 
+    /// \brief The layout of the matrix
+    static constexpr MatrixLayout layout() { return Layout; }
+
     /// \brief If the matrix is empty, i.e., `nrow() * ncol() == 0`
     bool empty() const { return nrow_ == 0 || ncol_ == 0; }
 
