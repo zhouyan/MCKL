@@ -486,6 +486,9 @@ class Matrix
     /// \brief The number of columns
     size_type ncol() const { return ncol_; }
 
+    /// \brief The number of elements in the leading dimension
+    size_type ldim() const { return ldim_dispatch(layout_dispatch()); }
+
     /// \brief The total number of elements
     size_type size() const { return nrow_ * ncol_; }
 
@@ -580,6 +583,8 @@ class Matrix
 
     // Layout == RowMajor
 
+    size_type ldim(row_major) const { return ncol_; }
+
     pointer row_begin_dispatch(size_type i, row_major) { return row_data(i); }
 
     const_pointer row_begin_dispatch(size_type i, row_major) const
@@ -652,6 +657,8 @@ class Matrix
     }
 
     // Layout == ColMajor
+
+    size_type ldim(col_major) const { return nrow_; }
 
     StepIterator<pointer> row_begin_dispatch(size_type i, col_major)
     {
