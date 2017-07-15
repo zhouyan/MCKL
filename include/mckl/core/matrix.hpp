@@ -583,7 +583,7 @@ class Matrix
 
     // Layout == RowMajor
 
-    size_type ldim(row_major) const { return ncol_; }
+    size_type ldim_dispatch(row_major) const { return ncol_; }
 
     pointer row_begin_dispatch(size_type i, row_major) { return row_data(i); }
 
@@ -658,7 +658,7 @@ class Matrix
 
     // Layout == ColMajor
 
-    size_type ldim(col_major) const { return nrow_; }
+    size_type ldim_dispatch(col_major) const { return nrow_; }
 
     StepIterator<pointer> row_begin_dispatch(size_type i, col_major)
     {
