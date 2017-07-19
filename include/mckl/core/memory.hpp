@@ -34,6 +34,7 @@
 
 #include <mckl/internal/config.h>
 
+#include <complex>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
@@ -113,22 +114,36 @@ inline constexpr std::size_t alignment_round(UIntType n)
     return n == 0 ? Alignment : alignment_round0<Alignment>(n);
 }
 
+template <typename T>
+class AlignOfImpl
+{
+  public:
+    static constexpr std::size_t value = std::is_scalar<T>::value ?
+        (alignof(T) > MCKL_ALIGNMENT ? alignof(T) : MCKL_ALIGNMENT) :
+        (alignof(T) > MCKL_MINIMUM_ALIGNMENT ? alignof(T) :
+                                               MCKL_MINIMUM_ALIGNMENT);
+}; // class AlignOfImpl
+
+template <typename T>
+class AlignOfImpl<std::complex<T>>
+{
+  public:
+    static constexpr std::size_t value = AlignOfImpl<T>::value;
+}; // class AlignOfImpl
+
 } // namespace mckl::internal
 
-/// \brief Alignment of types
+/// \brief Alignment of types in bytes
 /// \ingroup Core
 ///
 /// \details
 /// * For scalar types, defined to the maximum of `MCKL_ALIGNMENT` and
 /// `alignof(T)`
 /// * For all other types, define to the maximum of `MCKL_MINIMUM_ALIGNMENT`
-/// and `alignof(T)` as `value`.
+/// and `alignof(T)`.
+/// * For `std::complex<T>`, the alignment of `T` is used.
 template <typename T>
-constexpr std::size_t AlignOf = std::integral_constant<std::size_t,
-    std::is_scalar<T>::value ?
-        (alignof(T) > MCKL_ALIGNMENT ? alignof(T) : MCKL_ALIGNMENT) :
-        (alignof(T) > MCKL_MINIMUM_ALIGNMENT ? alignof(T) :
-                                               MCKL_MINIMUM_ALIGNMENT)>::value;
+constexpr std::size_t AlignOf = internal::AlignOfImpl<T>::value;
 
 /// \brief Memory allocation using the standard library
 /// \ingroup Core
