@@ -61,7 +61,7 @@ if(NOT DEFINED MCKL_INSTALL_INC_DIR)
     SET(MCKL_INSTALL_INC_DIR include)
 endif(NOT DEFINED MCKL_INSTALL_INC_DIR)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/mckl
-    DESTINATION ${MCKL_INSTALL_INC_DIR}/mckl
+    DESTINATION ${MCKL_INSTALL_INC_DIR}
     PATTERN ".DS_Store" EXCLUDE PATTERN "*.swp" EXCLUDE)
 
 ##############################################################################
