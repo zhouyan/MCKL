@@ -32,6 +32,14 @@
 #ifndef MCKL_INTERNAL_CONFIG_H
 #define MCKL_INTERNAL_CONFIG_H
 
+// Version number
+#define MCKL_VERSION_MAJOR 1
+#define MCKL_VERSION_MINOR 0
+#define MCKL_VERSION_PATCH 0
+#define MCKL_VERSION                                                          \
+    (MCKL_VERSION_MAJOR * 10000 + MCKL_VERSION_MINOR * 100 +                  \
+        MCKL_VERSION_PATCH)
+
 // Compiler dependent macros
 
 #include <mckl/internal/compiler.h>
