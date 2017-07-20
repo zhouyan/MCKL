@@ -1237,7 +1237,7 @@ MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_finite)
     template <typename T>                                                     \
     inline std::size_t find_##func(std::size_t n, const std::complex<T> *a)   \
     {                                                                         \
-        return find_##func(n, reinterpret_cast<const T *>(a)) / 2;            \
+        return find_##func(n * 2, reinterpret_cast<const T *>(a)) / 2;        \
     }
 
 #define MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(func, test)                     \
@@ -1254,7 +1254,7 @@ MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_finite)
     template <typename T>                                                     \
     inline std::size_t count_##func(std::size_t n, const std::complex<T> *a)  \
     {                                                                         \
-        return count_##func(n, reinterpret_cast<const T *>(a)) / 2;           \
+        return count_##func(n * 2, reinterpret_cast<const T *>(a)) / 2;       \
     }
 
 namespace internal {
