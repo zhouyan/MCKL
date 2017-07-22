@@ -89,11 +89,13 @@ inline void utility_hdf5(std::size_t N, std::size_t M)
         mckl::rand(rng, u01, m, v1.data());
 
         watch1.start();
-        mckl::hdf5store(v1, filename, dataname, false);
+        mckl::HDF5File h5file(filename, false);
+        mckl::hdf5store(h5file, dataname, v1);
         watch1.stop();
 
         watch2.start();
-        auto v2 = mckl::hdf5load<T2>(filename, dataname);
+        mckl::Vector<T2> v2;
+        mckl::hdf5load(h5file, dataname, &v2);
         watch2.stop();
 
         passed = passed && v1.size() == v2.size();
@@ -147,11 +149,13 @@ inline void utility_hdf5(std::size_t N, std::size_t M)
         mckl::rand(rng, u01, nrow * ncol, m1.data());
 
         watch1.start();
-        mckl::hdf5store(m1, filename, dataname, false);
+        mckl::HDF5File h5file(filename, false);
+        mckl::hdf5store(h5file, dataname, m1);
         watch1.stop();
 
         watch2.start();
-        auto m2 = mckl::hdf5load<T2, Layout2>(filename, dataname);
+        mckl::Matrix<T2, Layout2> m2;
+        mckl::hdf5load(h5file, dataname, &m2);
         watch2.stop();
 
         passed = passed && m1.nrow() == m2.nrow() && m1.ncol() == m2.ncol();

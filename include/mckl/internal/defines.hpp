@@ -44,10 +44,20 @@ class Virtual;
 /// \brief Matrix layout
 /// \ingroup Definitions
 enum class MatrixLayout { RowMajor = 101, ColMajor = 102 };
-
 constexpr MatrixLayout RowMajor = MatrixLayout::RowMajor;
-
 constexpr MatrixLayout ColMajor = MatrixLayout::ColMajor;
+
+/// \brief Matrix Transpose
+enum class MatrixTranspose { NoTrans = 111, Trans = 112, ConjTrans = 113 };
+
+/// \brief Matrix Upper/lower triangular
+enum class MatrixUpLo { Upper = 121, Lower = 122 };
+
+/// \brief Matrix diagonal elements
+enum class MatrixDiag { NonUnit = 131, Unit = 132 };
+
+/// \brief Symmetric matrix operator side
+enum class MatrixSide { Left = 141, Right = 142 };
 
 template <typename T, std::size_t K = 1>
 class BufferSize

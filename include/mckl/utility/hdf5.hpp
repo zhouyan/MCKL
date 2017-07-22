@@ -36,24 +36,42 @@
 #include <mckl/core/matrix.hpp>
 #include <hdf5.h>
 
-#define MCKL_DEFINE_UTILITY_HDF5_TYPE(CPPName, CName)                         \
-    class HDF5##CPPName : public HDF5ID<HDF5##CPPName>                        \
-    {                                                                         \
-      public:                                                                 \
-        HDF5##CPPName(::hid_t id) : HDF5ID<HDF5##CPPName>(id) {}              \
-                                                                              \
-        static void close(::hid_t id) { ::H5##CName##close(id); }             \
-    };
-
 namespace mckl {
 
-namespace internal {
-
+/// \brief RAII class for HDF5 IDs
+/// \ingroup HDF5
 template <typename Derived>
 class HDF5ID
 {
   public:
-    HDF5ID(::hid_t id) : id_(id) {}
+    HDF5ID() : id_(-1) {}
+
+    explicit HDF5ID(::hid_t id) : id_(id) {}
+
+    HDF5ID(const HDF5ID &other)
+        : id_(other.good() ? Derived::copy(other.id_) : other.id_)
+    {
+    }
+
+    HDF5ID &operator=(const HDF5ID &other)
+    {
+        if (this != &other) {
+            if (good()) {
+                Derived::close(id_);
+            }
+            id_ = other.good() ? Derived::copy(other.id_) : other.id_;
+        }
+
+        return *this;
+    }
+
+    HDF5ID(HDF5ID &&other) : id_(other.id_) { other.id_ = -1; }
+
+    HDF5ID &operator=(HDF5ID &&other)
+    {
+        std::swap(id_, other.id_);
+        return *this;
+    }
 
     ~HDF5ID()
     {
@@ -63,358 +81,781 @@ class HDF5ID
     }
 
     ::hid_t id() const { return id_; }
-
     bool good() const { return id_ >= 0; }
-
     bool operator!() const { return !good(); }
-
     explicit operator bool() const { return good(); }
 
-  private:
+  protected:
     ::hid_t id_;
 }; // class HDF5ID
 
-MCKL_DEFINE_UTILITY_HDF5_TYPE(DataSet, D)
-MCKL_DEFINE_UTILITY_HDF5_TYPE(DataSpace, S)
-MCKL_DEFINE_UTILITY_HDF5_TYPE(DataType, T)
-MCKL_DEFINE_UTILITY_HDF5_TYPE(File, F)
-MCKL_DEFINE_UTILITY_HDF5_TYPE(Group, G)
+class HDF5File;
+class HDF5Group;
+class HDF5DataType;
+class HDF5DataSpace;
+class HDF5Attribute;
+class HDF5DataSet;
+class HDF5PropertyList;
 
-inline ::hid_t hdf5_datafile(
-    const std::string &filename, bool open_only, bool read_only)
+/// \brief Enable and disable HDF5 low level error printing
+/// \ingroup HDF5
+///
+/// \param enabled If true, error printing will be enabled after the function
+/// call, otherwise it will be disabled.
+///
+/// \return The original status before the function call
+inline bool hdf5_error_printing(bool enabled)
 {
-    if (!open_only) {
-        return ::H5Fcreate(
-            filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    }
-
-    unsigned flag = 0;
-    if (read_only) {
-        flag = H5F_ACC_RDONLY;
+    ::H5E_auto2_t f = nullptr;
+    ::H5Eget_auto2(H5E_DEFAULT, &f, nullptr);
+    if (enabled) {
+        ::H5Eset_auto2(
+            H5E_DEFAULT, reinterpret_cast<::H5E_auto2_t>(::H5Eprint2), stderr);
     } else {
-        flag = H5F_ACC_RDWR;
+        ::H5Eset_auto2(H5E_DEFAULT, nullptr, nullptr);
     }
 
-    return ::H5Fopen(filename.c_str(), flag, H5P_DEFAULT);
+    return f != nullptr;
 }
 
-} // namespace mckl::internal
-
-/// \brief HDF5 data type
+/// \brief RAII class for HDF5 file object
 /// \ingroup HDF5
-template <typename>
-inline ::hid_t hdf5_datatype()
+class HDF5File : public HDF5ID<HDF5File>
 {
-    return -1;
-}
+  public:
+    using HDF5ID<HDF5File>::HDF5ID;
 
-/// \brief HDF5 data type specialization for char
+    HDF5File() = default;
+
+    /// \brief Open an HDF5 file if it possible, otherwise create a new one
+    explicit HDF5File(const std::string &filename) : HDF5ID<HDF5File>(-1)
+    {
+        bool print_error = hdf5_error_printing(false);
+        id_ = ::H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+        if (!good()) {
+            id_ = ::H5Fcreate(
+                filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        }
+        hdf5_error_printing(print_error);
+    }
+
+    /// \brief Open or create an HDF5 file
+    ///
+    /// \param append If true then an existing file is open, otherwise a new
+    /// one is created
+    HDF5File(const std::string &filename, bool append)
+        : HDF5ID<HDF5File>(append ?
+                  ::H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT) :
+                  ::H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
+                      H5P_DEFAULT))
+    {
+    }
+
+    /// \brief Open or create an HDF5 file
+    ///
+    /// \param append If true then an existing file is open, otherwise a new
+    /// one is created
+    /// \param read_only If true the file will be opened in read only mode.
+    HDF5File(const std::string &filename, bool append, bool read_only)
+        : HDF5ID<HDF5File>(append ?
+                  ::H5Fopen(filename.c_str(),
+                      (read_only ? H5F_ACC_RDONLY : H5F_ACC_RDWR),
+                      H5P_DEFAULT) :
+                  ::H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
+                      H5P_DEFAULT))
+    {
+    }
+
+    static ::hid_t copy(::hid_t) = delete;
+
+    static void close(::hid_t id) { ::H5Fclose(id); }
+}; // class HDF5File
+
+/// \brief RAII class for HDF5 group
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<char>()
+class HDF5Group : public HDF5ID<HDF5Group>
 {
-    return ::H5Tcopy(H5T_NATIVE_CHAR);
+  public:
+    using HDF5ID<HDF5Group>::HDF5ID;
+
+    HDF5Group() = default;
+
+    /// \brief Open a group if possible, otherwise create a new one
+    HDF5Group(const HDF5File &file, const std::string &groupname)
+        : HDF5ID<HDF5Group>(-1)
+    {
+        if (!file) {
+            return;
+        }
+        bool print_error = hdf5_error_printing(false);
+        id_ = ::H5Gopen2(file.id(), groupname.c_str(), H5P_DEFAULT);
+        if (!good()) {
+            id_ = ::H5Gcreate2(file.id(), groupname.c_str(), H5P_DEFAULT,
+                H5P_DEFAULT, H5P_DEFAULT);
+        }
+        hdf5_error_printing(print_error);
+    }
+
+    /// \brief Open a group if possible, otherwise create a new one
+    HDF5Group(const HDF5Group &group, const std::string &groupname)
+        : HDF5ID<HDF5Group>(-1)
+    {
+        if (!group) {
+            return;
+        }
+        bool print_error = hdf5_error_printing(false);
+        id_ = ::H5Gopen2(group.id(), groupname.c_str(), H5P_DEFAULT);
+        if (!good()) {
+            id_ = ::H5Gcreate2(group.id(), groupname.c_str(), H5P_DEFAULT,
+                H5P_DEFAULT, H5P_DEFAULT);
+        }
+        hdf5_error_printing(print_error);
+    }
+
+    /// \brief Get the names of all links in the group
+    std::vector<std::string> links() const;
+
+    static ::hid_t copy(::hid_t) = delete;
+
+    static void close(::hid_t id) { ::H5Gclose(id); }
+}; // class HDF5Group
+
+/// \brief RAII class for HDF5 data type
+/// \ingroup HDF5
+class HDF5DataType : public HDF5ID<HDF5DataType>
+{
+  public:
+    using HDF5ID<HDF5DataType>::HDF5ID;
+
+    HDF5DataType() = default;
+
+    explicit HDF5DataType(const HDF5DataSet &);
+
+    bool commit(const HDF5File &file, const std::string &name) const
+    {
+        return ::H5Tcommit2(file.id(), name.c_str(), id_, H5P_DEFAULT,
+            H5P_DEFAULT, H5P_DEFAULT);
+    }
+
+    bool commit(const HDF5Group &group, const std::string &name) const
+    {
+        return ::H5Tcommit2(group.id(), name.c_str(), id_, H5P_DEFAULT,
+            H5P_DEFAULT, H5P_DEFAULT);
+    }
+
+    void size(std::size_t s) const { ::H5Tset_size(id_, s); }
+
+    std::size_t size() const { return ::H5Tget_size(id_); }
+
+    static ::hid_t copy(::hid_t id) { return ::H5Tcopy(id); }
+
+    static void close(::hid_t id) { ::H5Tclose(id); }
+}; // class HDF5DataType
+
+/// \brief RAII class for HDF5 data space
+/// \ingroup HDF5
+class HDF5DataSpace : public HDF5ID<HDF5DataSpace>
+{
+  public:
+    using HDF5ID<HDF5DataSpace>::HDF5ID;
+
+    HDF5DataSpace() = default;
+
+    explicit HDF5DataSpace(int rank, ::hsize_t *dim)
+        : HDF5ID<HDF5DataSpace>(::H5Screate_simple(rank, dim, nullptr))
+    {
+    }
+
+    std::size_t npoints() const
+    {
+        return static_cast<std::size_t>(::H5Sget_simple_extent_npoints(id_));
+    }
+
+    std::size_t ndims() const
+    {
+        return static_cast<std::size_t>(::H5Sget_simple_extent_ndims(id_));
+    }
+
+    std::size_t dims(::hsize_t *dest) const
+    {
+        return static_cast<std::size_t>(
+            ::H5Sget_simple_extent_dims(id_, dest, nullptr));
+    }
+
+    static ::hid_t copy(::hid_t) = delete;
+
+    static void close(::hid_t id) { ::H5Sclose(id); }
+}; // class HDF5DataSpace
+
+/// \brief RAII class for HDF5 attribute
+/// \ingroup HDF5
+class HDF5Attribute : public HDF5ID<HDF5Attribute>
+{
+  public:
+    using HDF5ID<HDF5Attribute>::HDF5ID;
+
+    HDF5Attribute() = default;
+
+    HDF5Attribute(const HDF5File &file, const std::string &name)
+        : HDF5ID<HDF5Attribute>(
+              ::H5Aopen(file.id(), name.c_str(), H5P_DEFAULT))
+    {
+    }
+
+    HDF5Attribute(const HDF5Group &group, const std::string &name)
+        : HDF5ID<HDF5Attribute>(
+              ::H5Aopen(group.id(), name.c_str(), H5P_DEFAULT))
+    {
+    }
+
+    HDF5Attribute(const HDF5File &file, const std::string &name,
+        const HDF5DataType &type, const HDF5DataSpace &space)
+        : HDF5ID<HDF5Attribute>(::H5Acreate2(file.id(), name.c_str(),
+              type.id(), space.id(), H5P_DEFAULT, H5P_DEFAULT))
+    {
+    }
+
+    HDF5Attribute(const HDF5Group &group, const std::string &name,
+        const HDF5DataType &type, const HDF5DataSpace &space)
+        : HDF5ID<HDF5Attribute>(::H5Acreate2(group.id(), name.c_str(),
+              type.id(), space.id(), H5P_DEFAULT, H5P_DEFAULT))
+    {
+    }
+
+    HDF5DataSpace space() const { return HDF5DataSpace(::H5Aget_space(id_)); }
+
+    HDF5DataType type() const { return HDF5DataType(::H5Aget_type(id_)); }
+
+    bool write(const HDF5DataType &type, const void *mem) const
+    {
+        if (this->space().npoints() == 0) {
+            return false;
+        }
+
+        return ::H5Awrite(id_, type.id(), mem) >= 0;
+    }
+
+    bool read(const HDF5DataType &type, void *mem) const
+    {
+        if (this->space().npoints() == 0) {
+            return false;
+        }
+
+        return ::H5Aread(id_, type.id(), mem) >= 0;
+    }
+
+    static ::hid_t copy(::hid_t) = delete;
+
+    static void close(::hid_t id) { ::H5Aclose(id); }
+}; // class HDF5Attribute
+
+/// \brief RAII class for HDF5 data set
+/// \ingroup HDF5
+class HDF5DataSet : public HDF5ID<HDF5DataSet>
+{
+  public:
+    using HDF5ID<HDF5DataSet>::HDF5ID;
+
+    HDF5DataSet() = default;
+
+    HDF5DataSet(const HDF5File &file, const std::string &name)
+        : HDF5ID<HDF5DataSet>(::H5Dopen2(file.id(), name.c_str(), H5P_DEFAULT))
+    {
+    }
+
+    HDF5DataSet(const HDF5Group &group, const std::string &name)
+        : HDF5ID<HDF5DataSet>(
+              ::H5Dopen2(group.id(), name.c_str(), H5P_DEFAULT))
+    {
+    }
+
+    HDF5DataSet(const HDF5File &file, const std::string &name,
+        const HDF5DataType &type, const HDF5DataSpace &space)
+        : HDF5ID<HDF5DataSet>(::H5Dcreate2(file.id(), name.c_str(), type.id(),
+              space.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))
+    {
+    }
+
+    HDF5DataSet(const HDF5Group &group, const std::string &name,
+        const HDF5DataType &type, const HDF5DataSpace &space)
+        : HDF5ID<HDF5DataSet>(::H5Dcreate2(group.id(), name.c_str(), type.id(),
+              space.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT))
+    {
+    }
+
+    HDF5DataSpace space() const { return HDF5DataSpace(::H5Dget_space(id_)); }
+
+    HDF5DataType type() const { return HDF5DataType(::H5Dget_type(id_)); }
+
+    bool write(const HDF5DataType &type, const void *mem) const
+    {
+        if (this->space().npoints() == 0) {
+            return false;
+        }
+
+        return ::H5Dwrite(
+                   id_, type.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT, mem) >= 0;
+    }
+
+    bool read(const HDF5DataType &type, void *mem) const
+    {
+        if (this->space().npoints() == 0) {
+            return false;
+        }
+
+        return ::H5Dread(id_, type.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT, mem) >=
+            0;
+    }
+
+    static ::hid_t copy(::hid_t) = delete;
+
+    static void close(::hid_t id) { ::H5Dclose(id); }
+}; // class HDF5DataSet
+
+inline HDF5DataType::HDF5DataType(const HDF5DataSet &data)
+    : HDF5ID<HDF5DataType>(::H5Tcopy(data.id()))
+{
 }
 
-/// \brief HDF5 data type specialization for signed char
+/// \brief RAII class for HDF5 property list
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<signed char>()
+class HDF5PropertyList : public HDF5ID<HDF5PropertyList>
+{
+  public:
+    using HDF5ID<HDF5PropertyList>::HDF5ID;
+
+    HDF5PropertyList() = default;
+
+    static ::hid_t copy(::hid_t) = delete;
+
+    static void close(::hid_t id) { ::H5Pclose(id); }
+}; // class HDF5PropertyList
+
+/// \brief HDF5 data type id overload for char
+/// \ingroup HDF5
+inline ::hid_t hdf5typeid(char *) { return ::H5Tcopy(H5T_NATIVE_CHAR); }
+
+/// \brief HDF5 data type id overload for signed char
+/// \ingroup HDF5
+inline ::hid_t hdf5typeid(signed char *)
 {
     return ::H5Tcopy(H5T_NATIVE_SCHAR);
 }
 
-/// \brief HDF5 data type specialization for unsigned char
+/// \brief HDF5 data type id overload for unsigned char
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<unsigned char>()
+inline ::hid_t hdf5typeid(unsigned char *)
 {
     return ::H5Tcopy(H5T_NATIVE_UCHAR);
 }
 
-/// \brief HDF5 data type specialization for short
+/// \brief HDF5 data type id overload for short
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<short>()
-{
-    return ::H5Tcopy(H5T_NATIVE_SHORT);
-}
+inline ::hid_t hdf5typeid(short *) { return ::H5Tcopy(H5T_NATIVE_SHORT); }
 
-/// \brief HDF5 data type specialization for unsigned short
+/// \brief HDF5 data type id overload for unsigned short
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<unsigned short>()
+inline ::hid_t hdf5typeid(unsigned short *)
 {
     return ::H5Tcopy(H5T_NATIVE_UCHAR);
 }
 
-/// \brief HDF5 data type specialization for int
+/// \brief HDF5 data type id overload for int
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<int>()
-{
-    return ::H5Tcopy(H5T_NATIVE_INT);
-}
+inline ::hid_t hdf5typeid(int *) { return ::H5Tcopy(H5T_NATIVE_INT); }
 
-/// \brief HDF5 data type specialization for unsigned int
+/// \brief HDF5 data type id overload for unsigned int
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<unsigned int>()
+inline ::hid_t hdf5typeid(unsigned int *)
 {
     return ::H5Tcopy(H5T_NATIVE_UINT);
 }
 
-/// \brief HDF5 data type specialization for long
+/// \brief HDF5 data type id overload for long
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<long>()
-{
-    return ::H5Tcopy(H5T_NATIVE_LONG);
-}
+inline ::hid_t hdf5typeid(long *) { return ::H5Tcopy(H5T_NATIVE_LONG); }
 
-/// \brief HDF5 data type specialization for unsigned long
+/// \brief HDF5 data type id overload for unsigned long
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<unsigned long>()
+inline ::hid_t hdf5typeid(unsigned long *)
 {
     return ::H5Tcopy(H5T_NATIVE_ULONG);
 }
 
-/// \brief HDF5 data type specialization for long long
+/// \brief HDF5 data type id overload for long long
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<long long>()
-{
-    return ::H5Tcopy(H5T_NATIVE_LLONG);
-}
+inline ::hid_t hdf5typeid(long long *) { return ::H5Tcopy(H5T_NATIVE_LLONG); }
 
-/// \brief HDF5 data type specialization for unsigned long
+/// \brief HDF5 data type id overload for unsigned long
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<unsigned long long>()
+inline ::hid_t hdf5typeid(unsigned long long *)
 {
     return ::H5Tcopy(H5T_NATIVE_ULLONG);
 }
 
-/// \brief HDF5 data type specialization for float
+/// \brief HDF5 data type id overload for float
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<float>()
-{
-    return ::H5Tcopy(H5T_NATIVE_FLOAT);
-}
+inline ::hid_t hdf5typeid(float *) { return ::H5Tcopy(H5T_NATIVE_FLOAT); }
 
-/// \brief HDF5 data type specialization for double
+/// \brief HDF5 data type id overload for double
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<double>()
-{
-    return ::H5Tcopy(H5T_NATIVE_DOUBLE);
-}
+inline ::hid_t hdf5typeid(double *) { return ::H5Tcopy(H5T_NATIVE_DOUBLE); }
 
-/// \brief HDF5 data type specialization for long double
+/// \brief HDF5 data type id overload for long double
 /// \ingroup HDF5
-template <>
-inline ::hid_t hdf5_datatype<long double>()
+inline ::hid_t hdf5typeid(long double *)
 {
     return ::H5Tcopy(H5T_NATIVE_LDOUBLE);
 }
 
-/// \brief Create a new HDF5 file
-/// \ingroup HDF5
-inline void hdf5file(const std::string &filename)
-{
-    internal::HDF5File datafile(
-        internal::hdf5_datafile(filename, false, false));
-}
-
-/// \brief Create a new HDF5 group
-/// \ingroup HDF5
-inline void hdf5group(
-    const std::string &filename, const std::string dataname, bool append)
-{
-    internal::HDF5File datafile(
-        internal::hdf5_datafile(filename, append, false));
-    if (datafile) {
-        internal::HDF5Group datagroup(::H5Gcreate2(datafile.id(),
-            dataname.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    }
-}
-
-/// \brief Store a Vector in the HDF5 format
-/// \ingroup HDF5
-template <typename T, typename Alloc>
-inline void hdf5store(const Vector<T, Alloc> &vector,
-    const std::string &filename, const std::string &dataname, bool append)
-{
-    internal::HDF5File datafile(
-        internal::hdf5_datafile(filename, append, false));
-    if (!datafile) {
-        return;
-    }
-
-    internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype) {
-        return;
-    }
-
-    ::hsize_t dims[1] = {vector.size()};
-    internal::HDF5DataSpace dataspace(::H5Screate_simple(1, dims, nullptr));
-    if (!dataspace) {
-        return;
-    }
-
-    internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
-        datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    if (!dataset) {
-        return;
-    }
-
-    ::H5Dwrite(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT,
-        vector.data());
-}
-
-/// \brief Load data in HDF5 format into a vector given the destination type
-/// \ingroup HDF5
+/// \brief HDF5 data type
 template <typename T>
-inline Vector<T> hdf5load(
-    const std::string &filename, const std::string &dataname)
+inline HDF5DataType hdf5type()
 {
-    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
-    if (!datafile) {
-        return Vector<T>();
-    }
-
-    internal::HDF5DataSet dataset(
-        ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset) {
-        return Vector<T>();
-    }
-
-    internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace) {
-        return Vector<T>();
-    }
-
-    ::hssize_t n = ::H5Sget_simple_extent_npoints(dataspace.id());
-    if (n <= 0) {
-        return Vector<T>();
-    }
-
-    internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype) {
-        return Vector<T>();
-    }
-
-    Vector<T> vector(static_cast<std::size_t>(n));
-    ::herr_t err = ::H5Dread(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL,
-        H5P_DEFAULT, vector.data());
-    if (err < 0) {
-        return Vector<T>();
-    }
-
-    return vector;
+    return HDF5DataType(hdf5typeid(static_cast<T *>(nullptr)));
 }
 
-/// \brief Store a row major Matrix in the HDF5 format
+/// \brief Store a value in HDF5 format
 /// \ingroup HDF5
-template <typename T, typename Alloc>
-inline void hdf5store(const Matrix<T, RowMajor, Alloc> &matrix,
-    const std::string &filename, const std::string &dataname, bool append)
+template <typename Location, typename T>
+inline bool hdf5store(const Location &location, const std::string &name,
+    const T &value, bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
 {
-    internal::HDF5File datafile(
-        internal::hdf5_datafile(filename, append, false));
-    if (!datafile) {
-        return;
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
     }
 
-    internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype) {
-        return;
+    ::hsize_t dims[] = {1};
+    HDF5DataSpace space(1, dims);
+    if (!space) {
+        return false;
     }
 
-    ::hsize_t dims[2] = {matrix.nrow(), matrix.ncol()};
-    internal::HDF5DataSpace dataspace(::H5Screate_simple(2, dims, nullptr));
-    if (!dataspace) {
-        return;
+    if (isattr) {
+        HDF5Attribute attr(location, name, type, space);
+        if (!attr) {
+            return false;
+        }
+        return attr.write(type, &value);
     }
 
-    internal::HDF5DataSet dataset(::H5Dcreate2(datafile.id(), dataname.c_str(),
-        datatype.id(), dataspace.id(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT));
-    if (!dataset) {
-        return;
+    HDF5DataSet data(location, name, type, space);
+    if (!data) {
+        return false;
     }
-
-    ::H5Dwrite(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL, H5P_DEFAULT,
-        matrix.data());
+    return data.write(type, &value);
 }
 
-/// \brief Store a Matrix in the HDF5 format
+/// \brief Store a string in HDF5 format
 /// \ingroup HDF5
-template <typename T, typename Alloc>
-inline void hdf5store(const Matrix<T, ColMajor, Alloc> &matrix,
-    const std::string &filename, const std::string &dataname, bool append)
+template <typename Location>
+inline bool hdf5store(const Location &location, const std::string &name,
+    const std::string &str, bool isattr = false)
 {
-    Matrix<T, RowMajor, Alloc> tmp(matrix);
-    hdf5store(tmp, filename, dataname, append);
+    if (str.empty()) {
+        std::string empty_str;
+        empty_str.push_back('\0');
+        return hdf5store(location, name, empty_str, isattr);
+    }
+
+    HDF5DataType type(::H5Tcopy(H5T_C_S1));
+    if (!type) {
+        return false;
+    }
+
+    type.size(str.size());
+    if (!type) {
+        return false;
+    }
+
+    ::hsize_t dims[] = {1};
+    HDF5DataSpace space(1, dims);
+    if (!space) {
+        return false;
+    }
+
+    if (isattr) {
+        HDF5Attribute attr(location, name, type, space);
+        if (!attr) {
+            return false;
+        }
+        return attr.write(type, str.c_str());
+    }
+
+    HDF5DataSet data(location, name, type, space);
+    if (!data) {
+        return false;
+    }
+
+    return data.write(type, str.c_str());
 }
 
-/// \brief Load data in HDF5 format into a Matrix given destination layout and
-/// type
+/// \brief Store a vector in HDF5 format
 /// \ingroup HDF5
-template <typename T, MatrixLayout Layout, typename Alloc = Allocator<T>>
-inline Matrix<T, Layout, Alloc> hdf5load(
-    const std::string &filename, const std::string &dataname)
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5store(const Location &location, const std::string &name,
+    const Vector<T, Alloc> &vec, bool isattr = false)
 {
-    using matrix_type = Matrix<T, Layout, Alloc>;
-
-    internal::HDF5File datafile(internal::hdf5_datafile(filename, true, true));
-    if (!datafile) {
-        return matrix_type();
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
     }
 
-    internal::HDF5DataSet dataset(
-        ::H5Dopen(datafile.id(), dataname.c_str(), H5P_DEFAULT));
-    if (!dataset) {
-        return matrix_type();
+    ::hsize_t dims[] = {vec.size()};
+    HDF5DataSpace space(1, dims);
+    if (!space) {
+        return false;
     }
 
-    internal::HDF5DataSpace dataspace(::H5Dget_space(dataset.id()));
-    if (!dataspace) {
-        return matrix_type();
+    if (isattr) {
+        HDF5Attribute attr(location, name, type, space);
+        if (!attr) {
+            return false;
+        }
+        return attr.write(type, vec.data());
     }
 
-    int ndims = ::H5Sget_simple_extent_ndims(dataspace.id());
-    if (ndims != 2) {
-        return matrix_type();
+    HDF5DataSet data(location, name, type, space);
+    if (!data) {
+        return false;
+    }
+    return data.write(type, vec.data());
+}
+
+/// \brief Store a row major Matrix in HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5store(const Location &location, const std::string &name,
+    const Matrix<T, RowMajor, Alloc> &mat, bool isattr = false)
+{
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
+    }
+
+    ::hsize_t dims[] = {mat.nrow(), mat.ncol()};
+    HDF5DataSpace space(2, dims);
+    if (!space) {
+        return false;
+    }
+
+    if (isattr) {
+        HDF5Attribute attr(location, name, type, space);
+        if (!attr) {
+            return false;
+        }
+        return attr.write(type, mat.data());
+    }
+
+    HDF5DataSet data(location, name, type, space);
+    if (!data) {
+        return false;
+    }
+    return data.write(type, mat.data());
+}
+
+/// \brief Store a col major Matrix in HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5store(const Location &location, const std::string &name,
+    const Matrix<T, ColMajor, Alloc> &mat, bool isattr = false)
+{
+    Matrix<T, RowMajor, Alloc> tmp(mat);
+    return hdf5store(location, name, tmp, isattr);
+}
+
+/// \brief Load a value form HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T>
+inline bool hdf5load(const Location &location, const std::string &name,
+    T *value, bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
+{
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
+    }
+
+    if (isattr) {
+        HDF5Attribute attr(location, name);
+        if (!attr) {
+            return false;
+        }
+        return attr.read(type, value);
+    }
+
+    HDF5DataSet data(location, name);
+    if (!data) {
+        return false;
+    }
+    return data.read(type, value);
+}
+
+/// \brief Load a string form HDF5 format
+/// \ingroup HDF5
+template <typename Location>
+inline bool hdf5load(const Location &location, const std::string &name,
+    std::string *str, bool isattr = false)
+{
+    if (isattr) {
+        HDF5Attribute attr(location, name);
+        if (!attr) {
+            return false;
+        }
+
+        auto type = attr.type();
+        if (!type) {
+            return false;
+        }
+
+        str->resize(type.size());
+
+        return attr.read(type, const_cast<char *>(str->data()));
+    }
+
+    HDF5DataSet data(location, name);
+    if (!data) {
+        return false;
+    }
+
+    auto type = data.type();
+    if (!type) {
+        return false;
+    }
+
+    str->resize(type.size());
+
+    return data.read(type, const_cast<char *>(str->data()));
+}
+
+/// \brief Load a vector form HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5load(const Location &location, const std::string &name,
+    Vector<T, Alloc> *vec, bool isattr = false)
+{
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
+    }
+
+    if (isattr) {
+        HDF5Attribute attr(location, name);
+        if (!attr) {
+            return false;
+        }
+
+        auto space = attr.space();
+        if (!space) {
+            return false;
+        }
+
+        vec->resize(space.npoints());
+        if (vec->empty()) {
+            return true;
+        }
+
+        return attr.read(type, vec->data());
+    }
+
+    HDF5DataSet data(location, name);
+    if (!data) {
+        return false;
+    }
+
+    auto space = data.space();
+    if (!space) {
+        return false;
+    }
+
+    vec->resize(space.npoints());
+    if (vec->empty()) {
+        return true;
+    }
+
+    return data.read(type, vec->data());
+}
+
+/// \brief Load a row major matrix form HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5load(const Location &location, const std::string &name,
+    Matrix<T, RowMajor, Alloc> *mat, bool isattr = false)
+{
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
+    }
+
+    if (isattr) {
+        HDF5Attribute attr(location, name);
+        if (!attr) {
+            return false;
+        }
+
+        auto space = attr.space();
+        if (!space) {
+            return false;
+        }
+
+        if (space.ndims() != 2) {
+            return false;
+        }
+
+        ::hsize_t dims[2];
+        if (space.dims(dims) != 2) {
+            return false;
+        }
+
+        mat->resize(dims[0], dims[1]);
+        if (mat->empty()) {
+            return true;
+        }
+
+        return attr.read(type, mat->data());
+    }
+
+    HDF5DataSet data(location, name);
+    if (!data) {
+        return false;
+    }
+
+    auto space = data.space();
+    if (!space) {
+        return false;
+    }
+
+    if (space.ndims() != 2) {
+        return false;
     }
 
     ::hsize_t dims[2];
-    ndims = ::H5Sget_simple_extent_dims(dataspace.id(), dims, nullptr);
-    if (ndims != 2) {
-        return matrix_type();
+    if (space.dims(dims) != 2) {
+        return false;
     }
 
-    std::size_t nrow = static_cast<std::size_t>(dims[0]);
-    std::size_t ncol = static_cast<std::size_t>(dims[1]);
-
-    if (nrow * ncol == 0) {
-        return matrix_type(nrow, ncol);
+    mat->resize(dims[0], dims[1]);
+    if (mat->empty()) {
+        return true;
     }
 
-    internal::HDF5DataType datatype(hdf5_datatype<T>());
-    if (!datatype) {
-        return matrix_type();
+    return data.read(type, mat->data());
+}
+
+/// \brief Load a col major matrix form HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5load(const Location &location, const std::string &name,
+    Matrix<T, ColMajor, Alloc> *mat, bool isattr = false)
+{
+    Matrix<T, RowMajor, Alloc> tmp;
+    if (!hdf5load(location, name, &tmp, isattr)) {
+        return false;
     }
 
-    Matrix<T, RowMajor, Alloc> matrix(nrow, ncol);
-    ::herr_t err = ::H5Dread(dataset.id(), datatype.id(), H5S_ALL, H5S_ALL,
-        H5P_DEFAULT, matrix.data());
-    if (err < 0) {
-        return matrix_type();
-    }
+    *mat = std::move(Matrix<T, ColMajor, Alloc>(tmp));
 
-    return matrix_type(std::move(matrix));
+    return true;
 }
 
 } // namespace mckl
