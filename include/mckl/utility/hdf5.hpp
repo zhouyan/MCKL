@@ -36,6 +36,24 @@
 #include <mckl/core/matrix.hpp>
 #include <hdf5.h>
 
+extern "C" inline ::herr_t mckl_hdf5_add_link(
+    ::hid_t, const char *name, const ::H5L_info_t *, void *opdata)
+{
+    auto links = reinterpret_cast<std::vector<std::string> *>(opdata);
+    links->emplace_back(name);
+
+    return 0;
+}
+
+extern "C" inline ::herr_t mckl_hdf5_inc_link(
+    ::hid_t, const char *name, const ::H5L_info_t *, void *opdata)
+{
+    auto links = reinterpret_cast<std::size_t *>(opdata);
+    ++(*links);
+
+    return 0;
+}
+
 namespace mckl {
 
 /// \brief RAII class for HDF5 IDs
@@ -213,7 +231,24 @@ class HDF5Group : public HDF5ID<HDF5Group>
     }
 
     /// \brief Get the names of all links in the group
-    std::vector<std::string> links() const;
+    std::vector<std::string> links() const
+    {
+        std::vector<std::string> links;
+        ::H5Literate(id_, H5_INDEX_NAME, H5_ITER_INC, nullptr,
+            mckl_hdf5_add_link, &links);
+
+        return links;
+    }
+
+    /// \brief Get the number of links in the group
+    std::size_t size() const
+    {
+        std::size_t links = 0;
+        ::H5Literate(id_, H5_INDEX_NAME, H5_ITER_INC, nullptr,
+            mckl_hdf5_inc_link, &links);
+
+        return links;
+    }
 
     static ::hid_t copy(::hid_t) = delete;
 
