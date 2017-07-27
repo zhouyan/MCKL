@@ -132,11 +132,11 @@ class HDF5File : public HDF5ID<HDF5File>
     {
         bool print_error = hdf5_error_printing(false);
         id_ = ::H5Fopen(filename.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+        hdf5_error_printing(print_error);
         if (!good()) {
             id_ = ::H5Fcreate(
                 filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         }
-        hdf5_error_printing(print_error);
     }
 
     /// \brief Open or create an HDF5 file
@@ -189,11 +189,11 @@ class HDF5Group : public HDF5ID<HDF5Group>
         }
         bool print_error = hdf5_error_printing(false);
         id_ = ::H5Gopen2(file.id(), groupname.c_str(), H5P_DEFAULT);
+        hdf5_error_printing(print_error);
         if (!good()) {
             id_ = ::H5Gcreate2(file.id(), groupname.c_str(), H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT);
         }
-        hdf5_error_printing(print_error);
     }
 
     /// \brief Open a group if possible, otherwise create a new one
@@ -205,11 +205,11 @@ class HDF5Group : public HDF5ID<HDF5Group>
         }
         bool print_error = hdf5_error_printing(false);
         id_ = ::H5Gopen2(group.id(), groupname.c_str(), H5P_DEFAULT);
+        hdf5_error_printing(print_error);
         if (!good()) {
             id_ = ::H5Gcreate2(group.id(), groupname.c_str(), H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT);
         }
-        hdf5_error_printing(print_error);
     }
 
     /// \brief Get the names of all links in the group
