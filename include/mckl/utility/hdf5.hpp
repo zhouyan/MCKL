@@ -658,18 +658,26 @@ inline bool hdf5store(const Location &location, const std::string &name,
     return data.write(type, vec.data());
 }
 
-/// \brief Store a row major Matrix in HDF5 format
+/// \brief Store a Matrix in HDF5 format
 /// \ingroup HDF5
-template <typename Location, typename T, typename Alloc>
+template <typename Location, typename T, MatrixLayout Layout, typename Alloc>
 inline bool hdf5store(const Location &location, const std::string &name,
-    const Matrix<T, RowMajor, Alloc> &mat, bool isattr = false)
+    const Matrix<T, Layout, Alloc> &mat, bool isattr = false)
 {
     auto type = hdf5type<T>();
     if (!type) {
         return false;
     }
 
-    ::hsize_t dims[] = {mat.nrow(), mat.ncol()};
+    ::hsize_t dims[2];
+    if (Layout == RowMajor) {
+        dims[0] = mat.nrow();
+        dims[1] = mat.ncol();
+    }
+    if (Layout == ColMajor) {
+        dims[0] = mat.ncol();
+        dims[1] = mat.nrow();
+    }
     HDF5DataSpace space(2, dims);
     if (!space) {
         return false;
@@ -688,16 +696,6 @@ inline bool hdf5store(const Location &location, const std::string &name,
         return false;
     }
     return data.write(type, mat.data());
-}
-
-/// \brief Store a col major Matrix in HDF5 format
-/// \ingroup HDF5
-template <typename Location, typename T, typename Alloc>
-inline bool hdf5store(const Location &location, const std::string &name,
-    const Matrix<T, ColMajor, Alloc> &mat, bool isattr = false)
-{
-    Matrix<T, RowMajor, Alloc> tmp(mat);
-    return hdf5store(location, name, tmp, isattr);
 }
 
 /// \brief Load a value form HDF5 format
@@ -813,9 +811,9 @@ inline bool hdf5load(const Location &location, const std::string &name,
 
 /// \brief Load a row major matrix form HDF5 format
 /// \ingroup HDF5
-template <typename Location, typename T, typename Alloc>
+template <typename Location, typename T, MatrixLayout Layout, typename Alloc>
 inline bool hdf5load(const Location &location, const std::string &name,
-    Matrix<T, RowMajor, Alloc> *mat, bool isattr = false)
+    Matrix<T, Layout, Alloc> *mat, bool isattr = false)
 {
     auto type = hdf5type<T>();
     if (!type) {
@@ -842,7 +840,12 @@ inline bool hdf5load(const Location &location, const std::string &name,
             return false;
         }
 
-        mat->resize(dims[0], dims[1]);
+        if (Layout == RowMajor) {
+            mat->resize(dims[0], dims[1]);
+        }
+        if (Layout == ColMajor) {
+            mat->resize(dims[1], dims[0]);
+        }
         if (mat->empty()) {
             return true;
         }
@@ -869,28 +872,17 @@ inline bool hdf5load(const Location &location, const std::string &name,
         return false;
     }
 
-    mat->resize(dims[0], dims[1]);
+    if (Layout == RowMajor) {
+        mat->resize(dims[0], dims[1]);
+    }
+    if (Layout == ColMajor) {
+        mat->resize(dims[1], dims[0]);
+    }
     if (mat->empty()) {
         return true;
     }
 
     return data.read(type, mat->data());
-}
-
-/// \brief Load a col major matrix form HDF5 format
-/// \ingroup HDF5
-template <typename Location, typename T, typename Alloc>
-inline bool hdf5load(const Location &location, const std::string &name,
-    Matrix<T, ColMajor, Alloc> *mat, bool isattr = false)
-{
-    Matrix<T, RowMajor, Alloc> tmp;
-    if (!hdf5load(location, name, &tmp, isattr)) {
-        return false;
-    }
-
-    *mat = std::move(Matrix<T, ColMajor, Alloc>(tmp));
-
-    return true;
 }
 
 } // namespace mckl
