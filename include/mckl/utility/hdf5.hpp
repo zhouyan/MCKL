@@ -46,7 +46,7 @@ extern "C" inline ::herr_t mckl_hdf5_add_link(
 }
 
 extern "C" inline ::herr_t mckl_hdf5_inc_link(
-    ::hid_t, const char *name, const ::H5L_info_t *, void *opdata)
+    ::hid_t, const char *, const ::H5L_info_t *, void *opdata)
 {
     auto links = reinterpret_cast<std::size_t *>(opdata);
     ++(*links);
