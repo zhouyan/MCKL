@@ -32,6 +32,8 @@
 #ifndef MCKL_RANDOM_SKEIN_HPP
 #define MCKL_RANDOM_SKEIN_HPP
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
+
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/threefry.hpp>
 
@@ -78,7 +80,6 @@ class Skein
         static constexpr int out() { return 63; }
     }; // class type
 
-    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     /// \brief Type of input paramters such as keys and messages
     class param_type
     {
@@ -114,7 +115,6 @@ class Skein
         const char *data_;
         int type_;
     }; // class param_type
-    MCKL_POP_CLANG_WARNING
 
     /// \brief The number of bytes of internal state
     static constexpr std::size_t bytes() { return sizeof(key_type); }
@@ -554,5 +554,7 @@ using Skein512 = Skein<typename Threefish512::generator_type>;
 using Skein1024 = Skein<typename Threefish1024::generator_type>;
 
 } // namespace mckl
+
+MCKL_POP_CLANG_WARNING
 
 #endif // MCKL_RANDOM_SKEIN_HPP

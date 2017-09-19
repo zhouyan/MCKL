@@ -32,6 +32,8 @@
 #ifndef MCKL_ALGORITHM_SMC_HPP
 #define MCKL_ALGORITHM_SMC_HPP
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
+
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/resample.hpp>
 #include <mckl/core/estimator.hpp>
@@ -41,7 +43,6 @@
 
 namespace mckl {
 
-MCKL_PUSH_CLANG_WARNING("-Wpadded")
 /// \brief SMC estimator
 /// \ingroup SMC
 template <typename T, typename U = double>
@@ -133,7 +134,6 @@ class SMCEstimator
         return r_.data();
     }
 }; // class SMCEstimator
-MCKL_POP_CLANG_WARNING
 
 template <typename, typename = double>
 class SMCSampler;
@@ -421,5 +421,7 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
 }; // class SMCSampler
 
 } // namespace mckl
+
+MCKL_POP_CLANG_WARNING
 
 #endif // MCKL_ALGORITHM_SMC_HPP

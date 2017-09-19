@@ -32,6 +32,8 @@
 #ifndef MCKL_CORE_ESTIMATOR_HPP
 #define MCKL_CORE_ESTIMATOR_HPP
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
+
 #include <mckl/internal/common.hpp>
 #include <mckl/core/estimate_matrix.hpp>
 
@@ -107,11 +109,11 @@ class Estimator : public EstimateMatrix<T>
     }
 
   private:
-    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     std::function<void(Args...)> eval_;
-    MCKL_POP_CLANG_WARNING
 }; // class Estimator
 
 } // namespace mckl
+
+MCKL_POP_CLANG_WARNING
 
 #endif // MCKL_CORE_ESTIMATOR_HPP

@@ -159,6 +159,7 @@ class HDF5File : public HDF5ID<HDF5File>
 
     /// \brief Open or create an HDF5 file
     ///
+    /// \param filename The name of the file to open/create
     /// \param append If true then an existing file is open, otherwise a new
     /// one is created
     HDF5File(const std::string &filename, bool append)
@@ -171,6 +172,7 @@ class HDF5File : public HDF5ID<HDF5File>
 
     /// \brief Open or create an HDF5 file
     ///
+    /// \param filename The name of the file to open/create
     /// \param append If true then an existing file is open, otherwise a new
     /// one is created
     /// \param read_only If true the file will be opened in read only mode.

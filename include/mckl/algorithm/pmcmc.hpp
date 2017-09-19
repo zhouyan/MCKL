@@ -32,6 +32,8 @@
 #ifndef MCKL_ALGORITHM_PMCMC_HPP
 #define MCKL_ALGORITHM_PMCMC_HPP
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
+
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/mcmc.hpp>
 #include <mckl/algorithm/smc.hpp>
@@ -156,14 +158,14 @@ class PMCMCMutation
     }
 
   private:
-    MCKL_PUSH_CLANG_WARNING("-Wpadded")
     std::size_t M_;
     prior_type prior_;
     pf_type pf_;
     Vector<eval_type> eval_;
-    MCKL_POP_CLANG_WARNING
 }; // class PMCMCMutation
 
 } // namespace mckl
+
+MCKL_POP_CLANG_WARNING
 
 #endif // MCKL_ALGORITHM_PMCMC_HPP

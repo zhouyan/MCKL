@@ -32,10 +32,10 @@
 #ifndef MCKL_SMP_BACKEND_BASE_HPP
 #define MCKL_SMP_BACKEND_BASE_HPP
 
+MCKL_PUSH_CLANG_WARNING("-Wweak-vtables")
+
 #include <mckl/internal/common.hpp>
 #include <mckl/core/particle.hpp>
-
-MCKL_PUSH_CLANG_WARNING("-Wweak-vtables")
 
 /// \brief Default SMP backend
 /// \ingroup Config
