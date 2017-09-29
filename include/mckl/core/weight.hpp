@@ -33,6 +33,7 @@
 #define MCKL_CORE_WEIGHT_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/internal/cblas.hpp>
 #include <mckl/random/discrete_distribution.hpp>
 
 namespace mckl {

@@ -33,6 +33,7 @@
 #define MCKL_UTILITY_COVARIANCE_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/internal/cblas.hpp>
 
 namespace mckl {
 

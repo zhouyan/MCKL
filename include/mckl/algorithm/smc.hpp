@@ -32,14 +32,14 @@
 #ifndef MCKL_ALGORITHM_SMC_HPP
 #define MCKL_ALGORITHM_SMC_HPP
 
-MCKL_PUSH_CLANG_WARNING("-Wpadded")
-
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/resample.hpp>
 #include <mckl/core/estimator.hpp>
 #include <mckl/core/particle.hpp>
 #include <mckl/core/sampler.hpp>
 #include <mckl/core/state_matrix.hpp>
+
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 
 namespace mckl {
 

@@ -32,13 +32,13 @@
 #ifndef MCKL_ALGORITHM_PMCMC_HPP
 #define MCKL_ALGORITHM_PMCMC_HPP
 
-MCKL_PUSH_CLANG_WARNING("-Wpadded")
-
 #include <mckl/internal/common.hpp>
 #include <mckl/algorithm/mcmc.hpp>
 #include <mckl/algorithm/smc.hpp>
 #include <mckl/core/state_matrix.hpp>
 #include <mckl/random/rng.hpp>
+
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 
 namespace mckl {
 

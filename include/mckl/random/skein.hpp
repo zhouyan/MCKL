@@ -32,10 +32,10 @@
 #ifndef MCKL_RANDOM_SKEIN_HPP
 #define MCKL_RANDOM_SKEIN_HPP
 
-MCKL_PUSH_CLANG_WARNING("-Wpadded")
-
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/threefry.hpp>
+
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
 
 namespace mckl {
 

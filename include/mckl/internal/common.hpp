@@ -39,7 +39,6 @@
 #include <mckl/internal/traits.hpp>
 
 #include <mckl/internal/byte_order.hpp>
-#include <mckl/internal/cblas.hpp>
 #include <mckl/internal/const_math.hpp>
 #include <mckl/internal/iostream.hpp>
 
