@@ -42,8 +42,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = u'MCKL'
-version = u'1.0'
-release = u'1.0.0'
+version = u'0.1'
+release = u'0.1.0'
 
 copyright = u'2013-2017, Yan Zhou'
 author = u'Yan Zhou'

@@ -33,6 +33,7 @@
 #define MCKL_RANDOM_NORMAL_DISTRIBUTION_HPP
 
 #include <mckl/random/internal/common.hpp>
+#include <mckl/internal/cblas.hpp>
 #include <mckl/random/u01_distribution.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
 
@@ -76,7 +77,7 @@ inline void normal_distribution_impl(
     MCKL_POP_INTEL_WARNING
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename RealType, typename RNGType>
 inline void normal_distribution(

@@ -46,7 +46,7 @@ extern "C" inline ::herr_t mckl_hdf5_add_link(
 }
 
 extern "C" inline ::herr_t mckl_hdf5_inc_link(
-    ::hid_t, const char *name, const ::H5L_info_t *, void *opdata)
+    ::hid_t, const char *, const ::H5L_info_t *, void *opdata)
 {
     auto links = reinterpret_cast<std::size_t *>(opdata);
     ++(*links);
@@ -159,6 +159,7 @@ class HDF5File : public HDF5ID<HDF5File>
 
     /// \brief Open or create an HDF5 file
     ///
+    /// \param filename The name of the file to open/create
     /// \param append If true then an existing file is open, otherwise a new
     /// one is created
     HDF5File(const std::string &filename, bool append)
@@ -171,6 +172,7 @@ class HDF5File : public HDF5ID<HDF5File>
 
     /// \brief Open or create an HDF5 file
     ///
+    /// \param filename The name of the file to open/create
     /// \param append If true then an existing file is open, otherwise a new
     /// one is created
     /// \param read_only If true the file will be opened in read only mode.

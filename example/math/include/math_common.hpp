@@ -152,7 +152,7 @@ inline std::string math_error()
 #if MCKL_HAS_BOOST
     return "ULP";
 #else
-    return "Err.Rel";
+    return "Err";
 #endif
 }
 

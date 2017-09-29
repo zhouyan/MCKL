@@ -39,9 +39,10 @@
 #include <mckl/core/sampler.hpp>
 #include <mckl/core/state_matrix.hpp>
 
+MCKL_PUSH_CLANG_WARNING("-Wpadded")
+
 namespace mckl {
 
-MCKL_PUSH_CLANG_WARNING("-Wpadded")
 /// \brief SMC estimator
 /// \ingroup SMC
 template <typename T, typename U = double>
@@ -133,7 +134,6 @@ class SMCEstimator
         return r_.data();
     }
 }; // class SMCEstimator
-MCKL_POP_CLANG_WARNING
 
 template <typename, typename = double>
 class SMCSampler;
@@ -421,5 +421,7 @@ class SMCSampler : public Sampler<SMCSampler<T, U>>
 }; // class SMCSampler
 
 } // namespace mckl
+
+MCKL_POP_CLANG_WARNING
 
 #endif // MCKL_ALGORITHM_SMC_HPP
