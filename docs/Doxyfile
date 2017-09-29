@@ -2090,7 +2090,9 @@ PREDEFINED             = __TBB_TASK_GROUP_CONTEXT \
                          MCKL_HAS_OMP \
                          MCKL_HAS_TBB \
                          MCKL_HAS_MKL \
-                         MCKL_HAS_JEMALLOC
+                         MCKL_HAS_JEMALLOC \
+                         MCKL_PUSH_CLANG_WARNING \
+                         MCKL_POP_CLANG_WARNING
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
