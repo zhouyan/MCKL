@@ -555,7 +555,7 @@ inline HDF5DataType hdf5type()
 /// \brief Store a value in HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T>
-inline bool hdf5store(const Location &location, const std::string &name,
+inline bool hdf5store(Location &&location, const std::string &name,
     const T &value, bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
 {
     auto type = hdf5type<T>();
@@ -587,7 +587,7 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \brief Store a string in HDF5 format
 /// \ingroup HDF5
 template <typename Location>
-inline bool hdf5store(const Location &location, const std::string &name,
+inline bool hdf5store(Location &&location, const std::string &name,
     const std::string &str, bool isattr = false)
 {
     if (str.empty()) {
@@ -631,7 +631,7 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \brief Store a vector in HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, typename Alloc>
-inline bool hdf5store(const Location &location, const std::string &name,
+inline bool hdf5store(Location &&location, const std::string &name,
     const Vector<T, Alloc> &vec, bool isattr = false)
 {
     auto type = hdf5type<T>();
@@ -663,7 +663,7 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \brief Store a Matrix in HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, MatrixLayout Layout, typename Alloc>
-inline bool hdf5store(const Location &location, const std::string &name,
+inline bool hdf5store(Location &&location, const std::string &name,
     const Matrix<T, Layout, Alloc> &mat, bool isattr = false)
 {
     auto type = hdf5type<T>();
@@ -703,8 +703,8 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \brief Load a value form HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T>
-inline bool hdf5load(const Location &location, const std::string &name,
-    T *value, bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
+inline bool hdf5load(Location &&location, const std::string &name, T *value,
+    bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
 {
     auto type = hdf5type<T>();
     if (!type) {
@@ -729,7 +729,7 @@ inline bool hdf5load(const Location &location, const std::string &name,
 /// \brief Load a string form HDF5 format
 /// \ingroup HDF5
 template <typename Location>
-inline bool hdf5load(const Location &location, const std::string &name,
+inline bool hdf5load(Location &&location, const std::string &name,
     std::string *str, bool isattr = false)
 {
     if (isattr) {
@@ -766,7 +766,7 @@ inline bool hdf5load(const Location &location, const std::string &name,
 /// \brief Load a vector form HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, typename Alloc>
-inline bool hdf5load(const Location &location, const std::string &name,
+inline bool hdf5load(Location &&location, const std::string &name,
     Vector<T, Alloc> *vec, bool isattr = false)
 {
     auto type = hdf5type<T>();
@@ -814,7 +814,7 @@ inline bool hdf5load(const Location &location, const std::string &name,
 /// \brief Load a row major matrix form HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, MatrixLayout Layout, typename Alloc>
-inline bool hdf5load(const Location &location, const std::string &name,
+inline bool hdf5load(Location &&location, const std::string &name,
     Matrix<T, Layout, Alloc> *mat, bool isattr = false)
 {
     auto type = hdf5type<T>();
