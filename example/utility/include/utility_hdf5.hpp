@@ -218,20 +218,6 @@ inline void utility_hdf5(std::size_t N, std::size_t M)
 
     std::cout << std::string(95, '-') << std::endl;
 
-    utility_hdf5<mckl::RowMajor, mckl::ColMajor, float, float>(N, M);
-    utility_hdf5<mckl::RowMajor, mckl::ColMajor, float, double>(N, M);
-    utility_hdf5<mckl::RowMajor, mckl::ColMajor, double, float>(N, M);
-    utility_hdf5<mckl::RowMajor, mckl::ColMajor, double, double>(N, M);
-
-    std::cout << std::string(95, '-') << std::endl;
-
-    utility_hdf5<mckl::ColMajor, mckl::RowMajor, float, float>(N, M);
-    utility_hdf5<mckl::ColMajor, mckl::RowMajor, float, double>(N, M);
-    utility_hdf5<mckl::ColMajor, mckl::RowMajor, double, float>(N, M);
-    utility_hdf5<mckl::ColMajor, mckl::RowMajor, double, double>(N, M);
-
-    std::cout << std::string(95, '-') << std::endl;
-
     utility_hdf5<mckl::ColMajor, mckl::ColMajor, float, float>(N, M);
     utility_hdf5<mckl::ColMajor, mckl::ColMajor, float, double>(N, M);
     utility_hdf5<mckl::ColMajor, mckl::ColMajor, double, float>(N, M);
