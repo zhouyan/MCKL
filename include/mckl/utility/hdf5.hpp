@@ -632,15 +632,19 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \ingroup HDF5
 template <typename Location, typename T, typename Alloc>
 inline bool hdf5store(const Location &location, const std::string &name,
-    const Vector<T, Alloc> &vec, bool isattr = false)
+    const Vector<T, Alloc> &vec, bool isattr = false, bool extensible = false,
+    std::size_t chunk_size = 1024)
 {
     auto type = hdf5type<T>();
     if (!type) {
         return false;
     }
 
+    auto ext = extensible && !isattr;
+
     ::hsize_t dims[] = {vec.size()};
-    HDF5DataSpace space(1, dims);
+    ::hsize_t maxdims[] = {ext ? H5S_UNLIMITED : vec.size()};
+    HDF5DataSpace space(1, dims, maxdims);
     if (!space) {
         return false;
     }
@@ -653,11 +657,84 @@ inline bool hdf5store(const Location &location, const std::string &name,
         return attr.write(type, vec.data());
     }
 
-    HDF5DataSet data(location, name, type, space);
+    HDF5DataSet data;
+    if (ext) {
+        HDF5PropertyList plist(::H5Pcreate(H5P_DATASET_CREATE));
+        if (!plist) {
+            return false;
+        }
+
+        if (::H5Pset_layout(plist.id(), H5D_CHUNKED) != 0) {
+            return false;
+        }
+
+        ::hsize_t chunk_dims[] = {chunk_size};
+        if (::H5Pset_chunk(plist.id(), 1, chunk_dims) != 0) {
+            return false;
+        }
+
+        data = HDF5DataSet(::H5Dcreate2(location.id(), name.c_str(), type.id(),
+            space.id(), H5P_DEFAULT, plist.id(), H5P_DEFAULT));
+    } else {
+        data = HDF5DataSet(location, name, type, space);
+    }
+
     if (!data) {
         return false;
     }
+
     return data.write(type, vec.data());
+}
+
+/// \brief Append a vector in HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5append(const Location &location, const std::string &name,
+    const Vector<T, Alloc> &vec)
+{
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
+    }
+
+    HDF5DataSet data(location, name);
+    if (!data) {
+        return false;
+    }
+
+    auto space = data.space();
+    if (!space) {
+        return false;
+    }
+
+    ::hsize_t offset[] = {space.npoints()};
+    ::hsize_t exts[] = {vec.size()};
+    ::hsize_t dims[] = {offset[0] + exts[0]};
+    if (::H5Dset_extent(data.id(), dims) != 0) {
+        return false;
+    }
+
+    space = data.space();
+    if (!space) {
+        return false;
+    }
+
+    if (::H5Sselect_hyperslab(
+            space.id(), H5S_SELECT_SET, offset, nullptr, exts, nullptr) != 0) {
+        return false;
+    }
+
+    HDF5DataSpace mspace(1, exts);
+    if (!mspace) {
+        return false;
+    }
+
+    if (!::H5Dwrite(data.id(), type.id(), mspace.id(), space.id(), H5P_DEFAULT,
+            vec.data()) != 0) {
+        return false;
+    }
+
+    return true;
 }
 
 /// \brief Store a Matrix in HDF5 format
