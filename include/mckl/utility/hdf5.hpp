@@ -298,8 +298,9 @@ class HDF5DataSpace : public HDF5ID<HDF5DataSpace>
 
     HDF5DataSpace() = default;
 
-    explicit HDF5DataSpace(int rank, ::hsize_t *dim)
-        : HDF5ID<HDF5DataSpace>(::H5Screate_simple(rank, dim, nullptr))
+    explicit HDF5DataSpace(
+        int rank, ::hsize_t *dim, ::hsize_t *maxdims = nullptr)
+        : HDF5ID<HDF5DataSpace>(::H5Screate_simple(rank, dim, maxdims))
     {
     }
 
@@ -555,7 +556,7 @@ inline HDF5DataType hdf5type()
 /// \brief Store a value in HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T>
-inline bool hdf5store(const Location &location, const std::string &name,
+inline bool hdf5store(Location &&location, const std::string &name,
     const T &value, bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
 {
     auto type = hdf5type<T>();
@@ -587,7 +588,7 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \brief Store a string in HDF5 format
 /// \ingroup HDF5
 template <typename Location>
-inline bool hdf5store(const Location &location, const std::string &name,
+inline bool hdf5store(Location &&location, const std::string &name,
     const std::string &str, bool isattr = false)
 {
     if (str.empty()) {
@@ -631,16 +632,19 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \brief Store a vector in HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, typename Alloc>
-inline bool hdf5store(const Location &location, const std::string &name,
-    const Vector<T, Alloc> &vec, bool isattr = false)
+inline bool hdf5store(Location &&location, const std::string &name,
+    const Vector<T, Alloc> &vec, bool isattr = false, bool extensible = false,
+    std::size_t chunk_size = 1024)
 {
     auto type = hdf5type<T>();
     if (!type) {
         return false;
     }
 
+    auto ext = extensible && !isattr;
     ::hsize_t dims[] = {vec.size()};
-    HDF5DataSpace space(1, dims);
+    ::hsize_t maxdims[] = {ext ? H5S_UNLIMITED : vec.size()};
+    HDF5DataSpace space(1, dims, maxdims);
     if (!space) {
         return false;
     }
@@ -653,17 +657,94 @@ inline bool hdf5store(const Location &location, const std::string &name,
         return attr.write(type, vec.data());
     }
 
-    HDF5DataSet data(location, name, type, space);
+    HDF5DataSet data;
+    if (ext) {
+        HDF5PropertyList plist(::H5Pcreate(H5P_DATASET_CREATE));
+        if (!plist) {
+            return false;
+        }
+
+        if (::H5Pset_layout(plist.id(), H5D_CHUNKED) != 0) {
+            return false;
+        }
+
+        ::hsize_t chunk_dims[] = {chunk_size};
+        if (::H5Pset_chunk(plist.id(), 1, chunk_dims) != 0) {
+            return false;
+        }
+
+        data = HDF5DataSet(::H5Dcreate2(location.id(), name.c_str(), type.id(),
+            space.id(), H5P_DEFAULT, plist.id(), H5P_DEFAULT));
+    } else {
+        data = HDF5DataSet(location, name, type, space);
+    }
+
     if (!data) {
         return false;
     }
+
     return data.write(type, vec.data());
+}
+
+/// \brief Append a vector in HDF5 format
+/// \ingroup HDF5
+template <typename Location, typename T, typename Alloc>
+inline bool hdf5append(
+    Location &&location, const std::string &name, const Vector<T, Alloc> &vec)
+{
+    if (vec.empty()) {
+        return true;
+    }
+
+    auto type = hdf5type<T>();
+    if (!type) {
+        return false;
+    }
+
+    HDF5DataSet data(location, name);
+    if (!data) {
+        return false;
+    }
+
+    auto space = data.space();
+    if (!space) {
+        return false;
+    }
+
+    ::hsize_t offset[] = {space.npoints()};
+    ::hsize_t exts[] = {vec.size()};
+    ::hsize_t dims[] = {offset[0] + exts[0]};
+    if (::H5Dset_extent(data.id(), dims) != 0) {
+        return false;
+    }
+
+    space = data.space();
+    if (!space) {
+        return false;
+    }
+
+    if (::H5Sselect_hyperslab(
+            space.id(), H5S_SELECT_SET, offset, nullptr, exts, nullptr) != 0) {
+        return false;
+    }
+
+    HDF5DataSpace mspace(1, exts);
+    if (!mspace) {
+        return false;
+    }
+
+    if (::H5Dwrite(data.id(), type.id(), mspace.id(), space.id(), H5P_DEFAULT,
+            vec.data()) != 0) {
+        return false;
+    }
+
+    return true;
 }
 
 /// \brief Store a Matrix in HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, MatrixLayout Layout, typename Alloc>
-inline bool hdf5store(const Location &location, const std::string &name,
+inline bool hdf5store(Location &&location, const std::string &name,
     const Matrix<T, Layout, Alloc> &mat, bool isattr = false)
 {
     auto type = hdf5type<T>();
@@ -703,8 +784,8 @@ inline bool hdf5store(const Location &location, const std::string &name,
 /// \brief Load a value form HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T>
-inline bool hdf5load(const Location &location, const std::string &name,
-    T *value, bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
+inline bool hdf5load(Location &&location, const std::string &name, T *value,
+    bool isattr = false, decltype(hdf5type<T>()) * = nullptr)
 {
     auto type = hdf5type<T>();
     if (!type) {
@@ -729,7 +810,7 @@ inline bool hdf5load(const Location &location, const std::string &name,
 /// \brief Load a string form HDF5 format
 /// \ingroup HDF5
 template <typename Location>
-inline bool hdf5load(const Location &location, const std::string &name,
+inline bool hdf5load(Location &&location, const std::string &name,
     std::string *str, bool isattr = false)
 {
     if (isattr) {
@@ -766,7 +847,7 @@ inline bool hdf5load(const Location &location, const std::string &name,
 /// \brief Load a vector form HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, typename Alloc>
-inline bool hdf5load(const Location &location, const std::string &name,
+inline bool hdf5load(Location &&location, const std::string &name,
     Vector<T, Alloc> *vec, bool isattr = false)
 {
     auto type = hdf5type<T>();
@@ -814,7 +895,7 @@ inline bool hdf5load(const Location &location, const std::string &name,
 /// \brief Load a row major matrix form HDF5 format
 /// \ingroup HDF5
 template <typename Location, typename T, MatrixLayout Layout, typename Alloc>
-inline bool hdf5load(const Location &location, const std::string &name,
+inline bool hdf5load(Location &&location, const std::string &name,
     Matrix<T, Layout, Alloc> *mat, bool isattr = false)
 {
     auto type = hdf5type<T>();
