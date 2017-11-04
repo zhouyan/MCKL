@@ -298,8 +298,9 @@ class HDF5DataSpace : public HDF5ID<HDF5DataSpace>
 
     HDF5DataSpace() = default;
 
-    explicit HDF5DataSpace(int rank, ::hsize_t *dim)
-        : HDF5ID<HDF5DataSpace>(::H5Screate_simple(rank, dim, nullptr))
+    explicit HDF5DataSpace(
+        int rank, ::hsize_t *dim, ::hsize_t *maxdims = nullptr)
+        : HDF5ID<HDF5DataSpace>(::H5Screate_simple(rank, dim, maxdims))
     {
     }
 
@@ -641,7 +642,6 @@ inline bool hdf5store(Location &&location, const std::string &name,
     }
 
     auto ext = extensible && !isattr;
-
     ::hsize_t dims[] = {vec.size()};
     ::hsize_t maxdims[] = {ext ? H5S_UNLIMITED : vec.size()};
     HDF5DataSpace space(1, dims, maxdims);
@@ -692,6 +692,10 @@ template <typename Location, typename T, typename Alloc>
 inline bool hdf5append(
     Location &&location, const std::string &name, const Vector<T, Alloc> &vec)
 {
+    if (vec.empty()) {
+        return true;
+    }
+
     auto type = hdf5type<T>();
     if (!type) {
         return false;
@@ -729,7 +733,7 @@ inline bool hdf5append(
         return false;
     }
 
-    if (!::H5Dwrite(data.id(), type.id(), mspace.id(), space.id(), H5P_DEFAULT,
+    if (::H5Dwrite(data.id(), type.id(), mspace.id(), space.id(), H5P_DEFAULT,
             vec.data()) != 0) {
         return false;
     }
