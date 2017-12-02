@@ -554,6 +554,12 @@ class Matrix
         return mat;
     }
 
+    /// \brief Get a view of the matrix
+    MatrixView<T, Layout> view() const
+    {
+        return MatrixView<T, Layout>(nrow(), ncol(), data());
+    }
+
     /// \brief Return the associated allocator
     allocator_type get_allocator() const { return data_.get_allocator(); }
 
@@ -1082,10 +1088,7 @@ class Matrix
 
     size_type row_stride_dispatch(col_major) const { return nrow_; }
 
-    pointer row_data_dispatch(size_type i, col_major)
-    {
-        return data() + i;
-    }
+    pointer row_data_dispatch(size_type i, col_major) { return data() + i; }
 
     const_pointer row_data_dispatch(size_type i, col_major) const
     {
