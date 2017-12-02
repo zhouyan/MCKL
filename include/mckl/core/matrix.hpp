@@ -37,6 +37,399 @@
 
 namespace mckl {
 
+template <typename T, MatrixLayout Layout = ColMajor>
+class MatrixView
+{
+    using layout_dispatch = std::integral_constant<MatrixLayout, Layout>;
+    using row_major = std::integral_constant<MatrixLayout, RowMajor>;
+    using col_major = std::integral_constant<MatrixLayout, ColMajor>;
+
+  public:
+    using value_type = T;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
+    using reference = value_type &;
+    using const_reference = const value_type &;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
+
+    using iterator = pointer;
+    using const_iterator = const_pointer;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+    using row_iterator =
+        std::conditional_t<Layout == RowMajor, pointer, StepIterator<pointer>>;
+    using const_row_iterator = std::conditional_t<Layout == RowMajor,
+        const_pointer, StepIterator<const_pointer>>;
+    using reverse_row_iterator = std::reverse_iterator<row_iterator>;
+    using const_reverse_row_iterator =
+        std::reverse_iterator<const_row_iterator>;
+
+    using col_iterator =
+        std::conditional_t<Layout == ColMajor, pointer, StepIterator<pointer>>;
+    using const_col_iterator = std::conditional_t<Layout == ColMajor,
+        const_pointer, StepIterator<const_pointer>>;
+    using reverse_col_iterator = std::reverse_iterator<col_iterator>;
+    using const_reverse_col_iterator =
+        std::reverse_iterator<const_col_iterator>;
+
+    using row_range = Range<row_iterator>;
+    using const_row_range = Range<const_row_iterator>;
+    using reverse_row_range = Range<reverse_row_iterator>;
+    using const_reverse_row_range = Range<const_reverse_row_iterator>;
+
+    using col_range = Range<col_iterator>;
+    using const_col_range = Range<const_col_iterator>;
+    using reverse_col_range = Range<reverse_col_iterator>;
+    using const_reverse_col_range = Range<const_reverse_col_iterator>;
+
+    MatrixView() noexcept : nrow_(0), ncol_(0), data_(nullptr) {}
+
+    MatrixView(size_type nrow, size_type ncol, const_pointer data)
+        : nrow_(nrow), ncol_(ncol), data_(data)
+    {
+    }
+
+    MatrixView(const MatrixView &) = default;
+    MatrixView(MatrixView &&) = default;
+    MatrixView &operator=(const MatrixView &) = default;
+    MatrixView &operator=(MatrixView &&) = default;
+
+    /// \brief Iterator to the upper left corner of the matrix
+    const_iterator begin() const { return cbegin(); }
+
+    /// \brief Iterator to the upper left corner of the matrix
+    const_iterator cbegin() const { return data(); }
+
+    /// \brief Iterator to one pass the lower right corner of the matrix
+    const_iterator end() const { return cend(); }
+
+    /// \brief Iterator to one pass the lower right corner of the matrix
+    const_iterator cend() const { return begin() + nrow_ * ncol_; }
+
+    /// \brief Iterator to the lower right corner of the matrix
+    const_reverse_iterator rbegin() const { return crbegin(); }
+
+    /// \brief Iterator to the lower right corner of the matrix
+    const_reverse_iterator crbegin() const
+    {
+        return const_reverse_iterator(cend());
+    }
+
+    /// \brief Iterator one before the upper left corner of the matrix
+    const_reverse_iterator rend() const { return crend(); }
+
+    /// \brief Iterator one before the upper left corner of the matrix
+    const_reverse_iterator crend() const
+    {
+        return const_reverse_iterator(cbegin());
+    }
+
+    /// \brief Iterator to the beginning of a row
+    const_row_iterator row_begin(size_type i) const { return row_cbegin(i); }
+
+    /// \brief Iterator to the beginning of a row
+    const_row_iterator row_cbegin(size_type i) const
+    {
+        return row_begin_dispatch(i, layout_dispatch());
+    }
+
+    /// \brief Iterator to one pass the end of a row
+    const_row_iterator row_end(size_type i) const { return row_cend(i); }
+
+    /// \brief Iterator to one pass the end of a row
+    const_row_iterator row_cend(size_type i) const
+    {
+        return row_cbegin(i) + ncol_;
+    }
+
+    /// \brief Iterator to the end of a row
+    const_reverse_row_iterator row_rbegin(size_type i) const
+    {
+        return row_crbegin(i);
+    }
+
+    /// \brief Iterator to the end of a row
+    const_reverse_row_iterator row_crbegin(size_type i) const
+    {
+        return const_reverse_row_iterator(row_cend(i));
+    }
+
+    /// \brief Iterator to one before the beginning of a row
+    const_reverse_row_iterator row_rend(size_type i) const
+    {
+        return row_crend(i);
+    }
+
+    /// \brief Iterator to one before the beginning of a row
+    const_reverse_row_iterator row_crend(size_type i) const
+    {
+        return const_reverse_row_iterator(row_cbegin(i));
+    }
+
+    /// \brief Iterator to the beginning of a column
+    const_col_iterator col_begin(size_type j) const { return col_cbegin(j); }
+
+    /// \brief Iterator to the beginning of a column
+    const_col_iterator col_cbegin(size_type j) const
+    {
+        return col_begin_dispatch(j, layout_dispatch());
+    }
+
+    /// \brief Iterator to one pass the end of a column
+    const_col_iterator col_end(size_type j) const { return col_cend(j); }
+
+    /// \brief Iterator to one pass the end of a column
+    const_col_iterator col_cend(size_type j) const
+    {
+        return col_cbegin(j) + nrow_;
+    }
+
+    /// \brief Iterator to the end of a column
+    const_reverse_col_iterator col_rbegin(size_type j) const
+    {
+        return col_crbegin(j);
+    }
+
+    /// \brief Iterator to the end of a column
+    const_reverse_col_iterator col_crbegin(size_type j) const
+    {
+        return const_reverse_col_iterator(col_cend(j));
+    }
+
+    /// \brief Iterator to one before the beginning of a column
+    const_reverse_col_iterator col_rend(size_type j) const
+    {
+        return col_crend(j);
+    }
+
+    /// \brief Iterator to one before the beginning of a column
+    const_reverse_col_iterator col_crend(size_type j) const
+    {
+        return const_reverse_col_iterator(col_cbegin(j));
+    }
+
+    /// \brief Range of a row
+    const_row_range row(size_type i) const
+    {
+        return const_row_range(row_begin(i), row_end(i));
+    }
+
+    /// \brief Range of a row
+    const_row_range crow(size_type i) const
+    {
+        return const_row_range(row_cbegin(i), row_cend(i));
+    }
+
+    /// \brief Range of a row in reverse order
+    const_reverse_row_range rrow(size_type i) const
+    {
+        return const_reverse_row_range(row_rbegin(i), row_rend(i));
+    }
+
+    /// \brief Range of a row in reverse order
+    const_reverse_row_range crrow(size_type i) const
+    {
+        return const_reverse_row_range(row_crbegin(i), row_crend(i));
+    }
+
+    /// \brief Range of a column
+    const_col_range col(size_type i) const
+    {
+        return const_col_range(col_begin(i), col_end(i));
+    }
+
+    /// \brief Range of a column
+    const_col_range ccol(size_type i) const
+    {
+        return const_col_range(col_cbegin(i), col_cend(i));
+    }
+
+    /// \brief Range of a column in reverse order
+    const_reverse_col_range rcol(size_type i) const
+    {
+        return const_reverse_col_range(col_rbegin(i), col_rend(i));
+    }
+
+    /// \brief Range of a column in reverse order
+    const_reverse_col_range crcol(size_type i) const
+    {
+        return const_reverse_col_range(col_crbegin(i), col_crend(i));
+    }
+
+    /// \brief Access an element in the matrix with bound checking
+    const_reference at(size_type i, size_type j) const
+    {
+        runtime_assert<std::out_of_range>(
+            i < nrow_, "**Matrix::at** row index out of range");
+        runtime_assert<std::out_of_range>(
+            j < ncol_, "**Matrix::at** column index out of range");
+
+        return at_dispatch(i, j, layout_dispatch());
+    }
+
+    /// \brief Access an element in the matrix
+    const_reference operator()(size_type i, size_type j) const
+    {
+        return at_dispatch(i, j, layout_dispatch());
+    }
+
+    /// \brief Pointer to the upper left corner of the matrix
+    const_pointer data() const { return data_; }
+
+    /// \brief Pointer to the first element of a row
+    const_pointer row_data(size_type i) const
+    {
+        return row_data_dispatch(i, layout_dispatch());
+    }
+
+    /// \brief The stride of row-wise access through `row_data()`
+    size_type row_stride() const
+    {
+        return row_stride_dispatch(layout_dispatch());
+    }
+
+    /// \brief Pointer to the beginning of a column
+    const_pointer col_data(size_type j) const
+    {
+        return col_data_dispatch(j, layout_dispatch());
+    }
+
+    /// \brief The stride size of column-wise access through `col_data()`
+    size_type col_stride() const
+    {
+        return col_stride_dispatch(layout_dispatch());
+    }
+
+    /// \brief The layout of the matrix
+    static constexpr MatrixLayout layout() { return Layout; }
+
+    /// \brief If the matrix is empty, i.e., `nrow() * ncol() == 0`
+    bool empty() const { return nrow_ == 0 || ncol_ == 0; }
+
+    /// \brief The number of rows
+    size_type nrow() const { return nrow_; }
+
+    /// \brief The number of columns
+    size_type ncol() const { return ncol_; }
+
+    /// \brief The number of elements in the leading dimension
+    size_type ldim() const { return ldim_dispatch(layout_dispatch()); }
+
+    /// \brief The total number of elements
+    size_type size() const { return nrow_ * ncol_; }
+
+    /// \brief Swap two matrices
+    void swap(MatrixView &other) noexcept
+    {
+        std::swap(nrow_, other.nrow_);
+        std::swap(ncol_, other.ncol_);
+        std::swap(data_, other.data_);
+    }
+
+    /// \brief Swap two matrices
+    friend void swap(MatrixView &m1, MatrixView &m2) noexcept { m1.swap(m2); }
+
+    /// \brief Compare equality
+    friend bool operator==(const MatrixView &m1, const MatrixView &m2)
+    {
+        if (m1.nrow_ != m2.nrow_) {
+            return false;
+        }
+        if (m1.ncol_ != m2.ncol_) {
+            return false;
+        }
+        return m1.data_ == m2.data_;
+    }
+
+    /// \brief Compare inequality
+    friend bool operator!=(const MatrixView &m1, const MatrixView &m2)
+    {
+        return !(m1 == m2);
+    }
+
+  private:
+    size_type nrow_;
+    size_type ncol_;
+    const_pointer data_;
+
+    // Layout == RowMajor
+
+    size_type ldim_dispatch(row_major) const { return ncol_; }
+
+    const_pointer row_begin_dispatch(size_type i, row_major) const
+    {
+        return row_data(i);
+    }
+
+    StepIterator<const_pointer> col_begin_dispatch(
+        size_type j, row_major) const
+    {
+        return StepIterator<const_pointer>(
+            col_data(j), static_cast<difference_type>(col_stride()));
+    }
+
+    const_reference at_dispatch(size_type i, size_type j, row_major) const
+    {
+        return data_[i * ncol_ + j];
+    }
+
+    size_type row_stride_dispatch(row_major) const { return 1; }
+
+    pointer row_data_dispatch(size_type i, row_major)
+    {
+        return data_ + i * ncol_;
+    }
+
+    const_pointer row_data_dispatch(size_type i, row_major) const
+    {
+        return data_ + i * ncol_;
+    }
+
+    size_type col_stride_dispatch(row_major) const { return ncol_; }
+
+    const_pointer col_data_dispatch(size_type j, row_major) const
+    {
+        return data_ + j;
+    }
+
+    // Layout == ColMajor
+
+    size_type ldim_dispatch(col_major) const { return nrow_; }
+
+    StepIterator<const_pointer> row_begin_dispatch(
+        size_type i, col_major) const
+    {
+        return StepIterator<const_pointer>(
+            row_data(i), static_cast<difference_type>(row_stride()));
+    }
+
+    const_pointer col_begin_dispatch(size_type j, col_major) const
+    {
+        return col_data(j);
+    }
+
+    const_reference at_dispatch(size_type i, size_type j, col_major) const
+    {
+        return data_[j * nrow_ + i];
+    }
+
+    size_type row_stride_dispatch(col_major) const { return nrow_; }
+
+    const_pointer row_data_dispatch(size_type i, col_major) const
+    {
+        return data_ + i;
+    }
+
+    size_type col_stride_dispatch(col_major) const { return 1; }
+
+    const_pointer col_data_dispatch(size_type j, col_major) const
+    {
+        return data_ + j * nrow_;
+    }
+}; // class MatrixView
+
 /// \brief Matrix container
 /// \ingroup Core
 ///
@@ -619,24 +1012,21 @@ class Matrix
 
     pointer row_data_dispatch(size_type i, row_major)
     {
-        return data_.data() + i * ncol_;
+        return data() + i * ncol_;
     }
 
     const_pointer row_data_dispatch(size_type i, row_major) const
     {
-        return data_.data() + i * ncol_;
+        return data() + i * ncol_;
     }
 
     size_type col_stride_dispatch(row_major) const { return ncol_; }
 
-    pointer col_data_dispatch(size_type j, row_major)
-    {
-        return data_.data() + j;
-    }
+    pointer col_data_dispatch(size_type j, row_major) { return data() + j; }
 
     const_pointer col_data_dispatch(size_type j, row_major) const
     {
-        return data_.data() + j;
+        return data() + j;
     }
 
     void resize_dispatch(size_type nrow, size_type ncol, row_major)
@@ -694,24 +1084,24 @@ class Matrix
 
     pointer row_data_dispatch(size_type i, col_major)
     {
-        return data_.data() + i;
+        return data() + i;
     }
 
     const_pointer row_data_dispatch(size_type i, col_major) const
     {
-        return data_.data() + i;
+        return data() + i;
     }
 
     size_type col_stride_dispatch(col_major) const { return 1; }
 
     pointer col_data_dispatch(size_type j, col_major)
     {
-        return data_.data() + j * nrow_;
+        return data() + j * nrow_;
     }
 
     const_pointer col_data_dispatch(size_type j, col_major) const
     {
-        return data_.data() + j * nrow_;
+        return data() + j * nrow_;
     }
 
     void resize_dispatch(size_type nrow, size_type ncol, col_major)
