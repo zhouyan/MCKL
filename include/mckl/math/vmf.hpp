@@ -220,17 +220,23 @@ MCKL_DEFINE_MATH_VMF_VML_2R(Hypot, hypot)
 
 MCKL_DEFINE_MATH_VMF_VML_1R(Exp, exp)
 MCKL_DEFINE_MATH_VMF_VML_1C(Exp, exp)
+MCKL_DEFINE_MATH_VMF_VML_1R(Exp2, exp2)
+MCKL_DEFINE_MATH_VMF_VML_1R(Exp10, exp10)
 MCKL_DEFINE_MATH_VMF_VML_1R(Expm1, expm1)
 MCKL_DEFINE_MATH_VMF_VML_1R(Ln, log)
 MCKL_DEFINE_MATH_VMF_VML_1C(Ln, log)
+MCKL_DEFINE_MATH_VMF_VML_1R(Log2, log2)
 MCKL_DEFINE_MATH_VMF_VML_1R(Log10, log10)
 MCKL_DEFINE_MATH_VMF_VML_1C(Log10, log10)
 MCKL_DEFINE_MATH_VMF_VML_1R(Log1p, log1p)
+MCKL_DEFINE_MATH_VMF_VML_1R(Logb, logb)
 
 MCKL_DEFINE_MATH_VMF_VML_1R(Cos, cos)
 MCKL_DEFINE_MATH_VMF_VML_1C(Cos, cos)
 MCKL_DEFINE_MATH_VMF_VML_1R(Sin, sin)
 MCKL_DEFINE_MATH_VMF_VML_1C(Sin, sin)
+MCKL_DEFINE_MATH_VMF_VML_1R(Tan, tan)
+MCKL_DEFINE_MATH_VMF_VML_1C(Tan, tan)
 
 inline void sincos(std::size_t n, const float *a, float *y, float *z)
 {
@@ -257,15 +263,23 @@ inline void cis(std::size_t n, const double *a, std::complex<double> *y)
         static_cast<MKL_INT>(n), a, reinterpret_cast<::MKL_Complex16 *>(y));
 }
 
-MCKL_DEFINE_MATH_VMF_VML_1R(Tan, tan)
-MCKL_DEFINE_MATH_VMF_VML_1C(Tan, tan)
+MCKL_DEFINE_MATH_VMF_VML_1R(Cospi, cospi)
+MCKL_DEFINE_MATH_VMF_VML_1R(Sinpi, sinpi)
+MCKL_DEFINE_MATH_VMF_VML_1R(Tanpi, tanpi)
+MCKL_DEFINE_MATH_VMF_VML_1R(Cosd, cosd)
+MCKL_DEFINE_MATH_VMF_VML_1R(Sind, sind)
+MCKL_DEFINE_MATH_VMF_VML_1R(Tand, tand)
 MCKL_DEFINE_MATH_VMF_VML_1R(Acos, acos)
 MCKL_DEFINE_MATH_VMF_VML_1C(Acos, acos)
 MCKL_DEFINE_MATH_VMF_VML_1R(Asin, asin)
 MCKL_DEFINE_MATH_VMF_VML_1C(Asin, asin)
 MCKL_DEFINE_MATH_VMF_VML_1R(Atan, atan)
 MCKL_DEFINE_MATH_VMF_VML_1C(Atan, atan)
+MCKL_DEFINE_MATH_VMF_VML_1R(Acospi, acospi)
+MCKL_DEFINE_MATH_VMF_VML_1R(Asinpi, asinpi)
+MCKL_DEFINE_MATH_VMF_VML_1R(Atanpi, atanpi)
 MCKL_DEFINE_MATH_VMF_VML_2R(Atan2, atan2)
+MCKL_DEFINE_MATH_VMF_VML_2R(Atan2pi, atan2pi)
 
 MCKL_DEFINE_MATH_VMF_VML_1R(Cosh, cosh)
 MCKL_DEFINE_MATH_VMF_VML_1C(Cosh, cosh)
@@ -288,6 +302,7 @@ MCKL_DEFINE_MATH_VMF_VML_1R(ErfcInv, erfcinv)
 MCKL_DEFINE_MATH_VMF_VML_1R(CdfNormInv, cdfnorminv)
 MCKL_DEFINE_MATH_VMF_VML_1R(LGamma, lgamma)
 MCKL_DEFINE_MATH_VMF_VML_1R(TGamma, tgamma)
+MCKL_DEFINE_MATH_VMF_VML_1R(ExpInt1, expint1)
 
 MCKL_DEFINE_MATH_VMF_VML_1R(Floor, floor)
 MCKL_DEFINE_MATH_VMF_VML_1R(Ceil, ceil)
@@ -370,13 +385,13 @@ inline void sincos(std::size_t n, const double *a, double *y, double *z)
 
 MCKL_DEFINE_MATH_VMF_ASM_1D(tan)
 
-#endif // MCKL_USE_MKL_VML
-
 MCKL_DEFINE_MATH_VMF_ASM_1S(exp2)
 MCKL_DEFINE_MATH_VMF_ASM_1D(exp2)
 
 MCKL_DEFINE_MATH_VMF_ASM_1S(log2)
 MCKL_DEFINE_MATH_VMF_ASM_1D(log2)
+
+#endif // MCKL_USE_MKL_VML
 
 } // namespace mckl
 
@@ -746,16 +761,16 @@ MCKL_DEFINE_MATH_VMF_BVS(*, mul)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a b_i\f$
 MCKL_DEFINE_MATH_VMF_BSV(*, mul)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}_i\f$
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i \bar{b}_i\f$
 MCKL_DEFINE_MATH_VMF_2(mulbyconj, mulbyconj)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a_i \bar{b}\f$
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a_i \bar{b}\f$
 MCKL_DEFINE_MATH_VMF_2VS(mulbyconj, mulbyconj)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = a \bar{b}_i\f$
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = a \bar{b}_i\f$
 MCKL_DEFINE_MATH_VMF_2SV(mulbyconj, mulbyconj)
 
-/// \brief For \f$i=1,\ldots,n\f$, copute \f$y_i = \bar{a}_i\f$
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \bar{a}_i\f$
 MCKL_DEFINE_MATH_VMF_1(std::conj, conj)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = |a_i|\f$
@@ -804,31 +819,31 @@ inline void linear_frac(std::size_t n, const T *a, const T *b, T beta_a,
     }
 }
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i b_i + c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(muladd, fma, [[deprecated("use **muladd** instead")]])
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i b_i + c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(muladd, muladd, )
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i - c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i b_i - c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(mulsub, mulsub, )
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i + c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = -a_i b_i + c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(nmuladd, nmuladd, )
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i - c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = -a_i b_i - c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(nmulsub, nmulsub, )
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i + c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i b_i + c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(fmadd, fmadd, )
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = a_i b_i - c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = a_i b_i - c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(fmsub, fmsub, )
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i + c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = -a_i b_i + c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(fnmadd, fnmadd, )
 
-/// \brief For \f$i = 1,\ldots,n\f$, compute = \f$y_i = -a_i b_i - c_i\f$
+/// \brief For \f$i = 1,\ldots,n\f$, compute \f$y_i = -a_i b_i - c_i\f$
 MCKL_DEFINE_MATH_VMF_FMA(fnmsub, fnmsub, )
 
 /// @} vArithmetic
@@ -949,6 +964,13 @@ MCKL_DEFINE_MATH_VMF_1(std::exp, exp)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 2^{a_i}\f$
 MCKL_DEFINE_MATH_VMF_1(std::exp2, exp2)
 
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = 10^{a_i}\f$
+template <typename T>
+inline void exp10(std::size_t n, const T *a, T *y)
+{
+    pow<T>(n, static_cast<T>(10), a, y);
+}
+
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = e^{a_i} - 1\f$
 MCKL_DEFINE_MATH_VMF_1(std::expm1, expm1)
 
@@ -963,6 +985,9 @@ MCKL_DEFINE_MATH_VMF_1(std::log10, log10)
 
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log(a_i + 1)\f$
 MCKL_DEFINE_MATH_VMF_1(std::log1p, log1p)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \log_2|a_i|\f$
+MCKL_DEFINE_MATH_VMF_1(std::logb, logb)
 
 /// @} vExponential
 
@@ -1031,6 +1056,96 @@ inline void cis(std::size_t n, const T *a, std::complex<T> *y)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i)\f$
 MCKL_DEFINE_MATH_VMF_1(std::tan, tan)
 
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cos(\pi a_i)\f$
+template <typename T>
+inline void cospi(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul<T>(k, a, const_pi<T>(), y);
+        cos<T>(k, y, y);
+    }
+    mul<T>(l, a, const_pi<T>(), y);
+    cos<T>(l, y, y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sin(\pi a_i)\f$
+template <typename T>
+inline void sinpi(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul<T>(k, a, const_pi<T>(), y);
+        sin<T>(k, y, y);
+    }
+    mul<T>(l, a, const_pi<T>(), y);
+    sin<T>(l, y, y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(\pi a_i)\f$
+template <typename T>
+inline void tanpi(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul<T>(k, a, const_pi<T>(), y);
+        tan<T>(k, y, y);
+    }
+    mul<T>(l, a, const_pi<T>(), y);
+    tan<T>(l, y, y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \cos(a_i / 180)\f$
+template <typename T>
+inline void cosd(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul<T>(k, a, const_pi<T>() / 180, y);
+        cos<T>(k, y, y);
+    }
+    mul<T>(l, a, const_pi<T>() / 180, y);
+    cos<T>(l, y, y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \sin(a_i / 180)\f$
+template <typename T>
+inline void sind(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul<T>(k, a, const_pi<T>() / 180, y);
+        sin<T>(k, y, y);
+    }
+    mul<T>(l, a, const_pi<T>() / 180, y);
+    sin<T>(l, y, y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \tan(a_i / 180)\f$
+template <typename T>
+inline void tand(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        mul<T>(k, a, const_pi<T>() / 180, y);
+        tan<T>(k, y, y);
+    }
+    mul<T>(l, a, const_pi<T>() / 180, y);
+    tan<T>(l, y, y);
+}
+
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arccos(a_i)\f$
 MCKL_DEFINE_MATH_VMF_1(std::acos, acos)
 
@@ -1051,6 +1166,99 @@ MCKL_DEFINE_MATH_VMF_2VS(std::atan2, atan2)
 /// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a / b_i)\f$ with
 /// signs to determine the quadrant
 MCKL_DEFINE_MATH_VMF_2SV(std::atan2, atan2)
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arccos(a_i) / \pi\f$
+template <typename T>
+inline void acospi(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        acos<T>(k, a, y);
+        mul<T>(k, y, 1 / const_pi<T>(), y);
+    }
+    acos<T>(l, a, y);
+    mul<T>(l, y, 1 / const_pi<T>(), y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arcsin(a_i) / \pi\f$
+template <typename T>
+inline void asinpi(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        asin<T>(k, a, y);
+        mul<T>(k, y, 1 / const_pi<T>(), y);
+    }
+    asin<T>(l, a, y);
+    mul<T>(l, y, 1 / const_pi<T>(), y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i) / \pi\f$
+template <typename T>
+inline void atanpi(std::size_t n, const T *a, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        atan<T>(k, a, y);
+        mul<T>(k, y, 1 / const_pi<T>(), y);
+    }
+    atan<T>(l, a, y);
+    mul<T>(l, y, 1 / const_pi<T>(), y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b_i) / \pi\f$
+/// with signs to determine the quadrant
+template <typename T>
+inline void atan2pi(std::size_t n, const T *a, const T *b, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, b += k, y += k) {
+        atan2<T>(k, a, b, y);
+        mul<T>(k, y, 1 / const_pi<T>(), y);
+    }
+    atan2<T>(l, a, b, y);
+    mul<T>(l, y, 1 / const_pi<T>(), y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a_i / b) / \pi\f$
+/// with signs to determine the quadrant
+template <typename T>
+inline void atan2pi(std::size_t n, const T *a, T b, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
+        atan2<T>(k, a, b, y);
+        mul<T>(k, y, 1 / const_pi<T>(), y);
+    }
+    atan2<T>(l, a, b, y);
+    mul<T>(l, y, 1 / const_pi<T>(), y);
+}
+
+/// \brief For \f$i=1,\ldots,n\f$, compute \f$y_i = \arctan(a / b_i) / \pi\f$
+/// with signs to determine the quadrant
+template <typename T>
+inline void atan2pi(std::size_t n, T a, const T *b, T *y)
+{
+    const std::size_t k = 1024;
+    const std::size_t m = n / k;
+    const std::size_t l = n % k;
+    for (std::size_t i = 0; i != m; ++i, b += k, y += k) {
+        atan2<T>(k, a, b, y);
+        mul<T>(k, y, 1 / const_pi<T>(), y);
+    }
+    atan2<T>(l, a, b, y);
+    mul<T>(l, y, 1 / const_pi<T>(), y);
+}
 
 /// @} vTrigonometric
 
@@ -1175,11 +1383,11 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
     }
 }
 
-/// @} vRounding
+    /// @} vRounding
 
-/// \defgroup vFPClassify Floating point classification
-/// \ingroup VMF
-/// @{
+    /// \defgroup vFPClassify Floating point classification
+    /// \ingroup VMF
+    /// @{
 
 #if MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2
 
@@ -1280,7 +1488,7 @@ inline bool iszero(T a)
     MCKL_POP_INTEL_WARNING
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Return the index of the first element that is normal
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(normal, std::isnormal)
