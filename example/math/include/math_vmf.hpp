@@ -181,10 +181,20 @@ MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, acos, -1.0f, 1.0f, -1.0, 1.0)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, asin, -1.0f, 1.0f, -1.0, 1.0)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, atan, -5.0f, 5.0f, -5.0, 5.0)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, atan2, -1e3f, 1e3f, -1e3, 1e3)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, acospi, -1.0f, 1.0f, -1.0, 1.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, asinpi, -1.0f, 1.0f, -1.0, 1.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, atanpi, -5.0f, 5.0f, -5.0, 5.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, atan2pi, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cos, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sin, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R2, sincos, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, tan, -1e3f, 1e3f, -1e3, 1e3)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cospi, -1e3f, 1e3f, -1e3, 1e3)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sinpi, -1e3f, 1e3f, -1e3, 1e3)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, tanpi, -300.0f, 300.0f, -300.0, 300.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, cosd, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sind, -1e4f, 1e4f, -1e4, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, tand, -1e3f, 1e3f, -1e3, 1e3)
 
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, acosh, 4.0f, 1e19f, 1.001, 1e154)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, asinh, 4.0f, 1e19f, 0.002, 1e154)
@@ -204,10 +214,14 @@ MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, pow3o2, 0.1f, 1e4f, 0.1, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, sqrt, 0.0f, 1e4f, 0.0, 1e4)
 
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, exp, -87.0f, 87.0f, -707.0, 707.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, exp2, -87.0f, 87.0f, -707.0, 707.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, exp10, -10.0f, 35.0f, -10.0, 35.0)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, expm1, -70.0f, 70.0f, -500.0, 500.0)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, log, 0.1f, 1e4, 0.1, 1e4)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, log2, 0.1f, 1e4, 0.1, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, log10, 0.1f, 1e4, 0.1, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, log1p, 1.0f, 999.0f, 1.0, 999.0)
+MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, logb, -1e4f, 1e4f, -1e4, 1e4)
 
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A1R1, abs, -1e4f, 1e4f, -1e4, 1e4)
 MCKL_EXAMPLE_DEFINE_MATH_VMF(A2R1, add, -1e4f, 1e4f, -1e4, 1e4)
@@ -256,8 +270,11 @@ inline void math_vmf(std::size_t N, std::size_t M)
     math_vmf_hypot(N, M, perf);
 
     math_vmf_exp(N, M, perf);
+    math_vmf_exp2(N, M, perf);
+    math_vmf_exp10(N, M, perf);
     math_vmf_expm1(N, M, perf);
     math_vmf_log(N, M, perf);
+    math_vmf_log2(N, M, perf);
     math_vmf_log10(N, M, perf);
     math_vmf_log1p(N, M, perf);
 
@@ -265,10 +282,20 @@ inline void math_vmf(std::size_t N, std::size_t M)
     math_vmf_sin(N, M, perf);
     math_vmf_sincos(N, M, perf);
     math_vmf_tan(N, M, perf);
+    math_vmf_cospi(N, M, perf);
+    math_vmf_sinpi(N, M, perf);
+    math_vmf_tanpi(N, M, perf);
+    math_vmf_cosd(N, M, perf);
+    math_vmf_sind(N, M, perf);
+    math_vmf_tand(N, M, perf);
     math_vmf_acos(N, M, perf);
     math_vmf_asin(N, M, perf);
     math_vmf_atan(N, M, perf);
     math_vmf_atan2(N, M, perf);
+    math_vmf_acospi(N, M, perf);
+    math_vmf_asinpi(N, M, perf);
+    math_vmf_atanpi(N, M, perf);
+    math_vmf_atan2pi(N, M, perf);
 
     math_vmf_cosh(N, M, perf);
     math_vmf_sinh(N, M, perf);

@@ -34,7 +34,6 @@
 
 #include <mckl/random/internal/common.hpp>
 #include <mckl/random/uniform_real_distribution.hpp>
-#include <mkl_version.h>
 #include <mkl_vsl.h>
 
 namespace mckl {
