@@ -1468,7 +1468,7 @@ MCKL_DEFINE_MATH_VMF_ASM_FPCLASSIFY(count_not_finite)
 namespace internal {
 
 template <typename T>
-inline bool issubnormal(T a)
+inline bool __issubnormal(T a)
 {
     static_assert(std::is_floating_point<T>::value,
         "checking for subnormal used with a type other than floating point");
@@ -1479,7 +1479,7 @@ inline bool issubnormal(T a)
 }
 
 template <typename T>
-inline bool iszero(T a)
+inline bool __iszero(T a)
 {
     MCKL_PUSH_CLANG_WARNING("-Wfloat-equal")
     MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
@@ -1494,10 +1494,10 @@ inline bool iszero(T a)
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(normal, std::isnormal)
 
 /// \brief Return the index of the first element that is subnormal
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(subnormal, internal::issubnormal)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(subnormal, internal::__issubnormal)
 
 /// \brief Return the index of the first element that is zero
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(zero, internal::iszero)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(zero, internal::__iszero)
 
 /// \brief Return the index of the first element that is infinity
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(inf, std::isinf)
@@ -1512,10 +1512,10 @@ MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(finite, std::isfinite)
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(normal, std::isnormal)
 
 /// \brief Return the number of elements that are subnormal
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(subnormal, internal::issubnormal)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(subnormal, internal::__issubnormal)
 
 /// \brief Return the number of elements that are zero
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(zero, internal::iszero)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(zero, internal::__iszero)
 
 /// \brief Return the number of elements that are infinity
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(inf, std::isinf)
@@ -1530,10 +1530,10 @@ MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(finite, std::isfinite)
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_normal, !std::isnormal)
 
 /// \brief Return the index of the first element that is not subnormal
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_subnormal, !internal::issubnormal)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_subnormal, !internal::__issubnormal)
 
 /// \brief Return the index of the first element that is not zero
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_zero, !internal::iszero)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_zero, !internal::__iszero)
 
 /// \brief Return the index of the first element that is not infinity
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_inf, !std::isinf)
@@ -1548,10 +1548,10 @@ MCKL_DEFINE_MATH_VMF_FPCLASSIFY_FIND(not_finite, !std::isfinite)
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_normal, !std::isnormal)
 
 /// \brief Return the number of elements that are not subnormal
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_subnormal, !internal::issubnormal)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_subnormal, !internal::__issubnormal)
 
 /// \brief Return the number of elements that are not zero
-MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_zero, !internal::iszero)
+MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_zero, !internal::__iszero)
 
 /// \brief Return the number of elements that are not infinity
 MCKL_DEFINE_MATH_VMF_FPCLASSIFY_COUNT(not_inf, !std::isinf)
