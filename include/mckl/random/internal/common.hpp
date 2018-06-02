@@ -48,7 +48,7 @@
     static_assert(std::is_integral<IntType>::value,                           \
         "**" #Name                                                            \
         "Distribution** used with IntType other than integer types");         \
-    static_assert(std::numeric_limits<IntType>::digits >= MinBits,            \
+    static_assert(CHAR_BIT * sizeof(IntType) >= MinBits,                      \
         "**" #Name "Distribution** used with IntType smaller than " #MinBits  \
         " bits");
 
@@ -928,7 +928,7 @@ template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
 class IncrementBlockSI256;
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Traits of RNG engines
 /// \ingroup Random
