@@ -123,7 +123,7 @@ sub copyright
     for (@lines) {
         if (/Copyright/) {
             $found = 1;
-            $_ =~ s/201.-201./2013-2017/;
+            $_ =~ s/201.-201./2013-2018/;
             last;
         }
     }
