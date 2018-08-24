@@ -147,6 +147,16 @@ class Weight
         return dist(rng, data_.begin(), data_.end(), true);
     }
 
+    friend bool operator==(const Weight &w1, const Weight &w2)
+    {
+        return w1.ess_ == w2.ess_ && w1.data_ == w2.data_;
+    }
+
+    friend bool operator!=(const Weight &w1, const Weight &w2)
+    {
+        return !(w1 == w2);
+    }
+
   private:
     double ess_;
     Vector<double> data_;

@@ -401,6 +401,16 @@ class Particle
             grainsize);
     }
 
+    friend bool operator==(const Particle &p1, const Particle &p2)
+    {
+        return p1.state_ == p2.state_ && p1.weight_ == p2.weight_;
+    }
+
+    friend bool operator!=(const Particle &p1, const Particle &p2)
+    {
+        return !(p1 == p2);
+    }
+
   private:
     state_type state_;
     weight_type weight_;
