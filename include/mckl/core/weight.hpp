@@ -87,6 +87,18 @@ class Weight
         normalize(false);
     }
 
+    /// \brief Set exact values of ESS and normalized weights
+    ///
+    /// \details
+    /// This will set the internal state exactly to the input. No check of if
+    /// the values are really normalized or ESS is correctly calculated
+    template <typename InputIter>
+    void set_exact(double ess, InputIter first)
+    {
+        ess_ = ess;
+        std::copy_n(first, size(), data_.begin());
+    }
+
     /// \brief Set \f$W_i \propto W_i w_i\f$
     template <typename InputIter>
     void mul(InputIter first)
