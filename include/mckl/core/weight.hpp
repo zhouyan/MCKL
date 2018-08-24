@@ -34,6 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/internal/cblas.hpp>
+#include <mckl/core/is_equal.hpp>
 #include <mckl/random/discrete_distribution.hpp>
 
 namespace mckl {
@@ -167,6 +168,11 @@ class Weight
     friend bool operator!=(const Weight &w1, const Weight &w2)
     {
         return !(w1 == w2);
+    }
+
+    friend bool is_equal(const Weight &w1, const Weight &w2)
+    {
+        return is_equal(w1.ess_, w2.ess_) && is_equal(w1.data_, w2.data_);
     }
 
   private:

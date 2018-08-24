@@ -33,6 +33,7 @@
 #define MCKL_CORE_PARTICLE_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/is_equal.hpp>
 #include <mckl/core/iterator.hpp>
 #include <mckl/core/weight.hpp>
 #include <mckl/random/rng_set.hpp>
@@ -403,7 +404,7 @@ class Particle
 
     friend bool operator==(const Particle &p1, const Particle &p2)
     {
-        return p1.state_ == p2.state_ && p1.weight_ == p2.weight_;
+        return p1.weight_ == p2.weight_ && p1.state_ == p2.state_;
     }
 
     friend bool operator!=(const Particle &p1, const Particle &p2)
@@ -417,6 +418,13 @@ class Particle
     rng_set_type rng_set_;
     rng_type rng_;
 }; // class Particle
+
+template <typename T>
+inline bool is_equal(const Particle<T> &p1, const Particle<T> &p2)
+{
+    return is_equal(p1.weight(), p2.weight()) &&
+        is_equal(p1.state(), p2.state());
+}
 
 } // namespace mckl
 
