@@ -33,6 +33,7 @@
 #define MCKL_CORE_MATRIX_HPP
 
 #include <mckl/internal/common.hpp>
+#include <mckl/core/is_equal.hpp>
 #include <mckl/core/iterator.hpp>
 
 namespace mckl {
@@ -340,13 +341,35 @@ class MatrixView
         if (m1.ncol_ != m2.ncol_) {
             return false;
         }
-        return m1.data_ == m2.data_;
+        for (std::size_t i = 0; i != m1.nrow_ * m2.ncol_; ++i) {
+            if (m1.data_[i] != m2.data_[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /// \brief Compare inequality
     friend bool operator!=(const MatrixView &m1, const MatrixView &m2)
     {
         return !(m1 == m2);
+    }
+
+    /// \brief Compare equality
+    friend bool is_equal(const MatrixView &m1, const MatrixView &m2)
+    {
+        if (m1.nrow_ != m2.nrow_) {
+            return false;
+        }
+        if (m1.ncol_ != m2.ncol_) {
+            return false;
+        }
+        for (std::size_t i = 0; i != m1.nrow_ * m2.ncol_; ++i) {
+            if (!is_equal(m1.data_[i], m2.data_[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
   private:
@@ -974,6 +997,18 @@ class Matrix
     friend bool operator!=(const Matrix &m1, const Matrix &m2)
     {
         return !(m1 == m2);
+    }
+
+    /// \brief Compare equality
+    friend bool is_equal(const Matrix &m1, const Matrix &m2)
+    {
+        if (m1.nrow_ != m2.nrow_) {
+            return false;
+        }
+        if (m1.ncol_ != m2.ncol_) {
+            return false;
+        }
+        return is_equal(m1.data_, m2.data_);
     }
 
   private:

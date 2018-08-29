@@ -1,6 +1,8 @@
 *.swp
 .DS_Store
+/.idea
 /build
+/cmake-build-*
 /docs/_build
 /docs/doxygen
 /docs/tabs/random_distribution

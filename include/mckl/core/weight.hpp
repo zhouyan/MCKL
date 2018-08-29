@@ -34,6 +34,7 @@
 
 #include <mckl/internal/common.hpp>
 #include <mckl/internal/cblas.hpp>
+#include <mckl/core/is_equal.hpp>
 #include <mckl/random/discrete_distribution.hpp>
 
 namespace mckl {
@@ -85,6 +86,18 @@ class Weight
     {
         std::copy_n(first, size(), data_.begin());
         normalize(false);
+    }
+
+    /// \brief Set exact values of ESS and normalized weights
+    ///
+    /// \details
+    /// This will set the internal state exactly to the input. No check of if
+    /// the values are really normalized or ESS is correctly calculated
+    template <typename InputIter>
+    void set_exact(double ess, InputIter first)
+    {
+        ess_ = ess;
+        std::copy_n(first, size(), data_.begin());
     }
 
     /// \brief Set \f$W_i \propto W_i w_i\f$
@@ -145,6 +158,21 @@ class Weight
         DiscreteDistribution<size_type> dist;
 
         return dist(rng, data_.begin(), data_.end(), true);
+    }
+
+    friend bool operator==(const Weight &w1, const Weight &w2)
+    {
+        return w1.ess_ == w2.ess_ && w1.data_ == w2.data_;
+    }
+
+    friend bool operator!=(const Weight &w1, const Weight &w2)
+    {
+        return !(w1 == w2);
+    }
+
+    friend bool is_equal(const Weight &w1, const Weight &w2)
+    {
+        return is_equal(w1.ess_, w2.ess_) && is_equal(w1.data_, w2.data_);
     }
 
   private:
