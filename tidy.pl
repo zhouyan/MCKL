@@ -63,6 +63,7 @@ sub update
         } elsif (-d $path) {
             next if $path =~ /\.git$/;
             next if $path =~ /build$/;
+            next if $path =~ /build-/;
             next if $path =~ /docs\/_build$/;
             next if $path =~ /docs\/doxygen$/;
             next if $path =~ /docs\/tabs\/random_distribution$/;
