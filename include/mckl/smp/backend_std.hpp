@@ -87,7 +87,7 @@ inline mckl::Vector<ParticleRange<T>> backend_std_range(Particle<T> &particle)
     return range;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief SMCSampler<T>::eval_type subtype using the standard library
 /// \ingroup STD

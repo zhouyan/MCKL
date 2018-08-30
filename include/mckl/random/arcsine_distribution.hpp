@@ -56,7 +56,7 @@ inline void arcsine_distribution_impl(
     muladd(n, r, b - a, a, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Arcsine, arcsine, RealType, RealType, a, RealType, b)

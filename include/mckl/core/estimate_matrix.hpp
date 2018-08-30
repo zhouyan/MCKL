@@ -134,8 +134,8 @@ class EstimateMatrix : public Matrix<T, RowMajor>
     }
 
   private:
-    using matrix_type::resize;
     using matrix_type::push_back_col;
+    using matrix_type::resize;
 
     template <typename InputIter>
     void insert_estimate_dispatch(

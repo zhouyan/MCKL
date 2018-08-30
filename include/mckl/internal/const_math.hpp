@@ -191,7 +191,7 @@ class Factorial<UIntType, 0>
     static constexpr UIntType value = 1;
 }; // class Factorial
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

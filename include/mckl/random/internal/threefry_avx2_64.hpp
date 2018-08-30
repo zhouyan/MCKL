@@ -457,7 +457,7 @@ class ThreefryGeneratorAVX2Impl64<T, 16, 80, ThreefryConstants<T, 16>>
 {
 }; // class ThreefryGeneratorAVX2Impl64
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

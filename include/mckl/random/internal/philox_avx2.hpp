@@ -54,7 +54,7 @@ class PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants, 32>
 {
 }; // class PhiloxGeneratorImplAVX2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

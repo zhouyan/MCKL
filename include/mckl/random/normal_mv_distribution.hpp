@@ -57,7 +57,7 @@ inline void normal_mv_distribution_mulchol(
         static_cast<MCKL_BLAS_INT>(dim), r, static_cast<MCKL_BLAS_INT>(dim));
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename RealType, typename RNGType>
 inline void normal_mv_distribution(RNGType &rng, std::size_t n, RealType *r,

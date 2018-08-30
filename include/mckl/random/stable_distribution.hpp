@@ -200,7 +200,7 @@ inline void stable_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     muladd(n, r, b, a, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_4(Stable, stable, RealType, RealType,
     alpha, RealType, beta, RealType, a, RealType, b)

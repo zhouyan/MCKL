@@ -57,7 +57,7 @@ inline void fisher_f_distribution_impl(
     div(n, s.data(), r, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     FisherF, fisher_f, RealType, RealType, m, RealType, n)

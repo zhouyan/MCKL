@@ -63,7 +63,7 @@ class ThreefryGeneratorAVX2Impl<T, K, Rounds, Constants, 64>
 {
 }; // class ThreefryGeneratorImplAVX2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

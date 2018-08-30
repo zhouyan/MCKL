@@ -197,8 +197,8 @@ class U01CanonicalGenericImpl
     }
 }; // class U01CanonicalGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
-} // namespace mckl;
+} // namespace mckl
 
 #endif // MCKL_RANDOM_INTERNAL_U01_GENERIC_HPP

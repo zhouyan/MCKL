@@ -174,7 +174,8 @@ void mckl_fmadd512_vvs_ps(
     size_t, const float *, const float *, float, float *);
 void mckl_fmadd512_vsv_ps(
     size_t, const float *, float, const float *, float *);
-void mckl_fmadd512_svv_ps(size_t, float, const float *, const float *, float *);
+void mckl_fmadd512_svv_ps(
+    size_t, float, const float *, const float *, float *);
 void mckl_fmadd512_ssv_ps(size_t, float, float, const float *, float *);
 void mckl_fmadd512_svs_ps(size_t, float, const float *, float, float *);
 void mckl_fmadd512_vss_ps(size_t, const float *, float, float, float *);

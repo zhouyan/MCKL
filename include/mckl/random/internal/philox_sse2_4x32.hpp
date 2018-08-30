@@ -178,7 +178,7 @@ class Philox4x32GeneratorSSE2Impl
     }
 }; // class Philox4x32GeneratorSSE2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

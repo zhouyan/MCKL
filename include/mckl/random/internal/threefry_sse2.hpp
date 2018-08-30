@@ -63,7 +63,7 @@ class ThreefryGeneratorSSE2Impl<T, K, Rounds, Constants, 64>
 {
 }; // class ThreefryGeneratorImplSSE2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

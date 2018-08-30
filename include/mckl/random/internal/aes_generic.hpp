@@ -491,7 +491,7 @@ class AESGeneratorGenericImpl
     }
 }; // class AESGeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

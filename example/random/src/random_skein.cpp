@@ -38,9 +38,10 @@
             random_skein_##M##_##Nb##_##Nm##_##Nh, random_skein_##M##_msg);
 
 #define MCKL_EXAMPLE_RANDOM_SKEIN_MAC(Nb, Nm, Nh, Nk, M)                      \
-    pass = pass && random_skein_mac<mckl::Skein##Nb>(#M, Nm, Nh, Nk,          \
-                       random_skein_##M##_##Nb##_##Nm##_##Nh##_##Nk,          \
-                       random_skein_##M##_msg, random_skein_##M##_key);
+    pass = pass &&                                                            \
+        random_skein_mac<mckl::Skein##Nb>(#M, Nm, Nh, Nk,                     \
+            random_skein_##M##_##Nb##_##Nm##_##Nh##_##Nk,                     \
+            random_skein_##M##_msg, random_skein_##M##_key);
 
 #define MCKL_EXAMPLE_RANDOM_SKEIN_TREE(Nb, Nm, Nh, Yl, Yf, Ym, M)             \
     pass = pass &&                                                            \

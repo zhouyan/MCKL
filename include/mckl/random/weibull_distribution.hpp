@@ -65,7 +65,7 @@ inline void weibull_distribution_impl(
     MCKL_POP_INTEL_WARNING
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Weibull, weibull, RealType, RealType, a, RealType, b)

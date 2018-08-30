@@ -134,7 +134,7 @@ inline void u01_trans_systematic_impl(
     muladd(n - n0, r, delta, u, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Tranform a sequence of standard uniform random numbers to sorted
 /// sequence

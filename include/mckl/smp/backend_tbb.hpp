@@ -48,7 +48,7 @@ inline ::tbb::blocked_range<IntType> backend_tbb_range(
                             ::tbb::blocked_range<IntType>(0, N, grainsize);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief SMCSampler<T>::eval_type subtype using Intel Threading Building
 /// Blocks

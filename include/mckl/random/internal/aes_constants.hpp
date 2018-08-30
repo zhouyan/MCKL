@@ -293,7 +293,7 @@ class ARSConstantsWeyl
         0x9E3779B97F4A7C15, 0xBB67AE8584CAA73B};
 }; // class ARSConstantsWeyl
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Default ARS constants
 /// \ingroup AES

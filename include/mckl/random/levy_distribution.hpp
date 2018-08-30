@@ -63,7 +63,7 @@ inline void levy_distribution_impl(
     }
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Levy, levy, RealType, RealType, a, RealType, b)

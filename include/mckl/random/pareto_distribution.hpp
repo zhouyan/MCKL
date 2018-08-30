@@ -54,7 +54,7 @@ inline void pareto_distribution_impl(
     mul(n, b, r, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Pareto, pareto, RealType, RealType, a, RealType, b)

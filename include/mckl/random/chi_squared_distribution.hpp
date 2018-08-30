@@ -45,7 +45,7 @@ inline bool chi_squared_distribution_check_param(RealType n)
     return n > 0;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename RealType, typename RNGType>
 inline void chi_squared_distribution(

@@ -188,7 +188,7 @@ class Increment<T, 16>
     }
 }; // class Increment
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Increment a counter by given steps
 /// \ingroup Random
@@ -362,7 +362,7 @@ class IncrementBlock<T, K, 16>
     }
 }; // class IncrementBlock
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Increment a counter by one
 /// \ingroup Random

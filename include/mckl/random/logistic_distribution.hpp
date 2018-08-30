@@ -57,7 +57,7 @@ inline void logistic_distribution_impl(
     muladd(n, r, b, a, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Logistic, logistic, RealType, RealType, a, RealType, b)

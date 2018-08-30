@@ -61,7 +61,7 @@ inline void dirichlet_distribution_avg(
     }
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename RealType, typename RNGType>
 inline void dirichlet_distribution(RNGType &rng, std::size_t n, RealType *r,

@@ -1065,7 +1065,7 @@ class U01CanonicalAVX2Impl<UIntType, double, 1, 64>
     }
 }; // class U01CanonicalAVX2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

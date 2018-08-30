@@ -58,7 +58,7 @@ inline void geometric_distribution_impl(
     }
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
     Geometric, geometric, InType, double, p)

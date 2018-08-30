@@ -1752,7 +1752,7 @@ inline __m128i aeskeygenassist_si128<0xFF>(const __m128i &xmm)
     return _mm_aeskeygenassist_si128(xmm, 0x8D);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

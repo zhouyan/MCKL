@@ -322,7 +322,7 @@ class Threefish1024GeneratorGenericImpl
     }
 }; // class Threefish1024GeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

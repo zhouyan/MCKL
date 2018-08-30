@@ -205,7 +205,7 @@ class AESGeneratorAESNIImpl<
 {
 }; // class AESGeneratorAESNIImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

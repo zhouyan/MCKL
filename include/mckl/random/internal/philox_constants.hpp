@@ -100,7 +100,7 @@ class PhiloxConstantsMultiplier<T, 4, 64>
     static constexpr T value[2] = {0xCA5A826395121157, 0xD2E7470EE14C6C93};
 }; // class PhiloxConstantsMultiplier
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Default Philox constants
 /// \ingroup Philox

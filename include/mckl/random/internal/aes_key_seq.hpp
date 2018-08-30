@@ -194,7 +194,7 @@ class ARSKeySeqImpl
     key_type key_;
 }; // class ARSKeySeqImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

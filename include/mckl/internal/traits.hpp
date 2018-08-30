@@ -186,7 +186,7 @@ using is_seed_seq = std::integral_constant<bool,
         !std::is_convertible<T, typename RNGType::result_type>::value &&
         !std::is_convertible<T, KeyType>::value>;
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

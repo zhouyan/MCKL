@@ -57,7 +57,7 @@ inline void uniform_real_distribution_impl(
 #endif
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     UniformReal, uniform_real, RealType, RealType, a, RealType, b)

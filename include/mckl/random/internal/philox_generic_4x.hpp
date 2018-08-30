@@ -212,7 +212,7 @@ class Philox4x64GeneratorGenericImpl
 #endif // MCKL_USE_ASM_LIBRARY && MCKL_USE_BMI2
 };     // class Philox4x64GeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

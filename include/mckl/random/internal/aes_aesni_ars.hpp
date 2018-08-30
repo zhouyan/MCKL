@@ -237,7 +237,7 @@ class ARSGeneratorAESNIImpl
     }
 }; // class ARSGeneratorAESNIImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

@@ -224,7 +224,7 @@ class IncrementBlockSI128<T, 32, 1, 64>
     }
 }; // class IncrementBlockSI256
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

@@ -66,7 +66,7 @@ inline void student_t_distribution_impl(
     }
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
     StudentT, student_t, RealType, RealType, n)

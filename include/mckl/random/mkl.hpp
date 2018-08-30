@@ -71,7 +71,7 @@ inline int mkl_error_check(int status, const char *cpp, const char *c)
 
 #endif // MCKL_NO_RUNTIME_ASSERT
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief MKL `VSLStreamStatePtr` wrapper
 /// \ingroup MKL
@@ -781,7 +781,7 @@ class MKLUniformBits<BRNG, 64>
     }
 }; // class MKLUniformBits
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Use MKL BRNG as RNG engine
 /// \ingroup MKL
@@ -1244,7 +1244,7 @@ inline int mkl_uniform_int(::VSLStreamStatePtr stream, int n, unsigned *r)
     return 0;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Register an RNG as MKL BRNG
 /// \ingroup MKL

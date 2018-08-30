@@ -234,9 +234,9 @@ class SeedGenerator
 
     result_type randomize(const std::array<seed_type, M_> &k, std::true_type)
     {
-        return randomize(
-            k, std::integral_constant<int,
-                   std::numeric_limits<seed_type>::digits * M_>());
+        return randomize(k,
+            std::integral_constant<int,
+                std::numeric_limits<seed_type>::digits * M_>());
     }
 
     template <int D>

@@ -199,7 +199,7 @@ class RunTestImpl<true, Up> : public ChiSquaredTest<RunTestImpl<true, Up>>
     std::size_t n_;
 }; // class RunTestImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Run test
 /// \ingroup RandomTest

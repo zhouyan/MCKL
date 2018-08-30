@@ -196,7 +196,7 @@ class SerialTestImpl<D, T, true>
     }
 }; // class SerialTestImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Serial test
 /// \ingroup RandomTest

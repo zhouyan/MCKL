@@ -732,7 +732,7 @@ class Threefish1024GeneratorAVX2Impl
     }
 }; // class Threefish1024GeneratorAVX2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

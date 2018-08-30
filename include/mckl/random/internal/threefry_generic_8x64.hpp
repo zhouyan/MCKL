@@ -265,7 +265,7 @@ class Threefish512GeneratorGenericImpl
     }
 }; // class Threefish512GeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

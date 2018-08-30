@@ -181,7 +181,7 @@ inline std::basic_istream<CharT, Traits> &istream(
     return is;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename CharT, typename Traits, typename T, std::size_t N>
 inline std::basic_ostream<CharT, Traits> &operator<<(

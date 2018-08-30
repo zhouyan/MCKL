@@ -269,7 +269,7 @@ class Threefry2x32GeneratorSSE2Impl
     }
 }; // class Threefry2x32GeneratorSSE2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

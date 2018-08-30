@@ -264,7 +264,7 @@ class Threefry2x32GeneratorAVX2Impl
     }
 }; // class Threefry2x32GeneratorAVX2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

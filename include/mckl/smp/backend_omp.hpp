@@ -59,7 +59,7 @@ inline void backend_omp_range(IntType N, IntType &ibegin, IntType &iend)
     iend = ibegin + n;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief SMCSampler<T>::eval_type subtype using OpenMP
 /// \ingroup OMP

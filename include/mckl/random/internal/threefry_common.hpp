@@ -279,7 +279,7 @@ class ThreefryRBox
     }
 }; // class ThreefryRBox
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

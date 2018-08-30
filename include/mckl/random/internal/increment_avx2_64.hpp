@@ -79,7 +79,7 @@ MCKL_INLINE inline void increment_si256(
         ctr, s, std::integral_constant<bool, (direct && bits)>());
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

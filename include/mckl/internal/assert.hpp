@@ -163,7 +163,7 @@ inline bool is_nullptr(T ptr)
 
 inline bool is_nullptr(std::nullptr_t) { return true; }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

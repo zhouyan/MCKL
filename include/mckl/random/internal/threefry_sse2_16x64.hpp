@@ -680,7 +680,7 @@ class Threefish1024GeneratorSSE2Impl
     }
 }; // class Threefish1024GeneratorSSE2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

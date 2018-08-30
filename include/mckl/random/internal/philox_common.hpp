@@ -251,7 +251,7 @@ class PhiloxRBox<T, 4, N, Constants>
     }
 }; // class PhiloxRBox
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

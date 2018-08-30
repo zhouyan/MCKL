@@ -423,7 +423,7 @@ MCKL_INLINE inline void transpose2x64_store_si128(std::array<__m128i, 16> &s)
     std::get<0xA>(s) = s5;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

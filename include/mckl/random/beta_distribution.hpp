@@ -366,7 +366,7 @@ inline std::size_t beta_distribution_impl(RNGType &rng, std::size_t n,
     return 0;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename RealType, typename RNGType>
 inline void beta_distribution(

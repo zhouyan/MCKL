@@ -75,7 +75,7 @@ inline void uniform_bits_distribution_impl(
     std::copy_n(s.data(), n, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)

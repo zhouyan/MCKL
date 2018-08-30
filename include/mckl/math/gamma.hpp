@@ -129,7 +129,7 @@ inline double gammap_gcf(double a, double x)
     return std::exp(-x + a * std::log(x) - std::lgamma(a)) * h;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Regularized lower incomplete Gamma function
 /// \ingroup Special

@@ -484,7 +484,7 @@ MCKL_INLINE inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
     std::get<0xE>(s) = sB;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

@@ -338,7 +338,7 @@ MCKL_INLINE inline void fmadd_pd(std::array<__m256i, 16> &s, const __m256i &a,
             _mm256_castsi256_pd(a), _mm256_castsi256_pd(std::get<0xF>(b))));
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

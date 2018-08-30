@@ -83,7 +83,7 @@
     {                                                                         \
         using UIntType = U01UIntType<RNGType, RealType>;                      \
                                                                               \
-        alignas(MCKL_ALIGNMENT) std::array<UIntType, K> s;                                \
+        alignas(MCKL_ALIGNMENT) std::array<UIntType, K> s;                    \
         uniform_bits_distribution(rng, n, s.data());                          \
         name<UIntType, RealType>(n, s.data(), r);                             \
     }
@@ -133,7 +133,7 @@ MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_co)
 MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oc)
 MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oo)
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01Canonical, u01_canonical, RealType)
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01CC, u01_cc, RealType)

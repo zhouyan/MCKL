@@ -65,7 +65,7 @@ inline void laplace_distribution_impl(
     muladd(n, s.data(), r, a, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Laplace, laplace, RealType, RealType, a, RealType, b)

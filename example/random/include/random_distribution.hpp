@@ -441,8 +441,9 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
         return this->partition_quantile(n,
             [&](double p) {
                 return dist.a() +
-                    dist.b() * static_cast<RealType>(std::tan(
-                                   mckl::const_pi<double>() * (p - 0.5)));
+                    dist.b() *
+                    static_cast<RealType>(
+                        std::tan(mckl::const_pi<double>() * (p - 0.5)));
             },
             dist);
     }
@@ -687,10 +688,9 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
         return this->partition_quantile(n,
             [&](double p) {
                 double q = p - 0.5;
-                return q > 0 ?
-                    dist.a() -
+                return q > 0 ? dist.a() -
                         dist.b() * static_cast<RealType>(std::log(1 - 2 * q)) :
-                    dist.a() +
+                               dist.a() +
                         dist.b() * static_cast<RealType>(std::log(1 + 2 * q));
             },
             dist);
@@ -962,9 +962,9 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
         MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (dist.alpha() == 2) {
             RandomDistributionTrait<mckl::NormalDistribution<RealType>> trait;
-            return trait.partition(
-                n, mckl::NormalDistribution<RealType>(
-                       0, std::sqrt(static_cast<RealType>(2))));
+            return trait.partition(n,
+                mckl::NormalDistribution<RealType>(
+                    0, std::sqrt(static_cast<RealType>(2))));
         } else if (dist.alpha() == 1) {
             RandomDistributionTrait<mckl::CauchyDistribution<RealType>> trait;
             return trait.partition(

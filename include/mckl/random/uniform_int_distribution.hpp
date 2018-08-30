@@ -75,9 +75,9 @@ inline bool uniform_int_distribution_use_double(
 template <typename IntType>
 inline bool uniform_int_distribution_use_double(IntType a, IntType b)
 {
-    return uniform_int_distribution_use_double(
-        a, b, std::integral_constant<bool,
-                  std::numeric_limits<IntType>::digits <= 32>());
+    return uniform_int_distribution_use_double(a, b,
+        std::integral_constant<bool,
+            std::numeric_limits<IntType>::digits <= 32>());
 }
 
 template <typename IntType>
@@ -124,7 +124,7 @@ inline void uniform_int_distribution_impl(
         uniform_int_distribution_impl<K>(rng, n, r, a, b, std::false_type());
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     UniformInt, uniform_int, IntType, IntType, a, IntType, b)

@@ -155,7 +155,7 @@ class PhiloxGeneratorGenericImpl<T, 4, 10, Constants, 64>
 {
 }; // class PhiloxGeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

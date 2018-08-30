@@ -53,7 +53,7 @@ inline void lognormal_distribution_impl(
     exp(n, r, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Lognormal, lognormal, RealType, RealType, m, RealType, s)

@@ -100,7 +100,7 @@ using AESGeneratorImpl = AESGeneratorGenericImpl<KeySeqType>;
 
 #endif // MCKL_USE_AESNI
 
-} // namespace mck::internal
+} // namespace internal
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AES

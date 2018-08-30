@@ -260,7 +260,7 @@ class PhiloxGeneratorAVX2Impl32<T, 4, 10, Constants>
 {
 }; // class PhiloxGeneratorAVX2Impl32
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

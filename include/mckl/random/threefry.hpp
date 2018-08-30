@@ -70,7 +70,7 @@ using ThreefryGeneratorImpl =
     ThreefryGeneratorGenericImpl<T, K, Rounds, Constants>;
 #endif // MCKL_USE_AVX2
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Threefry RNG generator
 /// \ingroup Threefry

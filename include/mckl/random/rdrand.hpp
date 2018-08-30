@@ -167,9 +167,9 @@ class RDRANDEngine
         std::size_t ntrial = 0;
         while (true) {
             ++ntrial;
-            bool success = rdrand<result_type>(
-                &r, std::integral_constant<int,
-                        std::numeric_limits<result_type>::digits>());
+            bool success = rdrand<result_type>(&r,
+                std::integral_constant<int,
+                    std::numeric_limits<result_type>::digits>());
             if (success || ntrial > NTrialMax) {
                 break;
             }
@@ -184,9 +184,9 @@ class RDRANDEngine
     {
         result_type r;
         while (true) {
-            bool success = rdrand<result_type>(
-                &r, std::integral_constant<int,
-                        std::numeric_limits<result_type>::digits>());
+            bool success = rdrand<result_type>(&r,
+                std::integral_constant<int,
+                    std::numeric_limits<result_type>::digits>());
             if (success) {
                 break;
             }

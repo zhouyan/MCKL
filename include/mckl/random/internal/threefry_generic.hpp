@@ -208,7 +208,7 @@ class ThreefryGeneratorGenericImpl<T, 16, 80, ThreefryConstants<T, 16>, 64>
 {
 }; // class ThreefryGeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

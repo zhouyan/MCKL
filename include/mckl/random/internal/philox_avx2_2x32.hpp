@@ -172,7 +172,7 @@ class Philox2x32GeneratorAVX2Impl
     }
 }; // class Philox2x32GeneratorAVX2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

@@ -274,7 +274,7 @@ class AES192GeneratorAESNIImpl
     }
 }; // class AES192GeneratorAESNIImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

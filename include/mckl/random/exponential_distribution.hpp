@@ -54,7 +54,7 @@ inline void exponential_distribution_impl(
     mul(n, -1 / lambda, r, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
     Exponential, exponential, RealType, RealType, lambda)

@@ -181,7 +181,7 @@ inline void union_le(T &r)
 
 #endif // MCKL_HAS_LITTLE_ENDIAN
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

@@ -1105,7 +1105,7 @@ MCKL_INLINE inline void mul_pd(
             _mm_castsi128_pd(std::get<0xF>(a))));
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

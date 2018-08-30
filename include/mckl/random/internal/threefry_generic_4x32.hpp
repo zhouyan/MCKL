@@ -157,7 +157,7 @@ class Threefry4x32GeneratorGenericImpl
     }
 }; // class Threefry4x32GeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

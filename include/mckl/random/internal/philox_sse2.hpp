@@ -54,7 +54,7 @@ class PhiloxGeneratorSSE2Impl<T, K, Rounds, Constants, 32>
 {
 }; // class PhiloxGeneratorImplSSE2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

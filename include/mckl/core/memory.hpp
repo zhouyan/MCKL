@@ -114,7 +114,7 @@ class AlignOfImpl<std::complex<T>>
     static constexpr std::size_t value = AlignOfImpl<T>::value;
 }; // class AlignOfImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Alignment of types in bytes
 /// \ingroup Core

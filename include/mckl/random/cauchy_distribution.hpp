@@ -55,7 +55,7 @@ inline void cauchy_distribution_impl(
     muladd(n, r, b, a, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Cauchy, cauchy, RealType, RealType, a, RealType, b)

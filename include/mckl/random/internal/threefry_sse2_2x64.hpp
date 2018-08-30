@@ -226,7 +226,7 @@ class Threefry2x64GeneratorSSE2Impl
     }
 }; // class Threefry2x64GeneratorSSE2Impl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

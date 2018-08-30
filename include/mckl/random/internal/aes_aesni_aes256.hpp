@@ -248,7 +248,7 @@ class AES256GeneratorAESNIImpl
     }
 }; // class AES256GeneratorAESNIImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 
