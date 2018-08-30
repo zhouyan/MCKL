@@ -39,11 +39,23 @@
 #include <mckl/random/internal/u01_avx2.hpp>
 #endif
 
+#if MCKL_HAS_AVX512
+#include <mckl/random/internal/u01_avx512.hpp>
+#endif
+
 namespace mckl {
 
 namespace internal {
 
-#if MCKL_USE_AVX2
+#if MCKL_USE_AVX512
+
+template <typename UIntType, typename RealType, typename Lower, typename Upper>
+using U01Impl = U01AVX512Impl<UIntType, RealType, Lower, Upper>;
+
+template <typename UIntType, typename RealType, int M>
+using U01CanonicalImpl = U01CanonicalAVX512Impl<UIntType, RealType, M>;
+
+#elif MCKL_USE_AVX2
 
 template <typename UIntType, typename RealType, typename Lower, typename Upper>
 using U01Impl = U01AVX2Impl<UIntType, RealType, Lower, Upper>;
@@ -61,7 +73,7 @@ using U01CanonicalImpl = U01CanonicalGenericImpl<UIntType, RealType, M>;
 
 #endif // MCKL_USE_AVX2
 
-} // namespace mckl::inernal
+} // namespace internal
 
 /// \brief Convert uniform unsigned integers to floating points within [0, 1]
 /// \ingroup U01

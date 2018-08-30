@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/internal/common.hpp
+// MCKL/include/mckl/internal/avx512.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,80 +29,20 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_INTERNAL_COMMON_HPP
-#define MCKL_INTERNAL_COMMON_HPP
+#ifndef MCKL_INTERNAL_AVX512_HPP
+#define MCKL_INTERNAL_AVX512_HPP
 
 #include <mckl/internal/config.h>
-
-#include <mckl/internal/assert.hpp>
-#include <mckl/internal/defines.hpp>
-#include <mckl/internal/traits.hpp>
-
-#include <mckl/internal/byte_order.hpp>
+#include <mckl/internal/avx512_op.hpp>
 #include <mckl/internal/const_math.hpp>
-#include <mckl/internal/iostream.hpp>
-
-#if MCKL_HAS_SSE2
-#include <mckl/internal/sse2.hpp>
-#endif
-
-#if MCKL_HAS_AVX2
-#include <mckl/internal/avx2.hpp>
-#endif
-
-#if MCKL_HAS_AVX512
-#include <mckl/internal/avx512.hpp>
-#endif
-
-#if MCKL_HAS_AESNI
-#include <mckl/internal/aesni.hpp>
-#endif
+#include <array>
 
 #if MCKL_HAS_FMA
 #include <mckl/internal/fma.hpp>
 #endif
 
-#include <mckl/core/memory.hpp>
-#include <mckl/math.hpp>
+MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
 
-// Utilities
-#include <cstddef>
-#include <cstdlib>
-#include <functional>
-#include <type_traits>
-#include <utility>
+MCKL_POP_GCC_WARNING
 
-// Numeric limits
-#include <cfloat>
-#include <climits>
-#include <cstdint>
-#include <limits>
-
-// String
-#include <cstring>
-#include <string>
-
-// Containers
-#include <array>
-#include <map>
-#include <set>
-#include <vector>
-
-// Algorithms
-#include <algorithm>
-
-// Iterators
-#include <iterator>
-
-// Numerics
-#include <cmath>
-#include <complex>
-#include <numeric>
-#include <random>
-
-// Input/Output
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-
-#endif // MCKL_INTERNAL_COMMON_HPP
+#endif // MCKL_INTERNAL_AVX512_HPP
