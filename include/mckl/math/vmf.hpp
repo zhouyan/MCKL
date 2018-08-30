@@ -486,6 +486,20 @@ MCKL_DEFINE_MATH_VMF_ASM_1D(log2)
 
 namespace mckl {
 
+#if MCKL_USE_AVX512
+
+MCKL_DEFINE_MATH_FMA_FMA(fmadd512, muladd)
+MCKL_DEFINE_MATH_FMA_FMA(fmsub512, mulsub)
+MCKL_DEFINE_MATH_FMA_FMA(fnmadd512, nmuladd)
+MCKL_DEFINE_MATH_FMA_FMA(fnmsub512, nmulsub)
+
+MCKL_DEFINE_MATH_FMA_FMA(fmadd512, fmadd)
+MCKL_DEFINE_MATH_FMA_FMA(fmsub512, fmsub)
+MCKL_DEFINE_MATH_FMA_FMA(fnmadd512, fnmadd)
+MCKL_DEFINE_MATH_FMA_FMA(fnmsub512, fnmsub)
+
+#else // MCKL_USE_AVX512
+
 MCKL_DEFINE_MATH_FMA_FMA(fmadd, muladd)
 MCKL_DEFINE_MATH_FMA_FMA(fmsub, mulsub)
 MCKL_DEFINE_MATH_FMA_FMA(fnmadd, nmuladd)
@@ -495,6 +509,8 @@ MCKL_DEFINE_MATH_FMA_FMA(fmadd, fmadd)
 MCKL_DEFINE_MATH_FMA_FMA(fmsub, fmsub)
 MCKL_DEFINE_MATH_FMA_FMA(fnmadd, fnmadd)
 MCKL_DEFINE_MATH_FMA_FMA(fnmsub, fnmsub)
+
+#endif // MCKL_USE_AVX512
 
 } // namespace mckl
 
@@ -1383,11 +1399,11 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
     }
 }
 
-    /// @} vRounding
+/// @} vRounding
 
-    /// \defgroup vFPClassify Floating point classification
-    /// \ingroup VMF
-    /// @{
+/// \defgroup vFPClassify Floating point classification
+/// \ingroup VMF
+/// @{
 
 #if MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2
 

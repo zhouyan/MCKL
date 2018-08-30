@@ -167,6 +167,98 @@ void mckl_fnmsub_ssv_pd(size_t, double, double, const double *, double *);
 void mckl_fnmsub_svs_pd(size_t, double, const double *, double, double *);
 void mckl_fnmsub_vss_pd(size_t, const double *, double, double, double *);
 
+// fma512.asm
+void mckl_fmadd512_vvv_ps(
+    size_t, const float *, const float *, const float *, float *);
+void mckl_fmadd512_vvs_ps(
+    size_t, const float *, const float *, float, float *);
+void mckl_fmadd512_vsv_ps(
+    size_t, const float *, float, const float *, float *);
+void mckl_fmadd512_svv_ps(size_t, float, const float *, const float *, float *);
+void mckl_fmadd512_ssv_ps(size_t, float, float, const float *, float *);
+void mckl_fmadd512_svs_ps(size_t, float, const float *, float, float *);
+void mckl_fmadd512_vss_ps(size_t, const float *, float, float, float *);
+void mckl_fmadd512_vvv_pd(
+    size_t, const double *, const double *, const double *, double *);
+void mckl_fmadd512_vvs_pd(
+    size_t, const double *, const double *, double, double *);
+void mckl_fmadd512_vsv_pd(
+    size_t, const double *, double, const double *, double *);
+void mckl_fmadd512_svv_pd(
+    size_t, double, const double *, const double *, double *);
+void mckl_fmadd512_ssv_pd(size_t, double, double, const double *, double *);
+void mckl_fmadd512_svs_pd(size_t, double, const double *, double, double *);
+void mckl_fmadd512_vss_pd(size_t, const double *, double, double, double *);
+
+void mckl_fmsub512_vvv_ps(
+    size_t, const float *, const float *, const float *, float *);
+void mckl_fmsub512_vvs_ps(
+    size_t, const float *, const float *, float, float *);
+void mckl_fmsub512_vsv_ps(
+    size_t, const float *, float, const float *, float *);
+void mckl_fmsub512_svv_ps(
+    size_t, float, const float *, const float *, float *);
+void mckl_fmsub512_ssv_ps(size_t, float, float, const float *, float *);
+void mckl_fmsub512_svs_ps(size_t, float, const float *, float, float *);
+void mckl_fmsub512_vss_ps(size_t, const float *, float, float, float *);
+void mckl_fmsub512_vvv_pd(
+    size_t, const double *, const double *, const double *, double *);
+void mckl_fmsub512_vvs_pd(
+    size_t, const double *, const double *, double, double *);
+void mckl_fmsub512_vsv_pd(
+    size_t, const double *, double, const double *, double *);
+void mckl_fmsub512_svv_pd(
+    size_t, double, const double *, const double *, double *);
+void mckl_fmsub512_ssv_pd(size_t, double, double, const double *, double *);
+void mckl_fmsub512_svs_pd(size_t, double, const double *, double, double *);
+void mckl_fmsub512_vss_pd(size_t, const double *, double, double, double *);
+
+void mckl_fnmadd512_vvv_ps(
+    size_t, const float *, const float *, const float *, float *);
+void mckl_fnmadd512_vvs_ps(
+    size_t, const float *, const float *, float, float *);
+void mckl_fnmadd512_vsv_ps(
+    size_t, const float *, float, const float *, float *);
+void mckl_fnmadd512_svv_ps(
+    size_t, float, const float *, const float *, float *);
+void mckl_fnmadd512_ssv_ps(size_t, float, float, const float *, float *);
+void mckl_fnmadd512_svs_ps(size_t, float, const float *, float, float *);
+void mckl_fnmadd512_vss_ps(size_t, const float *, float, float, float *);
+void mckl_fnmadd512_vvv_pd(
+    size_t, const double *, const double *, const double *, double *);
+void mckl_fnmadd512_vvs_pd(
+    size_t, const double *, const double *, double, double *);
+void mckl_fnmadd512_vsv_pd(
+    size_t, const double *, double, const double *, double *);
+void mckl_fnmadd512_svv_pd(
+    size_t, double, const double *, const double *, double *);
+void mckl_fnmadd512_ssv_pd(size_t, double, double, const double *, double *);
+void mckl_fnmadd512_svs_pd(size_t, double, const double *, double, double *);
+void mckl_fnmadd512_vss_pd(size_t, const double *, double, double, double *);
+
+void mckl_fnmsub512_vvv_ps(
+    size_t, const float *, const float *, const float *, float *);
+void mckl_fnmsub512_vvs_ps(
+    size_t, const float *, const float *, float, float *);
+void mckl_fnmsub512_vsv_ps(
+    size_t, const float *, float, const float *, float *);
+void mckl_fnmsub512_svv_ps(
+    size_t, float, const float *, const float *, float *);
+void mckl_fnmsub512_ssv_ps(size_t, float, float, const float *, float *);
+void mckl_fnmsub512_svs_ps(size_t, float, const float *, float, float *);
+void mckl_fnmsub512_vss_ps(size_t, const float *, float, float, float *);
+void mckl_fnmsub512_vvv_pd(
+    size_t, const double *, const double *, const double *, double *);
+void mckl_fnmsub512_vvs_pd(
+    size_t, const double *, const double *, double, double *);
+void mckl_fnmsub512_vsv_pd(
+    size_t, const double *, double, const double *, double *);
+void mckl_fnmsub512_svv_pd(
+    size_t, double, const double *, const double *, double *);
+void mckl_fnmsub512_ssv_pd(size_t, double, double, const double *, double *);
+void mckl_fnmsub512_svs_pd(size_t, double, const double *, double, double *);
+void mckl_fnmsub512_vss_pd(size_t, const double *, double, double, double *);
+
 // fpclassify_avx2.asm
 size_t mckl_vs_find_normal(size_t, const float *);
 size_t mckl_vd_find_normal(size_t, const double *);
