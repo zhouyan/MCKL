@@ -42,114 +42,70 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     __m512i zmm0 = _mm512_loadu_si512(uptr++);                                \
     __m512i zmm1 = _mm512_loadu_si512(uptr++);                                \
     __m512i zmm2 = _mm512_loadu_si512(uptr++);                                \
-    __m512i zmm3 = _mm512_loadu_si512(uptr++);                                \
-    __m512i zmm4 = _mm512_loadu_si512(uptr++);                                \
-    __m512i zmm5 = _mm512_loadu_si512(uptr++);                                \
-    __m512i zmm6 = _mm512_loadu_si512(uptr++);                                \
-    __m512i zmm7 = _mm512_loadu_si512(uptr++);
+    __m512i zmm3 = _mm512_loadu_si512(uptr++);
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_LOADU_SI512_CVTEPU32_EPI64(u)         \
     const __m256i *uptr = reinterpret_cast<const __m256i *>(u);               \
     __m512i zmm0 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));         \
     __m512i zmm1 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));         \
     __m512i zmm2 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));         \
-    __m512i zmm3 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));         \
-    __m512i zmm4 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));         \
-    __m512i zmm5 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));         \
-    __m512i zmm6 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));         \
-    __m512i zmm7 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));
+    __m512i zmm3 = _mm512_cvtepu32_epi64(_mm256_loadu_si256(uptr++));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_STOREU_PS(r)                          \
     _mm512_storeu_ps(r + 0x00, _mm512_castsi512_ps(zmm0));                    \
     _mm512_storeu_ps(r + 0x10, _mm512_castsi512_ps(zmm1));                    \
     _mm512_storeu_ps(r + 0x20, _mm512_castsi512_ps(zmm2));                    \
-    _mm512_storeu_ps(r + 0x30, _mm512_castsi512_ps(zmm3));                    \
-    _mm512_storeu_ps(r + 0x40, _mm512_castsi512_ps(zmm4));                    \
-    _mm512_storeu_ps(r + 0x50, _mm512_castsi512_ps(zmm5));                    \
-    _mm512_storeu_ps(r + 0x60, _mm512_castsi512_ps(zmm6));                    \
-    _mm512_storeu_ps(r + 0x70, _mm512_castsi512_ps(zmm7));
+    _mm512_storeu_ps(r + 0x30, _mm512_castsi512_ps(zmm3));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_STOREU_PD(r)                          \
     _mm512_storeu_pd(r + 0x00, _mm512_castsi512_pd(zmm0));                    \
     _mm512_storeu_pd(r + 0x08, _mm512_castsi512_pd(zmm1));                    \
     _mm512_storeu_pd(r + 0x10, _mm512_castsi512_pd(zmm2));                    \
-    _mm512_storeu_pd(r + 0x18, _mm512_castsi512_pd(zmm3));                    \
-    _mm512_storeu_pd(r + 0x20, _mm512_castsi512_pd(zmm4));                    \
-    _mm512_storeu_pd(r + 0x28, _mm512_castsi512_pd(zmm5));                    \
-    _mm512_storeu_pd(r + 0x30, _mm512_castsi512_pd(zmm6));                    \
-    _mm512_storeu_pd(r + 0x38, _mm512_castsi512_pd(zmm7));
+    _mm512_storeu_pd(r + 0x18, _mm512_castsi512_pd(zmm3));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_AND1ADD_EPI32                         \
     const __m512i mask = _mm512_set1_epi32(1);                                \
     zmm0 = _mm512_add_epi32(zmm0, _mm512_and_si512(zmm0, mask));              \
     zmm1 = _mm512_add_epi32(zmm1, _mm512_and_si512(zmm1, mask));              \
     zmm2 = _mm512_add_epi32(zmm2, _mm512_and_si512(zmm2, mask));              \
-    zmm3 = _mm512_add_epi32(zmm3, _mm512_and_si512(zmm3, mask));              \
-    zmm4 = _mm512_add_epi32(zmm4, _mm512_and_si512(zmm4, mask));              \
-    zmm5 = _mm512_add_epi32(zmm5, _mm512_and_si512(zmm5, mask));              \
-    zmm6 = _mm512_add_epi32(zmm6, _mm512_and_si512(zmm6, mask));              \
-    zmm7 = _mm512_add_epi32(zmm7, _mm512_and_si512(zmm7, mask));
+    zmm3 = _mm512_add_epi32(zmm3, _mm512_and_si512(zmm3, mask));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_AND1ADD_EPI64                         \
     const __m512i mask = _mm512_set1_epi64(1);                                \
     zmm0 = _mm512_add_epi64(zmm0, _mm512_and_si512(zmm0, mask));              \
     zmm1 = _mm512_add_epi64(zmm1, _mm512_and_si512(zmm1, mask));              \
     zmm2 = _mm512_add_epi64(zmm2, _mm512_and_si512(zmm2, mask));              \
-    zmm3 = _mm512_add_epi64(zmm3, _mm512_and_si512(zmm3, mask));              \
-    zmm4 = _mm512_add_epi64(zmm4, _mm512_and_si512(zmm4, mask));              \
-    zmm5 = _mm512_add_epi64(zmm5, _mm512_and_si512(zmm5, mask));              \
-    zmm6 = _mm512_add_epi64(zmm6, _mm512_and_si512(zmm6, mask));              \
-    zmm7 = _mm512_add_epi64(zmm7, _mm512_and_si512(zmm7, mask));
+    zmm3 = _mm512_add_epi64(zmm3, _mm512_and_si512(zmm3, mask));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_SLLI_EPI32(imm8)                      \
     zmm0 = _mm512_slli_epi32(zmm0, imm8);                                     \
     zmm1 = _mm512_slli_epi32(zmm1, imm8);                                     \
     zmm2 = _mm512_slli_epi32(zmm2, imm8);                                     \
-    zmm3 = _mm512_slli_epi32(zmm3, imm8);                                     \
-    zmm4 = _mm512_slli_epi32(zmm4, imm8);                                     \
-    zmm5 = _mm512_slli_epi32(zmm5, imm8);                                     \
-    zmm6 = _mm512_slli_epi32(zmm6, imm8);                                     \
-    zmm7 = _mm512_slli_epi32(zmm7, imm8);
+    zmm3 = _mm512_slli_epi32(zmm3, imm8);
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_SRLI_EPI32(imm8)                      \
     zmm0 = _mm512_srli_epi32(zmm0, imm8);                                     \
     zmm1 = _mm512_srli_epi32(zmm1, imm8);                                     \
     zmm2 = _mm512_srli_epi32(zmm2, imm8);                                     \
-    zmm3 = _mm512_srli_epi32(zmm3, imm8);                                     \
-    zmm4 = _mm512_srli_epi32(zmm4, imm8);                                     \
-    zmm5 = _mm512_srli_epi32(zmm5, imm8);                                     \
-    zmm6 = _mm512_srli_epi32(zmm6, imm8);                                     \
-    zmm7 = _mm512_srli_epi32(zmm7, imm8);
+    zmm3 = _mm512_srli_epi32(zmm3, imm8);
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_SLLI_EPI64(imm8)                      \
     zmm0 = _mm512_slli_epi64(zmm0, imm8);                                     \
     zmm1 = _mm512_slli_epi64(zmm1, imm8);                                     \
     zmm2 = _mm512_slli_epi64(zmm2, imm8);                                     \
-    zmm3 = _mm512_slli_epi64(zmm3, imm8);                                     \
-    zmm4 = _mm512_slli_epi64(zmm4, imm8);                                     \
-    zmm5 = _mm512_slli_epi64(zmm5, imm8);                                     \
-    zmm6 = _mm512_slli_epi64(zmm6, imm8);                                     \
-    zmm7 = _mm512_slli_epi64(zmm7, imm8);
+    zmm3 = _mm512_slli_epi64(zmm3, imm8);
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_SRLI_EPI64(imm8)                      \
     zmm0 = _mm512_srli_epi64(zmm0, imm8);                                     \
     zmm1 = _mm512_srli_epi64(zmm1, imm8);                                     \
     zmm2 = _mm512_srli_epi64(zmm2, imm8);                                     \
-    zmm3 = _mm512_srli_epi64(zmm3, imm8);                                     \
-    zmm4 = _mm512_srli_epi64(zmm4, imm8);                                     \
-    zmm5 = _mm512_srli_epi64(zmm5, imm8);                                     \
-    zmm6 = _mm512_srli_epi64(zmm6, imm8);                                     \
-    zmm7 = _mm512_srli_epi64(zmm7, imm8);
+    zmm3 = _mm512_srli_epi64(zmm3, imm8);
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_CVTEPU32_PS_31                        \
     zmm0 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm0));                     \
     zmm1 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm1));                     \
     zmm2 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm2));                     \
-    zmm3 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm3));                     \
-    zmm4 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm4));                     \
-    zmm5 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm5));                     \
-    zmm6 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm6));                     \
-    zmm7 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm7));
+    zmm3 = _mm512_castps_si512(_mm512_cvtepi32_ps(zmm3));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_CVTEPU32_PS                           \
     const __m512 c = _mm512_set1_ps(Pow2<float, 23>::value);                  \
@@ -159,43 +115,23 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     __m512i xmm1 = _mm512_and_si512(zmm1, l);                                 \
     __m512i xmm2 = _mm512_and_si512(zmm2, l);                                 \
     __m512i xmm3 = _mm512_and_si512(zmm3, l);                                 \
-    __m512i xmm4 = _mm512_and_si512(zmm4, l);                                 \
-    __m512i xmm5 = _mm512_and_si512(zmm5, l);                                 \
-    __m512i xmm6 = _mm512_and_si512(zmm6, l);                                 \
-    __m512i xmm7 = _mm512_and_si512(zmm7, l);                                 \
     MCKL_RANDOM_INTERNAL_U01_AVX512_SRLI_EPI32(16);                           \
     zmm0 = _mm512_add_epi32(zmm0, _mm512_castps_si512(c));                    \
     zmm1 = _mm512_add_epi32(zmm1, _mm512_castps_si512(c));                    \
     zmm2 = _mm512_add_epi32(zmm2, _mm512_castps_si512(c));                    \
     zmm3 = _mm512_add_epi32(zmm3, _mm512_castps_si512(c));                    \
-    zmm4 = _mm512_add_epi32(zmm4, _mm512_castps_si512(c));                    \
-    zmm5 = _mm512_add_epi32(zmm5, _mm512_castps_si512(c));                    \
-    zmm6 = _mm512_add_epi32(zmm6, _mm512_castps_si512(c));                    \
-    zmm7 = _mm512_add_epi32(zmm7, _mm512_castps_si512(c));                    \
     xmm0 = _mm512_add_epi32(xmm0, _mm512_castps_si512(c));                    \
     xmm1 = _mm512_add_epi32(xmm1, _mm512_castps_si512(c));                    \
     xmm2 = _mm512_add_epi32(xmm2, _mm512_castps_si512(c));                    \
     xmm3 = _mm512_add_epi32(xmm3, _mm512_castps_si512(c));                    \
-    xmm4 = _mm512_add_epi32(xmm4, _mm512_castps_si512(c));                    \
-    xmm5 = _mm512_add_epi32(xmm5, _mm512_castps_si512(c));                    \
-    xmm6 = _mm512_add_epi32(xmm6, _mm512_castps_si512(c));                    \
-    xmm7 = _mm512_add_epi32(xmm7, _mm512_castps_si512(c));                    \
     zmm0 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm0), c));  \
     zmm1 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm1), c));  \
     zmm2 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm2), c));  \
     zmm3 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm3), c));  \
-    zmm4 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm4), c));  \
-    zmm5 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm5), c));  \
-    zmm6 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm6), c));  \
-    zmm7 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(zmm7), c));  \
     xmm0 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm0), c));  \
     xmm1 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm1), c));  \
     xmm2 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm2), c));  \
     xmm3 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm3), c));  \
-    xmm4 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm4), c));  \
-    xmm5 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm5), c));  \
-    xmm6 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm6), c));  \
-    xmm7 = _mm512_castps_si512(_mm512_sub_ps(_mm512_castsi512_ps(xmm7), c));  \
     zmm0 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
         _mm512_castsi512_ps(zmm0), d, _mm512_castsi512_ps(xmm0)));            \
     zmm1 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
@@ -203,15 +139,7 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     zmm2 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
         _mm512_castsi512_ps(zmm2), d, _mm512_castsi512_ps(xmm2)));            \
     zmm3 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
-        _mm512_castsi512_ps(zmm3), d, _mm512_castsi512_ps(xmm3)));            \
-    zmm4 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
-        _mm512_castsi512_ps(zmm4), d, _mm512_castsi512_ps(xmm4)));            \
-    zmm5 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
-        _mm512_castsi512_ps(zmm5), d, _mm512_castsi512_ps(xmm5)));            \
-    zmm6 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
-        _mm512_castsi512_ps(zmm6), d, _mm512_castsi512_ps(xmm6)));            \
-    zmm7 = _mm512_castps_si512(_mm512_fmadd_ps(                               \
-        _mm512_castsi512_ps(zmm7), d, _mm512_castsi512_ps(xmm7)));
+        _mm512_castsi512_ps(zmm3), d, _mm512_castsi512_ps(xmm3)));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_CVTEPU64_PD_52                        \
     const __m512d c = _mm512_set1_pd(Pow2<double, 52>::value);                \
@@ -219,18 +147,10 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     zmm1 = _mm512_add_epi64(zmm1, _mm512_castpd_si512(c));                    \
     zmm2 = _mm512_add_epi64(zmm2, _mm512_castpd_si512(c));                    \
     zmm3 = _mm512_add_epi64(zmm3, _mm512_castpd_si512(c));                    \
-    zmm4 = _mm512_add_epi64(zmm4, _mm512_castpd_si512(c));                    \
-    zmm5 = _mm512_add_epi64(zmm5, _mm512_castpd_si512(c));                    \
-    zmm6 = _mm512_add_epi64(zmm6, _mm512_castpd_si512(c));                    \
-    zmm7 = _mm512_add_epi64(zmm7, _mm512_castpd_si512(c));                    \
     zmm0 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm0), c));  \
     zmm1 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm1), c));  \
     zmm2 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm2), c));  \
-    zmm3 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm3), c));  \
-    zmm4 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm4), c));  \
-    zmm5 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm5), c));  \
-    zmm6 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm6), c));  \
-    zmm7 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm7), c));
+    zmm3 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm3), c));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_CVTEPU64_PD                           \
     const __m512d c = _mm512_set1_pd(Pow2<double, 52>::value);                \
@@ -240,43 +160,23 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     __m512i xmm1 = _mm512_and_si512(zmm1, l);                                 \
     __m512i xmm2 = _mm512_and_si512(zmm2, l);                                 \
     __m512i xmm3 = _mm512_and_si512(zmm3, l);                                 \
-    __m512i xmm4 = _mm512_and_si512(zmm4, l);                                 \
-    __m512i xmm5 = _mm512_and_si512(zmm5, l);                                 \
-    __m512i xmm6 = _mm512_and_si512(zmm6, l);                                 \
-    __m512i xmm7 = _mm512_and_si512(zmm7, l);                                 \
     MCKL_RANDOM_INTERNAL_U01_AVX512_SRLI_EPI64(32);                           \
     zmm0 = _mm512_add_epi64(zmm0, _mm512_castpd_si512(c));                    \
     zmm1 = _mm512_add_epi64(zmm1, _mm512_castpd_si512(c));                    \
     zmm2 = _mm512_add_epi64(zmm2, _mm512_castpd_si512(c));                    \
     zmm3 = _mm512_add_epi64(zmm3, _mm512_castpd_si512(c));                    \
-    zmm4 = _mm512_add_epi64(zmm4, _mm512_castpd_si512(c));                    \
-    zmm5 = _mm512_add_epi64(zmm5, _mm512_castpd_si512(c));                    \
-    zmm6 = _mm512_add_epi64(zmm6, _mm512_castpd_si512(c));                    \
-    zmm7 = _mm512_add_epi64(zmm7, _mm512_castpd_si512(c));                    \
     zmm0 = _mm512_add_epi64(zmm0, _mm512_castpd_si512(c));                    \
     xmm1 = _mm512_add_epi64(xmm1, _mm512_castpd_si512(c));                    \
     xmm2 = _mm512_add_epi64(xmm2, _mm512_castpd_si512(c));                    \
     xmm3 = _mm512_add_epi64(xmm3, _mm512_castpd_si512(c));                    \
-    xmm4 = _mm512_add_epi64(xmm4, _mm512_castpd_si512(c));                    \
-    xmm5 = _mm512_add_epi64(xmm5, _mm512_castpd_si512(c));                    \
-    xmm6 = _mm512_add_epi64(xmm6, _mm512_castpd_si512(c));                    \
-    xmm7 = _mm512_add_epi64(xmm7, _mm512_castpd_si512(c));                    \
     zmm0 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm0), c));  \
     zmm1 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm1), c));  \
     zmm2 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm2), c));  \
     zmm3 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm3), c));  \
-    zmm4 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm4), c));  \
-    zmm5 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm5), c));  \
-    zmm6 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm6), c));  \
-    zmm7 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm7), c));  \
     xmm0 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm0), c));  \
     xmm1 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm1), c));  \
     xmm2 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm2), c));  \
     xmm3 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm3), c));  \
-    xmm4 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm4), c));  \
-    xmm5 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm5), c));  \
-    xmm6 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm6), c));  \
-    xmm7 = _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm7), c));  \
     zmm0 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
         _mm512_castsi512_pd(zmm0), d, _mm512_castsi512_pd(xmm0)));            \
     zmm1 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
@@ -284,35 +184,19 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     zmm2 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
         _mm512_castsi512_pd(zmm2), d, _mm512_castsi512_pd(xmm2)));            \
     zmm3 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
-        _mm512_castsi512_pd(zmm3), d, _mm512_castsi512_pd(xmm3)));            \
-    zmm4 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
-        _mm512_castsi512_pd(zmm4), d, _mm512_castsi512_pd(xmm4)));            \
-    zmm5 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
-        _mm512_castsi512_pd(zmm5), d, _mm512_castsi512_pd(xmm5)));            \
-    zmm6 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
-        _mm512_castsi512_pd(zmm6), d, _mm512_castsi512_pd(xmm6)));            \
-    zmm7 = _mm512_castpd_si512(_mm512_fmadd_pd(                               \
-        _mm512_castsi512_pd(zmm7), d, _mm512_castsi512_pd(xmm7)));
+        _mm512_castsi512_pd(zmm3), d, _mm512_castsi512_pd(xmm3)));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_MUL_PS(a)                             \
     zmm0 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm0), a));  \
     zmm1 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm1), a));  \
     zmm2 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm2), a));  \
-    zmm3 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm3), a));  \
-    zmm4 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm4), a));  \
-    zmm5 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm5), a));  \
-    zmm6 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm6), a));  \
-    zmm7 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm7), a));
+    zmm3 = _mm512_castps_si512(_mm512_mul_ps(_mm512_castsi512_ps(zmm3), a));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_MUL_PD(a)                             \
     zmm0 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm0), a));  \
     zmm1 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm1), a));  \
     zmm2 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm2), a));  \
-    zmm3 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm3), a));  \
-    zmm4 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm4), a));  \
-    zmm5 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm5), a));  \
-    zmm6 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm6), a));  \
-    zmm7 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm7), a));
+    zmm3 = _mm512_castpd_si512(_mm512_mul_pd(_mm512_castsi512_pd(zmm3), a));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_FMADD_PS(a, b)                        \
     zmm0 = _mm512_castps_si512(                                               \
@@ -322,15 +206,7 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     zmm2 = _mm512_castps_si512(                                               \
         _mm512_fmadd_ps(_mm512_castsi512_ps(zmm2), a, b));                    \
     zmm3 = _mm512_castps_si512(                                               \
-        _mm512_fmadd_ps(_mm512_castsi512_ps(zmm3), a, b));                    \
-    zmm4 = _mm512_castps_si512(                                               \
-        _mm512_fmadd_ps(_mm512_castsi512_ps(zmm4), a, b));                    \
-    zmm5 = _mm512_castps_si512(                                               \
-        _mm512_fmadd_ps(_mm512_castsi512_ps(zmm5), a, b));                    \
-    zmm6 = _mm512_castps_si512(                                               \
-        _mm512_fmadd_ps(_mm512_castsi512_ps(zmm6), a, b));                    \
-    zmm7 = _mm512_castps_si512(                                               \
-        _mm512_fmadd_ps(_mm512_castsi512_ps(zmm7), a, b));
+        _mm512_fmadd_ps(_mm512_castsi512_ps(zmm3), a, b));
 
 #define MCKL_RANDOM_INTERNAL_U01_AVX512_FMADD_PD(a, b)                        \
     zmm0 = _mm512_castpd_si512(                                               \
@@ -340,15 +216,7 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     zmm2 = _mm512_castpd_si512(                                               \
         _mm512_fmadd_pd(_mm512_castsi512_pd(zmm2), a, b));                    \
     zmm3 = _mm512_castpd_si512(                                               \
-        _mm512_fmadd_pd(_mm512_castsi512_pd(zmm3), a, b));                    \
-    zmm4 = _mm512_castpd_si512(                                               \
-        _mm512_fmadd_pd(_mm512_castsi512_pd(zmm4), a, b));                    \
-    zmm5 = _mm512_castpd_si512(                                               \
-        _mm512_fmadd_pd(_mm512_castsi512_pd(zmm5), a, b));                    \
-    zmm6 = _mm512_castpd_si512(                                               \
-        _mm512_fmadd_pd(_mm512_castsi512_pd(zmm6), a, b));                    \
-    zmm7 = _mm512_castpd_si512(                                               \
-        _mm512_fmadd_pd(_mm512_castsi512_pd(zmm7), a, b));
+        _mm512_fmadd_pd(_mm512_castsi512_pd(zmm3), a, b));
 
 namespace mckl {
 
@@ -371,7 +239,7 @@ class U01AVX512ImplBase
 
     MCKL_INLINE static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
-        constexpr std::size_t S = 8;
+        constexpr std::size_t S = 4;
         constexpr std::size_t N = sizeof(__m512i) * S / sizeof(RealType);
 
         while (n >= N) {
@@ -405,7 +273,7 @@ class U01CanonicalAVX512ImplBase
 
     MCKL_INLINE static void eval(std::size_t n, const UIntType *u, RealType *r)
     {
-        constexpr std::size_t S = 8;
+        constexpr std::size_t S = 4;
         constexpr std::size_t N = sizeof(__m512i) * S / sizeof(RealType);
 
         while (n >= N) {
@@ -734,10 +602,6 @@ class U01CanonicalAVX512Impl<UIntType, double, 2, 32>
         __m512i xmm1 = _mm512_and_si512(zmm1, l);
         __m512i xmm2 = _mm512_and_si512(zmm2, l);
         __m512i xmm3 = _mm512_and_si512(zmm3, l);
-        __m512i xmm4 = _mm512_and_si512(zmm4, l);
-        __m512i xmm5 = _mm512_and_si512(zmm5, l);
-        __m512i xmm6 = _mm512_and_si512(zmm6, l);
-        __m512i xmm7 = _mm512_and_si512(zmm7, l);
 
         MCKL_RANDOM_INTERNAL_U01_AVX512_SRLI_EPI64(32);
 
@@ -745,19 +609,11 @@ class U01CanonicalAVX512Impl<UIntType, double, 2, 32>
         zmm1 = _mm512_add_epi64(zmm1, _mm512_castpd_si512(c));
         zmm2 = _mm512_add_epi64(zmm2, _mm512_castpd_si512(c));
         zmm3 = _mm512_add_epi64(zmm3, _mm512_castpd_si512(c));
-        zmm4 = _mm512_add_epi64(zmm4, _mm512_castpd_si512(c));
-        zmm5 = _mm512_add_epi64(zmm5, _mm512_castpd_si512(c));
-        zmm6 = _mm512_add_epi64(zmm6, _mm512_castpd_si512(c));
-        zmm7 = _mm512_add_epi64(zmm7, _mm512_castpd_si512(c));
 
         xmm0 = _mm512_add_epi64(xmm0, _mm512_castpd_si512(c));
         xmm1 = _mm512_add_epi64(xmm1, _mm512_castpd_si512(c));
         xmm2 = _mm512_add_epi64(xmm2, _mm512_castpd_si512(c));
         xmm3 = _mm512_add_epi64(xmm3, _mm512_castpd_si512(c));
-        xmm4 = _mm512_add_epi64(xmm4, _mm512_castpd_si512(c));
-        xmm5 = _mm512_add_epi64(xmm5, _mm512_castpd_si512(c));
-        xmm6 = _mm512_add_epi64(xmm6, _mm512_castpd_si512(c));
-        xmm7 = _mm512_add_epi64(xmm7, _mm512_castpd_si512(c));
 
         zmm0 =
             _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm0), c));
@@ -767,14 +623,6 @@ class U01CanonicalAVX512Impl<UIntType, double, 2, 32>
             _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm2), c));
         zmm3 =
             _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm3), c));
-        zmm4 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm4), c));
-        zmm5 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm5), c));
-        zmm6 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm6), c));
-        zmm7 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(zmm7), c));
 
         xmm0 =
             _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm0), c));
@@ -784,14 +632,6 @@ class U01CanonicalAVX512Impl<UIntType, double, 2, 32>
             _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm2), c));
         xmm3 =
             _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm3), c));
-        xmm4 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm4), c));
-        xmm5 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm5), c));
-        xmm6 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm6), c));
-        xmm7 =
-            _mm512_castpd_si512(_mm512_sub_pd(_mm512_castsi512_pd(xmm7), c));
 
         MCKL_RANDOM_INTERNAL_U01_AVX512_MUL_PD(d32);
 
@@ -803,14 +643,6 @@ class U01CanonicalAVX512Impl<UIntType, double, 2, 32>
             _mm512_castsi512_pd(xmm2), d64, _mm512_castsi512_pd(zmm2)));
         zmm3 = _mm512_castpd_si512(_mm512_fmadd_pd(
             _mm512_castsi512_pd(xmm3), d64, _mm512_castsi512_pd(zmm3)));
-        zmm4 = _mm512_castpd_si512(_mm512_fmadd_pd(
-            _mm512_castsi512_pd(xmm4), d64, _mm512_castsi512_pd(zmm4)));
-        zmm5 = _mm512_castpd_si512(_mm512_fmadd_pd(
-            _mm512_castsi512_pd(xmm5), d64, _mm512_castsi512_pd(zmm5)));
-        zmm6 = _mm512_castpd_si512(_mm512_fmadd_pd(
-            _mm512_castsi512_pd(xmm6), d64, _mm512_castsi512_pd(zmm6)));
-        zmm7 = _mm512_castpd_si512(_mm512_fmadd_pd(
-            _mm512_castsi512_pd(xmm7), d64, _mm512_castsi512_pd(zmm7)));
 
         MCKL_RANDOM_INTERNAL_U01_AVX512_STOREU_PD(r)
     }
