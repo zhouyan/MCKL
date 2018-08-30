@@ -97,7 +97,7 @@ class AESGeneratorAESNIImpl
             r += N * R;
         }
 
-        alignas(32) std::array<ResultType, N * R> t;
+        alignas(MCKL_ALIGNMENT) std::array<ResultType, N * R> t;
         for (std::size_t i = 0; i != n; ++i) {
             MCKL_INLINE_CALL increment(ctr);
             __m128i s =

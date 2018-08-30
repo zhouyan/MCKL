@@ -928,6 +928,10 @@ template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
 class IncrementBlockSI256;
 
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
+class IncrementBlockSI512;
+
 } // namespace internal
 
 /// \brief Traits of RNG engines

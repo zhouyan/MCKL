@@ -68,7 +68,7 @@ inline void u01_trans_sorted_impl(std::size_t n0, std::size_t n,
         return;
     }
 
-    alignas(32) std::array<RealType, K> s;
+    alignas(MCKL_ALIGNMENT) std::array<RealType, K> s;
     std::size_t j = 0;
     std::size_t m = N - n0;
     log(n - n0, u01, r);

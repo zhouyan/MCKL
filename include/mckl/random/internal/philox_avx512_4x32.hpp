@@ -102,77 +102,82 @@ class Philox4x32GeneratorAVX512Impl
         constexpr T w0 = Constants::weyl::value[0];
         constexpr T w1 = Constants::weyl::value[1];
 
-        const T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0,
-            std::get<0>(key), 0, std::get<1>(key)};
+        const T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0, std::get<0>(key), 0,
+            std::get<1>(key)};
         mckl_philox4x32_avx512_kernel(ctr.data(), n, r, mwk);
 #else  // MCKL_USE_ASM_LIBRARY
-       // TODO Move to AVX512
         constexpr std::size_t S = 8;
-        constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
+        constexpr std::size_t N = sizeof(__m512i) * S / (sizeof(T) * K);
 
         const int k0 = static_cast<int>(std::get<0>(key));
         const int k1 = static_cast<int>(std::get<1>(key));
-        const __m256i ymmk0 = _mm256_set_epi32(k1, 0, k0, 0, k1, 0, k0, 0);
+        const __m512i ymmk0 = _mm512_set_epi32(
+            k1, 0, k0, 0, k1, 0, k0, 0, k1, 0, k0, 0, k1, 0, k0, 0);
 
-        __m256i ymmc =
-            _mm256_set_epi64x(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+        __m512i ymmc =
+            _mm512_set_epi64(static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)),
+                static_cast<MCKL_INT64>(std::get<1>(ctr)),
+                static_cast<MCKL_INT64>(std::get<0>(ctr)),
+                static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)),
                 static_cast<MCKL_INT64>(std::get<1>(ctr)),
                 static_cast<MCKL_INT64>(std::get<0>(ctr)));
         ctr.front() += n;
 
-        __m256i *rptr = reinterpret_cast<__m256i *>(r);
+        __m512i *rptr = reinterpret_cast<__m512i *>(r);
         while (n != 0) {
-            __m256i ymm0 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x02, 0, 0x01));
-            __m256i ymm1 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x04, 0, 0x03));
-            __m256i ymm2 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x06, 0, 0x05));
-            __m256i ymm3 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x08, 0, 0x07));
-            __m256i ymm4 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0A, 0, 0x09));
-            __m256i ymm5 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0C, 0, 0x0B));
-            __m256i ymm6 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x0E, 0, 0x0D));
-            __m256i ymm7 =
-                _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x0F));
-            ymmc = _mm256_add_epi64(ymmc, _mm256_set_epi64x(0, 0x10, 0, 0x10));
+            __m512i ymm0 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x04, 0, 0x03, 0, 0x02, 0, 0x01));
+            __m512i ymm1 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x08, 0, 0x07, 0, 0x06, 0, 0x05));
+            __m512i ymm2 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x0C, 0, 0x0B, 0, 0x0A, 0, 0x09));
+            __m512i ymm3 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x10, 0, 0x0F, 0, 0x0E, 0, 0x0D));
+            __m512i ymm4 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x14, 0, 0x13, 0, 0x12, 0, 0x11));
+            __m512i ymm5 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x18, 0, 0x17, 0, 0x16, 0, 0x15));
+            __m512i ymm6 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x1C, 0, 0x1B, 0, 0x1A, 0, 0x19));
+            __m512i ymm7 = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x20, 0, 0x1F, 0, 0x1E, 0, 0x1D));
+            ymmc = _mm512_add_epi64(
+                ymmc, _mm512_set_epi64(0, 0x20, 0, 0x20, 0, 0x20, 0, 0x20));
 
-            ymm0 = _mm256_shuffle_epi32(ymm0, 0xC6);
-            ymm1 = _mm256_shuffle_epi32(ymm1, 0xC6);
-            ymm2 = _mm256_shuffle_epi32(ymm2, 0xC6);
-            ymm3 = _mm256_shuffle_epi32(ymm3, 0xC6);
-            ymm4 = _mm256_shuffle_epi32(ymm4, 0xC6);
-            ymm5 = _mm256_shuffle_epi32(ymm5, 0xC6);
-            ymm6 = _mm256_shuffle_epi32(ymm6, 0xC6);
-            ymm7 = _mm256_shuffle_epi32(ymm7, 0xC6);
+            ymm0 = _mm512_shuffle_epi32(ymm0, 0xC6);
+            ymm1 = _mm512_shuffle_epi32(ymm1, 0xC6);
+            ymm2 = _mm512_shuffle_epi32(ymm2, 0xC6);
+            ymm3 = _mm512_shuffle_epi32(ymm3, 0xC6);
+            ymm4 = _mm512_shuffle_epi32(ymm4, 0xC6);
+            ymm5 = _mm512_shuffle_epi32(ymm5, 0xC6);
+            ymm6 = _mm512_shuffle_epi32(ymm6, 0xC6);
+            ymm7 = _mm512_shuffle_epi32(ymm7, 0xC6);
 
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 0, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 1, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 2, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 3, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 4, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 5, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 6, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 7, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 8, 0x93)
-            MCKL_RANDOM_INTERNAL_PHILOX_AVX2_32_RBOX(4, 9, 0xB1)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 0, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 1, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 2, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 3, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 4, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 5, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 6, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 7, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 8, 0x93)
+            MCKL_RANDOM_INTERNAL_PHILOX_AVX512_32_RBOX(4, 9, 0xB1)
 
             if (n >= N) {
                 n -= N;
-                _mm256_storeu_si256(rptr++, ymm0);
-                _mm256_storeu_si256(rptr++, ymm1);
-                _mm256_storeu_si256(rptr++, ymm2);
-                _mm256_storeu_si256(rptr++, ymm3);
-                _mm256_storeu_si256(rptr++, ymm4);
-                _mm256_storeu_si256(rptr++, ymm5);
-                _mm256_storeu_si256(rptr++, ymm6);
-                _mm256_storeu_si256(rptr++, ymm7);
+                _mm512_storeu_si512(rptr++, ymm0);
+                _mm512_storeu_si512(rptr++, ymm1);
+                _mm512_storeu_si512(rptr++, ymm2);
+                _mm512_storeu_si512(rptr++, ymm3);
+                _mm512_storeu_si512(rptr++, ymm4);
+                _mm512_storeu_si512(rptr++, ymm5);
+                _mm512_storeu_si512(rptr++, ymm6);
+                _mm512_storeu_si512(rptr++, ymm7);
             } else {
-                std::array<__m256i, S> s;
+                std::array<__m512i, S> s;
                 std::get<0>(s) = ymm0;
                 std::get<1>(s) = ymm1;
                 std::get<2>(s) = ymm2;

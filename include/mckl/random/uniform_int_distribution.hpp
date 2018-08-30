@@ -90,7 +90,7 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void uniform_int_distribution_impl(RNGType &rng, std::size_t n,
     IntType *r, IntType a, IntType b, std::true_type)
 {
-    alignas(32) std::array<double, K> s;
+    alignas(MCKL_ALIGNMENT) std::array<double, K> s;
     double ra = static_cast<double>(a);
     double rb = static_cast<double>(b);
     double *const u = s.data();

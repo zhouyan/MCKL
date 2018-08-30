@@ -205,7 +205,7 @@ class Skein
         std::size_t N = M.bits();
         const char *C = M.data();
         const std::size_t k = internal::BufferSize<key_type>::value;
-        alignas(32) std::array<key_type, k> message;
+        alignas(MCKL_ALIGNMENT) std::array<key_type, k> message;
 
         const bool B = N % CHAR_BIT != 0;
         key_type H = G;

@@ -46,8 +46,6 @@ namespace mckl {
 
 namespace internal {
 
-// TODO Move to AVX512
-
 template <std::size_t>
 class PhiloxGeneratorAVX512Impl32Permute;
 
@@ -56,18 +54,18 @@ class PhiloxGeneratorAVX512Impl32Permute<2>
 {
   public:
     template <std::size_t S>
-    MCKL_INLINE static void first(std::array<__m256i, S> &)
+    MCKL_INLINE static void first(std::array<__m512i, S> &)
     {
     }
 
     template <std::size_t S>
-    MCKL_INLINE static void round(std::array<__m256i, S> &s)
+    MCKL_INLINE static void round(std::array<__m512i, S> &s)
     {
         shuffle_epi32<0xB1>(s);
     }
 
     template <std::size_t S>
-    MCKL_INLINE static void last(std::array<__m256i, S> &s)
+    MCKL_INLINE static void last(std::array<__m512i, S> &s)
     {
         shuffle_epi32<0xB1>(s);
     }
@@ -78,19 +76,19 @@ class PhiloxGeneratorAVX512Impl32Permute<4>
 {
   public:
     template <std::size_t S>
-    MCKL_INLINE static void first(std::array<__m256i, S> &s)
+    MCKL_INLINE static void first(std::array<__m512i, S> &s)
     {
         shuffle_epi32<0xC6>(s);
     }
 
     template <std::size_t S>
-    MCKL_INLINE static void round(std::array<__m256i, S> &s)
+    MCKL_INLINE static void round(std::array<__m512i, S> &s)
     {
         shuffle_epi32<0x93>(s);
     }
 
     template <std::size_t S>
-    MCKL_INLINE static void last(std::array<__m256i, S> &s)
+    MCKL_INLINE static void last(std::array<__m512i, S> &s)
     {
         shuffle_epi32<0xB1>(s);
     }
@@ -119,13 +117,13 @@ class PhiloxGeneratorAVX512Impl32
         const std::array<T, K / 2> &key)
     {
         constexpr std::size_t S = 8;
-        constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
+        constexpr std::size_t N = sizeof(__m512i) * S / (sizeof(T) * K);
         constexpr std::size_t R = sizeof(T) * K / sizeof(ResultType);
 
-        const std::array<__m256i, Rounds> rk(round_key(key));
+        const std::array<__m512i, Rounds> rk(round_key(key));
         while (n >= N) {
-            std::array<__m256i, S> s;
-            MCKL_INLINE_CALL increment_si256(ctr, s);
+            std::array<__m512i, S> s;
+            MCKL_INLINE_CALL increment_si512(ctr, s);
             MCKL_INLINE_CALL PhiloxGeneratorAVX512Impl32Permute<K>::first(s);
             MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, s, rk);
             MCKL_INLINE_CALL PhiloxGeneratorAVX512Impl32Permute<K>::last(s);
@@ -134,7 +132,7 @@ class PhiloxGeneratorAVX512Impl32
             r += N * R;
         }
 
-        alignas(32) std::array<ResultType, N * R> t;
+        alignas(MCKL_ALIGNMENT) std::array<ResultType, N * R> t;
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             ctr, n, t.data(), key);
         std::memcpy(r, t.data(), sizeof(T) * K * n);
@@ -142,34 +140,34 @@ class PhiloxGeneratorAVX512Impl32
 
   private:
     template <std::size_t, std::size_t S>
-    static void round(std::array<__m256i, S> &,
-        const std::array<__m256i, Rounds> &, std::false_type)
+    static void round(std::array<__m512i, S> &,
+        const std::array<__m512i, Rounds> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t S>
-    static void round(std::array<__m256i, S> &s,
-        const std::array<__m256i, Rounds> &rk, std::true_type)
+    static void round(std::array<__m512i, S> &s,
+        const std::array<__m512i, Rounds> &rk, std::true_type)
     {
         MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(N, s, rk);
     }
 
     template <std::size_t N, std::size_t S>
     MCKL_INLINE static void rbox(
-        std::array<__m256i, S> &s, const std::array<__m256i, Rounds> &rk)
+        std::array<__m512i, S> &s, const std::array<__m512i, Rounds> &rk)
     {
         rbox<N>(s, rk, std::integral_constant<bool, (N > 0 && N <= Rounds)>());
     }
 
     template <std::size_t, std::size_t S>
-    static void rbox(std::array<__m256i, S> &,
-        const std::array<__m256i, Rounds> &, std::false_type)
+    static void rbox(std::array<__m512i, S> &,
+        const std::array<__m512i, Rounds> &, std::false_type)
     {
     }
 
     template <std::size_t N, std::size_t S>
-    static void rbox(std::array<__m256i, S> &s,
-        const std::array<__m256i, Rounds> &rk, std::true_type)
+    static void rbox(std::array<__m512i, S> &s,
+        const std::array<__m512i, Rounds> &rk, std::true_type)
     {
         constexpr int mul0 =
             static_cast<int>(Constants::multiplier::value[0 % (K / 2)]);
@@ -179,30 +177,46 @@ class PhiloxGeneratorAVX512Impl32
             static_cast<int>(Constants::multiplier::value[2 % (K / 2)]);
         constexpr int mul3 =
             static_cast<int>(Constants::multiplier::value[3 % (K / 2)]);
+        constexpr int mul4 =
+            static_cast<int>(Constants::multiplier::value[4 % (K / 2)]);
+        constexpr int mul5 =
+            static_cast<int>(Constants::multiplier::value[5 % (K / 2)]);
+        constexpr int mul6 =
+            static_cast<int>(Constants::multiplier::value[6 % (K / 2)]);
+        constexpr int mul7 =
+            static_cast<int>(Constants::multiplier::value[7 % (K / 2)]);
         constexpr int mask = static_cast<int>(0xFFFFFFFF);
 
-        const __m256i m = _mm256_set_epi32(0, mul3, 0, mul2, 0, mul1, 0, mul0);
-        const __m256i a = _mm256_set_epi32(mask, 0, mask, 0, mask, 0, mask, 0);
-        const __m256i k = std::get<N - 1>(rk);
+        const __m512i m = _mm512_set_epi32(0, mul7, 0, mul6, 0, mul5, 0, mul4,
+            0, mul3, 0, mul2, 0, mul1, 0, mul0);
+        const __m512i a = _mm512_set_epi32(mask, 0, mask, 0, mask, 0, mask, 0,
+            mask, 0, mask, 0, mask, 0, mask, 0);
+        const __m512i k = std::get<N - 1>(rk);
 
-        std::array<__m256i, S> t;
+        std::array<__m512i, S> t;
         mul_epu32(s, m, t);
-        and_si256(s, a);
-        xor_si256(s, k);
-        xor_si256(s, t);
+        and_si512(s, a);
+        xor_si512(s, k);
+        xor_si512(s, t);
         permute<N>(s);
     }
 
-    MCKL_INLINE static std::array<__m256i, Rounds> round_key(
+    MCKL_INLINE static std::array<__m512i, Rounds> round_key(
         const std::array<T, K / 2> &k)
     {
         const int k0 = static_cast<int>(std::get<0 % (K / 2)>(k));
         const int k1 = static_cast<int>(std::get<1 % (K / 2)>(k));
         const int k2 = static_cast<int>(std::get<2 % (K / 2)>(k));
         const int k3 = static_cast<int>(std::get<3 % (K / 2)>(k));
+        const int k4 = static_cast<int>(std::get<4 % (K / 2)>(k));
+        const int k5 = static_cast<int>(std::get<5 % (K / 2)>(k));
+        const int k6 = static_cast<int>(std::get<6 % (K / 2)>(k));
+        const int k7 = static_cast<int>(std::get<7 % (K / 2)>(k));
 
-        std::array<__m256i, Rounds> rk;
-        set_key<0>(rk, _mm256_set_epi32(k3, 0, k2, 0, k1, 0, k0, 0),
+        std::array<__m512i, Rounds> rk;
+        set_key<0>(rk,
+            _mm512_set_epi32(
+                k7, 0, k6, 0, k5, 0, k4, 0, k3, 0, k2, 0, k1, 0, k0, 0),
             std::true_type());
 
         return rk;
@@ -210,13 +224,13 @@ class PhiloxGeneratorAVX512Impl32
 
     template <std::size_t>
     static void set_key(
-        std::array<__m256i, Rounds> &, const __m256i &, std::false_type)
+        std::array<__m512i, Rounds> &, const __m512i &, std::false_type)
     {
     }
 
     template <std::size_t N>
     static void set_key(
-        std::array<__m256i, Rounds> &rk, const __m256i &k, std::true_type)
+        std::array<__m512i, Rounds> &rk, const __m512i &k, std::true_type)
     {
         constexpr int w0 =
             static_cast<int>(Constants::weyl::value[0 % (K / 2)] * N);
@@ -226,25 +240,34 @@ class PhiloxGeneratorAVX512Impl32
             static_cast<int>(Constants::weyl::value[2 % (K / 2)] * N);
         constexpr int w3 =
             static_cast<int>(Constants::weyl::value[3 % (K / 2)] * N);
+        constexpr int w4 =
+            static_cast<int>(Constants::weyl::value[4 % (K / 2)] * N);
+        constexpr int w5 =
+            static_cast<int>(Constants::weyl::value[5 % (K / 2)] * N);
+        constexpr int w6 =
+            static_cast<int>(Constants::weyl::value[6 % (K / 2)] * N);
+        constexpr int w7 =
+            static_cast<int>(Constants::weyl::value[7 % (K / 2)] * N);
 
-        std::get<N>(rk) =
-            _mm256_add_epi32(k, _mm256_set_epi32(w3, 0, w2, 0, w1, 0, w0, 0));
+        std::get<N>(rk) = _mm512_add_epi32(k,
+            _mm512_set_epi32(
+                w7, 0, w6, 0, w5, 0, w4, 0, w3, 0, w2, 0, w1, 0, w0, 0));
         set_key<N + 1>(rk, k, std::integral_constant<bool, N + 1 < Rounds>());
     }
 
     template <std::size_t N, std::size_t S>
-    static void permute(std::array<__m256i, S> &s)
+    static void permute(std::array<__m512i, S> &s)
     {
         permute(s, std::integral_constant<bool, (N > 0 && N < Rounds)>());
     }
 
     template <std::size_t S>
-    static void permute(std::array<__m256i, S> &, std::false_type)
+    static void permute(std::array<__m512i, S> &, std::false_type)
     {
     }
 
     template <std::size_t S>
-    static void permute(std::array<__m256i, S> &s, std::true_type)
+    static void permute(std::array<__m512i, S> &s, std::true_type)
     {
         PhiloxGeneratorAVX512Impl32Permute<K>::round(s);
     }

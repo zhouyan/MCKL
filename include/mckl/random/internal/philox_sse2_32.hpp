@@ -132,7 +132,7 @@ class PhiloxGeneratorSSE2Impl32
             r += N * R;
         }
 
-        alignas(32) std::array<ResultType, N * R> t;
+        alignas(MCKL_ALIGNMENT) std::array<ResultType, N * R> t;
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             ctr, n, t.data(), key);
         std::memcpy(r, t.data(), sizeof(__m128i) * n);

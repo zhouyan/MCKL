@@ -49,7 +49,7 @@ inline void increment_si128(
 {
     constexpr T blocks = (sizeof(__m128i) * S) / (sizeof(T) * K);
 
-    alignas(32) std::array<std::array<T, K>, blocks> ctr_block;
+    alignas(MCKL_ALIGNMENT) std::array<std::array<T, K>, blocks> ctr_block;
     increment(ctr, ctr_block);
     std::memcpy(s.data(), ctr_block.data(), sizeof(__m128i) * S);
 }

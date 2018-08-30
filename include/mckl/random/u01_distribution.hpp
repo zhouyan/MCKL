@@ -83,7 +83,7 @@
     {                                                                         \
         using UIntType = U01UIntType<RNGType, RealType>;                      \
                                                                               \
-        alignas(32) std::array<UIntType, K> s;                                \
+        alignas(MCKL_ALIGNMENT) std::array<UIntType, K> s;                                \
         uniform_bits_distribution(rng, n, s.data());                          \
         name<UIntType, RealType>(n, s.data(), r);                             \
     }
@@ -123,7 +123,7 @@ inline void u01_canonical_distribution_impl(
     constexpr int P = (M + W - 1) / W;
     constexpr int Q = 1 > P ? 1 : P;
 
-    alignas(32) std::array<UIntType, K * Q> s;
+    alignas(MCKL_ALIGNMENT) std::array<UIntType, K * Q> s;
     uniform_bits_distribution(rng, n * Q, s.data());
     u01_canonical<UIntType, RealType, Q>(n, s.data(), r);
 }

@@ -64,7 +64,7 @@ inline void uniform_bits_distribution_impl(
     RNGType &rng, std::size_t n, UIntType *r, std::false_type, std::true_type)
 {
     const std::size_t k = BufferSize<UIntType>::value;
-    alignas(32) std::array<typename RNGType::result_type, k> s;
+    alignas(MCKL_ALIGNMENT) std::array<typename RNGType::result_type, k> s;
     while (n >= k) {
         rand(rng, k, s.data());
         std::copy_n(s.data(), k, r);

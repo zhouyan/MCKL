@@ -311,7 +311,7 @@ class AESGeneratorGenericImpl
   public:
     static void eval(const void *plain, void *cipher, const KeySeqType &ks)
     {
-        alignas(32) union {
+        alignas(MCKL_ALIGNMENT) union {
             std::array<std::uint32_t, 4> s;
             std::array<char, sizeof(std::uint32_t) * 4> r;
         } buf;
@@ -332,7 +332,7 @@ class AESGeneratorGenericImpl
     static void eval(
         Counter<std::uint32_t, 4> &ctr, ResultType *r, const KeySeqType &ks)
     {
-        alignas(32) union {
+        alignas(MCKL_ALIGNMENT) union {
             std::array<std::uint32_t, 4> s;
             Counter<std::uint32_t, 4> c;
             std::array<ResultType,
@@ -364,7 +364,7 @@ class AESGeneratorGenericImpl
         constexpr std::size_t R =
             sizeof(std::uint32_t) * 4 / sizeof(ResultType);
 
-        alignas(32) union {
+        alignas(MCKL_ALIGNMENT) union {
             std::array<std::uint32_t, 4> s;
             Counter<std::uint32_t, 4> c;
             std::array<ResultType,

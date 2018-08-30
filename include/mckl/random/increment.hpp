@@ -43,6 +43,10 @@
 #include <mckl/random/internal/increment_avx2_64.hpp>
 #endif
 
+#if MCKL_USE_AVX512
+#include <mckl/random/internal/increment_avx512_64.hpp>
+#endif
+
 namespace mckl {
 
 namespace internal {
@@ -90,7 +94,7 @@ class CounterImpl<T, K, true, true, true, true>
         std::array<std::uint64_t, sizeof(T) * K / sizeof(std::uint64_t)>;
 }; // class CounterImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief A counter type with the same width as `std::array<T, K>` but with
 /// possibly fewer elements

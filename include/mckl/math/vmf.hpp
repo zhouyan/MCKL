@@ -1027,7 +1027,7 @@ inline void sincos(std::size_t n, const T *a, T *y, T *z)
     const std::size_t l = n % k;
 
     if (a == y) {
-        alignas(32) std::array<T, k> s;
+        alignas(MCKL_ALIGNMENT) std::array<T, k> s;
         for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
             sin<T>(k, a, s.data());
             cos<T>(k, a, z);
@@ -1053,8 +1053,8 @@ inline void cis(std::size_t n, const T *a, std::complex<T> *y)
     const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    alignas(32) T s[k];
-    alignas(32) T c[k];
+    alignas(MCKL_ALIGNMENT) T s[k];
+    alignas(MCKL_ALIGNMENT) T c[k];
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
         sincos<T>(k, a, s, c);
         for (std::size_t j = 0; j != k; ++j) {

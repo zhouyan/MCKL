@@ -178,4 +178,27 @@
 #define MCKL_HAS_TESTU01 0
 #endif
 
+/// \brief The default alignment for scalar type
+/// \ingroup Config
+#ifndef MCKL_ALIGNMENT
+#if MCKL_USE_AVX512
+#define MCKL_ALIGNMENT 64
+#elif MCKL_USE_AVX2
+#define MCKL_ALIGNMENT 32
+#else
+#define MCKL_ALIGNMENT 16
+#endif
+#endif
+
+/// \brief The minimum alignment for any type
+/// \ingroup Config
+#ifndef MCKL_MINIMUM_ALIGNMENT
+#define MCKL_MINIMUM_ALIGNMENT 16
+#endif
+
+#if MCKL_ALIGNMENT < MCKL_MINIMUM_ALIGNMENT
+#undef MCKL_ALIGNEMNT
+#define MCKL_ALIGNMENT MCKL_MINIMUM_ALIGNMENT
+#endif
+
 #endif // MCKL_INTERNAL_CONFIG_H

@@ -48,7 +48,7 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void geometric_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, double p)
 {
-    alignas(32) std::array<double, K> s;
+    alignas(MCKL_ALIGNMENT) std::array<double, K> s;
     u01_oc_distribution(rng, n, s.data());
     log(n, s.data(), s.data());
     mul(n, 1 / std::log(1 - p), s.data(), s.data());

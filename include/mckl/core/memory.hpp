@@ -53,23 +53,6 @@
 #include <tbb/scalable_allocator.h>
 #endif
 
-/// \brief The default alignment for scalar type
-/// \ingroup Config
-#ifndef MCKL_ALIGNMENT
-#define MCKL_ALIGNMENT 32
-#endif
-
-/// \brief The minimum alignment for any type
-/// \ingroup Config
-#ifndef MCKL_MINIMUM_ALIGNMENT
-#define MCKL_MINIMUM_ALIGNMENT 16
-#endif
-
-#if MCKL_ALIGNMENT < MCKL_MINIMUM_ALIGNMENT
-#undef MCKL_ALIGNEMNT
-#define MCKL_ALIGNMENT MCKL_MINIMUM_ALIGNMENT
-#endif
-
 /// \brief Default allocation type
 /// \ingroup Config
 #ifndef MCKL_MEMORY_TYPE
