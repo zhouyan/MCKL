@@ -1,5 +1,5 @@
 //============================================================================
-// MCKL/include/mckl/random/internal/philox_avx2_4x32.hpp
+// MCKL/include/mckl/random/internal/philox_avx512_4x32.hpp
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
@@ -29,11 +29,11 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //============================================================================
 
-#ifndef MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_HPP
-#define MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_HPP
+#ifndef MCKL_RANDOM_INTERNAL_PHILOX_AVX512_4X32_HPP
+#define MCKL_RANDOM_INTERNAL_PHILOX_AVX512_4X32_HPP
 
 #include <mckl/random/internal/common.hpp>
-#include <mckl/random/internal/philox_avx2_32_common.hpp>
+#include <mckl/random/internal/philox_avx512_32_common.hpp>
 #include <mckl/random/internal/philox_common.hpp>
 #include <mckl/random/internal/philox_constants.hpp>
 #include <mckl/random/internal/philox_generic_4x.hpp>
@@ -45,10 +45,10 @@ namespace mckl {
 namespace internal {
 
 template <typename T, typename Constants>
-class Philox4x32GeneratorAVX2Impl
+class Philox4x32GeneratorAVX512Impl
 {
     static_assert(std::numeric_limits<T>::digits == 32,
-        "**Philox4x32GeneratorAVX2Impl** used with T other than a 32-bit "
+        "**Philox4x32GeneratorAVX512Impl** used with T other than a 32-bit "
         "unsigned integers");
 
     static constexpr std::size_t K = 4;
@@ -102,10 +102,11 @@ class Philox4x32GeneratorAVX2Impl
         constexpr T w0 = Constants::weyl::value[0];
         constexpr T w1 = Constants::weyl::value[1];
 
-        const T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0, std::get<0>(key), 0,
-            std::get<1>(key)};
-        mckl_philox4x32_avx2_kernel(ctr.data(), n, r, mwk);
+        const T mwk[12] = {m0, 0, m1, 0, 0, w0, 0, w1, 0,
+            std::get<0>(key), 0, std::get<1>(key)};
+        mckl_philox4x32_avx512_kernel(ctr.data(), n, r, mwk);
 #else  // MCKL_USE_ASM_LIBRARY
+       // TODO Move to AVX512
         constexpr std::size_t S = 8;
         constexpr std::size_t N = sizeof(__m256i) * S / (sizeof(T) * K);
 
@@ -186,7 +187,7 @@ class Philox4x32GeneratorAVX2Impl
         }
 #endif // MCKL_USE_ASM_LIBRARY
     }
-}; // class Philox4x32GeneratorAVX2Impl
+}; // class Philox4x32GeneratorAVX512Impl
 
 } // namespace internal
 
@@ -194,4 +195,4 @@ class Philox4x32GeneratorAVX2Impl
 
 MCKL_POP_GCC_WARNING
 
-#endif // MCKL_RANDOM_INTERNAL_PHILOX_AVX2_4X32_HPP
+#endif // MCKL_RANDOM_INTERNAL_PHILOX_AVX512_4X32_HPP

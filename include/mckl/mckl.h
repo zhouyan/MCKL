@@ -237,6 +237,10 @@ void mckl_philox2x32_sse2_kernel(uint64_t *, size_t, void *, const void *);
 void mckl_philox2x32_avx2_kernel(uint64_t *, size_t, void *, const void *);
 void mckl_philox4x32_avx2_kernel(uint64_t *, size_t, void *, const void *);
 
+// philox_avx512_32.asm
+void mckl_philox2x32_avx512_kernel(uint64_t *, size_t, void *, const void *);
+void mckl_philox4x32_avx512_kernel(uint64_t *, size_t, void *, const void *);
+
 // philox_bmi2_2x64.asm
 void mckl_philox2x64_bmi2_kernel(uint64_t *, size_t, void *, const void *);
 

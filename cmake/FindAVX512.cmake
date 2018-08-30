@@ -1,5 +1,5 @@
 # ============================================================================
-#  MCKL/lib/CMakeLists.txt
+#  MCKL/cmake/FindAVX512.cmake
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
 #
-#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 #  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,46 +29,22 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # ============================================================================
 
-project(MCKLLibrary C)
+# Find AVX512 support
+#
+# The following variable is set
+#
+# AVX512_FOUND - TRUE if AVX512 is found and work correctly
 
-include_directories(${PROJECT_SOURCE_DIR}/asm)
+if(DEFINED AVX512_FOUND)
+    return()
+endif(DEFINED AVX512_FOUND)
 
-set(MCKL_LIB_ASM
-    ${PROJECT_SOURCE_DIR}/asm/fpclassify.asm
-    ${PROJECT_SOURCE_DIR}/asm/sqrtf.asm
-    ${PROJECT_SOURCE_DIR}/asm/sqrt.asm
-    ${PROJECT_SOURCE_DIR}/asm/expf.asm
-    ${PROJECT_SOURCE_DIR}/asm/exp.asm
-    ${PROJECT_SOURCE_DIR}/asm/logf.asm
-    ${PROJECT_SOURCE_DIR}/asm/log.asm
-    ${PROJECT_SOURCE_DIR}/asm/sincos.asm
-    ${PROJECT_SOURCE_DIR}/asm/fma.asm
-    ${PROJECT_SOURCE_DIR}/asm/aes_aesni_avx2.asm
-    ${PROJECT_SOURCE_DIR}/asm/aes_aesni_sse2.asm
-    ${PROJECT_SOURCE_DIR}/asm/philox_avx2_32.asm
-    ${PROJECT_SOURCE_DIR}/asm/philox_bmi2_2x64.asm
-    ${PROJECT_SOURCE_DIR}/asm/philox_bmi2_4x64.asm
-    ${PROJECT_SOURCE_DIR}/asm/philox_sse2_32.asm)
+file(READ ${CMAKE_CURRENT_LIST_DIR}/FindAVX512.cpp AVX512_TEST_SOURCE)
 
-if (AVX512_FOUND)
-    list(APPEND MCKL_LIB_ASM
-        ${PROJECT_SOURCE_DIR}/asm/philox_avx512_32.asm)
-endif (AVX512_FOUND)
-
-set_source_files_properties(${MCKL_LIB_ASM}
-    PROPERTIES OBJECT_DEPENDS ${PROJECT_SOURCE_DIR}/asm/math.asm)
-
-if (APPLE)
-    add_compile_options(--prefix _)
-endif (APPLE)
-
-add_library(libmckl STATIC ${MCKL_LIB_ASM})
-set_target_properties(libmckl PROPERTIES OUTPUT_NAME mckl)
-if("${CMAKE_SOURCED_DIR}/lib" STREQUAL "${PROJECT_SOURCE_DIR}")
-    add_dependencies(lib libmckl)
-endif("${CMAKE_SOURCED_DIR}/lib" STREQUAL "${PROJECT_SOURCE_DIR}")
-
-if(NOT DEFINED MCKL_INSTALL_LIB_DIR)
-    set(MCKL_INSTALL_LIB_DIR lib)
-endif(NOT DEFINED MCKL_INSTALL_LIB_DIR)
-install(TARGETS libmckl DESTINATION ${MCKL_INSTALL_LIB_DIR})
+include(CheckCXXSourceCompiles)
+check_cxx_source_compiles("${AVX512_TEST_SOURCE}" AVX512_TEST)
+if(AVX512_TEST)
+    set(AVX512_FOUND TRUE CACHE BOOL "Found AVX512 support")
+else(AVX512_TEST)
+    set(AVX512_FOUND FALSE CACHE BOOL "NOT Found AVX512 support")
+endif(AVX512_TEST)

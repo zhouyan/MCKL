@@ -32,8 +32,12 @@
 #ifndef MCKL_INTERNAL_COMPILER_INTRIN_H
 #define MCKL_INTERNAL_COMPILER_INTRIN_H
 
+#ifndef MCKL_HAS_AVX512
+#define MCKL_HAS_AVX512 0
+#endif
+
 #ifndef MCKL_HAS_AVX2
-#define MCKL_HAS_AVX2 0
+#define MCKL_HAS_AVX2 MCKL_HAS_AVX512
 #endif
 
 #ifndef MCKL_HAS_AVX
@@ -118,6 +122,10 @@
 
 #ifndef MCKL_USE_AVX2
 #define MCKL_USE_AVX2 MCKL_HAS_AVX2
+#endif
+
+#ifndef MCKL_USE_AVX512
+#define MCKL_USE_AVX512 MCKL_HAS_AVX512
 #endif
 
 #ifndef MCKL_HAS_AESNI
