@@ -165,7 +165,7 @@ MCKL_PUSH_GCC_WARNING("-Wignored-attributes")
     zmm1 = _mm512_add_epi64(zmm1, _mm512_castpd_si512(c));                    \
     zmm2 = _mm512_add_epi64(zmm2, _mm512_castpd_si512(c));                    \
     zmm3 = _mm512_add_epi64(zmm3, _mm512_castpd_si512(c));                    \
-    zmm0 = _mm512_add_epi64(zmm0, _mm512_castpd_si512(c));                    \
+    xmm0 = _mm512_add_epi64(xmm0, _mm512_castpd_si512(c));                    \
     xmm1 = _mm512_add_epi64(xmm1, _mm512_castpd_si512(c));                    \
     xmm2 = _mm512_add_epi64(xmm2, _mm512_castpd_si512(c));                    \
     xmm3 = _mm512_add_epi64(xmm3, _mm512_castpd_si512(c));                    \
