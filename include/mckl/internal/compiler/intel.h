@@ -88,6 +88,14 @@
 #endif
 #endif
 
+#if defined(__AVX512BW__) && defined(__AVX512CD__) &&                         \
+    defined(__AVX512DQ__) && defined(__AVX512F__) && defined(__AVX512VL__)
+#ifndef MCKL_HAS_AVX512
+#define MCKL_HAS_AVX512 1
+#endif
+#endif
+#endif
+
 #ifdef __AVX__
 #ifndef MCKL_HAS_AESNI
 #define MCKL_HAS_AESNI 1
