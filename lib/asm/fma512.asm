@@ -133,11 +133,11 @@ align 16
 %else
     %error
 %endif
-    vmovap%2 zmm0{k1}, [rsi]
-    vmovap%2 zmm1{k1}, [rdx]
-    vmovap%2 zmm2{k1}, [rcx]
+    vmovup%2 zmm0{k1}, [rsi]
+    vmovup%2 zmm1{k1}, [rdx]
+    vmovup%2 zmm2{k1}, [rcx]
     v%{3}213p%2 zmm0, zmm1, zmm2
-    vmovap%2 [r8]{k1}, zmm0
+    vmovup%2 [r8]{k1}, zmm0
 
 .return:
     ret
@@ -181,10 +181,10 @@ align 16
 %else
     %error
 %endif
-    vmovap%2 zmm1{k1}, [rsi]
-    vmovap%2 zmm2{k1}, [rdx]
+    vmovup%2 zmm1{k1}, [rsi]
+    vmovup%2 zmm2{k1}, [rdx]
     v%{3}%{4}p%2 %5, %6, %7
-    vmovap%2 [rcx]{k1}, %5
+    vmovup%2 [rcx]{k1}, %5
 
 .return:
     ret
@@ -254,9 +254,9 @@ align 16
 %else
     %error
 %endif
-    vmovap%2 zmm2{k1}, [rsi]
+    vmovup%2 zmm2{k1}, [rsi]
     v%{3}%{4}p%2 %5, %6, %7
-    vmovap%2 [rdx]{k1}, %5
+    vmovup%2 [rdx]{k1}, %5
 
 .return:
     ret
