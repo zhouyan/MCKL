@@ -162,12 +162,6 @@ class Matrix
         return mat;
     }
 
-    /// \brief Get a view of the matrix
-    MatrixView<T, Layout> view() const
-    {
-        return MatrixView<T, Layout>(nrow(), ncol(), data());
-    }
-
     /// \brief Return the associated allocator
     allocator_type get_allocator() const { return data_.get_allocator(); }
 
