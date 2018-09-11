@@ -50,6 +50,7 @@ inline void cauchy_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
     u01_co_distribution(rng, n, r);
+    sub(n, r, static_cast<RealType>(0.5), r);
     mul(n, const_pi<RealType>(), r, r);
     tan(n, r, r);
     muladd(n, r, b, a, r);
@@ -87,7 +88,9 @@ class CauchyDistribution
         U01CODistribution<RealType> u01;
 
         return param.a() +
-            param.b() * std::tan(const_pi<result_type>() * u01(rng));
+            param.b() *
+            std::tan(const_pi<result_type>() *
+                (u01(rng) - static_cast<RealType>(0.5)));
     }
 }; // class CauchyDistribution
 
