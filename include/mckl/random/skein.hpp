@@ -89,7 +89,7 @@ class Skein
         /// \param N The length of the bit string
         /// \param data The address of the bit string
         /// \param type The type of the parameter
-        param_type(std::size_t N = 0, const void *data = nullptr,
+        explicit param_type(std::size_t N = 0, const void *data = nullptr,
             int type = type_field::msg())
             : N_(N), data_(static_cast<const char *>(data)), type_(type & 0x3F)
         {
@@ -115,6 +115,79 @@ class Skein
         const char *data_;
         int type_;
     }; // class param_type
+
+    /// \brief Configure type for stream hasher
+    class stream_hasher
+    {
+      public:
+        /// \brief State type for stream hasher
+        class state_type
+        {
+          private:
+            key_type G_;
+            value_type t0_;
+            value_type t1_;
+
+            friend stream_hasher;
+        }; // class state_type
+
+        explicit stream_hasher(std::size_t N,
+            const param_type &K = param_type(), int Yl = 0, int Yf = 0,
+            int Ym = 0)
+            : N_(N)
+            , K_(K)
+            , Yl_(Yl & 0xFF)
+            , Yf_(Yf & 0xFF)
+            , Ym_(Ym & 0xFF)
+            , C_(configure(N_, Yl_, Yf_, Ym_))
+            , simple_((Yl_ | Yf_ | Ym_) == 0)
+        {
+            internal::union_le<char>(C_);
+        }
+
+        state_type init() const
+        {
+            state_type ret;
+            std::memset(&ret, 0, sizeof(ret));
+
+            if (K_.bits() != 0) {
+                set_type(ret.t1_, type_field::key());
+                ret.G_ = ubi(ret.G_, K_, ret.t0_, ret.t1_);
+            }
+
+            set_type(ret.t1_, type_field::cfg());
+            ret.G_ = ubi(ret.G_, param_type(256, C_.data()), ret.t0_, ret.t1_);
+
+            return ret;
+        }
+
+        void update(state_type &state, const param_type &M) const
+        {
+            if (simple_) {
+                set_type(state.t1_, M.type());
+                state.G_ = ubi(state.G_, M, state.t0_, state.t1_);
+            } else {
+                set_type(state.t1_, M.type());
+                state.G_ = M.type() == type_field::msg() ?
+                    ubi_tree(state.G_, M, Yl_, Yf_, Ym_, 0) :
+                    ubi(state.G_, M, state.t0_, state.t1_);
+            }
+        }
+
+        void output(const state_type &state, void *H) const
+        {
+            Skein::output(state.G_, N_, H);
+        }
+
+      private:
+        std::size_t N_;
+        param_type K_;
+        int Yl_;
+        int Yf_;
+        int Ym_;
+        std::array<std::uint64_t, 4> C_;
+        bool simple_;
+    }; // class stream_hasher
 
     /// \brief The number of bytes of internal state
     static constexpr std::size_t bytes() { return sizeof(key_type); }
@@ -156,41 +229,12 @@ class Skein
             return;
         }
 
-        Yl &= 0xFF;
-        Yf &= 0xFF;
-        Ym &= 0xFF;
-
-        key_type G = {{0}};
-
-        std::array<std::uint64_t, 4> C = configure(N, Yl, Yf, Ym);
-        internal::union_le<char>(C);
-
-        value_type t0 = 0;
-        value_type t1 = 0;
-
-        if (K.bits() != 0) {
-            set_type(t1, type_field::key());
-            G = ubi(G, K, t0, t1);
+        stream_hasher hasher(N, K, Yl, Yf, Ym);
+        auto state = hasher.init();
+        for (std::size_t i = 0; i != n; ++i) {
+            hasher.update(state, M[i]);
         }
-
-        set_type(t1, type_field::cfg());
-        G = ubi(G, param_type(256, C.data()), t0, t1);
-
-        if ((Yl | Yf | Ym) == 0) {
-            for (std::size_t i = 0; i != n; ++i) {
-                set_type(t1, M[i].type());
-                G = ubi(G, M[i], t0, t1);
-            }
-        } else {
-            for (std::size_t i = 0; i != n; ++i) {
-                set_type(t1, M[i].type());
-                G = M[i].type() == type_field::msg() ?
-                    ubi_tree(G, M[i], Yl, Yf, Ym, 0) :
-                    ubi(G, M[i], t0, t1);
-            }
-        }
-
-        output(G, N, H);
+        hasher.output(state, H);
     }
 
     /// \brief UBI
