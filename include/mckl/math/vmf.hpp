@@ -644,6 +644,58 @@ inline T inv(T a)
 }
 
 template <typename T>
+inline T fmadd(T a, T b, T c)
+{
+    return std::fma(a, b, c);
+}
+
+template <typename T>
+inline T fmsub(T a, T b, T c)
+{
+    return std::fma(a, b, -c);
+}
+
+template <typename T>
+inline T fnmadd(T a, T b, T c)
+{
+    return -std::fma(a, b, -c);
+}
+
+template <typename T>
+inline T fnmsub(T a, T b, T c)
+{
+    return -std::fma(a, b, c);
+}
+
+#if MCKL_USE_FMA
+
+template <typename T>
+inline T muladd(T a, T b, T c)
+{
+    return fmadd(a, b, c);
+}
+
+template <typename T>
+inline T mulsub(T a, T b, T c)
+{
+    return fmsub(a, b, c);
+}
+
+template <typename T>
+inline T nmuladd(T a, T b, T c)
+{
+    return fnmadd(a, b, c);
+}
+
+template <typename T>
+inline T nmulsub(T a, T b, T c)
+{
+    return fnmsub(a, b, c);
+}
+
+#else // MCKL_USE_FMA
+
+template <typename T>
 inline T muladd(T a, T b, T c)
 {
     return a * b + c;
@@ -667,29 +719,7 @@ inline T nmulsub(T a, T b, T c)
     return -(a * b + c);
 }
 
-template <typename T>
-inline T fmadd(T a, T b, T c)
-{
-    return std::fma(a, b, c);
-}
-
-template <typename T>
-inline T fmsub(T a, T b, T c)
-{
-    return std::fma(a, b, -c);
-}
-
-template <typename T>
-inline T fnmadd(T a, T b, T c)
-{
-    return -std::fma(a, b, -c);
-}
-
-template <typename T>
-inline T fnmsub(T a, T b, T c)
-{
-    return -std::fma(a, b, c);
-}
+#endif // MCKL_USE_FMA
 
 template <typename T>
 inline T invsqrt(T a)
