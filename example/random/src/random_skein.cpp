@@ -30,7 +30,6 @@
 //============================================================================
 
 #include <mckl/random/skein.hpp>
-#include <mckl/utility/stop_watch.hpp>
 
 #define MCKL_EXAMPLE_RANDOM_SKEIN(Nb, Nm, Nh, M)                              \
     pass = pass &&                                                            \
