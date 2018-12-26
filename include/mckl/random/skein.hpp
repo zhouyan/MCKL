@@ -127,6 +127,7 @@ class Skein
             key_type G_;
             value_type t0_;
             value_type t1_;
+            int type_;
 
             friend stream_hasher;
         }; // class state_type
@@ -163,6 +164,14 @@ class Skein
 
         void update(state_type &state, const param_type &M) const
         {
+            if (state.type_ == 0) {
+                runtime_assert(M.type() > type_field::cfg(),
+                    "**Skein::hash** M[0].type() <= type_field::cfg()");
+            } else {
+                runtime_assert(M.type() > state.type_,
+                    "**Skein::hash** M[i].type() <= M[i - 1].type()");
+            }
+
             if (simple_) {
                 set_type(state.t1_, M.type());
                 state.G_ = ubi(state.G_, M, state.t0_, state.t1_);
@@ -172,10 +181,15 @@ class Skein
                     ubi_tree(state.G_, M, Yl_, Yf_, Ym_, 0) :
                     ubi(state.G_, M, state.t0_, state.t1_);
             }
+
+            state.type_ = M.type();
         }
 
         void output(const state_type &state, void *H) const
         {
+            runtime_assert(state.type_ < type_field::out(),
+                "**Skein::hash** M[n - 1].type() >= type_field::out()");
+
             Skein::output(state.G_, N_, H);
         }
 
@@ -225,10 +239,6 @@ class Skein
         void *H, const param_type &K = param_type(), int Yl = 0, int Yf = 0,
         int Ym = 0)
     {
-        if (!check_type(n, M)) {
-            return;
-        }
-
         stream_hasher hasher(N, K, Yl, Yf, Ym);
         auto state = hasher.init();
         for (std::size_t i = 0; i != n; ++i) {
@@ -553,35 +563,6 @@ class Skein
         std::get<2>(C) += static_cast<std::uint64_t>(Ym << 16);
 
         return C;
-    }
-
-    static bool check_type(std::size_t n, const param_type *M)
-    {
-        if (n == 0) {
-            return false;
-        }
-
-        if (M[0].type() <= type_field::cfg()) {
-            runtime_assert(
-                false, "**Skein::hash** M[0].type() <= type_field::cfg()");
-            return false;
-        }
-
-        for (std::size_t i = 1; i < n; ++i) {
-            if (M[i].type() <= M[i - 1].type()) {
-                runtime_assert(
-                    false, "**Skein::hash** M[i].type() <= M[i - 1].type()");
-                return false;
-            }
-        }
-
-        if (M[n - 1].type() >= type_field::out()) {
-            runtime_assert(
-                false, "**Skein::hash** M[n - 1].type() >= type_field::out()");
-            return false;
-        }
-
-        return true;
     }
 }; // class Skein
 
