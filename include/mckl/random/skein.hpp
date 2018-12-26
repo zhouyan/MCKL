@@ -117,31 +117,24 @@ class Skein
     }; // class param_type
 
     /// \brief Configure type for stream hasher
-    class stream_hasher
+    class mono_hasher
     {
       public:
-        /// \brief State type for stream hasher
+        using param_type = Skein::param_type;
+        using value_type = Skein::value_type;
+        using type_field = Skein::type_field;
+
         class state_type
         {
           private:
             key_type G_;
-            value_type t0_;
-            value_type t1_;
             int type_;
 
-            friend stream_hasher;
+            friend mono_hasher;
         }; // class state_type
 
-        explicit stream_hasher(std::size_t N,
-            const param_type &K = param_type(), int Yl = 0, int Yf = 0,
-            int Ym = 0)
-            : N_(N)
-            , K_(K)
-            , Yl_(Yl & 0xFF)
-            , Yf_(Yf & 0xFF)
-            , Ym_(Ym & 0xFF)
-            , C_(configure(N_, Yl_, Yf_, Ym_))
-            , simple_((Yl_ | Yf_ | Ym_) == 0)
+        explicit mono_hasher(std::size_t N, const param_type &K = param_type())
+            : N_(N), K_(K), C_(configure(N_, 0, 0, 0))
         {
             internal::union_le<char>(C_);
         }
@@ -151,13 +144,14 @@ class Skein
             state_type ret;
             std::memset(&ret, 0, sizeof(ret));
 
+            value_type t1 = 0;
             if (K_.bits() != 0) {
-                set_type(ret.t1_, type_field::key());
-                ret.G_ = ubi(ret.G_, K_, ret.t0_, ret.t1_);
+                set_type(t1, type_field::key());
+                ret.G_ = ubi(ret.G_, K_, 0, t1);
             }
 
-            set_type(ret.t1_, type_field::cfg());
-            ret.G_ = ubi(ret.G_, param_type(256, C_.data()), ret.t0_, ret.t1_);
+            set_type(t1, type_field::cfg());
+            ret.G_ = ubi(ret.G_, param_type(256, C_.data()), 0, t1);
 
             return ret;
         }
@@ -172,16 +166,9 @@ class Skein
                     "**Skein::hash** M[i].type() <= M[i - 1].type()");
             }
 
-            if (simple_) {
-                set_type(state.t1_, M.type());
-                state.G_ = ubi(state.G_, M, state.t0_, state.t1_);
-            } else {
-                set_type(state.t1_, M.type());
-                state.G_ = M.type() == type_field::msg() ?
-                    ubi_tree(state.G_, M, Yl_, Yf_, Ym_, 0) :
-                    ubi(state.G_, M, state.t0_, state.t1_);
-            }
-
+            value_type t1 = 0;
+            set_type(t1, M.type());
+            state.G_ = ubi(state.G_, M, 0, t1);
             state.type_ = M.type();
         }
 
@@ -196,12 +183,78 @@ class Skein
       private:
         std::size_t N_;
         param_type K_;
+        std::array<std::uint64_t, 4> C_;
+    }; // class mono_hasher
+
+    class tree_hasher
+    {
+      public:
+        using param_type = Skein::param_type;
+        using value_type = Skein::value_type;
+        using type_field = Skein::type_field;
+
+        class state_type
+        {
+          private:
+            key_type G_;
+            value_type t0_;
+            Vector<key_type> M1_;
+
+            friend tree_hasher;
+        }; // class state_type
+
+        explicit tree_hasher(std::size_t N, const param_type &K = param_type(),
+            int Yl = 20, int Yf = 20, int Ym = 2)
+            : N_(N)
+            , K_(K)
+            , Yl_(Yl & 0xFF)
+            , Yf_(Yf & 0xFF)
+            , Ym_(Ym & 0xFF)
+            , C_(configure(N_, Yl_, Yf_, Ym_))
+        {
+            internal::union_le<char>(C_);
+        }
+
+        state_type init() const
+        {
+            state_type ret;
+            std::memset(&ret, 0, sizeof(key_type) + sizeof(value_type));
+
+            value_type t1 = 0;
+
+            if (K_.bits() != 0) {
+                set_type(t1, type_field::key());
+                ret.G_ = ubi(ret.G_, K_, 0, t1);
+            }
+
+            set_type(t1, type_field::cfg());
+            ret.G_ = ubi(ret.G_, param_type(256, C_.data()), 0, t1);
+
+            return ret;
+        }
+
+        void update(state_type &state, const param_type &M) const
+        {
+            runtime_assert(M.type() == type_field::msg(),
+                "**Skein::hash** M[i].type() != type_field::msg()");
+
+            ubi_tree_m1(state.G_, M, Yl_, state.M1_, state.t0_);
+        }
+
+        void output(state_type &state, void *H) const
+        {
+            state.G_ = ubi_tree(state.G_, Yl_, Yf_, Ym_, 1, state.M1_);
+            Skein::output(state.G_, N_, H);
+        }
+
+      private:
+        std::size_t N_;
+        param_type K_;
         int Yl_;
         int Yf_;
         int Ym_;
         std::array<std::uint64_t, 4> C_;
-        bool simple_;
-    }; // class stream_hasher
+    }; // class tree_hasher
 
     /// \brief The number of bytes of internal state
     static constexpr std::size_t bytes() { return sizeof(key_type); }
@@ -239,20 +292,39 @@ class Skein
         void *H, const param_type &K = param_type(), int Yl = 0, int Yf = 0,
         int Ym = 0)
     {
-        stream_hasher hasher(N, K, Yl, Yf, Ym);
-        auto state = hasher.init();
-        for (std::size_t i = 0; i != n; ++i) {
-            hasher.update(state, M[i]);
+        if ((Yl | Yf | Ym) == 0) {
+            mono_hasher hasher(N, K);
+            auto state = hasher.init();
+            for (std::size_t i = 0; i != n; ++i) {
+                hasher.update(state, M[i]);
+            }
+            hasher.output(state, H);
+        } else {
+            tree_hasher hasher(N, K, Yl, Yf, Ym);
+            auto state = hasher.init();
+            for (std::size_t i = 0; i != n; ++i) {
+                hasher.update(state, M[i]);
+            }
+            hasher.output(state, H);
         }
-        hasher.output(state, H);
     }
 
-    /// \brief UBI
-    ///
-    /// \param G The input key
-    /// \param M The message
-    /// \param t0 The lower half of the initial tweak value
-    /// \param t1 The upper half of the initial tweak value
+  private:
+    static_assert(bits() >= 64,
+        "**Skein** used with a Generator with less than 64 bits");
+
+    static_assert(std::is_unsigned<value_type>::value,
+        "**Skein** used with a Generator with key_type::value_type not an "
+        "unsigned integer type");
+
+    static_assert(std::numeric_limits<value_type>::digits >= 32,
+        "**Skein** used with a Generator with key_type::value_type less than "
+        "32 bits");
+
+    static_assert(sizeof(key_type) == Generator::size(),
+        "**Skein** used with a Generator with block and key different in "
+        "size");
+
     static key_type ubi(
         const key_type &G, const param_type &M, value_type t0, value_type t1)
     {
@@ -319,11 +391,70 @@ class Skein
         return H;
     }
 
-    /// \brief Output
-    ///
-    /// \param G The chaining value
-    /// \param N The length of the output in bits
-    /// \param H The output
+    static void ubi_tree_m1(const key_type &G, const param_type &M, int Yl,
+        Vector<key_type> &M1, value_type &t0)
+    {
+        value_type t1 = 0;
+
+        if (M.bits() == 0) {
+            t0 = 0;
+            set_level(t1, 1);
+            set_type(t1, type_field::msg());
+            M1.push_back(ubi(G, M, t0, t1));
+        }
+
+        std::size_t Nl = bytes() * (const_one<std::size_t>() << Yl);
+        std::size_t k1 = M.bytes() / Nl + (M.bytes() % Nl == 0 ? 0 : 1);
+        M1.reserve(M1.size() + k1);
+
+        set_level(t1, 1);
+        set_type(t1, type_field::msg());
+        for (std::size_t i = 0; i != k1;
+             ++i, t0 += static_cast<value_type>(Nl)) {
+            std::size_t N =
+                i + 1 == k1 ? M.bits() - i * Nl * CHAR_BIT : Nl * CHAR_BIT;
+            M1.push_back(ubi(G, param_type(N, M.data() + i * Nl), t0, t1));
+            internal::union_le<char>(M1.back());
+        }
+    }
+
+    static key_type ubi_tree(
+        const key_type &G, int Yl, int Yf, int Ym, int l, Vector<key_type> &M1)
+    {
+        value_type t0 = 0;
+        value_type t1 = 0;
+
+        // Process the only block
+        if (M1.size() == 1) {
+            return M1.front();
+        }
+
+        param_type M(M1.size() * bits(), M1.data());
+
+        // Process the maximum level
+        if (l + 1 == Ym) {
+            t0 = 0;
+            set_level(t1, Ym);
+            set_type(t1, type_field::msg());
+            return ubi(G, M, t0, t1);
+        }
+
+        std::size_t Nn = bytes() * (const_one<std::size_t>() << Yf);
+        std::size_t kl = M.bytes() / Nn + (M.bytes() % Nn == 0 ? 0 : 1);
+        set_level(t1, l + 1);
+        set_type(t1, type_field::msg());
+        for (std::size_t i = 0; i != kl; ++i) {
+            t0 = static_cast<value_type>(i * Nn);
+            std::size_t N =
+                i + 1 == kl ? M.bits() - i * Nn * CHAR_BIT : Nn * CHAR_BIT;
+            M1[i] = ubi(G, param_type(N, M.data() + i * Nn), t0, t1);
+            internal::union_le<char>(M1[i]);
+        }
+        M1.resize(kl);
+
+        return ubi_tree(G, Yl, Yf, Ym, l + 1, M1);
+    }
+
     static void output(const key_type &G, std::size_t N, void *H)
     {
         N = N / CHAR_BIT + (N % CHAR_BIT == 0 ? 0 : 1);
@@ -380,85 +511,6 @@ class Skein
                 std::memcpy(C, buf.data(), m);
             }
         }
-    }
-
-  private:
-    static_assert(bits() >= 64,
-        "**Skein** used with a Generator with less than 64 bits");
-
-    static_assert(std::is_unsigned<value_type>::value,
-        "**Skein** used with a Generator with key_type::value_type not an "
-        "unsigned integer type");
-
-    static_assert(std::numeric_limits<value_type>::digits >= 32,
-        "**Skein** used with a Generator with key_type::value_type less than "
-        "32 bits");
-
-    static_assert(sizeof(key_type) == Generator::size(),
-        "**Skein** used with a Generator with block and key different in "
-        "size");
-
-    static key_type ubi_tree(
-        const key_type &G, const param_type &M, int Yl, int Yf, int Ym, int l)
-    {
-        value_type t0 = 0;
-        value_type t1 = 0;
-
-        // Process the first level
-        if (l == 0) {
-            if (M.bits() == 0) {
-                t0 = 0;
-                set_level(t1, 1);
-                set_type(t1, type_field::msg());
-                return ubi(G, M, t0, t1);
-            }
-            std::size_t Nl = bytes() * (const_one<std::size_t>() << Yl);
-            std::size_t k1 = M.bytes() / Nl + (M.bytes() % Nl == 0 ? 0 : 1);
-            Vector<key_type> M1(k1);
-            set_level(t1, 1);
-            set_type(t1, type_field::msg());
-            for (std::size_t i = 0; i != k1; ++i) {
-                t0 = static_cast<value_type>(i * Nl);
-                std::size_t N =
-                    i + 1 == k1 ? M.bits() - i * Nl * CHAR_BIT : Nl * CHAR_BIT;
-                M1[i] = ubi(G, param_type(N, M.data() + i * Nl), t0, t1);
-                internal::union_le<char>(M1[i]);
-            }
-            return ubi_tree(
-                G, param_type(bits() * k1, M1.data()), Yl, Yf, Ym, 1);
-        }
-
-        // Process the only block
-        if (M.bits() == bits()) {
-            key_type H = {{0}};
-            std::memcpy(H.data(), M.data(), bytes());
-            internal::union_le<char>(H);
-            return H;
-        }
-
-        // Process the maximum level
-        if (l + 1 == Ym) {
-            t0 = 0;
-            set_level(t1, Ym);
-            set_type(t1, type_field::msg());
-            return ubi(G, M, t0, t1);
-        }
-
-        std::size_t Nn = bytes() * (const_one<std::size_t>() << Yf);
-        std::size_t kl = M.bytes() / Nn + (M.bytes() % Nn == 0 ? 0 : 1);
-        Vector<key_type> Ml(kl);
-        set_level(t1, l + 1);
-        set_type(t1, type_field::msg());
-        for (std::size_t i = 0; i != kl; ++i) {
-            t0 = static_cast<value_type>(i * Nn);
-            std::size_t N =
-                i + 1 == kl ? M.bits() - i * Nn * CHAR_BIT : Nn * CHAR_BIT;
-            Ml[i] = ubi(G, param_type(N, M.data() + i * Nn), t0, t1);
-            internal::union_le<char>(Ml[i]);
-        }
-
-        return ubi_tree(
-            G, param_type(bits() * kl, Ml.data()), Yl, Yf, Ym, l + 1);
     }
 
     static void enc_block(

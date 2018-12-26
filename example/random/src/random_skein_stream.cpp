@@ -36,31 +36,30 @@
 int main()
 {
     ::mckl::Threefish256 rng;
-    std::size_t n1 = 1 << 4;
-    std::size_t n2 = 1 << 4;
+    std::size_t n1 = 1 << 20;
+    std::size_t n2 = 1 << 20;
     ::mckl::Vector<::mckl::Threefish256::result_type> buffer(n1 + n2);
     ::mckl::rand(rng, buffer.size(), buffer.data());
 
-    ::mckl::Skein256::stream_hasher hasher(256);
+    auto bits = ::mckl::Skein256::bits();
+    ::mckl::Skein256::tree_hasher::param_type K;
+    ::mckl::Skein256::tree_hasher hasher(256, K, 16, 0xFF, 2);
     auto state1 = hasher.init();
     auto state2 = hasher.init();
     std::array<std::uint64_t, 4> ret1;
     std::array<std::uint64_t, 4> ret2;
 
     hasher.update(state1,
-        ::mckl::Skein256::stream_hasher::param_type(
-            n1 * CHAR_BIT * sizeof(*buffer.data()), buffer.data()),
-        false);
+        ::mckl::Skein256::tree_hasher::param_type(
+            n1 * CHAR_BIT * sizeof(*buffer.data()), buffer.data()));
     hasher.update(state1,
-        ::mckl::Skein256::stream_hasher::param_type(
-            n2 * CHAR_BIT * sizeof(*buffer.data()), buffer.data() + n1),
-        true);
+        ::mckl::Skein256::tree_hasher::param_type(
+            n2 * CHAR_BIT * sizeof(*buffer.data()), buffer.data() + n1));
     hasher.output(state1, ret1.data());
 
     hasher.update(state2,
-        ::mckl::Skein256::stream_hasher::param_type(
-            (n1 + n2) * CHAR_BIT * sizeof(*buffer.data()), buffer.data()),
-        true);
+        ::mckl::Skein256::tree_hasher::param_type(
+            (n1 + n2) * CHAR_BIT * sizeof(*buffer.data()), buffer.data()));
     hasher.output(state2, ret2.data());
 
     std::cout << (ret1 == ret2 ? "Passed" : "Failed") << std::endl;
