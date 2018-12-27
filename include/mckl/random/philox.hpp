@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,10 @@
 #include <mckl/random/internal/philox_avx2.hpp>
 #endif
 
+#if MCKL_HAS_AVX512
+#include <mckl/random/internal/philox_avx512.hpp>
+#endif
+
 /// \brief PhiloxGenerator default rounds
 /// \ingroup Config
 #ifndef MCKL_PHILOX_ROUNDS
@@ -56,7 +60,10 @@ namespace mckl {
 
 namespace internal {
 
-#if MCKL_USE_AVX2
+#if MCKL_USE_AVX512
+template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
+using PhiloxGeneratorImpl = PhiloxGeneratorAVX512Impl<T, K, Rounds, Constants>;
+#elif MCKL_USE_AVX2
 template <typename T, std::size_t K, std::size_t Rounds, typename Constants>
 using PhiloxGeneratorImpl = PhiloxGeneratorAVX2Impl<T, K, Rounds, Constants>;
 #elif MCKL_USE_SSE2
@@ -68,7 +75,7 @@ using PhiloxGeneratorImpl =
     PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>;
 #endif // MCKL_USE_AVX2
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Philox RNG generator
 /// \ingroup Philox

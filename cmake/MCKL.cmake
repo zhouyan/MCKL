@@ -3,7 +3,7 @@
 # ----------------------------------------------------------------------------
 #  MCKL: Monte Carlo Kernel Library
 # ----------------------------------------------------------------------------
-#  Copyright (c) 2013-2017, Yan Zhou
+#  Copyright (c) 2013-2018, Yan Zhou
 #  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -157,6 +157,15 @@ if(AVX2_FOUND)
 else(AVX2_FOUND)
     set(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_AVX2=0)
 endif(AVX2_FOUND)
+
+# AVX512
+include(FindAVX512)
+if(AVX512_FOUND)
+    set(FEATURES ${FEATURES} "AVX512")
+    set(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_AVX512=1)
+else(AVX512_FOUND)
+    set(MCKL_DEFINITIONS ${MCKL_DEFINITIONS} -DMCKL_HAS_AVX512=0)
+endif(AVX512_FOUND)
 
 # AES-NI
 include(FindAESNI)

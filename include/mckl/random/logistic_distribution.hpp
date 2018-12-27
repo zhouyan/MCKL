@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ template <std::size_t K, typename RealType, typename RNGType>
 inline void logistic_distribution_impl(
     RNGType &rng, std::size_t n, RealType *r, RealType a, RealType b)
 {
-    alignas(32) std::array<RealType, K> s;
+    alignas(MCKL_ALIGNMENT) std::array<RealType, K> s;
     u01_oo_distribution(rng, n, r);
     sub(n, const_one<RealType>(), r, s.data());
     div(n, r, s.data(), r);
@@ -57,7 +57,7 @@ inline void logistic_distribution_impl(
     muladd(n, r, b, a, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_2(
     Logistic, logistic, RealType, RealType, a, RealType, b)

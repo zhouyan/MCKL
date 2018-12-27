@@ -34,7 +34,7 @@
 use v5.16;
 use Getopt::Long;
 
-my $clang_format = "/usr/local/opt/llvm/bin/clang-format";
+my $clang_format = "/usr/local/bin/clang-format";
 GetOptions("clang_format=s" => \$clang_format);
 
 my $root = $0;
@@ -63,6 +63,7 @@ sub update
         } elsif (-d $path) {
             next if $path =~ /\.git$/;
             next if $path =~ /build$/;
+            next if $path =~ /build-/;
             next if $path =~ /docs\/_build$/;
             next if $path =~ /docs\/doxygen$/;
             next if $path =~ /docs\/tabs\/random_distribution$/;

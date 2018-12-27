@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -116,17 +116,18 @@ inline double betai_approx(double a, double b, double x)
     double sum = 0;
     for (std::size_t i = 0; i != gammap_approx_n; ++i) {
         t = x + (xu - x) * gammap_approx_y[i];
-        sum += gammap_approx_w[i] * std::exp(a1 * (std::log(t) - lnmu) +
-                                        b1 * (std::log(1 - t) - lnmuc));
+        sum += gammap_approx_w[i] *
+            std::exp(
+                a1 * (std::log(t) - lnmu) + b1 * (std::log(1 - t) - lnmuc));
     }
-    double ans =
-        sum * (xu - x) * std::exp(a1 * lnmu - std::lgamma(a) + b1 * lnmuc -
-                             std::lgamma(b) + std::lgamma(a + b));
+    double ans = sum * (xu - x) *
+        std::exp(a1 * lnmu - std::lgamma(a) + b1 * lnmuc - std::lgamma(b) +
+            std::lgamma(a + b));
 
     return ans > 0 ? 1 - ans : -ans;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Regularized incomplete Beta function
 /// \ingroup Special

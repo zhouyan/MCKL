@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -927,6 +927,10 @@ class IncrementBlockSI128;
 template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
 class IncrementBlockSI256;
+
+template <typename T, std::size_t, std::size_t,
+    int = std::numeric_limits<T>::digits>
+class IncrementBlockSI512;
 
 } // namespace internal
 

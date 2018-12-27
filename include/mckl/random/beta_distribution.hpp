@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -248,7 +248,7 @@ inline std::size_t beta_distribution_impl_c(RNGType &rng, std::size_t n,
     const RealType t = constant.t();
     const RealType p = constant.p();
     const RealType ln_4 = 2 * const_ln_2<RealType>();
-    alignas(32) std::array<RealType, K * 5> s;
+    alignas(MCKL_ALIGNMENT) std::array<RealType, K * 5> s;
     RealType *const u1 = s.data();
     RealType *const u2 = s.data() + n;
     RealType *const v = s.data() + n * 2;
@@ -286,7 +286,7 @@ inline std::size_t beta_distribution_impl_j(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType,
     const BetaDistributionConstant<RealType> &constant)
 {
-    alignas(32) std::array<RealType, K * 3> s;
+    alignas(MCKL_ALIGNMENT) std::array<RealType, K * 3> s;
     const RealType a = constant.a();
     const RealType b = constant.b();
     RealType *const x = s.data();
@@ -366,7 +366,7 @@ inline std::size_t beta_distribution_impl(RNGType &rng, std::size_t n,
     return 0;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename RealType, typename RNGType>
 inline void beta_distribution(

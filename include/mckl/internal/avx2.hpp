@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -484,7 +484,7 @@ MCKL_INLINE inline void transpose4x64_store_si256(std::array<__m256i, 16> &s)
     std::get<0xE>(s) = sB;
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

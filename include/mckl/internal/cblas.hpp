@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -53,15 +53,15 @@ namespace mckl {
 
 namespace internal {
 
-using ::CblasRowMajor;
 using ::CblasColMajor;
+using ::CblasRowMajor;
 
+using ::CblasConjTrans;
 using ::CblasNoTrans;
 using ::CblasTrans;
-using ::CblasConjTrans;
 
-using ::CblasUpper;
 using ::CblasLower;
+using ::CblasUpper;
 
 using ::CblasNonUnit;
 using ::CblasUnit;
@@ -69,25 +69,25 @@ using ::CblasUnit;
 using ::CblasLeft;
 using ::CblasRight;
 
-using ::cblas_sdot;
 using ::cblas_ddot;
+using ::cblas_sdot;
 
-using ::cblas_sgemv;
 using ::cblas_dgemv;
+using ::cblas_sgemv;
 
-using ::cblas_stpmv;
 using ::cblas_dtpmv;
+using ::cblas_stpmv;
 
-using ::cblas_ssyr;
 using ::cblas_dsyr;
+using ::cblas_ssyr;
 
-using ::cblas_strmm;
 using ::cblas_dtrmm;
+using ::cblas_strmm;
 
-using ::cblas_ssyrk;
 using ::cblas_dsyrk;
+using ::cblas_ssyrk;
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 
@@ -366,7 +366,7 @@ inline void cblas_dsyrk(const CBLAS_LAYOUT layout, const CBLAS_UPLO uplo,
     (&uplof, &transf, &n, &k, &alpha, a, &lda, &beta, c, &ldc);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

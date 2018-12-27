@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ class Philox2xGeneratorGenericImpl
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
-        alignas(32) union {
+        alignas(MCKL_ALIGNMENT) union {
             std::array<T, K> s;
             std::array<char, sizeof(T) * K> r;
         } buf;
@@ -96,7 +96,7 @@ class Philox2xGeneratorGenericImpl
     static void eval(
         Counter<T, K> &ctr, ResultType *r, const std::array<T, K / 2> &key)
     {
-        alignas(32) union {
+        alignas(MCKL_ALIGNMENT) union {
             std::array<T, K> s;
             Counter<T, K> c;
             std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
@@ -140,7 +140,7 @@ class Philox2x64GeneratorGenericImpl
     static void eval(
         const void *plain, void *cipher, const std::array<T, K / 2> &key)
     {
-        alignas(32) union {
+        alignas(MCKL_ALIGNMENT) union {
             std::array<T, K> s;
             std::array<char, sizeof(T) * K> r;
         } buf;
@@ -156,7 +156,7 @@ class Philox2x64GeneratorGenericImpl
     static void eval(
         Counter<T, K> &ctr, ResultType *r, const std::array<T, K / 2> &key)
     {
-        alignas(32) union {
+        alignas(MCKL_ALIGNMENT) union {
             std::array<T, K> s;
             Counter<T, K> c;
             std::array<ResultType, sizeof(T) * K / sizeof(ResultType)> r;
@@ -198,7 +198,7 @@ class Philox2x64GeneratorGenericImpl
 #endif // MCKL_USE_ASM_LIBRARY && MCKL_USE_BMI2
 };     // class Philox2x64GeneratorGenericImpl
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

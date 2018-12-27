@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -130,7 +130,7 @@ inline void stable_distribution_impl_1(RNGType &rng, std::size_t n,
     RealType *r, RealType, RealType beta, RealType, RealType,
     const StableDistributionConstant<RealType> &constant)
 {
-    alignas(32) std::array<RealType, K * 3> s;
+    alignas(MCKL_ALIGNMENT) std::array<RealType, K * 3> s;
     const RealType xi = constant.xi();
     const RealType c = constant.c();
     RealType *const u = s.data();
@@ -157,7 +157,7 @@ inline void stable_distribution_impl_a(RNGType &rng, std::size_t n,
     RealType *r, RealType alpha, RealType, RealType, RealType,
     const StableDistributionConstant<RealType> &constant)
 {
-    alignas(32) std::array<RealType, K * 4> s;
+    alignas(MCKL_ALIGNMENT) std::array<RealType, K * 4> s;
     const RealType xi = constant.xi();
     const RealType c = constant.c();
     RealType *const u = s.data();
@@ -200,7 +200,7 @@ inline void stable_distribution_impl(RNGType &rng, std::size_t n, RealType *r,
     muladd(n, r, b, a, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_4(Stable, stable, RealType, RealType,
     alpha, RealType, beta, RealType, a, RealType, b)

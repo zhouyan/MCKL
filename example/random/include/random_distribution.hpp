@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -157,9 +157,11 @@
 #if MCKL_HAS_AESNI
 #include <mckl/random/aes.hpp>
 using MCKLRNGType = mckl::ARS;
+using MCKLRNG64Type = mckl::ARS_64;
 #else
 #include <mckl/random/philox.hpp>
 using MCKLRNGType = mckl::Philox4x32;
+using MCKLRNG64Type = mckl::Philox4x32_64;
 #endif
 
 #if MCKL_HAS_MKL
@@ -441,8 +443,9 @@ class RandomDistributionTrait<mckl::CauchyDistribution<RealType>>
         return this->partition_quantile(n,
             [&](double p) {
                 return dist.a() +
-                    dist.b() * static_cast<RealType>(std::tan(
-                                   mckl::const_pi<double>() * (p - 0.5)));
+                    dist.b() *
+                    static_cast<RealType>(
+                        std::tan(mckl::const_pi<double>() * (p - 0.5)));
             },
             dist);
     }
@@ -687,10 +690,9 @@ class RandomDistributionTrait<mckl::LaplaceDistribution<RealType>>
         return this->partition_quantile(n,
             [&](double p) {
                 double q = p - 0.5;
-                return q > 0 ?
-                    dist.a() -
+                return q > 0 ? dist.a() -
                         dist.b() * static_cast<RealType>(std::log(1 - 2 * q)) :
-                    dist.a() +
+                               dist.a() +
                         dist.b() * static_cast<RealType>(std::log(1 + 2 * q));
             },
             dist);
@@ -962,9 +964,9 @@ class RandomDistributionTrait<mckl::StableDistribution<RealType>>
         MCKL_PUSH_INTEL_WARNING(1572) // floating-point comparison
         if (dist.alpha() == 2) {
             RandomDistributionTrait<mckl::NormalDistribution<RealType>> trait;
-            return trait.partition(
-                n, mckl::NormalDistribution<RealType>(
-                       0, std::sqrt(static_cast<RealType>(2))));
+            return trait.partition(n,
+                mckl::NormalDistribution<RealType>(
+                    0, std::sqrt(static_cast<RealType>(2))));
         } else if (dist.alpha() == 1) {
             RandomDistributionTrait<mckl::CauchyDistribution<RealType>> trait;
             return trait.partition(
@@ -1537,7 +1539,7 @@ inline void random_distribution_summary_pval(
     const std::size_t D = names.size();
     const std::size_t R = pval[0].size() / D;
     const std::size_t lwid =
-        static_cast<std::size_t>(nwid + twid * (3 + MCKL_HAS_MKL));
+        static_cast<std::size_t>(nwid + twid * (5 + MCKL_HAS_MKL));
 
     const double *p0 = pval[0].data();
     const double *p1 = pval[1].data();
@@ -1550,7 +1552,9 @@ inline void random_distribution_summary_pval(
         std::cout << std::setw(nwid) << std::left << names[i];
         std::cout << std::setw(twid) << std::right << "STD";
         std::cout << std::setw(twid) << std::right << "MCKL";
+        std::cout << std::setw(twid) << std::right << "MCKL64";
         std::cout << std::setw(twid) << std::right << "Batch";
+        std::cout << std::setw(twid) << std::right << "Batch64";
 #if MCKL_HAS_MKL
         std::cout << std::setw(twid) << std::right << "MKL";
 #endif
@@ -1609,6 +1613,7 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     names.push_back(trait.name(param));
 
     MCKLRNGType rng;
+    MCKLRNG64Type rng64;
     MCKLDistType dist_mckl(random_distribution_init<MCKLDistType>(param));
     std_type dist_std(random_distribution_init<std_type>(param));
 
@@ -1635,7 +1640,23 @@ inline void random_distribution_test_pval(std::size_t N, std::size_t M,
     random_distribution_pval(chi2, ksad, pval);
 
     for (std::size_t i = 0; i != M; ++i) {
+        for (std::size_t j = 0; j != N; ++j) {
+            r[j] = dist_mckl(rng64);
+        }
+        chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);
+        ksad[i] = random_distribution_ksad(N, r.data(), dist_mckl);
+    }
+    random_distribution_pval(chi2, ksad, pval);
+
+    for (std::size_t i = 0; i != M; ++i) {
         mckl::rand(rng, dist_mckl, N, r.data());
+        chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);
+        ksad[i] = random_distribution_ksad(N, r.data(), dist_mckl);
+    }
+    random_distribution_pval(chi2, ksad, pval);
+
+    for (std::size_t i = 0; i != M; ++i) {
+        mckl::rand(rng64, dist_mckl, N, r.data());
         chi2[i] = random_distribution_chi2(N, r.data(), dist_mckl);
         ksad[i] = random_distribution_ksad(N, r.data(), dist_mckl);
     }

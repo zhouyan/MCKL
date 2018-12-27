@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ inline ::tbb::blocked_range<IntType> backend_tbb_range(
                             ::tbb::blocked_range<IntType>(0, N, grainsize);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief SMCSampler<T>::eval_type subtype using Intel Threading Building
 /// Blocks

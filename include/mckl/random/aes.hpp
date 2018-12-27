@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ using AESGeneratorImpl = AESGeneratorGenericImpl<KeySeqType>;
 
 #endif // MCKL_USE_AESNI
 
-} // namespace mck::internal
+} // namespace internal
 
 /// \brief AES128Engine key sequence generator
 /// \ingroup AES

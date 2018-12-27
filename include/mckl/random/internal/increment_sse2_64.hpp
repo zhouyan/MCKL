@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ inline void increment_si128(
 {
     constexpr T blocks = (sizeof(__m128i) * S) / (sizeof(T) * K);
 
-    alignas(32) std::array<std::array<T, K>, blocks> ctr_block;
+    alignas(MCKL_ALIGNMENT) std::array<std::array<T, K>, blocks> ctr_block;
     increment(ctr, ctr_block);
     std::memcpy(s.data(), ctr_block.data(), sizeof(__m128i) * S);
 }
@@ -79,7 +79,7 @@ MCKL_INLINE inline void increment_si128(
         ctr, s, std::integral_constant<bool, (direct && bits)>());
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

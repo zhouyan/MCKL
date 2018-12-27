@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -486,6 +486,20 @@ MCKL_DEFINE_MATH_VMF_ASM_1D(log2)
 
 namespace mckl {
 
+#if MCKL_USE_AVX512
+
+MCKL_DEFINE_MATH_FMA_FMA(fmadd512, muladd)
+MCKL_DEFINE_MATH_FMA_FMA(fmsub512, mulsub)
+MCKL_DEFINE_MATH_FMA_FMA(fnmadd512, nmuladd)
+MCKL_DEFINE_MATH_FMA_FMA(fnmsub512, nmulsub)
+
+MCKL_DEFINE_MATH_FMA_FMA(fmadd512, fmadd)
+MCKL_DEFINE_MATH_FMA_FMA(fmsub512, fmsub)
+MCKL_DEFINE_MATH_FMA_FMA(fnmadd512, fnmadd)
+MCKL_DEFINE_MATH_FMA_FMA(fnmsub512, fnmsub)
+
+#else // MCKL_USE_AVX512
+
 MCKL_DEFINE_MATH_FMA_FMA(fmadd, muladd)
 MCKL_DEFINE_MATH_FMA_FMA(fmsub, mulsub)
 MCKL_DEFINE_MATH_FMA_FMA(fnmadd, nmuladd)
@@ -495,6 +509,8 @@ MCKL_DEFINE_MATH_FMA_FMA(fmadd, fmadd)
 MCKL_DEFINE_MATH_FMA_FMA(fmsub, fmsub)
 MCKL_DEFINE_MATH_FMA_FMA(fnmadd, fnmadd)
 MCKL_DEFINE_MATH_FMA_FMA(fnmsub, fnmsub)
+
+#endif // MCKL_USE_AVX512
 
 } // namespace mckl
 
@@ -628,6 +644,58 @@ inline T inv(T a)
 }
 
 template <typename T>
+inline T fmadd(T a, T b, T c)
+{
+    return std::fma(a, b, c);
+}
+
+template <typename T>
+inline T fmsub(T a, T b, T c)
+{
+    return std::fma(a, b, -c);
+}
+
+template <typename T>
+inline T fnmadd(T a, T b, T c)
+{
+    return -std::fma(a, b, -c);
+}
+
+template <typename T>
+inline T fnmsub(T a, T b, T c)
+{
+    return -std::fma(a, b, c);
+}
+
+#if MCKL_USE_FMA
+
+template <typename T>
+inline T muladd(T a, T b, T c)
+{
+    return fmadd(a, b, c);
+}
+
+template <typename T>
+inline T mulsub(T a, T b, T c)
+{
+    return fmsub(a, b, c);
+}
+
+template <typename T>
+inline T nmuladd(T a, T b, T c)
+{
+    return fnmadd(a, b, c);
+}
+
+template <typename T>
+inline T nmulsub(T a, T b, T c)
+{
+    return fnmsub(a, b, c);
+}
+
+#else // MCKL_USE_FMA
+
+template <typename T>
 inline T muladd(T a, T b, T c)
 {
     return a * b + c;
@@ -651,29 +719,7 @@ inline T nmulsub(T a, T b, T c)
     return -(a * b + c);
 }
 
-template <typename T>
-inline T fmadd(T a, T b, T c)
-{
-    return std::fma(a, b, c);
-}
-
-template <typename T>
-inline T fmsub(T a, T b, T c)
-{
-    return std::fma(a, b, -c);
-}
-
-template <typename T>
-inline T fnmadd(T a, T b, T c)
-{
-    return -std::fma(a, b, -c);
-}
-
-template <typename T>
-inline T fnmsub(T a, T b, T c)
-{
-    return -std::fma(a, b, c);
-}
+#endif // MCKL_USE_FMA
 
 template <typename T>
 inline T invsqrt(T a)
@@ -1011,7 +1057,7 @@ inline void sincos(std::size_t n, const T *a, T *y, T *z)
     const std::size_t l = n % k;
 
     if (a == y) {
-        alignas(32) std::array<T, k> s;
+        alignas(MCKL_ALIGNMENT) std::array<T, k> s;
         for (std::size_t i = 0; i != m; ++i, a += k, y += k, z += k) {
             sin<T>(k, a, s.data());
             cos<T>(k, a, z);
@@ -1037,8 +1083,8 @@ inline void cis(std::size_t n, const T *a, std::complex<T> *y)
     const std::size_t k = 1024;
     const std::size_t m = n / k;
     const std::size_t l = n % k;
-    alignas(32) T s[k];
-    alignas(32) T c[k];
+    alignas(MCKL_ALIGNMENT) T s[k];
+    alignas(MCKL_ALIGNMENT) T c[k];
     for (std::size_t i = 0; i != m; ++i, a += k, y += k) {
         sincos<T>(k, a, s, c);
         for (std::size_t j = 0; j != k; ++j) {
@@ -1383,11 +1429,11 @@ inline void modf(std::size_t n, const T *a, T *y, T *z)
     }
 }
 
-    /// @} vRounding
+/// @} vRounding
 
-    /// \defgroup vFPClassify Floating point classification
-    /// \ingroup VMF
-    /// @{
+/// \defgroup vFPClassify Floating point classification
+/// \ingroup VMF
+/// @{
 
 #if MCKL_USE_ASM_LIBRARY && MCKL_USE_AVX2
 

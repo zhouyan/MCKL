@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,7 @@ class ThreefryConstantsPermute<16>
         0, 9, 2, 13, 6, 11, 4, 15, 10, 7, 12, 3, 14, 5, 8, 1};
 }; // class ThreefryConstantsPermute
 
-} // namespace mckl::internal
+} // namespace internal
 
 /// \brief Default Threefry constants
 /// \ingroup Threefry

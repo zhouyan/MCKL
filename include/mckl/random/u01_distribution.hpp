@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@
     {                                                                         \
         using UIntType = U01UIntType<RNGType, RealType>;                      \
                                                                               \
-        alignas(32) std::array<UIntType, K> s;                                \
+        alignas(MCKL_ALIGNMENT) std::array<UIntType, K> s;                    \
         uniform_bits_distribution(rng, n, s.data());                          \
         name<UIntType, RealType>(n, s.data(), r);                             \
     }
@@ -123,7 +123,7 @@ inline void u01_canonical_distribution_impl(
     constexpr int P = (M + W - 1) / W;
     constexpr int Q = 1 > P ? 1 : P;
 
-    alignas(32) std::array<UIntType, K * Q> s;
+    alignas(MCKL_ALIGNMENT) std::array<UIntType, K * Q> s;
     uniform_bits_distribution(rng, n * Q, s.data());
     u01_canonical<UIntType, RealType, Q>(n, s.data(), r);
 }
@@ -133,7 +133,7 @@ MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_co)
 MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oc)
 MCKL_DEFINE_RANDOM_U01_DISTRIBUTION_IMPL(u01_oo)
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01Canonical, u01_canonical, RealType)
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_0(U01CC, u01_cc, RealType)

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ template <std::size_t K, typename IntType, typename RNGType>
 inline void bernoulli_distribution_impl(
     RNGType &rng, std::size_t n, IntType *r, double p)
 {
-    alignas(32) std::array<double, K> s;
+    alignas(MCKL_ALIGNMENT) std::array<double, K> s;
     u01_co_distribution(rng, n, s.data());
     std::fill_n(r, n, 0);
     for (std::size_t i = 0; i != n; ++i) {
@@ -58,7 +58,7 @@ inline void bernoulli_distribution_impl(
     }
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 MCKL_DEFINE_RANDOM_DISTRIBUTION_BATCH_1(
     Bernoulli, bernoulli, InType, double, p)

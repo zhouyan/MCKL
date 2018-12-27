@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@ inline void uniform_bits_distribution_impl(
     RNGType &rng, std::size_t n, UIntType *r, std::false_type, std::true_type)
 {
     const std::size_t k = BufferSize<UIntType>::value;
-    alignas(32) std::array<typename RNGType::result_type, k> s;
+    alignas(MCKL_ALIGNMENT) std::array<typename RNGType::result_type, k> s;
     while (n >= k) {
         rand(rng, k, s.data());
         std::copy_n(s.data(), k, r);
@@ -75,7 +75,7 @@ inline void uniform_bits_distribution_impl(
     std::copy_n(s.data(), n, r);
 }
 
-} // namespace mckl::internal
+} // namespace internal
 
 template <typename UIntType, typename RNGType>
 inline void uniform_bits_distribution(RNGType &rng, std::size_t n, UIntType *r)

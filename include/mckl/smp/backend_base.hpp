@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -338,8 +338,9 @@ class SMCEstimatorEvalBase
 
     template <typename D>
     void eval_dispatch(std::size_t iter, std::size_t dim, ParticleIndex<T> idx,
-        double *r, void (D::*)(std::size_t, std::size_t, ParticleIndex<T>,
-                       double *) const)
+        double *r,
+        void (D::*)(std::size_t, std::size_t, ParticleIndex<T>, double *)
+            const)
     {
         static_cast<Derived *>(this)->eval_each(iter, dim, idx, r);
     }

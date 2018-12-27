@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -163,7 +163,7 @@ inline bool is_nullptr(T ptr)
 
 inline bool is_nullptr(std::nullptr_t) { return true; }
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 

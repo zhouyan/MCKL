@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------
 // MCKL: Monte Carlo Kernel Library
 //----------------------------------------------------------------------------
-// Copyright (c) 2013-2017, Yan Zhou
+// Copyright (c) 2013-2018, Yan Zhou
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -186,7 +186,7 @@ using is_seed_seq = std::integral_constant<bool,
         !std::is_convertible<T, typename RNGType::result_type>::value &&
         !std::is_convertible<T, KeyType>::value>;
 
-} // namespace mckl::internal
+} // namespace internal
 
 } // namespace mckl
 
