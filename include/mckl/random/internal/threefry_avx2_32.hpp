@@ -80,7 +80,7 @@ class ThreefryGeneratorAVX2Impl32
             MCKL_INLINE_CALL transpose8x32_load_si256(s);
             MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, s, par);
             MCKL_INLINE_CALL transpose8x32_store_si256(s);
-            std::memcpy(r, s.data(), sizeof(T) * K * N);
+            MCKL_MEMCPY(r, s.data(), sizeof(T) * K * N);
             n -= N;
             r += N * R;
         }

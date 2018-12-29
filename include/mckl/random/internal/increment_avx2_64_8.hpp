@@ -202,7 +202,7 @@ class IncrementBlockSI256<T, 32, 1, 64>
   public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m256i, 8> &s)
     {
-        std::memcpy(s.data(), ctr.data(), 256);
+        MCKL_MEMCPY(s.data(), ctr.data(), 256);
         std::get<0>(s) =
             _mm256_add_epi64(std::get<0>(s), _mm256_set_epi64x(0, 0, 0, 1));
     }

@@ -47,14 +47,14 @@ class ThreefryPBox
     {
         std::array<T, K> tmp;
         eval<0>(s, tmp, std::integral_constant<bool, 0 < K>());
-        std::memcpy(s.data(), tmp.data(), sizeof(T) * K);
+        MCKL_MEMCPY(s.data(), tmp.data(), sizeof(T) * K);
     }
 
     static void eval(T *s)
     {
         std::array<T, K> tmp;
         eval<0>(s, tmp, std::integral_constant<bool, 0 < K>());
-        std::memcpy(s, tmp.data(), sizeof(T) * K);
+        MCKL_MEMCPY(s, tmp.data(), sizeof(T) * K);
     }
 
   private:

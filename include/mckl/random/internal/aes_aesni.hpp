@@ -92,7 +92,7 @@ class AESGeneratorAESNIImpl
             MCKL_INLINE_CALL xor_si128(s, std::get<0>(rk));
             MCKL_RANDOM_INTERNAL_AES_UNROLL_ROUND(0, s, rk);
             MCKL_INLINE_CALL aesenclast_si128(s, std::get<rounds_>(rk));
-            std::memcpy(r, s.data(), sizeof(__m128i) * N);
+            MCKL_MEMCPY(r, s.data(), sizeof(__m128i) * N);
             n -= N;
             r += N * R;
         }

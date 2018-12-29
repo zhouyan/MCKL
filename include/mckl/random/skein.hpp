@@ -367,7 +367,7 @@ class Skein
         const std::size_t m = n / k;
         const std::size_t l = n % k;
         for (std::size_t i = 0; i != m; ++i) {
-            std::memcpy(message.data(), C, bytes() * k);
+            MCKL_MEMCPY(message.data(), C, bytes() * k);
             for (std::size_t j = 0; j != k; ++j) {
                 t0 += bytes();
                 enc_block(H, message[j], t0, t1);
@@ -478,7 +478,7 @@ class Skein
                 internal::union_le<char>(M);
                 generator(M.data(), buf.data());
                 buf.front() ^= M.front();
-                std::memcpy(C, buf.data(), bytes());
+                MCKL_MEMCPY(C, buf.data(), bytes());
                 ++ctr.front();
                 C += bytes();
             }
@@ -497,7 +497,7 @@ class Skein
                 for (std::size_t j = 0; j != M.size(); ++j) {
                     buf[j] ^= M[j];
                 }
-                std::memcpy(C, buf.data(), bytes());
+                MCKL_MEMCPY(C, buf.data(), bytes());
                 increment(ctr);
                 C += bytes();
             }
@@ -572,7 +572,7 @@ class Skein
 
     static void get_block(value_type &t0, const char *C, key_type &M)
     {
-        std::memcpy(M.data(), C, bytes());
+        MCKL_MEMCPY(M.data(), C, bytes());
         t0 += bytes();
     }
 
@@ -600,7 +600,7 @@ class Skein
             tmp[n - 1] |= 1;
             tmp[n - 1] <<= R;
         }
-        std::memcpy(M.data(), tmp.data(), bytes());
+        MCKL_MEMCPY(M.data(), tmp.data(), bytes());
         t0 += n;
     }
 

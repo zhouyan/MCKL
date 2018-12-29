@@ -51,7 +51,7 @@ class AES128KeySeqGeneratorGenericImpl
         const std::array<std::array<std::uint32_t, 4>, Rp1> &rk)
     {
         key_type key;
-        std::memcpy(key.data(), rk.data(), sizeof(key_type));
+        MCKL_MEMCPY(key.data(), rk.data(), sizeof(key_type));
 
         return key;
     }
@@ -108,7 +108,7 @@ class AES192KeySeqGeneratorGenericImpl
         const std::array<std::array<std::uint32_t, 4>, Rp1> &rk)
     {
         key_type key;
-        std::memcpy(key.data(), rk.data(), sizeof(key_type));
+        MCKL_MEMCPY(key.data(), rk.data(), sizeof(key_type));
 
         return key;
     }
@@ -123,7 +123,7 @@ class AES192KeySeqGeneratorGenericImpl
         tmp0_ = key;
         std::get<0>(rs) = tmp0_;
         generate<1>(rs, std::integral_constant<bool, 1 < Rs1>());
-        std::memcpy(rk.data(), rs.data(), sizeof(std::uint32_t) * Rp1 * 4);
+        MCKL_MEMCPY(rk.data(), rs.data(), sizeof(std::uint32_t) * Rp1 * 4);
     }
 
   private:
@@ -171,7 +171,7 @@ class AES256KeySeqGeneratorGenericImpl
         const std::array<std::array<std::uint32_t, 4>, Rp1> &rk)
     {
         key_type key;
-        std::memcpy(key.data(), rk.data(), sizeof(key_type));
+        MCKL_MEMCPY(key.data(), rk.data(), sizeof(key_type));
 
         return key;
     }
@@ -263,7 +263,7 @@ class ARSKeySeqGeneratorGenericImpl
         const std::array<std::array<std::uint32_t, 4>, Rp1> &rk)
     {
         key_type key;
-        std::memcpy(key.data(), rk.data(), sizeof(key_type));
+        MCKL_MEMCPY(key.data(), rk.data(), sizeof(key_type));
 
         return key;
     }
@@ -319,13 +319,13 @@ class AESGeneratorGenericImpl
         const std::array<std::array<std::uint32_t, 4>, rounds_ + 1> rk(
             ks.get());
 
-        std::memcpy(buf.s.data(), plain, sizeof(std::uint32_t) * 4);
+        MCKL_MEMCPY(buf.s.data(), plain, sizeof(std::uint32_t) * 4);
         union_le<char>(buf.s);
         encfirst(buf.s, rk);
         round<1>(buf.s, rk, std::integral_constant<bool, 1 < rounds_>());
         enclast(buf.s, rk);
         union_le<std::uint32_t>(buf.r);
-        std::memcpy(cipher, buf.s.data(), sizeof(std::uint32_t) * 4);
+        MCKL_MEMCPY(cipher, buf.s.data(), sizeof(std::uint32_t) * 4);
     }
 
     template <typename ResultType>
@@ -354,7 +354,7 @@ class AESGeneratorGenericImpl
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         union_le<std::uint32_t>(buf.r);
 #endif
-        std::memcpy(r, buf.r.data(), sizeof(std::uint32_t) * 4);
+        MCKL_MEMCPY(r, buf.r.data(), sizeof(std::uint32_t) * 4);
     }
 
     template <typename ResultType>
@@ -387,7 +387,7 @@ class AESGeneratorGenericImpl
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
             union_le<std::uint32_t>(buf.r);
 #endif
-            std::memcpy(r, buf.r.data(), sizeof(std::uint32_t) * 4);
+            MCKL_MEMCPY(r, buf.r.data(), sizeof(std::uint32_t) * 4);
         }
     }
 

@@ -53,7 +53,7 @@ class AES128KeySeqGeneratorAESNIImpl
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
         key_type key;
-        std::memcpy(key.data(), rk.data(), sizeof(key_type));
+        MCKL_MEMCPY(key.data(), rk.data(), sizeof(key_type));
 
         return key;
     }

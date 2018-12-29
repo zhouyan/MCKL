@@ -189,7 +189,7 @@ class IncrementBlockSI512<T, 32, 1, 64>
   public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m512i, 4> &s)
     {
-        std::memcpy(s.data(), ctr.data(), 512);
+        MCKL_MEMCPY(s.data(), ctr.data(), 512);
         std::get<0>(s) = _mm512_add_epi64(
             std::get<0>(s), _mm512_set_epi64(0, 0, 0, 0, 0, 0, 0, 1));
     }

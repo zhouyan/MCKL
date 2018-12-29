@@ -269,7 +269,7 @@ class Threefry4x32GeneratorSSE2Impl
                 std::get<5>(s) = xmms5;
                 std::get<6>(s) = xmms6;
                 std::get<7>(s) = xmms7;
-                std::memcpy(rptr, s.data(), n * sizeof(T) * K);
+                MCKL_MEMCPY(rptr, s.data(), n * sizeof(T) * K);
                 break;
             }
         }

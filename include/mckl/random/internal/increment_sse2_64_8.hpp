@@ -143,7 +143,7 @@ class IncrementBlockSI128<T, 16, 1, 64>
   public:
     static void eval(const std::array<T, K_> &ctr, std::array<__m128i, 8> &s)
     {
-        std::memcpy(s.data(), ctr.data(), 128);
+        MCKL_MEMCPY(s.data(), ctr.data(), 128);
         std::get<0>(s) = _mm_add_epi64(std::get<0>(s), _mm_set_epi64x(0, 1));
     }
 }; // class IncrementBlockSI128

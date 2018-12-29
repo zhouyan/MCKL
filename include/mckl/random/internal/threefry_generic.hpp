@@ -61,11 +61,11 @@ class ThreefryGeneratorGenericImpl
             std::array<char, sizeof(T) * K> r;
         } buf;
 
-        std::memcpy(buf.s.data(), plain, sizeof(T) * K);
+        MCKL_MEMCPY(buf.s.data(), plain, sizeof(T) * K);
         union_le<char>(buf.s);
         MCKL_RANDOM_INTERNAL_THREEFRY_UNROLL_ROUND(0, buf.s, par);
         union_le<T>(buf.r);
-        std::memcpy(cipher, buf.s.data(), sizeof(T) * K);
+        MCKL_MEMCPY(cipher, buf.s.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>
@@ -87,7 +87,7 @@ class ThreefryGeneratorGenericImpl
 #if MCKL_REQUIRE_ENDIANNESS_NEUTURAL
         union_le<T>(buf.r);
 #endif
-        std::memcpy(r, buf.r.data(), sizeof(T) * K);
+        MCKL_MEMCPY(r, buf.r.data(), sizeof(T) * K);
     }
 
     template <typename ResultType>

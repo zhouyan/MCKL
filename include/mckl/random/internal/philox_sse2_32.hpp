@@ -127,7 +127,7 @@ class PhiloxGeneratorSSE2Impl32
             MCKL_INLINE_CALL PhiloxGeneratorSSE2Impl32Permute<K>::first(s);
             MCKL_RANDOM_INTERNAL_PHILOX_UNROLL_ROUND(0, s, rk);
             MCKL_INLINE_CALL PhiloxGeneratorSSE2Impl32Permute<K>::last(s);
-            std::memcpy(r, s.data(), sizeof(__m128i) * N);
+            MCKL_MEMCPY(r, s.data(), sizeof(__m128i) * N);
             n -= N;
             r += N * R;
         }
@@ -135,7 +135,7 @@ class PhiloxGeneratorSSE2Impl32
         alignas(MCKL_ALIGNMENT) std::array<ResultType, N * R> t;
         PhiloxGeneratorGenericImpl<T, K, Rounds, Constants>::eval(
             ctr, n, t.data(), key);
-        std::memcpy(r, t.data(), sizeof(__m128i) * n);
+        MCKL_MEMCPY(r, t.data(), sizeof(__m128i) * n);
     }
 
   private:

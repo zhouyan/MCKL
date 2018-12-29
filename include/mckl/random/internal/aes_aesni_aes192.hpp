@@ -53,7 +53,7 @@ class AES192KeySeqGeneratorAESNIImpl
     static key_type key(const std::array<__m128i, Rp1> &rk)
     {
         key_type key;
-        std::memcpy(key.data(), rk.data(), sizeof(key_type));
+        MCKL_MEMCPY(key.data(), rk.data(), sizeof(key_type));
 
         return key;
     }
@@ -161,7 +161,7 @@ class AES192KeySeqGeneratorAESNIImpl
         std::array<__m128i, Rp1> &rk, const char *rk_ptr, std::true_type)
     {
         char *dst = reinterpret_cast<char *>(rk.data());
-        std::memcpy(dst + 24, rk_ptr + 24, Rp1 * 16 - 24);
+        MCKL_MEMCPY(dst + 24, rk_ptr + 24, Rp1 * 16 - 24);
     }
 }; // class AES192KeySeqGeneratorAESNIImpl
 

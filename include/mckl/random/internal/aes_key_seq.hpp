@@ -70,9 +70,9 @@ class AESKeySeqImpl
     {
         std::array<std::uint64_t, 2 * (rounds() + 1)> ks1;
         std::array<std::uint64_t, 2 * (rounds() + 1)> ks2;
-        std::memcpy(ks1.data(), seq1.rk_.data(),
+        MCKL_MEMCPY(ks1.data(), seq1.rk_.data(),
             sizeof(std::uint64_t) * 2 * (rounds() + 1));
-        std::memcpy(ks2.data(), seq2.rk_.data(),
+        MCKL_MEMCPY(ks2.data(), seq2.rk_.data(),
             sizeof(std::uint64_t) * 2 * (rounds() + 1));
 
         return ks1 == ks2;
@@ -94,7 +94,7 @@ class AESKeySeqImpl
         }
 
         std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
-        std::memcpy(ks.data(), seq.rk_.data(),
+        MCKL_MEMCPY(ks.data(), seq.rk_.data(),
             sizeof(std::uint64_t) * 2 * (rounds() + 1));
         ostream(os, ks);
 
@@ -113,7 +113,7 @@ class AESKeySeqImpl
         std::array<std::uint64_t, 2 * (rounds() + 1)> ks;
         istream(is, ks);
         if (is) {
-            std::memcpy(seq.rk_.data(), ks.data(),
+            MCKL_MEMCPY(seq.rk_.data(), ks.data(),
                 sizeof(std::uint64_t) * 2 * (rounds() + 1));
         }
 

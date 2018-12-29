@@ -748,6 +748,9 @@
         return operator()(rng, dist);                                         \
     }
 
+// #define MCKL_MEMCPY(dst, src, n) ::mckl::internal::copy<n>(dst, src)
+#define MCKL_MEMCPY(dst, src, n) std::memcpy(dst, src, n)
+
 namespace mckl {
 
 namespace internal {
@@ -931,6 +934,62 @@ class IncrementBlockSI256;
 template <typename T, std::size_t, std::size_t,
     int = std::numeric_limits<T>::digits>
 class IncrementBlockSI512;
+
+template <std::size_t N>
+inline void copy(void *dst, const void *src)
+{
+    std::memcpy(dst, src, N);
+}
+
+template <>
+inline void copy<sizeof(std::int8_t)>(void *dst, const void *src)
+{
+    *reinterpret_cast<std::int8_t *>(dst) =
+        *reinterpret_cast<const std::int8_t *>(src);
+}
+
+template <>
+inline void copy<sizeof(std::int16_t)>(void *dst, const void *src)
+{
+    *reinterpret_cast<std::int16_t *>(dst) =
+        *reinterpret_cast<const std::int16_t *>(src);
+}
+
+template <>
+inline void copy<sizeof(std::int32_t)>(void *dst, const void *src)
+{
+    *reinterpret_cast<std::int32_t *>(dst) =
+        *reinterpret_cast<const std::int32_t *>(src);
+}
+
+template <>
+inline void copy<sizeof(std::int64_t)>(void *dst, const void *src)
+{
+    *reinterpret_cast<std::int64_t *>(dst) =
+        *reinterpret_cast<const std::int64_t *>(src);
+}
+
+#if MCKL_HAS_SSE2
+
+template <>
+inline void copy<sizeof(__m128i)>(void *dst, const void *src)
+{
+    *reinterpret_cast<__m128i *>(dst) =
+        _mm_loadu_si128(reinterpret_cast<const __m128i *>(src));
+}
+
+#endif // MCKL_HAS_SSE2
+
+#if MCKL_HAS_AVX2
+
+template <>
+inline void copy<sizeof(__m256i)>(void *dst, const void *src)
+{
+    *reinterpret_cast<__m256i *>(dst) =
+        _mm256_loadu_si256(reinterpret_cast<const __m256i *>(src));
+}
+
+#endif //  MCKL_HAS_AVX2
 
 } // namespace internal
 

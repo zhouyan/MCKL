@@ -51,7 +51,7 @@ inline void increment_si512(
 
     alignas(MCKL_ALIGNMENT) std::array<std::array<T, K>, blocks> ctr_block;
     increment(ctr, ctr_block);
-    std::memcpy(s.data(), ctr_block.data(), sizeof(__m512i) * S);
+    MCKL_MEMCPY(s.data(), ctr_block.data(), sizeof(__m512i) * S);
 }
 
 template <typename T, std::size_t K, std::size_t S>

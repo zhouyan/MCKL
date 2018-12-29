@@ -101,7 +101,7 @@ class ThreefryGenerator
     key_type key() const
     {
         key_type key;
-        std::memcpy(key.data(), par_.data(), sizeof(T) * K);
+        MCKL_MEMCPY(key.data(), par_.data(), sizeof(T) * K);
 
         return key;
     }
@@ -110,7 +110,7 @@ class ThreefryGenerator
     {
         constexpr T p = Constants::parity::value;
 
-        std::memcpy(par_.data(), key.data(), sizeof(T) * K);
+        MCKL_MEMCPY(par_.data(), key.data(), sizeof(T) * K);
         std::get<K>(par_) = p;
         for (std::size_t i = 0; i != key.size(); ++i) {
             std::get<K>(par_) ^= par_[i];

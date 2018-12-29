@@ -136,8 +136,8 @@ class SerialTestImpl<D, T, true>
         // generate the first tuple
         rand(rng, u01, k, r.data());
         mul(k, static_cast<result_type>(D), r.data(), r.data());
-        std::memcpy(rhead.data(), r.data(), sizeof(result_type) * T);
-        std::memcpy(rtail.data(), r.data(), sizeof(result_type) * T);
+        MCKL_MEMCPY(rhead.data(), r.data(), sizeof(result_type) * T);
+        MCKL_MEMCPY(rtail.data(), r.data(), sizeof(result_type) * T);
 
         // generate the first n - t + 1 counts
         cidx_ = serial_index<D, T>(rhead.data());
