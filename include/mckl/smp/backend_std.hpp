@@ -115,10 +115,8 @@ class SMCSamplerEvalSMP<T, Derived, BackendSTD>
         this->eval_first(iter, particle);
         mckl::Vector<std::future<void>> task_group;
         for (auto range : internal::backend_std_range(particle)) {
-            task_group.push_back(std::async(
-                std::launch::async, [this, iter, &particle, range]() {
-                    this->eval_range(iter, range);
-                }));
+            task_group.push_back(std::async(std::launch::async,
+                [this, iter, range]() { this->eval_range(iter, range); }));
         }
         for (auto &task : task_group) {
             task.wait();
@@ -156,8 +154,8 @@ class SMCEstimatorEvalSMP<T, Derived, BackendSTD>
         this->eval_first(iter, particle);
         mckl::Vector<std::future<void>> task_group;
         for (auto range : internal::backend_std_range(particle)) {
-            task_group.push_back(std::async(
-                std::launch::async, [this, iter, dim, &particle, r, range]() {
+            task_group.push_back(
+                std::async(std::launch::async, [this, iter, dim, r, range]() {
                     this->eval_range(iter, dim, range,
                         r + static_cast<std::size_t>(range.ibegin()) * dim);
                 }));
