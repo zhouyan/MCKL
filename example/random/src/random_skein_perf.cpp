@@ -50,7 +50,7 @@ template <typename Hasher>
 inline void random_skein_perf(const std::string &name)
 {
     constexpr std::size_t n = 1 << 20;
-    constexpr int m = 1 << 2;
+    constexpr std::size_t m = 1 << 2;
     ::mckl::Vector<::mckl::Vector<std::uint64_t>> msg(m);
     ::mckl::Vector<std::uint64_t> ret(n);
     ::mckl::ARS_64 rng;
@@ -59,7 +59,7 @@ inline void random_skein_perf(const std::string &name)
         ::mckl::rand(rng, n, msg[i].data());
     }
 
-    std::size_t mb = 1.0 * n * m * sizeof(std::uint64_t) / (1 << 20);
+    double mb = 1.0 * n * m * sizeof(std::uint64_t) / (1 << 20);
 
     ::mckl::StopWatch watch;
 
@@ -69,8 +69,8 @@ inline void random_skein_perf(const std::string &name)
     ::mckl::Vector<typename Hasher::state_type> states(n);
     std::fill_n(states.data(), n, hasher.init());
     std::size_t N = CHAR_BIT * sizeof(std::uint64_t);
-    for (int j = 0; j != m; ++j) {
-        int type = Hasher::type_field::cfg() + j + 1;
+    for (std::size_t j = 0; j != m; ++j) {
+        auto type = static_cast<int>(Hasher::type_field::cfg() + j + 1);
         for (std::size_t i = 0; i != n; ++i) {
             hasher.update(
                 states[i], typename Hasher::param_type(N, &msg[j][i], type));
@@ -86,12 +86,12 @@ inline void random_skein_perf(const std::string &name)
     watch.start();
     states.resize(m);
     std::fill_n(states.data(), m, hasher.init());
-    for (int j = 0; j != m; ++j) {
-        int type = Hasher::type_field::cfg() + j + 1;
+    for (std::size_t j = 0; j != m; ++j) {
+        auto type = static_cast<int>(Hasher::type_field::cfg() + j + 1);
         hasher.update(states[j],
             typename Hasher::param_type(N * n, msg[j].data(), type));
     }
-    for (int j = 0; j != m; ++j) {
+    for (std::size_t j = 0; j != m; ++j) {
         hasher.output(states[j], &ret[j]);
     }
     watch.stop();
@@ -121,13 +121,13 @@ inline void random_skein_perf(const std::string &name)
     watch.start();
     str.clear();
     s.resize(n * sizeof(std::uint64_t));
-    for (int j = 0; j != m; ++j) {
+    for (std::size_t j = 0; j != m; ++j) {
         auto r = reinterpret_cast<std::uint64_t *>(s.data());
         for (std::size_t i = 0; i != n; ++i)
             *r++ = msg[j][i];
         str.emplace_back(s.data(), s.size());
     }
-    for (int j = 0; j != m; ++j) {
+    for (std::size_t j = 0; j != m; ++j) {
         ret[j] = shasher(str[j]);
     }
     watch.stop();
@@ -145,7 +145,9 @@ inline void random_skein_perf(const std::string &name)
 int main()
 {
     random_skein_perf<::mckl::Skein256::mono_hasher>("Skein256");
+
     random_skein_perf<::mckl::Skein512::mono_hasher>("Skein512");
+
     random_skein_perf<::mckl::Skein1024::mono_hasher>("Skein1024");
 
     random_skein_perf<

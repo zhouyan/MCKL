@@ -120,18 +120,11 @@ class Skein
     class mono_hasher
     {
       public:
+        using key_type = Skein::key_type;
         using param_type = Skein::param_type;
         using value_type = Skein::value_type;
         using type_field = Skein::type_field;
-
-        class state_type
-        {
-          private:
-            key_type G_;
-            int type_;
-
-            friend mono_hasher;
-        }; // class state_type
+        using state_type = key_type;
 
         explicit mono_hasher(std::size_t N, const param_type &K = param_type())
             : N_(N), K_(K), C_(configure(N_, 0, 0, 0))
@@ -141,43 +134,31 @@ class Skein
 
         state_type init() const
         {
-            state_type ret;
-            std::memset(&ret, 0, sizeof(ret));
+            state_type G;
+            std::memset(&G, 0, sizeof(G));
 
             value_type t1 = 0;
             if (K_.bits() != 0) {
                 set_type(t1, type_field::key());
-                ret.G_ = ubi(ret.G_, K_, 0, t1);
+                G = ubi(G, K_, 0, t1);
             }
 
             set_type(t1, type_field::cfg());
-            ret.G_ = ubi(ret.G_, param_type(256, C_.data()), 0, t1);
+            G = ubi(G, param_type(256, C_.data()), 0, t1);
 
-            return ret;
+            return G;
         }
 
-        void update(state_type &state, const param_type &M) const
+        void update(state_type &G, const param_type &M) const
         {
-            if (state.type_ == 0) {
-                runtime_assert(M.type() > type_field::cfg(),
-                    "**Skein::hash** M[0].type() <= type_field::cfg()");
-            } else {
-                runtime_assert(M.type() > state.type_,
-                    "**Skein::hash** M[i].type() <= M[i - 1].type()");
-            }
-
             value_type t1 = 0;
             set_type(t1, M.type());
-            state.G_ = ubi(state.G_, M, 0, t1);
-            state.type_ = M.type();
+            G = ubi(G, M, 0, t1);
         }
 
-        void output(const state_type &state, void *H) const
+        void output(const state_type &G, void *H) const
         {
-            runtime_assert(state.type_ < type_field::out(),
-                "**Skein::hash** M[n - 1].type() >= type_field::out()");
-
-            Skein::output(state.G_, N_, H);
+            Skein::output(G, N_, H);
         }
 
       private:
@@ -189,6 +170,7 @@ class Skein
     class tree_hasher
     {
       public:
+        using key_type = Skein::key_type;
         using param_type = Skein::param_type;
         using value_type = Skein::value_type;
         using type_field = Skein::type_field;
