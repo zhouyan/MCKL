@@ -101,7 +101,8 @@ template <typename T>
 class AlignOfImpl
 {
   public:
-    static constexpr std::size_t value = std::is_scalar<T>::value ?
+    static constexpr std::size_t value =
+        std::is_scalar<T>::value || std::is_pod<T>::value ?
         (alignof(T) > MCKL_ALIGNMENT ? alignof(T) : MCKL_ALIGNMENT) :
         (alignof(T) > MCKL_MINIMUM_ALIGNMENT ? alignof(T) :
                                                MCKL_MINIMUM_ALIGNMENT);
@@ -361,7 +362,9 @@ class Allocator : public std::allocator<T>
     template <typename U>
     void construct(U *p)
     {
-        construct_dispatch(p, std::is_scalar<U>());
+        construct_dispatch(p,
+            std::integral_constant<bool,
+                (std::is_scalar<U>::value || std::is_pod<U>::value)>());
     }
 
   private:
