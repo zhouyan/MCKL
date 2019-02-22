@@ -78,6 +78,7 @@ sub filename
     my $file = shift;
     open my $in, "<", $file;
     my @lines = <$in>;
+    open my $out, ">", $file;
 
     substr($file, 0, $nroot) = "MCKL";
 
@@ -92,8 +93,6 @@ sub filename
         say "Incorrect header guard: $file: $guard" unless @found == 3;
     }
 
-    open my $out, ">", $file;
-
     my $line = shift @lines;
     print $out $line;
 
@@ -105,8 +104,9 @@ sub filename
     }
 
     $line = shift @lines;
-    if ($line =~ /^(;; |\/\/ |#  |\.\.  )MCKL\//) {
-        print $out $1, $file, "\n";
+    if ($line =~ /^(;;|\/\/|#|\.\.)(\s*)(MCKL\/.*)/) {
+        say "Update filename $3 => $file";
+        print $out $1, $2, $file, "\n";
     } else {
         print $out $line;
     }
