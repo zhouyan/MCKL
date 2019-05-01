@@ -94,7 +94,6 @@
 #define MCKL_HAS_AVX512 1
 #endif
 #endif
-#endif
 
 #ifdef __AVX__
 #ifndef MCKL_HAS_AESNI

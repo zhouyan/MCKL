@@ -87,7 +87,7 @@ required with thread-local storage as an exception.
 
 Examples are in the `example` subdirectory, to build them,
 ```
-export CXXFLAGS="-std=c++11"
+export CXXFLAGS="-std=c++14"
 cd /path/to/mckl/source
 mkdir -p build
 cd build
